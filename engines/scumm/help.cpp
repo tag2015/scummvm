@@ -63,9 +63,14 @@ int ScummHelp::numPages(byte gameId) {
 #define ADD_LINE ADD_BIND("","")
 
 void ScummHelp::updateStrings(byte gameId, byte version, Common::Platform platform,
-				int page, U32String &title, U32String *&key, U32String *&dsc) {
+				int page, U32String &title, U32String *&key, U32String *&dsc, U32String *&bottomline) {
 	key = new U32String[HELP_NUM_LINES];
 	dsc = new U32String[HELP_NUM_LINES];
+	
+	bottomline = new U32String[2];
+	bottomline[0] = _("");
+	bottomline[1] = _("");
+	
 	int i = 0;
 	switch (page) {
 	case 1:
@@ -103,14 +108,16 @@ void ScummHelp::updateStrings(byte gameId, byte version, Common::Platform platfo
 		ADD_BIND(_("Ctrl") + U32String(" ") + _("Alt") + U32String(" s"), _("Cycle through stretch modes"));
 		ADD_BIND(_("Ctrl") + U32String(" ") + _("Alt") + U32String(" a"), _("Toggle aspect-ratio correction"));
 		ADD_BIND(_("Ctrl") + U32String(" ") + _("Alt") + U32String(" f"), _("Toggle linear filtered scaling"));
-		ADD_LINE;
-		ADD_LINE;
+//		ADD_LINE;
+//		ADD_LINE;
 		// FIXME: This should use word-wrapping, and should not assume
 		//        that the font is mono-spaced.
-		ADD_TEXT(_("* Note that using ctrl-f and"));
-		ADD_TEXT(_("  ctrl-g are not recommended"));
-		ADD_TEXT(_("  since they may cause crashes"));
-		ADD_TEXT(_("  or incorrect game behavior."));
+//		ADD_TEXT(_("* Note that using ctrl-f and"));
+//		ADD_TEXT(_("  ctrl-g are not recommended"));
+//		ADD_TEXT(_("  since they may cause crashes"));
+//		ADD_TEXT(_("  or incorrect game behavior."));
+		bottomline[0] = _("* Fast modes are not recommended and may cause");
+		bottomline[1] = _("unexpected behavior.");
 		break;
 	case 3:
 		if (gameId == GID_LOOM)

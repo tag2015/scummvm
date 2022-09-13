@@ -38,7 +38,7 @@ protected:
 public:
 	static int numPages(byte gameId);
 	static void updateStrings(byte gameId, byte version, Common::Platform platform,
-			int page, U32String &title, U32String *&key, U32String *&dsc);
+			int page, U32String &title, U32String *&key, U32String *&dsc, U32String *&bottomline);
 };
 
 } // End of namespace Scumm

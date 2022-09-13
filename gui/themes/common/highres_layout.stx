@@ -1957,6 +1957,14 @@
 			<widget name = 'HelpText'
 					height = '228'
 			/>
+			<widget name = 'BottomLine1'
+					width = '320'
+					height = 'Globals.Line.Height'
+			/>
+			<widget name = 'BottomLine2'
+					width = '320'
+					height = 'Globals.Line.Height'
+			/>
 			<layout type = 'horizontal' padding = '0, 0, 8, 0'>
 				<widget name = 'Prev'
 						type = 'Button'

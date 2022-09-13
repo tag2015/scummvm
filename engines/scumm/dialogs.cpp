@@ -207,6 +207,7 @@ protected:
 	GUI::StaticTextWidget *_title;
 	GUI::StaticTextWidget *_key[HELP_NUM_LINES];
 	GUI::StaticTextWidget *_dsc[HELP_NUM_LINES];
+	GUI::StaticTextWidget *_bottomline[2];
 
 	int _page;
 	int _numPages;
@@ -287,6 +288,9 @@ HelpDialog::HelpDialog(const GameSettings &game)
 		_dsc[i] = new GUI::StaticTextWidget(this, 0, 0, 10, 10, Common::U32String(), Graphics::kTextAlignLeft);
 	}
 
+	// 2 lines at the bottom for additional info
+		_bottomline[0] = new GUI::StaticTextWidget(this, "ScummHelp.BottomLine1", Common::U32String());
+		_bottomline[1] = new GUI::StaticTextWidget(this, "ScummHelp.BottomLine2", Common::U32String());
 }
 
 void HelpDialog::reflowLayout() {
@@ -319,15 +323,18 @@ void HelpDialog::reflowLayout() {
 }
 
 void HelpDialog::displayKeyBindings() {
-	U32String titleStr, *keyStr, *dscStr;
+	U32String titleStr, *keyStr, *dscStr, *bottomStr;
 
-	ScummHelp::updateStrings(_game.id, _game.version, _game.platform, _page, titleStr, keyStr, dscStr);
+	ScummHelp::updateStrings(_game.id, _game.version, _game.platform, _page, titleStr, keyStr, dscStr, bottomStr);
 
 	_title->setLabel(titleStr);
 	for (int i = 0; i < _numLines; i++) {
 		_key[i]->setLabel(keyStr[i]);
 		_dsc[i]->setLabel(dscStr[i]);
 	}
+
+	_bottomline[0]->setLabel(bottomStr[0]);
+	_bottomline[1]->setLabel(bottomStr[1]);
 
 	delete[] keyStr;
 	delete[] dscStr;
