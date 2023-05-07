@@ -1,15 +1,15 @@
-#ifndef MEMORY_H
-#define MEMORY_H
+#ifndef FALLOUT2_MEMORY_H
+#define FALLOUT2_MEMORY_H
 
-#include "memory_defs.h"
+#include "fallout2/memory_defs.h"
 
-namespace fallout {
+namespace Fallout2 {
 
-char* internal_strdup(const char* string);
-void* internal_malloc(size_t size);
-void* internal_realloc(void* ptr, size_t size);
-void internal_free(void* ptr);
+char *internal_strdup(const char *string);
+void *internal_malloc(size_t size);
+void *internal_realloc(void *ptr, size_t size);
+void internal_free(void *ptr);
 
-} // namespace fallout
+} // namespace Fallout2
 
-#endif /* MEMORY_H */
+#endif
