@@ -1,11 +1,11 @@
-#ifndef HEAP_H
-#define HEAP_H
+#ifndef FALLOUT2_HEAP_H
+#define FALLOUT2_HEAP_H
 
-namespace fallout {
+namespace Fallout2 {
 
 typedef struct HeapHandle {
 	unsigned int state;
-	unsigned char* data;
+	unsigned char *data;
 } HeapHandle;
 
 typedef struct Heap {
@@ -19,18 +19,18 @@ typedef struct Heap {
 	int moveableSize;
 	int lockedSize;
 	int systemSize;
-	HeapHandle* handles;
-	unsigned char* data;
+	HeapHandle *handles;
+	unsigned char *data;
 } Heap;
 
-bool heapInit(Heap* heap, int a2);
-bool heapFree(Heap* heap);
-bool heapBlockAllocate(Heap* heap, int* handleIndexPtr, int size, int a3);
-bool heapBlockDeallocate(Heap* heap, int* handleIndexPtr);
-bool heapLock(Heap* heap, int handleIndex, unsigned char** bufferPtr);
-bool heapUnlock(Heap* heap, int handleIndex);
-bool heapValidate(Heap* heap);
+bool heapInit(Heap *heap, int a2);
+bool heapFree(Heap *heap);
+bool heapBlockAllocate(Heap *heap, int *handleIndexPtr, int size, int a3);
+bool heapBlockDeallocate(Heap *heap, int *handleIndexPtr);
+bool heapLock(Heap *heap, int handleIndex, unsigned char **bufferPtr);
+bool heapUnlock(Heap *heap, int handleIndex);
+bool heapValidate(Heap *heap);
 
-} // namespace fallout
+} // namespace Fallout2
 
-#endif /* HEAP_H */
+#endif

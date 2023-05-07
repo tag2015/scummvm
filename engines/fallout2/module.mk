@@ -3,7 +3,11 @@ MODULE := engines/fallout2
 MODULE_OBJS = \
 	fallout2.o \
 	console.o \
-	metaengine.o
+	heap.o \
+	memory.o \
+	memory_manager.o \
+	metaengine.o \
+	version.o
 
 # This module can be built as a plugin
 ifeq ($(ENABLE_FALLOUT2), DYNAMIC_PLUGIN)
