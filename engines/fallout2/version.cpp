@@ -1,12 +1,10 @@
-#include "version.h"
+#include "fallout2/version.h"
 
-#include <stdio.h>
-
-namespace fallout {
+namespace Fallout2 {
 
 // 0x4B4580
-void versionGetVersion(char* dest, size_t size) {
+void versionGetVersion(char *dest, size_t size) {
 	snprintf(dest, size, "FALLOUT II %d.%02d", VERSION_MAJOR, VERSION_MINOR);
 }
 
-} // namespace fallout
+} // namespace Fallout2
