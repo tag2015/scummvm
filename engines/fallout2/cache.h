@@ -1,13 +1,12 @@
-#ifndef CACHE_H
-#define CACHE_H
+#ifndef FALLOUT2_CACHE_H
+#define FALLOUT2_CACHE_H
 
-#include <stddef.h>
+#include "fallout2/heap.h"
+#include "common/system.h"
 
-#include "heap.h"
+namespace Fallout2 {
 
-namespace fallout {
-
-#define INVALID_CACHE_ENTRY ((CacheEntry*)-1)
+#define INVALID_CACHE_ENTRY ((CacheEntry *)-1)
 
 typedef enum CacheEntryFlags {
 	// Specifies that cache entry has no references as should be evicted during
@@ -15,14 +14,14 @@ typedef enum CacheEntryFlags {
 	CACHE_ENTRY_MARKED_FOR_EVICTION = 0x01,
 } CacheEntryFlags;
 
-typedef int CacheSizeProc(int key, int* sizePtr);
-typedef int CacheReadProc(int key, int* sizePtr, unsigned char* buffer);
-typedef void CacheFreeProc(void* ptr);
+typedef int CacheSizeProc(int key, int *sizePtr);
+typedef int CacheReadProc(int key, int *sizePtr, unsigned char *buffer);
+typedef void CacheFreeProc(void *ptr);
 
 typedef struct CacheEntry {
 	int key;
 	int size;
-	unsigned char* data;
+	unsigned char *data;
 	unsigned int referenceCount;
 
 	// Total number of hits that this cache entry received during it's
@@ -55,21 +54,21 @@ typedef struct Cache {
 	unsigned int hits;
 
 	// List of cache entries.
-	CacheEntry** entries;
+	CacheEntry **entries;
 
-	CacheSizeProc* sizeProc;
-	CacheReadProc* readProc;
-	CacheFreeProc* freeProc;
+	CacheSizeProc *sizeProc;
+	CacheReadProc *readProc;
+	CacheFreeProc *freeProc;
 	Heap heap;
 } Cache;
 
-bool cacheInit(Cache* cache, CacheSizeProc* sizeProc, CacheReadProc* readProc, CacheFreeProc* freeProc, int maxSize);
-bool cacheFree(Cache* cache);
-bool cacheLock(Cache* cache, int key, void** data, CacheEntry** cacheEntryPtr);
-bool cacheUnlock(Cache* cache, CacheEntry* cacheEntry);
-bool cacheFlush(Cache* cache);
-bool cachePrintStats(Cache* cache, char* dest, size_t size);
+bool cacheInit(Cache *cache, CacheSizeProc *sizeProc, CacheReadProc *readProc, CacheFreeProc *freeProc, int maxSize);
+bool cacheFree(Cache *cache);
+bool cacheLock(Cache *cache, int key, void **data, CacheEntry **cacheEntryPtr);
+bool cacheUnlock(Cache *cache, CacheEntry *cacheEntry);
+bool cacheFlush(Cache *cache);
+bool cachePrintStats(Cache *cache, char *dest, size_t size);
 
-} // namespace fallout
+} // namespace Fallout2
 
-#endif /* CACHE_H */
+#endif
