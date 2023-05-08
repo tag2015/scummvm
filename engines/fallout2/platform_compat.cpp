@@ -1,7 +1,6 @@
-#include "platform_compat.h"
+#include "fallout2/platform_compat.h"
 
-#include <string.h>
-
+/*
 #ifdef _WIN32
 #include <windows.h>
 #endif
@@ -24,34 +23,47 @@
 #endif
 
 #include <SDL.h>
+*/
 
-namespace fallout {
+namespace Fallout2 {
 
-int compat_stricmp(const char* string1, const char* string2) {
-	return SDL_strcasecmp(string1, string2);
+int compat_stricmp(const char *string1, const char *string2) {
+	return scumm_stricmp(string1, string2);
 }
 
-int compat_strnicmp(const char* string1, const char* string2, size_t size) {
-	return SDL_strncasecmp(string1, string2, size);
+int compat_strnicmp(const char *string1, const char *string2, size_t size) {
+	return scumm_strnicmp(string1, string2, size);
 }
 
-char* compat_strupr(char* string) {
-	return SDL_strupr(string);
+char *compat_strupr(char *string) {
+	char *p = string;
+	for (; *p; p++)
+		*p = (char)toupper(*p);
+	return string;
 }
 
-char* compat_strlwr(char* string) {
-	return SDL_strlwr(string);
+char *compat_strlwr(char *string) {
+	char *p = string;
+	for (; *p; p++)
+		*p = (char)tolower(*p);
+	return string;
 }
 
-char* compat_itoa(int value, char* buffer, int radix) {
-	return SDL_itoa(value, buffer, radix);
+char *compat_itoa(int value, char *buffer, int radix) {
+	if (radix == 10) {
+		char tmp[30];
+		Common::sprintf_s(tmp, "%d", value);
+		Common::strcpy_s(buffer, strlen(tmp) + 1, tmp);
+	}
+	return buffer;
 }
 
-void compat_splitpath(const char* path, char* drive, char* dir, char* fname, char* ext) {
-#ifdef _WIN32
-	_splitpath(path, drive, dir, fname, ext);
-#else
-	const char* driveStart = path;
+void compat_splitpath(const char *path, char *drive, char *dir, char *fname, char *ext) {
+	// #ifdef _WIN32
+	//	_splitpath(path, drive, dir, fname, ext);
+	// #else
+	//  TODO check these
+	const char *driveStart = path;
 	if (path[0] == '/' && path[1] == '/') {
 		path += 2;
 		while (*path != '\0' && *path != '/' && *path != '.') {
@@ -68,11 +80,11 @@ void compat_splitpath(const char* path, char* drive, char* dir, char* fname, cha
 		drive[driveSize] = '\0';
 	}
 
-	const char* dirStart = path;
-	const char* fnameStart = path;
-	const char* extStart = NULL;
+	const char *dirStart = path;
+	const char *fnameStart = path;
+	const char *extStart = NULL;
 
-	const char* end = path;
+	const char *end = path;
 	while (*end != '\0') {
 		if (*end == '/') {
 			fnameStart = end + 1;
@@ -112,18 +124,19 @@ void compat_splitpath(const char* path, char* drive, char* dir, char* fname, cha
 		strncpy(ext, extStart, extSize);
 		ext[extSize] = '\0';
 	}
-#endif
+	// #endif
 }
 
-void compat_makepath(char* path, const char* drive, const char* dir, const char* fname, const char* ext) {
-#ifdef _WIN32
-	_makepath(path, drive, dir, fname, ext);
-#else
+void compat_makepath(char *path, const char *drive, const char *dir, const char *fname, const char *ext) {
+	// #ifdef _WIN32
+	//	_makepath(path, drive, dir, fname, ext);
+	// #else
+	//  TODO Check these
 	path[0] = '\0';
 
 	if (drive != NULL) {
 		if (*drive != '\0') {
-			strcpy(path, drive);
+			strncpy(path, drive, sizeof(path) - 1);
 			path = strchr(path, '\0');
 
 			if (path[-1] == '/') {
@@ -140,7 +153,7 @@ void compat_makepath(char* path, const char* drive, const char* dir, const char*
 				path++;
 			}
 
-			strcpy(path, dir);
+			strncpy(path, dir, sizeof(path) - 1);
 			path = strchr(path, '\0');
 
 			if (path[-1] == '/') {
@@ -156,7 +169,7 @@ void compat_makepath(char* path, const char* drive, const char* dir, const char*
 			path++;
 		}
 
-		strcpy(path, fname);
+		strncpy(path, fname, sizeof(path) - 1);
 		path = strchr(path, '\0');
 	} else {
 		if (*path == '/') {
@@ -170,69 +183,83 @@ void compat_makepath(char* path, const char* drive, const char* dir, const char*
 				*path++ = '.';
 			}
 
-			strcpy(path, ext);
+			strncpy(path, ext, sizeof(path) - 1);
 			path = strchr(path, '\0');
 		}
 	}
 
 	*path = '\0';
-#endif
+	// #endif
 }
 
-long compat_tell(int fd) {
+// TODO only used in sound
+/*long compat_tell(int fd) {
 	return lseek(fd, 0, SEEK_CUR);
 }
+*/
 
-long compat_filelength(int fd) {
+// TODO this isn't used anywhere
+/*long compat_filelength(int fd) {
 	long originalOffset = lseek(fd, 0, SEEK_CUR);
 	lseek(fd, 0, SEEK_SET);
 	long filesize = lseek(fd, 0, SEEK_END);
 	lseek(fd, originalOffset, SEEK_SET);
 	return filesize;
 }
+*/
 
-int compat_mkdir(const char* path) {
+int compat_mkdir(const char *path) {
+	// TODO: create dir
 	char nativePath[COMPAT_MAX_PATH];
-	strcpy(nativePath, path);
+	strncpy(nativePath, path, sizeof(nativePath) - 1);
 	compat_windows_path_to_native(nativePath);
 	compat_resolve_path(nativePath);
 
-#ifdef _WIN32
-	return mkdir(nativePath);
-#else
-	return mkdir(nativePath, 0755);
-#endif
+	/*#ifdef _WIN32
+		return mkdir(nativePath);
+	#else
+		return mkdir(nativePath, 0755);
+	#endif*/
+	return 0;
 }
 
 unsigned int compat_timeGetTime() {
-#ifdef _WIN32
-	return timeGetTime();
-#else
-	static auto start = std::chrono::steady_clock::now();
-	auto now = std::chrono::steady_clock::now();
-	return static_cast<unsigned int>(std::chrono::duration_cast<std::chrono::milliseconds>(now - start).count());
-#endif
+	// #ifdef _WIN32
+	//	return timeGetTime();
+	// #else
+	//	static auto start = std::chrono::steady_clock::now();
+	//	auto now = std::chrono::steady_clock::now();
+	//	return static_cast<unsigned int>(std::chrono::duration_cast<std::chrono::milliseconds>(now - start).count());
+	// #endif
+	return g_system->getMillis();
 }
 
-FILE* compat_fopen(const char* path, const char* mode) {
+Common::File *compat_fopen(const char *path, const char *mode) {
+	Common::File *file = new Common::File();
 	char nativePath[COMPAT_MAX_PATH];
-	strcpy(nativePath, path);
+	strncpy(nativePath, path, sizeof(nativePath) - 1);
 	compat_windows_path_to_native(nativePath);
 	compat_resolve_path(nativePath);
-	return fopen(nativePath, mode);
+	if (file->open(nativePath))
+		return file;
+	else
+		return nullptr;
 }
 
-gzFile compat_gzopen(const char* path, const char* mode) {
+// TODO: use scummvm stuff
+/*gzFile compat_gzopen(const char* path, const char* mode) {
 	char nativePath[COMPAT_MAX_PATH];
 	strcpy(nativePath, path);
 	compat_windows_path_to_native(nativePath);
 	compat_resolve_path(nativePath);
 	return gzopen(nativePath, mode);
-}
+}*/
 
-char* compat_fgets(char* buffer, int maxCount, FILE* stream) {
-	buffer = fgets(buffer, maxCount, stream);
-
+char *compat_fgets(char *buffer, int maxCount, Common::File *stream) {
+	//	buffer = fgets(buffer, maxCount, stream);
+	// TODO check
+	Common::String buffer_str(stream->readString(0, maxCount));
+	Common::strcpy_s(buffer, strlen(buffer_str.c_str()) + 1, buffer_str.c_str());
 	if (buffer != NULL) {
 		size_t len = strlen(buffer);
 		if (len >= 2 && buffer[len - 1] == '\n' && buffer[len - 2] == '\r') {
@@ -244,7 +271,8 @@ char* compat_fgets(char* buffer, int maxCount, FILE* stream) {
 	return buffer;
 }
 
-char* compat_gzgets(gzFile stream, char* buffer, int maxCount) {
+// TODO check
+/*char* compat_gzgets(gzFile stream, char* buffer, int maxCount) {
 	buffer = gzgets(stream, buffer, maxCount);
 
 	if (buffer != NULL) {
@@ -256,17 +284,21 @@ char* compat_gzgets(gzFile stream, char* buffer, int maxCount) {
 	}
 
 	return buffer;
-}
+}*/
 
-int compat_remove(const char* path) {
+int compat_remove(const char *path) {
+	/* TODO filedelete
 	char nativePath[COMPAT_MAX_PATH];
 	strcpy(nativePath, path);
 	compat_windows_path_to_native(nativePath);
 	compat_resolve_path(nativePath);
 	return remove(nativePath);
+	*/
+	return 0;
 }
 
-int compat_rename(const char* oldFileName, const char* newFileName) {
+int compat_rename(const char *oldFileName, const char *newFileName) {
+	/* TODO filerename
 	char nativeOldFileName[COMPAT_MAX_PATH];
 	strcpy(nativeOldFileName, oldFileName);
 	compat_windows_path_to_native(nativeOldFileName);
@@ -278,22 +310,26 @@ int compat_rename(const char* oldFileName, const char* newFileName) {
 	compat_resolve_path(nativeNewFileName);
 
 	return rename(nativeOldFileName, nativeNewFileName);
+	*/
+	return 0;
 }
 
-void compat_windows_path_to_native(char* path) {
-#ifndef _WIN32
-	char* pch = path;
+void compat_windows_path_to_native(char *path) {
+	// #ifndef _WIN32
+	char *pch = path;
 	while (*pch != '\0') {
 		if (*pch == '\\') {
 			*pch = '/';
 		}
 		pch++;
 	}
-#endif
+	// #endif
 }
 
-void compat_resolve_path(char* path) {
-#ifndef _WIN32
+void compat_resolve_path(char *path) {
+// TODO check
+// #ifndef _WIN32
+#if 0
 	char* pch = path;
 
 	DIR *dir;
@@ -345,26 +381,31 @@ void compat_resolve_path(char* path) {
 #endif
 }
 
-int compat_access(const char* path, int mode) {
+// check if file exists and is accessible
+int compat_access(const char *path, int mode) {
 	char nativePath[COMPAT_MAX_PATH];
-	strcpy(nativePath, path);
+	strncpy(nativePath, path, sizeof(nativePath) - 1);
 	compat_windows_path_to_native(nativePath);
 	compat_resolve_path(nativePath);
-	return access(nativePath, mode);
+	Common::File tmp;
+	if (tmp.exists(nativePath))
+		return 0;
+	else
+		return 1;
 }
 
-char* compat_strdup(const char* string) {
-	return SDL_strdup(string);
+char *compat_strdup(const char *string) {
+	return scumm_strdup(string);
 }
 
 // It's a replacement for compat_filelength(fileno(stream)) on platforms without
 // fileno defined.
-long getFileSize(FILE* stream) {
-	long originalOffset = ftell(stream);
-	fseek(stream, 0, SEEK_END);
-	long filesize = ftell(stream);
-	fseek(stream, originalOffset, SEEK_SET);
-	return filesize;
+long getFileSize(Common::File *stream) {
+	/*	long originalOffset = ftell(stream);
+		fseek(stream, 0, SEEK_END);
+		long filesize = ftell(stream);
+		fseek(stream, originalOffset, SEEK_SET);*/
+	return stream->size();
 }
 
-} // namespace fallout
+} // namespace Fallout2
