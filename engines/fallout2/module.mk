@@ -3,10 +3,12 @@ MODULE := engines/fallout2
 MODULE_OBJS = \
 	fallout2.o \
 	console.o \
+	metaengine.o \
+	cache.o \
 	heap.o \
 	memory.o \
 	memory_manager.o \
-	metaengine.o \
+	platform_compat.o \
 	version.o
 
 # This module can be built as a plugin

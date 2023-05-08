@@ -1,15 +1,18 @@
-#include "cache.h"
+#include "fallout2/cache.h"
 
+/*
 #include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+*/
 
-#include "debug.h"
-#include "memory.h"
-#include "sound.h"
+#include "fallout2/memory.h"
+// #include "fallout2/sound.h" TODO
 
-namespace fallout {
+#include "common/debug.h"
+
+namespace Fallout2 {
 
 // The initial number of cache entries in new cache.
 #define CACHE_ENTRIES_INITIAL_CAPACITY (100)
@@ -17,25 +20,25 @@ namespace fallout {
 // The number of cache entries added when cache capacity is reached.
 #define CACHE_ENTRIES_GROW_CAPACITY (50)
 
-static bool cacheFetchEntryForKey(Cache* cache, int key, int* indexPtr);
-static bool cacheInsertEntryAtIndex(Cache* cache, CacheEntry* cacheEntry, int index);
-static int cacheFindIndexForKey(Cache* cache, int key, int* indexPtr);
-static bool cacheEntryInit(CacheEntry* cacheEntry);
-static bool cacheEntryFree(Cache* cache, CacheEntry* cacheEntry);
-static bool cacheClean(Cache* cache);
-static bool cacheResetStatistics(Cache* cache);
-static bool cacheEnsureSize(Cache* cache, int size);
-static bool cacheSweep(Cache* cache);
-static bool cacheSetCapacity(Cache* cache, int newCapacity);
-static int cacheEntriesCompareByUsage(const void* a1, const void* a2);
-static int cacheEntriesCompareByMostRecentHit(const void* a1, const void* a2);
+static bool cacheFetchEntryForKey(Cache *cache, int key, int *indexPtr);
+static bool cacheInsertEntryAtIndex(Cache *cache, CacheEntry *cacheEntry, int index);
+static int cacheFindIndexForKey(Cache *cache, int key, int *indexPtr);
+static bool cacheEntryInit(CacheEntry *cacheEntry);
+static bool cacheEntryFree(Cache *cache, CacheEntry *cacheEntry);
+static bool cacheClean(Cache *cache);
+static bool cacheResetStatistics(Cache *cache);
+static bool cacheEnsureSize(Cache *cache, int size);
+static bool cacheSweep(Cache *cache);
+static bool cacheSetCapacity(Cache *cache, int newCapacity);
+static int cacheEntriesCompareByUsage(const void *a1, const void *a2);
+static int cacheEntriesCompareByMostRecentHit(const void *a1, const void *a2);
 
 // 0x510938
 static int _lock_sound_ticker = 0;
 
 // cache_init
 // 0x41FCC0
-bool cacheInit(Cache* cache, CacheSizeProc* sizeProc, CacheReadProc* readProc, CacheFreeProc* freeProc, int maxSize) {
+bool cacheInit(Cache *cache, CacheSizeProc *sizeProc, CacheReadProc *readProc, CacheFreeProc *freeProc, int maxSize) {
 	if (!heapInit(&(cache->heap), maxSize)) {
 		return false;
 	}
@@ -45,7 +48,7 @@ bool cacheInit(Cache* cache, CacheSizeProc* sizeProc, CacheReadProc* readProc, C
 	cache->entriesLength = 0;
 	cache->entriesCapacity = CACHE_ENTRIES_INITIAL_CAPACITY;
 	cache->hits = 0;
-	cache->entries = (CacheEntry**)internal_malloc(sizeof(*cache->entries) * cache->entriesCapacity);
+	cache->entries = (CacheEntry **)internal_malloc(sizeof(*cache->entries) * cache->entriesCapacity);
 	cache->sizeProc = sizeProc;
 	cache->readProc = readProc;
 	cache->freeProc = freeProc;
@@ -61,7 +64,7 @@ bool cacheInit(Cache* cache, CacheSizeProc* sizeProc, CacheReadProc* readProc, C
 
 // cache_exit
 // 0x41FD50
-bool cacheFree(Cache* cache) {
+bool cacheFree(Cache *cache) {
 	if (cache == NULL) {
 		return false;
 	}
@@ -89,7 +92,7 @@ bool cacheFree(Cache* cache) {
 }
 
 // 0x41FDE8
-bool cacheLock(Cache* cache, int key, void** data, CacheEntry** cacheEntryPtr) {
+bool cacheLock(Cache *cache, int key, void **data, CacheEntry **cacheEntryPtr) {
 	if (cache == NULL || data == NULL || cacheEntryPtr == NULL) {
 		return false;
 	}
@@ -100,7 +103,7 @@ bool cacheLock(Cache* cache, int key, void** data, CacheEntry** cacheEntryPtr) {
 	int rc = cacheFindIndexForKey(cache, key, &index);
 	if (rc == 2) {
 		// Use existing cache entry.
-		CacheEntry* cacheEntry = cache->entries[index];
+		CacheEntry *cacheEntry = cache->entries[index];
 		cacheEntry->hits++;
 	} else if (rc == 3) {
 		// New cache entry is required.
@@ -114,13 +117,14 @@ bool cacheLock(Cache* cache, int key, void** data, CacheEntry** cacheEntryPtr) {
 
 		_lock_sound_ticker %= 4;
 		if (_lock_sound_ticker == 0) {
-			soundContinueAll();
+			// TODO: Sound
+			// soundContinueAll();
 		}
 	} else {
 		return false;
 	}
 
-	CacheEntry* cacheEntry = cache->entries[index];
+	CacheEntry *cacheEntry = cache->entries[index];
 	if (cacheEntry->referenceCount == 0) {
 		if (!heapLock(&(cache->heap), cacheEntry->heapHandleIndex, &(cacheEntry->data))) {
 			return false;
@@ -143,7 +147,7 @@ bool cacheLock(Cache* cache, int key, void** data, CacheEntry** cacheEntryPtr) {
 }
 
 // 0x4200B8
-bool cacheUnlock(Cache* cache, CacheEntry* cacheEntry) {
+bool cacheUnlock(Cache *cache, CacheEntry *cacheEntry) {
 	if (cache == NULL || cacheEntry == NULL) {
 		return false;
 	}
@@ -163,14 +167,14 @@ bool cacheUnlock(Cache* cache, CacheEntry* cacheEntry) {
 
 // cache_flush
 // 0x42012C
-bool cacheFlush(Cache* cache) {
+bool cacheFlush(Cache *cache) {
 	if (cache == NULL) {
 		return false;
 	}
 
 	// Loop thru cache entries and mark those with no references for eviction.
 	for (int index = 0; index < cache->entriesLength; index++) {
-		CacheEntry* cacheEntry = cache->entries[index];
+		CacheEntry *cacheEntry = cache->entries[index];
 		if (cacheEntry->referenceCount == 0) {
 			cacheEntry->flags |= CACHE_ENTRY_MARKED_FOR_EVICTION;
 		}
@@ -189,7 +193,7 @@ bool cacheFlush(Cache* cache) {
 }
 
 // 0x42019C
-bool cachePrintStats(Cache* cache, char* dest, size_t size) {
+bool cachePrintStats(Cache *cache, char *dest, size_t size) {
 	if (cache == NULL || dest == NULL) {
 		return false;
 	}
@@ -202,8 +206,8 @@ bool cachePrintStats(Cache* cache, char* dest, size_t size) {
 // Fetches entry for the specified key into the cache.
 //
 // 0x4203AC
-static bool cacheFetchEntryForKey(Cache* cache, int key, int* indexPtr) {
-	CacheEntry* cacheEntry = (CacheEntry*)internal_malloc(sizeof(*cacheEntry));
+static bool cacheFetchEntryForKey(Cache *cache, int key, int *indexPtr) {
+	CacheEntry *cacheEntry = (CacheEntry *)internal_malloc(sizeof(*cacheEntry));
 	if (cacheEntry == NULL) {
 		return false;
 	}
@@ -301,7 +305,7 @@ static bool cacheFetchEntryForKey(Cache* cache, int key, int* indexPtr) {
 }
 
 // 0x4205E8
-static bool cacheInsertEntryAtIndex(Cache* cache, CacheEntry* cacheEntry, int index) {
+static bool cacheInsertEntryAtIndex(Cache *cache, CacheEntry *cacheEntry, int index) {
 	// Ensure cache have enough space for new entry.
 	if (cache->entriesLength == cache->entriesCapacity - 1) {
 		if (!cacheSetCapacity(cache, cache->entriesCapacity + CACHE_ENTRIES_GROW_CAPACITY)) {
@@ -325,7 +329,7 @@ static bool cacheInsertEntryAtIndex(Cache* cache, CacheEntry* cacheEntry, int in
 // this case indexPtr represents insertion point.
 //
 // 0x420654
-static int cacheFindIndexForKey(Cache* cache, int key, int* indexPtr) {
+static int cacheFindIndexForKey(Cache *cache, int key, int *indexPtr) {
 	int length = cache->entriesLength;
 	if (length == 0) {
 		*indexPtr = 0;
@@ -363,7 +367,7 @@ static int cacheFindIndexForKey(Cache* cache, int key, int* indexPtr) {
 }
 
 // 0x420708
-static bool cacheEntryInit(CacheEntry* cacheEntry) {
+static bool cacheEntryInit(CacheEntry *cacheEntry) {
 	cacheEntry->key = 0;
 	cacheEntry->size = 0;
 	cacheEntry->data = NULL;
@@ -377,7 +381,7 @@ static bool cacheEntryInit(CacheEntry* cacheEntry) {
 // NOTE: Inlined.
 //
 // 0x420740
-static bool cacheEntryFree(Cache* cache, CacheEntry* cacheEntry) {
+static bool cacheEntryFree(Cache *cache, CacheEntry *cacheEntry) {
 	if (cacheEntry->data != NULL) {
 		heapBlockDeallocate(&(cache->heap), &(cacheEntry->heapHandleIndex));
 	}
@@ -388,10 +392,10 @@ static bool cacheEntryFree(Cache* cache, CacheEntry* cacheEntry) {
 }
 
 // 0x420764
-static bool cacheClean(Cache* cache) {
-	Heap* heap = &(cache->heap);
+static bool cacheClean(Cache *cache) {
+	Heap *heap = &(cache->heap);
 	for (int index = 0; index < cache->entriesLength; index++) {
-		CacheEntry* cacheEntry = cache->entries[index];
+		CacheEntry *cacheEntry = cache->entries[index];
 
 		// NOTE: Original code is slightly different. For unknown reason it uses
 		// inner loop to decrement `referenceCount` one by one. Probably using
@@ -406,12 +410,12 @@ static bool cacheClean(Cache* cache) {
 }
 
 // 0x4207D4
-static bool cacheResetStatistics(Cache* cache) {
+static bool cacheResetStatistics(Cache *cache) {
 	if (cache == NULL) {
 		return false;
 	}
 
-	CacheEntry** entries = (CacheEntry**)internal_malloc(sizeof(*entries) * cache->entriesLength);
+	CacheEntry **entries = (CacheEntry **)internal_malloc(sizeof(*entries) * cache->entriesLength);
 	if (entries == NULL) {
 		return false;
 	}
@@ -421,7 +425,7 @@ static bool cacheResetStatistics(Cache* cache) {
 	qsort(entries, cache->entriesLength, sizeof(*entries), cacheEntriesCompareByMostRecentHit);
 
 	for (int index = 0; index < cache->entriesLength; index++) {
-		CacheEntry* cacheEntry = entries[index];
+		CacheEntry *cacheEntry = entries[index];
 		cacheEntry->mru = index;
 	}
 
@@ -435,7 +439,7 @@ static bool cacheResetStatistics(Cache* cache) {
 // Prepare cache for storing new entry with the specified size.
 //
 // 0x42084C
-static bool cacheEnsureSize(Cache* cache, int size) {
+static bool cacheEnsureSize(Cache *cache, int size) {
 	if (size > cache->maxSize) {
 		// The entry of given size is too big for caching, no matter what.
 		return false;
@@ -447,7 +451,7 @@ static bool cacheEnsureSize(Cache* cache, int size) {
 		return true;
 	}
 
-	CacheEntry** entries = (CacheEntry**)internal_malloc(sizeof(*entries) * cache->entriesLength);
+	CacheEntry **entries = (CacheEntry **)internal_malloc(sizeof(*entries) * cache->entriesLength);
 	if (entries != NULL) {
 		memcpy(entries, cache->entries, sizeof(*entries) * cache->entriesLength);
 		qsort(entries, cache->entriesLength, sizeof(*entries), cacheEntriesCompareByUsage);
@@ -459,7 +463,7 @@ static bool cacheEnsureSize(Cache* cache, int size) {
 		int accum = 0;
 		int index;
 		for (index = 0; index < cache->entriesLength; index++) {
-			CacheEntry* entry = entries[index];
+			CacheEntry *entry = entries[index];
 			if (entry->referenceCount == 0) {
 				if (entry->size >= threshold) {
 					entry->flags |= CACHE_ENTRY_MARKED_FOR_EVICTION;
@@ -490,7 +494,7 @@ static bool cacheEnsureSize(Cache* cache, int size) {
 			// Loop backwards from the point we've stopped and mark all
 			// unreferenced entries for sweeping.
 			for (; index >= 0; index--) {
-				CacheEntry* entry = entries[index];
+				CacheEntry *entry = entries[index];
 				if (entry->referenceCount == 0) {
 					entry->flags |= CACHE_ENTRY_MARKED_FOR_EVICTION;
 				}
@@ -510,9 +514,9 @@ static bool cacheEnsureSize(Cache* cache, int size) {
 }
 
 // 0x42099C
-static bool cacheSweep(Cache* cache) {
+static bool cacheSweep(Cache *cache) {
 	for (int index = 0; index < cache->entriesLength; index++) {
-		CacheEntry* cacheEntry = cache->entries[index];
+		CacheEntry *cacheEntry = cache->entries[index];
 		if ((cacheEntry->flags & CACHE_ENTRY_MARKED_FOR_EVICTION) != 0) {
 			if (cacheEntry->referenceCount != 0) {
 				// Entry was marked for eviction but still has references,
@@ -540,12 +544,12 @@ static bool cacheSweep(Cache* cache) {
 }
 
 // 0x420A40
-static bool cacheSetCapacity(Cache* cache, int newCapacity) {
+static bool cacheSetCapacity(Cache *cache, int newCapacity) {
 	if (newCapacity < cache->entriesLength) {
 		return false;
 	}
 
-	CacheEntry** entries = (CacheEntry**)internal_realloc(cache->entries, sizeof(*cache->entries) * newCapacity);
+	CacheEntry **entries = (CacheEntry **)internal_realloc(cache->entries, sizeof(*cache->entries) * newCapacity);
 	if (entries == NULL) {
 		return false;
 	}
@@ -557,9 +561,9 @@ static bool cacheSetCapacity(Cache* cache, int newCapacity) {
 }
 
 // 0x420A74
-static int cacheEntriesCompareByUsage(const void* a1, const void* a2) {
-	CacheEntry* v1 = *(CacheEntry**)a1;
-	CacheEntry* v2 = *(CacheEntry**)a2;
+static int cacheEntriesCompareByUsage(const void *a1, const void *a2) {
+	CacheEntry *v1 = *(CacheEntry **)a1;
+	CacheEntry *v2 = *(CacheEntry **)a2;
 
 	if (v1->referenceCount != 0 && v2->referenceCount == 0) {
 		return 1;
@@ -585,9 +589,9 @@ static int cacheEntriesCompareByUsage(const void* a1, const void* a2) {
 }
 
 // 0x420AE8
-static int cacheEntriesCompareByMostRecentHit(const void* a1, const void* a2) {
-	CacheEntry* v1 = *(CacheEntry**)a1;
-	CacheEntry* v2 = *(CacheEntry**)a2;
+static int cacheEntriesCompareByMostRecentHit(const void *a1, const void *a2) {
+	CacheEntry *v1 = *(CacheEntry **)a1;
+	CacheEntry *v2 = *(CacheEntry **)a2;
 
 	if (v1->mru < v2->mru) {
 		return 1;
@@ -598,4 +602,4 @@ static int cacheEntriesCompareByMostRecentHit(const void* a1, const void* a2) {
 	}
 }
 
-} // namespace fallout
+} // namespace Fallout2
