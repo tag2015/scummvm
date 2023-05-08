@@ -123,26 +123,14 @@
 *
 *	Queries about this source code can be sent to <david@tribble.com>.
 *
-* Copyright ©1997-2001 by David R. Tribble, all rights reserved.
+* Copyright 1997-2001 by David R. Tribble, all rights reserved.
 */
 
 
-#ifndef drt_fpattern_h
-#define drt_fpattern_h	1
+#ifndef FALLOUT2_THIRD_PARTY_FPATTERN_FPATTERN_H
+#define FALLOUT2_THIRD_PARTY_FPATTERN_FPATTERN_H
 
-#ifdef __cplusplus
-extern "C"
-{
-#endif
-
-
-/* Identification */
-
-#ifndef NO_H_IDENT
-static const char	drt_fpattern_h_id[] =
-    "@(#)drt/src/lib/fpattern.h $Revision: 1.4 $ $Date: 2001/11/12 06:00:00 $";
-#endif
-
+namespace Fallout2 {
 
 /* Manifest constants */
 
@@ -207,11 +195,6 @@ extern int	fpattern_isvalid(const char *pat);
 extern int	fpattern_match(const char *pat, const char *fname);
 extern int	fpattern_matchn(const char *pat, const char *fname);
 
+}  // namespace Fallout2
 
-#ifdef __cplusplus
-}
 #endif
-
-#endif /* drt_fpattern_h */
-
-/* End fpattern.h */
