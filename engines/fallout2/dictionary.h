@@ -1,19 +1,19 @@
-#ifndef DICTIONARY_H
-#define DICTIONARY_H
+#ifndef FALLOUT2_DICTIONARY_H
+#define FALLOUT2_DICTIONARY_H
 
-#include <stdio.h>
+#include "fallout2/memory_defs.h"
 
-#include "memory_defs.h"
+#include "common/file.h"
 
-namespace fallout {
+namespace Fallout2 {
 
-typedef int(DictionaryReadProc)(FILE* stream, void* buffer, unsigned int size, int a4);
-typedef int(DictionaryWriteProc)(FILE* stream, void* buffer, unsigned int size, int a4);
+typedef int(DictionaryReadProc)(Common::File *stream, void *buffer, unsigned int size, int a4);
+typedef int(DictionaryWriteProc)(Common::File *stream, void *buffer, unsigned int size, int a4);
 
 // NOTE: Last unnamed fields are likely seek, tell, and filelength.
 typedef struct DictionaryIO {
-	DictionaryReadProc* readProc;
-	DictionaryWriteProc* writeProc;
+	DictionaryReadProc *readProc;
+	DictionaryWriteProc *writeProc;
 	int field_8;
 	int field_C;
 	int field_10;
@@ -21,8 +21,8 @@ typedef struct DictionaryIO {
 
 // A tuple containing individual key-value pair of a dictionary.
 typedef struct DictionaryEntry {
-	char* key;
-	void* value;
+	char *key;
+	void *value;
 } DictionaryEntry;
 
 // A collection of key/value pairs.
@@ -47,24 +47,24 @@ typedef struct Dictionary {
 	DictionaryIO io;
 
 	// The array of key-value pairs.
-	DictionaryEntry* entries;
+	DictionaryEntry *entries;
 } Dictionary;
 
-int dictionaryInit(Dictionary* dictionary, int initialCapacity, size_t valueSize, DictionaryIO* io);
-int dictionarySetCapacity(Dictionary* dictionary, int newCapacity);
-int dictionaryFree(Dictionary* dictionary);
-int dictionaryGetIndexByKey(Dictionary* dictionary, const char* key);
-int dictionaryAddValue(Dictionary* dictionary, const char* key, const void* value);
-int dictionaryRemoveValue(Dictionary* dictionary, const char* key);
-int dictionaryCopy(Dictionary* dest, Dictionary* src);
-int dictionaryReadInt(FILE* stream, int* valuePtr);
-int dictionaryReadHeader(FILE* stream, Dictionary* dictionary);
-int dictionaryLoad(FILE* stream, Dictionary* dictionary, int a3);
-int dictionaryWriteInt(FILE* stream, int value);
-int dictionaryWriteHeader(FILE* stream, Dictionary* dictionary);
-int dictionaryWrite(FILE* stream, Dictionary* dictionary, int a3);
-void dictionarySetMemoryProcs(MallocProc* mallocProc, ReallocProc* reallocProc, FreeProc* freeProc);
+int dictionaryInit(Dictionary *dictionary, int initialCapacity, size_t valueSize, DictionaryIO *io);
+int dictionarySetCapacity(Dictionary *dictionary, int newCapacity);
+int dictionaryFree(Dictionary *dictionary);
+int dictionaryGetIndexByKey(Dictionary *dictionary, const char *key);
+int dictionaryAddValue(Dictionary *dictionary, const char *key, const void *value);
+int dictionaryRemoveValue(Dictionary *dictionary, const char *key);
+int dictionaryCopy(Dictionary *dest, Dictionary *src);
+int dictionaryReadInt(Common::File *stream, int *valuePtr);
+int dictionaryReadHeader(Common::File *stream, Dictionary *dictionary);
+int dictionaryLoad(Common::File *stream, Dictionary *dictionary, int a3);
+int dictionaryWriteInt(Common::File *stream, int value);
+int dictionaryWriteHeader(Common::File *stream, Dictionary *dictionary);
+int dictionaryWrite(Common::File *stream, Dictionary *dictionary, int a3);
+void dictionarySetMemoryProcs(MallocProc *mallocProc, ReallocProc *reallocProc, FreeProc *freeProc);
 
-} // namespace fallout
+} // namespace Fallout2
 
-#endif /* DICTIONARY_H */
+#endif
