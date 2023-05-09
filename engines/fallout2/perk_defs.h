@@ -1,7 +1,7 @@
-#ifndef PERK_DEFS_H
-#define PERK_DEFS_H
+#ifndef FALLOUT2_PERK_DEFS_H
+#define FALLOUT2_PERK_DEFS_H
 
-namespace fallout {
+namespace Fallout2 {
 
 typedef enum Perk {
 	PERK_AWARENESS,
@@ -126,6 +126,6 @@ typedef enum Perk {
 	PERK_COUNT,
 } Perk;
 
-} // namespace fallout
+} // namespace Fallout2
 
-#endif /* PERK_DEFS_H */
+#endif

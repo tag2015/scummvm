@@ -1,7 +1,7 @@
-#ifndef COMBAT_AI_DEFS_H
-#define COMBAT_AI_DEFS_H
+#ifndef FALLOUT2_COMBAT_AI_DEFS_H
+#define FALLOUT2_COMBAT_AI_DEFS_H
 
-namespace fallout {
+namespace Fallout2 {
 
 typedef enum AreaAttackMode {
 	AREA_ATTACK_MODE_ALWAYS,
@@ -81,6 +81,6 @@ typedef enum HurtTooMuch {
 	HURT_COUNT,
 } HurtTooMuch;
 
-} // namespace fallout
+} // namespace Fallout2
 
-#endif /* COMBAT_AI_DEFS_H */
+#endif
