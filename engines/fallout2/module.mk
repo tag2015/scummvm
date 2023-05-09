@@ -6,6 +6,7 @@ MODULE_OBJS = \
 	metaengine.o \
 	cache.o \
 	dfile.o \
+	dictionary.o \
 	heap.o \
 	memory.o \
 	memory_manager.o \
