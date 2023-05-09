@@ -1,7 +1,7 @@
-#ifndef GAME_VARS_H
-#define GAME_VARS_H
+#ifndef FALLOUT2_GAME_VARS_H
+#define FALLOUT2_GAME_VARS_H
 
-namespace fallout {
+namespace Fallout2 {
 
 typedef enum GameGlobalVar {
 	GVAR_PLAYER_REPUTATION,
@@ -702,6 +702,6 @@ typedef enum GameGlobalVar {
 	GVAR_PATCH_INVAIDITATOR,
 } GameGlobalVar;
 
-} // namespace fallout
+} // namespace Fallout2
 
-#endif /* GAME_VARS_H */
+#endif

@@ -1,5 +1,5 @@
-#ifndef COMBAT_DEFS_H
-#define COMBAT_DEFS_H
+#ifndef FALLOUT2_COMBAT_DEFS_H
+#define FALLOUT2_COMBAT_DEFS_H
 
 #include "obj_types.h"
 
@@ -10,7 +10,7 @@
 #define WEAPON_CRITICAL_FAILURE_TYPE_COUNT (7)
 #define WEAPON_CRITICAL_FAILURE_EFFECT_COUNT (5)
 
-namespace fallout {
+namespace Fallout2 {
 
 typedef enum CombatState {
 	COMBAT_STATE_0x01 = 0x01,
@@ -87,8 +87,8 @@ typedef enum HitLocation {
 } HitLocation;
 
 typedef struct STRUCT_664980 {
-	Object* attacker;
-	Object* defender;
+	Object *attacker;
+	Object *defender;
 	int actionPointsBonus;
 	int accuracyBonus;
 	int damageBonus;
@@ -100,23 +100,23 @@ typedef struct STRUCT_664980 {
 } STRUCT_664980;
 
 typedef struct Attack {
-	Object* attacker;
+	Object *attacker;
 	int hitMode;
-	Object* weapon;
+	Object *weapon;
 	int attackHitLocation;
 	int attackerDamage;
 	int attackerFlags;
 	int ammoQuantity;
 	int criticalMessageId;
-	Object* defender;
+	Object *defender;
 	int tile;
 	int defenderHitLocation;
 	int defenderDamage;
 	int defenderFlags;
 	int defenderKnockback;
-	Object* oops;
+	Object *oops;
 	int extrasLength;
-	Object* extras[EXPLOSION_TARGET_COUNT];
+	Object *extras[EXPLOSION_TARGET_COUNT];
 	int extrasHitLocation[EXPLOSION_TARGET_COUNT];
 	int extrasDamage[EXPLOSION_TARGET_COUNT];
 	int extrasFlags[EXPLOSION_TARGET_COUNT];
@@ -171,6 +171,6 @@ typedef enum CombatBadShot {
 	COMBAT_BAD_SHOT_BOTH_ARMS_CRIPPLED = 7,
 } CombatBadShot;
 
-} // namespace fallout
+} // namespace Fallout2
 
-#endif /* COMBAT_DEFS_H */
+#endif
