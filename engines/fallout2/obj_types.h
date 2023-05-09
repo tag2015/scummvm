@@ -1,15 +1,15 @@
-#ifndef OBJ_TYPES_H
-#define OBJ_TYPES_H
+#ifndef FALLOUT2_OBJ_TYPES_H
+#define FALLOUT2_OBJ_TYPES_H
 
-namespace fallout {
+namespace Fallout2 {
 
 // Rotation
 typedef enum Rotation {
 	ROTATION_NE, // 0
-	ROTATION_E, // 1
+	ROTATION_E,  // 1
 	ROTATION_SE, // 2
 	ROTATION_SW, // 3
-	ROTATION_W, // 4
+	ROTATION_W,  // 4
 	ROTATION_NW, // 5
 	ROTATION_COUNT,
 } Rotation;
@@ -159,7 +159,7 @@ typedef enum Dam {
 typedef struct Object Object;
 
 typedef struct InventoryItem {
-	Object* item;
+	Object *item;
 	int quantity;
 } InventoryItem;
 
@@ -167,12 +167,12 @@ typedef struct InventoryItem {
 typedef struct Inventory {
 	int length;
 	int capacity;
-	InventoryItem* items;
+	InventoryItem *items;
 } Inventory;
 
 typedef struct WeaponObjectData {
 	int ammoQuantity; // obj_pudg.pudweapon.cur_ammo_quantity
-	int ammoTypePid; // obj_pudg.pudweapon.cur_ammo_type_pid
+	int ammoTypePid;  // obj_pudg.pudweapon.cur_ammo_type_pid
 } WeaponObjectData;
 
 typedef struct AmmoItemData {
@@ -195,32 +195,32 @@ typedef union ItemObjectData {
 } ItemObjectData;
 
 typedef struct CritterCombatData {
-	int maneuver; // obj_pud.combat_data.maneuver
-	int ap; // obj_pud.combat_data.curr_mp
-	int results; // obj_pud.combat_data.results
+	int maneuver;       // obj_pud.combat_data.maneuver
+	int ap;             // obj_pud.combat_data.curr_mp
+	int results;        // obj_pud.combat_data.results
 	int damageLastTurn; // obj_pud.combat_data.damage_last_turn
-	int aiPacket; // obj_pud.combat_data.ai_packet
-	int team; // obj_pud.combat_data.team_num
+	int aiPacket;       // obj_pud.combat_data.ai_packet
+	int team;           // obj_pud.combat_data.team_num
 	union {
-		Object* whoHitMe; // obj_pud.combat_data.who_hit_me
+		Object *whoHitMe; // obj_pud.combat_data.who_hit_me
 		int whoHitMeCid;
 	};
 } CritterCombatData;
 
 typedef struct CritterObjectData {
-	int field_0; // obj_pud.reaction_to_pc
+	int field_0;              // obj_pud.reaction_to_pc
 	CritterCombatData combat; // obj_pud.combat_data
-	int hp; // obj_pud.curr_hp
-	int radiation; // obj_pud.curr_rad
-	int poison; // obj_pud.curr_poison
+	int hp;                   // obj_pud.curr_hp
+	int radiation;            // obj_pud.curr_rad
+	int poison;               // obj_pud.curr_poison
 } CritterObjectData;
 
 typedef struct DoorSceneryData {
-	int openFlags; // obj_pudg.pudportal.cur_open_flags
+	int openFlags;			  // obj_pudg.pudportal.cur_open_flags
 } DoorSceneryData;
 
 typedef struct StairsSceneryData {
-	int destinationMap; // obj_pudg.pudstairs.destMap
+	int destinationMap;       // obj_pudg.pudstairs.destMap
 	int destinationBuiltTile; // obj_pudg.pudstairs.destBuiltTile
 } StairsSceneryData;
 
@@ -264,34 +264,34 @@ typedef struct ObjectData {
 } ObjectData;
 
 typedef struct Object {
-	int id; // obj_id
-	int tile; // obj_tile_num
-	int x; // obj_x
-	int y; // obj_y
-	int sx; // obj_sx
-	int sy; // obj_sy
-	int frame; // obj_cur_frm
-	int rotation; // obj_cur_rot
-	int fid; // obj_fid
-	int flags; // obj_flags
+	int id;        // obj_id
+	int tile;      // obj_tile_num
+	int x;         // obj_x
+	int y;         // obj_y
+	int sx;        // obj_sx
+	int sy;        // obj_sy
+	int frame;     // obj_cur_frm
+	int rotation;  // obj_cur_rot
+	int fid;       // obj_fid
+	int flags;     // obj_flags
 	int elevation; // obj_elev
 	union {
 		int field_2C_array[14];
 		ObjectData data;
 	};
-	int pid; // obj_pid
-	int cid; // obj_cid
-	int lightDistance; // obj_light_distance
+	int pid;            // obj_pid
+	int cid;            // obj_cid
+	int lightDistance;  // obj_light_distance
 	int lightIntensity; // obj_light_intensity
-	int outline; // obj_outline
-	int sid; // obj_sid
-	Object* owner;
+	int outline;        // obj_outline
+	int sid;            // obj_sid
+	Object *owner;
 	int field_80;
 } Object;
 
 typedef struct ObjectListNode {
-	Object* obj;
-	struct ObjectListNode* next;
+	Object *obj;
+	struct ObjectListNode *next;
 } ObjectListNode;
 
 #define BUILT_TILE_TILE_MASK 0x3FFFFFF
@@ -316,6 +316,6 @@ static inline int builtTileCreate(int tile, int elevation) {
 	return tile | ((elevation << BUILT_TILE_ELEVATION_SHIFT) & BUILT_TILE_ELEVATION_MASK);
 }
 
-} // namespace fallout
+} // namespace Fallout2
 
-#endif /* OBJ_TYPES_H */
+#endif

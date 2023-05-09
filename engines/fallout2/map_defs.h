@@ -1,7 +1,7 @@
-#ifndef MAPDEFS_H
-#define MAPDEFS_H
+#ifndef FALLOUT2_MAPDEFS_H
+#define FALLOUT2_MAPDEFS_H
 
-namespace fallout {
+namespace Fallout2 {
 
 #define ELEVATION_COUNT (3)
 
@@ -25,6 +25,6 @@ static inline bool hexGridTileIsValid(int tile) {
 	return tile >= 0 && tile < HEX_GRID_SIZE;
 }
 
-} // namespace fallout
+} // namespace Fallout2
 
-#endif /* MAPDEFS_H */
+#endif

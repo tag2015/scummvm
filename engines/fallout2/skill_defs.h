@@ -1,7 +1,7 @@
-#ifndef SKILL_DEFS_H
-#define SKILL_DEFS_H
+#ifndef FALLOUT2_SKILL_DEFS_H
+#define FALLOUT2_SKILL_DEFS_H
 
-namespace fallout {
+namespace Fallout2 {
 
 // max number of tagged skills
 #define NUM_TAGGED_SKILLS 4
@@ -31,6 +31,6 @@ typedef enum Skill {
 	SKILL_COUNT,
 } Skill;
 
-} // namespace fallout
+} // namespace Fallout2
 
-#endif /* SKILL_DEFS_H */
+#endif
