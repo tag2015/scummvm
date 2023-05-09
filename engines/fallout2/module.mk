@@ -5,11 +5,13 @@ MODULE_OBJS = \
 	console.o \
 	metaengine.o \
 	cache.o \
+	dfile.o \
 	heap.o \
 	memory.o \
 	memory_manager.o \
 	platform_compat.o \
-	version.o
+	version.o \
+	third_party/fpattern/fpattern.o
 
 # This module can be built as a plugin
 ifeq ($(ENABLE_FALLOUT2), DYNAMIC_PLUGIN)
