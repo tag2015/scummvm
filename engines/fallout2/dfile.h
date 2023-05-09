@@ -1,13 +1,12 @@
-#ifndef DFILE_H
-#define DFILE_H
+#ifndef FALLOUT2_DFILE_H
+#define FALLOUT2_DFILE_H
 
-#include <stdio.h>
-
-#include <zlib.h>
+#include "common/compression/zlib.h"
+#include "common/file.h"
 
 #include "platform_compat.h"
 
-namespace fallout {
+namespace Fallout2 {
 
 typedef struct DBase DBase;
 typedef struct DBaseEntry DBaseEntry;
@@ -16,7 +15,7 @@ typedef struct DFile DFile;
 // A representation of .DAT file.
 typedef struct DBase {
 	// The path of .DAT file that this structure represents.
-	char* path;
+	char *path;
 
 	// The offset to the beginning of data section of .DAT file.
 	int dataOffset;
@@ -25,14 +24,14 @@ typedef struct DBase {
 	int entriesLength;
 
 	// The array of entries.
-	DBaseEntry* entries;
+	DBaseEntry *entries;
 
 	// The head of linked list of open file handles.
-	DFile* dfileHead;
+	DFile *dfileHead;
 } DBase;
 
 typedef struct DBaseEntry {
-	char* path;
+	char *path;
 	unsigned char compressed;
 	int uncompressedSize;
 	int dataSize;
@@ -41,8 +40,8 @@ typedef struct DBaseEntry {
 
 // A handle to open entry in .DAT file.
 typedef struct DFile {
-	DBase* dbase;
-	DBaseEntry* entry;
+	DBase *dbase;
+	DBaseEntry *entry;
 	int flags;
 
 	// The stream of .DAT file opened for reading in binary mode.
@@ -50,17 +49,18 @@ typedef struct DFile {
 	// This stream is not shared across open handles. Instead every [DFile]
 	// opens it's own stream via [fopen], which is then closed via [fclose] in
 	// [dfileClose].
-	FILE* stream;
+	Common::File *stream;
 
 	// The inflate stream used to decompress data.
 	//
 	// This value is NULL if entry is not compressed.
-	z_streamp decompressionStream;
+	Common::SeekableReadStream *decompressionStream;
+	// z_streamp
 
 	// The decompression buffer of size [DFILE_DECOMPRESSION_BUFFER_SIZE].
 	//
 	// This value is NULL if entry is not compressed.
-	unsigned char* decompressionBuffer;
+	unsigned char *decompressionBuffer;
 
 	// The last ungot character.
 	//
@@ -89,7 +89,7 @@ typedef struct DFile {
 	//
 	// [DFile]s are stored in [DBase] in reverse order, so it's actually a
 	// previous opened file, not next.
-	DFile* next;
+	DFile *next;
 } DFile;
 
 typedef struct DFileFindData {
@@ -110,26 +110,26 @@ typedef struct DFileFindData {
 	int index;
 } DFileFindData;
 
-DBase* dbaseOpen(const char* filename);
-bool dbaseClose(DBase* dbase);
-bool dbaseFindFirstEntry(DBase* dbase, DFileFindData* findFileData, const char* pattern);
-bool dbaseFindNextEntry(DBase* dbase, DFileFindData* findFileData);
-bool dbaseFindClose(DBase* dbase, DFileFindData* findFileData);
-long dfileGetSize(DFile* stream);
-int dfileClose(DFile* stream);
-DFile* dfileOpen(DBase* dbase, const char* filename, const char* mode);
-int dfilePrintFormattedArgs(DFile* stream, const char* format, va_list args);
-int dfileReadChar(DFile* stream);
-char* dfileReadString(char* str, int size, DFile* stream);
-int dfileWriteChar(int ch, DFile* stream);
-int dfileWriteString(const char* s, DFile* stream);
-size_t dfileRead(void* ptr, size_t size, size_t count, DFile* stream);
-size_t dfileWrite(const void* ptr, size_t size, size_t count, DFile* stream);
-int dfileSeek(DFile* stream, long offset, int origin);
-long dfileTell(DFile* stream);
-void dfileRewind(DFile* stream);
-int dfileEof(DFile* stream);
+DBase *dbaseOpen(const char *filename);
+bool dbaseClose(DBase *dbase);
+bool dbaseFindFirstEntry(DBase *dbase, DFileFindData *findFileData, const char *pattern);
+bool dbaseFindNextEntry(DBase *dbase, DFileFindData *findFileData);
+bool dbaseFindClose(DBase *dbase, DFileFindData *findFileData);
+long dfileGetSize(DFile *stream);
+int dfileClose(DFile *stream);
+DFile *dfileOpen(DBase *dbase, const char *filename, const char *mode);
+int dfilePrintFormattedArgs(DFile *stream, const char *format, va_list args);
+int dfileReadChar(DFile *stream);
+char *dfileReadString(char *str, int size, DFile *stream);
+int dfileWriteChar(int ch, DFile *stream);
+int dfileWriteString(const char *s, DFile *stream);
+size_t dfileRead(void *ptr, size_t size, size_t count, DFile *stream);
+size_t dfileWrite(const void *ptr, size_t size, size_t count, DFile *stream);
+int dfileSeek(DFile *stream, long offset, int origin);
+long dfileTell(DFile *stream);
+void dfileRewind(DFile *stream);
+int dfileEof(DFile *stream);
 
-} // namespace fallout
+} // namespace Fallout2
 
-#endif /* DFILE_H */
+#endif
