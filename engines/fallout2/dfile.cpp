@@ -67,12 +67,16 @@ DBase *dbaseOpen(const char *filePath) {
 	// Get file size, and reposition stream to read footer, which contains two
 	// 32-bits ints.
 	int fileSize = getFileSize(stream);
+
+	int dbaseDataSize = 0;
+	int entriesDataSize = 0;
+
 	if (stream->seek(fileSize - sizeof(int) * 2, SEEK_SET) == false) {
 		goto err;
 	}
 
 	// Read the size of entries table.
-	int entriesDataSize = stream->readUint32LE();
+	entriesDataSize = stream->readUint32LE();
 	if (stream->err()) {
 		goto err;
 	}
@@ -81,7 +85,7 @@ DBase *dbaseOpen(const char *filePath) {
 	//
 	// NOTE: It appears that this approach allows existence of arbitrary data in
 	// the beginning of the .DAT file.
-	int dbaseDataSize = stream->readUint32LE();
+	dbaseDataSize = stream->readUint32LE();
 	if (stream->err()) {
 		goto err;
 	}
@@ -208,8 +212,8 @@ bool dbaseFindFirstEntry(DBase *dbase, DFileFindData *findFileData, const char *
 	for (int index = 0; index < dbase->entriesLength; index++) {
 		DBaseEntry *entry = &(dbase->entries[index]);
 		if (fpattern_match(pattern, entry->path)) {
-			strncpy(findFileData->fileName, entry->path, sizeof(findFileData->fileName));
-			strncpy(findFileData->pattern, pattern, sizeof(findFileData->pattern));
+			strncpy(findFileData->fileName, entry->path, sizeof(findFileData->fileName) - 1);
+			strncpy(findFileData->pattern, pattern, sizeof(findFileData->pattern) - 1);
 			findFileData->index = index;
 			return true;
 		}
@@ -223,7 +227,7 @@ bool dbaseFindNextEntry(DBase *dbase, DFileFindData *findFileData) {
 	for (int index = findFileData->index + 1; index < dbase->entriesLength; index++) {
 		DBaseEntry *entry = &(dbase->entries[index]);
 		if (fpattern_match(findFileData->pattern, entry->path)) {
-			strncpy(findFileData->fileName, entry->path, sizeof(findFileData->fileName));
+			strncpy(findFileData->fileName, entry->path, sizeof(findFileData->fileName) - 1);
 			findFileData->index = index;
 			return true;
 		}
