@@ -1,7 +1,7 @@
-#ifndef STAT_DEFS
-#define STAT_DEFS
+#ifndef FALLOUT2_STAT_DEFS
+#define FALLOUT2_STAT_DEFS
 
-namespace fallout {
+namespace Fallout2 {
 
 // The minimum value of SPECIAL stat.
 #define PRIMARY_STAT_MIN (1)
@@ -82,6 +82,6 @@ typedef enum PcStat {
 	PC_STAT_COUNT,
 } PcStat;
 
-} // namespace fallout
+} // namespace Fallout2
 
-#endif /* STAT_DEFS */
+#endif
