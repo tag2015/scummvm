@@ -1,7 +1,7 @@
-#ifndef PROTO_TYPES_H
-#define PROTO_TYPES_H
+#ifndef FALLOUT2_PROTO_TYPES_H
+#define FALLOUT2_PROTO_TYPES_H
 
-namespace fallout {
+namespace Fallout2 {
 
 // Number of prototypes in prototype extent.
 #define PROTO_LIST_EXTENT_SIZE 16
@@ -227,64 +227,64 @@ typedef enum ItemProtoExtendedFlags {
 } ItemProtoExtendedFlags;
 
 typedef struct {
-	int armorClass; // d.ac
+	int armorClass;          // d.ac
 	int damageResistance[7]; // d.dam_resist
-	int damageThreshold[7]; // d.dam_thresh
-	int perk; // d.perk
-	int maleFid; // d.male_fid
-	int femaleFid; // d.female_fid
+	int damageThreshold[7];  // d.dam_thresh
+	int perk;                // d.perk
+	int maleFid;             // d.male_fid
+	int femaleFid;           // d.female_fid
 } ProtoItemArmorData;
 
 typedef struct {
-	int maxSize; // d.max_size
+	int maxSize;   // d.max_size
 	int openFlags; // d.open_flags
 } ProtoItemContainerData;
 
 typedef struct {
-	int stat[3]; // d.stat
-	int amount[3]; // d.amount
-	int duration1; // d.duration1
-	int amount1[3]; // d.amount1
-	int duration2; // d.duration2
-	int amount2[3]; // d.amount2
-	int addictionChance; // d.addiction_chance
+	int stat[3];          // d.stat
+	int amount[3];        // d.amount
+	int duration1;        // d.duration1
+	int amount1[3];       // d.amount1
+	int duration2;        // d.duration2
+	int amount2[3];       // d.amount2
+	int addictionChance;  // d.addiction_chance
 	int withdrawalEffect; // d.withdrawal_effect
-	int withdrawalOnset; // d.withdrawal_onset
+	int withdrawalOnset;  // d.withdrawal_onset
 } ProtoItemDrugData;
 
 typedef struct {
-	int animationCode; // d.animation_code
-	int minDamage; // d.min_damage
-	int maxDamage; // d.max_damage
-	int damageType; // d.dt
-	int maxRange1; // d.max_range1
-	int maxRange2; // d.max_range2
-	int projectilePid; // d.proj_pid
-	int minStrength; // d.min_st
-	int actionPointCost1; // d.mp_cost1
-	int actionPointCost2; // d.mp_cost2
+	int animationCode;       // d.animation_code
+	int minDamage;           // d.min_damage
+	int maxDamage;           // d.max_damage
+	int damageType;          // d.dt
+	int maxRange1;           // d.max_range1
+	int maxRange2;           // d.max_range2
+	int projectilePid;       // d.proj_pid
+	int minStrength;         // d.min_st
+	int actionPointCost1;    // d.mp_cost1
+	int actionPointCost2;    // d.mp_cost2
 	int criticalFailureType; // d.crit_fail_table
-	int perk; // d.perk
-	int rounds; // d.rounds
-	int caliber; // d.caliber
-	int ammoTypePid; // d.ammo_type_pid
-	int ammoCapacity; // d.max_ammo
+	int perk;                // d.perk
+	int rounds;              // d.rounds
+	int caliber;             // d.caliber
+	int ammoTypePid;         // d.ammo_type_pid
+	int ammoCapacity;        // d.max_ammo
 	unsigned char soundCode; // d.sound_id
 } ProtoItemWeaponData;
 
 typedef struct {
-	int caliber; // d.caliber
-	int quantity; // d.quantity
-	int armorClassModifier; // d.ac_adjust
+	int caliber;                  // d.caliber
+	int quantity;                 // d.quantity
+	int armorClassModifier;       // d.ac_adjust
 	int damageResistanceModifier; // d.dr_adjust
-	int damageMultiplier; // d.dam_mult
-	int damageDivisor; // d.dam_div
+	int damageMultiplier;         // d.dam_mult
+	int damageDivisor;            // d.dam_div
 } ProtoItemAmmoData;
 
 typedef struct {
 	int powerTypePid; // d.power_type_pid
-	int powerType; // d.power_type
-	int charges; // d.charges
+	int powerType;    // d.power_type
+	int charges;      // d.charges
 } ProtoItemMiscData;
 
 typedef struct {
@@ -313,30 +313,30 @@ typedef struct ItemProtoData {
 } ItemProtoData;
 
 typedef struct ItemProto {
-	int pid; // pid
-	int messageId; // message_num
-	int fid; // fid
-	int lightDistance; // light_distance
+	int pid;            // pid
+	int messageId;      // message_num
+	int fid;            // fid
+	int lightDistance;  // light_distance
 	int lightIntensity; // light_intensity
-	int flags; // flags
-	int extendedFlags; // flags_ext
-	int sid; // sid
-	int type; // type
+	int flags;          // flags
+	int extendedFlags;  // flags_ext
+	int sid;            // sid
+	int type;           // type
 	ItemProtoData data; // d
-	int material; // material
-	int size; // size
-	int weight; // weight
-	int cost; // cost
-	int inventoryFid; // inv_fid
+	int material;       // material
+	int size;           // size
+	int weight;         // weight
+	int cost;           // cost
+	int inventoryFid;   // inv_fid
 	unsigned char field_80;
 } ItemProto;
 
 typedef struct CritterProtoData {
-	int flags; // d.flags
-	int baseStats[35]; // d.stat_base
+	int flags;          // d.flags
+	int baseStats[35];  // d.stat_base
 	int bonusStats[35]; // d.stat_bonus
-	int skills[18]; // d.stat_points
-	int bodyType; // d.body
+	int skills[18];     // d.stat_points
+	int bodyType;       // d.body
 	int experience;
 	int killType;
 	// Looks like this is the "native" damage type when critter is unarmed.
@@ -344,23 +344,23 @@ typedef struct CritterProtoData {
 } CritterProtoData;
 
 typedef struct CritterProto {
-	int pid; // pid
-	int messageId; // message_num
-	int fid; // fid
-	int lightDistance; // light_distance
-	int lightIntensity; // light_intensity
-	int flags; // flags
-	int extendedFlags; // flags_ext
-	int sid; // sid
+	int pid;               // pid
+	int messageId;         // message_num
+	int fid;               // fid
+	int lightDistance;     // light_distance
+	int lightIntensity;    // light_intensity
+	int flags;             // flags
+	int extendedFlags;     // flags_ext
+	int sid;               // sid
 	CritterProtoData data; // d
-	int headFid; // head_fid
-	int aiPacket; // ai_packet
-	int team; // team_num
+	int headFid;           // head_fid
+	int aiPacket;          // ai_packet
+	int team;              // team_num
 } CritterProto;
 
 typedef struct {
 	int openFlags; // d.open_flags
-	int keyCode; // d.key_code
+	int keyCode;   // d.key_code
 } SceneryProtoDoorData;
 
 typedef struct {
@@ -392,15 +392,15 @@ typedef struct SceneryProtoData {
 } SceneryProtoData;
 
 typedef struct SceneryProto {
-	int pid; // id
-	int messageId; // message_num
-	int fid; // fid
-	int lightDistance; // light_distance
+	int pid;            // id
+	int messageId;      // message_num
+	int fid;            // fid
+	int lightDistance;  // light_distance
 	int lightIntensity; // light_intensity
-	int flags; // flags
-	int extendedFlags; // flags_ext
-	int sid; // sid
-	int type; // type
+	int flags;          // flags
+	int extendedFlags;  // flags_ext
+	int sid;            // sid
+	int type;           // type
 	SceneryProtoData data;
 	int field_2C; // material
 	int field_30; //
@@ -408,42 +408,42 @@ typedef struct SceneryProto {
 } SceneryProto;
 
 typedef struct WallProto {
-	int pid; // id
-	int messageId; // message_num
-	int fid; // fid
-	int lightDistance; // light_distance
+	int pid;            // id
+	int messageId;      // message_num
+	int fid;            // fid
+	int lightDistance;  // light_distance
 	int lightIntensity; // light_intensity
-	int flags; // flags
-	int extendedFlags; // flags_ext
-	int sid; // sid
-	int material; // material
+	int flags;          // flags
+	int extendedFlags;  // flags_ext
+	int sid;            // sid
+	int material;       // material
 } WallProto;
 
 typedef struct TileProto {
-	int pid; // id
-	int messageId; // message_num
-	int fid; // fid
-	int flags; // flags
+	int pid;           // id
+	int messageId;     // message_num
+	int fid;           // fid
+	int flags;         // flags
 	int extendedFlags; // flags_ext
-	int sid; // sid
-	int material; // material
+	int sid;           // sid
+	int material;      // material
 } TileProto;
 
 typedef struct MiscProto {
-	int pid; // id
-	int messageId; // message_num
-	int fid; // fid
-	int lightDistance; // light_distance
+	int pid;            // id
+	int messageId;      // message_num
+	int fid;            // fid
+	int lightDistance;  // light_distance
 	int lightIntensity; // light_intensity
-	int flags; // flags
-	int extendedFlags; // flags_ext
+	int flags;          // flags
+	int extendedFlags;  // flags_ext
 } MiscProto;
 
 typedef union Proto {
 	struct {
-		int pid; // pid
+		int pid;       // pid
 		int messageId; // message_num
-		int fid; // fid
+		int fid;       // fid
 
 		// TODO: Move to NonTile props?
 		int lightDistance;
@@ -461,21 +461,21 @@ typedef union Proto {
 } Proto;
 
 typedef struct ProtoListExtent {
-	Proto* proto[PROTO_LIST_EXTENT_SIZE];
+	Proto *proto[PROTO_LIST_EXTENT_SIZE];
 	// Number of protos in the extent
 	int length;
-	struct ProtoListExtent* next;
+	struct ProtoListExtent *next;
 } ProtoListExtent;
 
 typedef struct ProtoList {
-	ProtoListExtent* head;
-	ProtoListExtent* tail;
+	ProtoListExtent *head;
+	ProtoListExtent *tail;
 	// Number of extents in the list.
 	int length;
 	// Number of lines in proto/{type}/{type}.lst.
 	int max_entries_num;
 } ProtoList;
 
-} // namespace fallout
+} // namespace Fallout2
 
-#endif /* PROTO_TYPES_H */
+#endif
