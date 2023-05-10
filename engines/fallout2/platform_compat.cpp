@@ -272,9 +272,9 @@ char *compat_fgets(char *buffer, int maxCount, Common::File *stream) {
 }
 
 // TODO check
-/*char* compat_gzgets(gzFile stream, char* buffer, int maxCount) {
-	buffer = gzgets(stream, buffer, maxCount);
-
+char *compat_gzgets(Common::SeekableReadStream *stream, char *buffer, int maxCount) {
+	Common::String buffer_str(stream->readString(0, maxCount));
+	Common::strcpy_s(buffer, strlen(buffer_str.c_str()) + 1, buffer_str.c_str());
 	if (buffer != NULL) {
 		size_t len = strlen(buffer);
 		if (len >= 2 && buffer[len - 1] == '\n' && buffer[len - 2] == '\r') {
@@ -284,7 +284,7 @@ char *compat_fgets(char *buffer, int maxCount, Common::File *stream) {
 	}
 
 	return buffer;
-}*/
+}
 
 int compat_remove(const char *path) {
 	/* TODO filedelete
