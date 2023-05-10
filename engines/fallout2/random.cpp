@@ -1,16 +1,18 @@
-#include "random.h"
+#include "fallout2/random.h"
 
-#include <limits.h>
+#include "common/debug.h"
+#include "fallout2/fallout2.h"
+#include "fallout2/platform_compat.h"
+
+/*#include <limits.h>
 #include <stdlib.h>
-
 #include <random>
+*/
 
-#include "debug.h"
-#include "platform_compat.h"
-#include "scripts.h"
-#include "sfall_config.h"
+// #include "scripts.h" TODO: for getGameTime
+// #include "sfall_config.h" TODO: sfall criticals time override
 
-namespace fallout {
+namespace Fallout2 {
 
 static int _roll_reset_();
 static int randomTranslateRoll(int delta, int criticalSuccessModifier);
@@ -37,8 +39,8 @@ static int _idum;
 
 // 0x4A2FE0
 void randomInit() {
-	unsigned int randomSeed = randomGetSeed();
-	std::srand(randomSeed);
+	//	unsigned int randomSeed = randomGetSeed();
+	//	std::srand(randomSeed);
 
 	int pseudorandomSeed = randomInt32();
 	randomSeedPrerandomInternal(pseudorandomSeed);
@@ -64,19 +66,19 @@ void randomExit() {
 }
 
 // NOTE: Uncollapsed 0x4A2FFC.
-int randomSave(File* stream) {
-	return _roll_reset_();
-}
+// int randomSave(File* stream) {
+//	return _roll_reset_();
+//}
 
 // NOTE: Uncollapsed 0x4A2FFC.
-int randomLoad(File* stream) {
-	return _roll_reset_();
-}
+// int randomLoad(File* stream) {
+//	return _roll_reset_();
+//}
 
 // Rolls d% against [difficulty].
 //
 // 0x4A3000
-int randomRoll(int difficulty, int criticalSuccessModifier, int* howMuchPtr) {
+int randomRoll(int difficulty, int criticalSuccessModifier, int *howMuchPtr) {
 	int delta = difficulty - randomBetween(1, 100);
 	int result = randomTranslateRoll(delta, criticalSuccessModifier);
 
@@ -92,17 +94,20 @@ int randomRoll(int difficulty, int criticalSuccessModifier, int* howMuchPtr) {
 //
 // 0x4A3030
 static int randomTranslateRoll(int delta, int criticalSuccessModifier) {
-	int gameTime = gameTimeGetTime();
+	// int gameTime = gameTimeGetTime();  TODO
 
 	// SFALL: Remove criticals time limits.
-	bool criticalsTimeLimitsRemoved = false;
-	configGetBool(&gSfallConfig, SFALL_CONFIG_MISC_KEY, SFALL_CONFIG_REMOVE_CRITICALS_TIME_LIMITS_KEY, &criticalsTimeLimitsRemoved);
+	// TODO: Time limits are already disabled
+	// TODO: load sfall option
+	//	bool criticalsTimeLimitsRemoved = false;
+	bool criticalsTimeLimitsRemoved = true;
+	// configGetBool(&gSfallConfig, SFALL_CONFIG_MISC_KEY, SFALL_CONFIG_REMOVE_CRITICALS_TIME_LIMITS_KEY, &criticalsTimeLimitsRemoved);
 
 	int roll;
 	if (delta < 0) {
 		roll = ROLL_FAILURE;
 
-		if (criticalsTimeLimitsRemoved || (gameTime / GAME_TIME_TICKS_PER_DAY) >= 1) {
+		if (criticalsTimeLimitsRemoved /*|| (gameTime / GAME_TIME_TICKS_PER_DAY) >= 1*/) {
 			// 10% to become critical failure.
 			if (randomBetween(1, 100) <= -delta / 10) {
 				roll = ROLL_CRITICAL_FAILURE;
@@ -111,7 +116,7 @@ static int randomTranslateRoll(int delta, int criticalSuccessModifier) {
 	} else {
 		roll = ROLL_SUCCESS;
 
-		if (criticalsTimeLimitsRemoved || (gameTime / GAME_TIME_TICKS_PER_DAY) >= 1) {
+		if (criticalsTimeLimitsRemoved /*|| (gameTime / GAME_TIME_TICKS_PER_DAY) >= 1*/) {
 			// 10% + modifier to become critical success.
 			if (randomBetween(1, 100) <= delta / 10 + criticalSuccessModifier) {
 				roll = ROLL_CRITICAL_SUCCESS;
@@ -133,7 +138,7 @@ int randomBetween(int min, int max) {
 	}
 
 	if (result < min || result > max) {
-		debugPrint("Random number %d is not in range %d to %d", result, min, max);
+		debug("Random number %d is not in range %d to %d", result, min, max);
 		result = min;
 	}
 
@@ -173,7 +178,7 @@ void randomSeedPrerandom(int seed) {
 
 // 0x4A31C4
 static int randomInt32() {
-	return std::rand();
+	return g_engine->getRandomNumber(RAND_MAX);
 }
 
 // 0x4A31E0
@@ -217,7 +222,7 @@ static void randomValidatePrerandom() {
 	for (int attempt = 0; attempt < 100000; attempt++) {
 		int value = randomBetween(1, 25);
 		if (value - 1 < 0) {
-			debugPrint("I made a negative number %d\n", value - 1);
+			debug("I made a negative number %d", value - 1);
 		}
 
 		results[value - 1]++;
@@ -230,13 +235,13 @@ static void randomValidatePrerandom() {
 		v1 += v2;
 	}
 
-	debugPrint("Chi squared is %f, P = %f at 0.05\n", v1, dbl_50D4C2);
+	debug("Chi squared is %f, P = %f at 0.05", v1, dbl_50D4C2);
 
 	if (v1 < dbl_50D4BA) {
-		debugPrint("Sequence is random, 95%% confidence.\n");
+		debug("Sequence is random, 95%% confidence.");
 	} else {
-		debugPrint("Warning! Sequence is not random, 95%% confidence.\n");
+		debug("Warning! Sequence is not random, 95%% confidence.");
 	}
 }
 
-} // namespace fallout
+} // namespace Fallout2

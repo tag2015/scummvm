@@ -10,10 +10,12 @@ MODULE_OBJS = \
 	draw.o \
 	file_find.o \
 	geometry.o \
+	graph_lib.o \
 	heap.o \
 	memory.o \
 	memory_manager.o \
 	platform_compat.o \
+	random.o \
 	version.o \
 	third_party/fpattern/fpattern.o
 

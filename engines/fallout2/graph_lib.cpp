@@ -1,14 +1,17 @@
-#include "graph_lib.h"
+#include "fallout2/graph_lib.h"
 
-#include <string.h>
+#include "fallout2/color.h"
+#include "fallout2/memory.h"
+#include "common/debug.h"
 
+// #include "debug.h" TODO
+
+/*
 #include <algorithm>
+#include <string.h>
+*/
 
-#include "color.h"
-#include "debug.h"
-#include "memory.h"
-
-namespace fallout {
+namespace Fallout2 {
 
 static void _InitTree();
 static void _InsertNode(int a1);
@@ -18,7 +21,7 @@ static void _DeleteNode(int a1);
 static unsigned char _GreyTable[256];
 
 // 0x596E90
-static int* _dad_2;
+static int *_dad_2;
 
 // 0x596E94
 static int _match_length;
@@ -27,13 +30,13 @@ static int _match_length;
 static int _textsize;
 
 // 0x596E9C
-static int* _rson;
+static int *_rson;
 
 // 0x596EA0
-static int* _lson;
+static int *_lson;
 
 // 0x596EA4
-static unsigned char* _text_buf;
+static unsigned char *_text_buf;
 
 // 0x596EA8
 static int _codesize;
@@ -48,11 +51,11 @@ unsigned char HighRGB(unsigned char color) {
 	int g = (rgb & 0x3E0) >> 5;
 	int b = (rgb & 0x1F);
 
-	return std::max(std::max(r, g), b);
+	return MAX(MAX(r, g), b);
 }
 
 // 0x44F250
-int graphCompress(unsigned char* a1, unsigned char* a2, int a3) {
+int graphCompress(unsigned char *a1, unsigned char *a2, int a3) {
 	_dad_2 = NULL;
 	_rson = NULL;
 	_lson = NULL;
@@ -60,13 +63,13 @@ int graphCompress(unsigned char* a1, unsigned char* a2, int a3) {
 
 	// NOTE: Original code is slightly different, it uses deep nesting or a
 	// bunch of gotos.
-	_lson = (int*)internal_malloc(sizeof(*_lson) * 4104);
-	_rson = (int*)internal_malloc(sizeof(*_rson) * 4376);
-	_dad_2 = (int*)internal_malloc(sizeof(*_dad_2) * 4104);
-	_text_buf = (unsigned char*)internal_malloc(sizeof(*_text_buf) * 4122);
+	_lson = (int *)internal_malloc(sizeof(*_lson) * 4104);
+	_rson = (int *)internal_malloc(sizeof(*_rson) * 4376);
+	_dad_2 = (int *)internal_malloc(sizeof(*_dad_2) * 4104);
+	_text_buf = (unsigned char *)internal_malloc(sizeof(*_text_buf) * 4122);
 
 	if (_lson == NULL || _rson == NULL || _dad_2 == NULL || _text_buf == NULL) {
-		debugPrint("\nGRAPHLIB: Error allocating compression buffers!\n");
+		debug("\nGRAPHLIB: Error allocating compression buffers");
 
 		if (_dad_2 != NULL) {
 			internal_free(_dad_2);
@@ -175,7 +178,7 @@ int graphCompress(unsigned char* a1, unsigned char* a2, int a3) {
 
 			_DeleteNode(v10);
 
-			unsigned char* v19 = _text_buf + v10;
+			unsigned char *v19 = _text_buf + v10;
 			_text_buf[v10] = v34;
 
 			if (v10 < 17) {
@@ -240,7 +243,7 @@ static void _InsertNode(int a1) {
 	_rson[a1] = 4096;
 	_match_length = 0;
 
-	unsigned char* v2 = _text_buf + a1;
+	unsigned char *v2 = _text_buf + a1;
 
 	int v21 = 4097 + _text_buf[a1];
 	int v5 = 1;
@@ -263,7 +266,7 @@ static void _InsertNode(int a1) {
 		}
 
 		int v9;
-		unsigned char* v10 = v2 + 1;
+		unsigned char *v10 = v2 + 1;
 		int v11 = v21 + 1;
 		for (v9 = 1; v9 < 18; v9++) {
 			v5 = *v10 - _text_buf[v11];
@@ -339,10 +342,10 @@ static void _DeleteNode(int a1) {
 }
 
 // 0x44F92C
-int graphDecompress(unsigned char* src, unsigned char* dest, int length) {
-	_text_buf = (unsigned char*)internal_malloc(sizeof(*_text_buf) * 4122);
+int graphDecompress(unsigned char *src, unsigned char *dest, int length) {
+	_text_buf = (unsigned char *)internal_malloc(sizeof(*_text_buf) * 4122);
 	if (_text_buf == NULL) {
-		debugPrint("\nGRAPHLIB: Error allocating decompression buffer!\n");
+		debug("\nGRAPHLIB: Error allocating decompression buffer!");
 		return -1;
 	}
 
@@ -402,8 +405,8 @@ void grayscalePaletteUpdate(int a1, int a2) {
 		for (int index = a1; index <= a2; index++) {
 			// NOTE: Calls `Color2RGB` many times due to `min` and `max` macro
 			// uses.
-			int v1 = std::max((Color2RGB(index) & 0x7C00) >> 10, std::max((Color2RGB(index) & 0x3E0) >> 5, Color2RGB(index) & 0x1F));
-			int v2 = std::min((Color2RGB(index) & 0x7C00) >> 10, std::min((Color2RGB(index) & 0x3E0) >> 5, Color2RGB(index) & 0x1F));
+			int v1 = MAX((Color2RGB(index) & 0x7C00) >> 10, MAX((Color2RGB(index) & 0x3E0) >> 5, Color2RGB(index) & 0x1F));
+			int v2 = MIN((Color2RGB(index) & 0x7C00) >> 10, MIN((Color2RGB(index) & 0x3E0) >> 5, Color2RGB(index) & 0x1F));
 			int v3 = v1 + v2;
 			int v4 = (int)((double)v3 * 240.0 / 510.0);
 
@@ -414,8 +417,8 @@ void grayscalePaletteUpdate(int a1, int a2) {
 }
 
 // 0x44FC40
-void grayscalePaletteApply(unsigned char* buffer, int width, int height, int pitch) {
-	unsigned char* ptr = buffer;
+void grayscalePaletteApply(unsigned char *buffer, int width, int height, int pitch) {
+	unsigned char *ptr = buffer;
 	int skip = pitch - width;
 
 	for (int y = 0; y < height; y++) {
@@ -427,4 +430,4 @@ void grayscalePaletteApply(unsigned char* buffer, int width, int height, int pit
 	}
 }
 
-} // namespace fallout
+} // namespace Fallout2
