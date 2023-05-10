@@ -1,3 +1,5 @@
+/* DELETE */
+
 #include "win32.h"
 
 #include <stdlib.h>
