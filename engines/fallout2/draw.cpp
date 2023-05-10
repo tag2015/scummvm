@@ -1,21 +1,21 @@
-#include "draw.h"
+#include "fallout2/draw.h"
 
-#include <string.h>
+#include "fallout2/color.h"
 
-#include "color.h"
-#include "svga.h"
+// TODO
+// #include "svga.h"
 
-namespace fallout {
+namespace Fallout2 {
 
 // 0x4D2FC0
-void bufferDrawLine(unsigned char* buf, int pitch, int x1, int y1, int x2, int y2, int color) {
+void bufferDrawLine(unsigned char *buf, int pitch, int x1, int y1, int x2, int y2, int color) {
 	int temp;
 	int dx;
 	int dy;
-	unsigned char* p1;
-	unsigned char* p2;
-	unsigned char* p3;
-	unsigned char* p4;
+	unsigned char *p1;
+	unsigned char *p2;
+	unsigned char *p3;
+	unsigned char *p4;
 
 	if (x1 == x2) {
 		if (y1 > y2) {
@@ -130,7 +130,7 @@ void bufferDrawLine(unsigned char* buf, int pitch, int x1, int y1, int x2, int y
 }
 
 // 0x4D31A4
-void bufferDrawRect(unsigned char* buf, int pitch, int left, int top, int right, int bottom, int color) {
+void bufferDrawRect(unsigned char *buf, int pitch, int left, int top, int right, int bottom, int color) {
 	bufferDrawLine(buf, pitch, left, top, right, top, color);
 	bufferDrawLine(buf, pitch, left, bottom, right, bottom, color);
 	bufferDrawLine(buf, pitch, left, top, left, bottom, color);
@@ -138,7 +138,7 @@ void bufferDrawRect(unsigned char* buf, int pitch, int left, int top, int right,
 }
 
 // 0x4D322C
-void bufferDrawRectShadowed(unsigned char* buf, int pitch, int left, int top, int right, int bottom, int ltColor, int rbColor) {
+void bufferDrawRectShadowed(unsigned char *buf, int pitch, int left, int top, int right, int bottom, int ltColor, int rbColor) {
 	bufferDrawLine(buf, pitch, left, top, right, top, ltColor);
 	bufferDrawLine(buf, pitch, left, bottom, right, bottom, rbColor);
 	bufferDrawLine(buf, pitch, left, top, left, bottom, ltColor);
@@ -146,7 +146,7 @@ void bufferDrawRectShadowed(unsigned char* buf, int pitch, int left, int top, in
 }
 
 // 0x4D33F0
-void blitBufferToBufferStretch(unsigned char* src, int srcWidth, int srcHeight, int srcPitch, unsigned char* dest, int destWidth, int destHeight, int destPitch) {
+void blitBufferToBufferStretch(unsigned char *src, int srcWidth, int srcHeight, int srcPitch, unsigned char *dest, int destWidth, int destHeight, int destPitch) {
 	int stepX = (destWidth << 16) / srcWidth;
 	int stepY = (destHeight << 16) / srcHeight;
 
@@ -154,13 +154,13 @@ void blitBufferToBufferStretch(unsigned char* src, int srcWidth, int srcHeight, 
 		int startDestY = (srcY * stepY) >> 16;
 		int endDestY = ((srcY + 1) * stepY) >> 16;
 
-		unsigned char* currSrc = src + srcPitch * srcY;
+		unsigned char *currSrc = src + srcPitch * srcY;
 		for (int srcX = 0; srcX < srcWidth; srcX += 1) {
 			int startDestX = (srcX * stepX) >> 16;
 			int endDestX = ((srcX + 1) * stepX) >> 16;
 
 			for (int destY = startDestY; destY < endDestY; destY += 1) {
-				unsigned char* currDest = dest + destPitch * destY + startDestX;
+				unsigned char *currDest = dest + destPitch * destY + startDestX;
 				for (int destX = startDestX; destX < endDestX; destX += 1) {
 					*currDest++ = *currSrc;
 				}
@@ -172,7 +172,7 @@ void blitBufferToBufferStretch(unsigned char* src, int srcWidth, int srcHeight, 
 }
 
 // 0x4D3560
-void blitBufferToBufferStretchTrans(unsigned char* src, int srcWidth, int srcHeight, int srcPitch, unsigned char* dest, int destWidth, int destHeight, int destPitch) {
+void blitBufferToBufferStretchTrans(unsigned char *src, int srcWidth, int srcHeight, int srcPitch, unsigned char *dest, int destWidth, int destHeight, int destPitch) {
 	int stepX = (destWidth << 16) / srcWidth;
 	int stepY = (destHeight << 16) / srcHeight;
 
@@ -180,14 +180,14 @@ void blitBufferToBufferStretchTrans(unsigned char* src, int srcWidth, int srcHei
 		int startDestY = (srcY * stepY) >> 16;
 		int endDestY = ((srcY + 1) * stepY) >> 16;
 
-		unsigned char* currSrc = src + srcPitch * srcY;
+		unsigned char *currSrc = src + srcPitch * srcY;
 		for (int srcX = 0; srcX < srcWidth; srcX += 1) {
 			int startDestX = (srcX * stepX) >> 16;
 			int endDestX = ((srcX + 1) * stepX) >> 16;
 
 			if (*currSrc != 0) {
 				for (int destY = startDestY; destY < endDestY; destY += 1) {
-					unsigned char* currDest = dest + destPitch * destY + startDestX;
+					unsigned char *currDest = dest + destPitch * destY + startDestX;
 					for (int destX = startDestX; destX < endDestX; destX += 1) {
 						*currDest++ = *currSrc;
 					}
@@ -200,17 +200,17 @@ void blitBufferToBufferStretchTrans(unsigned char* src, int srcWidth, int srcHei
 }
 
 // 0x4D36D4
-void blitBufferToBuffer(unsigned char* src, int width, int height, int srcPitch, unsigned char* dest, int destPitch) {
+void blitBufferToBuffer(unsigned char *src, int width, int height, int srcPitch, unsigned char *dest, int destPitch) {
 	srcCopy(dest, destPitch, src, srcPitch, width, height);
 }
 
 // 0x4D3704
-void blitBufferToBufferTrans(unsigned char* src, int width, int height, int srcPitch, unsigned char* dest, int destPitch) {
+void blitBufferToBufferTrans(unsigned char *src, int width, int height, int srcPitch, unsigned char *dest, int destPitch) {
 	transSrcCopy(dest, destPitch, src, srcPitch, width, height);
 }
 
 // 0x4D387C
-void bufferFill(unsigned char* buf, int width, int height, int pitch, int a5) {
+void bufferFill(unsigned char *buf, int width, int height, int pitch, int a5) {
 	int y;
 
 	for (y = 0; y < height; y++) {
@@ -220,12 +220,12 @@ void bufferFill(unsigned char* buf, int width, int height, int pitch, int a5) {
 }
 
 // 0x4D38E0
-void _buf_texture(unsigned char* buf, int width, int height, int pitch, void* a5, int a6, int a7) {
+void _buf_texture(unsigned char *buf, int width, int height, int pitch, void *a5, int a6, int a7) {
 	// TODO: Incomplete.
 }
 
 // 0x4D3A48
-void _lighten_buf(unsigned char* buf, int width, int height, int pitch) {
+void _lighten_buf(unsigned char *buf, int width, int height, int pitch) {
 	int skip = pitch - width;
 
 	for (int y = 0; y < height; y++) {
@@ -240,7 +240,7 @@ void _lighten_buf(unsigned char* buf, int width, int height, int pitch) {
 // Swaps two colors in the buffer.
 //
 // 0x4D3A8C
-void _swap_color_buf(unsigned char* buf, int width, int height, int pitch, int color1, int color2) {
+void _swap_color_buf(unsigned char *buf, int width, int height, int pitch, int color1, int color2) {
 	int step = pitch - width;
 	for (int y = 0; y < height; y++) {
 		for (int x = 0; x < width; x++) {
@@ -257,8 +257,8 @@ void _swap_color_buf(unsigned char* buf, int width, int height, int pitch, int c
 }
 
 // 0x4D3AE0
-void bufferOutline(unsigned char* buf, int width, int height, int pitch, int color) {
-	unsigned char* ptr = buf + pitch;
+void bufferOutline(unsigned char *buf, int width, int height, int pitch, int color) {
+	unsigned char *ptr = buf + pitch;
 
 	bool cycle;
 	for (int y = 0; y < height - 2; y++) {
@@ -299,7 +299,7 @@ void bufferOutline(unsigned char* buf, int width, int height, int pitch, int col
 }
 
 // 0x4E0DB0
-void srcCopy(unsigned char* dest, int destPitch, unsigned char* src, int srcPitch, int width, int height) {
+void srcCopy(unsigned char *dest, int destPitch, unsigned char *src, int srcPitch, int width, int height) {
 	for (int y = 0; y < height; y++) {
 		memcpy(dest, src, width);
 		dest += destPitch;
@@ -308,7 +308,7 @@ void srcCopy(unsigned char* dest, int destPitch, unsigned char* src, int srcPitc
 }
 
 // 0x4E0ED5
-void transSrcCopy(unsigned char* dest, int destPitch, unsigned char* src, int srcPitch, int width, int height) {
+void transSrcCopy(unsigned char *dest, int destPitch, unsigned char *src, int srcPitch, int width, int height) {
 	int destSkip = destPitch - width;
 	int srcSkip = srcPitch - width;
 
@@ -325,4 +325,4 @@ void transSrcCopy(unsigned char* dest, int destPitch, unsigned char* src, int sr
 	}
 }
 
-} // namespace fallout
+} // namespace Fallout2
