@@ -1,10 +1,10 @@
-#ifndef GAME_MEMORY_H
-#define GAME_MEMORY_H
+#ifndef FALLOUT2_GAME_MEMORY_H
+#define FALLOUT2_GAME_MEMORY_H
 
-namespace fallout {
+namespace Fallout2 {
 
 int gameMemoryInit();
 
-} // namespace fallout
+} // namespace Fallout2
 
-#endif /* GAME_MEMORY_H */
+#endif
