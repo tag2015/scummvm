@@ -7,6 +7,9 @@ MODULE_OBJS = \
 	cache.o \
 	dfile.o \
 	dictionary.o \
+	draw.o \
+	file_find.o \
+	geometry.o \
 	heap.o \
 	memory.o \
 	memory_manager.o \
