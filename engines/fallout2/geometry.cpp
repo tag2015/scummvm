@@ -1,37 +1,35 @@
-#include "geometry.h"
+#include "fallout2/geometry.h"
 
-#include <stdlib.h>
+#include "fallout2/memory.h"
+
+/*#include <stdlib.h>
 
 #include <algorithm>
+*/
 
-#include "memory.h"
-
-namespace fallout {
+namespace Fallout2 {
 
 // 0x51DEF4
-static RectListNode* _rectList = NULL;
+static RectListNode *_rectList = NULL;
 
 // 0x4C6900
 void _GNW_rect_exit() {
 	while (_rectList != NULL) {
-		RectListNode* next = _rectList->next;
+		RectListNode *next = _rectList->next;
 		internal_free(_rectList);
 		_rectList = next;
 	}
 }
 
 // 0x4C6924
-void _rect_clip_list(RectListNode** rectListNodePtr, Rect* rect) {
+void _rect_clip_list(RectListNode **rectListNodePtr, Rect *rect) {
 	Rect v1;
 	rectCopy(&v1, rect);
 
 	// NOTE: Original code is slightly different.
 	while (*rectListNodePtr != NULL) {
-		RectListNode* rectListNode = *rectListNodePtr;
-		if (v1.right >= rectListNode->rect.left
-		        && v1.bottom >= rectListNode->rect.top
-		        && v1.left <= rectListNode->rect.right
-		        && v1.top <= rectListNode->rect.bottom) {
+		RectListNode *rectListNode = *rectListNodePtr;
+		if (v1.right >= rectListNode->rect.left && v1.bottom >= rectListNode->rect.top && v1.left <= rectListNode->rect.right && v1.top <= rectListNode->rect.bottom) {
 			Rect v2;
 			rectCopy(&v2, &(rectListNode->rect));
 
@@ -41,7 +39,7 @@ void _rect_clip_list(RectListNode** rectListNodePtr, Rect* rect) {
 			_rectList = rectListNode;
 
 			if (v2.top < v1.top) {
-				RectListNode* newRectListNode = _rect_malloc();
+				RectListNode *newRectListNode = _rect_malloc();
 				if (newRectListNode == NULL) {
 					return;
 				}
@@ -57,7 +55,7 @@ void _rect_clip_list(RectListNode** rectListNodePtr, Rect* rect) {
 			}
 
 			if (v2.bottom > v1.bottom) {
-				RectListNode* newRectListNode = _rect_malloc();
+				RectListNode *newRectListNode = _rect_malloc();
 				if (newRectListNode == NULL) {
 					return;
 				}
@@ -73,7 +71,7 @@ void _rect_clip_list(RectListNode** rectListNodePtr, Rect* rect) {
 			}
 
 			if (v2.left < v1.left) {
-				RectListNode* newRectListNode = _rect_malloc();
+				RectListNode *newRectListNode = _rect_malloc();
 				if (newRectListNode == NULL) {
 					return;
 				}
@@ -87,7 +85,7 @@ void _rect_clip_list(RectListNode** rectListNodePtr, Rect* rect) {
 			}
 
 			if (v2.right > v1.right) {
-				RectListNode* newRectListNode = _rect_malloc();
+				RectListNode *newRectListNode = _rect_malloc();
 				if (newRectListNode == NULL) {
 					return;
 				}
@@ -106,10 +104,10 @@ void _rect_clip_list(RectListNode** rectListNodePtr, Rect* rect) {
 }
 
 // 0x4C6BB8
-RectListNode* _rect_malloc() {
+RectListNode *_rect_malloc() {
 	if (_rectList == NULL) {
 		for (int index = 0; index < 10; index++) {
-			RectListNode* rectListNode = (RectListNode*)internal_malloc(sizeof(*rectListNode));
+			RectListNode *rectListNode = (RectListNode *)internal_malloc(sizeof(*rectListNode));
 			if (rectListNode == NULL) {
 				break;
 			}
@@ -123,14 +121,14 @@ RectListNode* _rect_malloc() {
 		return NULL;
 	}
 
-	RectListNode* rectListNode = _rectList;
+	RectListNode *rectListNode = _rectList;
 	_rectList = _rectList->next;
 
 	return rectListNode;
 }
 
 // 0x4C6C04
-void _rect_free(RectListNode* rectListNode) {
+void _rect_free(RectListNode *rectListNode) {
 	rectListNode->next = _rectList;
 	_rectList = rectListNode;
 }
@@ -139,11 +137,11 @@ void _rect_free(RectListNode* rectListNode) {
 // rectangle.
 //
 // 0x4C6C18
-void rectUnion(const Rect* s1, const Rect* s2, Rect* r) {
-	r->left = std::min(s1->left, s2->left);
-	r->top = std::min(s1->top, s2->top);
-	r->right = std::max(s1->right, s2->right);
-	r->bottom = std::max(s1->bottom, s2->bottom);
+void rectUnion(const Rect *s1, const Rect *s2, Rect *r) {
+	r->left = MIN(s1->left, s2->left);
+	r->top = MIN(s1->top, s2->top);
+	r->right = MAX(s1->right, s2->right);
+	r->bottom = MAX(s1->bottom, s2->bottom);
 }
 
 // Calculates intersection of two source rectangles and places it into third
@@ -151,7 +149,7 @@ void rectUnion(const Rect* s1, const Rect* s2, Rect* r) {
 // it returns -1 and resulting rectangle is a copy of s1.
 //
 // 0x4C6C68
-int rectIntersection(const Rect* s1, const Rect* s2, Rect* r) {
+int rectIntersection(const Rect *s1, const Rect *s2, Rect *r) {
 	r->left = s1->left;
 	r->top = s1->top;
 	r->right = s1->right;
@@ -180,4 +178,4 @@ int rectIntersection(const Rect* s1, const Rect* s2, Rect* r) {
 	return -1;
 }
 
-} // namespace fallout
+} // namespace Fallout2

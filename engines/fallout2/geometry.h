@@ -1,7 +1,7 @@
-#ifndef GEOMETRY_H
-#define GEOMETRY_H
+#ifndef FALLOUT2_GEOMETRY_H
+#define FALLOUT2_GEOMETRY_H
 
-namespace fallout {
+namespace Fallout2 {
 
 typedef struct Point {
 	int x;
@@ -22,38 +22,38 @@ typedef struct Rect {
 
 typedef struct RectListNode {
 	Rect rect;
-	struct RectListNode* next;
+	struct RectListNode *next;
 } RectListNode;
 
 void _GNW_rect_exit();
-void _rect_clip_list(RectListNode** rectListNodePtr, Rect* rect);
-RectListNode* _rect_malloc();
-void _rect_free(RectListNode* entry);
-void rectUnion(const Rect* s1, const Rect* s2, Rect* r);
-int rectIntersection(const Rect* a1, const Rect* a2, Rect* a3);
+void _rect_clip_list(RectListNode **rectListNodePtr, Rect *rect);
+RectListNode *_rect_malloc();
+void _rect_free(RectListNode *entry);
+void rectUnion(const Rect *s1, const Rect *s2, Rect *r);
+int rectIntersection(const Rect *a1, const Rect *a2, Rect *a3);
 
-static inline void rectCopy(Rect* dest, const Rect* src) {
+static inline void rectCopy(Rect *dest, const Rect *src) {
 	dest->left = src->left;
 	dest->top = src->top;
 	dest->right = src->right;
 	dest->bottom = src->bottom;
 }
 
-static inline int rectGetWidth(const Rect* rect) {
+static inline int rectGetWidth(const Rect *rect) {
 	return rect->right - rect->left + 1;
 }
 
-static inline int rectGetHeight(const Rect* rect) {
+static inline int rectGetHeight(const Rect *rect) {
 	return rect->bottom - rect->top + 1;
 }
 
-static inline void rectOffset(Rect* rect, int dx, int dy) {
+static inline void rectOffset(Rect *rect, int dx, int dy) {
 	rect->left += dx;
 	rect->top += dy;
 	rect->right += dx;
 	rect->bottom += dy;
 }
 
-} // namespace fallout
+} // namespace Fallout2
 
-#endif /* GEOMETRY_H */
+#endif
