@@ -1,13 +1,15 @@
-#include "color.h"
+#include "fallout2/color.h"
+#include "fallout2/fallout2.h"
 
-#include <math.h>
+/*#include <math.h>
 #include <string.h>
 
 #include <algorithm>
+*/
 
-#include "svga.h"
+// #include "svga.h"
 
-namespace fallout {
+namespace Fallout2 {
 
 #define COLOR_PALETTE_STACK_CAPACITY 16
 
@@ -17,16 +19,16 @@ typedef struct ColorPaletteStackEntry {
 	unsigned char colorTable[32768];
 } ColorPaletteStackEntry;
 
-static int colorPaletteFileOpen(const char* filePath, int flags);
-static int colorPaletteFileRead(int fd, void* buffer, size_t size);
+static int colorPaletteFileOpen(const char *filePath, int flags);
+static int colorPaletteFileRead(int fd, void *buffer, size_t size);
 static int colorPaletteFileClose(int fd);
-static void* colorPaletteMallocDefaultImpl(size_t size);
-static void* colorPaletteReallocDefaultImpl(void* ptr, size_t size);
-static void colorPaletteFreeDefaultImpl(void* ptr);
+static void *colorPaletteMallocDefaultImpl(size_t size);
+static void *colorPaletteReallocDefaultImpl(void *ptr, size_t size);
+static void colorPaletteFreeDefaultImpl(void *ptr);
 static void _setIntensityTableColor(int a1);
 static void _setIntensityTables();
 static void _setMixTableColor(int a1);
-static void _buildBlendTable(unsigned char* ptr, unsigned char ch);
+static void _buildBlendTable(unsigned char *ptr, unsigned char ch);
 static void _rebuildColorBlendTables();
 
 // 0x50F930
@@ -42,7 +44,7 @@ static char _aColor_cColorpa[] = "color.c: colorpalettestack overflow";
 static char aColor_cColor_0[] = "color.c: colorpalettestack underflow";
 
 // 0x51DF10
-static char* _errorStr = _aColor_cNoError;
+static char *_errorStr = _aColor_cNoError;
 
 // 0x51DF14
 static bool _colorsInited = false;
@@ -51,27 +53,26 @@ static bool _colorsInited = false;
 static double gBrightness = 1.0;
 
 // 0x51DF20
-static ColorTransitionCallback* gColorPaletteTransitionCallback = NULL;
+static ColorTransitionCallback *gColorPaletteTransitionCallback = NULL;
 
 // 0x51DF24
-static MallocProc* gColorPaletteMallocProc = colorPaletteMallocDefaultImpl;
+static MallocProc *gColorPaletteMallocProc = colorPaletteMallocDefaultImpl;
 
 // 0x51DF28
-static ReallocProc* gColorPaletteReallocProc = colorPaletteReallocDefaultImpl;
+static ReallocProc *gColorPaletteReallocProc = colorPaletteReallocDefaultImpl;
 
 // 0x51DF2C
-static FreeProc* gColorPaletteFreeProc = colorPaletteFreeDefaultImpl;
+static FreeProc *gColorPaletteFreeProc = colorPaletteFreeDefaultImpl;
 
 // 0x51DF30
-static ColorFileNameManger* gColorFileNameMangler = NULL;
+static ColorFileNameManger *gColorFileNameMangler = NULL;
 
 // 0x51DF34
 unsigned char _cmap[768] = {
-	0x3F, 0x3F, 0x3F
-};
+	0x3F, 0x3F, 0x3F};
 
 // 0x673050
-static ColorPaletteStackEntry* gColorPaletteStack[COLOR_PALETTE_STACK_CAPACITY];
+static ColorPaletteStackEntry *gColorPaletteStack[COLOR_PALETTE_STACK_CAPACITY];
 
 // 0x673090
 unsigned char _systemCmap[256 * 3];
@@ -80,7 +81,7 @@ unsigned char _systemCmap[256 * 3];
 unsigned char _currentGammaTable[64];
 
 // 0x6733D0
-unsigned char* _blendTable[256];
+unsigned char *_blendTable[256];
 
 // 0x6737D0
 unsigned char _mappedColor[256];
@@ -101,18 +102,18 @@ unsigned char _colorTable[32768];
 static int gColorPaletteStackSize;
 
 // 0x6AB928
-static ColorPaletteFileReadProc* gColorPaletteFileReadProc;
+static ColorPaletteFileReadProc *gColorPaletteFileReadProc;
 
 // 0x6AB92C
-static ColorPaletteCloseProc* gColorPaletteFileCloseProc;
+static ColorPaletteCloseProc *gColorPaletteFileCloseProc;
 
 // 0x6AB930
-static ColorPaletteFileOpenProc* gColorPaletteFileOpenProc;
+static ColorPaletteFileOpenProc *gColorPaletteFileOpenProc;
 
 // NOTE: Inlined.
 //
 // 0x4C7200
-static int colorPaletteFileOpen(const char* filePath, int flags) {
+static int colorPaletteFileOpen(const char *filePath, int flags) {
 	if (gColorPaletteFileOpenProc != NULL) {
 		return gColorPaletteFileOpenProc(filePath, flags);
 	}
@@ -123,7 +124,7 @@ static int colorPaletteFileOpen(const char* filePath, int flags) {
 // NOTE: Inlined.
 //
 // 0x4C7218
-static int colorPaletteFileRead(int fd, void* buffer, size_t size) {
+static int colorPaletteFileRead(int fd, void *buffer, size_t size) {
 	if (gColorPaletteFileReadProc != NULL) {
 		return gColorPaletteFileReadProc(fd, buffer, size);
 	}
@@ -143,24 +144,24 @@ static int colorPaletteFileClose(int fd) {
 }
 
 // 0x4C7248
-void colorPaletteSetFileIO(ColorPaletteFileOpenProc* openProc, ColorPaletteFileReadProc* readProc, ColorPaletteCloseProc* closeProc) {
+void colorPaletteSetFileIO(ColorPaletteFileOpenProc *openProc, ColorPaletteFileReadProc *readProc, ColorPaletteCloseProc *closeProc) {
 	gColorPaletteFileOpenProc = openProc;
 	gColorPaletteFileReadProc = readProc;
 	gColorPaletteFileCloseProc = closeProc;
 }
 
 // 0x4C725C
-static void* colorPaletteMallocDefaultImpl(size_t size) {
+static void *colorPaletteMallocDefaultImpl(size_t size) {
 	return malloc(size);
 }
 
 // 0x4C7264
-static void* colorPaletteReallocDefaultImpl(void* ptr, size_t size) {
+static void *colorPaletteReallocDefaultImpl(void *ptr, size_t size) {
 	return realloc(ptr, size);
 }
 
 // 0x4C726C
-static void colorPaletteFreeDefaultImpl(void* ptr) {
+static void colorPaletteFreeDefaultImpl(void *ptr) {
 	free(ptr);
 }
 
@@ -181,9 +182,10 @@ int Color2RGB(Color c) {
 // Performs animated palette transition.
 //
 // 0x4C7320
-void colorPaletteFadeBetween(unsigned char* oldPalette, unsigned char* newPalette, int steps) {
+void colorPaletteFadeBetween(unsigned char *oldPalette, unsigned char *newPalette, int steps) {
 	for (int step = 0; step < steps; step++) {
-		sharedFpsLimiter.mark();
+		// TODO
+		//		sharedFpsLimiter.mark();
 
 		unsigned char palette[768];
 
@@ -198,23 +200,23 @@ void colorPaletteFadeBetween(unsigned char* oldPalette, unsigned char* newPalett
 		}
 
 		_setSystemPalette(palette);
-		renderPresent();
-		sharedFpsLimiter.throttle();
+		//		renderPresent(); TODO
+		//		sharedFpsLimiter.throttle();
 	}
 
-	sharedFpsLimiter.mark();
+	//	sharedFpsLimiter.mark();
 	_setSystemPalette(newPalette);
-	renderPresent();
-	sharedFpsLimiter.throttle();
+	//	renderPresent();  TODO
+	//	sharedFpsLimiter.throttle();
 }
 
 // 0x4C73D4
-void colorPaletteSetTransitionCallback(ColorTransitionCallback* callback) {
+void colorPaletteSetTransitionCallback(ColorTransitionCallback *callback) {
 	gColorPaletteTransitionCallback = callback;
 }
 
 // 0x4C73E4
-void _setSystemPalette(unsigned char* palette) {
+void _setSystemPalette(unsigned char *palette) {
 	unsigned char newPalette[768];
 
 	for (int index = 0; index < 768; index++) {
@@ -222,16 +224,16 @@ void _setSystemPalette(unsigned char* palette) {
 		_systemCmap[index] = palette[index];
 	}
 
-	directDrawSetPalette(newPalette);
+	// directDrawSetPalette(newPalette); TODO
 }
 
 // 0x4C7420
-unsigned char* _getSystemPalette() {
+unsigned char *_getSystemPalette() {
 	return _systemCmap;
 }
 
 // 0x4C7428
-void _setSystemPaletteEntries(unsigned char* palette, int start, int end) {
+void _setSystemPaletteEntries(unsigned char *palette, int start, int end) {
 	unsigned char newPalette[768];
 
 	int length = end - start + 1;
@@ -245,7 +247,7 @@ void _setSystemPaletteEntries(unsigned char* palette, int start, int end) {
 		_systemCmap[start * 3 + index * 3 + 2] = palette[index * 3 + 2];
 	}
 
-	directDrawSetPaletteInRange(newPalette, start, end - start + 1);
+	//	directDrawSetPaletteInRange(newPalette, start, end - start + 1); TODO
 }
 
 // 0x4C7550
@@ -372,7 +374,7 @@ static void _setMixTableColor(int a1) {
 }
 
 // 0x4C78E4
-bool colorPaletteLoad(const char* path) {
+bool colorPaletteLoad(const char *path) {
 	if (gColorFileNameMangler != NULL) {
 		path = gColorFileNameMangler(path);
 	}
@@ -447,16 +449,16 @@ bool colorPaletteLoad(const char* path) {
 }
 
 // 0x4C7AB4
-char* _colorError() {
+char *_colorError() {
 	return _errorStr;
 }
 
 // 0x4C7B44
-static void _buildBlendTable(unsigned char* ptr, unsigned char ch) {
+static void _buildBlendTable(unsigned char *ptr, unsigned char ch) {
 	int r, g, b;
 	int i, j;
 	int v12, v14, v16;
-	unsigned char* beg;
+	unsigned char *beg;
 
 	beg = ptr;
 
@@ -522,27 +524,27 @@ static void _rebuildColorBlendTables() {
 }
 
 // 0x4C7DC0
-unsigned char* _getColorBlendTable(int ch) {
-	unsigned char* ptr;
+unsigned char *_getColorBlendTable(int ch) {
+	unsigned char *ptr;
 
 	if (_blendTable[ch] == NULL) {
-		ptr = (unsigned char*)gColorPaletteMallocProc(4100);
-		*(int*)ptr = 1;
+		ptr = (unsigned char *)gColorPaletteMallocProc(4100);
+		*(int *)ptr = 1;
 		_blendTable[ch] = ptr + 4;
 		_buildBlendTable(_blendTable[ch], ch);
 	}
 
 	ptr = _blendTable[ch];
-	*(int*)((unsigned char*)ptr - 4) = *(int*)((unsigned char*)ptr - 4) + 1;
+	*(int *)((unsigned char *)ptr - 4) = *(int *)((unsigned char *)ptr - 4) + 1;
 
 	return ptr;
 }
 
 // 0x4C7E20
 void _freeColorBlendTable(int a1) {
-	unsigned char* v2 = _blendTable[a1];
+	unsigned char *v2 = _blendTable[a1];
 	if (v2 != NULL) {
-		int* count = (int*)(v2 - sizeof(int));
+		int *count = (int *)(v2 - sizeof(int));
 		*count -= 1;
 		if (*count == 0) {
 			gColorPaletteFreeProc(count);
@@ -552,7 +554,7 @@ void _freeColorBlendTable(int a1) {
 }
 
 // 0x4C7E58
-void colorPaletteSetMemoryProcs(MallocProc* mallocProc, ReallocProc* reallocProc, FreeProc* freeProc) {
+void colorPaletteSetMemoryProcs(MallocProc *mallocProc, ReallocProc *reallocProc, FreeProc *freeProc) {
 	gColorPaletteMallocProc = mallocProc;
 	gColorPaletteReallocProc = reallocProc;
 	gColorPaletteFreeProc = freeProc;
@@ -564,7 +566,7 @@ void colorSetBrightness(double value) {
 
 	for (int i = 0; i < 64; i++) {
 		double value = pow(i, gBrightness);
-		_currentGammaTable[i] = (unsigned char)std::clamp(value, 0.0, 63.0);
+		_currentGammaTable[i] = (unsigned char)clamp(value, 0.0, 63.0);
 	}
 
 	_setSystemPalette(_systemCmap);
@@ -579,7 +581,7 @@ bool colorPushColorPalette() {
 		return false;
 	}
 
-	ColorPaletteStackEntry* entry = (ColorPaletteStackEntry*)malloc(sizeof(*entry));
+	ColorPaletteStackEntry *entry = (ColorPaletteStackEntry *)malloc(sizeof(*entry));
 	gColorPaletteStack[gColorPaletteStackSize] = entry;
 
 	memcpy(entry->mappedColors, _mappedColor, sizeof(_mappedColor));
@@ -602,7 +604,7 @@ bool colorPopColorPalette() {
 
 	gColorPaletteStackSize--;
 
-	ColorPaletteStackEntry* entry = gColorPaletteStack[gColorPaletteStackSize];
+	ColorPaletteStackEntry *entry = gColorPaletteStack[gColorPaletteStackSize];
 
 	memcpy(_mappedColor, entry->mappedColors, sizeof(_mappedColor));
 	memcpy(_cmap, entry->cmap, sizeof(_cmap));
@@ -654,4 +656,4 @@ void _colorsClose() {
 	gColorPaletteStackSize = 0;
 }
 
-} // namespace fallout
+} // namespace Fallout2
