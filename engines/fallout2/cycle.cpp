@@ -1,12 +1,12 @@
-#include "cycle.h"
+#include "fallout2/cycle.h"
 
-#include "color.h"
-#include "input.h"
-#include "palette.h"
-#include "settings.h"
-#include "svga.h"
+#include "fallout2/color.h"
+// #include "fallout2/input.h" TODO for tickers
+#include "fallout2/palette.h"
+// #include "fallout2/settings.h" TODO speed options
+//  #include "fallout2/svga.h"
 
-namespace fallout {
+namespace Fallout2 {
 
 static constexpr unsigned int kSlowCyclePeriod = 1000 / 5;
 static constexpr unsigned int kMediumCyclePeriod = 1000 / 7;
@@ -100,9 +100,10 @@ void colorCycleInit() {
 		return;
 	}
 
-	if (!settings.system.color_cycling) {
-		return;
-	}
+	// TODO settings
+	//	if (!settings.system.color_cycling) {
+	//		return;
+	//	}
 
 	for (int index = 0; index < 12; index++) {
 		slime[index] >>= 2;
@@ -124,12 +125,14 @@ void colorCycleInit() {
 		monitors[index] >>= 2;
 	}
 
-	tickersAdd(colorCycleTicker);
+	// TODO tickers
+	//	tickersAdd(colorCycleTicker);
 
 	gColorCycleInitialized = true;
 	gColorCycleEnabled = true;
 
-	cycleSetSpeedFactor(settings.system.cycle_speed_factor);
+	// TODO settings
+	//	cycleSetSpeedFactor(settings.system.cycle_speed_factor);
 }
 
 // 0x42E8CC
@@ -139,7 +142,8 @@ void colorCycleReset() {
 		last_cycle_medium = 0;
 		last_cycle_fast = 0;
 		last_cycle_very_fast = 0;
-		tickersAdd(colorCycleTicker);
+		// TODO tickers
+		// tickersAdd(colorCycleTicker);
 		gColorCycleEnabled = true;
 	}
 }
@@ -147,7 +151,8 @@ void colorCycleReset() {
 // 0x42E90C
 void colorCycleFree() {
 	if (gColorCycleInitialized) {
-		tickersRemove(colorCycleTicker);
+		// TODO tickers
+		// tickersRemove(colorCycleTicker);
 		gColorCycleInitialized = false;
 		gColorCycleEnabled = false;
 	}
@@ -171,7 +176,8 @@ bool colorCycleEnabled() {
 // 0x42E950
 void cycleSetSpeedFactor(int value) {
 	gColorCycleSpeedFactor = value;
-	settings.system.cycle_speed_factor = value;
+	// TODO settings
+	//	settings.system.cycle_speed_factor = value;
 }
 
 // 0x42E97C
@@ -203,8 +209,8 @@ void colorCycleTicker() {
 
 	bool changed = false;
 
-	unsigned char* palette = _getSystemPalette();
-	unsigned int time = getTicks();
+	unsigned char *palette = _getSystemPalette();
+	unsigned int time = /*getTicks();*/ g_system->getMillis();
 
 	if (getTicksBetween(time, last_cycle_slow) >= kSlowCyclePeriod * gColorCycleSpeedFactor) {
 		changed = true;
@@ -318,4 +324,13 @@ void colorCycleTicker() {
 	}
 }
 
-} // namespace fallout
+// TODO duplicated from input
+unsigned int getTicksBetween(unsigned int end, unsigned int start) {
+	if (start > end) {
+		return INT_MAX;
+	} else {
+		return end - start;
+	}
+}
+
+} // namespace Fallout2
