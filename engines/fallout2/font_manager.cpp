@@ -1,16 +1,16 @@
-#include "font_manager.h"
+#include "fallout2/font_manager.h"
 
-#include <stdio.h>
-#include <string.h>
+/*#include <stdio.h>
+#include <string.h>*/
 
-#include "color.h"
-#include "db.h"
-#include "memory_manager.h"
+#include "fallout2/color.h"
+#include "fallout2/db.h"
+#include "fallout2/memory_manager.h"
 
 // The maximum number of interface fonts.
 #define INTERFACE_FONT_MAX (16)
 
-namespace fallout {
+namespace Fallout2 {
 
 typedef struct InterfaceFontGlyph {
 	short width;
@@ -26,23 +26,23 @@ typedef struct InterfaceFontDescriptor {
 	short field_8;
 	short field_A;
 	InterfaceFontGlyph glyphs[256];
-	unsigned char* data;
+	unsigned char *data;
 } InterfaceFontDescriptor;
 
 static int interfaceFontLoad(int font);
 static void interfaceFontSetCurrentImpl(int font);
 static int interfaceFontGetLineHeightImpl();
-static int interfaceFontGetStringWidthImpl(const char* string);
+static int interfaceFontGetStringWidthImpl(const char *string);
 static int interfaceFontGetCharacterWidthImpl(int ch);
-static int interfaceFontGetMonospacedStringWidthImpl(const char* string);
+static int interfaceFontGetMonospacedStringWidthImpl(const char *string);
 static int interfaceFontGetLetterSpacingImpl();
-static int interfaceFontGetBufferSizeImpl(const char* string);
+static int interfaceFontGetBufferSizeImpl(const char *string);
 static int interfaceFontGetMonospacedCharacterWidthImpl();
-static void interfaceFontDrawImpl(unsigned char* buf, const char* string, int length, int pitch, int color);
-static void interfaceFontByteSwapUInt32(unsigned int* value);
-static void interfaceFontByteSwapInt32(int* value);
-static void interfaceFontByteSwapUInt16(unsigned short* value);
-static void interfaceFontByteSwapInt16(short* value);
+static void interfaceFontDrawImpl(unsigned char *buf, const char *string, int length, int pitch, int color);
+static void interfaceFontByteSwapUInt32(unsigned int *value);
+static void interfaceFontByteSwapInt32(int *value);
+static void interfaceFontByteSwapUInt16(unsigned short *value);
+static void interfaceFontByteSwapInt16(short *value);
 
 // 0x518680
 static bool gInterfaceFontsInitialized = false;
@@ -72,7 +72,7 @@ static InterfaceFontDescriptor gInterfaceFontDescriptors[INTERFACE_FONT_MAX];
 static int gCurrentInterfaceFont;
 
 // 0x58E93C
-static InterfaceFontDescriptor* gCurrentInterfaceFontDescriptor;
+static InterfaceFontDescriptor *gCurrentInterfaceFontDescriptor;
 
 // 0x441C80
 int interfaceFontsInit() {
@@ -113,12 +113,12 @@ void interfaceFontsExit() {
 
 // 0x441D20
 static int interfaceFontLoad(int font_index) {
-	InterfaceFontDescriptor* fontDescriptor = &(gInterfaceFontDescriptors[font_index]);
+	InterfaceFontDescriptor *fontDescriptor = &(gInterfaceFontDescriptors[font_index]);
 
 	char path[56];
 	snprintf(path, sizeof(path), "font%d.aaf", font_index);
 
-	File* stream = fileOpen(path, "rb");
+	File *stream = fileOpen(path, "rb");
 	if (stream == NULL) {
 		return -1;
 	}
@@ -162,7 +162,7 @@ static int interfaceFontLoad(int font_index) {
 	interfaceFontByteSwapInt16(&(fontDescriptor->lineSpacing));
 
 	for (int index = 0; index < 256; index++) {
-		InterfaceFontGlyph* glyph = &(fontDescriptor->glyphs[index]);
+		InterfaceFontGlyph *glyph = &(fontDescriptor->glyphs[index]);
 
 		if (fileRead(&(glyph->width), 2, 1, stream) != 1) {
 			fileClose(stream);
@@ -185,7 +185,7 @@ static int interfaceFontLoad(int font_index) {
 
 	int glyphDataSize = fileSize - 2060;
 
-	fontDescriptor->data = (unsigned char*)internal_malloc_safe(glyphDataSize, __FILE__, __LINE__); // FONTMGR.C, 259
+	fontDescriptor->data = (unsigned char *)internal_malloc_safe(glyphDataSize, __FILE__, __LINE__); // FONTMGR.C, 259
 	if (fontDescriptor->data == NULL) {
 		fileClose(stream);
 		return -1;
@@ -225,7 +225,7 @@ static int interfaceFontGetLineHeightImpl() {
 }
 
 // 0x442188
-static int interfaceFontGetStringWidthImpl(const char* string) {
+static int interfaceFontGetStringWidthImpl(const char *string) {
 	if (!gInterfaceFontsInitialized) {
 		return 0;
 	}
@@ -266,7 +266,7 @@ static int interfaceFontGetCharacterWidthImpl(int ch) {
 }
 
 // 0x442210
-static int interfaceFontGetMonospacedStringWidthImpl(const char* str) {
+static int interfaceFontGetMonospacedStringWidthImpl(const char *str) {
 	if (!gInterfaceFontsInitialized) {
 		return 0;
 	}
@@ -284,7 +284,7 @@ static int interfaceFontGetLetterSpacingImpl() {
 }
 
 // 0x442258
-static int interfaceFontGetBufferSizeImpl(const char* str) {
+static int interfaceFontGetBufferSizeImpl(const char *str) {
 	if (!gInterfaceFontsInitialized) {
 		return 0;
 	}
@@ -309,7 +309,7 @@ static int interfaceFontGetMonospacedCharacterWidthImpl() {
 }
 
 // 0x4422B4
-static void interfaceFontDrawImpl(unsigned char* buf, const char* string, int length, int pitch, int color) {
+static void interfaceFontDrawImpl(unsigned char *buf, const char *string, int length, int pitch, int color) {
 	if (!gInterfaceFontsInitialized) {
 		return;
 	}
@@ -321,7 +321,7 @@ static void interfaceFontDrawImpl(unsigned char* buf, const char* string, int le
 		interfaceFontDrawImpl(buf + pitch + 1, string, length, pitch, (color & ~0xFF) | _colorTable[0]);
 	}
 
-	unsigned char* palette = _getColorBlendTable(color & 0xFF);
+	unsigned char *palette = _getColorBlendTable(color & 0xFF);
 
 	int monospacedCharacterWidth;
 	if ((color & FONT_MONO) != 0) {
@@ -329,7 +329,7 @@ static void interfaceFontDrawImpl(unsigned char* buf, const char* string, int le
 		monospacedCharacterWidth = interfaceFontGetMonospacedCharacterWidthImpl();
 	}
 
-	unsigned char* ptr = buf;
+	unsigned char *ptr = buf;
 	while (*string != '\0') {
 		unsigned char ch = static_cast<unsigned char>(*string++);
 
@@ -340,7 +340,7 @@ static void interfaceFontDrawImpl(unsigned char* buf, const char* string, int le
 			characterWidth = gCurrentInterfaceFontDescriptor->glyphs[ch].width;
 		}
 
-		unsigned char* end;
+		unsigned char *end;
 		if ((color & FONT_MONO) != 0) {
 			end = ptr + monospacedCharacterWidth;
 			ptr += (monospacedCharacterWidth - characterWidth - gCurrentInterfaceFontDescriptor->letterSpacing) / 2;
@@ -352,8 +352,8 @@ static void interfaceFontDrawImpl(unsigned char* buf, const char* string, int le
 			break;
 		}
 
-		InterfaceFontGlyph* glyph = &(gCurrentInterfaceFontDescriptor->glyphs[ch]);
-		unsigned char* glyphDataPtr = gCurrentInterfaceFontDescriptor->data + glyph->offset;
+		InterfaceFontGlyph *glyph = &(gCurrentInterfaceFontDescriptor->glyphs[ch]);
+		unsigned char *glyphDataPtr = gCurrentInterfaceFontDescriptor->data + glyph->offset;
 
 		// Skip blank pixels (difference between font's line height and glyph height).
 		ptr += (gCurrentInterfaceFontDescriptor->maxHeight - glyph->height) * pitch;
@@ -373,7 +373,7 @@ static void interfaceFontDrawImpl(unsigned char* buf, const char* string, int le
 
 	if ((color & FONT_UNDERLINE) != 0) {
 		int length = ptr - buf;
-		unsigned char* underlinePtr = buf + pitch * (gCurrentInterfaceFontDescriptor->maxHeight - 1);
+		unsigned char *underlinePtr = buf + pitch * (gCurrentInterfaceFontDescriptor->maxHeight - 1);
 		for (int index = 0; index < length; index++) {
 			*underlinePtr++ = color & 0xFF;
 		}
@@ -385,7 +385,7 @@ static void interfaceFontDrawImpl(unsigned char* buf, const char* string, int le
 // NOTE: Inlined.
 //
 // 0x442520
-static void interfaceFontByteSwapUInt32(unsigned int* value) {
+static void interfaceFontByteSwapUInt32(unsigned int *value) {
 	unsigned int swapped = *value;
 	unsigned short high = swapped >> 16;
 	// NOTE: Uninline.
@@ -397,20 +397,20 @@ static void interfaceFontByteSwapUInt32(unsigned int* value) {
 }
 
 // NOTE: 0x442520 with different signature.
-static void interfaceFontByteSwapInt32(int* value) {
-	interfaceFontByteSwapUInt32((unsigned int*)value);
+static void interfaceFontByteSwapInt32(int *value) {
+	interfaceFontByteSwapUInt32((unsigned int *)value);
 }
 
 // 0x442568
-static void interfaceFontByteSwapUInt16(unsigned short* value) {
+static void interfaceFontByteSwapUInt16(unsigned short *value) {
 	unsigned short swapped = *value;
 	swapped = (swapped >> 8) | (swapped << 8);
 	*value = swapped;
 }
 
 // NOTE: 0x442568 with different signature.
-static void interfaceFontByteSwapInt16(short* value) {
-	interfaceFontByteSwapUInt16((unsigned short*)value);
+static void interfaceFontByteSwapInt16(short *value) {
+	interfaceFontByteSwapUInt16((unsigned short *)value);
 }
 
-} // namespace fallout
+} // namespace Fallout2

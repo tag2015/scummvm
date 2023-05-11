@@ -1,9 +1,9 @@
-#ifndef PCX_H
-#define PCX_H
+#ifndef FALLOUT2_PCX_H
+#define FALLOUT2_PCX_H
 
-#include "db.h"
+#include "fallout2/db.h"
 
-namespace fallout {
+namespace Fallout2 {
 
 typedef struct PcxHeader {
 	unsigned char identifier;
@@ -29,11 +29,11 @@ typedef struct PcxHeader {
 extern unsigned char gPcxLastRunLength;
 extern unsigned char gPcxLastValue;
 
-void pcxReadHeader(PcxHeader* pcxHeader, File* stream);
-int pcxReadLine(unsigned char* data, int size, File* stream);
-int pcxReadPalette(PcxHeader* pcxHeader, unsigned char* palette, File* stream);
-unsigned char* pcxRead(const char* path, int* widthPtr, int* heightPtr, unsigned char* palette);
+void pcxReadHeader(PcxHeader *pcxHeader, File *stream);
+int pcxReadLine(unsigned char *data, int size, File *stream);
+int pcxReadPalette(PcxHeader *pcxHeader, unsigned char *palette, File *stream);
+unsigned char *pcxRead(const char *path, int *widthPtr, int *heightPtr, unsigned char *palette);
 
-} // namespace fallout
+} // namespace Fallout2
 
-#endif /* PCX_H */
+#endif
