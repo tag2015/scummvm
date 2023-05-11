@@ -1,15 +1,18 @@
-#include "palette.h"
+#include "fallout2/palette.h"
 
-#include <string.h>
+/// #include <string.h>
 
-#include "color.h"
-#include "cycle.h"
-#include "debug.h"
-#include "game_sound.h"
-#include "input.h"
-#include "svga.h"
+#include "common/debug.h"
+#include "fallout2/color.h"
+#include "fallout2/cycle.h"
 
-namespace fallout {
+// #include "debug.h"
+
+// #include "game_sound.h" TODO
+// #include "input.h" TODO
+// #include "svga.h" TODO
+
+namespace Fallout2 {
 
 static void _palette_reset_();
 
@@ -31,10 +34,11 @@ void paletteInit() {
 	memset(gPaletteWhite, 63, 256 * 3);
 	memcpy(gPalette, _cmap, 256 * 3);
 
-	unsigned int tick = getTicks();
-	if (backgroundSoundIsEnabled() || speechIsEnabled()) {
-		colorPaletteSetTransitionCallback(soundContinueAll);
-	}
+	unsigned int tick = /* getTicks();*/ g_system->getMillis();
+	// TODO audio
+	//	if (backgroundSoundIsEnabled() || speechIsEnabled()) {
+	//  colorPaletteSetTransitionCallback(soundContinueAll);
+	//	}
 
 	colorPaletteFadeBetween(gPalette, gPalette, 60);
 
@@ -42,12 +46,14 @@ void paletteInit() {
 
 	// Actual fade duration will never be 0 since |colorPaletteFadeBetween| uses
 	// frame rate throttling.
-	unsigned int actualFadeDuration = getTicksSince(tick);
+	// TODO
+	// unsigned int actualFadeDuration = getTicksSince(tick);
+	unsigned int actualFadeDuration = getTicksBetween(g_system->getMillis(), tick);
 
 	// Calculate fade steps needed to perform fading in about 700 ms.
 	gPaletteFadeSteps = 60 * 700 / actualFadeDuration;
 
-	debugPrint("\nFade time is %u\nFade steps are %d\n", actualFadeDuration, gPaletteFadeSteps);
+	debug("\nFade time is %u\nFade steps are %d", actualFadeDuration, gPaletteFadeSteps);
 }
 
 // NOTE: Collapsed.
@@ -67,13 +73,14 @@ void paletteExit() {
 }
 
 // 0x493AD4
-void paletteFadeTo(unsigned char* palette) {
+void paletteFadeTo(unsigned char *palette) {
 	bool colorCycleWasEnabled = colorCycleEnabled();
 	colorCycleDisable();
 
-	if (backgroundSoundIsEnabled() || speechIsEnabled()) {
-		colorPaletteSetTransitionCallback(soundContinueAll);
-	}
+	// TODO sound
+	//	if (backgroundSoundIsEnabled() || speechIsEnabled()) {
+	//		colorPaletteSetTransitionCallback(soundContinueAll);
+	//	}
 
 	colorPaletteFadeBetween(gPalette, palette, gPaletteFadeSteps);
 	colorPaletteSetTransitionCallback(NULL);
@@ -86,15 +93,15 @@ void paletteFadeTo(unsigned char* palette) {
 }
 
 // 0x493B48
-void paletteSetEntries(unsigned char* palette) {
+void paletteSetEntries(unsigned char *palette) {
 	memcpy(gPalette, palette, sizeof(gPalette));
 	_setSystemPalette(palette);
 }
 
 // 0x493B78
-void paletteSetEntriesInRange(unsigned char* palette, int start, int end) {
+void paletteSetEntriesInRange(unsigned char *palette, int start, int end) {
 	memcpy(gPalette + 3 * start, palette, 3 * (end - start + 1));
 	_setSystemPaletteEntries(palette, start, end);
 }
 
-} // namespace fallout
+} // namespace Fallout2
