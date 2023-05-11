@@ -1,8 +1,8 @@
-#include "pcx.h"
+#include "fallout2/pcx.h"
 
-#include "memory_manager.h"
+#include "fallout2/memory_manager.h"
 
-namespace fallout {
+namespace Fallout2 {
 
 // 0x519DC8
 unsigned char gPcxLastRunLength = 0;
@@ -15,7 +15,7 @@ unsigned char gPcxLastValue = 0;
 // they read everything into temporary variables. There are no error checks.
 //
 // 0x4961D4
-void pcxReadHeader(PcxHeader* pcxHeader, File* stream) {
+void pcxReadHeader(PcxHeader *pcxHeader, File *stream) {
 	pcxHeader->identifier = fileReadChar(stream);
 	pcxHeader->version = fileReadChar(stream);
 	pcxHeader->encoding = fileReadChar(stream);
@@ -74,7 +74,7 @@ void pcxReadHeader(PcxHeader* pcxHeader, File* stream) {
 }
 
 // 0x49636C
-int pcxReadLine(unsigned char* data, int size, File* stream) {
+int pcxReadLine(unsigned char *data, int size, File *stream) {
 	unsigned char runLength = gPcxLastRunLength;
 	unsigned char value = gPcxLastValue;
 
@@ -113,7 +113,7 @@ int pcxReadLine(unsigned char* data, int size, File* stream) {
 }
 
 // 0x49641C
-int pcxReadPalette(PcxHeader* pcxHeader, unsigned char* palette, File* stream) {
+int pcxReadPalette(PcxHeader *pcxHeader, unsigned char *palette, File *stream) {
 	if (pcxHeader->version != 5) {
 		return 0;
 	}
@@ -136,8 +136,8 @@ int pcxReadPalette(PcxHeader* pcxHeader, unsigned char* palette, File* stream) {
 }
 
 // 0x496494
-unsigned char* pcxRead(const char* path, int* widthPtr, int* heightPtr, unsigned char* palette) {
-	File* stream = fileOpen(path, "rb");
+unsigned char *pcxRead(const char *path, int *widthPtr, int *heightPtr, unsigned char *palette) {
+	File *stream = fileOpen(path, "rb");
 	if (stream == NULL) {
 		return NULL;
 	}
@@ -152,7 +152,7 @@ unsigned char* pcxRead(const char* path, int* widthPtr, int* heightPtr, unsigned
 	*heightPtr = height;
 
 	int bytesPerLine = pcxHeader.planeCount * pcxHeader.bytesPerLine;
-	unsigned char* data = (unsigned char*)internal_malloc_safe(bytesPerLine * height, __FILE__, __LINE__); // "..\\int\\PCX.C", 195
+	unsigned char *data = (unsigned char *)internal_malloc_safe(bytesPerLine * height, __FILE__, __LINE__); // "..\\int\\PCX.C", 195
 	if (data == NULL) {
 		// NOTE: This code is unreachable, internal_malloc_safe never fails.
 		fileClose(stream);
@@ -162,7 +162,7 @@ unsigned char* pcxRead(const char* path, int* widthPtr, int* heightPtr, unsigned
 	gPcxLastRunLength = 0;
 	gPcxLastValue = 0;
 
-	unsigned char* ptr = data;
+	unsigned char *ptr = data;
 	for (int y = 0; y < height; y++) {
 		pcxReadLine(ptr, bytesPerLine, stream);
 		ptr += width;
@@ -175,4 +175,4 @@ unsigned char* pcxRead(const char* path, int* widthPtr, int* heightPtr, unsigned
 	return data;
 }
 
-} // namespace fallout
+} // namespace Fallout2
