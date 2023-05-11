@@ -1,7 +1,7 @@
-#ifndef CYCLE_H
-#define CYCLE_H
+#ifndef FALLOUT2_CYCLE_H
+#define FALLOUT2_CYCLE_H
 
-namespace fallout {
+namespace Fallout2 {
 
 void colorCycleInit();
 void colorCycleReset();
@@ -12,6 +12,8 @@ bool colorCycleEnabled();
 void cycleSetSpeedFactor(int value);
 void colorCycleTicker();
 
-} // namespace fallout
+unsigned int getTicksBetween(unsigned int end, unsigned int start); // TODO: remove
 
-#endif /* CYCLE_H */
+} // namespace Fallout2
+
+#endif
