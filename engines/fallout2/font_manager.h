@@ -1,15 +1,15 @@
-#ifndef FONT_MANAGER_H
-#define FONT_MANAGER_H
+#ifndef FALLOUT2_FONT_MANAGER_H
+#define FALLOUT2_FONT_MANAGER_H
 
-#include "text_font.h"
+#include "fallout2/text_font.h"
 
-namespace fallout {
+namespace Fallout2 {
 
 extern FontManager gModernFontManager;
 
 int interfaceFontsInit();
 void interfaceFontsExit();
 
-} // namespace fallout
+} // namespace Fallout2
 
-#endif /* FONT_MANAGER_H */
+#endif
