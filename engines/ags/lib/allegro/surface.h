@@ -262,6 +262,40 @@ public:
 			aDest = static_cast<uint8>(a);
 	}
 
+	// kAlFontTransBlender
+	inline void blendPreservedAlphaTrans(uint8 aSrc, uint8 rSrc, uint8 gSrc, uint8 bSrc, uint8 &aDest, uint8 &rDest, uint8 &gDest, uint8 &bDest, uint32 alpha) const {
+		// Original blender function: __preservedalpha_blender_trans24
+		uint32 x = ((uint32)aSrc << 24) | ((uint32)rSrc << 16) | ((uint32)gSrc << 8) | (uint32)bSrc;
+		uint32 y = ((uint32)aDest << 24) | ((uint32)rDest << 16) | ((uint32)gDest << 8) | (uint32)bDest;
+
+		uint32 newalpha = (y & 0xFF000000);
+
+		if ((y & 0xFFFFFF) == 0xFF00FF) {
+			rDest = rSrc;
+			gDest = gSrc;
+			bDest = bSrc;
+			aDest = aSrc | (alpha << 24);
+			return;
+		}
+
+		if (alpha)
+			alpha++;
+
+		uint32 res = ((x & 0xFF00FF) - (y & 0xFF00FF)) * alpha / 256 + y;
+		y &= 0xFF00;
+		x &= 0xFF00;
+		uint32 g = (x - y) * alpha / 256 + y;
+
+		res &= 0xFF00FF;
+		g &= 0xFF00;
+
+		uint32 blendedColor = res | g | newalpha;
+		aDest = (blendedColor >> 24) & 0xff;
+		rDest = (blendedColor >> 16) & 0xff;
+		gDest = (blendedColor >> 8) & 0xff;
+		bDest = blendedColor & 0xff;
+	}
+
 	// kTintBlenderMode and kTintLightBlenderMode
 	void blendTintSprite(uint8 aSrc, uint8 rSrc, uint8 gSrc, uint8 bSrc, uint8 &aDest, uint8 &rDest, uint8 &gDest, uint8 &bDest, uint32 alpha, bool light) const;
 

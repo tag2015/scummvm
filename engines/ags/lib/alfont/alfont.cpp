@@ -179,7 +179,9 @@ uint32_t __preservedalpha_blender_trans24(uint32_t x, uint32_t y, uint32_t n) {
 /* replaces set_trans_blender() */
 void set_preservedalpha_trans_blender(int r, int g, int b, int a) {
 	//set_blender_mode(__skiptranspixels_blender_trans15, __skiptranspixels_blender_trans16, __preservedalpha_blender_trans24, r, g, b, a);
-	set_blender_mode(kAlphaPreservedBlenderMode, r, g, b, a);
+//	set_blender_mode(kArgbToArgbBlender, r, g, b, a);
+//	set_blender_mode(kAlphaPreservedBlenderMode, r, g, b, a);
+	set_blender_mode(kAlFontTransBlender, r, g, b, a);
 }
 
 
@@ -748,6 +750,9 @@ void alfont_textout_aa_ex(BITMAP *bmp, ALFONT_FONT *f, const char *s, int x, int
 	int curr_uformat = 0;
 	int first_flag = TRUE; //First Char flag
 	BITMAP *masked_bmp = nullptr; //the masked bmp used by Font hollow
+
+	BITMAP *tmp_bmp = create_bitmap(1,1);  // temporary bmp for blender
+	putpixel(tmp_bmp, 0, 0, color);
 
 #ifdef ALFONT_DOS
 	iconv_t c_pt;
@@ -1563,7 +1568,7 @@ void alfont_textout_aa_ex(BITMAP *bmp, ALFONT_FONT *f, const char *s, int x, int
 									if (f->underline_left == TRUE) {
 										if (first_x > (bmp_x + ((max_bmp_y - bmp_y) / 2))) first_x = bmp_x + ((max_bmp_y - bmp_y) / 2);
 									}
-									putpixel(bmp, bmp_x + ((max_bmp_y - bmp_y) / 2), bmp_y, color);
+									bmp->draw(tmp_bmp, Common::Rect(0, 0, 1, 1), bmp_x + ((max_bmp_y - bmp_y) / 2), bmp_y, false, false, false, alpha);
 								} else if (f->style == 2) {
 									if (f->underline_right == TRUE) {
 										if (final_x < (bmp_x + 1)) final_x = bmp_x + 1;
@@ -1573,8 +1578,8 @@ void alfont_textout_aa_ex(BITMAP *bmp, ALFONT_FONT *f, const char *s, int x, int
 										if (first_x > (bmp_x + 1)) first_x = bmp_x + 1;
 										if (first_x > (bmp_x)) first_x = bmp_x;
 									}
-									putpixel(bmp, bmp_x + 1, bmp_y, color);
-									putpixel(bmp, bmp_x, bmp_y, color);
+									bmp->draw(tmp_bmp, Common::Rect(0, 0, 1, 1), bmp_x + 1, bmp_y, false, false, false, alpha);
+									bmp->draw(tmp_bmp, Common::Rect(0, 0, 1, 1), bmp_x, bmp_y, false, false, false, alpha);
 								} else if (f->style == 3) {
 									if (f->underline_right == TRUE) {
 										if (final_x < (bmp_x + ((max_bmp_y - bmp_y) / 2) + 1)) final_x = bmp_x + ((max_bmp_y - bmp_y) / 2) + 1;
@@ -1584,10 +1589,10 @@ void alfont_textout_aa_ex(BITMAP *bmp, ALFONT_FONT *f, const char *s, int x, int
 										if (first_x > (bmp_x + ((max_bmp_y - bmp_y) / 2) + 1)) first_x = bmp_x + ((max_bmp_y - bmp_y) / 2) + 1;
 										if (first_x > (bmp_x + ((max_bmp_y - bmp_y) / 2))) first_x = bmp_x + ((max_bmp_y - bmp_y) / 2);
 									}
-									putpixel(bmp, bmp_x + ((max_bmp_y - bmp_y) / 2) + 1, bmp_y, color);
-									putpixel(bmp, bmp_x + ((max_bmp_y - bmp_y) / 2), bmp_y, color);
+									bmp->draw(tmp_bmp, Common::Rect(0, 0, 1, 1), bmp_x + ((max_bmp_y - bmp_y) / 2) + 1, bmp_y, false, false, false, alpha);
+									bmp->draw(tmp_bmp, Common::Rect(0, 0, 1, 1), bmp_x + ((max_bmp_y - bmp_y) / 2), bmp_y, false, false, false, alpha);
 								} else {
-									putpixel(bmp, bmp_x, bmp_y, color);
+									bmp->draw(tmp_bmp, Common::Rect(0, 0, 1, 1), bmp_x, bmp_y, false, false, false, alpha);
 								}
 							}
 						}

@@ -80,7 +80,8 @@ enum BlenderMode {
 	kOpaqueBlenderMode,
 	kAdditiveBlenderMode,
 	kTintBlenderMode,
-	kTintLightBlenderMode
+	kTintLightBlenderMode,
+	kAlFontTransBlender
 };
 
 extern int makecol(byte r, byte g, byte b);

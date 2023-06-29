@@ -391,6 +391,9 @@ void BITMAP::blendPixel(uint8 aSrc, uint8 rSrc, uint8 gSrc, uint8 bSrc, uint8 &a
 	case kTintLightBlenderMode:
 		blendTintSprite(aSrc, rSrc, gSrc, bSrc, aDest, rDest, gDest, bDest, alpha, true);
 		break;
+	case kAlFontTransBlender:
+		blendPreservedAlphaTrans(aSrc, rSrc, gSrc, bSrc, aDest, rDest, gDest, bDest, alpha);
+		break;
 	}
 }
 
