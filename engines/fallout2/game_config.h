@@ -1,9 +1,9 @@
-#ifndef GAME_CONFIG_H
-#define GAME_CONFIG_H
+#ifndef FALLOUT2_GAME_CONFIG_H
+#define FALLOUT2_GAME_CONFIG_H
 
-#include "config.h"
+#include "fallout2/config.h"
 
-namespace fallout {
+namespace Fallout2 {
 
 // The file name of the main config file.
 #define GAME_CONFIG_FILE_NAME "fallout2.cfg"
@@ -118,10 +118,10 @@ extern bool gGameConfigInitialized;
 extern Config gGameConfig;
 extern char gGameConfigFilePath[];
 
-bool gameConfigInit(bool isMapper, int argc, char** argv);
+bool gameConfigInit(bool isMapper, int argc, char **argv);
 bool gameConfigSave();
 bool gameConfigExit(bool shouldSave);
 
-} // namespace fallout
+} // namespace Fallout2
 
-#endif /* GAME_CONFIG_H */
+#endif

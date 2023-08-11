@@ -1,27 +1,27 @@
-#include "config.h"
+#include "fallout2/config.h"
 
-#include <ctype.h>
+/*#include <ctype.h>
 #include <errno.h>
 #include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
+#include <string.h>*/
 
-#include "db.h"
-#include "memory.h"
-#include "platform_compat.h"
+#include "fallout2/db.h"
+#include "fallout2/memory.h"
+#include "fallout2/platform_compat.h"
 
-namespace fallout {
+namespace Fallout2 {
 
 #define CONFIG_FILE_MAX_LINE_LENGTH (256)
 
 // The initial number of sections (or key-value) pairs in the config.
 #define CONFIG_INITIAL_CAPACITY (10)
 
-static bool configParseLine(Config* config, char* string);
-static bool configParseKeyValue(char* string, char* key, char* value);
-static bool configEnsureSectionExists(Config* config, const char* sectionKey);
-static bool configTrimString(char* string);
+static bool configParseLine(Config *config, char *string);
+static bool configParseKeyValue(char *string, char *key, char *value);
+static bool configEnsureSectionExists(Config *config, const char *sectionKey);
+static bool configTrimString(char *string);
 
 // Last section key read from .INI file.
 //
@@ -29,7 +29,7 @@ static bool configTrimString(char* string);
 static char gConfigLastSectionKey[CONFIG_FILE_MAX_LINE_LENGTH] = "unknown";
 
 // 0x42BD90
-bool configInit(Config* config) {
+bool configInit(Config *config) {
 	if (config == NULL) {
 		return false;
 	}
@@ -42,19 +42,19 @@ bool configInit(Config* config) {
 }
 
 // 0x42BDBC
-void configFree(Config* config) {
+void configFree(Config *config) {
 	if (config == NULL) {
 		return;
 	}
 
 	for (int sectionIndex = 0; sectionIndex < config->entriesLength; sectionIndex++) {
-		DictionaryEntry* sectionEntry = &(config->entries[sectionIndex]);
+		DictionaryEntry *sectionEntry = &(config->entries[sectionIndex]);
 
-		ConfigSection* section = (ConfigSection*)sectionEntry->value;
+		ConfigSection *section = (ConfigSection *)sectionEntry->value;
 		for (int keyValueIndex = 0; keyValueIndex < section->entriesLength; keyValueIndex++) {
-			DictionaryEntry* keyValueEntry = &(section->entries[keyValueIndex]);
+			DictionaryEntry *keyValueEntry = &(section->entries[keyValueIndex]);
 
-			char** value = (char**)keyValueEntry->value;
+			char **value = (char **)keyValueEntry->value;
 			internal_free(*value);
 			*value = NULL;
 		}
@@ -74,14 +74,14 @@ void configFree(Config* config) {
 // I don't know if this is intentional or it's bug.
 //
 // 0x42BE38
-bool configParseCommandLineArguments(Config* config, int argc, char** argv) {
+bool configParseCommandLineArguments(Config *config, int argc, char **argv) {
 	if (config == NULL) {
 		return false;
 	}
 
 	for (int arg = 0; arg < argc; arg++) {
-		char* pch;
-		char* string = argv[arg];
+		char *pch;
+		char *string = argv[arg];
 
 		// Find opening bracket.
 		pch = strchr(string, '[');
@@ -89,7 +89,7 @@ bool configParseCommandLineArguments(Config* config, int argc, char** argv) {
 			continue;
 		}
 
-		char* sectionKey = pch + 1;
+		char *sectionKey = pch + 1;
 
 		// Find closing bracket.
 		pch = strchr(sectionKey, ']');
@@ -115,7 +115,7 @@ bool configParseCommandLineArguments(Config* config, int argc, char** argv) {
 }
 
 // 0x42BF48
-bool configGetString(Config* config, const char* sectionKey, const char* key, char** valuePtr) {
+bool configGetString(Config *config, const char *sectionKey, const char *key, char **valuePtr) {
 	if (config == NULL || sectionKey == NULL || key == NULL || valuePtr == NULL) {
 		return false;
 	}
@@ -125,22 +125,22 @@ bool configGetString(Config* config, const char* sectionKey, const char* key, ch
 		return false;
 	}
 
-	DictionaryEntry* sectionEntry = &(config->entries[sectionIndex]);
-	ConfigSection* section = (ConfigSection*)sectionEntry->value;
+	DictionaryEntry *sectionEntry = &(config->entries[sectionIndex]);
+	ConfigSection *section = (ConfigSection *)sectionEntry->value;
 
 	int index = dictionaryGetIndexByKey(section, key);
 	if (index == -1) {
 		return false;
 	}
 
-	DictionaryEntry* keyValueEntry = &(section->entries[index]);
-	*valuePtr = *(char**)keyValueEntry->value;
+	DictionaryEntry *keyValueEntry = &(section->entries[index]);
+	*valuePtr = *(char **)keyValueEntry->value;
 
 	return true;
 }
 
 // 0x42BF90
-bool configSetString(Config* config, const char* sectionKey, const char* key, const char* value) {
+bool configSetString(Config *config, const char *sectionKey, const char *key, const char *value) {
 	if (config == NULL || sectionKey == NULL || key == NULL || value == NULL) {
 		return false;
 	}
@@ -153,21 +153,21 @@ bool configSetString(Config* config, const char* sectionKey, const char* key, co
 		sectionIndex = dictionaryGetIndexByKey(config, sectionKey);
 	}
 
-	DictionaryEntry* sectionEntry = &(config->entries[sectionIndex]);
-	ConfigSection* section = (ConfigSection*)sectionEntry->value;
+	DictionaryEntry *sectionEntry = &(config->entries[sectionIndex]);
+	ConfigSection *section = (ConfigSection *)sectionEntry->value;
 
 	int index = dictionaryGetIndexByKey(section, key);
 	if (index != -1) {
-		DictionaryEntry* keyValueEntry = &(section->entries[index]);
+		DictionaryEntry *keyValueEntry = &(section->entries[index]);
 
-		char** existingValue = (char**)keyValueEntry->value;
+		char **existingValue = (char **)keyValueEntry->value;
 		internal_free(*existingValue);
 		*existingValue = NULL;
 
 		dictionaryRemoveValue(section, key);
 	}
 
-	char* valueCopy = internal_strdup(value);
+	char *valueCopy = internal_strdup(value);
 	if (valueCopy == NULL) {
 		return false;
 	}
@@ -181,17 +181,17 @@ bool configSetString(Config* config, const char* sectionKey, const char* key, co
 }
 
 // 0x42C05C
-bool configGetInt(Config* config, const char* sectionKey, const char* key, int* valuePtr, unsigned char base /* = 0 */) {
+bool configGetInt(Config *config, const char *sectionKey, const char *key, int *valuePtr, unsigned char base /* = 0 */) {
 	if (valuePtr == NULL) {
 		return false;
 	}
 
-	char* stringValue;
+	char *stringValue;
 	if (!configGetString(config, sectionKey, key, &stringValue)) {
 		return false;
 	}
 
-	char* end;
+	char *end;
 	errno = 0;
 	long l = strtol(stringValue, &end, base); // see https://stackoverflow.com/a/6154614
 
@@ -212,12 +212,12 @@ bool configGetInt(Config* config, const char* sectionKey, const char* key, int* 
 }
 
 // 0x42C090
-bool configGetIntList(Config* config, const char* sectionKey, const char* key, int* arr, int count) {
+bool configGetIntList(Config *config, const char *sectionKey, const char *key, int *arr, int count) {
 	if (arr == NULL || count < 2) {
 		return false;
 	}
 
-	char* string;
+	char *string;
 	if (!configGetString(config, sectionKey, key, &string)) {
 		return false;
 	}
@@ -226,7 +226,7 @@ bool configGetIntList(Config* config, const char* sectionKey, const char* key, i
 	string = strncpy(temp, string, CONFIG_FILE_MAX_LINE_LENGTH - 1);
 
 	while (1) {
-		char* pch = strchr(string, ',');
+		char *pch = strchr(string, ',');
 		if (pch == NULL) {
 			break;
 		}
@@ -252,7 +252,7 @@ bool configGetIntList(Config* config, const char* sectionKey, const char* key, i
 }
 
 // 0x42C160
-bool configSetInt(Config* config, const char* sectionKey, const char* key, int value) {
+bool configSetInt(Config *config, const char *sectionKey, const char *key, int value) {
 	char stringValue[20];
 	compat_itoa(value, stringValue, 10);
 
@@ -262,7 +262,7 @@ bool configSetInt(Config* config, const char* sectionKey, const char* key, int v
 // Reads .INI file into config.
 //
 // 0x42C280
-bool configRead(Config* config, const char* filePath, bool isDb) {
+bool configRead(Config *config, const char *filePath, bool isDb) {
 	if (config == NULL || filePath == NULL) {
 		return false;
 	}
@@ -270,7 +270,7 @@ bool configRead(Config* config, const char* filePath, bool isDb) {
 	char string[CONFIG_FILE_MAX_LINE_LENGTH];
 
 	if (isDb) {
-		File* stream = fileOpen(filePath, "rb");
+		File *stream = fileOpen(filePath, "rb");
 		if (stream != NULL) {
 			while (fileReadString(string, sizeof(string), stream) != NULL) {
 				configParseLine(config, string);
@@ -278,13 +278,13 @@ bool configRead(Config* config, const char* filePath, bool isDb) {
 			fileClose(stream);
 		}
 	} else {
-		FILE* stream = compat_fopen(filePath, "rt");
+		Common::File *stream = compat_fopen(filePath, "rt");
 		if (stream != NULL) {
 			while (compat_fgets(string, sizeof(string), stream) != NULL) {
 				configParseLine(config, string);
 			}
 
-			fclose(stream);
+			stream->close();
 		}
 
 		// FIXME: This function returns `true` even if the file was not actually
@@ -297,25 +297,27 @@ bool configRead(Config* config, const char* filePath, bool isDb) {
 // Writes config into .INI file.
 //
 // 0x42C324
-bool configWrite(Config* config, const char* filePath, bool isDb) {
+// TODO: Write config
+bool configWrite(Config *config, const char *filePath, bool isDb) {
+#if 0
 	if (config == NULL || filePath == NULL) {
 		return false;
 	}
 
 	if (isDb) {
-		File* stream = fileOpen(filePath, "wt");
+		File *stream = fileOpen(filePath, "wt");
 		if (stream == NULL) {
 			return false;
 		}
 
 		for (int sectionIndex = 0; sectionIndex < config->entriesLength; sectionIndex++) {
-			DictionaryEntry* sectionEntry = &(config->entries[sectionIndex]);
+			DictionaryEntry *sectionEntry = &(config->entries[sectionIndex]);
 			filePrintFormatted(stream, "[%s]\n", sectionEntry->key);
 
-			ConfigSection* section = (ConfigSection*)sectionEntry->value;
+			ConfigSection *section = (ConfigSection *)sectionEntry->value;
 			for (int index = 0; index < section->entriesLength; index++) {
-				DictionaryEntry* keyValueEntry = &(section->entries[index]);
-				filePrintFormatted(stream, "%s=%s\n", keyValueEntry->key, *(char**)keyValueEntry->value);
+				DictionaryEntry *keyValueEntry = &(section->entries[index]);
+				filePrintFormatted(stream, "%s=%s\n", keyValueEntry->key, *(char **)keyValueEntry->value);
 			}
 
 			filePrintFormatted(stream, "\n");
@@ -323,19 +325,19 @@ bool configWrite(Config* config, const char* filePath, bool isDb) {
 
 		fileClose(stream);
 	} else {
-		FILE* stream = compat_fopen(filePath, "wt");
+		FILE *stream = compat_fopen(filePath, "wt");
 		if (stream == NULL) {
 			return false;
 		}
 
 		for (int sectionIndex = 0; sectionIndex < config->entriesLength; sectionIndex++) {
-			DictionaryEntry* sectionEntry = &(config->entries[sectionIndex]);
+			DictionaryEntry *sectionEntry = &(config->entries[sectionIndex]);
 			fprintf(stream, "[%s]\n", sectionEntry->key);
 
-			ConfigSection* section = (ConfigSection*)sectionEntry->value;
+			ConfigSection *section = (ConfigSection *)sectionEntry->value;
 			for (int index = 0; index < section->entriesLength; index++) {
-				DictionaryEntry* keyValueEntry = &(section->entries[index]);
-				fprintf(stream, "%s=%s\n", keyValueEntry->key, *(char**)keyValueEntry->value);
+				DictionaryEntry *keyValueEntry = &(section->entries[index]);
+				fprintf(stream, "%s=%s\n", keyValueEntry->key, *(char **)keyValueEntry->value);
 			}
 
 			fprintf(stream, "\n");
@@ -343,7 +345,7 @@ bool configWrite(Config* config, const char* filePath, bool isDb) {
 
 		fclose(stream);
 	}
-
+#endif
 	return true;
 }
 
@@ -361,8 +363,8 @@ bool configWrite(Config* config, const char* filePath, bool isDb) {
 // added to the config, or `false` otherwise.
 //
 // 0x42C4BC
-static bool configParseLine(Config* config, char* string) {
-	char* pch;
+static bool configParseLine(Config *config, char *string) {
+	char *pch;
 
 	// Find comment marker and truncate the string.
 	pch = strchr(string, ';');
@@ -382,19 +384,19 @@ static bool configParseLine(Config* config, char* string) {
 	// keys there.
 
 	// Skip leading whitespace.
-	while (isspace(*string)) {
+	while (Common::isSpace(*string)) {
 		string++;
 	}
 
 	// Check if it's a section key.
 	if (*string == '[') {
-		char* sectionKey = string + 1;
+		char *sectionKey = string + 1;
 
 		// Find closing bracket.
 		pch = strchr(sectionKey, ']');
 		if (pch != NULL) {
 			*pch = '\0';
-			strcpy(gConfigLastSectionKey, sectionKey);
+			strncpy(gConfigLastSectionKey, sectionKey, sizeof(gConfigLastSectionKey) - 1);
 			return configTrimString(gConfigLastSectionKey);
 		}
 	}
@@ -414,21 +416,21 @@ static bool configParseLine(Config* config, char* string) {
 // Both key and value are trimmed.
 //
 // 0x42C594
-static bool configParseKeyValue(char* string, char* key, char* value) {
+static bool configParseKeyValue(char *string, char *key, char *value) {
 	if (string == NULL || key == NULL || value == NULL) {
 		return false;
 	}
 
 	// Find equals character.
-	char* pch = strchr(string, '=');
+	char *pch = strchr(string, '=');
 	if (pch == NULL) {
 		return false;
 	}
 
 	*pch = '\0';
 
-	strcpy(key, string);
-	strcpy(value, pch + 1);
+	strncpy(key, string, sizeof(key) - 1);
+	strncpy(value, pch + 1, sizeof(key) - 1);
 
 	*pch = '=';
 
@@ -444,7 +446,7 @@ static bool configParseKeyValue(char* string, char* key, char* value) {
 // otherwise.
 //
 // 0x42C638
-static bool configEnsureSectionExists(Config* config, const char* sectionKey) {
+static bool configEnsureSectionExists(Config *config, const char *sectionKey) {
 	if (config == NULL || sectionKey == NULL) {
 		return false;
 	}
@@ -455,7 +457,7 @@ static bool configEnsureSectionExists(Config* config, const char* sectionKey) {
 	}
 
 	ConfigSection section;
-	if (dictionaryInit(&section, CONFIG_INITIAL_CAPACITY, sizeof(char**), NULL) == -1) {
+	if (dictionaryInit(&section, CONFIG_INITIAL_CAPACITY, sizeof(char **), NULL) == -1) {
 		return false;
 	}
 
@@ -469,7 +471,7 @@ static bool configEnsureSectionExists(Config* config, const char* sectionKey) {
 // Removes leading and trailing whitespace from the specified string.
 //
 // 0x42C698
-static bool configTrimString(char* string) {
+static bool configTrimString(char *string) {
 	if (string == NULL) {
 		return false;
 	}
@@ -481,8 +483,8 @@ static bool configTrimString(char* string) {
 
 	// Starting from the end of the string, loop while it's a whitespace and
 	// decrement string length.
-	char* pch = string + length - 1;
-	while (length != 0 && isspace(*pch)) {
+	char *pch = string + length - 1;
+	while (length != 0 && Common::isSpace(*pch)) {
 		length--;
 		pch--;
 	}
@@ -493,7 +495,7 @@ static bool configTrimString(char* string) {
 	// Starting from the beginning of the string loop while it's a whitespace
 	// and decrement string length.
 	pch = string;
-	while (isspace(*pch)) {
+	while (Common::isSpace(*pch)) {
 		pch++;
 		length--;
 	}
@@ -505,12 +507,12 @@ static bool configTrimString(char* string) {
 }
 
 // 0x42C718
-bool configGetDouble(Config* config, const char* sectionKey, const char* key, double* valuePtr) {
+bool configGetDouble(Config *config, const char *sectionKey, const char *key, double *valuePtr) {
 	if (valuePtr == NULL) {
 		return false;
 	}
 
-	char* stringValue;
+	char *stringValue;
 	if (!configGetString(config, sectionKey, key, &stringValue)) {
 		return false;
 	}
@@ -521,7 +523,7 @@ bool configGetDouble(Config* config, const char* sectionKey, const char* key, do
 }
 
 // 0x42C74C
-bool configSetDouble(Config* config, const char* sectionKey, const char* key, double value) {
+bool configSetDouble(Config *config, const char *sectionKey, const char *key, double value) {
 	char stringValue[32];
 	snprintf(stringValue, sizeof(stringValue), "%.6f", value);
 
@@ -529,7 +531,7 @@ bool configSetDouble(Config* config, const char* sectionKey, const char* key, do
 }
 
 // NOTE: Boolean-typed variant of [configGetInt].
-bool configGetBool(Config* config, const char* sectionKey, const char* key, bool* valuePtr) {
+bool configGetBool(Config *config, const char *sectionKey, const char *key, bool *valuePtr) {
 	if (valuePtr == NULL) {
 		return false;
 	}
@@ -545,8 +547,8 @@ bool configGetBool(Config* config, const char* sectionKey, const char* key, bool
 }
 
 // NOTE: Boolean-typed variant of [configGetInt].
-bool configSetBool(Config* config, const char* sectionKey, const char* key, bool value) {
+bool configSetBool(Config *config, const char *sectionKey, const char *key, bool value) {
 	return configSetInt(config, sectionKey, key, value ? 1 : 0);
 }
 
-} // namespace fallout
+} // namespace Fallout2
