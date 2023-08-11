@@ -1,12 +1,12 @@
-#include "game_config.h"
+#include "fallout2/game_config.h"
 
-#include <stdio.h>
-#include <string.h>
+/*#include <stdio.h>
+#include <string.h>*/
 
-#include "main.h"
-#include "platform_compat.h"
+// #include "main.h"
+#include "fallout2/platform_compat.h"
 
-namespace fallout {
+namespace Fallout2 {
 
 // A flag indicating if [gGameConfig] was initialized.
 //
@@ -42,7 +42,7 @@ char gGameConfigFilePath[COMPAT_MAX_PATH];
 // [configParseCommandLineArguments] for expected format.
 //
 // 0x444570
-bool gameConfigInit(bool isMapper, int argc, char** argv) {
+bool gameConfigInit(bool isMapper, int argc, char **argv) {
 	if (gGameConfigInitialized) {
 		return false;
 	}
@@ -50,10 +50,12 @@ bool gameConfigInit(bool isMapper, int argc, char** argv) {
 	if (!configInit(&gGameConfig)) {
 		return false;
 	}
-
+	warning("initialized!");
 	// Initialize defaults.
 	configSetString(&gGameConfig, GAME_CONFIG_SYSTEM_KEY, GAME_CONFIG_EXECUTABLE_KEY, "game");
+	warning("set game!");
 	configSetString(&gGameConfig, GAME_CONFIG_SYSTEM_KEY, GAME_CONFIG_MASTER_DAT_KEY, "master.dat");
+	warning("set master!");
 	configSetString(&gGameConfig, GAME_CONFIG_SYSTEM_KEY, GAME_CONFIG_MASTER_PATCHES_KEY, "data");
 	configSetString(&gGameConfig, GAME_CONFIG_SYSTEM_KEY, GAME_CONFIG_CRITTER_DAT_KEY, "critter.dat");
 	configSetString(&gGameConfig, GAME_CONFIG_SYSTEM_KEY, GAME_CONFIG_CRITTER_PATCHES_KEY, "data");
@@ -120,14 +122,14 @@ bool gameConfigInit(bool isMapper, int argc, char** argv) {
 	}
 
 	// Make `fallout2.cfg` file path.
-	char* executable = argv[0];
-	char* ch = strrchr(executable, '\\');
+	char *executable ="fallout2.exe"/* argv[0]*/;
+	char *ch = strrchr(executable, '\\');
 	if (ch != NULL) {
 		*ch = '\0';
 		snprintf(gGameConfigFilePath, sizeof(gGameConfigFilePath), "%s\\%s", executable, GAME_CONFIG_FILE_NAME);
 		*ch = '\\';
 	} else {
-		strcpy(gGameConfigFilePath, GAME_CONFIG_FILE_NAME);
+		strncpy(gGameConfigFilePath, GAME_CONFIG_FILE_NAME, sizeof(gGameConfigFilePath) - 1);
 	}
 
 	// Read contents of `fallout2.cfg` into config. The values from the file
@@ -181,4 +183,4 @@ bool gameConfigExit(bool shouldSave) {
 	return result;
 }
 
-} // namespace fallout
+} // namespace Fallout2

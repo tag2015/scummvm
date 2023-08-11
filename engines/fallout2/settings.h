@@ -1,19 +1,19 @@
-#ifndef FALLOUT_SETTINGS_H_
-#define FALLOUT_SETTINGS_H_
+#ifndef FALLOUT2_SETTINGS_H
+#define FALLOUT2_SETTINGS_H
 
-#include <string>
+// #include <string>
 
-#include "game_config.h"
+#include "fallout2/game_config.h"
 
-namespace fallout {
+namespace Fallout2 {
 
 struct SystemSettings {
-	std::string executable = "game";
-	std::string master_dat_path = "master.dat";
-	std::string master_patches_path = "data";
-	std::string critter_dat_path = "critter.dat";
-	std::string critter_patches_path = "data";
-	std::string language = ENGLISH;
+	Common::String executable = "game";
+	Common::String master_dat_path = "master.dat";
+	Common::String master_patches_path = "data";
+	Common::String critter_dat_path = "critter.dat";
+	Common::String critter_patches_path = "data";
+	Common::String language = ENGLISH;
 	int scroll_lock = 0;
 	bool interrupt_walk = true;
 	int art_cache_size = 8;
@@ -62,12 +62,12 @@ struct SoundSettings {
 	int sndfx_volume = 22281;
 	int speech_volume = 22281;
 	int cache_size = 448;
-	std::string music_path1 = "sound\\music\\";
-	std::string music_path2 = "sound\\music\\";
+	Common::String music_path1 = "sound\\music\\";
+	Common::String music_path2 = "sound\\music\\";
 };
 
 struct DebugSettings {
-	std::string mode = "environment";
+	Common::String mode = "environment";
 	bool show_tile_num = false;
 	bool show_script_messages = false;
 	bool show_load_info = false;
@@ -99,10 +99,10 @@ struct Settings {
 
 extern Settings settings;
 
-bool settingsInit(bool isMapper, int argc, char** argv);
+bool settingsInit(bool isMapper, int argc, char **argv);
 bool settingsSave();
 bool settingsExit(bool shouldSave);
 
-} // namespace fallout
+} // namespace Fallout2
 
-#endif /* FALLOUT_SETTINGS_H_ */
+#endif

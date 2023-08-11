@@ -1,21 +1,22 @@
-#include "settings.h"
+#include "fallout2/settings.h"
 
-namespace fallout {
+namespace Fallout2 {
 
 static void settingsFromConfig();
 static void settingsToConfig();
-static void settingsRead(const char* section, const char* key, std::string& value);
-static void settingsRead(const char* section, const char* key, int& value);
-static void settingsRead(const char* section, const char* key, bool& value);
-static void settingsRead(const char* section, const char* key, double& value);
-static void settingsWrite(const char* section, const char* key, std::string& value);
-static void settingsWrite(const char* section, const char* key, int& value);
-static void settingsWrite(const char* section, const char* key, bool& value);
-static void settingsWrite(const char* section, const char* key, double& value);
+static void settingsRead(const char *section, const char *key, Common::String &value);
+static void settingsRead(const char *section, const char *key, int &value);
+static void settingsRead(const char *section, const char *key, bool &value);
+static void settingsRead(const char *section, const char *key, double &value);
+static void settingsWrite(const char *section, const char *key, Common::String &value);
+static void settingsWrite(const char *section, const char *key, int &value);
+static void settingsWrite(const char *section, const char *key, bool &value);
+static void settingsWrite(const char *section, const char *key, double &value);
 
 Settings settings;
 
-bool settingsInit(bool isMapper, int argc, char** argv) {
+bool settingsInit(bool isMapper, int argc, char **argv) {
+	warning("initializing settings, gGameConfigInitialized: %d", gGameConfigInitialized);
 	if (!gameConfigInit(isMapper, argc, argv)) {
 		return false;
 	}
@@ -184,48 +185,48 @@ static void settingsToConfig() {
 	settingsWrite(GAME_CONFIG_MAPPER_KEY, GAME_CONFIG_SORT_SCRIPT_LIST_KEY, settings.mapper.sort_script_list);
 }
 
-static void settingsRead(const char* section, const char* key, std::string& value) {
-	char* v;
+static void settingsRead(const char *section, const char *key, Common::String &value) {
+	char *v;
 	if (configGetString(&gGameConfig, section, key, &v)) {
 		value = v;
 	}
 }
 
-static void settingsRead(const char* section, const char* key, int& value) {
+static void settingsRead(const char *section, const char *key, int &value) {
 	int v;
 	if (configGetInt(&gGameConfig, section, key, &v)) {
 		value = v;
 	}
 }
 
-static void settingsRead(const char* section, const char* key, bool& value) {
+static void settingsRead(const char *section, const char *key, bool &value) {
 	bool v;
 	if (configGetBool(&gGameConfig, section, key, &v)) {
 		value = v;
 	}
 }
 
-static void settingsRead(const char* section, const char* key, double& value) {
+static void settingsRead(const char *section, const char *key, double &value) {
 	double v;
 	if (configGetDouble(&gGameConfig, section, key, &v)) {
 		value = v;
 	}
 }
 
-static void settingsWrite(const char* section, const char* key, std::string& value) {
+static void settingsWrite(const char *section, const char *key, Common::String &value) {
 	configSetString(&gGameConfig, section, key, value.c_str());
 }
 
-static void settingsWrite(const char* section, const char* key, int& value) {
+static void settingsWrite(const char *section, const char *key, int &value) {
 	configSetInt(&gGameConfig, section, key, value);
 }
 
-static void settingsWrite(const char* section, const char* key, bool& value) {
+static void settingsWrite(const char *section, const char *key, bool &value) {
 	configSetBool(&gGameConfig, section, key, value);
 }
 
-static void settingsWrite(const char* section, const char* key, double& value) {
+static void settingsWrite(const char *section, const char *key, double &value) {
 	configSetDouble(&gGameConfig, section, key, value);
 }
 
-} // namespace fallout
+} // namespace Fallout2
