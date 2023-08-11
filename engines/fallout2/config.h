@@ -1,9 +1,9 @@
-#ifndef CONFIG_H
-#define CONFIG_H
+#ifndef FALLOUT2_CONFIG_H
+#define FALLOUT2_CONFIG_H
 
-#include "dictionary.h"
+#include "fallout2/dictionary.h"
 
-namespace fallout {
+namespace Fallout2 {
 
 // A representation of .INI file.
 //
@@ -17,22 +17,22 @@ typedef Dictionary Config;
 // key-pair values, and it's values are pointers to strings (char**).
 typedef Dictionary ConfigSection;
 
-bool configInit(Config* config);
-void configFree(Config* config);
-bool configParseCommandLineArguments(Config* config, int argc, char** argv);
-bool configGetString(Config* config, const char* sectionKey, const char* key, char** valuePtr);
-bool configSetString(Config* config, const char* sectionKey, const char* key, const char* value);
-bool configGetInt(Config* config, const char* sectionKey, const char* key, int* valuePtr, unsigned char base = 0);
-bool configGetIntList(Config* config, const char* section, const char* key, int* arr, int count);
-bool configSetInt(Config* config, const char* sectionKey, const char* key, int value);
-bool configRead(Config* config, const char* filePath, bool isDb);
-bool configWrite(Config* config, const char* filePath, bool isDb);
-bool configGetDouble(Config* config, const char* sectionKey, const char* key, double* valuePtr);
-bool configSetDouble(Config* config, const char* sectionKey, const char* key, double value);
+bool configInit(Config *config);
+void configFree(Config *config);
+bool configParseCommandLineArguments(Config *config, int argc, char **argv);
+bool configGetString(Config *config, const char *sectionKey, const char *key, char **valuePtr);
+bool configSetString(Config *config, const char *sectionKey, const char *key, const char *value);
+bool configGetInt(Config *config, const char *sectionKey, const char *key, int *valuePtr, unsigned char base = 0);
+bool configGetIntList(Config *config, const char *section, const char *key, int *arr, int count);
+bool configSetInt(Config *config, const char *sectionKey, const char *key, int value);
+bool configRead(Config *config, const char *filePath, bool isDb);
+bool configWrite(Config *config, const char *filePath, bool isDb);
+bool configGetDouble(Config *config, const char *sectionKey, const char *key, double *valuePtr);
+bool configSetDouble(Config *config, const char *sectionKey, const char *key, double value);
 
-bool configGetBool(Config* config, const char* sectionKey, const char* key, bool* valuePtr);
-bool configSetBool(Config* config, const char* sectionKey, const char* key, bool value);
+bool configGetBool(Config *config, const char *sectionKey, const char *key, bool *valuePtr);
+bool configSetBool(Config *config, const char *sectionKey, const char *key, bool value);
 
-} // namespace fallout
+} // namespace Fallout2
 
-#endif /* CONFIG_H */
+#endif
