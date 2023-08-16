@@ -1,45 +1,45 @@
-#include "datafile.h"
+#include "fallout2/datafile.h"
 
-#include <string.h>
+// #include <string.h>
 
-#include "color.h"
-#include "db.h"
-#include "memory_manager.h"
-#include "pcx.h"
-#include "platform_compat.h"
+#include "fallout2/color.h"
+#include "fallout2/db.h"
+#include "fallout2/memory_manager.h"
+#include "fallout2/pcx.h"
+#include "fallout2/platform_compat.h"
 
-namespace fallout {
+namespace Fallout2 {
 
 // 0x5184AC
-DatafileLoader* gDatafileLoader = NULL;
+DatafileLoader *gDatafileLoader = NULL;
 
 // 0x5184B0
-DatafileNameMangler* gDatafileNameMangler = datafileDefaultNameManglerImpl;
+DatafileNameMangler *gDatafileNameMangler = datafileDefaultNameManglerImpl;
 
 // 0x56D7E0
 unsigned char gDatafilePalette[768];
 
 // 0x42EE70
-char* datafileDefaultNameManglerImpl(char* path) {
+char *datafileDefaultNameManglerImpl(char *path) {
 	return path;
 }
 
 // NOTE: Unused.
 //
 // 0x42EE74
-void datafileSetNameMangler(DatafileNameMangler* mangler) {
+void datafileSetNameMangler(DatafileNameMangler *mangler) {
 	gDatafileNameMangler = mangler;
 }
 
 // NOTE: Unused.
 //
 // 0x42EE7C
-void datafileSetLoader(DatafileLoader* loader) {
+void datafileSetLoader(DatafileLoader *loader) {
 	gDatafileLoader = loader;
 }
 
 // 0x42EE84
-void sub_42EE84(unsigned char* data, unsigned char* palette, int width, int height) {
+void sub_42EE84(unsigned char *data, unsigned char *palette, int width, int height) {
 	unsigned char indexedPalette[256];
 
 	indexedPalette[0] = 0;
@@ -61,7 +61,7 @@ void sub_42EE84(unsigned char* data, unsigned char* palette, int width, int heig
 // NOTE: Unused.
 //
 // 0x42EEF8
-void sub_42EEF8(unsigned char* data, unsigned char* palette, int width, int height) {
+void sub_42EEF8(unsigned char *data, unsigned char *palette, int width, int height) {
 	unsigned char indexedPalette[256];
 
 	indexedPalette[0] = 0;
@@ -81,9 +81,9 @@ void sub_42EEF8(unsigned char* data, unsigned char* palette, int width, int heig
 }
 
 // 0x42EF60
-unsigned char* datafileReadRaw(char* path, int* widthPtr, int* heightPtr) {
-	char* mangledPath = gDatafileNameMangler(path);
-	char* dot = strrchr(mangledPath, '.');
+unsigned char *datafileReadRaw(char *path, int *widthPtr, int *heightPtr) {
+	char *mangledPath = gDatafileNameMangler(path);
+	char *dot = strrchr(mangledPath, '.');
 	if (dot != NULL) {
 		if (compat_stricmp(dot + 1, "pcx") == 0) {
 			return pcxRead(mangledPath, widthPtr, heightPtr, gDatafilePalette);
@@ -98,8 +98,8 @@ unsigned char* datafileReadRaw(char* path, int* widthPtr, int* heightPtr) {
 }
 
 // 0x42EFCC
-unsigned char* datafileRead(char* path, int* widthPtr, int* heightPtr) {
-	unsigned char* v1 = datafileReadRaw(path, widthPtr, heightPtr);
+unsigned char *datafileRead(char *path, int *widthPtr, int *heightPtr) {
+	unsigned char *v1 = datafileReadRaw(path, widthPtr, heightPtr);
 	if (v1 != NULL) {
 		sub_42EE84(v1, gDatafilePalette, *widthPtr, *heightPtr);
 	}
@@ -109,10 +109,10 @@ unsigned char* datafileRead(char* path, int* widthPtr, int* heightPtr) {
 // NOTE: Unused
 //
 // 0x42EFF4
-unsigned char* sub_42EFF4(char* path) {
+unsigned char *sub_42EFF4(char *path) {
 	int width;
 	int height;
-	unsigned char* v3 = datafileReadRaw(path, &width, &height);
+	unsigned char *v3 = datafileReadRaw(path, &width, &height);
 	if (v3 != NULL) {
 		internal_free_safe(v3, __FILE__, __LINE__); // "..\\int\\DATAFILE.C", 148
 		return gDatafilePalette;
@@ -124,22 +124,22 @@ unsigned char* sub_42EFF4(char* path) {
 // NOTE: Unused.
 //
 // 0x42F024
-void sub_42F024(unsigned char* data, int* widthPtr, int* heightPtr) {
+void sub_42F024(unsigned char *data, int *widthPtr, int *heightPtr) {
 	int width = *widthPtr;
 	int height = *heightPtr;
-	unsigned char* temp = (unsigned char*)internal_malloc_safe(width * height, __FILE__, __LINE__); // "..\\int\\DATAFILE.C", 157
+	unsigned char *temp = (unsigned char *)internal_malloc_safe(width * height, __FILE__, __LINE__); // "..\\int\\DATAFILE.C", 157
 
 	// NOTE: Original code does not initialize `x`.
 	int y = 0;
 	int x = 0;
-	unsigned char* src1 = data;
+	unsigned char *src1 = data;
 
 	for (y = 0; y < height; y++) {
 		if (*src1 == 0) {
 			break;
 		}
 
-		unsigned char* src2 = src1;
+		unsigned char *src2 = src1;
 		for (x = 0; x < width; x++) {
 			if (*src2 == 0) {
 				break;
@@ -156,22 +156,22 @@ void sub_42F024(unsigned char* data, int* widthPtr, int* heightPtr) {
 }
 
 // 0x42F0E4
-unsigned char* datafileGetPalette() {
+unsigned char *datafileGetPalette() {
 	return gDatafilePalette;
 }
 
 // NOTE: Unused.
 //
 // 0x42F0EC
-unsigned char* datafileLoad(char* path, int* sizePtr) {
-	const char* mangledPath = gDatafileNameMangler(path);
-	File* stream = fileOpen(mangledPath, "rb");
+unsigned char *datafileLoad(char *path, int *sizePtr) {
+	const char *mangledPath = gDatafileNameMangler(path);
+	File *stream = fileOpen(mangledPath, "rb");
 	if (stream == NULL) {
 		return NULL;
 	}
 
 	int size = fileGetSize(stream);
-	unsigned char* data = (unsigned char*)internal_malloc_safe(size, __FILE__, __LINE__); // "..\\int\\DATAFILE.C", 185
+	unsigned char *data = (unsigned char *)internal_malloc_safe(size, __FILE__, __LINE__); // "..\\int\\DATAFILE.C", 185
 	if (data == NULL) {
 		// NOTE: This code is unreachable, internal_malloc_safe never fails.
 		// Otherwise it leaks stream.
@@ -185,4 +185,4 @@ unsigned char* datafileLoad(char* path, int* sizePtr) {
 	return data;
 }
 
-} // namespace fallout
+} // namespace Fallout2
