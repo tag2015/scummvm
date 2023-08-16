@@ -1,9 +1,9 @@
-#ifndef MESSAGE_H
-#define MESSAGE_H
+#ifndef FALLOUT2_MESSAGE_H
+#define FALLOUT2_MESSAGE_H
 
-#include <stddef.h>
+// #include <stddef.h>
 
-namespace fallout {
+namespace Fallout2 {
 
 #define MESSAGE_LIST_ITEM_TEXT_FILTERED 0x01
 
@@ -63,35 +63,35 @@ enum {
 typedef struct MessageListItem {
 	int num;
 	int flags;
-	char* audio;
-	char* text;
+	char *audio;
+	char *text;
 } MessageListItem;
 
 typedef struct MessageList {
 	int entries_num;
-	MessageListItem* entries;
+	MessageListItem *entries;
 } MessageList;
 
 int badwordsInit();
 void badwordsExit();
-bool messageListInit(MessageList* msg);
-bool messageListFree(MessageList* msg);
-bool messageListLoad(MessageList* msg, const char* path);
-bool messageListGetItem(MessageList* msg, MessageListItem* entry);
-bool _message_make_path(char* dest, size_t size, const char* path);
-char* getmsg(MessageList* msg, MessageListItem* entry, int num);
-bool messageListFilterBadwords(MessageList* messageList);
+bool messageListInit(MessageList *msg);
+bool messageListFree(MessageList *msg);
+bool messageListLoad(MessageList *msg, const char *path);
+bool messageListGetItem(MessageList *msg, MessageListItem *entry);
+bool _message_make_path(char *dest, size_t size, const char *path);
+char *getmsg(MessageList *msg, MessageListItem *entry, int num);
+bool messageListFilterBadwords(MessageList *messageList);
 
-void messageListFilterGenderWords(MessageList* messageList, int gender);
+void messageListFilterGenderWords(MessageList *messageList, int gender);
 
 bool messageListRepositoryInit();
 void messageListRepositoryReset();
 void messageListRepositoryExit();
-void messageListRepositorySetStandardMessageList(int messageListId, MessageList* messageList);
-void messageListRepositorySetProtoMessageList(int messageListId, MessageList* messageList);
-int messageListRepositoryAddExtra(int messageListId, const char* path);
-char* messageListRepositoryGetMsg(int messageListId, int messageId);
+void messageListRepositorySetStandardMessageList(int messageListId, MessageList *messageList);
+void messageListRepositorySetProtoMessageList(int messageListId, MessageList *messageList);
+int messageListRepositoryAddExtra(int messageListId, const char *path);
+char *messageListRepositoryGetMsg(int messageListId, int messageId);
 
-} // namespace fallout
+} // namespace Fallout2
 
-#endif /* MESSAGE_H */
+#endif
