@@ -1,9 +1,9 @@
-#ifndef SFALL_CONFIG_H
-#define SFALL_CONFIG_H
+#ifndef FALLOUT2_SFALL_CONFIG_H
+#define FALLOUT2_SFALL_CONFIG_H
 
-#include "config.h"
+#include "fallout2/config.h"
 
-namespace fallout {
+namespace Fallout2 {
 
 #define SFALL_CONFIG_FILE_NAME "ddraw.ini"
 
@@ -77,9 +77,9 @@ namespace fallout {
 extern bool gSfallConfigInitialized;
 extern Config gSfallConfig;
 
-bool sfallConfigInit(int argc, char** argv);
+bool sfallConfigInit(int argc, char **argv);
 void sfallConfigExit();
 
-} // namespace fallout
+} // namespace Fallout2
 
-#endif /* SFALL_CONFIG_H */
+#endif
