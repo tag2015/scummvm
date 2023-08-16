@@ -3,6 +3,8 @@
 
 // #include <stddef.h>
 
+#include "common/scummsys.h"
+
 namespace Fallout2 {
 
 #define MESSAGE_LIST_ITEM_TEXT_FILTERED 0x01

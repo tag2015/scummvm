@@ -1,22 +1,29 @@
-#include "message.h"
+#include "fallout2/message.h"
 
-#include <ctype.h>
+/*#include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 #include <array>
 #include <unordered_map>
+*/
 
-#include "debug.h"
-#include "memory.h"
-#include "platform_compat.h"
-#include "proto_types.h"
-#include "random.h"
-#include "settings.h"
-#include "sfall_config.h"
+#include "fallout2/db.h"
+#include "fallout2/debug.h"
+#include "fallout2/memory.h"
+#include "fallout2/platform_compat.h"
+#include "fallout2/proto_types.h"
+#include "fallout2/random.h"
+#include "fallout2/settings.h"
+#include "fallout2/sfall_config.h"
 
-namespace fallout {
+#include "fallout2/lib/std/map.h"
+
+#include "common/array.h"
+#include "common/util.h"
+
+namespace Fallout2 {
 
 #define BADWORD_LENGTH_MAX 80
 
@@ -33,50 +40,50 @@ static constexpr int kFirstTemporaryMessageListId = 0x3000;
 static constexpr int kLastTemporaryMessageListId = 0x3FFF;
 
 struct MessageListRepositoryState {
-	std::array<MessageList*, STANDARD_MESSAGE_LIST_COUNT> standardMessageLists;
-	std::array<MessageList*, PROTO_MESSAGE_LIST_COUNT> protoMessageLists;
-	std::unordered_map<int, MessageList*> persistentMessageLists;
-	std::unordered_map<int, MessageList*> temporaryMessageLists;
+	Common::Array<MessageList *> standardMessageLists; // size: STANDARD_MESSAGE_LIST_COUNT
+	Common::Array<MessageList *> protoMessageLists;    // size: PROTO_MESSAGE_LIST_COUNT
+	std::unordered_map<int, MessageList *> persistentMessageLists;
+	std::unordered_map<int, MessageList *> temporaryMessageLists;
 	int nextTemporaryMessageListId = kFirstTemporaryMessageListId;
 };
 
-static bool _message_find(MessageList* msg, int num, int* out_index);
-static bool _message_add(MessageList* msg, MessageListItem* new_entry);
-static bool _message_parse_number(int* out_num, const char* str);
-static int _message_load_field(File* file, char* str);
+static bool _message_find(MessageList *msg, int num, int *out_index);
+static bool _message_add(MessageList *msg, MessageListItem *new_entry);
+static bool _message_parse_number(int *out_num, const char *str);
+static int _message_load_field(File *file, char *str);
 
-static MessageList* messageListRepositoryLoad(const char* path);
+static MessageList *messageListRepositoryLoad(const char *path);
 
 // 0x50B79C
 static char _Error_1[] = "Error";
 
 // 0x50B960
-static const char* gBadwordsReplacements = "!@#$%&*@#*!&$%#&%#*%!$&%@*$@&";
+static const char *gBadwordsReplacements = "!@#$%&*@#*!&$%#&%#*%!$&%@*$@&";
 
 // 0x519598
-static char** gBadwords = NULL;
+static char **gBadwords = NULL;
 
 // 0x51959C
 static int gBadwordsCount = 0;
 
 // 0x5195A0
-static int* gBadwordsLengths = NULL;
+static int *gBadwordsLengths = NULL;
 
 // Default text for getmsg when no entry is found.
 //
 // 0x5195A4
-static char* _message_error_str = _Error_1;
+static char *_message_error_str = _Error_1;
 
 // Temporary message list item text used during filtering badwords.
 //
 // 0x63207C
 static char _bad_copy[MESSAGE_LIST_ITEM_FIELD_MAX_SIZE];
 
-static MessageListRepositoryState* _messageListRepositoryState;
+static MessageListRepositoryState *_messageListRepositoryState;
 
 // 0x484770
 int badwordsInit() {
-	File* stream = fileOpen("data\\badwords.txt", "rt");
+	File *stream = fileOpen("data\\badwords.txt", "rt");
 	if (stream == NULL) {
 		return -1;
 	}
@@ -88,13 +95,13 @@ int badwordsInit() {
 		gBadwordsCount++;
 	}
 
-	gBadwords = (char**)internal_malloc(sizeof(*gBadwords) * gBadwordsCount);
+	gBadwords = (char **)internal_malloc(sizeof(*gBadwords) * gBadwordsCount);
 	if (gBadwords == NULL) {
 		fileClose(stream);
 		return -1;
 	}
 
-	gBadwordsLengths = (int*)internal_malloc(sizeof(*gBadwordsLengths) * gBadwordsCount);
+	gBadwordsLengths = (int *)internal_malloc(sizeof(*gBadwordsLengths) * gBadwordsCount);
 	if (gBadwordsLengths == NULL) {
 		internal_free(gBadwords);
 		fileClose(stream);
@@ -157,7 +164,7 @@ void badwordsExit() {
 
 // message_init
 // 0x48494C
-bool messageListInit(MessageList* messageList) {
+bool messageListInit(MessageList *messageList) {
 	if (messageList != NULL) {
 		messageList->entries_num = 0;
 		messageList->entries = NULL;
@@ -166,9 +173,9 @@ bool messageListInit(MessageList* messageList) {
 }
 
 // 0x484964
-bool messageListFree(MessageList* messageList) {
+bool messageListFree(MessageList *messageList) {
 	int i;
-	MessageListItem* entry;
+	MessageListItem *entry;
 
 	if (messageList == NULL) {
 		return false;
@@ -198,9 +205,9 @@ bool messageListFree(MessageList* messageList) {
 
 // message_load
 // 0x484AA4
-bool messageListLoad(MessageList* messageList, const char* path) {
+bool messageListLoad(MessageList *messageList, const char *path) {
 	char localized_path[COMPAT_MAX_PATH];
-	File* file_ptr;
+	File *file_ptr;
 	char num[MESSAGE_LIST_ITEM_FIELD_MAX_SIZE];
 	char audio[MESSAGE_LIST_ITEM_FIELD_MAX_SIZE];
 	char text[MESSAGE_LIST_ITEM_FIELD_MAX_SIZE];
@@ -281,9 +288,9 @@ err:
 }
 
 // 0x484C30
-bool messageListGetItem(MessageList* msg, MessageListItem* entry) {
+bool messageListGetItem(MessageList *msg, MessageListItem *entry) {
 	int index;
-	MessageListItem* ptr;
+	MessageListItem *ptr;
 
 	if (msg == NULL) {
 		return false;
@@ -312,7 +319,7 @@ bool messageListGetItem(MessageList* msg, MessageListItem* entry) {
 // Builds language-aware path in "text" subfolder.
 //
 // 0x484CB8
-bool _message_make_path(char* dest, size_t size, const char* path) {
+bool _message_make_path(char *dest, size_t size, const char *path) {
 	if (dest == NULL) {
 		return false;
 	}
@@ -327,7 +334,7 @@ bool _message_make_path(char* dest, size_t size, const char* path) {
 }
 
 // 0x484D10
-static bool _message_find(MessageList* msg, int num, int* out_index) {
+static bool _message_find(MessageList *msg, int num, int *out_index) {
 	int r, l, mid;
 	int cmp;
 
@@ -364,10 +371,10 @@ static bool _message_find(MessageList* msg, int num, int* out_index) {
 }
 
 // 0x484D68
-static bool _message_add(MessageList* msg, MessageListItem* new_entry) {
+static bool _message_add(MessageList *msg, MessageListItem *new_entry) {
 	int index;
-	MessageListItem* entries;
-	MessageListItem* existing_entry;
+	MessageListItem *entries;
+	MessageListItem *existing_entry;
 
 	if (_message_find(msg, new_entry->num, &index)) {
 		existing_entry = &(msg->entries[index]);
@@ -381,7 +388,7 @@ static bool _message_add(MessageList* msg, MessageListItem* new_entry) {
 		}
 	} else {
 		if (msg->entries != NULL) {
-			entries = (MessageListItem*)internal_realloc(msg->entries, sizeof(MessageListItem) * (msg->entries_num + 1));
+			entries = (MessageListItem *)internal_realloc(msg->entries, sizeof(MessageListItem) * (msg->entries_num + 1));
 			if (entries == NULL) {
 				return false;
 			}
@@ -393,7 +400,7 @@ static bool _message_add(MessageList* msg, MessageListItem* new_entry) {
 				memmove(&(msg->entries[index + 1]), &(msg->entries[index]), sizeof(MessageListItem) * (msg->entries_num - index));
 			}
 		} else {
-			msg->entries = (MessageListItem*)internal_malloc(sizeof(MessageListItem));
+			msg->entries = (MessageListItem *)internal_malloc(sizeof(MessageListItem));
 			if (msg->entries == NULL) {
 				return false;
 			}
@@ -424,8 +431,8 @@ static bool _message_add(MessageList* msg, MessageListItem* new_entry) {
 }
 
 // 0x484F60
-static bool _message_parse_number(int* out_num, const char* str) {
-	const char* ch;
+static bool _message_parse_number(int *out_num, const char *str) {
+	const char *ch;
 	bool success;
 
 	ch = str;
@@ -439,7 +446,7 @@ static bool _message_parse_number(int* out_num, const char* str) {
 	}
 
 	while (*ch != '\0') {
-		if (!isdigit(*ch)) {
+		if (!Common::isDigit(*ch)) {
 			success = false;
 			break;
 		}
@@ -461,7 +468,7 @@ static bool _message_parse_number(int* out_num, const char* str) {
 // 4 - limit exceeded (> `MESSAGE_LIST_ITEM_FIELD_MAX_SIZE`)
 //
 // 0x484FB4
-static int _message_load_field(File* file, char* str) {
+static int _message_load_field(File *file, char *str) {
 	int ch;
 	int len;
 
@@ -511,7 +518,7 @@ static int _message_load_field(File* file, char* str) {
 }
 
 // 0x48504C
-char* getmsg(MessageList* msg, MessageListItem* entry, int num) {
+char *getmsg(MessageList *msg, MessageListItem *entry, int num) {
 	entry->num = num;
 
 	if (!messageListGetItem(msg, entry)) {
@@ -523,7 +530,7 @@ char* getmsg(MessageList* msg, MessageListItem* entry, int num) {
 }
 
 // 0x485078
-bool messageListFilterBadwords(MessageList* messageList) {
+bool messageListFilterBadwords(MessageList *messageList) {
 	if (messageList == NULL) {
 		return false;
 	}
@@ -544,23 +551,23 @@ bool messageListFilterBadwords(MessageList* messageList) {
 	int replacementsIndex = randomBetween(1, replacementsCount) - 1;
 
 	for (int index = 0; index < messageList->entries_num; index++) {
-		MessageListItem* item = &(messageList->entries[index]);
-		strcpy(_bad_copy, item->text);
+		MessageListItem *item = &(messageList->entries[index]);
+		strncpy(_bad_copy, item->text, sizeof(_bad_copy) - 1);
 		compat_strupr(_bad_copy);
 
 		for (int badwordIndex = 0; badwordIndex < gBadwordsCount; badwordIndex++) {
 			// I don't quite understand the loop below. It has no stop
 			// condition besides no matching substring. It also overwrites
 			// already masked words on every iteration.
-			for (char* p = _bad_copy;; p++) {
-				const char* substr = strstr(p, gBadwords[badwordIndex]);
+			for (char *p = _bad_copy;; p++) {
+				const char *substr = strstr(p, gBadwords[badwordIndex]);
 				if (substr == NULL) {
 					break;
 				}
 
-				if (substr == _bad_copy || (!isalpha(substr[-1]) && !isalpha(substr[gBadwordsLengths[badwordIndex]]))) {
+				if (substr == _bad_copy || (!Common::isAlpha(substr[-1]) && !Common::isAlpha(substr[gBadwordsLengths[badwordIndex]]))) {
 					item->flags |= MESSAGE_LIST_ITEM_TEXT_FILTERED;
-					char* ptr = item->text + (substr - _bad_copy);
+					char *ptr = item->text + (substr - _bad_copy);
 
 					for (int j = 0; j < gBadwordsLengths[badwordIndex]; j++) {
 						*ptr++ = gBadwordsReplacements[replacementsIndex++];
@@ -576,7 +583,7 @@ bool messageListFilterBadwords(MessageList* messageList) {
 	return true;
 }
 
-void messageListFilterGenderWords(MessageList* messageList, int gender) {
+void messageListFilterGenderWords(MessageList *messageList, int gender) {
 	if (messageList == NULL) {
 		return;
 	}
@@ -588,18 +595,18 @@ void messageListFilterGenderWords(MessageList* messageList, int gender) {
 	}
 
 	for (int index = 0; index < messageList->entries_num; index++) {
-		MessageListItem* item = &(messageList->entries[index]);
-		char* text = item->text;
-		char* sep;
+		MessageListItem *item = &(messageList->entries[index]);
+		char *text = item->text;
+		char *sep;
 
 		while ((sep = strchr(text, '^')) != NULL) {
 			*sep = '\0';
-			char* start = strrchr(text, '<');
-			char* end = strchr(sep + 1, '>');
+			char *start = strrchr(text, '<');
+			char *end = strchr(sep + 1, '>');
 			*sep = '^';
 
 			if (start != NULL && end != NULL) {
-				char* src;
+				char *src;
 				size_t length;
 				if (gender == GENDER_FEMALE) {
 					src = sep + 1;
@@ -610,7 +617,7 @@ void messageListFilterGenderWords(MessageList* messageList, int gender) {
 				}
 
 				strncpy(start, src, length);
-				strcpy(start + length, end + 1);
+				strncpy(start + length, end + 1, sizeof(start + length) - 1);
 			} else {
 				text = sep + 1;
 			}
@@ -619,12 +626,16 @@ void messageListFilterGenderWords(MessageList* messageList, int gender) {
 }
 
 bool messageListRepositoryInit() {
-	_messageListRepositoryState = new (std::nothrow) MessageListRepositoryState();
+	_messageListRepositoryState = new /*(std::nothrow)*/ MessageListRepositoryState();
+
 	if (_messageListRepositoryState == nullptr) {
 		return false;
 	}
 
-	char* fileList;
+	_messageListRepositoryState->standardMessageLists.resize(STANDARD_MESSAGE_LIST_COUNT);
+	_messageListRepositoryState->protoMessageLists.resize(PROTO_MESSAGE_LIST_COUNT);
+
+	char *fileList;
 	configGetString(&gSfallConfig, SFALL_CONFIG_MISC_KEY, SFALL_CONFIG_EXTRA_MESSAGE_LISTS_KEY, &fileList);
 	if (fileList != nullptr && *fileList == '\0') {
 		fileList = nullptr;
@@ -633,12 +644,12 @@ bool messageListRepositoryInit() {
 	char path[COMPAT_MAX_PATH];
 	int nextMessageListId = 0;
 	while (fileList != nullptr) {
-		char* pch = strchr(fileList, ',');
+		char *pch = strchr(fileList, ',');
 		if (pch != nullptr) {
 			*pch = '\0';
 		}
 
-		char* sep = strchr(fileList, ':');
+		char *sep = strchr(fileList, ':');
 		if (sep != nullptr) {
 			*sep = '\0';
 			nextMessageListId = atoi(sep + 1);
@@ -650,7 +661,7 @@ bool messageListRepositoryInit() {
 			*sep = ':';
 		}
 
-		MessageList* messageList = messageListRepositoryLoad(path);
+		MessageList *messageList = messageListRepositoryLoad(path);
 		if (messageList != nullptr) {
 			_messageListRepositoryState->persistentMessageLists[kFirstPersistentMessageListId + nextMessageListId] = messageList;
 		}
@@ -681,9 +692,9 @@ bool messageListRepositoryInit() {
 }
 
 void messageListRepositoryReset() {
-	for (auto& pair : _messageListRepositoryState->temporaryMessageLists) {
-		messageListFree(pair.second);
-		delete pair.second;
+	for (auto &pair : _messageListRepositoryState->temporaryMessageLists) {
+		messageListFree(pair._value);
+		delete pair._value;
 	}
 	_messageListRepositoryState->temporaryMessageLists.clear();
 	_messageListRepositoryState->nextTemporaryMessageListId = kFirstTemporaryMessageListId;
@@ -691,14 +702,14 @@ void messageListRepositoryReset() {
 
 void messageListRepositoryExit() {
 	if (_messageListRepositoryState != nullptr) {
-		for (auto& pair : _messageListRepositoryState->temporaryMessageLists) {
-			messageListFree(pair.second);
-			delete pair.second;
+		for (auto &pair : _messageListRepositoryState->temporaryMessageLists) {
+			messageListFree(pair._value);
+			delete pair._value;
 		}
 
-		for (auto& pair : _messageListRepositoryState->persistentMessageLists) {
-			messageListFree(pair.second);
-			delete pair.second;
+		for (auto &pair : _messageListRepositoryState->persistentMessageLists) {
+			messageListFree(pair._value);
+			delete pair._value;
 		}
 
 		delete _messageListRepositoryState;
@@ -706,15 +717,15 @@ void messageListRepositoryExit() {
 	}
 }
 
-void messageListRepositorySetStandardMessageList(int standardMessageList, MessageList* messageList) {
+void messageListRepositorySetStandardMessageList(int standardMessageList, MessageList *messageList) {
 	_messageListRepositoryState->standardMessageLists[standardMessageList] = messageList;
 }
 
-void messageListRepositorySetProtoMessageList(int protoMessageList, MessageList* messageList) {
+void messageListRepositorySetProtoMessageList(int protoMessageList, MessageList *messageList) {
 	_messageListRepositoryState->protoMessageLists[protoMessageList] = messageList;
 }
 
-int messageListRepositoryAddExtra(int messageListId, const char* path) {
+int messageListRepositoryAddExtra(int messageListId, const char *path) {
 	if (messageListId != 0) {
 		// CE: Probably there is a bug in Sfall, when |messageListId| is
 		// non-zero, it is enforced to be within persistent id range. That is
@@ -737,7 +748,7 @@ int messageListRepositoryAddExtra(int messageListId, const char* path) {
 		}
 	}
 
-	MessageList* messageList = messageListRepositoryLoad(path);
+	MessageList *messageList = messageListRepositoryLoad(path);
 	if (messageList == nullptr) {
 		return -2;
 	}
@@ -751,8 +762,8 @@ int messageListRepositoryAddExtra(int messageListId, const char* path) {
 	return messageListId;
 }
 
-char* messageListRepositoryGetMsg(int messageListId, int messageId) {
-	MessageList* messageList = nullptr;
+char *messageListRepositoryGetMsg(int messageListId, int messageId) {
+	MessageList *messageList = nullptr;
 
 	if (messageListId >= kFirstStandardMessageListId && messageListId <= kLastStandardMessageListId) {
 		messageList = _messageListRepositoryState->standardMessageLists[messageListId - kFirstStandardMessageListId];
@@ -761,12 +772,12 @@ char* messageListRepositoryGetMsg(int messageListId, int messageId) {
 	} else if (messageListId >= kFirstPersistentMessageListId && messageListId <= kLastPersistentMessageListId) {
 		auto it = _messageListRepositoryState->persistentMessageLists.find(messageListId);
 		if (it != _messageListRepositoryState->persistentMessageLists.end()) {
-			messageList = it->second;
+			messageList = it->_value;
 		}
 	} else if (messageListId >= kFirstTemporaryMessageListId && messageListId <= kLastTemporaryMessageListId) {
 		auto it = _messageListRepositoryState->temporaryMessageLists.find(messageListId);
 		if (it != _messageListRepositoryState->temporaryMessageLists.end()) {
-			messageList = it->second;
+			messageList = it->_value;
 		}
 	}
 
@@ -774,8 +785,8 @@ char* messageListRepositoryGetMsg(int messageListId, int messageId) {
 	return getmsg(messageList, &messageListItem, messageId);
 }
 
-static MessageList* messageListRepositoryLoad(const char* path) {
-	MessageList* messageList = new (std::nothrow) MessageList();
+static MessageList *messageListRepositoryLoad(const char *path) {
+	MessageList *messageList = new /*(std::nothrow)*/ MessageList();
 	if (messageList == nullptr) {
 		return nullptr;
 	}
@@ -793,4 +804,4 @@ static MessageList* messageListRepositoryLoad(const char* path) {
 	return messageList;
 }
 
-} // namespace fallout
+} // namespace Fallout2
