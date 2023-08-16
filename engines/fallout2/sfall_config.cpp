@@ -1,18 +1,18 @@
-#include "sfall_config.h"
+#include "fallout2/sfall_config.h"
 
-#include <stdio.h>
-#include <string.h>
+/*#include <stdio.h>
+#include <string.h>*/
 
-#include "platform_compat.h"
+#include "fallout2/platform_compat.h"
 
-namespace fallout {
+namespace Fallout2 {
 
 #define SFALL_CONFIG_FILE_NAME "ddraw.ini"
 
 bool gSfallConfigInitialized = false;
 Config gSfallConfig;
 
-bool sfallConfigInit(int argc, char** argv) {
+bool sfallConfigInit(int argc, char **argv) {
 	if (gSfallConfigInitialized) {
 		return false;
 	}
@@ -58,14 +58,14 @@ bool sfallConfigInit(int argc, char** argv) {
 	configSetInt(&gSfallConfig, SFALL_CONFIG_MISC_KEY, SFALL_CONFIG_MOVIE_TIMER_ARTIMER4, 360);
 
 	char path[COMPAT_MAX_PATH];
-	char* executable = argv[0];
-	char* ch = strrchr(executable, '\\');
+	char *executable = argv[0];
+	char *ch = strrchr(executable, '\\');
 	if (ch != NULL) {
 		*ch = '\0';
 		snprintf(path, sizeof(path), "%s\\%s", executable, SFALL_CONFIG_FILE_NAME);
 		*ch = '\\';
 	} else {
-		strcpy(path, SFALL_CONFIG_FILE_NAME);
+		strncpy(path, SFALL_CONFIG_FILE_NAME, sizeof(path) - 1);
 	}
 
 	configRead(&gSfallConfig, path, false);
@@ -84,4 +84,4 @@ void sfallConfigExit() {
 	}
 }
 
-} // namespace fallout
+} // namespace Fallout2
