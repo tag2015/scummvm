@@ -1,20 +1,20 @@
-#ifndef REGION_H
-#define REGION_H
+#ifndef FALLOUT2_REGION_H
+#define FALLOUT2_REGION_H
 
-#include "geometry.h"
-#include "interpreter.h"
+#include "fallout2/geometry.h"
+#include "fallout2/interpreter.h"
 
-namespace fallout {
+namespace Fallout2 {
 
 #define REGION_NAME_LENGTH (32)
 
 typedef struct Region Region;
 
-typedef void RegionMouseEventCallback(Region* region, void* userData, int event);
+typedef void RegionMouseEventCallback(Region *region, void *userData, int event);
 
 typedef struct Region {
 	char name[REGION_NAME_LENGTH];
-	Point* points;
+	Point *points;
 	int field_24;
 	int field_28;
 	int field_2C;
@@ -23,30 +23,30 @@ typedef struct Region {
 	int field_38;
 	int pointsLength;
 	int pointsCapacity;
-	Program* program;
+	Program *program;
 	int procs[4];
 	int rightProcs[4];
 	int field_68;
 	int field_6C;
 	int field_70;
 	int field_74;
-	RegionMouseEventCallback* mouseEventCallback;
-	RegionMouseEventCallback* rightMouseEventCallback;
-	void* mouseEventCallbackUserData;
-	void* rightMouseEventCallbackUserData;
-	void* userData;
+	RegionMouseEventCallback *mouseEventCallback;
+	RegionMouseEventCallback *rightMouseEventCallback;
+	void *mouseEventCallbackUserData;
+	void *rightMouseEventCallbackUserData;
+	void *userData;
 } Region;
 
-void _regionSetBound(Region* region);
-Region* regionCreate(int a1);
-void regionAddPoint(Region* region, int x, int y);
-void regionDelete(Region* region);
-void regionSetName(Region* region, const char* src);
-char* regionGetName(Region* region);
-void* regionGetUserData(Region* region);
-void regionSetUserData(Region* region, void* data);
-void regionAddFlag(Region* region, int value);
+void _regionSetBound(Region *region);
+Region *regionCreate(int a1);
+void regionAddPoint(Region *region, int x, int y);
+void regionDelete(Region *region);
+void regionSetName(Region *region, const char *src);
+char *regionGetName(Region *region);
+void *regionGetUserData(Region *region);
+void regionSetUserData(Region *region, void *data);
+void regionAddFlag(Region *region, int value);
 
-} // namespace fallout
+} // namespace Fallout2
 
-#endif /* REGION_H */
+#endif
