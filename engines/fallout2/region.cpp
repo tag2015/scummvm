@@ -1,12 +1,12 @@
-#include "region.h"
+#include "fallout2/region.h"
 
-#include <limits.h>
-#include <string.h>
+// #include <limits.h>
+// #include <string.h>
 
-#include "debug.h"
-#include "memory_manager.h"
+#include "fallout2/debug.h"
+#include "fallout2/memory_manager.h"
 
-namespace fallout {
+namespace Fallout2 {
 
 // 0x50D394
 static char _aNull[] = "<null>";
@@ -14,7 +14,7 @@ static char _aNull[] = "<null>";
 // Probably recalculates bounding box of the region.
 //
 // 0x4A2B50
-void _regionSetBound(Region* region) {
+void _regionSetBound(Region *region) {
 	int v1 = INT_MAX;
 	int v2 = INT_MIN;
 	int v3 = INT_MAX;
@@ -24,11 +24,15 @@ void _regionSetBound(Region* region) {
 	int v7 = 0;
 
 	for (int index = 0; index < region->pointsLength; index++) {
-		Point* point = &(region->points[index]);
-		if (v1 >= point->x) v1 = point->x;
-		if (v3 >= point->y) v3 = point->y;
-		if (v2 <= point->x) v2 = point->x;
-		if (v4 <= point->y) v4 = point->y;
+		Point *point = &(region->points[index]);
+		if (v1 >= point->x)
+			v1 = point->x;
+		if (v3 >= point->y)
+			v3 = point->y;
+		if (v2 <= point->x)
+			v2 = point->x;
+		if (v4 <= point->y)
+			v4 = point->y;
 		v6 += point->x;
 		v7 += point->y;
 		v5++;
@@ -46,7 +50,7 @@ void _regionSetBound(Region* region) {
 }
 
 // 0x4A2C14
-bool regionContainsPoint(Region* region, int x, int y) {
+bool regionContainsPoint(Region *region, int x, int y) {
 	if (region == NULL) {
 		return false;
 	}
@@ -57,7 +61,7 @@ bool regionContainsPoint(Region* region, int x, int y) {
 
 	int v1;
 
-	Point* prev = &(region->points[0]);
+	Point *prev = &(region->points[0]);
 	if (x >= prev->x) {
 		if (y >= prev->y) {
 			v1 = 2;
@@ -76,7 +80,7 @@ bool regionContainsPoint(Region* region, int x, int y) {
 	for (int index = 0; index < region->pointsLength; index++) {
 		int v2;
 
-		Point* point = &(region->points[index + 1]);
+		Point *point = &(region->points[index + 1]);
 		if (x >= point->x) {
 			if (y >= point->y) {
 				v2 = 2;
@@ -121,12 +125,12 @@ bool regionContainsPoint(Region* region, int x, int y) {
 }
 
 // 0x4A2D78
-Region* regionCreate(int initialCapacity) {
-	Region* region = (Region*)internal_malloc_safe(sizeof(*region), __FILE__, __LINE__); // "..\int\REGION.C", 142
+Region *regionCreate(int initialCapacity) {
+	Region *region = (Region *)internal_malloc_safe(sizeof(*region), __FILE__, __LINE__); // "..\int\REGION.C", 142
 	memset(region, 0, sizeof(*region));
 
 	if (initialCapacity != 0) {
-		region->points = (Point*)internal_malloc_safe(sizeof(*region->points) * (initialCapacity + 1), __FILE__, __LINE__); // "..\int\REGION.C", 147
+		region->points = (Point *)internal_malloc_safe(sizeof(*region->points) * (initialCapacity + 1), __FILE__, __LINE__); // "..\int\REGION.C", 147
 		region->pointsCapacity = initialCapacity + 1;
 	} else {
 		region->points = NULL;
@@ -161,7 +165,7 @@ Region* regionCreate(int initialCapacity) {
 
 // regionAddPoint
 // 0x4A2E68
-void regionAddPoint(Region* region, int x, int y) {
+void regionAddPoint(Region *region, int x, int y) {
 	if (region == NULL) {
 		debugPrint("regionAddPoint(): null region ptr\n");
 		return;
@@ -169,30 +173,30 @@ void regionAddPoint(Region* region, int x, int y) {
 
 	if (region->points != NULL) {
 		if (region->pointsCapacity - 1 == region->pointsLength) {
-			region->points = (Point*)internal_realloc_safe(region->points, sizeof(*region->points) * (region->pointsCapacity + 1), __FILE__, __LINE__); // "..\int\REGION.C", 190
+			region->points = (Point *)internal_realloc_safe(region->points, sizeof(*region->points) * (region->pointsCapacity + 1), __FILE__, __LINE__); // "..\int\REGION.C", 190
 			region->pointsCapacity++;
 		}
 	} else {
 		region->pointsCapacity = 2;
 		region->pointsLength = 0;
-		region->points = (Point*)internal_malloc_safe(sizeof(*region->points) * 2, __FILE__, __LINE__); // "..\int\REGION.C", 185
+		region->points = (Point *)internal_malloc_safe(sizeof(*region->points) * 2, __FILE__, __LINE__); // "..\int\REGION.C", 185
 	}
 
 	int pointIndex = region->pointsLength;
 	region->pointsLength++;
 
-	Point* point = &(region->points[pointIndex]);
+	Point *point = &(region->points[pointIndex]);
 	point->x = x;
 	point->y = y;
 
-	Point* end = &(region->points[pointIndex + 1]);
+	Point *end = &(region->points[pointIndex + 1]);
 	end->x = region->points->x;
 	end->y = region->points->y;
 }
 
 // regionDelete
 // 0x4A2F0C
-void regionDelete(Region* region) {
+void regionDelete(Region *region) {
 	if (region == NULL) {
 		debugPrint("regionDelete(): null region ptr\n");
 		return;
@@ -207,7 +211,7 @@ void regionDelete(Region* region) {
 
 // regionAddName
 // 0x4A2F54
-void regionSetName(Region* region, const char* name) {
+void regionSetName(Region *region, const char *name) {
 	if (region == NULL) {
 		debugPrint("regionAddName(): null region ptr\n");
 		return;
@@ -223,7 +227,7 @@ void regionSetName(Region* region, const char* name) {
 
 // regionGetName
 // 0x4A2F80
-char* regionGetName(Region* region) {
+char *regionGetName(Region *region) {
 	if (region == NULL) {
 		debugPrint("regionGetName(): null region ptr\n");
 		return _aNull;
@@ -234,7 +238,7 @@ char* regionGetName(Region* region) {
 
 // regionGetUserData
 // 0x4A2F98
-void* regionGetUserData(Region* region) {
+void *regionGetUserData(Region *region) {
 	if (region == NULL) {
 		debugPrint("regionGetUserData(): null region ptr\n");
 		return NULL;
@@ -245,7 +249,7 @@ void* regionGetUserData(Region* region) {
 
 // regionSetUserData
 // 0x4A2FB4
-void regionSetUserData(Region* region, void* data) {
+void regionSetUserData(Region *region, void *data) {
 	if (region == NULL) {
 		debugPrint("regionSetUserData(): null region ptr\n");
 		return;
@@ -255,8 +259,8 @@ void regionSetUserData(Region* region, void* data) {
 }
 
 // 0x4A2FD0
-void regionAddFlag(Region* region, int value) {
+void regionAddFlag(Region *region, int value) {
 	region->field_74 |= value;
 }
 
-} // namespace fallout
+} // namespace Fallout2
