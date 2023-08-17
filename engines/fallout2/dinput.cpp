@@ -1,6 +1,7 @@
-#include "dinput.h"
+#include "fallout2/dinput.h"
+#include "fallout2/fallout2.h"
 
-namespace fallout {
+namespace Fallout2 {
 
 enum InputType {
 	INPUT_TYPE_MOUSE,
@@ -28,9 +29,9 @@ extern int screenGetHeight();
 
 // 0x4E0400
 bool directInputInit() {
-	if (SDL_InitSubSystem(SDL_INIT_EVENTS) != 0) {
-		return false;
-	}
+	//	if (SDL_InitSubSystem(SDL_INIT_EVENTS) != 0) {
+	//		return false;
+	//	}
 
 	if (!mouseDeviceInit()) {
 		goto err;
@@ -51,7 +52,7 @@ err:
 
 // 0x4E0478
 void directInputFree() {
-	SDL_QuitSubSystem(SDL_INIT_EVENTS);
+	//	SDL_QuitSubSystem(SDL_INIT_EVENTS);
 }
 
 // 0x4E04E8
@@ -65,50 +66,57 @@ bool mouseDeviceUnacquire() {
 }
 
 // 0x4E053C
-bool mouseDeviceGetData(MouseData* mouseState) {
-	if (gLastInputType == INPUT_TYPE_TOUCH) {
-		mouseState->x = gTouchMouseDeltaX;
-		mouseState->y = gTouchMouseDeltaY;
-		mouseState->buttons[0] = 0;
-		mouseState->buttons[1] = 0;
-		mouseState->wheelX = 0;
-		mouseState->wheelY = 0;
-		gTouchMouseDeltaX = 0;
-		gTouchMouseDeltaY = 0;
+bool mouseDeviceGetData(MouseData *mouseState) {
+	// TODO: Touch control
+	// if (gLastInputType == INPUT_TYPE_TOUCH) {
+	// 	mouseState->x = gTouchMouseDeltaX;
+	// 	mouseState->y = gTouchMouseDeltaY;
+	// 	mouseState->buttons[0] = 0;
+	// 	mouseState->buttons[1] = 0;
+	// 	mouseState->wheelX = 0;
+	// 	mouseState->wheelY = 0;
+	// 	gTouchMouseDeltaX = 0;
+	// 	gTouchMouseDeltaY = 0;
 
-		if (gTouchFingers == 0) {
-			if (SDL_GetTicks() - gTouchGestureLastTouchUpTimestamp > 150) {
-				if (!gTouchGestureHandled) {
-					if (gTouchGestureTaps == 2) {
-						mouseState->buttons[0] = 1;
-						gTouchGestureHandled = true;
-					} else if (gTouchGestureTaps == 3) {
-						mouseState->buttons[1] = 1;
-						gTouchGestureHandled = true;
-					}
-				}
-			}
-		} else if (gTouchFingers == 1) {
-			if (SDL_GetTicks() - gTouchGestureLastTouchDownTimestamp > 150) {
-				if (gTouchGestureTaps == 1) {
-					mouseState->buttons[0] = 1;
-					gTouchGestureHandled = true;
-				} else if (gTouchGestureTaps == 2) {
-					mouseState->buttons[1] = 1;
-					gTouchGestureHandled = true;
-				}
-			}
-		}
-	} else {
-		Uint32 buttons = SDL_GetRelativeMouseState(&(mouseState->x), &(mouseState->y));
-		mouseState->buttons[0] = (buttons & SDL_BUTTON(SDL_BUTTON_LEFT)) != 0;
-		mouseState->buttons[1] = (buttons & SDL_BUTTON(SDL_BUTTON_RIGHT)) != 0;
-		mouseState->wheelX = gMouseWheelDeltaX;
-		mouseState->wheelY = gMouseWheelDeltaY;
+	// 	if (gTouchFingers == 0) {
+	// 		if (SDL_GetTicks() - gTouchGestureLastTouchUpTimestamp > 150) {
+	// 			if (!gTouchGestureHandled) {
+	// 				if (gTouchGestureTaps == 2) {
+	// 					mouseState->buttons[0] = 1;
+	// 					gTouchGestureHandled = true;
+	// 				} else if (gTouchGestureTaps == 3) {
+	// 					mouseState->buttons[1] = 1;
+	// 					gTouchGestureHandled = true;
+	// 				}
+	// 			}
+	// 		}
+	// 	} else if (gTouchFingers == 1) {
+	// 		if (SDL_GetTicks() - gTouchGestureLastTouchDownTimestamp > 150) {
+	// 			if (gTouchGestureTaps == 1) {
+	// 				mouseState->buttons[0] = 1;
+	// 				gTouchGestureHandled = true;
+	// 			} else if (gTouchGestureTaps == 2) {
+	// 				mouseState->buttons[1] = 1;
+	// 				gTouchGestureHandled = true;
+	// 			}
+	// 		}
+	// 	}
+	// } else {
+	//		Uint32 buttons = SDL_GetRelativeMouseState(&(mouseState->x), &(mouseState->y));
+	//		mouseState->buttons[0] = (buttons & SDL_BUTTON(SDL_BUTTON_LEFT)) != 0;
+	//		mouseState->buttons[1] = (buttons & SDL_BUTTON(SDL_BUTTON_RIGHT)) != 0;
+	Common::Point mousePos = g_engine->getEventManager()->getMousePos();
+	mouseState->x = mousePos.x;
+	mouseState->y = mousePos.y;
+	mouseState->buttons[0] = g_engine->getEventManager()->getButtonState() & 1;
+	mouseState->buttons[1] = g_engine->getEventManager()->getButtonState() & 2;
 
-		gMouseWheelDeltaX = 0;
-		gMouseWheelDeltaY = 0;
-	}
+	mouseState->wheelX = gMouseWheelDeltaX;
+	mouseState->wheelY = gMouseWheelDeltaY;
+
+	gMouseWheelDeltaX = 0;
+	gMouseWheelDeltaY = 0;
+	//	}
 
 	return true;
 }
@@ -125,18 +133,19 @@ bool keyboardDeviceUnacquire() {
 
 // 0x4E05FC
 bool keyboardDeviceReset() {
-	SDL_FlushEvents(SDL_KEYDOWN, SDL_TEXTINPUT);
+	//	SDL_FlushEvents(SDL_KEYDOWN, SDL_TEXTINPUT);
 	return true;
 }
 
 // 0x4E0650
-bool keyboardDeviceGetData(KeyboardData* keyboardData) {
+bool keyboardDeviceGetData(KeyboardData *keyboardData) {
 	return true;
 }
 
 // 0x4E070C
 bool mouseDeviceInit() {
-	return SDL_SetRelativeMouseMode(SDL_TRUE) == 0;
+	// return SDL_SetRelativeMouseMode(SDL_TRUE) == 0;
+	return true;
 }
 
 // 0x4E078C
@@ -152,13 +161,14 @@ bool keyboardDeviceInit() {
 void keyboardDeviceFree() {
 }
 
-void handleMouseEvent(SDL_Event* event) {
+void handleMouseEvent(const Common::Event *event) {
 	// Mouse movement and buttons are accumulated in SDL itself and will be
 	// processed later in `mouseDeviceGetData` via `SDL_GetRelativeMouseState`.
 
-	if (event->type == SDL_MOUSEWHEEL) {
-		gMouseWheelDeltaX += event->wheel.x;
-		gMouseWheelDeltaY += event->wheel.y;
+	if (event->type == Common::EVENT_WHEELUP)
+		gMouseWheelDeltaY -= 5; // FIXME
+	else if (event->type == Common::EVENT_WHEELDOWN) {
+		gMouseWheelDeltaY += 5; // FIXME
 	}
 
 	if (gLastInputType != INPUT_TYPE_MOUSE) {
@@ -178,51 +188,52 @@ void handleMouseEvent(SDL_Event* event) {
 	}
 }
 
-void handleTouchEvent(SDL_Event* event) {
-	int windowWidth = screenGetWidth();
-	int windowHeight = screenGetHeight();
+void handleTouchEvent(const Common::Event *event) {
+	// TODO: Touch control
+	/*	int windowWidth = screenGetWidth();
+		int windowHeight = screenGetHeight();
 
-	if (event->tfinger.type == SDL_FINGERDOWN) {
-		gTouchFingers++;
+		if (event->tfinger.type == SDL_FINGERDOWN) {
+			gTouchFingers++;
 
-		gTouchMouseLastX = (int)(event->tfinger.x * windowWidth);
-		gTouchMouseLastY = (int)(event->tfinger.y * windowHeight);
-		gTouchMouseDeltaX = 0;
-		gTouchMouseDeltaY = 0;
+			gTouchMouseLastX = (int)(event->tfinger.x * windowWidth);
+			gTouchMouseLastY = (int)(event->tfinger.y * windowHeight);
+			gTouchMouseDeltaX = 0;
+			gTouchMouseDeltaY = 0;
 
-		if (event->tfinger.timestamp - gTouchGestureLastTouchDownTimestamp > 250) {
-			gTouchGestureTaps = 0;
-			gTouchGestureHandled = false;
+			if (event->tfinger.timestamp - gTouchGestureLastTouchDownTimestamp > 250) {
+				gTouchGestureTaps = 0;
+				gTouchGestureHandled = false;
+			}
+
+			gTouchGestureLastTouchDownTimestamp = event->tfinger.timestamp;
+		} else if (event->tfinger.type == SDL_FINGERMOTION) {
+			int prevX = gTouchMouseLastX;
+			int prevY = gTouchMouseLastY;
+			gTouchMouseLastX = (int)(event->tfinger.x * windowWidth);
+			gTouchMouseLastY = (int)(event->tfinger.y * windowHeight);
+			gTouchMouseDeltaX += gTouchMouseLastX - prevX;
+			gTouchMouseDeltaY += gTouchMouseLastY - prevY;
+		} else if (event->tfinger.type == SDL_FINGERUP) {
+			gTouchFingers--;
+
+			int prevX = gTouchMouseLastX;
+			int prevY = gTouchMouseLastY;
+			gTouchMouseLastX = (int)(event->tfinger.x * windowWidth);
+			gTouchMouseLastY = (int)(event->tfinger.y * windowHeight);
+			gTouchMouseDeltaX += gTouchMouseLastX - prevX;
+			gTouchMouseDeltaY += gTouchMouseLastY - prevY;
+
+			gTouchGestureTaps++;
+			gTouchGestureLastTouchUpTimestamp = event->tfinger.timestamp;
 		}
 
-		gTouchGestureLastTouchDownTimestamp = event->tfinger.timestamp;
-	} else if (event->tfinger.type == SDL_FINGERMOTION) {
-		int prevX = gTouchMouseLastX;
-		int prevY = gTouchMouseLastY;
-		gTouchMouseLastX = (int)(event->tfinger.x * windowWidth);
-		gTouchMouseLastY = (int)(event->tfinger.y * windowHeight);
-		gTouchMouseDeltaX += gTouchMouseLastX - prevX;
-		gTouchMouseDeltaY += gTouchMouseLastY - prevY;
-	} else if (event->tfinger.type == SDL_FINGERUP) {
-		gTouchFingers--;
+		if (gLastInputType != INPUT_TYPE_TOUCH) {
+			// Reset mouse data.
+			SDL_GetRelativeMouseState(NULL, NULL);
 
-		int prevX = gTouchMouseLastX;
-		int prevY = gTouchMouseLastY;
-		gTouchMouseLastX = (int)(event->tfinger.x * windowWidth);
-		gTouchMouseLastY = (int)(event->tfinger.y * windowHeight);
-		gTouchMouseDeltaX += gTouchMouseLastX - prevX;
-		gTouchMouseDeltaY += gTouchMouseLastY - prevY;
-
-		gTouchGestureTaps++;
-		gTouchGestureLastTouchUpTimestamp = event->tfinger.timestamp;
-	}
-
-	if (gLastInputType != INPUT_TYPE_TOUCH) {
-		// Reset mouse data.
-		SDL_GetRelativeMouseState(NULL, NULL);
-
-		gLastInputType = INPUT_TYPE_TOUCH;
-	}
+			gLastInputType = INPUT_TYPE_TOUCH;
+		}*/
 }
 
-} // namespace fallout
+} // namespace Fallout2
