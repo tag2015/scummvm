@@ -1,12 +1,12 @@
-#ifndef WORD_WRAP_H
-#define WORD_WRAP_H
+#ifndef FALLOUT2_WORD_WRAP_H
+#define FALLOUT2_WORD_WRAP_H
 
-namespace fallout {
+namespace Fallout2 {
 
 #define WORD_WRAP_MAX_COUNT (64)
 
-int wordWrap(const char* string, int width, short* breakpoints, short* breakpointsLengthPtr);
+int wordWrap(const char *string, int width, short *breakpoints, short *breakpointsLengthPtr);
 
-} // namespace fallout
+} // namespace Fallout2
 
-#endif /* WORD_WRAP_H */
+#endif
