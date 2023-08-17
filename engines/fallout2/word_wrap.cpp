@@ -1,15 +1,16 @@
-#include "word_wrap.h"
+#include "fallout2/word_wrap.h"
 
-#include <ctype.h>
+/*#include <ctype.h>
 #include <stddef.h>
-#include <string.h>
+#include <string.h>*/
 
-#include "text_font.h"
+#include "fallout2/text_font.h"
+#include "common/str.h"
 
-namespace fallout {
+namespace Fallout2 {
 
 // 0x4BC6F0
-int wordWrap(const char* string, int width, short* breakpoints, short* breakpointsLengthPtr) {
+int wordWrap(const char *string, int width, short *breakpoints, short *breakpointsLengthPtr) {
 	breakpoints[0] = 0;
 	*breakpointsLengthPtr = 1;
 
@@ -30,13 +31,13 @@ int wordWrap(const char* string, int width, short* breakpoints, short* breakpoin
 	int gap = fontGetLetterSpacing();
 
 	int accum = 0;
-	const char* prevSpaceOrHyphen = NULL;
-	const char* pch = string;
+	const char *prevSpaceOrHyphen = NULL;
+	const char *pch = string;
 	while (*pch != '\0') {
 		accum += gap + fontGetCharacterWidth(*pch & 0xFF);
 		if (accum <= width) {
 			// NOTE: quests.txt #807 uses extended ascii.
-			if (isspace(*pch & 0xFF) || *pch == '-') {
+			if (Common::isSpace(*pch & 0xFF) || *pch == '-') {
 				prevSpaceOrHyphen = pch;
 			}
 		} else {
@@ -74,4 +75,4 @@ int wordWrap(const char* string, int width, short* breakpoints, short* breakpoin
 	return 0;
 }
 
-} // namespace fallout
+} // namespace Fallout2
