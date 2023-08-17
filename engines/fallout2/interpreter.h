@@ -1,11 +1,13 @@
-#ifndef INTERPRETER_H
-#define INTERPRETER_H
+#ifndef FALLOUT2_INTERPRETER_H
+#define FALLOUT2_INTERPRETER_H
 
+#define FORBIDDEN_SYMBOL_EXCEPTION_setjmp
 #include <setjmp.h>
 
-#include <vector>
+// #include <vector>
+#include "common/array.h"
 
-namespace fallout {
+namespace Fallout2 {
 
 // The maximum number of opcodes.
 //
@@ -145,7 +147,7 @@ typedef struct ProgramValue {
 	union {
 		int integerValue;
 		float floatValue;
-		void* pointerValue;
+		void *pointerValue;
 	};
 
 	bool isEmpty();
@@ -154,84 +156,84 @@ typedef struct ProgramValue {
 	float asFloat();
 } ProgramValue;
 
-typedef std::vector<ProgramValue> ProgramStack;
+typedef Common::Array<ProgramValue> ProgramStack; // originally std::vector
 
 typedef struct Program Program;
-typedef int(InterpretCheckWaitFunc)(Program* program);
+typedef int(InterpretCheckWaitFunc)(Program *program);
 
 // It's size in original code is 144 (0x8C) bytes due to the different
 // size of `jmp_buf`.
 typedef struct Program {
-	char* name;
-	unsigned char* data;
-	struct Program* parent;
-	struct Program* child;
-	int instructionPointer; // current pos in data
-	int framePointer; // saved stack 1 pos - probably beginning of local variables - probably called base
-	int basePointer; // saved stack 1 pos - probably beginning of global variables
-	unsigned char* staticStrings; // static strings table
-	unsigned char* dynamicStrings; // dynamic strings table
-	unsigned char* identifiers;
-	unsigned char* procedures;
+	char *name;
+	unsigned char *data;
+	struct Program *parent;
+	struct Program *child;
+	int instructionPointer;        // current pos in data
+	int framePointer;              // saved stack 1 pos - probably beginning of local variables - probably called base
+	int basePointer;               // saved stack 1 pos - probably beginning of global variables
+	unsigned char *staticStrings;  // static strings table
+	unsigned char *dynamicStrings; // dynamic strings table
+	unsigned char *identifiers;
+	unsigned char *procedures;
 	jmp_buf env;
-	unsigned int waitEnd; // end time of timer (field_74 + wait time)
+	unsigned int waitEnd;   // end time of timer (field_74 + wait time)
 	unsigned int waitStart; // time when wait was called
-	int field_78; // time when program begin execution (for the first time)?, -1 - program never executed
-	InterpretCheckWaitFunc* checkWaitFunc;
+	int field_78;           // time when program begin execution (for the first time)?, -1 - program never executed
+	InterpretCheckWaitFunc *checkWaitFunc;
 	int flags; // flags
 	int windowId;
 	bool exited;
-	ProgramStack* stackValues;
-	ProgramStack* returnStackValues;
+	ProgramStack *stackValues;
+	ProgramStack *returnStackValues;
 } Program;
 
 typedef unsigned int(InterpretTimerFunc)();
-typedef void OpcodeHandler(Program* program);
+typedef void OpcodeHandler(Program *program);
 
 extern int _TimeOut;
 
-char* _interpretMangleName(char* s);
-void _interpretOutputFunc(int (*func)(char*));
-int _interpretOutput(const char* format, ...);
-[[noreturn]] void programFatalError(const char* str, ...);
-void _interpretDecStringRef(Program* program, opcode_t a2, int a3);
-Program* programCreateByPath(const char* path);
-char* programGetString(Program* program, opcode_t opcode, int offset);
-char* programGetIdentifier(Program* program, int offset);
-int programPushString(Program* program, char* string);
+char *_interpretMangleName(char *s);
+void _interpretOutputFunc(int (*func)(char *));
+int _interpretOutput(const char *format, ...);
+[[noreturn]] void programFatalError(const char *str, ...);
+void _interpretDecStringRef(Program *program, opcode_t a2, int a3);
+Program *programCreateByPath(const char *path);
+char *programGetString(Program *program, opcode_t opcode, int offset);
+char *programGetIdentifier(Program *program, int offset);
+int programPushString(Program *program, char *string);
 void interpreterRegisterOpcodeHandlers();
 void _interpretClose();
-void _interpret(Program* program, int a2);
-void _executeProc(Program* program, int procedureIndex);
-int programFindProcedure(Program* prg, const char* name);
-void _executeProcedure(Program* program, int procedureIndex);
-void programListNodeCreate(Program* program);
-void runProgram(Program* program);
-Program* runScript(char* name);
+void _interpret(Program *program, int a2);
+void _executeProc(Program *program, int procedureIndex);
+int programFindProcedure(Program *prg, const char *name);
+void _executeProcedure(Program *program, int procedureIndex);
+void programListNodeCreate(Program *program);
+void runProgram(Program *program);
+Program *runScript(char *name);
 void _updatePrograms();
 void programListFree();
-void interpreterRegisterOpcode(int opcode, OpcodeHandler* handler);
+void interpreterRegisterOpcode(int opcode, OpcodeHandler *handler);
 
-void programStackPushValue(Program* program, ProgramValue& programValue);
-void programStackPushInteger(Program* program, int value);
-void programStackPushFloat(Program* program, float value);
-void programStackPushString(Program* program, char* string);
-void programStackPushPointer(Program* program, void* value);
+void programStackPushValue(Program *program, ProgramValue &programValue);
+void programStackPushInteger(Program *program, int value);
+void programStackPushFloat(Program *program, float value);
+void programStackPushString(Program *program, char *string);
+void programStackPushPointer(Program *program, void *value);
 
-ProgramValue programStackPopValue(Program* program);
-int programStackPopInteger(Program* program);
-float programStackPopFloat(Program* program);
-char* programStackPopString(Program* program);
-void* programStackPopPointer(Program* program);
+ProgramValue programStackPopValue(Program *program);
+int programStackPopInteger(Program *program);
+float programStackPopFloat(Program *program);
+char *programStackPopString(Program *program);
+void *programStackPopPointer(Program *program);
 
-void programReturnStackPushValue(Program* program, ProgramValue& programValue);
-void programReturnStackPushInteger(Program* program, int value);
-void programReturnStackPushPointer(Program* program, void* value);
+void programReturnStackPushValue(Program *program, ProgramValue &programValue);
+void programReturnStackPushInteger(Program *program, int value);
+void programReturnStackPushPointer(Program *program, void *value);
 
-ProgramValue programReturnStackPopValue(Program* program);
-int programReturnStackPopInteger(Program* program);
-void* programReturnStackPopPointer(Program* program);
+ProgramValue programReturnStackPopValue(Program *program);
+int programReturnStackPopInteger(Program *program);
+void *programReturnStackPopPointer(Program *program);
 
-} // namespace fallout
+} // namespace Fallout2
 
-#endif /* INTERPRETER_H */
+#endif
