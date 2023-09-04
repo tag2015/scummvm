@@ -5,7 +5,7 @@
 
 #include <zlib.h>*/
 
-#include "common/compression/zlib.h"
+#include "common/compression/deflate.h"
 #include "common/file.h"
 #include "fallout2/dfile.h"
 #include "fallout2/platform_compat.h"
