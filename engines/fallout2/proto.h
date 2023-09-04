@@ -1,13 +1,13 @@
-#ifndef PROTO_H
-#define PROTO_H
+#ifndef FALLOUT2_PROTO_H
+#define FALLOUT2_PROTO_H
 
-#include "db.h"
-#include "message.h"
-#include "obj_types.h"
-#include "platform_compat.h"
-#include "proto_types.h"
+#include "fallout2/db.h"
+#include "fallout2/message.h"
+#include "fallout2/obj_types.h"
+#include "fallout2/platform_compat.h"
+#include "fallout2/proto_types.h"
 
-namespace fallout {
+namespace Fallout2 {
 
 typedef enum ItemDataMember {
 	ITEM_DATA_MEMBER_PID = 0,
@@ -89,7 +89,7 @@ typedef enum ProtoDataMemberType {
 
 typedef union ProtoDataMemberValue {
 	int integerValue;
-	char* stringValue;
+	char *stringValue;
 } ProtoDataMemberValue;
 
 typedef enum PrototypeMessage {
@@ -100,37 +100,37 @@ typedef enum PrototypeMessage {
 extern char _cd_path_base[COMPAT_MAX_PATH];
 
 extern MessageList gProtoMessageList;
-extern char* _proto_none_str;
+extern char *_proto_none_str;
 
-void _proto_make_path(char* path, int pid);
-int _proto_list_str(int pid, char* proto_path);
+void _proto_make_path(char *path, int pid);
+int _proto_list_str(int pid, char *proto_path);
 size_t proto_size(int type);
 bool _proto_action_can_use(int pid);
 bool _proto_action_can_use_on(int pid);
 bool _proto_action_can_talk_to(int pid);
 int _proto_action_can_pickup(int pid);
-char* protoGetMessage(int pid, int message);
-char* protoGetName(int pid);
-char* protoGetDescription(int pid);
-void objectDataReset(Object* obj);
-int objectDataRead(Object* obj, File* stream);
-int objectDataWrite(Object* obj, File* stream);
-int _proto_update_init(Object* obj);
+char *protoGetMessage(int pid, int message);
+char *protoGetName(int pid);
+char *protoGetDescription(int pid);
+void objectDataReset(Object *obj);
+int objectDataRead(Object *obj, File *stream);
+int objectDataWrite(Object *obj, File *stream);
+int _proto_update_init(Object *obj);
 int _proto_dude_update_gender();
-int _proto_dude_init(const char* path);
-int protoGetDataMember(int pid, int member, ProtoDataMemberValue* value);
+int _proto_dude_init(const char *path);
+int protoGetDataMember(int pid, int member, ProtoDataMemberValue *value);
 int protoInit();
 void protoReset();
 void protoExit();
 int _proto_save_pid(int pid);
 void _proto_remove_all();
-int protoGetProto(int pid, Proto** out_proto);
+int protoGetProto(int pid, Proto **out_proto);
 int _ResetPlayer();
 
 static bool isExitGridPid(int pid) {
 	return pid >= FIRST_EXIT_GRID_PID && pid <= LAST_EXIT_GRID_PID;
 }
 
-} // namespace fallout
+} // namespace Fallout2
 
 #endif /* PROTO_H */
