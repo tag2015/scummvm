@@ -1,7 +1,7 @@
 #ifndef FALLOUT2_PLATFORM_COMPAT_H
 #define FALLOUT2_PLATFORM_COMPAT_H
 
-#include "common/compression/zlib.h"
+#include "common/compression/deflate.h"
 #include "common/file.h"
 #include "common/system.h"
 

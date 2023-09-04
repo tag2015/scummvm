@@ -821,7 +821,7 @@ static bool dfileReadCompressed(DFile *stream, void *ptr, size_t size) {
 	stream->stream->read(stream->decompressionBuffer, stream->entry->dataSize);
 
 	unsigned long actual_size = size; // FIXME:
-	Common::uncompress((byte *)ptr, &actual_size, stream->decompressionBuffer, stream->entry->dataSize);
+	Common::inflateZlib((byte *)ptr, &actual_size, stream->decompressionBuffer, stream->entry->dataSize);
 
 	/*	do {
 			if (stream->decompressionStream->avail_out == 0) {
