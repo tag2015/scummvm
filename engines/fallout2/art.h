@@ -1,14 +1,14 @@
-#ifndef ART_H
-#define ART_H
+#ifndef FALLOUT2_ART_H
+#define FALLOUT2_ART_H
 
-#include "cache.h"
-#include "db.h"
-#include "heap.h"
-#include "obj_types.h"
-#include "platform_compat.h"
-#include "proto_types.h"
+#include "fallout2/cache.h"
+#include "fallout2/db.h"
+#include "fallout2/heap.h"
+#include "fallout2/obj_types.h"
+#include "fallout2/platform_compat.h"
+#include "fallout2/proto_types.h"
 
-namespace fallout {
+namespace Fallout2 {
 
 typedef enum Head {
 	HEAD_INVALID,
@@ -89,16 +89,16 @@ typedef struct ArtFrame {
 
 typedef enum WeaponAnimation {
 	WEAPON_ANIMATION_NONE,
-	WEAPON_ANIMATION_KNIFE, // d
-	WEAPON_ANIMATION_CLUB, // e
-	WEAPON_ANIMATION_HAMMER, // f
-	WEAPON_ANIMATION_SPEAR, // g
-	WEAPON_ANIMATION_PISTOL, // h
-	WEAPON_ANIMATION_SMG, // i
-	WEAPON_ANIMATION_SHOTGUN, // j
+	WEAPON_ANIMATION_KNIFE,       // d
+	WEAPON_ANIMATION_CLUB,        // e
+	WEAPON_ANIMATION_HAMMER,      // f
+	WEAPON_ANIMATION_SPEAR,       // g
+	WEAPON_ANIMATION_PISTOL,      // h
+	WEAPON_ANIMATION_SMG,         // i
+	WEAPON_ANIMATION_SHOTGUN,     // j
 	WEAPON_ANIMATION_LASER_RIFLE, // k
-	WEAPON_ANIMATION_MINIGUN, // l
-	WEAPON_ANIMATION_LAUNCHER, // m
+	WEAPON_ANIMATION_MINIGUN,     // l
+	WEAPON_ANIMATION_LAUNCHER,    // m
 	WEAPON_ANIMATION_COUNT,
 } WeaponAnimation;
 
@@ -119,40 +119,40 @@ extern Cache gArtCache;
 int artInit();
 void artReset();
 void artExit();
-char* artGetObjectTypeName(int objectType);
+char *artGetObjectTypeName(int objectType);
 int artIsObjectTypeHidden(int objectType);
 int artGetFidgetCount(int headFid);
-void artRender(int fid, unsigned char* dest, int width, int height, int pitch);
-Art* artLock(int fid, CacheEntry** cache_entry);
-unsigned char* artLockFrameData(int fid, int frame, int direction, CacheEntry** out_cache_entry);
-unsigned char* artLockFrameDataReturningSize(int fid, CacheEntry** out_cache_entry, int* widthPtr, int* heightPtr);
-int artUnlock(CacheEntry* cache_entry);
+void artRender(int fid, unsigned char *dest, int width, int height, int pitch);
+Art *artLock(int fid, CacheEntry **cache_entry);
+unsigned char *artLockFrameData(int fid, int frame, int direction, CacheEntry **out_cache_entry);
+unsigned char *artLockFrameDataReturningSize(int fid, CacheEntry **out_cache_entry, int *widthPtr, int *heightPtr);
+int artUnlock(CacheEntry *cache_entry);
 int artCacheFlush();
-int artCopyFileName(int objectType, int a2, char* a3);
-int _art_get_code(int a1, int a2, char* a3, char* a4);
-char* artBuildFilePath(int a1);
-int artGetFramesPerSecond(Art* art);
-int artGetActionFrame(Art* art);
-int artGetFrameCount(Art* art);
-int artGetWidth(Art* art, int frame, int direction);
-int artGetHeight(Art* art, int frame, int direction);
-int artGetSize(Art* art, int frame, int direction, int* out_width, int* out_height);
-int artGetFrameOffsets(Art* art, int frame, int direction, int* a4, int* a5);
-int artGetRotationOffsets(Art* art, int rotation, int* out_offset_x, int* out_offset_y);
-unsigned char* artGetFrameData(Art* art, int frame, int direction);
-ArtFrame* artGetFrame(Art* art, int frame, int direction);
+int artCopyFileName(int objectType, int a2, char *a3);
+int _art_get_code(int a1, int a2, char *a3, char *a4);
+char *artBuildFilePath(int a1);
+int artGetFramesPerSecond(Art *art);
+int artGetActionFrame(Art *art);
+int artGetFrameCount(Art *art);
+int artGetWidth(Art *art, int frame, int direction);
+int artGetHeight(Art *art, int frame, int direction);
+int artGetSize(Art *art, int frame, int direction, int *out_width, int *out_height);
+int artGetFrameOffsets(Art *art, int frame, int direction, int *a4, int *a5);
+int artGetRotationOffsets(Art *art, int rotation, int *out_offset_x, int *out_offset_y);
+unsigned char *artGetFrameData(Art *art, int frame, int direction);
+ArtFrame *artGetFrame(Art *art, int frame, int direction);
 bool artExists(int fid);
 bool _art_fid_valid(int fid);
 int _art_alias_num(int a1);
 int artCritterFidShouldRun(int a1);
 int artAliasFid(int fid);
 int buildFid(int objectType, int frmId, int animType, int a4, int rotation);
-Art* artLoad(const char* path);
-int artRead(const char* path, unsigned char* data);
-int artWrite(const char* path, unsigned char* data);
+Art *artLoad(const char *path);
+int artRead(const char *path, unsigned char *data);
+int artWrite(const char *path, unsigned char *data);
 
 class FrmImage {
-  public:
+public:
 	FrmImage();
 	~FrmImage();
 
@@ -168,17 +168,17 @@ class FrmImage {
 	int getHeight() const {
 		return _height;
 	}
-	unsigned char* getData() const {
+	unsigned char *getData() const {
 		return _data;
 	}
 
-  private:
-	CacheEntry* _key;
-	unsigned char* _data;
+private:
+	CacheEntry *_key;
+	unsigned char *_data;
 	int _width;
 	int _height;
 };
 
-} // namespace fallout
+} // namespace Fallout2
 
 #endif
