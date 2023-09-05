@@ -9,7 +9,7 @@ namespace Fallout2 {
 #define GAME_CONFIG_FILE_NAME "fallout2.cfg"
 
 #define GAME_CONFIG_SYSTEM_KEY "system"
-#define GAME_CONFIG_PREFERENCES_KEY "preferences"
+#define GAME_CONFIG_PREFERENCES_KEY "prefs"
 #define GAME_CONFIG_SOUND_KEY "sound"
 #define GAME_CONFIG_MAPPER_KEY "mapper"
 #define GAME_CONFIG_DEBUG_KEY "debug"
