@@ -4,13 +4,16 @@ MODULE_OBJS = \
 	fallout2.o \
 	console.o \
 	metaengine.o \
+	art.o \
 	cache.o \
 	color.o \
 	config.o \
 	cycle.o \
+	datafile.o \
 	db.o \
 	dfile.o \
 	dictionary.o \
+	dinput.o \
 	draw.o \
 	file_find.o \
 	font_manager.o \
@@ -21,13 +24,17 @@ MODULE_OBJS = \
 	heap.o \
 	memory.o \
 	memory_manager.o \
+	message.o \
 	palette.o \
 	pcx.o \
 	platform_compat.o \
 	random.o \
+	region.o \
 	settings.o \
+	sfall_config.o \
 	text_font.o \
 	version.o \
+	word_wrap.o \
 	xfile.o \
 	third_party/fpattern/fpattern.o
 
