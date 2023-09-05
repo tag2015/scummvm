@@ -1,15 +1,15 @@
-#ifndef INTERPRETER_EXTRA_H
-#define INTERPRETER_EXTRA_H
+#ifndef FALLOUT2_INTERPRETER_EXTRA_H
+#define FALLOUT2_INTERPRETER_EXTRA_H
 
-#include "interpreter.h"
+#include "fallout2/interpreter.h"
 
-namespace fallout {
+namespace Fallout2 {
 
 void _intExtraClose_();
 void _initIntExtra();
 void intExtraUpdate();
-void intExtraRemoveProgramReferences(Program* program);
+void intExtraRemoveProgramReferences(Program *program);
 
-} // namespace fallout
+} // namespace Fallout2
 
-#endif /* INTERPRETER_EXTRA_H */
+#endif
