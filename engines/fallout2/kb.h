@@ -1,11 +1,11 @@
-#ifndef FALLOUT_KB_H_
-#define FALLOUT_KB_H_
+#ifndef FALLOUT2_KB_H
+#define FALLOUT2_KB_H
 
-#include <SDL.h>
+// #include <SDL.h>
 
-#include "dinput.h"
+#include "fallout2/dinput.h"
 
-namespace fallout {
+namespace Fallout2 {
 
 #define KEY_STATE_UP 0
 #define KEY_STATE_DOWN 1
@@ -351,8 +351,8 @@ void keyboardEnable();
 int keyboardIsDisabled();
 void keyboardSetLayout(int new_language);
 int keyboardGetLayout();
-void _kb_simulate_key(KeyboardData* data);
+void _kb_simulate_key(KeyboardData *data);
 
-} // namespace fallout
+} // namespace Fallout2
 
-#endif /* FALLOUT_KB_H_ */
+#endif
