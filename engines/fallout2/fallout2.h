@@ -100,6 +100,8 @@ public:
 extern Fallout2Engine *g_engine;
 #define SHOULD_QUIT ::Fallout2::g_engine->shouldQuit()
 
+#define clamp(v, c1, c2) (((v) < (c1)) ? (c1) : (((v) > (c2)) ? (c2) : (v)))
+
 } // End of namespace Fallout2
 
 #endif // FALLOUT2_H
