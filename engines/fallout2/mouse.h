@@ -1,10 +1,10 @@
-#ifndef FALLOUT_MOUSE_H_
-#define FALLOUT_MOUSE_H_
+#ifndef FALLOUT2_MOUSE_H
+#define FALLOUT2_MOUSE_H
 
-#include "geometry.h"
-#include "window.h"
+#include "fallout2/geometry.h"
+#include "fallout2/window.h"
 
-namespace fallout {
+namespace Fallout2 {
 
 #define MOUSE_DEFAULT_CURSOR_WIDTH 8
 #define MOUSE_DEFAULT_CURSOR_HEIGHT 8
@@ -28,32 +28,32 @@ namespace fallout {
 
 #define BUTTON_REPEAT_TIME 250
 
-extern WindowDrawingProc2* _mouse_blit_trans;
+extern WindowDrawingProc2 *_mouse_blit_trans;
 extern WINDOWDRAWINGPROC _mouse_blit;
 
 int mouseInit();
 void mouseFree();
-int mouseSetFrame(unsigned char* a1, int width, int height, int pitch, int a5, int a6, char a7);
+int mouseSetFrame(unsigned char *a1, int width, int height, int pitch, int a5, int a6, char a7);
 void mouseShowCursor();
 void mouseHideCursor();
 void _mouse_info();
 void _mouse_simulate_input(int delta_x, int delta_y, int buttons);
 bool _mouse_in(int left, int top, int right, int bottom);
 bool _mouse_click_in(int left, int top, int right, int bottom);
-void mouseGetRect(Rect* rect);
-void mouseGetPosition(int* out_x, int* out_y);
+void mouseGetRect(Rect *rect);
+void mouseGetPosition(int *out_x, int *out_y);
 void _mouse_set_position(int a1, int a2);
 int mouseGetEvent();
 bool cursorIsHidden();
-void _mouse_get_raw_state(int* out_x, int* out_y, int* out_buttons);
+void _mouse_get_raw_state(int *out_x, int *out_y, int *out_buttons);
 void mouseSetSensitivity(double value);
 
-void mouseGetPositionInWindow(int win, int* x, int* y);
+void mouseGetPositionInWindow(int win, int *x, int *y);
 bool mouseHitTestInWindow(int win, int left, int top, int right, int bottom);
-void mouseGetWheel(int* x, int* y);
-void convertMouseWheelToArrowKey(int* keyCodePtr);
+void mouseGetWheel(int *x, int *y);
+void convertMouseWheelToArrowKey(int *keyCodePtr);
 int mouse_get_last_buttons();
 
-} // namespace fallout
+} // namespace Fallout2
 
-#endif /* FALLOUT_MOUSE_H_ */
+#endif
