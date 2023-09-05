@@ -1,23 +1,25 @@
-#ifndef FALLOUT_SVGA_H_
-#define FALLOUT_SVGA_H_
+#ifndef FALLOUT2_SVGA_H
+#define FALLOUT2_SVGA_H
 
-#include <SDL.h>
+// #include <SDL.h>
 
-#include "fps_limiter.h"
-#include "geometry.h"
+// #include "fps_limiter.h"
+#include "fallout2/geometry.h"
 
-namespace fallout {
+namespace Fallout2 {
 
 extern Rect _scr_size;
-extern void (*_scr_blit)(unsigned char* src, int src_pitch, int a3, int src_x, int src_y, int src_width, int src_height, int dest_x, int dest_y);
+extern void (*_scr_blit)(unsigned char *src, int src_pitch, int a3, int src_x, int src_y, int src_width, int src_height, int dest_x, int dest_y);
 extern void (*_zero_mem)();
 
+/*
 extern SDL_Window* gSdlWindow;
 extern SDL_Surface* gSdlSurface;
 extern SDL_Renderer* gSdlRenderer;
 extern SDL_Texture* gSdlTexture;
 extern SDL_Surface* gSdlTextureSurface;
 extern FpsLimiter sharedFpsLimiter;
+*/
 
 int _init_mode_320_200();
 int _init_mode_320_400();
@@ -34,10 +36,10 @@ int _init_vesa_mode(int width, int height);
 int _GNW95_init_window(int width, int height, bool fullscreen);
 int directDrawInit(int width, int height, int bpp);
 void directDrawFree();
-void directDrawSetPaletteInRange(unsigned char* a1, int a2, int a3);
-void directDrawSetPalette(unsigned char* palette);
-unsigned char* directDrawGetPalette();
-void _GNW95_ShowRect(unsigned char* src, int src_pitch, int a3, int src_x, int src_y, int src_width, int src_height, int dest_x, int dest_y);
+void directDrawSetPaletteInRange(unsigned char *a1, int a2, int a3);
+void directDrawSetPalette(unsigned char *palette);
+unsigned char *directDrawGetPalette();
+void _GNW95_ShowRect(unsigned char *src, int src_pitch, int a3, int src_x, int src_y, int src_width, int src_height, int dest_x, int dest_y);
 void _GNW95_zero_vid_mem();
 
 int screenGetWidth();
@@ -46,6 +48,6 @@ int screenGetVisibleHeight();
 void handleWindowSizeChanged();
 void renderPresent();
 
-} // namespace fallout
+} // namespace Fallout2
 
-#endif /* FALLOUT_SVGA_H_ */
+#endif
