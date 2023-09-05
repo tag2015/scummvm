@@ -50,12 +50,9 @@ bool gameConfigInit(bool isMapper, int argc, char **argv) {
 	if (!configInit(&gGameConfig)) {
 		return false;
 	}
-	warning("initialized!");
 	// Initialize defaults.
 	configSetString(&gGameConfig, GAME_CONFIG_SYSTEM_KEY, GAME_CONFIG_EXECUTABLE_KEY, "game");
-	warning("set game!");
 	configSetString(&gGameConfig, GAME_CONFIG_SYSTEM_KEY, GAME_CONFIG_MASTER_DAT_KEY, "master.dat");
-	warning("set master!");
 	configSetString(&gGameConfig, GAME_CONFIG_SYSTEM_KEY, GAME_CONFIG_MASTER_PATCHES_KEY, "data");
 	configSetString(&gGameConfig, GAME_CONFIG_SYSTEM_KEY, GAME_CONFIG_CRITTER_DAT_KEY, "critter.dat");
 	configSetString(&gGameConfig, GAME_CONFIG_SYSTEM_KEY, GAME_CONFIG_CRITTER_PATCHES_KEY, "data");
@@ -134,11 +131,13 @@ bool gameConfigInit(bool isMapper, int argc, char **argv) {
 
 	// Read contents of `fallout2.cfg` into config. The values from the file
 	// will override the defaults above.
-	configRead(&gGameConfig, gGameConfigFilePath, false);
+	// TODO: read config
+	// configRead(&gGameConfig, gGameConfigFilePath, false);
 
 	// Add key-values from command line, which overrides both defaults and
 	// whatever was loaded from `fallout2.cfg`.
-	configParseCommandLineArguments(&gGameConfig, argc, argv);
+	// TODO? Commandline
+	// configParseCommandLineArguments(&gGameConfig, argc, argv);
 
 	gGameConfigInitialized = true;
 
