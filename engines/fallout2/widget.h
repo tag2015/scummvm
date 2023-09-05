@@ -1,11 +1,11 @@
-#ifndef WIDGET_H
-#define WIDGET_H
+#ifndef FALLOUT2_WIDGET_H
+#define FALLOUT2_WIDGET_H
 
-namespace fallout {
+namespace Fallout2 {
 
 int _update_widgets();
 void sub_4B5998(int win);
 
-} // namespace fallout
+} // namespace Fallout2
 
 #endif /* WIDGET_H */
