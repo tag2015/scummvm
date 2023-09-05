@@ -30,6 +30,8 @@ namespace Fallout2 {
 
 #define KEY_QUEUE_SIZE 64
 
+#define SDL_NUM_SCANCODES 512
+
 typedef enum Key {
 	KEY_ESCAPE = '\x1b',
 	KEY_TAB = '\x09',
