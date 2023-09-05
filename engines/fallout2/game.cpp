@@ -1,70 +1,72 @@
-#include "game.h"
+#include "fallout2/game.h"
 
-#include <stdio.h>
-#include <string.h>
+//#include <stdio.h>
+//#include <string.h>
 
-#include "actions.h"
-#include "animation.h"
-#include "art.h"
-#include "automap.h"
-#include "character_editor.h"
-#include "character_selector.h"
-#include "color.h"
-#include "combat.h"
-#include "combat_ai.h"
-#include "critter.h"
-#include "cycle.h"
-#include "db.h"
-#include "dbox.h"
-#include "debug.h"
-#include "display_monitor.h"
-#include "draw.h"
-#include "endgame.h"
-#include "font_manager.h"
-#include "game_dialog.h"
-#include "game_memory.h"
-#include "game_mouse.h"
-#include "game_movie.h"
-#include "game_sound.h"
-#include "input.h"
-#include "interface.h"
-#include "inventory.h"
-#include "item.h"
-#include "kb.h"
-#include "loadsave.h"
-#include "map.h"
-#include "memory.h"
-#include "mouse.h"
-#include "movie.h"
-#include "movie_effect.h"
-#include "object.h"
-#include "options.h"
-#include "palette.h"
-#include "party_member.h"
-#include "perk.h"
-#include "pipboy.h"
-#include "platform_compat.h"
-#include "preferences.h"
-#include "proto.h"
-#include "queue.h"
-#include "random.h"
-#include "scripts.h"
-#include "settings.h"
-#include "sfall_config.h"
-#include "sfall_global_vars.h"
-#include "sfall_lists.h"
-#include "skill.h"
-#include "skilldex.h"
-#include "stat.h"
-#include "svga.h"
-#include "text_font.h"
-#include "tile.h"
-#include "trait.h"
-#include "version.h"
-#include "window_manager.h"
-#include "worldmap.h"
 
-namespace fallout {
+// #include "actions.h"
+// #include "animation.h"
+// #include "art.h"
+// #include "automap.h"
+// #include "character_editor.h"
+// #include "character_selector.h"
+// #include "color.h"
+// #include "combat.h"
+// #include "combat_ai.h"
+// #include "critter.h"
+// #include "cycle.h"
+#include "fallout2/db.h"
+// #include "dbox.h"
+#include "fallout2/debug.h"
+// #include "display_monitor.h"
+#include "fallout2/draw.h"
+// #include "endgame.h"
+// #include "font_manager.h"
+// #include "game_dialog.h"
+// #include "game_memory.h"
+// #include "game_mouse.h"
+// #include "game_movie.h"
+// #include "game_sound.h"
+// #include "input.h"
+// #include "interface.h"
+// #include "inventory.h"
+// #include "item.h"
+// #include "kb.h"
+// #include "loadsave.h"
+// #include "map.h"
+#include "fallout2/memory.h"
+// #include "mouse.h"
+// #include "movie.h"
+// #include "movie_effect.h"
+// #include "object.h"
+// #include "options.h"
+#include "fallout2/palette.h"
+// #include "party_member.h"
+// #include "perk.h"
+// #include "pipboy.h"
+// #include "platform_compat.h"
+// #include "preferences.h"
+// #include "proto.h"
+// #include "queue.h"
+// #include "random.h"
+// #include "scripts.h"
+#include "fallout2/settings.h"
+// #include "sfall_config.h"
+// #include "sfall_global_vars.h"
+// #include "sfall_lists.h"
+// #include "skill.h"
+// #include "skilldex.h"
+// #include "stat.h"
+// #include "svga.h"
+// #include "text_font.h"
+// #include "tile.h"
+// #include "trait.h"
+#include "fallout2/version.h"
+// #include "window_manager.h"
+// #include "worldmap.h"
+
+
+namespace Fallout2 {
 
 #define HELP_SCREEN_WIDTH (640)
 #define HELP_SCREEN_HEIGHT (480)
@@ -77,7 +79,7 @@ static int gameLoadGlobalVars();
 static int gameTakeScreenshot(int width, int height, unsigned char* buffer, unsigned char* palette);
 static void gameFreeGlobalVars();
 static void showHelp();
-static int gameDbInit();
+//static int gameDbInit();  TODO: reenable
 static void showSplash();
 
 // 0x501C9C
@@ -115,6 +117,8 @@ MessageList gMiscMessageList;
 // CE: Sonora folks like to store objects in global variables.
 static void** gGameGlobalPointers = nullptr;
 
+// TODO
+#if 0
 // 0x442580
 int gameInitWithOptions(const char* windowTitle, bool isMapper, int font, int a4, int argc, char** argv) {
 	char path[COMPAT_MAX_PATH];
@@ -351,6 +355,8 @@ int gameInitWithOptions(const char* windowTitle, bool isMapper, int font, int a4
 
 	return 0;
 }
+
+
 
 // 0x442B84
 void gameReset() {
@@ -1265,9 +1271,10 @@ int showQuitConfirmationDialog() {
 
 	return rc;
 }
+#endif
 
 // 0x44418C
-static int gameDbInit() {
+/*static*/ int gameDbInit() {
 	const char* main_file_name;
 	const char* patch_file_name;
 	int patch_index;
@@ -1288,7 +1295,8 @@ static int gameDbInit() {
 
 	int master_db_handle = dbOpen(main_file_name, 0, patch_file_name, 1);
 	if (master_db_handle == -1) {
-		showMesageBox("Could not find the master datafile. Please make sure the FALLOUT CD is in the drive and that you are running FALLOUT from the directory you installed it to.");
+//		showMesageBox("Could not find the master datafile. Please make sure the FALLOUT CD is in the drive and that you are running FALLOUT from the directory you installed it to.");
+		warning("Could not find the master datafile. Please make sure the FALLOUT CD is in the drive and that you are running FALLOUT from the directory you installed it to.");
 		return -1;
 	}
 
@@ -1304,7 +1312,8 @@ static int gameDbInit() {
 
 	int critter_db_handle = dbOpen(main_file_name, 0, patch_file_name, 1);
 	if (critter_db_handle == -1) {
-		showMesageBox("Could not find the critter datafile. Please make sure the FALLOUT CD is in the drive and that you are running FALLOUT from the directory you installed it to.");
+//		showMesageBox("Could not find the critter datafile. Please make sure the FALLOUT CD is in the drive and that you are running FALLOUT from the directory you installed it to.");
+		warning("Could not find the critter datafile. Please make sure the FALLOUT CD is in the drive and that you are running FALLOUT from the directory you installed it to.");
 		return -1;
 	}
 
@@ -1322,6 +1331,7 @@ static int gameDbInit() {
 
 	return 0;
 }
+
 
 // 0x444384
 static void showSplash() {
@@ -1399,8 +1409,8 @@ static void showSplash() {
 		configFree(&config);
 	}
 
-	int screenWidth = screenGetWidth();
-	int screenHeight = screenGetHeight();
+	int screenWidth = 640; // screenGetWidth(); TODO svga
+	int screenHeight = 480; // screenGetHeight();
 
 	if (size != 0 || screenWidth < width || screenHeight < height) {
 		int scaledWidth;
@@ -1425,7 +1435,7 @@ static void showSplash() {
 
 			int x = screenWidth > scaledWidth ? (screenWidth - scaledWidth) / 2 : 0;
 			int y = screenHeight > scaledHeight ? (screenHeight - scaledHeight) / 2 : 0;
-			_scr_blit(scaled, scaledWidth, scaledHeight, 0, 0, scaledWidth, scaledHeight, x, y);
+//			_scr_blit(scaled, scaledWidth, scaledHeight, 0, 0, scaledWidth, scaledHeight, x, y);  TODO
 			paletteFadeTo(palette);
 
 			internal_free(scaled);
@@ -1433,7 +1443,7 @@ static void showSplash() {
 	} else {
 		int x = (screenWidth - width) / 2;
 		int y = (screenHeight - height) / 2;
-		_scr_blit(data, width, height, 0, 0, width, height, x, y);
+//		_scr_blit(data, width, height, 0, 0, width, height, x, y);  TODO
 		paletteFadeTo(palette);
 	}
 
@@ -1443,6 +1453,7 @@ static void showSplash() {
 	settings.system.splash = splash + 1;
 }
 
+#if 0
 int gameShowDeathDialog(const char* message) {
 	bool isoWasEnabled = isoDisable();
 
@@ -1488,6 +1499,7 @@ int gameShowDeathDialog(const char* message) {
 
 	return rc;
 }
+#endif
 
 void* gameGetGlobalPointer(int var) {
 	if (var < 0 || var >= gGameGlobalVarsLength) {
@@ -1532,4 +1544,4 @@ ScopedGameMode::~ScopedGameMode() {
 	GameMode::exitGameMode(gameMode);
 }
 
-} // namespace fallout
+} // namespace Fallout2
