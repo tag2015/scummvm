@@ -30,6 +30,17 @@
 #include "engines/util.h"
 #include "graphics/palette.h"
 
+#include "fallout2/version.h"
+#include "fallout2/win32.h"
+#include "fallout2/random.h"
+#include "fallout2/game_memory.h"
+#include "fallout2/settings.h"
+#include "fallout2/debug.h"
+#include "fallout2/game.h"
+#include "fallout2/message.h"
+#include "fallout2/window.h"
+
+
 namespace Fallout2 {
 
 Fallout2Engine *g_engine;
@@ -74,6 +85,43 @@ Common::Error Fallout2Engine::run() {
 	Common::Event e;
 	int offset = 0;
 
+	char version[100];
+	versionGetVersion(version, 50);
+	debug("%s",version);
+	gProgramIsActive = true;
+	randomInit(); // specific engine rng init
+	if (gameMemoryInit() == -1)
+		warning("Error allocating memory");
+	else
+		debug("Fallout2: memory allocation successful!");
+
+	char test_argv[10][512];
+	strncpy(test_argv[0],"fallout2.exe",sizeof(test_argv[0]));
+	char *tmp_argv = test_argv[0];
+	char **tmp_argv2 = &tmp_argv;
+
+	if(settingsInit(false, 1, tmp_argv2))
+		debug("Settings initialized!");
+	else
+		warning("can't init settings");
+
+	if (gameDbInit() != -1)
+		debug("Databases opened");
+	else
+		warning("can't open databases!");
+
+	// Message list repository is considered a specialized file manager, so
+	// it should be initialized early in the process.
+	if(messageListRepositoryInit() == true)
+		debug("Initialized message repository");
+	else
+		warning("Couldn't initialize message repo");
+
+//	_initWindow(1,0);
+	// throw a dice (yay!)
+	debugPrint("RandomRoll (diff= 70) result: %d", randomRoll(70, 5, NULL));
+	debugPrint("RandomRoll (diff= 10) result: %d", randomRoll(10, 5, NULL));
+	debugPrint("RandomRoll (diff= 150) result: %d", randomRoll(150, 5, NULL));
 	while (!shouldQuit()) {
 		while (g_system->getEventManager()->pollEvent(e)) {
 		}
