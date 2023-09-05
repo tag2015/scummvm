@@ -12,6 +12,7 @@
 #endif*/
 
 #include "fallout2/file_find.h"
+#include "common/debug.h"
 
 namespace Fallout2 {
 
@@ -537,6 +538,7 @@ bool xbaseOpen(const char *path) {
 		xbase->dbase = dbase;
 		xbase->next = gXbaseHead;
 		gXbaseHead = xbase;
+		debug("Opened XBASE: %s, isDAT: %d ", xbase->path, xbase->isDbase);
 		return true;
 	}
 
@@ -565,6 +567,8 @@ bool xbaseOpen(const char *path) {
 #endif
 	xbase->next = gXbaseHead;
 	gXbaseHead = xbase;
+	warning("XBASE: Changing dir is not supported!!");
+	debug("Opened XBASE: %s, isDAT: %d ", xbase->path, xbase->isDbase);
 
 	return true;
 }
@@ -714,7 +718,7 @@ void xlistFree(XList *xlist) {
 // 0x4DFFAC
 static int xbaseMakeDirectory(const char *filePath) {
 // TODO create directory
-#if 0 
+#if 0
 	char workingDirectory[COMPAT_MAX_PATH];
 	if (getcwd(workingDirectory, COMPAT_MAX_PATH) == NULL) {
 		return -1;
