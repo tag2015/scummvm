@@ -1,11 +1,11 @@
-#ifndef MOUSE_MANAGER_H
-#define MOUSE_MANAGER_H
+#ifndef FALLOUT2_MOUSE_MANAGER_H
+#define FALLOUT2_MOUSE_MANAGER_H
 
-namespace fallout {
+namespace Fallout2 {
 
 #define MOUSE_MGR_CACHE_CAPACITY 32
 
-typedef char*(MouseManagerNameMangler)(char* fileName);
+typedef char *(MouseManagerNameMangler)(char *fileName);
 typedef int(MouseManagerRateProvider)();
 typedef int(MouseManagerTimeProvider)();
 
@@ -16,7 +16,7 @@ typedef enum MouseManagerMouseType {
 } MouseManagerMouseType;
 
 typedef struct MouseManagerStaticData {
-	unsigned char* data;
+	unsigned char *data;
 	int field_4;
 	int field_8;
 	int width;
@@ -24,10 +24,10 @@ typedef struct MouseManagerStaticData {
 } MouseManagerStaticData;
 
 typedef struct MouseManagerAnimatedData {
-	unsigned char** field_0;
-	unsigned char** field_4;
-	int* field_8;
-	int* field_C;
+	unsigned char **field_0;
+	unsigned char **field_4;
+	int *field_8;
+	int *field_C;
 	int width;
 	int height;
 	float field_18;
@@ -40,9 +40,9 @@ typedef struct MouseManagerAnimatedData {
 
 typedef struct MouseManagerCacheEntry {
 	union {
-		void* data;
-		MouseManagerStaticData* staticData;
-		MouseManagerAnimatedData* animatedData;
+		void *data;
+		MouseManagerStaticData *staticData;
+		MouseManagerAnimatedData *animatedData;
 	};
 	int type;
 	unsigned char palette[256 * 3];
@@ -51,35 +51,35 @@ typedef struct MouseManagerCacheEntry {
 	char field_32C[32];
 } MouseManagerCacheEntry;
 
-extern MouseManagerNameMangler* gMouseManagerNameMangler;
-extern MouseManagerRateProvider* gMouseManagerRateProvider;
-extern MouseManagerTimeProvider* gMouseManagerTimeProvider;
+extern MouseManagerNameMangler *gMouseManagerNameMangler;
+extern MouseManagerRateProvider *gMouseManagerRateProvider;
+extern MouseManagerTimeProvider *gMouseManagerTimeProvider;
 
 extern MouseManagerCacheEntry gMouseManagerCache[MOUSE_MGR_CACHE_CAPACITY];
 extern bool gMouseManagerIsAnimating;
-extern unsigned char* gMouseManagerCurrentPalette;
-extern MouseManagerAnimatedData* gMouseManagerCurrentAnimatedData;
-extern unsigned char* gMouseManagerCurrentStaticData;
+extern unsigned char *gMouseManagerCurrentPalette;
+extern MouseManagerAnimatedData *gMouseManagerCurrentAnimatedData;
+extern unsigned char *gMouseManagerCurrentStaticData;
 extern int gMouseManagerCurrentCacheEntryIndex;
 
-char* mouseManagerNameManglerDefaultImpl(char* a1);
+char *mouseManagerNameManglerDefaultImpl(char *a1);
 int mouseManagerRateProviderDefaultImpl();
 int mouseManagerTimeProviderDefaultImpl();
-void mouseManagerSetNameMangler(MouseManagerNameMangler* func);
-void mouseManagerFreeCacheEntry(MouseManagerCacheEntry* entry);
-int mouseManagerInsertCacheEntry(void** data, int type, unsigned char* palette, const char* fileName);
+void mouseManagerSetNameMangler(MouseManagerNameMangler *func);
+void mouseManagerFreeCacheEntry(MouseManagerCacheEntry *entry);
+int mouseManagerInsertCacheEntry(void **data, int type, unsigned char *palette, const char *fileName);
 void mouseManagerFlushCache();
-MouseManagerCacheEntry* mouseManagerFindCacheEntry(const char* fileName, unsigned char** palettePtr, int* a3, int* a4, int* widthPtr, int* heightPtr, int* typePtr);
+MouseManagerCacheEntry *mouseManagerFindCacheEntry(const char *fileName, unsigned char **palettePtr, int *a3, int *a4, int *widthPtr, int *heightPtr, int *typePtr);
 void mouseManagerInit();
 void mouseManagerExit();
 void mouseManagerUpdate();
-int mouseManagerSetFrame(char* fileName, int a2);
-bool mouseManagerSetMouseShape(char* fileName, int a2, int a3);
-bool mouseManagerSetMousePointer(char* fileName);
+int mouseManagerSetFrame(char *fileName, int a2);
+bool mouseManagerSetMouseShape(char *fileName, int a2, int a3);
+bool mouseManagerSetMousePointer(char *fileName);
 void mouseManagerResetMouse();
 void mouseManagerHideMouse();
 void mouseManagerShowMouse();
 
-} // namespace fallout
+} // namespace Fallout2
 
-#endif /* MOUSE_MANAGER_H */
+#endif
