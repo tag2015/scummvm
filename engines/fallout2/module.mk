@@ -15,13 +15,16 @@ MODULE_OBJS = \
 	dictionary.o \
 	dinput.o \
 	draw.o \
+	export.o \
 	file_find.o \
 	font_manager.o \
+	game.o \
 	game_config.o \
 	game_memory.o \
 	geometry.o \
 	graph_lib.o \
 	heap.o \
+	interpreter.o \
 	memory.o \
 	memory_manager.o \
 	message.o \
@@ -34,6 +37,8 @@ MODULE_OBJS = \
 	sfall_config.o \
 	text_font.o \
 	version.o \
+	widget.o \
+	window.o \
 	word_wrap.o \
 	xfile.o \
 	third_party/fpattern/fpattern.o
