@@ -1,6 +1,6 @@
-#include "widget.h"
+#include "fallout2/widget.h"
 
-namespace fallout {
+namespace Fallout2 {
 
 static void _showRegion(int a1);
 
@@ -28,4 +28,4 @@ void sub_4B5998(int win) {
 	// TODO: Incomplete.
 }
 
-} // namespace fallout
+} // namespace Fallout2
