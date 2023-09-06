@@ -65,6 +65,7 @@ typedef struct DFile {
 	// TODO
 	// Decompressed data
 	unsigned char *decompressedData;
+	int decompressed_position;
 
 	// The last ungot character.
 	//

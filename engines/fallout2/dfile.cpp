@@ -819,6 +819,12 @@ static bool dfileReadCompressed(DFile *stream, void *ptr, size_t size) {
 	//  ptr out (Bytef *)ptr;
 	//  stream in
 
+	if(stream->decompressedData != NULL) {
+		debug("Already decompressed, returning");
+//		stream->position += size;
+		return true;
+	}
+
 	stream->decompressionBuffer = (byte *)malloc(stream->entry->dataSize);// OK (full uncompress)
 	stream->decompressedData = (byte *) malloc(stream->entry->uncompressedSize); // OK (full uncompress)
 //	stream->decompressionBuffer = (byte *)malloc(size * sizeof(byte));
@@ -859,11 +865,11 @@ static bool dfileReadCompressed(DFile *stream, void *ptr, size_t size) {
 	debug("UnCompressed initial byte+1 %u", *( stream->decompressedData+1) );
 	debug("UnCompressed initial byte+2 %u", *(stream->decompressedData+2) );
 	debug("UnCompressed initial byte+3 %u", *( stream->decompressedData+3) );
-	// debug("UnCompressed initial byte+4 %u", *( stream->decompressedData+4) );
-	// debug("UnCompressed initial byte+5 %u", *( stream->decompressedData+5) );
-	// debug("UnCompressed initial byte+6 %u", *( stream->decompressedData+6) );
-	// debug("UnCompressed initial byte+7 %u", *( stream->decompressedData+7) );
-	// debug("UnCompressed initial byte+8 %u", *( stream->decompressedData+8) );
+	debug("UnCompressed initial byte+4 %u", *( stream->decompressedData+4) );
+	debug("UnCompressed initial byte+5 %u", *( stream->decompressedData+5) );
+	debug("UnCompressed initial byte+6 %u", *( stream->decompressedData+6) );
+	debug("UnCompressed initial byte+7 %u", *( stream->decompressedData+7) );
+	debug("UnCompressed initial byte+8 %u", *( stream->decompressedData+8) );
 
 //	debug("UnCompressed initial byte %u",  *( (byte*) ptr) );
 //	debug("UnCompressed initial byte+1 %u", *( (byte*) ptr+1) );
@@ -900,7 +906,7 @@ static bool dfileReadCompressed(DFile *stream, void *ptr, size_t size) {
 			return false;
 		} */
 
-	stream->position += size;  // FIXME ???
+//	stream->position += size;  // FIXME ???
 
 	return true;
 }
