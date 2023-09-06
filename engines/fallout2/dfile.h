@@ -62,6 +62,10 @@ typedef struct DFile {
 	// This value is NULL if entry is not compressed.
 	unsigned char *decompressionBuffer;
 
+	// TODO
+	// Decompressed data
+	unsigned char *decompressedData;
+
 	// The last ungot character.
 	//
 	// See [DFILE_HAS_UNGETC] notes.
