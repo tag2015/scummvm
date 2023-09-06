@@ -98,6 +98,7 @@ XFile *xfileOpen(const char *filePath, const char *mode) {
 
 		stream->type = XFILE_TYPE_FILE;
 		snprintf(path, sizeof(path), "%s", filePath);
+		debug("XFILE: Absolute path: %s",path);
 	} else {
 		// [filePath] is a relative path. Loop thru open xbases and attempt to
 		// open [filePath] from appropriate xbase.
@@ -109,11 +110,13 @@ XFile *xfileOpen(const char *filePath, const char *mode) {
 				if (stream->dfile != NULL) {
 					stream->type = XFILE_TYPE_DFILE;
 					snprintf(path, sizeof(path), "%s", filePath);
+					debug("XFILE: Relative path (dbase): %s",path);
 					break;
 				}
 			} else {
 				// Build path relative to directory-based xbase.
 				snprintf(path, sizeof(path), "%s\\%s", curr->path, filePath);
+				debug("XFILE: Relative path (dir): %s",path);
 
 				// Attempt to open plain stream.
 				stream->file = compat_fopen(path, mode);
@@ -128,6 +131,7 @@ XFile *xfileOpen(const char *filePath, const char *mode) {
 		if (stream->file == NULL) {
 			// File was not opened during the loop above. Attempt to open file
 			// relative to the current working directory.
+			debug("XFILE: not opened?");
 			stream->file = compat_fopen(filePath, mode);
 			if (stream->file == NULL) {
 				free(stream);
@@ -145,6 +149,7 @@ XFile *xfileOpen(const char *filePath, const char *mode) {
 		int ch1 = stream->file->readByte();
 		int ch2 = stream->file->readByte();
 		if (ch1 == 0x1F && ch2 == 0x8B) {
+			debug("XFILE: found gzipped stream");
 			// File is gzipped. Close plain stream and reopen this file as
 			// gzipped stream.
 			// fclose(stream->file);
@@ -155,6 +160,7 @@ XFile *xfileOpen(const char *filePath, const char *mode) {
 			stream->gzfile = Common::wrapCompressedReadStream(stream->file);
 		} else {
 			// File is not gzipped.
+			debug("XFILE: found normal (uncompressed) stream");
 			stream->file->seek(0, SEEK_SET);
 		}
 	}
@@ -308,6 +314,7 @@ size_t xfileRead(void *ptr, size_t size, size_t count, XFile *stream) {
 
 	size_t elementsRead;
 
+	debug("XFILE: xfileRead: file type: %d", stream->type);
 	switch (stream->type) {
 	case XFILE_TYPE_DFILE:
 		elementsRead = dfileRead(ptr, size, count, stream->dfile);
@@ -327,6 +334,8 @@ size_t xfileRead(void *ptr, size_t size, size_t count, XFile *stream) {
 		// elementsRead = fread(ptr, size, count, stream->file);
 		break;
 	}
+
+	debug("XFILE: elements read: %lld", elementsRead);
 
 	return elementsRead;
 }
