@@ -206,8 +206,20 @@ size_t fileRead(void *ptr, size_t size, size_t count, File *stream) {
 		long remainingSize = size * count;
 		long chunkSize = gFileReadProgressChunkSize - gFileReadProgressBytesRead;
 
+		size_t bytesRead;
+
 		while (remainingSize >= chunkSize) {
-			size_t bytesRead = xfileRead(byteBuffer, sizeof(*byteBuffer), chunkSize, stream);
+			if (stream->type == XFILE_TYPE_DFILE && stream->dfile->entry->compressed) {
+				if (stream->dfile->decompressedData == NULL) {
+					bytesRead = xfileRead(byteBuffer, sizeof(*byteBuffer), chunkSize, stream);
+				}
+				debug("Fetching compressed data");
+				memcpy(ptr, (stream->dfile->decompressedData + stream->dfile->decompressed_position), size * count);
+				stream->dfile->decompressed_position += count;
+				stream->dfile->position += (size * count);
+			} else {
+				bytesRead = xfileRead(byteBuffer, sizeof(*byteBuffer), chunkSize, stream);
+			}
 			byteBuffer += bytesRead;
 			totalBytesRead += bytesRead;
 			remainingSize -= bytesRead;
@@ -227,7 +239,19 @@ size_t fileRead(void *ptr, size_t size, size_t count, File *stream) {
 		return totalBytesRead / size;
 	}
 
-	return xfileRead(ptr, size, count, stream);
+	if (stream->type == XFILE_TYPE_DFILE && stream->dfile->entry->compressed) {
+		if (stream->dfile->decompressedData == NULL)
+			xfileRead(ptr, size, count, stream);
+		debug("Fetching compressed data - start: %u", *(stream->dfile->decompressedData));
+		debug("Fetching compressed data - current: %u", *(stream->dfile->decompressedData + stream->dfile->decompressed_position));
+		memcpy(ptr, (stream->dfile->decompressedData + stream->dfile->decompressed_position), size * count);
+		stream->dfile->decompressed_position += (size * count);
+		stream->dfile->position += size;
+	}
+	else
+		 xfileRead(ptr, size, count, stream);
+
+	return count;
 }
 
 // 0x4C60B8
@@ -320,6 +344,7 @@ int fileReadInt32(File *stream, int *valuePtr) {
 						  *(stream->dfile->decompressedData+3) );
 //			value = (int*) ptr;
 			debug("value %d", value);
+			stream->dfile->decompressed_position += 4;
 		}
 	}
 	*valuePtr = value;
