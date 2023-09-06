@@ -7,6 +7,7 @@
 #include "fallout2/platform_compat.h"
 #include "fallout2/xfile.h"
 
+#include "common/debug.h"
 namespace Fallout2 {
 
 typedef struct FileList {
@@ -302,10 +303,28 @@ int fileReadInt32(File *stream, int *valuePtr) {
 	int value;
 
 	if (xfileRead(&value, 4, 1, stream) == -1) {
+		debug("Error reading int32");
 		return -1;
 	}
-
-	*valuePtr = ((value & 0xFF000000) >> 24) | ((value & 0xFF0000) >> 8) | ((value & 0xFF00) << 8) | ((value & 0xFF) << 24);
+	else {
+		if(stream->dfile->entry->compressed)  { // FIXME idk why compressed entries lose the pointer, for now just do it here
+	debug("UnCompressed initial byte %u",  *( stream->dfile->decompressedData ));
+	debug("UnCompressed initial byte+1 %u", *( stream->dfile->decompressedData+1) );
+	debug("UnCompressed initial byte+2 %u", *(stream->dfile->decompressedData+2) );
+	debug("UnCompressed initial byte+3 %u", *( stream->dfile->decompressedData+3) );
+//			void *ptr = (byte *) malloc(sizeof(byte)*4);
+//			memcpy( ptr, stream->dfile->decompressedData, sizeof(byte)*4);
+			value = (int)( *(stream->dfile->decompressedData) << 24 |
+			  			  *(stream->dfile->decompressedData+1) << 16 |
+						  *(stream->dfile->decompressedData+2) << 8 |
+						  *(stream->dfile->decompressedData+3) );
+//			value = (int*) ptr;
+			debug("value %d", value);
+		}
+	}
+	*valuePtr = value;
+//	*valuePtr = ((value & 0xFF000000) >> 24) | ((value & 0xFF0000) >> 8) | ((value & 0xFF00) << 8) | ((value & 0xFF) << 24);
+	debug("Readi int32 succesfully");
 
 	return 0;
 }
