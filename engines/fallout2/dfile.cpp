@@ -4,6 +4,9 @@
 
 #include "fallout2/third_party/fpattern/fpattern.h"
 
+#include "fallout2/debug.h"
+#include "common/compression/deflate.h"
+
 /*
 #include <assert.h>
 #include <stdio.h>
@@ -673,6 +676,7 @@ static DFile *dfileOpenInternal(DBase *dbase, const char *filePath, const char *
 	}
 
 	if (entry->compressed == 1) {
+		debug("DFILE entry is compressed");
 		// Entry is compressed, setup decompression stream and decompression
 		// buffer. This step is not needed when previous instance of dfile is
 		// passed via parameter, which might already have stream and
@@ -815,13 +819,59 @@ static bool dfileReadCompressed(DFile *stream, void *ptr, size_t size) {
 	//  ptr out (Bytef *)ptr;
 	//  stream in
 
-	stream->decompressionBuffer = (byte *)malloc(stream->entry->dataSize);
-	ptr = (byte *)malloc(size);
+	stream->decompressionBuffer = (byte *)malloc(stream->entry->dataSize);// OK (full uncompress)
+	stream->decompressedData = (byte *) malloc(stream->entry->uncompressedSize); // OK (full uncompress)
+//	stream->decompressionBuffer = (byte *)malloc(size * sizeof(byte));
+//	stream->decompressedData = (byte *) malloc(stream->entry->uncompressedSize);
 
-	stream->stream->read(stream->decompressionBuffer, stream->entry->dataSize);
+//	ptr = (byte *)malloc(size);
+//	void *full_ptr = (byte *)malloc(stream->entry->uncompressedSize);
 
-	unsigned long actual_size = size; // FIXME:
-	Common::inflateZlib((byte *)ptr, &actual_size, stream->decompressionBuffer, stream->entry->dataSize);
+//	stream->stream->read(stream->decompressionBuffer, size);
+	stream->stream->read(stream->decompressionBuffer, stream->entry->uncompressedSize);
+
+	unsigned long uncomp_size = stream->entry->uncompressedSize; // FIXME
+	debug("Using inflate in dfileReadCompressed!");
+	debug("Full Compressed size: %d - Full Expected size: %d", stream->entry->dataSize, stream->entry->uncompressedSize);
+	debug("size: %d", size);
+	// TODO how to extract just a part?
+//	Common::inflateZlib((byte *)full_ptr, &uncomp_size, stream->decompressionBuffer, stream->entry->dataSize);
+	Common::inflateZlib(stream->decompressedData, &uncomp_size, stream->decompressionBuffer, stream->entry->dataSize);  // OK
+//	Common::inflateZlib(stream->decompressedData, &uncomp_size, stream->decompressionBuffer, size);
+
+
+//	memcpy(ptr, full_ptr, size);  // copy requested unpacked data
+
+	// DEBUG DEBUG - echo all bytes to see if this shit works
+	debug("Compressed initial byte %u", * (stream->decompressionBuffer) );
+	debug("Compressed initial byte+1 %u", * (stream->decompressionBuffer+1) );
+	debug("Compressed initial byte+2 %u", * (stream->decompressionBuffer+2) );
+	debug("Compressed initial byte+3 %u", * (stream->decompressionBuffer+3) );
+	// debug("Compressed initial byte+4 %u", * (stream->decompressionBuffer+4) );
+	// debug("Compressed initial byte+5 %u", * (stream->decompressionBuffer+5) );
+	// debug("Compressed initial byte+6 %u", * (stream->decompressionBuffer+6) );
+	// debug("Compressed initial byte+7 %u", * (stream->decompressionBuffer+7) );
+	// debug("Compressed initial byte+8 %u", * (stream->decompressionBuffer+8) );
+
+//	void *newptr = full_ptr;
+
+	debug("UnCompressed initial byte %u",  *( stream->decompressedData) );
+	debug("UnCompressed initial byte+1 %u", *( stream->decompressedData+1) );
+	debug("UnCompressed initial byte+2 %u", *(stream->decompressedData+2) );
+	debug("UnCompressed initial byte+3 %u", *( stream->decompressedData+3) );
+	// debug("UnCompressed initial byte+4 %u", *( stream->decompressedData+4) );
+	// debug("UnCompressed initial byte+5 %u", *( stream->decompressedData+5) );
+	// debug("UnCompressed initial byte+6 %u", *( stream->decompressedData+6) );
+	// debug("UnCompressed initial byte+7 %u", *( stream->decompressedData+7) );
+	// debug("UnCompressed initial byte+8 %u", *( stream->decompressedData+8) );
+
+//	debug("UnCompressed initial byte %u",  *( (byte*) ptr) );
+//	debug("UnCompressed initial byte+1 %u", *( (byte*) ptr+1) );
+//	debug("UnCompressed initial byte+2 %u", *((byte*) ptr+2) );
+//	debug("UnCompressed initial byte+3 %u", *( (byte*) ptr+3) );
+
+//	for(int i=0;i<10;i++)
+//		debug("Uncompressed byte at address %d: %u", i, * (byte*) newptr++ );
 
 	/*	do {
 			if (stream->decompressionStream->avail_out == 0) {
@@ -850,7 +900,7 @@ static bool dfileReadCompressed(DFile *stream, void *ptr, size_t size) {
 			return false;
 		} */
 
-	stream->position += size;
+	stream->position += size;  // FIXME ???
 
 	return true;
 }
