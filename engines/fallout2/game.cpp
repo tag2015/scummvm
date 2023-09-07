@@ -65,6 +65,8 @@
 // #include "window_manager.h"
 // #include "worldmap.h"
 
+#include "graphics/palette.h"
+#include "graphics/surface.h"
 
 namespace Fallout2 {
 
@@ -80,7 +82,7 @@ static int gameTakeScreenshot(int width, int height, unsigned char* buffer, unsi
 static void gameFreeGlobalVars();
 static void showHelp();
 //static int gameDbInit();  TODO: reenable
-static void showSplash();
+//static void showSplash();
 
 // 0x501C9C
 static char _aGame_0[] = "game\\";
@@ -1332,9 +1334,9 @@ int showQuitConfirmationDialog() {
 	return 0;
 }
 
-
+#if 0
 // 0x444384
-static void showSplash() {
+/*static*/ void showSplash() {
 	int splash = settings.system.splash;
 
 	char path[64];
@@ -1452,6 +1454,7 @@ static void showSplash() {
 
 	settings.system.splash = splash + 1;
 }
+#endif
 
 #if 0
 int gameShowDeathDialog(const char* message) {
