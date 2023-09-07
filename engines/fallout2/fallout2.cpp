@@ -31,15 +31,21 @@
 #include "graphics/palette.h"
 #include "graphics/surface.h"
 
+#include "fallout2/db.h"
 #include "fallout2/debug.h"
 #include "fallout2/game.h"
 #include "fallout2/game_memory.h"
+#include "fallout2/memory.h"
 #include "fallout2/message.h"
+#include "fallout2/palette.h"
+#include "fallout2/platform_compat.h"
 #include "fallout2/random.h"
 #include "fallout2/settings.h"
 #include "fallout2/version.h"
 #include "fallout2/win32.h"
 #include "fallout2/window.h"
+
+#define SPLASH_COUNT (10)
 
 namespace Fallout2 {
 
@@ -62,6 +68,149 @@ Common::String Fallout2Engine::getGameId() const {
 	return _gameDescription->gameId;
 }
 
+void Fallout2Engine::showSplash() {
+	int splash = settings.system.splash;
+
+	char path[64];
+	const char *language = settings.system.language.c_str();
+	if (compat_stricmp(language, ENGLISH) != 0) {
+		snprintf(path, sizeof(path), "art\\%s\\splash\\", language);
+	} else {
+		snprintf(path, sizeof(path), "art\\splash\\");
+	}
+
+	File *stream;
+	for (int index = 0; index < SPLASH_COUNT; index++) {
+		char filePath[64];
+		snprintf(filePath, sizeof(filePath), "%ssplash%d.rix", path, splash);
+		debug("Splash screen path: %s", filePath);
+		stream = fileOpen(filePath, "rb");
+		if (stream != NULL) {
+			break;
+		}
+
+		splash++;
+
+		if (splash >= SPLASH_COUNT) {
+			splash = 0;
+		}
+	}
+
+	if (stream == NULL) {
+		return;
+	}
+
+	unsigned char *palette = reinterpret_cast<unsigned char *>(internal_malloc(768));
+	if (palette == NULL) {
+		fileClose(stream);
+		return;
+	}
+
+	int32 version;
+	if (fileReadInt32(stream, &version) == -1)
+		warning("Problem reading image header");
+	if (version != (int32)'RIX3') {
+		fileClose(stream);
+		return;
+	} else
+		debug("Found RIX3 image signature!");
+
+	short width;
+	fileRead(&width, sizeof(width), 1, stream);
+
+	short height;
+	fileRead(&height, sizeof(height), 1, stream);
+
+	debug("Splash screen width: %d height: %d", width, height);
+
+	unsigned char *data = reinterpret_cast<unsigned char *>(internal_malloc(width * height));
+	if (data == NULL) {
+		internal_free(palette);
+		fileClose(stream);
+		return;
+	}
+
+	short junk;
+	paletteSetEntries(gPaletteBlack);
+	//	fileSeek(stream, 10, SEEK_SET); TODO seek not implemented
+	fileRead(&junk, sizeof(junk), 1, stream); // skip junk
+	fileRead(palette, 1, 768, stream);
+	fileRead(data, 1, width * height, stream);
+	//	fileClose(stream);
+
+	debug("Loaded splash screen!");
+
+	int size = 0;
+
+	// set image palette
+	for (int i = 0; i < 768; i++)
+		palette[i] = palette[i] << 2;  // the standard palette is too dark
+	g_system->getPaletteManager()->setPalette(palette, 0, 256);
+
+	// TODO: Move to settings.
+	/*	Config config;
+	if (configInit(&config)) {
+		if (configRead(&config, "f2_res.ini", false)) {
+			configGetInt(&config, "STATIC_SCREENS", "SPLASH_SCRN_SIZE", &size);
+		}
+
+		configFree(&config);
+	}*/
+
+	int screenWidth = 640; // screenGetWidth(); TODO svga
+	int screenHeight = 480; // screenGetHeight();
+
+	if (size != 0 || screenWidth < width || screenHeight < height) {
+		int scaledWidth;
+		int scaledHeight;
+
+		if (size == 2) {
+			scaledWidth = screenWidth;
+			scaledHeight = screenHeight;
+		} else {
+			if (screenHeight * width >= screenWidth * height) {
+				scaledWidth = screenWidth;
+				scaledHeight = screenWidth * height / width;
+			} else {
+				scaledWidth = screenHeight * width / height;
+				scaledHeight = screenHeight;
+			}
+		}
+
+		unsigned char *scaled = reinterpret_cast<unsigned char *>(internal_malloc(scaledWidth * scaledHeight));
+		if (scaled != NULL) {
+			// blitBufferToBufferStretch(data, width, height, width, scaled, scaledWidth, scaledHeight, scaledWidth);
+
+			int x = screenWidth > scaledWidth ? (screenWidth - scaledWidth) / 2 : 0;
+			int y = screenHeight > scaledHeight ? (screenHeight - scaledHeight) / 2 : 0;
+			// _scr_blit(scaled, scaledWidth, scaledHeight, 0, 0, scaledWidth, scaledHeight, x, y);  TODO
+			paletteFadeTo(palette);
+
+			internal_free(scaled);
+		}
+	} else {
+		int x = (screenWidth - width) / 2;
+		int y = (screenHeight - height) / 2;
+
+		// Draw splash screen
+		for (int y_pix = 0, i = 0; y_pix < 480; y_pix++)
+			for (int x_pix = 0; x_pix < 640; x_pix++) {
+				_screen->setPixel(x_pix, y_pix, data[i]);
+				i++;
+			}
+
+		g_system->updateScreen();
+
+//		_scr_blit(data, width, height, 0, 0, width, height, x, y);  TODO
+//		paletteFadeTo(palette);
+	}
+
+	internal_free(data);
+	internal_free(palette);
+
+	settings.system.splash = splash + 1;
+}
+
 Common::Error Fallout2Engine::run() {
 	// Initialize 640x480 paletted graphics mode
 	initGraphics(640, 480);
@@ -80,8 +229,10 @@ Common::Error Fallout2Engine::run() {
 	//		_screen->frameRect(Common::Rect(i, i, 320 - i, 200 - i), i);
 	//	_screen->update();
 
-	// Allocate empty palette
+	// Set empty palette
 	byte pal[256 * 3] = { 0 };
+	g_system->getPaletteManager()->setPalette(pal, 0, 256);
+
 	int offset = 0;
 
 	Common::Event e;
@@ -127,20 +278,14 @@ Common::Error Fallout2Engine::run() {
 	debugPrint("RandomRoll (diff= 10) result: %d", randomRoll(10, 5, NULL));
 	debugPrint("RandomRoll (diff= 150) result: %d", randomRoll(150, 5, NULL));
 
-	// showSplash();
-
+	// show splash screen
+	settings.system.splash = getRandomNumber(6); // 6 possible splashscreens
+	showSplash();
 	_screen->update();
+
 	while (!shouldQuit()) {
 		while (g_system->getEventManager()->pollEvent(e)) {
 		}
-		// Cycle through a simple palette
-		++offset;
-		for (int i = 0; i < 256; ++i)
-			pal[i * 3 + 1] = (i + offset) % 256;
-		g_system->getPaletteManager()->setPalette(pal, 0, 256);
-
-		_screen->update();
-
 		// Delay for a bit. All events loops should have a delay
 		// to prevent the system being unduly loaded
 		g_system->delayMillis(10);
