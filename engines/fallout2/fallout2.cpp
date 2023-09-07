@@ -20,26 +20,26 @@
  */
 
 #include "fallout2/fallout2.h"
-#include "fallout2/detection.h"
-#include "fallout2/console.h"
-#include "common/scummsys.h"
 #include "common/config-manager.h"
 #include "common/debug-channels.h"
 #include "common/events.h"
+#include "common/scummsys.h"
 #include "common/system.h"
 #include "engines/util.h"
+#include "fallout2/console.h"
+#include "fallout2/detection.h"
 #include "graphics/palette.h"
+#include "graphics/surface.h"
 
-#include "fallout2/version.h"
-#include "fallout2/win32.h"
-#include "fallout2/random.h"
-#include "fallout2/game_memory.h"
-#include "fallout2/settings.h"
 #include "fallout2/debug.h"
 #include "fallout2/game.h"
+#include "fallout2/game_memory.h"
 #include "fallout2/message.h"
+#include "fallout2/random.h"
+#include "fallout2/settings.h"
+#include "fallout2/version.h"
+#include "fallout2/win32.h"
 #include "fallout2/window.h"
-
 
 namespace Fallout2 {
 
@@ -63,8 +63,8 @@ Common::String Fallout2Engine::getGameId() const {
 }
 
 Common::Error Fallout2Engine::run() {
-	// Initialize 320x200 paletted graphics mode
-	initGraphics(320, 200);
+	// Initialize 640x480 paletted graphics mode
+	initGraphics(640, 480);
 	_screen = new Graphics::Screen();
 
 	// Set the engine's debugger console
@@ -76,61 +76,69 @@ Common::Error Fallout2Engine::run() {
 		(void)loadGameState(saveSlot);
 
 	// Draw a series of boxes on screen as a sample
-	for (int i = 0; i < 100; ++i)
-		_screen->frameRect(Common::Rect(i, i, 320 - i, 200 - i), i);
-	_screen->update();
+	//	for (int i = 0; i < 100; ++i)
+	//		_screen->frameRect(Common::Rect(i, i, 320 - i, 200 - i), i);
+	//	_screen->update();
 
-	// Simple event handling loop
+	// Allocate empty palette
 	byte pal[256 * 3] = { 0 };
-	Common::Event e;
 	int offset = 0;
 
+	Common::Event e;
+
+	// Print engine version
 	char version[100];
-	versionGetVersion(version, 50);
-	debug("%s",version);
+	versionGetVersion(version, sizeof(version));
+	debug("%s", version);
+
 	gProgramIsActive = true;
-	randomInit(); // specific engine rng init
+
+	// Init game-specific RNG
+	randomInit();
+
+	// Init memory manager
 	if (gameMemoryInit() == -1)
 		warning("Error allocating memory");
 	else
-		debug("Fallout2: memory allocation successful!");
+		debug("Memory allocation successful!");
 
-	char test_argv[10][512];
-	strncpy(test_argv[0],"fallout2.exe",sizeof(test_argv[0]));
-	char *tmp_argv = test_argv[0];
-	char **tmp_argv2 = &tmp_argv;
-
-	if(settingsInit(false, 1, tmp_argv2))
+	// Init game settings
+	if (settingsInit(false, 1, nullptr))
 		debug("Settings initialized!");
 	else
-		warning("can't init settings");
+		warning("Couldn't init settings");
 
+	// Init resources
 	if (gameDbInit() != -1)
-		debug("Databases opened");
+		debug("Databases opened!");
 	else
-		warning("can't open databases!");
+		warning("Couldn't open databases");
 
 	// Message list repository is considered a specialized file manager, so
 	// it should be initialized early in the process.
-	if(messageListRepositoryInit() == true)
-		debug("Initialized message repository");
+	// Initialize messages repository
+	if (messageListRepositoryInit() == true)
+		debug("Initialized message repository!");
 	else
-		warning("Couldn't initialize message repo");
+		warning("Couldn't initialize message repository");
 
-//	_initWindow(1,0);
 	// throw a dice (yay!)
 	debugPrint("RandomRoll (diff= 70) result: %d", randomRoll(70, 5, NULL));
 	debugPrint("RandomRoll (diff= 10) result: %d", randomRoll(10, 5, NULL));
 	debugPrint("RandomRoll (diff= 150) result: %d", randomRoll(150, 5, NULL));
+
+	// showSplash();
+
+	_screen->update();
 	while (!shouldQuit()) {
 		while (g_system->getEventManager()->pollEvent(e)) {
 		}
-
 		// Cycle through a simple palette
 		++offset;
 		for (int i = 0; i < 256; ++i)
 			pal[i * 3 + 1] = (i + offset) % 256;
 		g_system->getPaletteManager()->setPalette(pal, 0, 256);
+
 		_screen->update();
 
 		// Delay for a bit. All events loops should have a delay
