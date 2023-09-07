@@ -273,6 +273,9 @@ Common::Error Fallout2Engine::run() {
 	else
 		warning("Couldn't initialize message repository");
 
+	// init game palette
+	paletteInit();
+
 	// throw a dice (yay!)
 	debugPrint("RandomRoll (diff= 70) result: %d", randomRoll(70, 5, NULL));
 	debugPrint("RandomRoll (diff= 10) result: %d", randomRoll(10, 5, NULL));

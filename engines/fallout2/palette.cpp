@@ -50,10 +50,15 @@ void paletteInit() {
 	// unsigned int actualFadeDuration = getTicksSince(tick);
 	unsigned int actualFadeDuration = getTicksBetween(g_system->getMillis(), tick);
 
+	// TODO: The game performs the fading as a benchmark to find how many ms it takes
+	// Since it's currently skipped it's instantaneous and forces actualFadeDuration to zero
+	// Just set a safe 500ms time for now
+	actualFadeDuration = 500;
+
 	// Calculate fade steps needed to perform fading in about 700 ms.
 	gPaletteFadeSteps = 60 * 700 / actualFadeDuration;
 
-	debug("\nFade time is %u\nFade steps are %d", actualFadeDuration, gPaletteFadeSteps);
+	debug("Palette init - Fade time is %u\nFade steps are %d", actualFadeDuration, gPaletteFadeSteps);
 }
 
 // NOTE: Collapsed.
