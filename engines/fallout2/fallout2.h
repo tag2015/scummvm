@@ -95,6 +95,8 @@ public:
 		Common::Serializer s(stream, nullptr);
 		return syncGame(s);
 	}
+
+	void showSplash();
 };
 
 extern Fallout2Engine *g_engine;
