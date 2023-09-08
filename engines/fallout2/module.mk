@@ -36,6 +36,7 @@ MODULE_OBJS = \
 	settings.o \
 	sfall_config.o \
 	text_font.o \
+	tile.o \
 	version.o \
 	widget.o \
 	window.o \
