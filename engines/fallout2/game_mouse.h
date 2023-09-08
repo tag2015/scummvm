@@ -1,9 +1,9 @@
-#ifndef GAME_MOUSE_H
-#define GAME_MOUSE_H
+#ifndef FALLOUT2_GAME_MOUSE_H
+#define FALLOUT2_GAME_MOUSE_H
 
-#include "obj_types.h"
+#include "fallout2/obj_types.h"
 
-namespace fallout {
+namespace Fallout2 {
 
 typedef enum GameMouseMode {
 	GAME_MOUSE_MODE_MOVE,
@@ -70,8 +70,8 @@ typedef enum MouseCursorType {
 
 extern bool _gmouse_clicked_on_edge;
 
-extern Object* gGameMouseBouncingCursor;
-extern Object* gGameMouseHexCursor;
+extern Object *gGameMouseBouncingCursor;
+extern Object *gGameMouseHexCursor;
 
 int gameMouseInit();
 int gameMouseReset();
@@ -95,14 +95,14 @@ void gameMouseObjectsShow();
 void gameMouseObjectsHide();
 bool gameMouseObjectsIsVisible();
 int gameMouseRenderPrimaryAction(int x, int y, int menuItem, int width, int height);
-int _gmouse_3d_pick_frame_hot(int* a1, int* a2);
-int gameMouseRenderActionMenuItems(int x, int y, const int* menuItems, int menuItemsCount, int width, int height);
+int _gmouse_3d_pick_frame_hot(int *a1, int *a2);
+int gameMouseRenderActionMenuItems(int x, int y, const int *menuItems, int menuItemsCount, int width, int height);
 int gameMouseHighlightActionMenuItemAtIndex(int menuItemIndex);
 void gameMouseLoadItemHighlight();
-void _gmouse_remove_item_outline(Object* object);
+void _gmouse_remove_item_outline(Object *object);
 
 void gameMouseRefreshImmediately();
 
-} // namespace fallout
+} // namespace Fallout2
 
-#endif /* GAME_MOUSE_H */
+#endif
