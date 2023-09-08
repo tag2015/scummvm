@@ -1,7 +1,7 @@
-#ifndef LIGHT_H
-#define LIGHT_H
+#ifndef FALLOUT2_LIGHT_H
+#define FALLOUT2_LIGHT_H
 
-namespace fallout {
+namespace Fallout2 {
 
 #define LIGHT_INTENSITY_MIN (65536 / 4)
 #define LIGHT_INTENSITY_MAX 65536
@@ -20,6 +20,6 @@ void lightIncreaseTileIntensity(int elevation, int tile, int intensity);
 void lightDecreaseTileIntensity(int elevation, int tile, int intensity);
 void lightResetTileIntensity();
 
-} // namespace fallout
+} // namespace Fallout2
 
-#endif /* LIGHT_H */
+#endif
