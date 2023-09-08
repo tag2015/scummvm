@@ -42,6 +42,7 @@
 #include "fallout2/platform_compat.h"
 #include "fallout2/random.h"
 #include "fallout2/settings.h"
+#include "fallout2/tile.h"
 #include "fallout2/version.h"
 #include "fallout2/win32.h"
 #include "fallout2/window.h"
@@ -245,9 +246,6 @@ Common::Error Fallout2Engine::run() {
 
 	gProgramIsActive = true;
 
-	// Init game-specific RNG
-	randomInit();
-
 	// Init memory manager
 	if (gameMemoryInit() == -1)
 		warning("Error allocating memory");
@@ -277,6 +275,10 @@ Common::Error Fallout2Engine::run() {
 	// init game palette
 	paletteInit();
 
+	// Init game-specific RNG
+	randomInit();
+	debug("Initialized RNG!");
+
 	// show splash screen
 	settings.system.splash = getRandomNumber(6); // 6 possible splashscreens
 	showSplash();
@@ -287,6 +289,8 @@ Common::Error Fallout2Engine::run() {
 	fontManagerAdd(&gModernFontManager);
 	fontSetCurrent(0);  // this does nothing, font IDs are >100
 	debug("Fonts initialized!");
+
+	tileDisable();
 
 	// throw a dice (yay!)
 	debugPrint("RandomRoll (diff= 70) result: %d", randomRoll(70, 5, NULL));
