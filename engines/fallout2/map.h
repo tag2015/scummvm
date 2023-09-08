@@ -1,15 +1,15 @@
-#ifndef MAP_H
-#define MAP_H
+#ifndef FALLOUT2_MAP_H
+#define FALLOUT2_MAP_H
 
-#include "combat_defs.h"
-#include "db.h"
-#include "geometry.h"
-#include "interpreter.h"
-#include "map_defs.h"
-#include "message.h"
-#include "platform_compat.h"
+#include "fallout2/combat_defs.h"
+#include "fallout2/db.h"
+#include "fallout2/geometry.h"
+#include "fallout2/interpreter.h"
+#include "fallout2/map_defs.h"
+#include "fallout2/message.h"
+#include "fallout2/platform_compat.h"
 
-namespace fallout {
+namespace Fallout2 {
 
 #define ORIGINAL_ISO_WINDOW_WIDTH 640
 #define ORIGINAL_ISO_WINDOW_HEIGHT 380
@@ -65,16 +65,16 @@ typedef struct MapTransition {
 	int rotation;
 } MapTransition;
 
-typedef void IsoWindowRefreshProc(Rect* rect);
+typedef void IsoWindowRefreshProc(Rect *rect);
 
 extern int gMapSid;
-extern int* gMapLocalVars;
+extern int *gMapLocalVars;
 extern int gMapLocalVarsLength;
 extern int gElevation;
 
 extern MessageList gMapMessageList;
 extern MapHeader gMapHeader;
-extern TileData* _square[ELEVATION_COUNT];
+extern TileData *_square[ELEVATION_COUNT];
 extern int gIsoWindow;
 
 int isoInit();
@@ -86,29 +86,29 @@ void isoEnable();
 bool isoDisable();
 bool isoIsDisabled();
 int mapSetElevation(int elevation);
-int mapSetGlobalVar(int var, ProgramValue& value);
-int mapGetGlobalVar(int var, ProgramValue& value);
-int mapSetLocalVar(int var, ProgramValue& value);
-int mapGetLocalVar(int var, ProgramValue& value);
+int mapSetGlobalVar(int var, ProgramValue &value);
+int mapGetGlobalVar(int var, ProgramValue &value);
+int mapSetLocalVar(int var, ProgramValue &value);
+int mapGetLocalVar(int var, ProgramValue &value);
 int _map_malloc_local_var(int a1);
 void mapSetStart(int a1, int a2, int a3);
-char* mapGetName(int map_num, int elev);
+char *mapGetName(int map_num, int elev);
 bool _is_map_idx_same(int map_num1, int map_num2);
 int _get_map_idx_same(int map_num1, int map_num2);
-char* mapGetCityName(int map_num);
-char* _map_get_description_idx_(int map_index);
+char *mapGetCityName(int map_num);
+char *_map_get_description_idx_(int map_index);
 int mapGetCurrentMap();
 int mapScroll(int dx, int dy);
 int mapSetEnteringLocation(int a1, int a2, int a3);
 void mapNewMap();
-int mapLoadByName(char* fileName);
+int mapLoadByName(char *fileName);
 int mapLoadById(int map_index);
-int mapLoadSaved(char* fileName);
+int mapLoadSaved(char *fileName);
 int _map_target_load_area();
-int mapSetTransition(MapTransition* transition);
+int mapSetTransition(MapTransition *transition);
 int mapHandleTransition();
 int _map_save_in_game(bool a1);
 
-} // namespace fallout
+} // namespace Fallout2
 
-#endif /* MAP_H */
+#endif
