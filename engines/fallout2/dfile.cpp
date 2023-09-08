@@ -259,12 +259,12 @@ int dfileClose(DFile *stream) {
 
 	int rc = 0;
 
+	/*
 	if (stream->entry->compressed == 1) {
-		// TODO
-		/*		if (inflateEnd(stream->decompressionStream) != Z_OK) {
-					rc = -1;
-				}*/
-	}
+		if (inflateEnd(stream->decompressionStream) != Z_OK) {
+			rc = -1;
+		}
+	}*/
 
 	if (stream->decompressionStream != NULL) {
 		free(stream->decompressionStream);
@@ -272,6 +272,11 @@ int dfileClose(DFile *stream) {
 
 	if (stream->decompressionBuffer != NULL) {
 		free(stream->decompressionBuffer);
+	}
+
+	if (stream->decompressedData != NULL) {
+		free(stream->decompressedData);
+		stream->decompressed_position = 0;
 	}
 
 	if (stream->stream != NULL) {
@@ -305,6 +310,8 @@ int dfileClose(DFile *stream) {
 
 	free(stream);
 
+	if (!rc)
+		debug("Freed stream");
 	return rc;
 }
 
@@ -808,105 +815,65 @@ static bool dfileReadCompressed(DFile *stream, void *ptr, size_t size) {
 		}
 	}
 
-	// TODO check decompression stuff
-	//	stream->decompressionStream->next_out = (Bytef *)ptr;
-	//	stream->decompressionStream->avail_out = size;
-
-	//	stream->stream
-	//	stream->decompressionStream
-	//	size input stream->entry->dataSize
-	//	size output : size
-	//  ptr out (Bytef *)ptr;
-	//  stream in
-
-	if(stream->decompressedData != NULL) {
+	if (stream->decompressedData != NULL) {
 		debug("Already decompressed, returning");
-//		stream->position += size;
 		return true;
 	}
 
-	stream->decompressionBuffer = (byte *)malloc(stream->entry->dataSize);// OK (full uncompress)
-	stream->decompressedData = (byte *) malloc(stream->entry->uncompressedSize); // OK (full uncompress)
-//	stream->decompressionBuffer = (byte *)malloc(size * sizeof(byte));
-//	stream->decompressedData = (byte *) malloc(stream->entry->uncompressedSize);
+	// In the original implementation, only the required <size> was extracted and copied to *ptr.
+	// With the new implementation, the file is ENTIRELY extracted to *decompressedData on first access,
+	// and kept for future accesses, using decompressed_position to track the offset
+	// The actually required bytes are copied into *ptr in the fileRead function
 
-//	ptr = (byte *)malloc(size);
-//	void *full_ptr = (byte *)malloc(stream->entry->uncompressedSize);
+	stream->decompressionBuffer = (byte *)malloc(stream->entry->dataSize * sizeof(byte));
+	stream->decompressedData = (byte *)malloc(stream->entry->uncompressedSize * sizeof(byte));
 
-//	stream->stream->read(stream->decompressionBuffer, size);
-	stream->stream->read(stream->decompressionBuffer, stream->entry->uncompressedSize);
+	stream->stream->read(stream->decompressionBuffer, stream->entry->dataSize);
 
-	unsigned long uncomp_size = stream->entry->uncompressedSize; // FIXME
+	unsigned long uncomp_size = stream->entry->uncompressedSize;
+
 	debug("Using inflate in dfileReadCompressed!");
 	debug("Full Compressed size: %d - Full Expected size: %d", stream->entry->dataSize, stream->entry->uncompressedSize);
-	debug("size: %d", size);
-	// TODO how to extract just a part?
-//	Common::inflateZlib((byte *)full_ptr, &uncomp_size, stream->decompressionBuffer, stream->entry->dataSize);
-	Common::inflateZlib(stream->decompressedData, &uncomp_size, stream->decompressionBuffer, stream->entry->dataSize);  // OK
-//	Common::inflateZlib(stream->decompressedData, &uncomp_size, stream->decompressionBuffer, size);
 
+	Common::inflateZlib(stream->decompressedData, &uncomp_size, stream->decompressionBuffer, stream->entry->dataSize); // OK
+	debug("Successfully uncompressed data: %ld", uncomp_size);
 
-//	memcpy(ptr, full_ptr, size);  // copy requested unpacked data
+	debug("Uncompressed initial byte %u", *(stream->decompressedData));
 
-	// DEBUG DEBUG - echo all bytes to see if this shit works
-	debug("Compressed initial byte %u", * (stream->decompressionBuffer) );
-	debug("Compressed initial byte+1 %u", * (stream->decompressionBuffer+1) );
-	debug("Compressed initial byte+2 %u", * (stream->decompressionBuffer+2) );
-	debug("Compressed initial byte+3 %u", * (stream->decompressionBuffer+3) );
-	// debug("Compressed initial byte+4 %u", * (stream->decompressionBuffer+4) );
-	// debug("Compressed initial byte+5 %u", * (stream->decompressionBuffer+5) );
-	// debug("Compressed initial byte+6 %u", * (stream->decompressionBuffer+6) );
-	// debug("Compressed initial byte+7 %u", * (stream->decompressionBuffer+7) );
-	// debug("Compressed initial byte+8 %u", * (stream->decompressionBuffer+8) );
+//	for (int i = 0; i < 10; i++)
+//		debug("Uncompressed byte at address %d: %u", i, *(stream->decompressedData + i));
 
-//	void *newptr = full_ptr;
+// old implementation for reference
+#if 0
+	do {
+		if (stream->decompressionStream->avail_out == 0) {
+			// Everything was decompressed.
+			break;
+		}
 
-	debug("UnCompressed initial byte %u",  *( stream->decompressedData) );
-	debug("UnCompressed initial byte+1 %u", *( stream->decompressedData+1) );
-	debug("UnCompressed initial byte+2 %u", *(stream->decompressedData+2) );
-	debug("UnCompressed initial byte+3 %u", *( stream->decompressedData+3) );
-	debug("UnCompressed initial byte+4 %u", *( stream->decompressedData+4) );
-	debug("UnCompressed initial byte+5 %u", *( stream->decompressedData+5) );
-	debug("UnCompressed initial byte+6 %u", *( stream->decompressedData+6) );
-	debug("UnCompressed initial byte+7 %u", *( stream->decompressedData+7) );
-	debug("UnCompressed initial byte+8 %u", *( stream->decompressedData+8) );
+		if (stream->decompressionStream->avail_in == 0) {
+			// No more unprocessed data, request next chunk.
+			size_t bytesToRead = std::min(DFILE_DECOMPRESSION_BUFFER_SIZE, stream->entry->dataSize - stream->compressedBytesRead);
 
-//	debug("UnCompressed initial byte %u",  *( (byte*) ptr) );
-//	debug("UnCompressed initial byte+1 %u", *( (byte*) ptr+1) );
-//	debug("UnCompressed initial byte+2 %u", *((byte*) ptr+2) );
-//	debug("UnCompressed initial byte+3 %u", *( (byte*) ptr+3) );
-
-//	for(int i=0;i<10;i++)
-//		debug("Uncompressed byte at address %d: %u", i, * (byte*) newptr++ );
-
-	/*	do {
-			if (stream->decompressionStream->avail_out == 0) {
-				// Everything was decompressed.
+			if (fread(stream->decompressionBuffer, bytesToRead, 1, stream->stream) != 1) {
 				break;
 			}
 
-			if (stream->decompressionStream->avail_in == 0) {
-				// No more unprocessed data, request next chunk.
-				size_t bytesToRead = std::min(DFILE_DECOMPRESSION_BUFFER_SIZE, stream->entry->dataSize - stream->compressedBytesRead);
+			stream->decompressionStream->avail_in = bytesToRead;
+			stream->decompressionStream->next_in = stream->decompressionBuffer;
 
-				if (fread(stream->decompressionBuffer, bytesToRead, 1, stream->stream) != 1) {
-					break;
-				}
+			stream->compressedBytesRead += bytesToRead;
+		}
+	} while (inflate(stream->decompressionStream, Z_NO_FLUSH) == Z_OK);
 
-				stream->decompressionStream->avail_in = bytesToRead;
-				stream->decompressionStream->next_in = stream->decompressionBuffer;
+	if (stream->decompressionStream->avail_out != 0) {
+		// There are some data still waiting, which means there was in error
+		// during decompression loop above.
+		return false;
+	}
 
-				stream->compressedBytesRead += bytesToRead;
-			}
-		} while (inflate(stream->decompressionStream, Z_NO_FLUSH) == Z_OK);
-
-		if (stream->decompressionStream->avail_out != 0) {
-			// There are some data still waiting, which means there was in error
-			// during decompression loop above.
-			return false;
-		} */
-
-//	stream->position += size;  // FIXME ???
+	stream->position += size;
+#endif
 
 	return true;
 }
