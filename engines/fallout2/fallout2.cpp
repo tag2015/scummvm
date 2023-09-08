@@ -33,6 +33,7 @@
 
 #include "fallout2/db.h"
 #include "fallout2/debug.h"
+#include "fallout2/font_manager.h"
 #include "fallout2/game.h"
 #include "fallout2/game_memory.h"
 #include "fallout2/memory.h"
@@ -136,9 +137,9 @@ void Fallout2Engine::showSplash() {
 	fileRead(&junk, sizeof(junk), 1, stream); // skip junk
 	fileRead(palette, 1, 768, stream);
 	fileRead(data, 1, width * height, stream);
-	//	fileClose(stream);
-
 	debug("Loaded splash screen!");
+	fileClose(stream);
+
 
 	int size = 0;
 
@@ -276,19 +277,28 @@ Common::Error Fallout2Engine::run() {
 	// init game palette
 	paletteInit();
 
-	// throw a dice (yay!)
-	debugPrint("RandomRoll (diff= 70) result: %d", randomRoll(70, 5, NULL));
-	debugPrint("RandomRoll (diff= 10) result: %d", randomRoll(10, 5, NULL));
-	debugPrint("RandomRoll (diff= 150) result: %d", randomRoll(150, 5, NULL));
-
 	// show splash screen
 	settings.system.splash = getRandomNumber(6); // 6 possible splashscreens
 	showSplash();
 	_screen->update();
 
+	// init fonts
+	interfaceFontsInit();
+	fontManagerAdd(&gModernFontManager);
+	fontSetCurrent(0);  // this does nothing, font IDs are >100
+	debug("Fonts initialized!");
+
+	// throw a dice (yay!)
+	debugPrint("RandomRoll (diff= 70) result: %d", randomRoll(70, 5, NULL));
+	debugPrint("RandomRoll (diff= 10) result: %d", randomRoll(10, 5, NULL));
+	debugPrint("RandomRoll (diff= 150) result: %d", randomRoll(150, 5, NULL));
+
 	while (!shouldQuit()) {
 		while (g_system->getEventManager()->pollEvent(e)) {
 		}
+		if(e.type == Common::EVENT_SCREEN_CHANGED)
+			_screen->update();
+
 		// Delay for a bit. All events loops should have a delay
 		// to prevent the system being unduly loaded
 		g_system->delayMillis(10);
