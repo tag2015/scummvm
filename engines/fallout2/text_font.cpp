@@ -8,6 +8,8 @@
 #include "fallout2/memory.h"
 #include "fallout2/platform_compat.h"
 
+#include "common/debug.h"
+
 namespace Fallout2 {
 
 // The maximum number of text fonts.
@@ -283,6 +285,7 @@ void fontSetCurrent(int font) {
 		gCurrentFont = font;
 
 		fontManager->setCurrentProc(font);
+		debug("Set font %d!", font);
 	}
 }
 

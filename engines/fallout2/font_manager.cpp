@@ -6,6 +6,7 @@
 #include "fallout2/color.h"
 #include "fallout2/db.h"
 #include "fallout2/memory_manager.h"
+#include "common/debug.h"
 
 // The maximum number of interface fonts.
 #define INTERFACE_FONT_MAX (16)
@@ -197,6 +198,7 @@ static int interfaceFontLoad(int font_index) {
 		return -1;
 	}
 
+	debug("Font %d loaded properly", font_index);
 	fileClose(stream);
 	return 0;
 }
