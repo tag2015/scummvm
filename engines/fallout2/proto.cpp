@@ -52,7 +52,7 @@ static char _aDrugStatSpecia[] = "Drug Stat (Special)";
 static char _aNone_1[] = "None";
 
 // 0x51C18C
-char _cd_path_base[COMPAT_MAX_PATH];
+// char _cd_path_base[COMPAT_MAX_PATH];
 
 // 0x51C290
 static ProtoList _protoLists[11] = {
