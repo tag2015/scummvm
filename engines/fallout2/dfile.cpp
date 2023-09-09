@@ -389,6 +389,7 @@ char *dfileReadString(char *string, int size, DFile *stream) {
 	// terminator.
 	for (int index = 0; index < size - 1; index++) {
 		int ch = dfileReadCharInternal(stream);
+		debug(5, "ReadString: pos: %d - char: %c", index, ch);
 		if (ch == -1) {
 			break;
 		}
@@ -514,6 +515,8 @@ int dfileSeek(DFile *stream, long offset, int origin) {
 	switch (origin) {
 	case SEEK_SET:
 		offsetFromBeginning = offset;
+		if (stream->entry->compressed == 1)
+			stream->decompressed_position = 0;
 		break;
 	case SEEK_CUR:
 		offsetFromBeginning = stream->position + offset;
@@ -540,6 +543,7 @@ int dfileSeek(DFile *stream, long offset, int origin) {
 			if (offsetFromBeginning < pos) {
 				// We cannot go backwards in compressed stream, so the only way
 				// is to start from the beginning.
+				stream->decompressed_position = 0;
 				dfileRewind(stream);
 			}
 
@@ -745,24 +749,33 @@ err:
 static int dfileReadCharInternal(DFile *stream) {
 	if (stream->entry->compressed == 1) {
 		char ch;
-		if (!dfileReadCompressed(stream, &ch, sizeof(ch))) {
+
+		if (stream->decompressedData == NULL)
+			if (!dfileReadCompressed(stream, &ch, sizeof(ch))) {
+				return -1;
+			}
+
+		if (stream->decompressed_position >= stream->entry->uncompressedSize)
 			return -1;
-		}
+
+		ch = stream->decompressedData[stream->decompressed_position++];
 
 		if ((stream->flags & DFILE_TEXT) != 0) {
 			// NOTE: I'm not sure if they are comparing as chars or ints. Since
 			// character literals are ints, let's cast read characters to int as
 			// well.
 			if (ch == '\r') {
-				char nextCh;
-				if (dfileReadCompressed(stream, &nextCh, sizeof(nextCh))) {
-					if (nextCh == '\n') {
-						ch = nextCh;
-					} else {
-						// NOTE: Uninline.
-						dfileUngetCompressed(stream, nextCh & 0xFF);
-					}
+				char nextCh = stream->decompressedData[stream->decompressed_position++];
+
+				// if (dfileReadCompressed(stream, &nextCh, sizeof(nextCh))) {
+
+				if (nextCh == '\n') {
+					ch = nextCh;
+				} else {
+					// NOTE: Uninline.
+					dfileUngetCompressed(stream, nextCh & 0xFF);
 				}
+				//}
 			}
 		}
 
@@ -885,6 +898,7 @@ static void dfileUngetCompressed(DFile *stream, int ch) {
 	stream->compressedUngotten = ch;
 	stream->flags |= DFILE_HAS_COMPRESSED_UNGETC;
 	stream->position--;
+	stream->decompressed_position--;
 }
 
 } // namespace Fallout2
