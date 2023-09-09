@@ -52,7 +52,7 @@ static char _aDrugStatSpecia[] = "Drug Stat (Special)";
 static char _aNone_1[] = "None";
 
 // 0x51C18C
-// char _cd_path_base[COMPAT_MAX_PATH];
+char _cd_path_base[COMPAT_MAX_PATH];
 
 // 0x51C290
 static ProtoList _protoLists[11] = {
@@ -189,7 +189,7 @@ static char **_critter_stats_list;
 
 // NOTE: Inlined.
 void _proto_make_path(char *path, int pid) {
-	strncpy(path, /*_cd_path_base*/ "", sizeof(path) - 1);
+	strncpy(path, _cd_path_base, sizeof(path) - 1);
 	strcat_s(path, sizeof(path), _proto_path_base);
 	if (pid != -1) {
 		strcat_s(path, sizeof(path), artGetObjectTypeName(PID_TYPE(pid)));
@@ -1551,8 +1551,8 @@ static int protoRead(Proto *proto, File *stream) {
 		if (fileReadInt32(stream, &(proto->critter.team)) == -1)
 			return -1;
 
-		if (protoCritterDataRead(stream, &(proto->critter.data)) == -1)
-			return -1;
+//		if (protoCritterDataRead(stream, &(proto->critter.data)) == -1)  TODO critter.cpp
+//			return -1;
 
 		return 0;
 	case OBJ_TYPE_SCENERY:
@@ -1834,8 +1834,8 @@ static int protoWrite(Proto *proto, File *stream) {
 			return -1;
 		if (fileWriteInt32(stream, proto->critter.team) == -1)
 			return -1;
-		if (protoCritterDataWrite(stream, &(proto->critter.data)) == -1)
-			return -1;
+//		if (protoCritterDataWrite(stream, &(proto->critter.data)) == -1)  TODO critter.cpp
+//			return -1;
 
 		return 0;
 	case OBJ_TYPE_SCENERY:
