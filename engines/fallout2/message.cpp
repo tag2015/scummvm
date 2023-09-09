@@ -145,6 +145,7 @@ int badwordsInit() {
 		return -1;
 	}
 
+	debug("Loaded bad words list (%d entries)!", gBadwordsCount);
 	return 0;
 }
 
