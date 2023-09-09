@@ -97,7 +97,6 @@ typedef enum PrototypeMessage {
 	PROTOTYPE_MESSAGE_DESCRIPTION,
 } PrototypeMesage;
 
-char _cd_path_base[COMPAT_MAX_PATH] = "";
 
 extern MessageList gProtoMessageList;
 extern char *_proto_none_str;
