@@ -1,42 +1,42 @@
-#include "proto.h"
+#include "fallout2/proto.h"
 
-#include <stdio.h>
-#include <string.h>
+// #include <stdio.h>
+// #include <string.h>
 
-#include "art.h"
-#include "character_editor.h"
-#include "combat.h"
-#include "config.h"
-#include "critter.h"
-#include "debug.h"
-#include "dialog.h"
-#include "game.h"
-#include "game_movie.h"
-#include "interface.h"
-#include "map.h"
-#include "memory.h"
-#include "object.h"
-#include "perk.h"
-#include "settings.h"
-#include "skill.h"
-#include "stat.h"
-#include "trait.h"
+#include "fallout2/art.h"
+#include "fallout2/character_editor.h"
+#include "fallout2/combat.h"
+#include "fallout2/config.h"
+#include "fallout2/critter.h"
+#include "fallout2/debug.h"
+#include "fallout2/dialog.h"
+#include "fallout2/game.h"
+#include "fallout2/game_movie.h"
+#include "fallout2/interface.h"
+#include "fallout2/map.h"
+#include "fallout2/memory.h"
+#include "fallout2/object.h"
+#include "fallout2/perk.h"
+#include "fallout2/settings.h"
+#include "fallout2/skill.h"
+#include "fallout2/stat.h"
+#include "fallout2/trait.h"
 
-namespace fallout {
+namespace Fallout2 {
 
-static int _proto_critter_init(Proto* a1, int a2);
-static int objectCritterCombatDataRead(CritterCombatData* data, File* stream);
-static int objectCritterCombatDataWrite(CritterCombatData* data, File* stream);
-static int _proto_update_gen(Object* obj);
+static int _proto_critter_init(Proto *a1, int a2);
+static int objectCritterCombatDataRead(CritterCombatData *data, File *stream);
+static int objectCritterCombatDataWrite(CritterCombatData *data, File *stream);
+static int _proto_update_gen(Object *obj);
 static int _proto_header_load();
-static int protoItemDataRead(ItemProtoData* item_data, int type, File* stream);
-static int protoSceneryDataRead(SceneryProtoData* scenery_data, int type, File* stream);
-static int protoRead(Proto* buf, File* stream);
-static int protoItemDataWrite(ItemProtoData* item_data, int type, File* stream);
-static int protoSceneryDataWrite(SceneryProtoData* scenery_data, int type, File* stream);
-static int protoWrite(Proto* buf, File* stream);
-static int _proto_load_pid(int pid, Proto** out_proto);
-static int _proto_find_free_subnode(int type, Proto** out_ptr);
+static int protoItemDataRead(ItemProtoData *item_data, int type, File *stream);
+static int protoSceneryDataRead(SceneryProtoData *scenery_data, int type, File *stream);
+static int protoRead(Proto *buf, File *stream);
+static int protoItemDataWrite(ItemProtoData *item_data, int type, File *stream);
+static int protoSceneryDataWrite(SceneryProtoData *scenery_data, int type, File *stream);
+static int protoWrite(Proto *buf, File *stream);
+static int _proto_load_pid(int pid, Proto **out_proto);
+static int _proto_find_free_subnode(int type, Proto **out_ptr);
 static void _proto_remove_some_list(int type);
 static void _proto_remove_list(int type);
 static int _proto_new_id(int a1);
@@ -56,27 +56,27 @@ static char _aNone_1[] = "None";
 
 // 0x51C290
 static ProtoList _protoLists[11] = {
-	{ 0, 0, 0, 1 },
-	{ 0, 0, 0, 1 },
-	{ 0, 0, 0, 1 },
-	{ 0, 0, 0, 1 },
-	{ 0, 0, 0, 1 },
-	{ 0, 0, 0, 1 },
-	{ 0, 0, 0, 1 },
-	{ 0, 0, 0, 0 },
-	{ 0, 0, 0, 0 },
-	{ 0, 0, 0, 0 },
-	{ 0, 0, 0, 0 },
+	{0, 0, 0, 1},
+	{0, 0, 0, 1},
+	{0, 0, 0, 1},
+	{0, 0, 0, 1},
+	{0, 0, 0, 1},
+	{0, 0, 0, 1},
+	{0, 0, 0, 1},
+	{0, 0, 0, 0},
+	{0, 0, 0, 0},
+	{0, 0, 0, 0},
+	{0, 0, 0, 0},
 };
 
 // 0x51C340
 static const size_t _proto_sizes[11] = {
-	sizeof(ItemProto), // 0x84
+	sizeof(ItemProto),    // 0x84
 	sizeof(CritterProto), // 0x1A0
 	sizeof(SceneryProto), // 0x38
-	sizeof(WallProto), // 0x24
-	sizeof(TileProto), // 0x1C
-	sizeof(MiscProto), // 0x1C
+	sizeof(WallProto),    // 0x24
+	sizeof(TileProto),    // 0x1C
+	sizeof(MiscProto),    // 0x1C
 	0,
 	0,
 	0,
@@ -99,9 +99,9 @@ static CritterProto gDudeProto = {
 	0,
 	-1,
 	0,
-	{ 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 18, 0, 0, 0, 0, 0, 0, 0, 0, 100, 0, 0, 0, 23, 0 },
-	{ 0 },
-	{ 0 },
+	{5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 18, 0, 0, 0, 0, 0, 0, 0, 0, 100, 0, 0, 0, 23, 0},
+	{0},
+	{0},
 	0,
 	0,
 	0,
@@ -112,7 +112,7 @@ static CritterProto gDudeProto = {
 };
 
 // 0x51C534
-static char* _proto_path_base = _aProto_0;
+static char *_proto_path_base = _aProto_0;
 
 // 0x51C538
 static int _init_true = 0;
@@ -121,19 +121,19 @@ static int _init_true = 0;
 static int _retval = 0;
 
 // 0x66452C
-static char* _mp_perk_code_None;
+static char *_mp_perk_code_None;
 
 // 0x664530
-static char* _mp_perk_code_strs[PERK_COUNT];
+static char *_mp_perk_code_strs[PERK_COUNT];
 
 // 0x66470C
-static char* _mp_critter_stats_list;
+static char *_mp_critter_stats_list;
 
 // 0x664710
-static char* _critter_stats_list_None;
+static char *_critter_stats_list_None;
 
 // 0x664714
-static char* _critter_stats_list_strs[STAT_COUNT];
+static char *_critter_stats_list_strs[STAT_COUNT];
 
 // Message list by object type
 // 0 - pro_item.msg
@@ -147,10 +147,10 @@ static char* _critter_stats_list_strs[STAT_COUNT];
 static MessageList _proto_msg_files[6];
 
 // 0x6647DC
-static char* gRaceTypeNames[RACE_TYPE_COUNT];
+static char *gRaceTypeNames[RACE_TYPE_COUNT];
 
 // 0x6647E4
-static char* gSceneryTypeNames[SCENERY_TYPE_COUNT];
+static char *gSceneryTypeNames[SCENERY_TYPE_COUNT];
 
 // proto.msg
 //
@@ -158,48 +158,48 @@ static char* gSceneryTypeNames[SCENERY_TYPE_COUNT];
 MessageList gProtoMessageList;
 
 // 0x664804
-static char* gMaterialTypeNames[MATERIAL_TYPE_COUNT];
+static char *gMaterialTypeNames[MATERIAL_TYPE_COUNT];
 
 // "<None>" from proto.msg
 //
 // 0x664824
-char* _proto_none_str;
+char *_proto_none_str;
 
 // 0x664828
-static char* gBodyTypeNames[BODY_TYPE_COUNT];
+static char *gBodyTypeNames[BODY_TYPE_COUNT];
 
 // 0x664834
-static char* gItemTypeNames[ITEM_TYPE_COUNT];
+static char *gItemTypeNames[ITEM_TYPE_COUNT];
 
 // 0x66484C
-static char* gDamageTypeNames[DAMAGE_TYPE_COUNT];
+static char *gDamageTypeNames[DAMAGE_TYPE_COUNT];
 
 // 0x66486C
-static char* gCaliberTypeNames[CALIBER_TYPE_COUNT];
+static char *gCaliberTypeNames[CALIBER_TYPE_COUNT];
 
 // Perk names.
 //
 // 0x6648B8
-static char** _perk_code_strs;
+static char **_perk_code_strs;
 
 // Stat names.
 //
 // 0x6648BC
-static char** _critter_stats_list;
+static char **_critter_stats_list;
 
 // NOTE: Inlined.
-void _proto_make_path(char* path, int pid) {
-	strcpy(path, _cd_path_base);
-	strcat(path, _proto_path_base);
+void _proto_make_path(char *path, int pid) {
+	strncpy(path, /*_cd_path_base*/ "", sizeof(path) - 1);
+	strcat_s(path, sizeof(path), _proto_path_base);
 	if (pid != -1) {
-		strcat(path, artGetObjectTypeName(PID_TYPE(pid)));
+		strcat_s(path, sizeof(path), artGetObjectTypeName(PID_TYPE(pid)));
 	}
 }
 
 // Append proto file name to proto_path from proto.lst.
 //
 // 0x49E758
-int _proto_list_str(int pid, char* proto_path) {
+int _proto_list_str(int pid, char *proto_path) {
 	if (pid == -1) {
 		return -1;
 	}
@@ -210,11 +210,11 @@ int _proto_list_str(int pid, char* proto_path) {
 
 	char path[COMPAT_MAX_PATH];
 	_proto_make_path(path, pid);
-	strcat(path, "\\");
-	strcat(path, artGetObjectTypeName(PID_TYPE(pid)));
-	strcat(path, ".lst");
+	strcat_s(path, sizeof(path), "\\");
+	strcat_s(path, sizeof(path), artGetObjectTypeName(PID_TYPE(pid)));
+	strcat_s(path, sizeof(path), ".lst");
 
-	File* stream = fileOpen(path, "rt");
+	File *stream = fileOpen(path, "rt");
 
 	int i = 1;
 	char string[256];
@@ -232,7 +232,7 @@ int _proto_list_str(int pid, char* proto_path) {
 		return -1;
 	}
 
-	char* pch = strchr(string, ' ');
+	char *pch = strchr(string, ' ');
 	if (pch != NULL) {
 		*pch = '\0';
 	}
@@ -242,7 +242,7 @@ int _proto_list_str(int pid, char* proto_path) {
 		*pch = '\0';
 	}
 
-	strcpy(proto_path, string);
+	strncpy(proto_path, string, sizeof(proto_path) - 1);
 
 	return 0;
 }
@@ -254,7 +254,7 @@ size_t proto_size(int type) {
 
 // 0x49E99C
 bool _proto_action_can_use(int pid) {
-	Proto* proto;
+	Proto *proto;
 	if (protoGetProto(pid, &proto) == -1) {
 		return false;
 	}
@@ -272,7 +272,7 @@ bool _proto_action_can_use(int pid) {
 
 // 0x49E9DC
 bool _proto_action_can_use_on(int pid) {
-	Proto* proto;
+	Proto *proto;
 	if (protoGetProto(pid, &proto) == -1) {
 		return false;
 	}
@@ -290,7 +290,7 @@ bool _proto_action_can_use_on(int pid) {
 
 // 0x49EA24
 bool _proto_action_can_talk_to(int pid) {
-	Proto* proto;
+	Proto *proto;
 	if (protoGetProto(pid, &proto) == -1) {
 		return false;
 	}
@@ -314,7 +314,7 @@ int _proto_action_can_pickup(int pid) {
 		return false;
 	}
 
-	Proto* proto;
+	Proto *proto;
 	if (protoGetProto(pid, &proto) == -1) {
 		return false;
 	}
@@ -327,13 +327,13 @@ int _proto_action_can_pickup(int pid) {
 }
 
 // 0x49EAA4
-char* protoGetMessage(int pid, int message) {
-	char* v1 = _proto_none_str;
+char *protoGetMessage(int pid, int message) {
+	char *v1 = _proto_none_str;
 
-	Proto* proto;
+	Proto *proto;
 	if (protoGetProto(pid, &proto) != -1) {
 		if (proto->messageId != -1) {
-			MessageList* messageList = &(_proto_msg_files[PID_TYPE(pid)]);
+			MessageList *messageList = &(_proto_msg_files[PID_TYPE(pid)]);
 
 			MessageListItem messageListItem;
 			messageListItem.num = proto->messageId + message;
@@ -347,21 +347,21 @@ char* protoGetMessage(int pid, int message) {
 }
 
 // 0x49EAFC
-char* protoGetName(int pid) {
+char *protoGetName(int pid) {
 	if (pid == 0x1000000) {
-		return critterGetName(gDude);
+		return ""; // critterGetName(gDude);  TODO critter.cpp
 	}
 
 	return protoGetMessage(pid, PROTOTYPE_MESSAGE_NAME);
 }
 
 // 0x49EB1C
-char* protoGetDescription(int pid) {
+char *protoGetDescription(int pid) {
 	return protoGetMessage(pid, PROTOTYPE_MESSAGE_DESCRIPTION);
 }
 
 // 0x49EDB4
-static int _proto_critter_init(Proto* a1, int a2) {
+static int _proto_critter_init(Proto *a1, int a2) {
 	if (!_protos_been_initialized) {
 		return -1;
 	}
@@ -384,68 +384,91 @@ static int _proto_critter_init(Proto* a1, int a2) {
 		a1->fid = buildFid(OBJ_TYPE_CRITTER, 0, 0, 0, 0);
 	}
 
-	CritterProtoData* data = &(a1->critter.data);
+	CritterProtoData *data = &(a1->critter.data);
 	data->experience = 60;
 	data->killType = 0;
 	data->damageType = 0;
-	protoCritterDataResetStats(data);
-	protoCritterDataResetSkills(data);
+//	protoCritterDataResetStats(data);  TODO stat.cpp
+//	protoCritterDataResetSkills(data);  TODO skill.cpp
 
 	return 0;
 }
 
 // 0x49EEA4
-void objectDataReset(Object* obj) {
+void objectDataReset(Object *obj) {
 	// NOTE: Original code is slightly different. It uses loop to zero object
 	// data byte by byte.
 	memset(&(obj->data), 0, sizeof(obj->data));
 }
 
 // 0x49EEB8
-static int objectCritterCombatDataRead(CritterCombatData* data, File* stream) {
-	if (fileReadInt32(stream, &(data->damageLastTurn)) == -1) return -1;
-	if (fileReadInt32(stream, &(data->maneuver)) == -1) return -1;
-	if (fileReadInt32(stream, &(data->ap)) == -1) return -1;
-	if (fileReadInt32(stream, &(data->results)) == -1) return -1;
-	if (fileReadInt32(stream, &(data->aiPacket)) == -1) return -1;
-	if (fileReadInt32(stream, &(data->team)) == -1) return -1;
-	if (fileReadInt32(stream, &(data->whoHitMeCid)) == -1) return -1;
+static int objectCritterCombatDataRead(CritterCombatData *data, File *stream) {
+	if (fileReadInt32(stream, &(data->damageLastTurn)) == -1)
+		return -1;
+	if (fileReadInt32(stream, &(data->maneuver)) == -1)
+		return -1;
+	if (fileReadInt32(stream, &(data->ap)) == -1)
+		return -1;
+	if (fileReadInt32(stream, &(data->results)) == -1)
+		return -1;
+	if (fileReadInt32(stream, &(data->aiPacket)) == -1)
+		return -1;
+	if (fileReadInt32(stream, &(data->team)) == -1)
+		return -1;
+	if (fileReadInt32(stream, &(data->whoHitMeCid)) == -1)
+		return -1;
 
 	return 0;
 }
 
 // 0x49EF40
-static int objectCritterCombatDataWrite(CritterCombatData* data, File* stream) {
-	if (fileWriteInt32(stream, data->damageLastTurn) == -1) return -1;
-	if (fileWriteInt32(stream, data->maneuver) == -1) return -1;
-	if (fileWriteInt32(stream, data->ap) == -1) return -1;
-	if (fileWriteInt32(stream, data->results) == -1) return -1;
-	if (fileWriteInt32(stream, data->aiPacket) == -1) return -1;
-	if (fileWriteInt32(stream, data->team) == -1) return -1;
-	if (fileWriteInt32(stream, data->whoHitMeCid) == -1) return -1;
+static int objectCritterCombatDataWrite(CritterCombatData *data, File *stream) {
+	if (fileWriteInt32(stream, data->damageLastTurn) == -1)
+		return -1;
+	if (fileWriteInt32(stream, data->maneuver) == -1)
+		return -1;
+	if (fileWriteInt32(stream, data->ap) == -1)
+		return -1;
+	if (fileWriteInt32(stream, data->results) == -1)
+		return -1;
+	if (fileWriteInt32(stream, data->aiPacket) == -1)
+		return -1;
+	if (fileWriteInt32(stream, data->team) == -1)
+		return -1;
+	if (fileWriteInt32(stream, data->whoHitMeCid) == -1)
+		return -1;
 
 	return 0;
 }
 
 // 0x49F004
-int objectDataRead(Object* obj, File* stream) {
-	Proto* proto;
+int objectDataRead(Object *obj, File *stream) {
+	Proto *proto;
 	int temp;
 
-	Inventory* inventory = &(obj->data.inventory);
-	if (fileReadInt32(stream, &(inventory->length)) == -1) return -1;
-	if (fileReadInt32(stream, &(inventory->capacity)) == -1) return -1;
+	Inventory *inventory = &(obj->data.inventory);
+	if (fileReadInt32(stream, &(inventory->length)) == -1)
+		return -1;
+	if (fileReadInt32(stream, &(inventory->capacity)) == -1)
+		return -1;
 	// CE: Original code reads inventory items pointer which is meaningless.
-	if (fileReadInt32(stream, &temp) == -1) return -1;
+	if (fileReadInt32(stream, &temp) == -1)
+		return -1;
 
 	if (PID_TYPE(obj->pid) == OBJ_TYPE_CRITTER) {
-		if (fileReadInt32(stream, &(obj->data.critter.field_0)) == -1) return -1;
-		if (objectCritterCombatDataRead(&(obj->data.critter.combat), stream) == -1) return -1;
-		if (fileReadInt32(stream, &(obj->data.critter.hp)) == -1) return -1;
-		if (fileReadInt32(stream, &(obj->data.critter.radiation)) == -1) return -1;
-		if (fileReadInt32(stream, &(obj->data.critter.poison)) == -1) return -1;
+		if (fileReadInt32(stream, &(obj->data.critter.field_0)) == -1)
+			return -1;
+		if (objectCritterCombatDataRead(&(obj->data.critter.combat), stream) == -1)
+			return -1;
+		if (fileReadInt32(stream, &(obj->data.critter.hp)) == -1)
+			return -1;
+		if (fileReadInt32(stream, &(obj->data.critter.radiation)) == -1)
+			return -1;
+		if (fileReadInt32(stream, &(obj->data.critter.poison)) == -1)
+			return -1;
 	} else {
-		if (fileReadInt32(stream, &(obj->data.flags)) == -1) return -1;
+		if (fileReadInt32(stream, &(obj->data.flags)) == -1)
+			return -1;
 
 		if (obj->data.flags == 0xCCCCCCCC) {
 			debugPrint("\nNote: Reading pud: updated_flags was un-Set!");
@@ -454,21 +477,27 @@ int objectDataRead(Object* obj, File* stream) {
 
 		switch (PID_TYPE(obj->pid)) {
 		case OBJ_TYPE_ITEM:
-			if (protoGetProto(obj->pid, &proto) == -1) return -1;
+			if (protoGetProto(obj->pid, &proto) == -1)
+				return -1;
 
 			switch (proto->item.type) {
 			case ITEM_TYPE_WEAPON:
-				if (fileReadInt32(stream, &(obj->data.item.weapon.ammoQuantity)) == -1) return -1;
-				if (fileReadInt32(stream, &(obj->data.item.weapon.ammoTypePid)) == -1) return -1;
+				if (fileReadInt32(stream, &(obj->data.item.weapon.ammoQuantity)) == -1)
+					return -1;
+				if (fileReadInt32(stream, &(obj->data.item.weapon.ammoTypePid)) == -1)
+					return -1;
 				break;
 			case ITEM_TYPE_AMMO:
-				if (fileReadInt32(stream, &(obj->data.item.ammo.quantity)) == -1) return -1;
+				if (fileReadInt32(stream, &(obj->data.item.ammo.quantity)) == -1)
+					return -1;
 				break;
 			case ITEM_TYPE_MISC:
-				if (fileReadInt32(stream, &(obj->data.item.misc.charges)) == -1) return -1;
+				if (fileReadInt32(stream, &(obj->data.item.misc.charges)) == -1)
+					return -1;
 				break;
 			case ITEM_TYPE_KEY:
-				if (fileReadInt32(stream, &(obj->data.item.key.keyCode)) == -1) return -1;
+				if (fileReadInt32(stream, &(obj->data.item.key.keyCode)) == -1)
+					return -1;
 				break;
 			default:
 				break;
@@ -476,34 +505,46 @@ int objectDataRead(Object* obj, File* stream) {
 
 			break;
 		case OBJ_TYPE_SCENERY:
-			if (protoGetProto(obj->pid, &proto) == -1) return -1;
+			if (protoGetProto(obj->pid, &proto) == -1)
+				return -1;
 
 			switch (proto->scenery.type) {
 			case SCENERY_TYPE_DOOR:
-				if (fileReadInt32(stream, &(obj->data.scenery.door.openFlags)) == -1) return -1;
+				if (fileReadInt32(stream, &(obj->data.scenery.door.openFlags)) == -1)
+					return -1;
 				break;
 			case SCENERY_TYPE_STAIRS:
-				if (fileReadInt32(stream, &(obj->data.scenery.stairs.destinationBuiltTile)) == -1) return -1;
-				if (fileReadInt32(stream, &(obj->data.scenery.stairs.destinationMap)) == -1) return -1;
+				if (fileReadInt32(stream, &(obj->data.scenery.stairs.destinationBuiltTile)) == -1)
+					return -1;
+				if (fileReadInt32(stream, &(obj->data.scenery.stairs.destinationMap)) == -1)
+					return -1;
 				break;
 			case SCENERY_TYPE_ELEVATOR:
-				if (fileReadInt32(stream, &(obj->data.scenery.elevator.type)) == -1) return -1;
-				if (fileReadInt32(stream, &(obj->data.scenery.elevator.level)) == -1) return -1;
+				if (fileReadInt32(stream, &(obj->data.scenery.elevator.type)) == -1)
+					return -1;
+				if (fileReadInt32(stream, &(obj->data.scenery.elevator.level)) == -1)
+					return -1;
 				break;
 			case SCENERY_TYPE_LADDER_UP:
-				if (gMapHeader.version == 19) {
-					if (fileReadInt32(stream, &(obj->data.scenery.ladder.destinationBuiltTile)) == -1) return -1;
+				if (/*gMapHeader.version == 19*/ 0) { // TODO map.cpp
+					if (fileReadInt32(stream, &(obj->data.scenery.ladder.destinationBuiltTile)) == -1)
+						return -1;
 				} else {
-					if (fileReadInt32(stream, &(obj->data.scenery.ladder.destinationMap)) == -1) return -1;
-					if (fileReadInt32(stream, &(obj->data.scenery.ladder.destinationBuiltTile)) == -1) return -1;
+					if (fileReadInt32(stream, &(obj->data.scenery.ladder.destinationMap)) == -1)
+						return -1;
+					if (fileReadInt32(stream, &(obj->data.scenery.ladder.destinationBuiltTile)) == -1)
+						return -1;
 				}
 				break;
 			case SCENERY_TYPE_LADDER_DOWN:
-				if (gMapHeader.version == 19) {
-					if (fileReadInt32(stream, &(obj->data.scenery.ladder.destinationBuiltTile)) == -1) return -1;
+				if (/*gMapHeader.version == 19*/ 0) { // TODO map.cpp
+					if (fileReadInt32(stream, &(obj->data.scenery.ladder.destinationBuiltTile)) == -1)
+						return -1;
 				} else {
-					if (fileReadInt32(stream, &(obj->data.scenery.ladder.destinationMap)) == -1) return -1;
-					if (fileReadInt32(stream, &(obj->data.scenery.ladder.destinationBuiltTile)) == -1) return -1;
+					if (fileReadInt32(stream, &(obj->data.scenery.ladder.destinationMap)) == -1)
+						return -1;
+					if (fileReadInt32(stream, &(obj->data.scenery.ladder.destinationBuiltTile)) == -1)
+						return -1;
 				}
 				break;
 			}
@@ -511,10 +552,14 @@ int objectDataRead(Object* obj, File* stream) {
 			break;
 		case OBJ_TYPE_MISC:
 			if (isExitGridPid(obj->pid)) {
-				if (fileReadInt32(stream, &(obj->data.misc.map)) == -1) return -1;
-				if (fileReadInt32(stream, &(obj->data.misc.tile)) == -1) return -1;
-				if (fileReadInt32(stream, &(obj->data.misc.elevation)) == -1) return -1;
-				if (fileReadInt32(stream, &(obj->data.misc.rotation)) == -1) return -1;
+				if (fileReadInt32(stream, &(obj->data.misc.map)) == -1)
+					return -1;
+				if (fileReadInt32(stream, &(obj->data.misc.tile)) == -1)
+					return -1;
+				if (fileReadInt32(stream, &(obj->data.misc.elevation)) == -1)
+					return -1;
+				if (fileReadInt32(stream, &(obj->data.misc.rotation)) == -1)
+					return -1;
 			}
 			break;
 		}
@@ -524,66 +569,91 @@ int objectDataRead(Object* obj, File* stream) {
 }
 
 // 0x49F428
-int objectDataWrite(Object* obj, File* stream) {
-	Proto* proto;
+int objectDataWrite(Object *obj, File *stream) {
+	Proto *proto;
 
-	ObjectData* data = &(obj->data);
-	if (fileWriteInt32(stream, data->inventory.length) == -1) return -1;
-	if (fileWriteInt32(stream, data->inventory.capacity) == -1) return -1;
+	ObjectData *data = &(obj->data);
+	if (fileWriteInt32(stream, data->inventory.length) == -1)
+		return -1;
+	if (fileWriteInt32(stream, data->inventory.capacity) == -1)
+		return -1;
 	// CE: Original code writes inventory items pointer, which is meaningless.
-	if (fileWriteInt32(stream, 0) == -1) return -1;
+	if (fileWriteInt32(stream, 0) == -1)
+		return -1;
 
 	if (PID_TYPE(obj->pid) == OBJ_TYPE_CRITTER) {
-		if (fileWriteInt32(stream, data->flags) == -1) return -1;
-		if (objectCritterCombatDataWrite(&(obj->data.critter.combat), stream) == -1) return -1;
-		if (fileWriteInt32(stream, data->critter.hp) == -1) return -1;
-		if (fileWriteInt32(stream, data->critter.radiation) == -1) return -1;
-		if (fileWriteInt32(stream, data->critter.poison) == -1) return -1;
+		if (fileWriteInt32(stream, data->flags) == -1)
+			return -1;
+		if (objectCritterCombatDataWrite(&(obj->data.critter.combat), stream) == -1)
+			return -1;
+		if (fileWriteInt32(stream, data->critter.hp) == -1)
+			return -1;
+		if (fileWriteInt32(stream, data->critter.radiation) == -1)
+			return -1;
+		if (fileWriteInt32(stream, data->critter.poison) == -1)
+			return -1;
 	} else {
-		if (fileWriteInt32(stream, data->flags) == -1) return -1;
+		if (fileWriteInt32(stream, data->flags) == -1)
+			return -1;
 
 		switch (PID_TYPE(obj->pid)) {
 		case OBJ_TYPE_ITEM:
-			if (protoGetProto(obj->pid, &proto) == -1) return -1;
+			if (protoGetProto(obj->pid, &proto) == -1)
+				return -1;
 
 			switch (proto->item.type) {
 			case ITEM_TYPE_WEAPON:
-				if (fileWriteInt32(stream, data->item.weapon.ammoQuantity) == -1) return -1;
-				if (fileWriteInt32(stream, data->item.weapon.ammoTypePid) == -1) return -1;
+				if (fileWriteInt32(stream, data->item.weapon.ammoQuantity) == -1)
+					return -1;
+				if (fileWriteInt32(stream, data->item.weapon.ammoTypePid) == -1)
+					return -1;
 				break;
 			case ITEM_TYPE_AMMO:
-				if (fileWriteInt32(stream, data->item.ammo.quantity) == -1) return -1;
+				if (fileWriteInt32(stream, data->item.ammo.quantity) == -1)
+					return -1;
 				break;
 			case ITEM_TYPE_MISC:
-				if (fileWriteInt32(stream, data->item.misc.charges) == -1) return -1;
+				if (fileWriteInt32(stream, data->item.misc.charges) == -1)
+					return -1;
 				break;
 			case ITEM_TYPE_KEY:
-				if (fileWriteInt32(stream, data->item.key.keyCode) == -1) return -1;
+				if (fileWriteInt32(stream, data->item.key.keyCode) == -1)
+					return -1;
 				break;
 			}
 			break;
 		case OBJ_TYPE_SCENERY:
-			if (protoGetProto(obj->pid, &proto) == -1) return -1;
+			if (protoGetProto(obj->pid, &proto) == -1)
+				return -1;
 
 			switch (proto->scenery.type) {
 			case SCENERY_TYPE_DOOR:
-				if (fileWriteInt32(stream, data->scenery.door.openFlags) == -1) return -1;
+				if (fileWriteInt32(stream, data->scenery.door.openFlags) == -1)
+					return -1;
 				break;
 			case SCENERY_TYPE_STAIRS:
-				if (fileWriteInt32(stream, data->scenery.stairs.destinationBuiltTile) == -1) return -1;
-				if (fileWriteInt32(stream, data->scenery.stairs.destinationMap) == -1) return -1;
+				if (fileWriteInt32(stream, data->scenery.stairs.destinationBuiltTile) == -1)
+					return -1;
+				if (fileWriteInt32(stream, data->scenery.stairs.destinationMap) == -1)
+					return -1;
 				break;
 			case SCENERY_TYPE_ELEVATOR:
-				if (fileWriteInt32(stream, data->scenery.elevator.type) == -1) return -1;
-				if (fileWriteInt32(stream, data->scenery.elevator.level) == -1) return -1;
+				if (fileWriteInt32(stream, data->scenery.elevator.type) == -1)
+					return -1;
+				if (fileWriteInt32(stream, data->scenery.elevator.level) == -1)
+					return -1;
 				break;
 			case SCENERY_TYPE_LADDER_UP:
-				if (fileWriteInt32(stream, data->scenery.ladder.destinationMap) == -1) return -1;
-				if (fileWriteInt32(stream, data->scenery.ladder.destinationBuiltTile) == -1) return -1;
+				if (fileWriteInt32(stream, data->scenery.ladder.destinationMap) == -1)
+					return -1;
+				if (fileWriteInt32(stream, data->scenery.ladder.destinationBuiltTile) == -1)
+					return -1;
 				break;
 			case SCENERY_TYPE_LADDER_DOWN:
-				if (fileWriteInt32(stream, data->scenery.ladder.destinationMap) == -1) return -1;
-				if (fileWriteInt32(stream, data->scenery.ladder.destinationBuiltTile) == -1) return -1;
+				if (fileWriteInt32(stream, data->scenery.ladder.destinationMap) == -1)
+					return -1;
+				if (fileWriteInt32(stream, data->scenery.ladder.destinationBuiltTile) == -1)
+					return -1;
 				break;
 			default:
 				break;
@@ -591,10 +661,14 @@ int objectDataWrite(Object* obj, File* stream) {
 			break;
 		case OBJ_TYPE_MISC:
 			if (isExitGridPid(obj->pid)) {
-				if (fileWriteInt32(stream, data->misc.map) == -1) return -1;
-				if (fileWriteInt32(stream, data->misc.tile) == -1) return -1;
-				if (fileWriteInt32(stream, data->misc.elevation) == -1) return -1;
-				if (fileWriteInt32(stream, data->misc.rotation) == -1) return -1;
+				if (fileWriteInt32(stream, data->misc.map) == -1)
+					return -1;
+				if (fileWriteInt32(stream, data->misc.tile) == -1)
+					return -1;
+				if (fileWriteInt32(stream, data->misc.elevation) == -1)
+					return -1;
+				if (fileWriteInt32(stream, data->misc.rotation) == -1)
+					return -1;
 			}
 			break;
 		default:
@@ -606,14 +680,14 @@ int objectDataWrite(Object* obj, File* stream) {
 }
 
 // 0x49F73C
-static int _proto_update_gen(Object* obj) {
-	Proto* proto;
+static int _proto_update_gen(Object *obj) {
+	Proto *proto;
 
 	if (!_protos_been_initialized) {
 		return -1;
 	}
 
-	ObjectData* data = &(obj->data);
+	ObjectData *data = &(obj->data);
 	data->inventory.length = 0;
 	data->inventory.capacity = 0;
 	data->inventory.items = NULL;
@@ -678,7 +752,7 @@ static int _proto_update_gen(Object* obj) {
 }
 
 // 0x49F8A0
-int _proto_update_init(Object* obj) {
+int _proto_update_init(Object *obj) {
 	if (!_protos_been_initialized) {
 		return -1;
 	}
@@ -699,17 +773,17 @@ int _proto_update_init(Object* obj) {
 		return _proto_update_gen(obj);
 	}
 
-	ObjectData* data = &(obj->data);
+	ObjectData *data = &(obj->data);
 	data->inventory.length = 0;
 	data->inventory.capacity = 0;
 	data->inventory.items = NULL;
-	_combat_data_init(obj);
-	data->critter.hp = critterGetStat(obj, STAT_MAXIMUM_HIT_POINTS);
-	data->critter.combat.ap = critterGetStat(obj, STAT_MAXIMUM_ACTION_POINTS);
-	critterUpdateDerivedStats(obj);
+	// _combat_data_init(obj);  TODO combat.cpp
+	data->critter.hp = STAT_MAXIMUM_HIT_POINTS; //  critterGetStat(obj, STAT_MAXIMUM_HIT_POINTS); TODO stat.cpp
+	data->critter.combat.ap = STAT_MAXIMUM_ACTION_POINTS; // critterGetStat(obj, STAT_MAXIMUM_ACTION_POINTS);  TODO stat.cpp
+	// critterUpdateDerivedStats(obj);  // stat.cpp
 	obj->data.critter.combat.whoHitMe = NULL;
 
-	Proto* proto;
+	Proto *proto;
 	if (protoGetProto(obj->pid, &proto) != -1) {
 		data->critter.combat.aiPacket = proto->critter.aiPacket;
 		data->critter.combat.team = proto->critter.team;
@@ -720,18 +794,18 @@ int _proto_update_init(Object* obj) {
 
 // 0x49F984
 int _proto_dude_update_gender() {
-	Proto* proto;
+	Proto *proto;
 	if (protoGetProto(0x1000000, &proto) == -1) {
 		return -1;
 	}
 
 	int nativeLook = DUDE_NATIVE_LOOK_TRIBAL;
-	if (gameMovieIsSeen(MOVIE_VSUIT)) {
-		nativeLook = DUDE_NATIVE_LOOK_JUMPSUIT;
-	}
+//	if (gameMovieIsSeen(MOVIE_VSUIT)) {  TODO game_movie.cpp
+//		nativeLook = DUDE_NATIVE_LOOK_JUMPSUIT;
+//	}
 
 	int frmId;
-	if (critterGetStat(gDude, STAT_GENDER) == GENDER_MALE) {
+	if (/* critterGetStat(gDude, STAT_GENDER) == GENDER_MALE*/ 1) {  // TODO stat.cpp
 		frmId = _art_vault_person_nums[nativeLook][GENDER_MALE];
 	} else {
 		frmId = _art_vault_person_nums[nativeLook][GENDER_FEMALE];
@@ -739,7 +813,7 @@ int _proto_dude_update_gender() {
 
 	_art_vault_guy_num = frmId;
 
-	if (critterGetArmor(gDude) == NULL) {
+/*	if (critterGetArmor(gDude) == NULL) {  // TODO inventory.cpp
 		int v1 = 0;
 		if (critterGetItem2(gDude) != NULL || critterGetItem1(gDude) != NULL) {
 			v1 = (gDude->fid & 0xF000) >> 12;
@@ -747,7 +821,7 @@ int _proto_dude_update_gender() {
 
 		int fid = buildFid(OBJ_TYPE_CRITTER, _art_vault_guy_num, 0, v1, 0);
 		objectSetFid(gDude, fid, NULL);
-	}
+	}*/
 
 	proto->fid = buildFid(OBJ_TYPE_CRITTER, _art_vault_guy_num, 0, 0, 0);
 
@@ -756,7 +830,7 @@ int _proto_dude_update_gender() {
 
 // proto_dude_init
 // 0x49FA64
-int _proto_dude_init(const char* path) {
+int _proto_dude_init(const char *path) {
 	gDudeProto.fid = buildFid(OBJ_TYPE_CRITTER, _art_vault_guy_num, 0, 0, 0);
 
 	if (_init_true) {
@@ -765,7 +839,7 @@ int _proto_dude_init(const char* path) {
 
 	_init_true = 1;
 
-	Proto* proto;
+	Proto *proto;
 	if (protoGetProto(0x1000000, &proto) == -1) {
 		return -1;
 	}
@@ -777,7 +851,7 @@ int _proto_dude_init(const char* path) {
 	gDude->data.critter.combat.team = 0;
 	_ResetPlayer();
 
-	if (gcdLoad(path) == -1) {
+	if (/*gcdLoad(path) == -1*/ 0) {  // TODO critter.cpp
 		_retval = -1;
 	}
 
@@ -788,7 +862,7 @@ int _proto_dude_init(const char* path) {
 	proto->critter.data.damageType = 0;
 
 	_proto_dude_update_gender();
-	_inven_reset_dude();
+	// _inven_reset_dude();  TODO inventory.cpp
 
 	if ((gDude->flags & OBJECT_FLAT) != 0) {
 		_obj_toggle_flat(gDude, NULL);
@@ -798,8 +872,8 @@ int _proto_dude_init(const char* path) {
 		gDude->flags &= ~OBJECT_NO_BLOCK;
 	}
 
-	critterUpdateDerivedStats(gDude);
-	critterAdjustHitPoints(gDude, 10000);
+	// critterUpdateDerivedStats(gDude); TODO stat.cpp
+	// critterAdjustHitPoints(gDude, 10000);  TODO critter.cpp
 
 	if (_retval) {
 		debugPrint("\n ** Error in proto_dude_init()! **\n");
@@ -810,8 +884,8 @@ int _proto_dude_init(const char* path) {
 
 // proto_data_member
 // 0x49FFD8
-int protoGetDataMember(int pid, int member, ProtoDataMemberValue* value) {
-	Proto* proto;
+int protoGetDataMember(int pid, int member, ProtoDataMemberValue *value) {
+	Proto *proto;
 	if (protoGetProto(pid, &proto) == -1) {
 		return -1;
 	}
@@ -1054,14 +1128,14 @@ int protoInit() {
 
 	compat_mkdir(path);
 
-	strcpy(path + len, "\\critters");
+	strncpy(path + len, "\\critters", sizeof(path) - 1);
 	compat_mkdir(path);
 
-	strcpy(path + len, "\\items");
+	strncpy(path + len, "\\items", sizeof(path) - 1);
 	compat_mkdir(path);
 
 	// TODO: Get rid of cast.
-	_proto_critter_init((Proto*)&gDudeProto, 0x1000000);
+	_proto_critter_init((Proto *)&gDudeProto, 0x1000000);
 
 	gDudeProto.pid = 0x1000000;
 	gDudeProto.fid = buildFid(OBJ_TYPE_CRITTER, 1, 0, 0, 0);
@@ -1103,7 +1177,7 @@ int protoInit() {
 	_critter_stats_list = _critter_stats_list_strs;
 	_critter_stats_list_None = _aNone_1;
 	for (i = 0; i < STAT_COUNT; i++) {
-		_critter_stats_list_strs[i] = statGetName(i);
+		_critter_stats_list_strs[i] = ""; //statGetName(i);  TODO stat.cpp
 		if (_critter_stats_list_strs[i] == NULL) {
 			debugPrint("\nError: Finding stat names!");
 			return -1;
@@ -1113,7 +1187,7 @@ int protoInit() {
 	_mp_perk_code_None = _aNone_1;
 	_perk_code_strs = _mp_perk_code_strs;
 	for (i = 0; i < PERK_COUNT; i++) {
-		_mp_perk_code_strs[i] = perkGetName(i);
+		_mp_perk_code_strs[i] = ""; // perkGetName(i); TODO perk.cpp
 		if (_mp_perk_code_strs[i] == NULL) {
 			debugPrint("\nError: Finding perk names!");
 			return -1;
@@ -1179,7 +1253,7 @@ void protoReset() {
 	int i;
 
 	// TODO: Get rid of cast.
-	_proto_critter_init((Proto*)&gDudeProto, 0x1000000);
+	_proto_critter_init((Proto *)&gDudeProto, 0x1000000);
 	gDudeProto.pid = 0x1000000;
 	gDudeProto.fid = buildFid(OBJ_TYPE_CRITTER, 1, 0, 0, 0);
 
@@ -1219,7 +1293,7 @@ void protoExit() {
 // 0x4A08E0
 static int _proto_header_load() {
 	for (int index = 0; index < 6; index++) {
-		ProtoList* ptr = &(_protoLists[index]);
+		ProtoList *ptr = &(_protoLists[index]);
 		ptr->head = NULL;
 		ptr->tail = NULL;
 		ptr->length = 0;
@@ -1227,11 +1301,11 @@ static int _proto_header_load() {
 
 		char path[COMPAT_MAX_PATH];
 		_proto_make_path(path, index << 24);
-		strcat(path, "\\");
-		strcat(path, artGetObjectTypeName(index));
-		strcat(path, ".lst");
+		strcat_s(path, sizeof(path), "\\");
+		strcat_s(path, sizeof(path), artGetObjectTypeName(index));
+		strcat_s(path, sizeof(path), ".lst");
 
-		File* stream = fileOpen(path, "rt");
+		File *stream = fileOpen(path, "rt");
 		if (stream == NULL) {
 			return -1;
 		}
@@ -1259,73 +1333,119 @@ static int _proto_header_load() {
 }
 
 // 0x4A0AEC
-static int protoItemDataRead(ItemProtoData* item_data, int type, File* stream) {
+static int protoItemDataRead(ItemProtoData *item_data, int type, File *stream) {
 	switch (type) {
 	case ITEM_TYPE_ARMOR:
-		if (fileReadInt32(stream, &(item_data->armor.armorClass)) == -1) return -1;
-		if (fileReadInt32List(stream, item_data->armor.damageResistance, 7) == -1) return -1;
-		if (fileReadInt32List(stream, item_data->armor.damageThreshold, 7) == -1) return -1;
-		if (fileReadInt32(stream, &(item_data->armor.perk)) == -1) return -1;
-		if (fileReadInt32(stream, &(item_data->armor.maleFid)) == -1) return -1;
-		if (fileReadInt32(stream, &(item_data->armor.femaleFid)) == -1) return -1;
+		if (fileReadInt32(stream, &(item_data->armor.armorClass)) == -1)
+			return -1;
+		if (fileReadInt32List(stream, item_data->armor.damageResistance, 7) == -1)
+			return -1;
+		if (fileReadInt32List(stream, item_data->armor.damageThreshold, 7) == -1)
+			return -1;
+		if (fileReadInt32(stream, &(item_data->armor.perk)) == -1)
+			return -1;
+		if (fileReadInt32(stream, &(item_data->armor.maleFid)) == -1)
+			return -1;
+		if (fileReadInt32(stream, &(item_data->armor.femaleFid)) == -1)
+			return -1;
 
 		return 0;
 	case ITEM_TYPE_CONTAINER:
-		if (fileReadInt32(stream, &(item_data->container.maxSize)) == -1) return -1;
-		if (fileReadInt32(stream, &(item_data->container.openFlags)) == -1) return -1;
+		if (fileReadInt32(stream, &(item_data->container.maxSize)) == -1)
+			return -1;
+		if (fileReadInt32(stream, &(item_data->container.openFlags)) == -1)
+			return -1;
 
 		return 0;
 	case ITEM_TYPE_DRUG:
-		if (fileReadInt32(stream, &(item_data->drug.stat[0])) == -1) return -1;
-		if (fileReadInt32(stream, &(item_data->drug.stat[1])) == -1) return -1;
-		if (fileReadInt32(stream, &(item_data->drug.stat[2])) == -1) return -1;
-		if (fileReadInt32List(stream, item_data->drug.amount, 3) == -1) return -1;
-		if (fileReadInt32(stream, &(item_data->drug.duration1)) == -1) return -1;
-		if (fileReadInt32List(stream, item_data->drug.amount1, 3) == -1) return -1;
-		if (fileReadInt32(stream, &(item_data->drug.duration2)) == -1) return -1;
-		if (fileReadInt32List(stream, item_data->drug.amount2, 3) == -1) return -1;
-		if (fileReadInt32(stream, &(item_data->drug.addictionChance)) == -1) return -1;
-		if (fileReadInt32(stream, &(item_data->drug.withdrawalEffect)) == -1) return -1;
-		if (fileReadInt32(stream, &(item_data->drug.withdrawalOnset)) == -1) return -1;
+		if (fileReadInt32(stream, &(item_data->drug.stat[0])) == -1)
+			return -1;
+		if (fileReadInt32(stream, &(item_data->drug.stat[1])) == -1)
+			return -1;
+		if (fileReadInt32(stream, &(item_data->drug.stat[2])) == -1)
+			return -1;
+		if (fileReadInt32List(stream, item_data->drug.amount, 3) == -1)
+			return -1;
+		if (fileReadInt32(stream, &(item_data->drug.duration1)) == -1)
+			return -1;
+		if (fileReadInt32List(stream, item_data->drug.amount1, 3) == -1)
+			return -1;
+		if (fileReadInt32(stream, &(item_data->drug.duration2)) == -1)
+			return -1;
+		if (fileReadInt32List(stream, item_data->drug.amount2, 3) == -1)
+			return -1;
+		if (fileReadInt32(stream, &(item_data->drug.addictionChance)) == -1)
+			return -1;
+		if (fileReadInt32(stream, &(item_data->drug.withdrawalEffect)) == -1)
+			return -1;
+		if (fileReadInt32(stream, &(item_data->drug.withdrawalOnset)) == -1)
+			return -1;
 
 		return 0;
 	case ITEM_TYPE_WEAPON:
-		if (fileReadInt32(stream, &(item_data->weapon.animationCode)) == -1) return -1;
-		if (fileReadInt32(stream, &(item_data->weapon.minDamage)) == -1) return -1;
-		if (fileReadInt32(stream, &(item_data->weapon.maxDamage)) == -1) return -1;
-		if (fileReadInt32(stream, &(item_data->weapon.damageType)) == -1) return -1;
-		if (fileReadInt32(stream, &(item_data->weapon.maxRange1)) == -1) return -1;
-		if (fileReadInt32(stream, &(item_data->weapon.maxRange2)) == -1) return -1;
-		if (fileReadInt32(stream, &(item_data->weapon.projectilePid)) == -1) return -1;
-		if (fileReadInt32(stream, &(item_data->weapon.minStrength)) == -1) return -1;
-		if (fileReadInt32(stream, &(item_data->weapon.actionPointCost1)) == -1) return -1;
-		if (fileReadInt32(stream, &(item_data->weapon.actionPointCost2)) == -1) return -1;
-		if (fileReadInt32(stream, &(item_data->weapon.criticalFailureType)) == -1) return -1;
-		if (fileReadInt32(stream, &(item_data->weapon.perk)) == -1) return -1;
-		if (fileReadInt32(stream, &(item_data->weapon.rounds)) == -1) return -1;
-		if (fileReadInt32(stream, &(item_data->weapon.caliber)) == -1) return -1;
-		if (fileReadInt32(stream, &(item_data->weapon.ammoTypePid)) == -1) return -1;
-		if (fileReadInt32(stream, &(item_data->weapon.ammoCapacity)) == -1) return -1;
-		if (fileReadUInt8(stream, &(item_data->weapon.soundCode)) == -1) return -1;
+		if (fileReadInt32(stream, &(item_data->weapon.animationCode)) == -1)
+			return -1;
+		if (fileReadInt32(stream, &(item_data->weapon.minDamage)) == -1)
+			return -1;
+		if (fileReadInt32(stream, &(item_data->weapon.maxDamage)) == -1)
+			return -1;
+		if (fileReadInt32(stream, &(item_data->weapon.damageType)) == -1)
+			return -1;
+		if (fileReadInt32(stream, &(item_data->weapon.maxRange1)) == -1)
+			return -1;
+		if (fileReadInt32(stream, &(item_data->weapon.maxRange2)) == -1)
+			return -1;
+		if (fileReadInt32(stream, &(item_data->weapon.projectilePid)) == -1)
+			return -1;
+		if (fileReadInt32(stream, &(item_data->weapon.minStrength)) == -1)
+			return -1;
+		if (fileReadInt32(stream, &(item_data->weapon.actionPointCost1)) == -1)
+			return -1;
+		if (fileReadInt32(stream, &(item_data->weapon.actionPointCost2)) == -1)
+			return -1;
+		if (fileReadInt32(stream, &(item_data->weapon.criticalFailureType)) == -1)
+			return -1;
+		if (fileReadInt32(stream, &(item_data->weapon.perk)) == -1)
+			return -1;
+		if (fileReadInt32(stream, &(item_data->weapon.rounds)) == -1)
+			return -1;
+		if (fileReadInt32(stream, &(item_data->weapon.caliber)) == -1)
+			return -1;
+		if (fileReadInt32(stream, &(item_data->weapon.ammoTypePid)) == -1)
+			return -1;
+		if (fileReadInt32(stream, &(item_data->weapon.ammoCapacity)) == -1)
+			return -1;
+		if (fileReadUInt8(stream, &(item_data->weapon.soundCode)) == -1)
+			return -1;
 
 		return 0;
 	case ITEM_TYPE_AMMO:
-		if (fileReadInt32(stream, &(item_data->ammo.caliber)) == -1) return -1;
-		if (fileReadInt32(stream, &(item_data->ammo.quantity)) == -1) return -1;
-		if (fileReadInt32(stream, &(item_data->ammo.armorClassModifier)) == -1) return -1;
-		if (fileReadInt32(stream, &(item_data->ammo.damageResistanceModifier)) == -1) return -1;
-		if (fileReadInt32(stream, &(item_data->ammo.damageMultiplier)) == -1) return -1;
-		if (fileReadInt32(stream, &(item_data->ammo.damageDivisor)) == -1) return -1;
+		if (fileReadInt32(stream, &(item_data->ammo.caliber)) == -1)
+			return -1;
+		if (fileReadInt32(stream, &(item_data->ammo.quantity)) == -1)
+			return -1;
+		if (fileReadInt32(stream, &(item_data->ammo.armorClassModifier)) == -1)
+			return -1;
+		if (fileReadInt32(stream, &(item_data->ammo.damageResistanceModifier)) == -1)
+			return -1;
+		if (fileReadInt32(stream, &(item_data->ammo.damageMultiplier)) == -1)
+			return -1;
+		if (fileReadInt32(stream, &(item_data->ammo.damageDivisor)) == -1)
+			return -1;
 
 		return 0;
 	case ITEM_TYPE_MISC:
-		if (fileReadInt32(stream, &(item_data->misc.powerTypePid)) == -1) return -1;
-		if (fileReadInt32(stream, &(item_data->misc.powerType)) == -1) return -1;
-		if (fileReadInt32(stream, &(item_data->misc.charges)) == -1) return -1;
+		if (fileReadInt32(stream, &(item_data->misc.powerTypePid)) == -1)
+			return -1;
+		if (fileReadInt32(stream, &(item_data->misc.powerType)) == -1)
+			return -1;
+		if (fileReadInt32(stream, &(item_data->misc.charges)) == -1)
+			return -1;
 
 		return 0;
 	case ITEM_TYPE_KEY:
-		if (fileReadInt32(stream, &(item_data->key.keyCode)) == -1) return -1;
+		if (fileReadInt32(stream, &(item_data->key.keyCode)) == -1)
+			return -1;
 
 		return 0;
 	}
@@ -1334,30 +1454,38 @@ static int protoItemDataRead(ItemProtoData* item_data, int type, File* stream) {
 }
 
 // 0x4A0ED0
-static int protoSceneryDataRead(SceneryProtoData* scenery_data, int type, File* stream) {
+static int protoSceneryDataRead(SceneryProtoData *scenery_data, int type, File *stream) {
 	switch (type) {
 	case SCENERY_TYPE_DOOR:
-		if (fileReadInt32(stream, &(scenery_data->door.openFlags)) == -1) return -1;
-		if (fileReadInt32(stream, &(scenery_data->door.keyCode)) == -1) return -1;
+		if (fileReadInt32(stream, &(scenery_data->door.openFlags)) == -1)
+			return -1;
+		if (fileReadInt32(stream, &(scenery_data->door.keyCode)) == -1)
+			return -1;
 
 		return 0;
 	case SCENERY_TYPE_STAIRS:
-		if (fileReadInt32(stream, &(scenery_data->stairs.field_0)) == -1) return -1;
-		if (fileReadInt32(stream, &(scenery_data->stairs.field_4)) == -1) return -1;
+		if (fileReadInt32(stream, &(scenery_data->stairs.field_0)) == -1)
+			return -1;
+		if (fileReadInt32(stream, &(scenery_data->stairs.field_4)) == -1)
+			return -1;
 
 		return 0;
 	case SCENERY_TYPE_ELEVATOR:
-		if (fileReadInt32(stream, &(scenery_data->elevator.type)) == -1) return -1;
-		if (fileReadInt32(stream, &(scenery_data->elevator.level)) == -1) return -1;
+		if (fileReadInt32(stream, &(scenery_data->elevator.type)) == -1)
+			return -1;
+		if (fileReadInt32(stream, &(scenery_data->elevator.level)) == -1)
+			return -1;
 
 		return 0;
 	case SCENERY_TYPE_LADDER_UP:
 	case SCENERY_TYPE_LADDER_DOWN:
-		if (fileReadInt32(stream, &(scenery_data->ladder.field_0)) == -1) return -1;
+		if (fileReadInt32(stream, &(scenery_data->ladder.field_0)) == -1)
+			return -1;
 
 		return 0;
 	case SCENERY_TYPE_GENERIC:
-		if (fileReadInt32(stream, &(scenery_data->generic.field_0)) == -1) return -1;
+		if (fileReadInt32(stream, &(scenery_data->generic.field_0)) == -1)
+			return -1;
 
 		return 0;
 	}
@@ -1367,73 +1495,121 @@ static int protoSceneryDataRead(SceneryProtoData* scenery_data, int type, File* 
 
 // read .pro file
 // 0x4A0FA0
-static int protoRead(Proto* proto, File* stream) {
-	if (fileReadInt32(stream, &(proto->pid)) == -1) return -1;
-	if (fileReadInt32(stream, &(proto->messageId)) == -1) return -1;
-	if (fileReadInt32(stream, &(proto->fid)) == -1) return -1;
+static int protoRead(Proto *proto, File *stream) {
+	if (fileReadInt32(stream, &(proto->pid)) == -1)
+		return -1;
+	if (fileReadInt32(stream, &(proto->messageId)) == -1)
+		return -1;
+	if (fileReadInt32(stream, &(proto->fid)) == -1)
+		return -1;
 
 	switch (PID_TYPE(proto->pid)) {
 	case OBJ_TYPE_ITEM:
-		if (fileReadInt32(stream, &(proto->item.lightDistance)) == -1) return -1;
-		if (_db_freadInt(stream, &(proto->item.lightIntensity)) == -1) return -1;
-		if (fileReadInt32(stream, &(proto->item.flags)) == -1) return -1;
-		if (fileReadInt32(stream, &(proto->item.extendedFlags)) == -1) return -1;
-		if (fileReadInt32(stream, &(proto->item.sid)) == -1) return -1;
-		if (fileReadInt32(stream, &(proto->item.type)) == -1) return -1;
-		if (fileReadInt32(stream, &(proto->item.material)) == -1) return -1;
-		if (fileReadInt32(stream, &(proto->item.size)) == -1) return -1;
-		if (_db_freadInt(stream, &(proto->item.weight)) == -1) return -1;
-		if (fileReadInt32(stream, &(proto->item.cost)) == -1) return -1;
-		if (fileReadInt32(stream, &(proto->item.inventoryFid)) == -1) return -1;
-		if (fileReadUInt8(stream, &(proto->item.field_80)) == -1) return -1;
-		if (protoItemDataRead(&(proto->item.data), proto->item.type, stream) == -1) return -1;
+		if (fileReadInt32(stream, &(proto->item.lightDistance)) == -1)
+			return -1;
+		if (_db_freadInt(stream, &(proto->item.lightIntensity)) == -1)
+			return -1;
+		if (fileReadInt32(stream, &(proto->item.flags)) == -1)
+			return -1;
+		if (fileReadInt32(stream, &(proto->item.extendedFlags)) == -1)
+			return -1;
+		if (fileReadInt32(stream, &(proto->item.sid)) == -1)
+			return -1;
+		if (fileReadInt32(stream, &(proto->item.type)) == -1)
+			return -1;
+		if (fileReadInt32(stream, &(proto->item.material)) == -1)
+			return -1;
+		if (fileReadInt32(stream, &(proto->item.size)) == -1)
+			return -1;
+		if (_db_freadInt(stream, &(proto->item.weight)) == -1)
+			return -1;
+		if (fileReadInt32(stream, &(proto->item.cost)) == -1)
+			return -1;
+		if (fileReadInt32(stream, &(proto->item.inventoryFid)) == -1)
+			return -1;
+		if (fileReadUInt8(stream, &(proto->item.field_80)) == -1)
+			return -1;
+		if (protoItemDataRead(&(proto->item.data), proto->item.type, stream) == -1)
+			return -1;
 
 		return 0;
 	case OBJ_TYPE_CRITTER:
-		if (fileReadInt32(stream, &(proto->critter.lightDistance)) == -1) return -1;
-		if (_db_freadInt(stream, &(proto->critter.lightIntensity)) == -1) return -1;
-		if (fileReadInt32(stream, &(proto->critter.flags)) == -1) return -1;
-		if (fileReadInt32(stream, &(proto->critter.extendedFlags)) == -1) return -1;
-		if (fileReadInt32(stream, &(proto->critter.sid)) == -1) return -1;
-		if (fileReadInt32(stream, &(proto->critter.headFid)) == -1) return -1;
-		if (fileReadInt32(stream, &(proto->critter.aiPacket)) == -1) return -1;
-		if (fileReadInt32(stream, &(proto->critter.team)) == -1) return -1;
+		if (fileReadInt32(stream, &(proto->critter.lightDistance)) == -1)
+			return -1;
+		if (_db_freadInt(stream, &(proto->critter.lightIntensity)) == -1)
+			return -1;
+		if (fileReadInt32(stream, &(proto->critter.flags)) == -1)
+			return -1;
+		if (fileReadInt32(stream, &(proto->critter.extendedFlags)) == -1)
+			return -1;
+		if (fileReadInt32(stream, &(proto->critter.sid)) == -1)
+			return -1;
+		if (fileReadInt32(stream, &(proto->critter.headFid)) == -1)
+			return -1;
+		if (fileReadInt32(stream, &(proto->critter.aiPacket)) == -1)
+			return -1;
+		if (fileReadInt32(stream, &(proto->critter.team)) == -1)
+			return -1;
 
-		if (protoCritterDataRead(stream, &(proto->critter.data)) == -1) return -1;
+		if (protoCritterDataRead(stream, &(proto->critter.data)) == -1)
+			return -1;
 
 		return 0;
 	case OBJ_TYPE_SCENERY:
-		if (fileReadInt32(stream, &(proto->scenery.lightDistance)) == -1) return -1;
-		if (_db_freadInt(stream, &(proto->scenery.lightIntensity)) == -1) return -1;
-		if (fileReadInt32(stream, &(proto->scenery.flags)) == -1) return -1;
-		if (fileReadInt32(stream, &(proto->scenery.extendedFlags)) == -1) return -1;
-		if (fileReadInt32(stream, &(proto->scenery.sid)) == -1) return -1;
-		if (fileReadInt32(stream, &(proto->scenery.type)) == -1) return -1;
-		if (fileReadInt32(stream, &(proto->scenery.field_2C)) == -1) return -1;
-		if (fileReadUInt8(stream, &(proto->scenery.field_34)) == -1) return -1;
-		if (protoSceneryDataRead(&(proto->scenery.data), proto->scenery.type, stream) == -1) return -1;
+		if (fileReadInt32(stream, &(proto->scenery.lightDistance)) == -1)
+			return -1;
+		if (_db_freadInt(stream, &(proto->scenery.lightIntensity)) == -1)
+			return -1;
+		if (fileReadInt32(stream, &(proto->scenery.flags)) == -1)
+			return -1;
+		if (fileReadInt32(stream, &(proto->scenery.extendedFlags)) == -1)
+			return -1;
+		if (fileReadInt32(stream, &(proto->scenery.sid)) == -1)
+			return -1;
+		if (fileReadInt32(stream, &(proto->scenery.type)) == -1)
+			return -1;
+		if (fileReadInt32(stream, &(proto->scenery.field_2C)) == -1)
+			return -1;
+		if (fileReadUInt8(stream, &(proto->scenery.field_34)) == -1)
+			return -1;
+		if (protoSceneryDataRead(&(proto->scenery.data), proto->scenery.type, stream) == -1)
+			return -1;
 		return 0;
 	case OBJ_TYPE_WALL:
-		if (fileReadInt32(stream, &(proto->wall.lightDistance)) == -1) return -1;
-		if (_db_freadInt(stream, &(proto->wall.lightIntensity)) == -1) return -1;
-		if (fileReadInt32(stream, &(proto->wall.flags)) == -1) return -1;
-		if (fileReadInt32(stream, &(proto->wall.extendedFlags)) == -1) return -1;
-		if (fileReadInt32(stream, &(proto->wall.sid)) == -1) return -1;
-		if (fileReadInt32(stream, &(proto->wall.material)) == -1) return -1;
+		if (fileReadInt32(stream, &(proto->wall.lightDistance)) == -1)
+			return -1;
+		if (_db_freadInt(stream, &(proto->wall.lightIntensity)) == -1)
+			return -1;
+		if (fileReadInt32(stream, &(proto->wall.flags)) == -1)
+			return -1;
+		if (fileReadInt32(stream, &(proto->wall.extendedFlags)) == -1)
+			return -1;
+		if (fileReadInt32(stream, &(proto->wall.sid)) == -1)
+			return -1;
+		if (fileReadInt32(stream, &(proto->wall.material)) == -1)
+			return -1;
 
 		return 0;
 	case OBJ_TYPE_TILE:
-		if (fileReadInt32(stream, &(proto->tile.flags)) == -1) return -1;
-		if (fileReadInt32(stream, &(proto->tile.extendedFlags)) == -1) return -1;
-		if (fileReadInt32(stream, &(proto->tile.sid)) == -1) return -1;
-		if (fileReadInt32(stream, &(proto->tile.material)) == -1) return -1;
+		if (fileReadInt32(stream, &(proto->tile.flags)) == -1)
+			return -1;
+		if (fileReadInt32(stream, &(proto->tile.extendedFlags)) == -1)
+			return -1;
+		if (fileReadInt32(stream, &(proto->tile.sid)) == -1)
+			return -1;
+		if (fileReadInt32(stream, &(proto->tile.material)) == -1)
+			return -1;
 
 		return 0;
 	case OBJ_TYPE_MISC:
-		if (fileReadInt32(stream, &(proto->misc.lightDistance)) == -1) return -1;
-		if (_db_freadInt(stream, &(proto->misc.lightIntensity)) == -1) return -1;
-		if (fileReadInt32(stream, &(proto->misc.flags)) == -1) return -1;
-		if (fileReadInt32(stream, &(proto->misc.extendedFlags)) == -1) return -1;
+		if (fileReadInt32(stream, &(proto->misc.lightDistance)) == -1)
+			return -1;
+		if (_db_freadInt(stream, &(proto->misc.lightIntensity)) == -1)
+			return -1;
+		if (fileReadInt32(stream, &(proto->misc.flags)) == -1)
+			return -1;
+		if (fileReadInt32(stream, &(proto->misc.extendedFlags)) == -1)
+			return -1;
 
 		return 0;
 	}
@@ -1442,73 +1618,119 @@ static int protoRead(Proto* proto, File* stream) {
 }
 
 // 0x4A1390
-static int protoItemDataWrite(ItemProtoData* item_data, int type, File* stream) {
+static int protoItemDataWrite(ItemProtoData *item_data, int type, File *stream) {
 	switch (type) {
 	case ITEM_TYPE_ARMOR:
-		if (fileWriteInt32(stream, item_data->armor.armorClass) == -1) return -1;
-		if (fileWriteInt32List(stream, item_data->armor.damageResistance, 7) == -1) return -1;
-		if (fileWriteInt32List(stream, item_data->armor.damageThreshold, 7) == -1) return -1;
-		if (fileWriteInt32(stream, item_data->armor.perk) == -1) return -1;
-		if (fileWriteInt32(stream, item_data->armor.maleFid) == -1) return -1;
-		if (fileWriteInt32(stream, item_data->armor.femaleFid) == -1) return -1;
+		if (fileWriteInt32(stream, item_data->armor.armorClass) == -1)
+			return -1;
+		if (fileWriteInt32List(stream, item_data->armor.damageResistance, 7) == -1)
+			return -1;
+		if (fileWriteInt32List(stream, item_data->armor.damageThreshold, 7) == -1)
+			return -1;
+		if (fileWriteInt32(stream, item_data->armor.perk) == -1)
+			return -1;
+		if (fileWriteInt32(stream, item_data->armor.maleFid) == -1)
+			return -1;
+		if (fileWriteInt32(stream, item_data->armor.femaleFid) == -1)
+			return -1;
 
 		return 0;
 	case ITEM_TYPE_CONTAINER:
-		if (fileWriteInt32(stream, item_data->container.maxSize) == -1) return -1;
-		if (fileWriteInt32(stream, item_data->container.openFlags) == -1) return -1;
+		if (fileWriteInt32(stream, item_data->container.maxSize) == -1)
+			return -1;
+		if (fileWriteInt32(stream, item_data->container.openFlags) == -1)
+			return -1;
 
 		return 0;
 	case ITEM_TYPE_DRUG:
-		if (fileWriteInt32(stream, item_data->drug.stat[0]) == -1) return -1;
-		if (fileWriteInt32(stream, item_data->drug.stat[1]) == -1) return -1;
-		if (fileWriteInt32(stream, item_data->drug.stat[2]) == -1) return -1;
-		if (fileWriteInt32List(stream, item_data->drug.amount, 3) == -1) return -1;
-		if (fileWriteInt32(stream, item_data->drug.duration1) == -1) return -1;
-		if (fileWriteInt32List(stream, item_data->drug.amount1, 3) == -1) return -1;
-		if (fileWriteInt32(stream, item_data->drug.duration2) == -1) return -1;
-		if (fileWriteInt32List(stream, item_data->drug.amount2, 3) == -1) return -1;
-		if (fileWriteInt32(stream, item_data->drug.addictionChance) == -1) return -1;
-		if (fileWriteInt32(stream, item_data->drug.withdrawalEffect) == -1) return -1;
-		if (fileWriteInt32(stream, item_data->drug.withdrawalOnset) == -1) return -1;
+		if (fileWriteInt32(stream, item_data->drug.stat[0]) == -1)
+			return -1;
+		if (fileWriteInt32(stream, item_data->drug.stat[1]) == -1)
+			return -1;
+		if (fileWriteInt32(stream, item_data->drug.stat[2]) == -1)
+			return -1;
+		if (fileWriteInt32List(stream, item_data->drug.amount, 3) == -1)
+			return -1;
+		if (fileWriteInt32(stream, item_data->drug.duration1) == -1)
+			return -1;
+		if (fileWriteInt32List(stream, item_data->drug.amount1, 3) == -1)
+			return -1;
+		if (fileWriteInt32(stream, item_data->drug.duration2) == -1)
+			return -1;
+		if (fileWriteInt32List(stream, item_data->drug.amount2, 3) == -1)
+			return -1;
+		if (fileWriteInt32(stream, item_data->drug.addictionChance) == -1)
+			return -1;
+		if (fileWriteInt32(stream, item_data->drug.withdrawalEffect) == -1)
+			return -1;
+		if (fileWriteInt32(stream, item_data->drug.withdrawalOnset) == -1)
+			return -1;
 
 		return 0;
 	case ITEM_TYPE_WEAPON:
-		if (fileWriteInt32(stream, item_data->weapon.animationCode) == -1) return -1;
-		if (fileWriteInt32(stream, item_data->weapon.maxDamage) == -1) return -1;
-		if (fileWriteInt32(stream, item_data->weapon.minDamage) == -1) return -1;
-		if (fileWriteInt32(stream, item_data->weapon.damageType) == -1) return -1;
-		if (fileWriteInt32(stream, item_data->weapon.maxRange1) == -1) return -1;
-		if (fileWriteInt32(stream, item_data->weapon.maxRange2) == -1) return -1;
-		if (fileWriteInt32(stream, item_data->weapon.projectilePid) == -1) return -1;
-		if (fileWriteInt32(stream, item_data->weapon.minStrength) == -1) return -1;
-		if (fileWriteInt32(stream, item_data->weapon.actionPointCost1) == -1) return -1;
-		if (fileWriteInt32(stream, item_data->weapon.actionPointCost2) == -1) return -1;
-		if (fileWriteInt32(stream, item_data->weapon.criticalFailureType) == -1) return -1;
-		if (fileWriteInt32(stream, item_data->weapon.perk) == -1) return -1;
-		if (fileWriteInt32(stream, item_data->weapon.rounds) == -1) return -1;
-		if (fileWriteInt32(stream, item_data->weapon.caliber) == -1) return -1;
-		if (fileWriteInt32(stream, item_data->weapon.ammoTypePid) == -1) return -1;
-		if (fileWriteInt32(stream, item_data->weapon.ammoCapacity) == -1) return -1;
-		if (fileWriteUInt8(stream, item_data->weapon.soundCode) == -1) return -1;
+		if (fileWriteInt32(stream, item_data->weapon.animationCode) == -1)
+			return -1;
+		if (fileWriteInt32(stream, item_data->weapon.maxDamage) == -1)
+			return -1;
+		if (fileWriteInt32(stream, item_data->weapon.minDamage) == -1)
+			return -1;
+		if (fileWriteInt32(stream, item_data->weapon.damageType) == -1)
+			return -1;
+		if (fileWriteInt32(stream, item_data->weapon.maxRange1) == -1)
+			return -1;
+		if (fileWriteInt32(stream, item_data->weapon.maxRange2) == -1)
+			return -1;
+		if (fileWriteInt32(stream, item_data->weapon.projectilePid) == -1)
+			return -1;
+		if (fileWriteInt32(stream, item_data->weapon.minStrength) == -1)
+			return -1;
+		if (fileWriteInt32(stream, item_data->weapon.actionPointCost1) == -1)
+			return -1;
+		if (fileWriteInt32(stream, item_data->weapon.actionPointCost2) == -1)
+			return -1;
+		if (fileWriteInt32(stream, item_data->weapon.criticalFailureType) == -1)
+			return -1;
+		if (fileWriteInt32(stream, item_data->weapon.perk) == -1)
+			return -1;
+		if (fileWriteInt32(stream, item_data->weapon.rounds) == -1)
+			return -1;
+		if (fileWriteInt32(stream, item_data->weapon.caliber) == -1)
+			return -1;
+		if (fileWriteInt32(stream, item_data->weapon.ammoTypePid) == -1)
+			return -1;
+		if (fileWriteInt32(stream, item_data->weapon.ammoCapacity) == -1)
+			return -1;
+		if (fileWriteUInt8(stream, item_data->weapon.soundCode) == -1)
+			return -1;
 
 		return 0;
 	case ITEM_TYPE_AMMO:
-		if (fileWriteInt32(stream, item_data->ammo.caliber) == -1) return -1;
-		if (fileWriteInt32(stream, item_data->ammo.quantity) == -1) return -1;
-		if (fileWriteInt32(stream, item_data->ammo.armorClassModifier) == -1) return -1;
-		if (fileWriteInt32(stream, item_data->ammo.damageResistanceModifier) == -1) return -1;
-		if (fileWriteInt32(stream, item_data->ammo.damageMultiplier) == -1) return -1;
-		if (fileWriteInt32(stream, item_data->ammo.damageDivisor) == -1) return -1;
+		if (fileWriteInt32(stream, item_data->ammo.caliber) == -1)
+			return -1;
+		if (fileWriteInt32(stream, item_data->ammo.quantity) == -1)
+			return -1;
+		if (fileWriteInt32(stream, item_data->ammo.armorClassModifier) == -1)
+			return -1;
+		if (fileWriteInt32(stream, item_data->ammo.damageResistanceModifier) == -1)
+			return -1;
+		if (fileWriteInt32(stream, item_data->ammo.damageMultiplier) == -1)
+			return -1;
+		if (fileWriteInt32(stream, item_data->ammo.damageDivisor) == -1)
+			return -1;
 
 		return 0;
 	case ITEM_TYPE_MISC:
-		if (fileWriteInt32(stream, item_data->misc.powerTypePid) == -1) return -1;
-		if (fileWriteInt32(stream, item_data->misc.powerType) == -1) return -1;
-		if (fileWriteInt32(stream, item_data->misc.charges) == -1) return -1;
+		if (fileWriteInt32(stream, item_data->misc.powerTypePid) == -1)
+			return -1;
+		if (fileWriteInt32(stream, item_data->misc.powerType) == -1)
+			return -1;
+		if (fileWriteInt32(stream, item_data->misc.charges) == -1)
+			return -1;
 
 		return 0;
 	case ITEM_TYPE_KEY:
-		if (fileWriteInt32(stream, item_data->key.keyCode) == -1) return -1;
+		if (fileWriteInt32(stream, item_data->key.keyCode) == -1)
+			return -1;
 
 		return 0;
 	}
@@ -1517,30 +1739,38 @@ static int protoItemDataWrite(ItemProtoData* item_data, int type, File* stream) 
 }
 
 // 0x4A16E4
-static int protoSceneryDataWrite(SceneryProtoData* scenery_data, int type, File* stream) {
+static int protoSceneryDataWrite(SceneryProtoData *scenery_data, int type, File *stream) {
 	switch (type) {
 	case SCENERY_TYPE_DOOR:
-		if (fileWriteInt32(stream, scenery_data->door.openFlags) == -1) return -1;
-		if (fileWriteInt32(stream, scenery_data->door.keyCode) == -1) return -1;
+		if (fileWriteInt32(stream, scenery_data->door.openFlags) == -1)
+			return -1;
+		if (fileWriteInt32(stream, scenery_data->door.keyCode) == -1)
+			return -1;
 
 		return 0;
 	case SCENERY_TYPE_STAIRS:
-		if (fileWriteInt32(stream, scenery_data->stairs.field_0) == -1) return -1;
-		if (fileWriteInt32(stream, scenery_data->stairs.field_4) == -1) return -1;
+		if (fileWriteInt32(stream, scenery_data->stairs.field_0) == -1)
+			return -1;
+		if (fileWriteInt32(stream, scenery_data->stairs.field_4) == -1)
+			return -1;
 
 		return 0;
 	case SCENERY_TYPE_ELEVATOR:
-		if (fileWriteInt32(stream, scenery_data->elevator.type) == -1) return -1;
-		if (fileWriteInt32(stream, scenery_data->elevator.level) == -1) return -1;
+		if (fileWriteInt32(stream, scenery_data->elevator.type) == -1)
+			return -1;
+		if (fileWriteInt32(stream, scenery_data->elevator.level) == -1)
+			return -1;
 
 		return 0;
 	case SCENERY_TYPE_LADDER_UP:
 	case SCENERY_TYPE_LADDER_DOWN:
-		if (fileWriteInt32(stream, scenery_data->ladder.field_0) == -1) return -1;
+		if (fileWriteInt32(stream, scenery_data->ladder.field_0) == -1)
+			return -1;
 
 		return 0;
 	case SCENERY_TYPE_GENERIC:
-		if (fileWriteInt32(stream, scenery_data->generic.field_0) == -1) return -1;
+		if (fileWriteInt32(stream, scenery_data->generic.field_0) == -1)
+			return -1;
 
 		return 0;
 	}
@@ -1549,71 +1779,119 @@ static int protoSceneryDataWrite(SceneryProtoData* scenery_data, int type, File*
 }
 
 // 0x4A17B4
-static int protoWrite(Proto* proto, File* stream) {
-	if (fileWriteInt32(stream, proto->pid) == -1) return -1;
-	if (fileWriteInt32(stream, proto->messageId) == -1) return -1;
-	if (fileWriteInt32(stream, proto->fid) == -1) return -1;
+static int protoWrite(Proto *proto, File *stream) {
+	if (fileWriteInt32(stream, proto->pid) == -1)
+		return -1;
+	if (fileWriteInt32(stream, proto->messageId) == -1)
+		return -1;
+	if (fileWriteInt32(stream, proto->fid) == -1)
+		return -1;
 
 	switch (PID_TYPE(proto->pid)) {
 	case OBJ_TYPE_ITEM:
-		if (fileWriteInt32(stream, proto->item.lightDistance) == -1) return -1;
-		if (_db_fwriteLong(stream, proto->item.lightIntensity) == -1) return -1;
-		if (fileWriteInt32(stream, proto->item.flags) == -1) return -1;
-		if (fileWriteInt32(stream, proto->item.extendedFlags) == -1) return -1;
-		if (fileWriteInt32(stream, proto->item.sid) == -1) return -1;
-		if (fileWriteInt32(stream, proto->item.type) == -1) return -1;
-		if (fileWriteInt32(stream, proto->item.material) == -1) return -1;
-		if (fileWriteInt32(stream, proto->item.size) == -1) return -1;
-		if (_db_fwriteLong(stream, proto->item.weight) == -1) return -1;
-		if (fileWriteInt32(stream, proto->item.cost) == -1) return -1;
-		if (fileWriteInt32(stream, proto->item.inventoryFid) == -1) return -1;
-		if (fileWriteUInt8(stream, proto->item.field_80) == -1) return -1;
-		if (protoItemDataWrite(&(proto->item.data), proto->item.type, stream) == -1) return -1;
+		if (fileWriteInt32(stream, proto->item.lightDistance) == -1)
+			return -1;
+		if (_db_fwriteLong(stream, proto->item.lightIntensity) == -1)
+			return -1;
+		if (fileWriteInt32(stream, proto->item.flags) == -1)
+			return -1;
+		if (fileWriteInt32(stream, proto->item.extendedFlags) == -1)
+			return -1;
+		if (fileWriteInt32(stream, proto->item.sid) == -1)
+			return -1;
+		if (fileWriteInt32(stream, proto->item.type) == -1)
+			return -1;
+		if (fileWriteInt32(stream, proto->item.material) == -1)
+			return -1;
+		if (fileWriteInt32(stream, proto->item.size) == -1)
+			return -1;
+		if (_db_fwriteLong(stream, proto->item.weight) == -1)
+			return -1;
+		if (fileWriteInt32(stream, proto->item.cost) == -1)
+			return -1;
+		if (fileWriteInt32(stream, proto->item.inventoryFid) == -1)
+			return -1;
+		if (fileWriteUInt8(stream, proto->item.field_80) == -1)
+			return -1;
+		if (protoItemDataWrite(&(proto->item.data), proto->item.type, stream) == -1)
+			return -1;
 
 		return 0;
 	case OBJ_TYPE_CRITTER:
-		if (fileWriteInt32(stream, proto->critter.lightDistance) == -1) return -1;
-		if (_db_fwriteLong(stream, proto->critter.lightIntensity) == -1) return -1;
-		if (fileWriteInt32(stream, proto->critter.flags) == -1) return -1;
-		if (fileWriteInt32(stream, proto->critter.extendedFlags) == -1) return -1;
-		if (fileWriteInt32(stream, proto->critter.sid) == -1) return -1;
-		if (fileWriteInt32(stream, proto->critter.headFid) == -1) return -1;
-		if (fileWriteInt32(stream, proto->critter.aiPacket) == -1) return -1;
-		if (fileWriteInt32(stream, proto->critter.team) == -1) return -1;
-		if (protoCritterDataWrite(stream, &(proto->critter.data)) == -1) return -1;
+		if (fileWriteInt32(stream, proto->critter.lightDistance) == -1)
+			return -1;
+		if (_db_fwriteLong(stream, proto->critter.lightIntensity) == -1)
+			return -1;
+		if (fileWriteInt32(stream, proto->critter.flags) == -1)
+			return -1;
+		if (fileWriteInt32(stream, proto->critter.extendedFlags) == -1)
+			return -1;
+		if (fileWriteInt32(stream, proto->critter.sid) == -1)
+			return -1;
+		if (fileWriteInt32(stream, proto->critter.headFid) == -1)
+			return -1;
+		if (fileWriteInt32(stream, proto->critter.aiPacket) == -1)
+			return -1;
+		if (fileWriteInt32(stream, proto->critter.team) == -1)
+			return -1;
+		if (protoCritterDataWrite(stream, &(proto->critter.data)) == -1)
+			return -1;
 
 		return 0;
 	case OBJ_TYPE_SCENERY:
-		if (fileWriteInt32(stream, proto->scenery.lightDistance) == -1) return -1;
-		if (_db_fwriteLong(stream, proto->scenery.lightIntensity) == -1) return -1;
-		if (fileWriteInt32(stream, proto->scenery.flags) == -1) return -1;
-		if (fileWriteInt32(stream, proto->scenery.extendedFlags) == -1) return -1;
-		if (fileWriteInt32(stream, proto->scenery.sid) == -1) return -1;
-		if (fileWriteInt32(stream, proto->scenery.type) == -1) return -1;
-		if (fileWriteInt32(stream, proto->scenery.field_2C) == -1) return -1;
-		if (fileWriteUInt8(stream, proto->scenery.field_34) == -1) return -1;
-		if (protoSceneryDataWrite(&(proto->scenery.data), proto->scenery.type, stream) == -1) return -1;
+		if (fileWriteInt32(stream, proto->scenery.lightDistance) == -1)
+			return -1;
+		if (_db_fwriteLong(stream, proto->scenery.lightIntensity) == -1)
+			return -1;
+		if (fileWriteInt32(stream, proto->scenery.flags) == -1)
+			return -1;
+		if (fileWriteInt32(stream, proto->scenery.extendedFlags) == -1)
+			return -1;
+		if (fileWriteInt32(stream, proto->scenery.sid) == -1)
+			return -1;
+		if (fileWriteInt32(stream, proto->scenery.type) == -1)
+			return -1;
+		if (fileWriteInt32(stream, proto->scenery.field_2C) == -1)
+			return -1;
+		if (fileWriteUInt8(stream, proto->scenery.field_34) == -1)
+			return -1;
+		if (protoSceneryDataWrite(&(proto->scenery.data), proto->scenery.type, stream) == -1)
+			return -1;
 	case OBJ_TYPE_WALL:
-		if (fileWriteInt32(stream, proto->wall.lightDistance) == -1) return -1;
-		if (_db_fwriteLong(stream, proto->wall.lightIntensity) == -1) return -1;
-		if (fileWriteInt32(stream, proto->wall.flags) == -1) return -1;
-		if (fileWriteInt32(stream, proto->wall.extendedFlags) == -1) return -1;
-		if (fileWriteInt32(stream, proto->wall.sid) == -1) return -1;
-		if (fileWriteInt32(stream, proto->wall.material) == -1) return -1;
+		if (fileWriteInt32(stream, proto->wall.lightDistance) == -1)
+			return -1;
+		if (_db_fwriteLong(stream, proto->wall.lightIntensity) == -1)
+			return -1;
+		if (fileWriteInt32(stream, proto->wall.flags) == -1)
+			return -1;
+		if (fileWriteInt32(stream, proto->wall.extendedFlags) == -1)
+			return -1;
+		if (fileWriteInt32(stream, proto->wall.sid) == -1)
+			return -1;
+		if (fileWriteInt32(stream, proto->wall.material) == -1)
+			return -1;
 
 		return 0;
 	case OBJ_TYPE_TILE:
-		if (fileWriteInt32(stream, proto->tile.flags) == -1) return -1;
-		if (fileWriteInt32(stream, proto->tile.extendedFlags) == -1) return -1;
-		if (fileWriteInt32(stream, proto->tile.sid) == -1) return -1;
-		if (fileWriteInt32(stream, proto->tile.material) == -1) return -1;
+		if (fileWriteInt32(stream, proto->tile.flags) == -1)
+			return -1;
+		if (fileWriteInt32(stream, proto->tile.extendedFlags) == -1)
+			return -1;
+		if (fileWriteInt32(stream, proto->tile.sid) == -1)
+			return -1;
+		if (fileWriteInt32(stream, proto->tile.material) == -1)
+			return -1;
 
 		return 0;
 	case OBJ_TYPE_MISC:
-		if (fileWriteInt32(stream, proto->misc.lightDistance) == -1) return -1;
-		if (_db_fwriteLong(stream, proto->misc.lightIntensity) == -1) return -1;
-		if (fileWriteInt32(stream, proto->misc.flags) == -1) return -1;
-		if (fileWriteInt32(stream, proto->misc.extendedFlags) == -1) return -1;
+		if (fileWriteInt32(stream, proto->misc.lightDistance) == -1)
+			return -1;
+		if (_db_fwriteLong(stream, proto->misc.lightIntensity) == -1)
+			return -1;
+		if (fileWriteInt32(stream, proto->misc.flags) == -1)
+			return -1;
+		if (fileWriteInt32(stream, proto->misc.extendedFlags) == -1)
+			return -1;
 
 		return 0;
 	}
@@ -1623,18 +1901,18 @@ static int protoWrite(Proto* proto, File* stream) {
 
 // 0x4A1B30
 int _proto_save_pid(int pid) {
-	Proto* proto;
+	Proto *proto;
 	if (protoGetProto(pid, &proto) == -1) {
 		return -1;
 	}
 
 	char path[260];
 	_proto_make_path(path, pid);
-	strcat(path, "\\");
+	strcat_s(path, sizeof(path), "\\");
 
 	_proto_list_str(pid, path + strlen(path));
 
-	File* stream = fileOpen(path, "wb");
+	File *stream = fileOpen(path, "wb");
 	if (stream == NULL) {
 		return -1;
 	}
@@ -1647,16 +1925,16 @@ int _proto_save_pid(int pid) {
 }
 
 // 0x4A1C3C
-static int _proto_load_pid(int pid, Proto** protoPtr) {
+static int _proto_load_pid(int pid, Proto **protoPtr) {
 	char path[COMPAT_MAX_PATH];
 	_proto_make_path(path, pid);
-	strcat(path, "\\");
+	strcat_s(path, sizeof(path), "\\");
 
 	if (_proto_list_str(pid, path + strlen(path)) == -1) {
 		return -1;
 	}
 
-	File* stream = fileOpen(path, "rb");
+	File *stream = fileOpen(path, "rb");
 	if (stream == NULL) {
 		debugPrint("\nError: Can't fopen proto!\n");
 		*protoPtr = NULL;
@@ -1678,19 +1956,19 @@ static int _proto_load_pid(int pid, Proto** protoPtr) {
 }
 
 // 0x4A1D98
-static int _proto_find_free_subnode(int type, Proto** protoPtr) {
-	Proto* proto = (Proto*)internal_malloc(proto_size(type));
+static int _proto_find_free_subnode(int type, Proto **protoPtr) {
+	Proto *proto = (Proto *)internal_malloc(proto_size(type));
 	*protoPtr = proto;
 	if (proto == NULL) {
 		return -1;
 	}
 
-	ProtoList* protoList = &(_protoLists[type]);
-	ProtoListExtent* protoListExtent = protoList->tail;
+	ProtoList *protoList = &(_protoLists[type]);
+	ProtoListExtent *protoListExtent = protoList->tail;
 
 	if (protoList->head != NULL) {
 		if (protoListExtent->length == PROTO_LIST_EXTENT_SIZE) {
-			ProtoListExtent* newExtent = protoListExtent->next = (ProtoListExtent*)internal_malloc(sizeof(ProtoListExtent));
+			ProtoListExtent *newExtent = protoListExtent->next = (ProtoListExtent *)internal_malloc(sizeof(ProtoListExtent));
 			if (protoListExtent == NULL) {
 				internal_free(proto);
 				*protoPtr = NULL;
@@ -1706,7 +1984,7 @@ static int _proto_find_free_subnode(int type, Proto** protoPtr) {
 			protoListExtent = newExtent;
 		}
 	} else {
-		protoListExtent = (ProtoListExtent*)internal_malloc(sizeof(ProtoListExtent));
+		protoListExtent = (ProtoListExtent *)internal_malloc(sizeof(ProtoListExtent));
 		if (protoListExtent == NULL) {
 			internal_free(proto);
 			*protoPtr = NULL;
@@ -1731,8 +2009,8 @@ static int _proto_find_free_subnode(int type, Proto** protoPtr) {
 //
 // 0x4A2040
 static void _proto_remove_some_list(int type) {
-	ProtoList* protoList = &(_protoLists[type]);
-	ProtoListExtent* protoListExtent = protoList->head;
+	ProtoList *protoList = &(_protoLists[type]);
+	ProtoListExtent *protoListExtent = protoList->head;
 	if (protoListExtent != NULL) {
 		protoList->length--;
 		protoList->head = protoListExtent->next;
@@ -1749,11 +2027,11 @@ static void _proto_remove_some_list(int type) {
 //
 // 0x4A2094
 static void _proto_remove_list(int type) {
-	ProtoList* protoList = &(_protoLists[type]);
+	ProtoList *protoList = &(_protoLists[type]);
 
-	ProtoListExtent* curr = protoList->head;
+	ProtoListExtent *curr = protoList->head;
 	while (curr != NULL) {
-		ProtoListExtent* next = curr->next;
+		ProtoListExtent *next = curr->next;
 		for (int index = 0; index < curr->length; index++) {
 			internal_free(curr->proto[index]);
 		}
@@ -1777,7 +2055,7 @@ void _proto_remove_all() {
 
 // proto_ptr
 // 0x4A2108
-int protoGetProto(int pid, Proto** protoPtr) {
+int protoGetProto(int pid, Proto **protoPtr) {
 	*protoPtr = NULL;
 
 	if (pid == -1) {
@@ -1785,15 +2063,15 @@ int protoGetProto(int pid, Proto** protoPtr) {
 	}
 
 	if (pid == 0x1000000) {
-		*protoPtr = (Proto*)&gDudeProto;
+		*protoPtr = (Proto *)&gDudeProto;
 		return 0;
 	}
 
-	ProtoList* protoList = &(_protoLists[PID_TYPE(pid)]);
-	ProtoListExtent* protoListExtent = protoList->head;
+	ProtoList *protoList = &(_protoLists[PID_TYPE(pid)]);
+	ProtoListExtent *protoListExtent = protoList->head;
 	while (protoListExtent != NULL) {
 		for (int index = 0; index < protoListExtent->length; index++) {
-			Proto* proto = (Proto*)protoListExtent->proto[index];
+			Proto *proto = (Proto *)protoListExtent->proto[index];
 			if (pid == proto->pid) {
 				*protoPtr = proto;
 				return 0;
@@ -1826,23 +2104,23 @@ static int _proto_max_id(int a1) {
 
 // 0x4A22C0
 int _ResetPlayer() {
-	Proto* proto;
+	Proto *proto;
 	protoGetProto(gDude->pid, &proto);
 
-	pcStatsReset();
-	protoCritterDataResetStats(&(proto->critter.data));
+	// pcStatsReset();  TODO stat.cpp
+	// protoCritterDataResetStats(&(proto->critter.data));
 
 	// SFALL: Fix base EMP DR not being properly initialized.
 	proto->critter.data.baseStats[STAT_DAMAGE_RESISTANCE_EMP] = 100;
 
-	critterReset();
-	characterEditorReset();
-	protoCritterDataResetSkills(&(proto->critter.data));
-	skillsReset();
-	perksReset();
-	traitsReset();
-	critterUpdateDerivedStats(gDude);
+	// critterReset();  TODO critter.cpp
+	// characterEditorReset();  TODO character_editor.cpp
+	// protoCritterDataResetSkills(&(proto->critter.data));  TODO skill.cpp
+	// skillsReset(); TODO skill.cpp
+	// perksReset();  TODO perks.cpp
+	// traitsReset();  TODO traits.cpp
+	// critterUpdateDerivedStats(gDude);  TODO stat.cpp
 	return 0;
 }
 
-} // namespace fallout
+} // namespace Fallout2

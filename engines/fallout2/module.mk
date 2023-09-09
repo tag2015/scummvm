@@ -33,6 +33,7 @@ MODULE_OBJS = \
 	palette.o \
 	pcx.o \
 	platform_compat.o \
+	proto.o \
 	random.o \
 	region.o \
 	settings.o \
