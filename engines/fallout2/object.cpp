@@ -449,9 +449,9 @@ int objectRead(Object *obj, File *stream) {
 	obj->outline = 0;
 	obj->owner = NULL;
 
-	if (objectDataRead(obj, stream) != 0) {
+//	if (objectDataRead(obj, stream) != 0) {  TODO: proto.cpp
 		return -1;
-	}
+//	}
 
 	if (/*isExitGridPid(obj->pid)*/ 0) {  // TODO proto.cpp
 		if (obj->data.misc.map <= 0) {
@@ -685,8 +685,8 @@ static int objectWrite(Object *obj, File *stream) {
 		return -1;
 	if (fileWriteInt32(stream, obj->field_80) == -1)
 		return -1;
-	if (objectDataWrite(obj, stream) == -1)
-		return -1;
+	//if (objectDataWrite(obj, stream) == -1)  TODO proto.cpp
+	//	return -1;
 
 	return 0;
 }
@@ -1030,7 +1030,7 @@ int _obj_copy(Object **a1, Object *a2) {
 		return -1;
 	}
 
-	objectDataReset(objectListNode->obj);
+//	objectDataReset(objectListNode->obj);  TODO: proto.cpp
 
 	memcpy(objectListNode->obj, a2, sizeof(Object));
 
@@ -1072,12 +1072,12 @@ int _obj_copy(Object **a1, Object *a2) {
 			return -1;
 		}
 
-		if (itemAdd(objectListNode->obj, newItem, oldInventoryItem->quantity) == 1) {
+	/*	if (itemAdd(objectListNode->obj, newItem, oldInventoryItem->quantity) == 1) { TODO item.cpp
 			// TODO: Probably leaking object allocated with objectAllocate.
 			// NOTE: Uninline.
 			objectListNodeDestroy(&objectListNode);
 			return -1;
-		}
+		}*/
 	}
 
 	return 0;
@@ -1459,12 +1459,14 @@ int objectSetLocation(Object *obj, int tile, int elevation, Rect *rect) {
 		int roofX = tile % 200 / 2;
 		int roofY = tile / 200 / 2;
 		if (roofX != _obj_last_roof_x || roofY != _obj_last_roof_y || elevation != _obj_last_elev) {
-			int currentSquare = _square[elevation]->field_0[roofX + 100 * roofY];
+//			int currentSquare = _square[elevation]->field_0[roofX + 100 * roofY];  TODO _square in map.cpp
+			int currentSquare = 0; // TODO remove!!!
 			int currentSquareFid = buildFid(OBJ_TYPE_TILE, (currentSquare >> 16) & 0xFFF, 0, 0, 0);
 			// CE: Add additional checks for -1 to prevent array lookup at index -101.
-			int previousSquare = _obj_last_roof_x != -1 && _obj_last_roof_y != -1
-									 ? _square[elevation]->field_0[_obj_last_roof_x + 100 * _obj_last_roof_y]
-									 : 0;
+//			int previousSquare = _obj_last_roof_x != -1 && _obj_last_roof_y != -1  // TODO map.cpp
+//									 ? _square[elevation]->field_0[_obj_last_roof_x + 100 * _obj_last_roof_y]
+//									 : 0;
+			int previousSquare = 0;  // TODO remove!!
 			bool isEmpty = buildFid(OBJ_TYPE_TILE, 1, 0, 0, 0) == currentSquareFid;
 
 			if (isEmpty != _obj_last_is_empty || (((currentSquare >> 16) & 0xF000) >> 12) != (((previousSquare >> 16) & 0xF000) >> 12)) {
@@ -1477,7 +1479,9 @@ int objectSetLocation(Object *obj, int tile, int elevation, Rect *rect) {
 				}
 
 				if (rect != NULL) {
-					rectUnion(rect, &_scr_size, rect);
+//					rectUnion(rect, &_scr_size, rect);  TODO svga.cpp
+					Rect scr_size = { 0, 0, 640, 480 };
+					rectUnion(rect, &scr_size, rect);
 				}
 			}
 
@@ -1513,10 +1517,10 @@ int objectSetLocation(Object *obj, int tile, int elevation, Rect *rect) {
 
 // 0x48A9A0
 int _obj_reset_roof() {
-	int fid = buildFid(OBJ_TYPE_TILE, (_square[gDude->elevation]->field_0[_obj_last_roof_x + 100 * _obj_last_roof_y] >> 16) & 0xFFF, 0, 0, 0);
+/*	int fid = buildFid(OBJ_TYPE_TILE, (_square[gDude->elevation]->field_0[_obj_last_roof_x + 100 * _obj_last_roof_y] >> 16) & 0xFFF, 0, 0, 0);  TODO _square in map.cpp
 	if (fid != buildFid(OBJ_TYPE_TILE, 1, 0, 0, 0)) {
 		tile_fill_roof(_obj_last_roof_x, _obj_last_roof_y, gDude->elevation, 1);
-	}
+	}*/
 	return 0;
 }
 
@@ -2350,7 +2354,7 @@ void objectGetRect(Object *obj, Rect *rect) {
 bool _obj_occupied(int tile, int elevation) {
 	ObjectListNode *objectListNode = gObjectListHeadByTile[tile];
 	while (objectListNode != NULL) {
-		if (objectListNode->obj->elevation == elevation && objectListNode->obj != gGameMouseBouncingCursor && objectListNode->obj != gGameMouseHexCursor) {
+		if (objectListNode->obj->elevation == elevation /* && objectListNode->obj != gGameMouseBouncingCursor && objectListNode->obj != gGameMouseHexCursor */) {  // TODO game_mouse.cpp
 			return true;
 		}
 		objectListNode = objectListNode->next;
@@ -3069,7 +3073,7 @@ void _obj_preload_art_cache(int flags) {
 
 	if ((flags & 0x02) == 0) {
 		for (int i = 0; i < SQUARE_GRID_SIZE; i++) {
-			int v3 = _square[0]->field_0[i];
+			int v3 = 0; // _square[0]->field_0[i];  // TODO map.cpp
 			arr[v3 & 0xFFF] = 1;
 			arr[(v3 >> 16) & 0xFFF] = 1;
 		}
@@ -3077,7 +3081,7 @@ void _obj_preload_art_cache(int flags) {
 
 	if ((flags & 0x04) == 0) {
 		for (int i = 0; i < SQUARE_GRID_SIZE; i++) {
-			int v3 = _square[1]->field_0[i];
+			int v3 = 0; //_square[1]->field_0[i];  // TODO map.cpp
 			arr[v3 & 0xFFF] = 1;
 			arr[(v3 >> 16) & 0xFFF] = 1;
 		}
@@ -3085,7 +3089,7 @@ void _obj_preload_art_cache(int flags) {
 
 	if ((flags & 0x08) == 0) {
 		for (int i = 0; i < SQUARE_GRID_SIZE; i++) {
-			int v3 = _square[2]->field_0[i];
+			int v3 = 0; //_square[2]->field_0[i];  // TODO map.cpp
 			arr[v3 & 0xFFF] = 1;
 			arr[(v3 >> 16) & 0xFFF] = 1;
 		}
