@@ -1,12 +1,12 @@
-#ifndef SCRIPTS_H
-#define SCRIPTS_H
+#ifndef FALLOUT2_SCRIPTS_H
+#define FALLOUT2_SCRIPTS_H
 
-#include "combat_defs.h"
-#include "db.h"
-#include "interpreter.h"
-#include "obj_types.h"
+#include "fallout2/combat_defs.h"
+#include "fallout2/db.h"
+#include "fallout2/interpreter.h"
+#include "fallout2/obj_types.h"
 
-namespace fallout {
+namespace Fallout2 {
 
 #define SCRIPT_FLAG_0x01 (0x01)
 #define SCRIPT_FLAG_0x02 (0x02)
@@ -38,10 +38,10 @@ typedef enum ScriptRequests {
 } ScriptRequests;
 
 typedef enum ScriptType {
-	SCRIPT_TYPE_SYSTEM, // s_system
+	SCRIPT_TYPE_SYSTEM,  // s_system
 	SCRIPT_TYPE_SPATIAL, // s_spatial
-	SCRIPT_TYPE_TIMED, // s_time
-	SCRIPT_TYPE_ITEM, // s_item
+	SCRIPT_TYPE_TIMED,   // s_time
+	SCRIPT_TYPE_ITEM,    // s_item
 	SCRIPT_TYPE_CRITTER, // s_critter
 	SCRIPT_TYPE_COUNT,
 } ScriptType;
@@ -56,7 +56,7 @@ typedef enum ScriptProc {
 	SCRIPT_PROC_USE = 6,
 	SCRIPT_PROC_USE_OBJ_ON = 7,
 	SCRIPT_PROC_USE_SKILL_ON = 8,
-	SCRIPT_PROC_9 = 9, // use_ad_on_proc
+	SCRIPT_PROC_9 = 9,   // use_ad_on_proc
 	SCRIPT_PROC_10 = 10, // use_disad_on_proc
 	SCRIPT_PROC_TALK = 11,
 	SCRIPT_PROC_CRITTER = 12,
@@ -104,7 +104,7 @@ typedef struct Script {
 	// scr_script_idx
 	int field_14;
 
-	Program* program;
+	Program *program;
 
 	// scr_oid
 	int field_1C;
@@ -123,13 +123,13 @@ typedef struct Script {
 	// See [opGetScriptAction].
 	int action;
 	int fixedParam;
-	Object* owner;
+	Object *owner;
 
 	// source_obj
-	Object* source;
+	Object *source;
 
 	// target_obj
-	Object* target;
+	Object *target;
 	int actionBeingUsed;
 	int scriptOverrides;
 	int field_48;
@@ -146,44 +146,44 @@ typedef struct Script {
 } Script;
 
 int gameTimeGetTime();
-void gameTimeGetDate(int* monthPtr, int* dayPtr, int* yearPtr);
+void gameTimeGetDate(int *monthPtr, int *dayPtr, int *yearPtr);
 int gameTimeGetHour();
-char* gameTimeGetTimeString();
+char *gameTimeGetTimeString();
 void gameTimeAddTicks(int a1);
 void gameTimeAddSeconds(int a1);
 void gameTimeSetTime(int time);
 int gameTimeScheduleUpdateEvent();
-int gameTimeEventProcess(Object* obj, void* data);
-int _scriptsCheckGameEvents(int* moviePtr, int window);
-int mapUpdateEventProcess(Object* obj, void* data);
+int gameTimeEventProcess(Object *obj, void *data);
+int _scriptsCheckGameEvents(int *moviePtr, int window);
+int mapUpdateEventProcess(Object *obj, void *data);
 int scriptsNewObjectId();
-int scriptGetSid(Program* a1);
-Object* scriptGetSelf(Program* s);
-int scriptSetObjects(int sid, Object* source, Object* target);
+int scriptGetSid(Program *a1);
+Object *scriptGetSelf(Program *s);
+int scriptSetObjects(int sid, Object *source, Object *target);
 void scriptSetFixedParam(int a1, int a2);
 int scriptSetActionBeingUsed(int sid, int a2);
-void _scrSetQueueTestVals(Object* a1, int a2);
-int _scrQueueRemoveFixed(Object* obj, void* data);
+void _scrSetQueueTestVals(Object *a1, int a2);
+int _scrQueueRemoveFixed(Object *obj, void *data);
 int scriptAddTimerEvent(int sid, int delay, int param);
-int scriptEventWrite(File* stream, void* data);
-int scriptEventRead(File* stream, void** dataPtr);
-int scriptEventProcess(Object* obj, void* data);
-int _scripts_clear_combat_requests(Script* script);
+int scriptEventWrite(File *stream, void *data);
+int scriptEventRead(File *stream, void **dataPtr);
+int scriptEventProcess(Object *obj, void *data);
+int _scripts_clear_combat_requests(Script *script);
 int scriptsHandleRequests();
 int _scripts_check_state_in_combat();
-int scriptsRequestCombat(STRUCT_664980* a1);
-void _scripts_request_combat_locked(STRUCT_664980* ptr);
+int scriptsRequestCombat(STRUCT_664980 *a1);
+void _scripts_request_combat_locked(STRUCT_664980 *ptr);
 void scriptsRequestWorldMap();
-int scriptsRequestElevator(Object* a1, int a2);
+int scriptsRequestElevator(Object *a1, int a2);
 int scriptsRequestExplosion(int tile, int elevation, int minDamage, int maxDamage);
-void scriptsRequestDialog(Object* a1);
+void scriptsRequestDialog(Object *a1);
 void scriptsRequestEndgame();
-int scriptsRequestLooting(Object* a1, Object* a2);
-int scriptsRequestStealing(Object* a1, Object* a2);
-void _script_make_path(char* path);
+int scriptsRequestLooting(Object *a1, Object *a2);
+int scriptsRequestStealing(Object *a1, Object *a2);
+void _script_make_path(char *path);
 int scriptExecProc(int sid, int proc);
 bool scriptHasProc(int sid, int proc);
-int _scr_find_str_run_info(int a1, int* a2, int sid);
+int _scr_find_str_run_info(int a1, int *a2, int sid);
 int scriptsSetDudeScript();
 int scriptsClearDudeScript();
 int scriptsInit();
@@ -197,33 +197,33 @@ int scriptsEnable();
 int scriptsDisable();
 void _scr_enable_critters();
 void _scr_disable_critters();
-int scriptsSaveGameGlobalVars(File* stream);
-int scriptsLoadGameGlobalVars(File* stream);
-int scriptsSkipGameGlobalVars(File* stream);
-int scriptSaveAll(File* stream);
-int scriptLoadAll(File* stream);
-int scriptGetScript(int sid, Script** script);
-int scriptAdd(int* sidPtr, int scriptType);
+int scriptsSaveGameGlobalVars(File *stream);
+int scriptsLoadGameGlobalVars(File *stream);
+int scriptsSkipGameGlobalVars(File *stream);
+int scriptSaveAll(File *stream);
+int scriptLoadAll(File *stream);
+int scriptGetScript(int sid, Script **script);
+int scriptAdd(int *sidPtr, int scriptType);
 int scriptRemove(int index);
 int _scr_remove_all();
 int _scr_remove_all_force();
-Script* scriptGetFirstSpatialScript(int elevation);
-Script* scriptGetNextSpatialScript();
+Script *scriptGetFirstSpatialScript(int elevation);
+Script *scriptGetNextSpatialScript();
 void _scr_spatials_enable();
 void _scr_spatials_disable();
-bool scriptsExecSpatialProc(Object* obj, int tile, int elevation);
+bool scriptsExecSpatialProc(Object *obj, int tile, int elevation);
 int scriptsExecStartProc();
 void scriptsExecMapEnterProc();
 void scriptsExecMapUpdateProc();
 void scriptsExecMapUpdateScripts(int a1);
 void scriptsExecMapExitProc();
-char* _scr_get_msg_str(int messageListId, int messageId);
-char* _scr_get_msg_str_speech(int messageListId, int messageId, int a3);
-int scriptGetLocalVar(int sid, int var, ProgramValue& value);
-int scriptSetLocalVar(int sid, int var, ProgramValue& value);
+char *_scr_get_msg_str(int messageListId, int messageId);
+char *_scr_get_msg_str_speech(int messageListId, int messageId, int a3);
+int scriptGetLocalVar(int sid, int var, ProgramValue &value);
+int scriptSetLocalVar(int sid, int var, ProgramValue &value);
 bool _scr_end_combat();
-int _scr_explode_scenery(Object* a1, int tile, int radius, int elevation);
+int _scr_explode_scenery(Object *a1, int tile, int radius, int elevation);
 
-} // namespace fallout
+} // namespace Fallout2
 
-#endif /* SCRIPTS_H */
+#endif
