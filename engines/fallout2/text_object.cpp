@@ -1,19 +1,19 @@
-#include "text_object.h"
+#include "fallout2/text_object.h"
 
-#include <string.h>
+// #include <string.h>
 
-#include "debug.h"
-#include "draw.h"
-#include "input.h"
-#include "memory.h"
-#include "object.h"
-#include "settings.h"
-#include "svga.h"
-#include "text_font.h"
-#include "tile.h"
-#include "word_wrap.h"
+#include "fallout2/debug.h"
+#include "fallout2/draw.h"
+#include "fallout2/input.h"
+#include "fallout2/memory.h"
+#include "fallout2/object.h"
+#include "fallout2/settings.h"
+#include "fallout2/svga.h"
+#include "fallout2/text_font.h"
+#include "fallout2/tile.h"
+#include "fallout2/word_wrap.h"
 
-namespace fallout {
+namespace Fallout2 {
 
 // The maximum number of text objects that can exist at the same time.
 #define TEXT_OBJECTS_MAX_COUNT (20)
@@ -25,7 +25,7 @@ typedef enum TextObjectFlags {
 
 typedef struct TextObject {
 	int flags;
-	Object* owner;
+	Object *owner;
 	unsigned int time;
 	int linesCount;
 	int sx;
@@ -35,11 +35,11 @@ typedef struct TextObject {
 	int y;
 	int width;
 	int height;
-	unsigned char* data;
+	unsigned char *data;
 } TextObject;
 
 static void textObjectsTicker();
-static void textObjectFindPlacement(TextObject* textObject);
+static void textObjectFindPlacement(TextObject *textObject);
 
 // 0x51D944
 static int gTextObjectsCount = 0;
@@ -51,7 +51,7 @@ static unsigned int gTextObjectsBaseDelay = 3500;
 static unsigned int gTextObjectsLineDelay = 1399;
 
 // 0x6681C0
-static TextObject* gTextObjects[TEXT_OBJECTS_MAX_COUNT];
+static TextObject *gTextObjects[TEXT_OBJECTS_MAX_COUNT];
 
 // 0x668210
 static int gTextObjectsWindowWidth;
@@ -60,7 +60,7 @@ static int gTextObjectsWindowWidth;
 static int gTextObjectsWindowHeight;
 
 // 0x668218
-static unsigned char* gTextObjectsWindowBuffer;
+static unsigned char *gTextObjectsWindowBuffer;
 
 // 0x66821C
 static bool gTextObjectsEnabled;
@@ -69,7 +69,7 @@ static bool gTextObjectsEnabled;
 static bool gTextObjectsInitialized;
 
 // 0x4B0130
-int textObjectsInit(unsigned char* windowBuffer, int width, int height) {
+int textObjectsInit(unsigned char *windowBuffer, int width, int height) {
 	if (gTextObjectsInitialized) {
 		return -1;
 	}
@@ -79,7 +79,7 @@ int textObjectsInit(unsigned char* windowBuffer, int width, int height) {
 	gTextObjectsWindowHeight = height;
 	gTextObjectsCount = 0;
 
-	tickersAdd(textObjectsTicker);
+	// tickersAdd(textObjectsTicker); TODO input.cpp
 
 	gTextObjectsBaseDelay = (unsigned int)(settings.preferences.text_base_delay * 1000.0);
 	gTextObjectsLineDelay = (unsigned int)(settings.preferences.text_line_delay * 1000.0);
@@ -102,7 +102,7 @@ int textObjectsReset() {
 	}
 
 	gTextObjectsCount = 0;
-	tickersAdd(textObjectsTicker);
+	// tickersAdd(textObjectsTicker); TODO input.cpp
 
 	return 0;
 }
@@ -111,7 +111,7 @@ int textObjectsReset() {
 void textObjectsFree() {
 	if (gTextObjectsInitialized) {
 		textObjectsReset();
-		tickersRemove(textObjectsTicker);
+		// tickersRemove(textObjectsTicker); TODO input.cpp
 		gTextObjectsInitialized = false;
 	}
 }
@@ -146,7 +146,7 @@ void textObjectsSetLineDelay(double value) {
 
 // text_object_create
 // 0x4B036C
-int textObjectAdd(Object* object, char* string, int font, int color, int outlineColor, Rect* rect) {
+int textObjectAdd(Object *object, char *string, int font, int color, int outlineColor, Rect *rect) {
 	if (!gTextObjectsInitialized) {
 		return -1;
 	}
@@ -164,7 +164,7 @@ int textObjectAdd(Object* object, char* string, int font, int color, int outline
 		return -1;
 	}
 
-	TextObject* textObject = (TextObject*)internal_malloc(sizeof(*textObject));
+	TextObject *textObject = (TextObject *)internal_malloc(sizeof(*textObject));
 	if (textObject == NULL) {
 		return -1;
 	}
@@ -189,8 +189,8 @@ int textObjectAdd(Object* object, char* string, int font, int color, int outline
 	textObject->width = 0;
 
 	for (int index = 0; index < textObject->linesCount; index++) {
-		char* ending = string + beginnings[index + 1];
-		char* beginning = string + beginnings[index];
+		char *ending = string + beginnings[index + 1];
+		char *beginning = string + beginnings[index];
 		if (ending[-1] == ' ') {
 			--ending;
 		}
@@ -199,7 +199,7 @@ int textObjectAdd(Object* object, char* string, int font, int color, int outline
 		*ending = '\0';
 
 		// NOTE: Calls `fontGetStringWidth` twice.
-		textObject->width = std::max(textObject->width, fontGetStringWidth(beginning));
+		textObject->width = MAX(textObject->width, fontGetStringWidth(beginning));
 
 		*ending = c;
 	}
@@ -212,7 +212,7 @@ int textObjectAdd(Object* object, char* string, int font, int color, int outline
 	}
 
 	int size = textObject->width * textObject->height;
-	textObject->data = (unsigned char*)internal_malloc(size);
+	textObject->data = (unsigned char *)internal_malloc(size);
 	if (textObject->data == NULL) {
 		fontSetCurrent(oldFont);
 		return -1;
@@ -220,7 +220,7 @@ int textObjectAdd(Object* object, char* string, int font, int color, int outline
 
 	memset(textObject->data, 0, size);
 
-	unsigned char* dest = textObject->data;
+	unsigned char *dest = textObject->data;
 	int skip = textObject->width * (fontGetLineHeight() + 1);
 
 	if (outlineColor != -1) {
@@ -228,8 +228,8 @@ int textObjectAdd(Object* object, char* string, int font, int color, int outline
 	}
 
 	for (int index = 0; index < textObject->linesCount; index++) {
-		char* beginning = string + beginnings[index];
-		char* ending = string + beginnings[index + 1];
+		char *beginning = string + beginnings[index];
+		char *ending = string + beginnings[index + 1];
 		if (ending[-1] == ' ') {
 			--ending;
 		}
@@ -268,7 +268,7 @@ int textObjectAdd(Object* object, char* string, int font, int color, int outline
 	textObjectsRemoveByOwner(object);
 
 	textObject->owner = object;
-	textObject->time = _get_bk_time();
+	textObject->time = 0; // _get_bk_time();  TODO input.cpp
 
 	gTextObjects[gTextObjectsCount] = textObject;
 	gTextObjectsCount++;
@@ -279,13 +279,13 @@ int textObjectAdd(Object* object, char* string, int font, int color, int outline
 }
 
 // 0x4B06E8
-void textObjectsRenderInRect(Rect* rect) {
+void textObjectsRenderInRect(Rect *rect) {
 	if (!gTextObjectsInitialized) {
 		return;
 	}
 
 	for (int index = 0; index < gTextObjectsCount; index++) {
-		TextObject* textObject = gTextObjects[index];
+		TextObject *textObject = gTextObjects[index];
 		tileToScreenXY(textObject->tile, &(textObject->x), &(textObject->y), gElevation);
 		textObject->x += textObject->sx;
 		textObject->y += textObject->sy;
@@ -297,11 +297,11 @@ void textObjectsRenderInRect(Rect* rect) {
 		textObjectRect.bottom = textObject->height + textObject->y - 1;
 		if (rectIntersection(&textObjectRect, rect, &textObjectRect) == 0) {
 			blitBufferToBufferTrans(textObject->data + textObject->width * (textObjectRect.top - textObject->y) + (textObjectRect.left - textObject->x),
-			                        textObjectRect.right - textObjectRect.left + 1,
-			                        textObjectRect.bottom - textObjectRect.top + 1,
-			                        textObject->width,
-			                        gTextObjectsWindowBuffer + gTextObjectsWindowWidth * textObjectRect.top + textObjectRect.left,
-			                        gTextObjectsWindowWidth);
+									textObjectRect.right - textObjectRect.left + 1,
+									textObjectRect.bottom - textObjectRect.top + 1,
+									textObject->width,
+									gTextObjectsWindowBuffer + gTextObjectsWindowWidth * textObjectRect.top + textObjectRect.left,
+									gTextObjectsWindowWidth);
 		}
 	}
 }
@@ -321,10 +321,10 @@ static void textObjectsTicker() {
 	Rect dirtyRect;
 
 	for (int index = 0; index < gTextObjectsCount; index++) {
-		TextObject* textObject = gTextObjects[index];
+		TextObject *textObject = gTextObjects[index];
 
 		unsigned int delay = gTextObjectsLineDelay * textObject->linesCount + gTextObjectsBaseDelay;
-		if ((textObject->flags & TEXT_OBJECT_MARKED_FOR_REMOVAL) != 0 || (getTicksBetween(_get_bk_time(), textObject->time) > delay)) {
+//		if ((textObject->flags & TEXT_OBJECT_MARKED_FOR_REMOVAL) != 0 || (getTicksBetween(_get_bk_time(), textObject->time) > delay)) {  TODO input.cpp
 			tileToScreenXY(textObject->tile, &(textObject->x), &(textObject->y), gElevation);
 			textObject->x += textObject->sx;
 			textObject->y += textObject->sy;
@@ -349,7 +349,7 @@ static void textObjectsTicker() {
 
 			gTextObjectsCount--;
 			index--;
-		}
+//		}  TODO input.cpp
 	}
 
 	if (textObjectsRemoved) {
@@ -360,7 +360,7 @@ static void textObjectsTicker() {
 // Finds best position for placing text object.
 //
 // 0x4B0954
-static void textObjectFindPlacement(TextObject* textObject) {
+static void textObjectFindPlacement(TextObject *textObject) {
 	int tileScreenX;
 	int tileScreenY;
 	tileToScreenXY(textObject->tile, &tileScreenX, &tileScreenY, gElevation);
@@ -371,24 +371,21 @@ static void textObjectFindPlacement(TextObject* textObject) {
 		textObject->y -= textObject->height + 60;
 	}
 
-	if ((textObject->x >= 0 && textObject->x + textObject->width - 1 < gTextObjectsWindowWidth)
-	        && (textObject->y >= 0 && textObject->y + textObject->height - 1 < gTextObjectsWindowHeight)) {
+	if ((textObject->x >= 0 && textObject->x + textObject->width - 1 < gTextObjectsWindowWidth) && (textObject->y >= 0 && textObject->y + textObject->height - 1 < gTextObjectsWindowHeight)) {
 		textObject->sx = textObject->x - tileScreenX;
 		textObject->sy = textObject->y - tileScreenY;
 		return;
 	}
 
 	textObject->x -= textObject->width / 2;
-	if ((textObject->x >= 0 && textObject->x + textObject->width - 1 < gTextObjectsWindowWidth)
-	        && (textObject->y >= 0 && textObject->y + textObject->height - 1 < gTextObjectsWindowHeight)) {
+	if ((textObject->x >= 0 && textObject->x + textObject->width - 1 < gTextObjectsWindowWidth) && (textObject->y >= 0 && textObject->y + textObject->height - 1 < gTextObjectsWindowHeight)) {
 		textObject->sx = textObject->x - tileScreenX;
 		textObject->sy = textObject->y - tileScreenY;
 		return;
 	}
 
 	textObject->x += textObject->width;
-	if ((textObject->x >= 0 && textObject->x + textObject->width - 1 < gTextObjectsWindowWidth)
-	        && (textObject->y >= 0 && textObject->y + textObject->height - 1 < gTextObjectsWindowHeight)) {
+	if ((textObject->x >= 0 && textObject->x + textObject->width - 1 < gTextObjectsWindowWidth) && (textObject->y >= 0 && textObject->y + textObject->height - 1 < gTextObjectsWindowHeight)) {
 		textObject->sx = textObject->x - tileScreenX;
 		textObject->sy = textObject->y - tileScreenY;
 		return;
@@ -396,16 +393,14 @@ static void textObjectFindPlacement(TextObject* textObject) {
 
 	textObject->x = tileScreenX - 16 - textObject->width;
 	textObject->y = tileScreenY - 16 - textObject->height;
-	if ((textObject->x >= 0 && textObject->x + textObject->width - 1 < gTextObjectsWindowWidth)
-	        && (textObject->y >= 0 && textObject->y + textObject->height - 1 < gTextObjectsWindowHeight)) {
+	if ((textObject->x >= 0 && textObject->x + textObject->width - 1 < gTextObjectsWindowWidth) && (textObject->y >= 0 && textObject->y + textObject->height - 1 < gTextObjectsWindowHeight)) {
 		textObject->sx = textObject->x - tileScreenX;
 		textObject->sy = textObject->y - tileScreenY;
 		return;
 	}
 
 	textObject->x += textObject->width + 64;
-	if ((textObject->x >= 0 && textObject->x + textObject->width - 1 < gTextObjectsWindowWidth)
-	        && (textObject->y >= 0 && textObject->y + textObject->height - 1 < gTextObjectsWindowHeight)) {
+	if ((textObject->x >= 0 && textObject->x + textObject->width - 1 < gTextObjectsWindowWidth) && (textObject->y >= 0 && textObject->y + textObject->height - 1 < gTextObjectsWindowHeight)) {
 		textObject->sx = textObject->x - tileScreenX;
 		textObject->sy = textObject->y - tileScreenY;
 		return;
@@ -413,24 +408,21 @@ static void textObjectFindPlacement(TextObject* textObject) {
 
 	textObject->x = tileScreenX + 16 - textObject->width / 2;
 	textObject->y = tileScreenY;
-	if ((textObject->x >= 0 && textObject->x + textObject->width - 1 < gTextObjectsWindowWidth)
-	        && (textObject->y >= 0 && textObject->y + textObject->height - 1 < gTextObjectsWindowHeight)) {
+	if ((textObject->x >= 0 && textObject->x + textObject->width - 1 < gTextObjectsWindowWidth) && (textObject->y >= 0 && textObject->y + textObject->height - 1 < gTextObjectsWindowHeight)) {
 		textObject->sx = textObject->x - tileScreenX;
 		textObject->sy = textObject->y - tileScreenY;
 		return;
 	}
 
 	textObject->x -= textObject->width / 2;
-	if ((textObject->x >= 0 && textObject->x + textObject->width - 1 < gTextObjectsWindowWidth)
-	        && (textObject->y >= 0 && textObject->y + textObject->height - 1 < gTextObjectsWindowHeight)) {
+	if ((textObject->x >= 0 && textObject->x + textObject->width - 1 < gTextObjectsWindowWidth) && (textObject->y >= 0 && textObject->y + textObject->height - 1 < gTextObjectsWindowHeight)) {
 		textObject->sx = textObject->x - tileScreenX;
 		textObject->sy = textObject->y - tileScreenY;
 		return;
 	}
 
 	textObject->x += textObject->width;
-	if ((textObject->x >= 0 && textObject->x + textObject->width - 1 < gTextObjectsWindowWidth)
-	        && (textObject->y >= 0 && textObject->y + textObject->height - 1 < gTextObjectsWindowHeight)) {
+	if ((textObject->x >= 0 && textObject->x + textObject->width - 1 < gTextObjectsWindowWidth) && (textObject->y >= 0 && textObject->y + textObject->height - 1 < gTextObjectsWindowHeight)) {
 		textObject->sx = textObject->x - tileScreenX;
 		textObject->sy = textObject->y - tileScreenY;
 		return;
@@ -445,7 +437,7 @@ static void textObjectFindPlacement(TextObject* textObject) {
 // Marks text objects attached to [object] for removal.
 //
 // 0x4B0C00
-void textObjectsRemoveByOwner(Object* object) {
+void textObjectsRemoveByOwner(Object *object) {
 	for (int index = 0; index < gTextObjectsCount; index++) {
 		if (gTextObjects[index]->owner == object) {
 			gTextObjects[index]->flags |= TEXT_OBJECT_MARKED_FOR_REMOVAL;
@@ -453,4 +445,4 @@ void textObjectsRemoveByOwner(Object* object) {
 	}
 }
 
-} // namespace fallout
+} // namespace Fallout2
