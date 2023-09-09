@@ -1,13 +1,14 @@
-#include "light.h"
+#include "fallout2/light.h"
 
-#include <algorithm>
+// #include <algorithm>
 
-#include "map_defs.h"
-#include "object.h"
-#include "perk.h"
-#include "tile.h"
+#include "fallout2/fallout2.h"
+#include "fallout2/map_defs.h"
+#include "fallout2/object.h"
+#include "fallout2/perk.h"
+#include "fallout2/tile.h"
 
-namespace fallout {
+namespace Fallout2 {
 
 // 20% of max light per "Night Vision" rank
 #define LIGHT_LEVEL_NIGHT_VISION_BONUS (65536 / 5)
@@ -42,8 +43,8 @@ int lightGetAmbientIntensity() {
 
 // 0x47A908
 void lightSetAmbientIntensity(int intensity, bool shouldUpdateScreen) {
-	int adjustedIntensity = intensity + perkGetRank(gDude, PERK_NIGHT_VISION) * LIGHT_LEVEL_NIGHT_VISION_BONUS;
-	int normalizedIntensity = std::clamp(adjustedIntensity, LIGHT_INTENSITY_MIN, LIGHT_INTENSITY_MAX);
+	int adjustedIntensity = intensity; // + perkGetRank(gDude, PERK_NIGHT_VISION) * LIGHT_LEVEL_NIGHT_VISION_BONUS;  TODO: perk.cpp
+	int normalizedIntensity = clamp(adjustedIntensity, LIGHT_INTENSITY_MIN, LIGHT_INTENSITY_MAX);
 
 	int oldAmbientIntensity = gAmbientIntensity;
 	gAmbientIntensity = normalizedIntensity;
@@ -65,7 +66,7 @@ int lightGetTileIntensity(int elevation, int tile) {
 		return 0;
 	}
 
-	return std::min(gTileIntensity[elevation][tile], LIGHT_INTENSITY_MAX);
+	return MIN(gTileIntensity[elevation][tile], LIGHT_INTENSITY_MAX);
 }
 
 // 0x47A9C4
@@ -129,4 +130,4 @@ void lightResetTileIntensity() {
 	}
 }
 
-} // namespace fallout
+} // namespace Fallout2
