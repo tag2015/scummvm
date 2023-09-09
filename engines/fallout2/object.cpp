@@ -449,18 +449,18 @@ int objectRead(Object *obj, File *stream) {
 	obj->outline = 0;
 	obj->owner = NULL;
 
-//	if (objectDataRead(obj, stream) != 0) {  TODO: proto.cpp
+	if (objectDataRead(obj, stream) != 0) {
 		return -1;
-//	}
+	}
 
-	if (/*isExitGridPid(obj->pid)*/ 0) {  // TODO proto.cpp
+	if (isExitGridPid(obj->pid)) {
 		if (obj->data.misc.map <= 0) {
 			if ((obj->fid & 0xFFF) < 33) {
 				obj->fid = buildFid(OBJ_TYPE_MISC, (obj->fid & 0xFFF) + 16, FID_ANIM_TYPE(obj->fid), 0, 0);
 			}
 		}
 	} else {
-		if (PID_TYPE(obj->pid) == 0 && !(gMapHeader.flags & 0x01)) {
+		if (PID_TYPE(obj->pid) == 0 /* && !(gMapHeader.flags & 0x01)*/) {  // TODO map.cpp
 			_object_fix_weapon_ammo(obj);
 		}
 	}
@@ -609,14 +609,14 @@ static void _object_fix_weapon_ammo(Object *obj) {
 		return;
 	}
 
-	// TODO proto.cpp
-/*	Proto *proto;
+	// TODO item.cpp
+	Proto *proto;
 	if (protoGetProto(obj->pid, &proto) == -1) {
 		debugPrint("\nError: obj_load: proto_ptr failed on pid");
-		exit(1);
+		error("_object_fix_weapon_ammo");
 	}
 
-	int charges;
+/*	int charges;
 	if (itemGetType(obj) == ITEM_TYPE_WEAPON) {
 		int ammoTypePid = obj->data.item.weapon.ammoTypePid;
 		if (ammoTypePid == 0xCCCCCCCC || ammoTypePid == -1) {
@@ -685,8 +685,8 @@ static int objectWrite(Object *obj, File *stream) {
 		return -1;
 	if (fileWriteInt32(stream, obj->field_80) == -1)
 		return -1;
-	//if (objectDataWrite(obj, stream) == -1)  TODO proto.cpp
-	//	return -1;
+	if (objectDataWrite(obj, stream) == -1)
+		return -1;
 
 	return 0;
 }
@@ -937,7 +937,6 @@ int objectCreateWithFidPid(Object **objectPtr, int fid, int pid) {
 		return 0;
 	}
 
-	/* TODO proto.cpp
 	_proto_update_init(objectListNode->obj);
 
 	Proto *proto = NULL;
@@ -991,8 +990,8 @@ int objectCreateWithFidPid(Object **objectPtr, int fid, int pid) {
 		objectListNode->obj->flags |= OBJECT_NO_HIGHLIGHT;
 	}
 
-	_obj_new_sid(objectListNode->obj, &(objectListNode->obj->sid));
-*/
+//	_obj_new_sid(objectListNode->obj, &(objectListNode->obj->sid));  TODO proto_instance.cpp
+
 	return 0;
 }
 
@@ -1000,14 +999,14 @@ int objectCreateWithFidPid(Object **objectPtr, int fid, int pid) {
 int objectCreateWithPid(Object **objectPtr, int pid) {
 	Proto *proto;
 
-/*	*objectPtr = NULL;   TODO: proto.cpp
+	*objectPtr = NULL;
 
 	if (protoGetProto(pid, &proto) == -1) {
 		return -1;
 	}
 
 	return objectCreateWithFidPid(objectPtr, proto->fid, pid);
-*/
+
 	return -1;
 }
 
@@ -1030,7 +1029,7 @@ int _obj_copy(Object **a1, Object *a2) {
 		return -1;
 	}
 
-//	objectDataReset(objectListNode->obj);  TODO: proto.cpp
+	objectDataReset(objectListNode->obj);
 
 	memcpy(objectListNode->obj, a2, sizeof(Object));
 
@@ -1042,10 +1041,10 @@ int _obj_copy(Object **a1, Object *a2) {
 
 //	objectListNode->obj->id = scriptsNewObjectId();  TODO script.cpp
 
-/*	if (objectListNode->obj->sid != -1) {  TODO proto.cpp
+	if (objectListNode->obj->sid != -1) {
 		objectListNode->obj->sid = -1;
-		_obj_new_sid(objectListNode->obj, &(objectListNode->obj->sid));
-	} */
+	//	_obj_new_sid(objectListNode->obj, &(objectListNode->obj->sid));  TODO proto_instance.cpp
+	}
 
 	if (objectSetRotation(objectListNode->obj, a2->rotation, NULL) == -1) {
 		// TODO: Probably leaking object allocated with objectAllocate.
@@ -2033,16 +2032,16 @@ int _obj_inven_free(Inventory *inventory) {
 bool _obj_action_can_use(Object *obj) {
 	int pid = obj->pid;
 	// SFALL
-/*	if (pid != PROTO_ID_LIT_FLARE && !explosiveIsActiveExplosive(pid)) {  TODO: item.cpp proto.cpp
+	if (pid != PROTO_ID_LIT_FLARE /*&& !explosiveIsActiveExplosive(pid)*/) {  //TODO: item.cpp
 		return _proto_action_can_use(pid);
 	} else {
 		return false;
-	}*/
+	}
 }
 
 // 0x48B278
 bool _obj_action_can_talk_to(Object *obj) {
-//	return _proto_action_can_talk_to(obj->pid) && (PID_TYPE(obj->pid) == OBJ_TYPE_CRITTER) && critterIsActive(obj); TODO proto.cpp
+//	return _proto_action_can_talk_to(obj->pid) && (PID_TYPE(obj->pid) == OBJ_TYPE_CRITTER) && critterIsActive(obj); TODO critter.cpp
 	return false;  // FIXME remove
 }
 
@@ -2052,13 +2051,12 @@ bool _obj_portal_is_walk_thru(Object *obj) {
 		return false;
 	}
 
-/*	Proto *proto;  TODO proto.cpp
+	Proto *proto;
 	if (protoGetProto(obj->pid, &proto) == -1) {
 		return false;
 	}
 
-	return (proto->scenery.data.generic.field_0 & 0x04) != 0;*/
-	return false; // FIXME remove
+	return (proto->scenery.data.generic.field_0 & 0x04) != 0;
 }
 
 // 0x48B2E8
@@ -2880,7 +2878,7 @@ int _obj_intersects_with(Object *object, int x, int y) {
 						} else {
 							int type = FID_TYPE(object->fid);
 							if (type == OBJ_TYPE_SCENERY || type == OBJ_TYPE_WALL) {
-							/*	Proto *proto;  TODO proto.cpp
+								Proto *proto;
 								protoGetProto(object->pid, &proto);
 
 								bool v20;
@@ -2901,7 +2899,7 @@ int _obj_intersects_with(Object *object, int x, int y) {
 									if (_obj_intersects_with(gEgg, x, y) != 0) {
 										flags |= 0x04;
 									}
-								} */
+								}
 							}
 						}
 					}
@@ -3057,7 +3055,7 @@ char *objectGetDescription(Object *obj) {
 //		return itemGetDescription(obj); TODO item.cpp
 	}
 
-//	return protoGetDescription(obj->pid); TODO proto.cpp
+	return protoGetDescription(obj->pid);
 }
 
 // Warm objects cache?
@@ -4450,7 +4448,7 @@ static int _obj_adjust_light(Object *obj, int a2, Rect *rect) {
 									v14 = (objectListNode->obj->flags & OBJECT_LIGHT_THRU) == 0;
 
 									if (FID_TYPE(objectListNode->obj->fid) == OBJ_TYPE_WALL) {
-/*										if ((objectListNode->obj->flags & OBJECT_FLAT) == 0) {  TODO proto.cpp
+										if ((objectListNode->obj->flags & OBJECT_FLAT) == 0) {
 											Proto *proto;
 											protoGetProto(objectListNode->obj->pid, &proto);
 											if ((proto->wall.extendedFlags & 0x8000000) != 0 || (proto->wall.extendedFlags & 0x40000000) != 0) {
@@ -4470,7 +4468,7 @@ static int _obj_adjust_light(Object *obj, int a2, Rect *rect) {
 													v12 = false;
 												}
 											}
-										}*/
+										}
 									} else {
 										if (v14 && rotation >= ROTATION_E && rotation <= ROTATION_SW) {
 											v12 = false;
@@ -4837,7 +4835,7 @@ static void _obj_render_object(Object *object, Rect *rect, int light) {
 
 	if (type == 2 || type == 3) {
 		if ((gDude->flags & OBJECT_HIDDEN) == 0 && (object->flags & OBJECT_FLAG_0xFC000) == 0) {
-/*			Proto *proto;  TODO proto.cpp
+			Proto *proto;
 			protoGetProto(object->pid, &proto);
 
 			bool v17;
@@ -4860,8 +4858,7 @@ static void _obj_render_object(Object *object, Rect *rect, int light) {
 				if (v17 && tileIsInFrontOf(gDude->tile, object->tile) && (object->flags & OBJECT_WALL_TRANS_END) != 0) {
 					v17 = 0;
 				}
-			}*/
-			bool v17 = true;  // FIXME remove!!!
+			}
 			if (v17) {
 				CacheEntry *eggHandle;
 				Art *egg = artLock(gEgg->fid, &eggHandle);
