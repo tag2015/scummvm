@@ -1,15 +1,15 @@
-#ifndef DISPLAY_MONITOR_H
-#define DISPLAY_MONITOR_H
+#ifndef FALLOUT2_DISPLAY_MONITOR_H
+#define FALLOUT2_DISPLAY_MONITOR_H
 
-namespace fallout {
+namespace Fallout2 {
 
 int displayMonitorInit();
 int displayMonitorReset();
 void displayMonitorExit();
-void displayMonitorAddMessage(char* string);
+void displayMonitorAddMessage(char *string);
 void displayMonitorDisable();
 void displayMonitorEnable();
 
-} // namespace fallout
+} // namespace Fallout2
 
-#endif /* DISPLAY_MONITOR_H */
+#endif

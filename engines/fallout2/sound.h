@@ -1,10 +1,10 @@
-#ifndef SOUND_H
-#define SOUND_H
+#ifndef FALLOUT2_SOUND_H
+#define FALLOUT2_SOUND_H
 
-#include "memory_defs.h"
-#include "win32.h"
+#include "fallout2/memory_defs.h"
+// #include "win32.h"
 
-namespace fallout {
+namespace Fallout2 {
 
 #define VOLUME_MIN (0)
 #define VOLUME_MAX (0x7FFF)
@@ -46,22 +46,22 @@ typedef enum SoundError {
 	SOUND_ERR_COUNT,
 } SoundError;
 
-typedef int SoundOpenProc(const char* filePath, int* sampleRate);
+typedef int SoundOpenProc(const char *filePath, int *sampleRate);
 typedef int SoundCloseProc(int fileHandle);
-typedef int SoundReadProc(int fileHandle, void* buf, unsigned int size);
-typedef int SoundWriteProc(int fileHandle, const void* buf, unsigned int size);
+typedef int SoundReadProc(int fileHandle, void *buf, unsigned int size);
+typedef int SoundWriteProc(int fileHandle, const void *buf, unsigned int size);
 typedef long SoundSeekProc(int fileHandle, long offset, int origin);
 typedef long SoundTellProc(int fileHandle);
 typedef long SoundFileLengthProc(int fileHandle);
 
 typedef struct SoundFileIO {
-	SoundOpenProc* open;
-	SoundCloseProc* close;
-	SoundReadProc* read;
-	SoundWriteProc* write;
-	SoundSeekProc* seek;
-	SoundTellProc* tell;
-	SoundFileLengthProc* filelength;
+	SoundOpenProc *open;
+	SoundCloseProc *close;
+	SoundReadProc *read;
+	SoundWriteProc *write;
+	SoundSeekProc *seek;
+	SoundTellProc *tell;
+	SoundFileLengthProc *filelength;
 	int fd;
 } SoundFileIO;
 
@@ -84,12 +84,12 @@ typedef enum SoundFlags {
 	SOUND_FLAG_0x200 = 0x200,
 } SoundFlags;
 
-typedef void SoundCallback(void* userData, int a2);
-typedef void SoundDeleteCallback(void* userData);
+typedef void SoundCallback(void *userData, int a2);
+typedef void SoundDeleteCallback(void *userData);
 
 typedef struct Sound {
 	SoundFileIO io;
-	unsigned char* data;
+	unsigned char *data;
 	int soundBuffer;
 	int bitsPerSample;
 	int channels;
@@ -111,46 +111,46 @@ typedef struct Sound {
 	unsigned int lastPosition;
 	int numBuffers;
 	int dataSize;
-	void* userData;
-	void* callbackUserData;
-	SoundCallback* callback;
-	void* deleteUserData;
-	SoundDeleteCallback* deleteCallback;
-	struct Sound* next;
-	struct Sound* prev;
+	void *userData;
+	void *callbackUserData;
+	SoundCallback *callback;
+	void *deleteUserData;
+	SoundDeleteCallback *deleteCallback;
+	struct Sound *next;
+	struct Sound *prev;
 } Sound;
 
-void soundSetMemoryProcs(MallocProc* mallocProc, ReallocProc* reallocProc, FreeProc* freeProc);
-const char* soundGetErrorDescription(int err);
+void soundSetMemoryProcs(MallocProc *mallocProc, ReallocProc *reallocProc, FreeProc *freeProc);
+const char *soundGetErrorDescription(int err);
 int soundInit(int a1, int numBuffers, int a3, int dataSize, int rate);
 void soundExit();
-Sound* soundAllocate(int type, int soundFlags);
-int soundLoad(Sound* sound, char* filePath);
-int soundPlay(Sound* sound);
-int soundStop(Sound* sound);
-int soundDelete(Sound* sound);
-bool soundIsPlaying(Sound* sound);
-bool _soundDone(Sound* sound);
-bool soundIsPaused(Sound* sound);
-int _soundType(Sound* sound, int type);
-int soundGetDuration(Sound* sound);
-int soundSetLooping(Sound* sound, int loops);
+Sound *soundAllocate(int type, int soundFlags);
+int soundLoad(Sound *sound, char *filePath);
+int soundPlay(Sound *sound);
+int soundStop(Sound *sound);
+int soundDelete(Sound *sound);
+bool soundIsPlaying(Sound *sound);
+bool _soundDone(Sound *sound);
+bool soundIsPaused(Sound *sound);
+int _soundType(Sound *sound, int type);
+int soundGetDuration(Sound *sound);
+int soundSetLooping(Sound *sound, int loops);
 int _soundVolumeHMItoDirectSound(int a1);
-int soundSetVolume(Sound* sound, int volume);
-int soundSetCallback(Sound* sound, SoundCallback* callback, void* userData);
-int soundSetChannels(Sound* sound, int channels);
-int soundSetReadLimit(Sound* sound, int readLimit);
-int soundPause(Sound* sound);
-int soundResume(Sound* sound);
-int soundSetFileIO(Sound* sound, SoundOpenProc* openProc, SoundCloseProc* closeProc, SoundReadProc* readProc, SoundWriteProc* writeProc, SoundSeekProc* seekProc, SoundTellProc* tellProc, SoundFileLengthProc* fileLengthProc);
+int soundSetVolume(Sound *sound, int volume);
+int soundSetCallback(Sound *sound, SoundCallback *callback, void *userData);
+int soundSetChannels(Sound *sound, int channels);
+int soundSetReadLimit(Sound *sound, int readLimit);
+int soundPause(Sound *sound);
+int soundResume(Sound *sound);
+int soundSetFileIO(Sound *sound, SoundOpenProc *openProc, SoundCloseProc *closeProc, SoundReadProc *readProc, SoundWriteProc *writeProc, SoundSeekProc *seekProc, SoundTellProc *tellProc, SoundFileLengthProc *fileLengthProc);
 int _soundSetMasterVolume(int value);
-int _soundGetPosition(Sound* sound);
-int _soundSetPosition(Sound* sound, int pos);
-int _soundFade(Sound* sound, int duration, int targetVolume);
+int _soundGetPosition(Sound *sound);
+int _soundSetPosition(Sound *sound, int pos);
+int _soundFade(Sound *sound, int duration, int targetVolume);
 void soundDeleteAll();
 void soundContinueAll();
-int soundSetDefaultFileIO(SoundOpenProc* openProc, SoundCloseProc* closeProc, SoundReadProc* readProc, SoundWriteProc* writeProc, SoundSeekProc* seekProc, SoundTellProc* tellProc, SoundFileLengthProc* fileLengthProc);
+int soundSetDefaultFileIO(SoundOpenProc *openProc, SoundCloseProc *closeProc, SoundReadProc *readProc, SoundWriteProc *writeProc, SoundSeekProc *seekProc, SoundTellProc *tellProc, SoundFileLengthProc *fileLengthProc);
 
-} // namespace fallout
+} // namespace Fallout2
 
-#endif /* SOUND_H */
+#endif
