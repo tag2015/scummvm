@@ -292,6 +292,8 @@ Common::Error Fallout2Engine::run() {
 
 	tileDisable();
 
+	badwordsInit();
+
 	// throw a dice (yay!)
 	debugPrint("RandomRoll (diff= 70) result: %d", randomRoll(70, 5, NULL));
 	debugPrint("RandomRoll (diff= 10) result: %d", randomRoll(10, 5, NULL));
