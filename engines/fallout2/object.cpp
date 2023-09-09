@@ -1,63 +1,63 @@
-#include "object.h"
+#include "fallout2/object.h"
 
-#include <assert.h>
+/*#include <assert.h>
 #include <string.h>
 
-#include <algorithm>
+#include <algorithm>*/
 
-#include "animation.h"
-#include "art.h"
-#include "color.h"
-#include "combat.h"
-#include "critter.h"
-#include "debug.h"
-#include "draw.h"
-#include "game.h"
-#include "game_mouse.h"
-#include "item.h"
-#include "light.h"
-#include "map.h"
-#include "memory.h"
-#include "party_member.h"
-#include "proto.h"
-#include "proto_instance.h"
-#include "scripts.h"
-#include "settings.h"
-#include "svga.h"
-#include "text_object.h"
-#include "tile.h"
-#include "worldmap.h"
+#include "fallout2/animation.h"
+#include "fallout2/art.h"
+#include "fallout2/color.h"
+#include "fallout2/combat.h"
+#include "fallout2/critter.h"
+#include "fallout2/debug.h"
+#include "fallout2/draw.h"
+#include "fallout2/game.h"
+#include "fallout2/game_mouse.h"
+#include "fallout2/item.h"
+#include "fallout2/light.h"
+#include "fallout2/map.h"
+#include "fallout2/memory.h"
+#include "fallout2/party_member.h"
+#include "fallout2/proto.h"
+#include "fallout2/proto_instance.h"
+#include "fallout2/scripts.h"
+#include "fallout2/settings.h"
+#include "fallout2/svga.h"
+#include "fallout2/text_object.h"
+#include "fallout2/tile.h"
+#include "fallout2/worldmap.h"
 
-namespace fallout {
+namespace Fallout2 {
 
-static int objectLoadAllInternal(File* stream);
-static void _object_fix_weapon_ammo(Object* obj);
-static int objectWrite(Object* obj, File* stream);
+static int objectLoadAllInternal(File *stream);
+static void _object_fix_weapon_ammo(Object *obj);
+static int objectWrite(Object *obj, File *stream);
 static int _obj_offset_table_init();
 static void _obj_offset_table_exit();
 static int _obj_order_table_init();
-static int _obj_order_comp_func_even(const void* a1, const void* a2);
-static int _obj_order_comp_func_odd(const void* a1, const void* a2);
+static int _obj_order_comp_func_even(const void *a1, const void *a2);
+static int _obj_order_comp_func_odd(const void *a1, const void *a2);
 static void _obj_order_table_exit();
 static int _obj_render_table_init();
 static void _obj_render_table_exit();
 static void _obj_light_table_init();
 static void _obj_blend_table_init();
 static void _obj_blend_table_exit();
-static int _obj_save_obj(File* stream, Object* object);
-static int _obj_load_obj(File* stream, Object** objectPtr, int elevation, Object* owner);
-static int objectAllocate(Object** objectPtr);
-static void objectDeallocate(Object** objectPtr);
-static int objectListNodeCreate(ObjectListNode** nodePtr);
-static void objectListNodeDestroy(ObjectListNode** nodePtr);
-static int objectGetListNode(Object* obj, ObjectListNode** out_node, ObjectListNode** out_prev_node);
-static void _obj_insert(ObjectListNode* ptr);
-static int _obj_remove(ObjectListNode* a1, ObjectListNode* a2);
-static int _obj_connect_to_tile(ObjectListNode* node, int tile_index, int elev, Rect* rect);
-static int _obj_adjust_light(Object* obj, int a2, Rect* rect);
-static void objectDrawOutline(Object* object, Rect* rect);
-static void _obj_render_object(Object* object, Rect* rect, int light);
-static int _obj_preload_sort(const void* a1, const void* a2);
+static int _obj_save_obj(File *stream, Object *object);
+static int _obj_load_obj(File *stream, Object **objectPtr, int elevation, Object *owner);
+static int objectAllocate(Object **objectPtr);
+static void objectDeallocate(Object **objectPtr);
+static int objectListNodeCreate(ObjectListNode **nodePtr);
+static void objectListNodeDestroy(ObjectListNode **nodePtr);
+static int objectGetListNode(Object *obj, ObjectListNode **out_node, ObjectListNode **out_prev_node);
+static void _obj_insert(ObjectListNode *ptr);
+static int _obj_remove(ObjectListNode *a1, ObjectListNode *a2);
+static int _obj_connect_to_tile(ObjectListNode *node, int tile_index, int elev, Rect *rect);
+static int _obj_adjust_light(Object *obj, int a2, Rect *rect);
+static void objectDrawOutline(Object *object, Rect *rect);
+static void _obj_render_object(Object *object, Rect *rect, int light);
+static int _obj_preload_sort(const void *a1, const void *a2);
 
 // 0x5195F8
 static bool gObjectsInitialized = false;
@@ -72,25 +72,25 @@ static int gObjectsUpdateAreaHexHeight = 0;
 static int gObjectsUpdateAreaHexSize = 0;
 
 // 0x519608
-static int* _orderTable[2] = {
+static int *_orderTable[2] = {
 	NULL,
 	NULL,
 };
 
 // 0x519610
-static int* _offsetTable[2] = {
+static int *_offsetTable[2] = {
 	NULL,
 	NULL,
 };
 
 // 0x519618
-static int* _offsetDivTable = NULL;
+static int *_offsetDivTable = NULL;
 
 // 0x51961C
-static int* _offsetModTable = NULL;
+static int *_offsetModTable = NULL;
 
 // 0x519620
-static ObjectListNode** _renderTable = NULL;
+static ObjectListNode **_renderTable = NULL;
 
 // Number of objects in _outlinedObjects.
 //
@@ -100,7 +100,7 @@ static int _outlineCount = 0;
 // Contains objects that are not bounded to tiles.
 //
 // 0x519628
-static ObjectListNode* gObjectListHead = NULL;
+static ObjectListNode *gObjectListHead = NULL;
 
 // 0x51962C
 static int _centerToUpperLeft = 0;
@@ -112,25 +112,25 @@ static int gObjectFindElevation = 0;
 static int gObjectFindTile = 0;
 
 // 0x519638
-static ObjectListNode* gObjectFindLastObjectListNode = NULL;
+static ObjectListNode *gObjectFindLastObjectListNode = NULL;
 
 // 0x51963C
-static int* gObjectFids = NULL;
+static int *gObjectFids = NULL;
 
 // 0x519640
 static int gObjectFidsLength = 0;
 
 // 0x51964C
 static Rect _light_rect[9] = {
-	{ 0, 0, 96, 42 },
-	{ 0, 0, 160, 74 },
-	{ 0, 0, 224, 106 },
-	{ 0, 0, 288, 138 },
-	{ 0, 0, 352, 170 },
-	{ 0, 0, 416, 202 },
-	{ 0, 0, 480, 234 },
-	{ 0, 0, 544, 266 },
-	{ 0, 0, 608, 298 },
+	{0, 0, 96, 42},
+	{0, 0, 160, 74},
+	{0, 0, 224, 106},
+	{0, 0, 288, 138},
+	{0, 0, 352, 170},
+	{0, 0, 416, 202},
+	{0, 0, 480, 234},
+	{0, 0, 544, 266},
+	{0, 0, 608, 298},
 };
 
 // 0x5196DC
@@ -189,22 +189,22 @@ static int _obj_last_elev = -1;
 static bool _obj_last_is_empty = true;
 
 // 0x519780
-unsigned char* _wallBlendTable = NULL;
+unsigned char *_wallBlendTable = NULL;
 
 // 0x519784
-static unsigned char* _glassBlendTable = NULL;
+static unsigned char *_glassBlendTable = NULL;
 
 // 0x519788
-static unsigned char* _steamBlendTable = NULL;
+static unsigned char *_steamBlendTable = NULL;
 
 // 0x51978C
-static unsigned char* _energyBlendTable = NULL;
+static unsigned char *_energyBlendTable = NULL;
 
 // 0x519790
-static unsigned char* _redBlendTable = NULL;
+static unsigned char *_redBlendTable = NULL;
 
 // 0x519794
-Object* _moveBlockObj = NULL;
+Object *_moveBlockObj = NULL;
 
 // 0x519798
 static int _objItemOutlineState = 0;
@@ -234,7 +234,7 @@ static Rect gObjectsWindowRect;
 // Likely outlined objects on the screen.
 //
 // 0x639C00
-static Object* _outlinedObjects[100];
+static Object *_outlinedObjects[100];
 
 // 0x639D90
 static Rect gObjectsUpdateAreaPixelBounds;
@@ -242,7 +242,7 @@ static Rect gObjectsUpdateAreaPixelBounds;
 // Contains objects that are bounded to tiles.
 //
 // 0x639DA0
-static ObjectListNode* gObjectListHeadByTile[HEX_GRID_SIZE];
+static ObjectListNode *gObjectListHeadByTile[HEX_GRID_SIZE];
 
 // 0x660EA0
 static unsigned char _glassGrayTable[256];
@@ -254,7 +254,7 @@ unsigned char _commonGrayTable[256];
 static int gObjectsWindowBufferSize;
 
 // 0x6610A4
-static unsigned char* gObjectsWindowBuffer;
+static unsigned char *gObjectsWindowBuffer;
 
 // 0x6610A8
 static int gObjectsWindowHeight;
@@ -262,7 +262,7 @@ static int gObjectsWindowHeight;
 // Translucent "egg" effect around player.
 //
 // 0x6610AC
-Object* gEgg;
+Object *gEgg;
 
 // 0x6610B0
 static int gObjectsWindowPitch;
@@ -272,7 +272,7 @@ static int gObjectsWindowWidth;
 
 // obj_dude
 // 0x6610B8
-Object* gDude;
+Object *gDude;
 
 // 0x6610BC
 static char _obj_seen_check[5001];
@@ -282,7 +282,7 @@ static char _obj_seen[5001];
 
 // obj_init
 // 0x488780
-int objectsInit(unsigned char* buf, int width, int height, int pitch) {
+int objectsInit(unsigned char *buf, int width, int height, int pitch) {
 	int dudeFid;
 	int eggFid;
 
@@ -343,10 +343,10 @@ int objectsInit(unsigned char* buf, int width, int height, int pitch) {
 	gDude->flags |= OBJECT_LIGHT_THRU;
 	objectSetLight(gDude, 4, 0x10000, NULL);
 
-	if (partyMemberAdd(gDude) == -1) {
-		debugPrint("\n  Error: Can't add Player into party!");
-		exit(1);
-	}
+//	if (partyMemberAdd(gDude) == -1) {  TODO party_member.cpp
+//		debugPrint("\n  Error: Can't add Player into party!");
+//		exit(1);
+//	}
 
 	eggFid = buildFid(OBJ_TYPE_INTERFACE, 2, 0, 0, 0);
 	objectCreateWithFidPid(&gEgg, eggFid, -1);
@@ -406,27 +406,45 @@ void objectsExit() {
 }
 
 // 0x488AF4
-int objectRead(Object* obj, File* stream) {
+int objectRead(Object *obj, File *stream) {
 	int field_74;
 
-	if (fileReadInt32(stream, &(obj->id)) == -1) return -1;
-	if (fileReadInt32(stream, &(obj->tile)) == -1) return -1;
-	if (fileReadInt32(stream, &(obj->x)) == -1) return -1;
-	if (fileReadInt32(stream, &(obj->y)) == -1) return -1;
-	if (fileReadInt32(stream, &(obj->sx)) == -1) return -1;
-	if (fileReadInt32(stream, &(obj->sy)) == -1) return -1;
-	if (fileReadInt32(stream, &(obj->frame)) == -1) return -1;
-	if (fileReadInt32(stream, &(obj->rotation)) == -1) return -1;
-	if (fileReadInt32(stream, &(obj->fid)) == -1) return -1;
-	if (fileReadInt32(stream, &(obj->flags)) == -1) return -1;
-	if (fileReadInt32(stream, &(obj->elevation)) == -1) return -1;
-	if (fileReadInt32(stream, &(obj->pid)) == -1) return -1;
-	if (fileReadInt32(stream, &(obj->cid)) == -1) return -1;
-	if (fileReadInt32(stream, &(obj->lightDistance)) == -1) return -1;
-	if (fileReadInt32(stream, &(obj->lightIntensity)) == -1) return -1;
-	if (fileReadInt32(stream, &field_74) == -1) return -1;
-	if (fileReadInt32(stream, &(obj->sid)) == -1) return -1;
-	if (fileReadInt32(stream, &(obj->field_80)) == -1) return -1;
+	if (fileReadInt32(stream, &(obj->id)) == -1)
+		return -1;
+	if (fileReadInt32(stream, &(obj->tile)) == -1)
+		return -1;
+	if (fileReadInt32(stream, &(obj->x)) == -1)
+		return -1;
+	if (fileReadInt32(stream, &(obj->y)) == -1)
+		return -1;
+	if (fileReadInt32(stream, &(obj->sx)) == -1)
+		return -1;
+	if (fileReadInt32(stream, &(obj->sy)) == -1)
+		return -1;
+	if (fileReadInt32(stream, &(obj->frame)) == -1)
+		return -1;
+	if (fileReadInt32(stream, &(obj->rotation)) == -1)
+		return -1;
+	if (fileReadInt32(stream, &(obj->fid)) == -1)
+		return -1;
+	if (fileReadInt32(stream, &(obj->flags)) == -1)
+		return -1;
+	if (fileReadInt32(stream, &(obj->elevation)) == -1)
+		return -1;
+	if (fileReadInt32(stream, &(obj->pid)) == -1)
+		return -1;
+	if (fileReadInt32(stream, &(obj->cid)) == -1)
+		return -1;
+	if (fileReadInt32(stream, &(obj->lightDistance)) == -1)
+		return -1;
+	if (fileReadInt32(stream, &(obj->lightIntensity)) == -1)
+		return -1;
+	if (fileReadInt32(stream, &field_74) == -1)
+		return -1;
+	if (fileReadInt32(stream, &(obj->sid)) == -1)
+		return -1;
+	if (fileReadInt32(stream, &(obj->field_80)) == -1)
+		return -1;
 
 	obj->outline = 0;
 	obj->owner = NULL;
@@ -435,7 +453,7 @@ int objectRead(Object* obj, File* stream) {
 		return -1;
 	}
 
-	if (isExitGridPid(obj->pid)) {
+	if (/*isExitGridPid(obj->pid)*/ 0) {  // TODO proto.cpp
 		if (obj->data.misc.map <= 0) {
 			if ((obj->fid & 0xFFF) < 33) {
 				obj->fid = buildFid(OBJ_TYPE_MISC, (obj->fid & 0xFFF) + 16, FID_ANIM_TYPE(obj->fid), 0, 0);
@@ -451,7 +469,7 @@ int objectRead(Object* obj, File* stream) {
 }
 
 // 0x488CE4
-int objectLoadAll(File* stream) {
+int objectLoadAll(File *stream) {
 	int rc = objectLoadAllInternal(stream);
 
 	gViolenceLevel = -1;
@@ -460,7 +478,7 @@ int objectLoadAll(File* stream) {
 }
 
 // 0x488CF8
-static int objectLoadAllInternal(File* stream) {
+static int objectLoadAllInternal(File *stream) {
 	if (stream == NULL) {
 		return -1;
 	}
@@ -479,7 +497,7 @@ static int objectLoadAllInternal(File* stream) {
 	}
 
 	if (objectCount != 0) {
-		gObjectFids = (int*)internal_malloc(sizeof(*gObjectFids) * objectCount);
+		gObjectFids = (int *)internal_malloc(sizeof(*gObjectFids) * objectCount);
 		memset(gObjectFids, 0, sizeof(*gObjectFids) * objectCount);
 		if (gObjectFids == NULL) {
 			return -1;
@@ -494,7 +512,7 @@ static int objectLoadAllInternal(File* stream) {
 		}
 
 		for (int objectIndex = 0; objectIndex < objectCountAtElevation; objectIndex++) {
-			ObjectListNode* objectListNode;
+			ObjectListNode *objectListNode;
 
 			// NOTE: Uninline.
 			if (objectListNodeCreate(&objectListNode) == -1) {
@@ -520,8 +538,8 @@ static int objectLoadAllInternal(File* stream) {
 			objectListNode->obj->outline = 0;
 			gObjectFids[gObjectFidsLength++] = objectListNode->obj->fid;
 
-			if (objectListNode->obj->sid != -1) {
-				Script* script;
+			if (/*objectListNode->obj->sid != -1*/ 0) {  // TODO script.cpp
+				Script *script;
 				if (scriptGetScript(objectListNode->obj->sid, &script) == -1) {
 					objectListNode->obj->sid = -1;
 					debugPrint("\nError connecting object to script!");
@@ -540,22 +558,22 @@ static int objectLoadAllInternal(File* stream) {
 				objectListNode->obj->flags &= ~OBJECT_NO_REMOVE;
 			}
 
-			Inventory* inventory = &(objectListNode->obj->data.inventory);
+			Inventory *inventory = &(objectListNode->obj->data.inventory);
 			if (inventory->length != 0) {
-				inventory->items = (InventoryItem*)internal_malloc(sizeof(InventoryItem) * inventory->capacity);
+				inventory->items = (InventoryItem *)internal_malloc(sizeof(InventoryItem) * inventory->capacity);
 				if (inventory->items == NULL) {
 					return -1;
 				}
 
 				for (int inventoryItemIndex = 0; inventoryItemIndex < inventory->length; inventoryItemIndex++) {
-					InventoryItem* inventoryItem = &(inventory->items[inventoryItemIndex]);
+					InventoryItem *inventoryItem = &(inventory->items[inventoryItemIndex]);
 					if (fileReadInt32(stream, &(inventoryItem->quantity)) != 0) {
 						debugPrint("Error loading inventory\n");
 						return -1;
 					}
 
 					if (fixMapInventory) {
-						inventoryItem->item = (Object*)internal_malloc(sizeof(Object));
+						inventoryItem->item = (Object *)internal_malloc(sizeof(Object));
 						if (inventoryItem->item == NULL) {
 							debugPrint("Error loading inventory\n");
 							return -1;
@@ -586,12 +604,13 @@ static int objectLoadAllInternal(File* stream) {
 // Fixes ammo pid and number of charges.
 //
 // 0x48911C
-static void _object_fix_weapon_ammo(Object* obj) {
+static void _object_fix_weapon_ammo(Object *obj) {
 	if (PID_TYPE(obj->pid) != OBJ_TYPE_ITEM) {
 		return;
 	}
 
-	Proto* proto;
+	// TODO proto.cpp
+/*	Proto *proto;
 	if (protoGetProto(obj->pid, &proto) == -1) {
 		debugPrint("\nError: obj_load: proto_ptr failed on pid");
 		exit(1);
@@ -625,36 +644,55 @@ static void _object_fix_weapon_ammo(Object* obj) {
 				}
 			}
 		}
-	}
+	} */
 }
 
 // 0x489200
-static int objectWrite(Object* obj, File* stream) {
-	if (fileWriteInt32(stream, obj->id) == -1) return -1;
-	if (fileWriteInt32(stream, obj->tile) == -1) return -1;
-	if (fileWriteInt32(stream, obj->x) == -1) return -1;
-	if (fileWriteInt32(stream, obj->y) == -1) return -1;
-	if (fileWriteInt32(stream, obj->sx) == -1) return -1;
-	if (fileWriteInt32(stream, obj->sy) == -1) return -1;
-	if (fileWriteInt32(stream, obj->frame) == -1) return -1;
-	if (fileWriteInt32(stream, obj->rotation) == -1) return -1;
-	if (fileWriteInt32(stream, obj->fid) == -1) return -1;
-	if (fileWriteInt32(stream, obj->flags) == -1) return -1;
-	if (fileWriteInt32(stream, obj->elevation) == -1) return -1;
-	if (fileWriteInt32(stream, obj->pid) == -1) return -1;
-	if (fileWriteInt32(stream, obj->cid) == -1) return -1;
-	if (fileWriteInt32(stream, obj->lightDistance) == -1) return -1;
-	if (fileWriteInt32(stream, obj->lightIntensity) == -1) return -1;
-	if (fileWriteInt32(stream, obj->outline) == -1) return -1;
-	if (fileWriteInt32(stream, obj->sid) == -1) return -1;
-	if (fileWriteInt32(stream, obj->field_80) == -1) return -1;
-	if (objectDataWrite(obj, stream) == -1) return -1;
+static int objectWrite(Object *obj, File *stream) {
+	if (fileWriteInt32(stream, obj->id) == -1)
+		return -1;
+	if (fileWriteInt32(stream, obj->tile) == -1)
+		return -1;
+	if (fileWriteInt32(stream, obj->x) == -1)
+		return -1;
+	if (fileWriteInt32(stream, obj->y) == -1)
+		return -1;
+	if (fileWriteInt32(stream, obj->sx) == -1)
+		return -1;
+	if (fileWriteInt32(stream, obj->sy) == -1)
+		return -1;
+	if (fileWriteInt32(stream, obj->frame) == -1)
+		return -1;
+	if (fileWriteInt32(stream, obj->rotation) == -1)
+		return -1;
+	if (fileWriteInt32(stream, obj->fid) == -1)
+		return -1;
+	if (fileWriteInt32(stream, obj->flags) == -1)
+		return -1;
+	if (fileWriteInt32(stream, obj->elevation) == -1)
+		return -1;
+	if (fileWriteInt32(stream, obj->pid) == -1)
+		return -1;
+	if (fileWriteInt32(stream, obj->cid) == -1)
+		return -1;
+	if (fileWriteInt32(stream, obj->lightDistance) == -1)
+		return -1;
+	if (fileWriteInt32(stream, obj->lightIntensity) == -1)
+		return -1;
+	if (fileWriteInt32(stream, obj->outline) == -1)
+		return -1;
+	if (fileWriteInt32(stream, obj->sid) == -1)
+		return -1;
+	if (fileWriteInt32(stream, obj->field_80) == -1)
+		return -1;
+	if (objectDataWrite(obj, stream) == -1)
+		return -1;
 
 	return 0;
 }
 
 // 0x48935C
-int objectSaveAll(File* stream) {
+int objectSaveAll(File *stream) {
 	if (stream == NULL) {
 		return -1;
 	}
@@ -677,8 +715,8 @@ int objectSaveAll(File* stream) {
 		}
 
 		for (int tile = 0; tile < HEX_GRID_SIZE; tile++) {
-			for (ObjectListNode* objectListNode = gObjectListHeadByTile[tile]; objectListNode != NULL; objectListNode = objectListNode->next) {
-				Object* object = objectListNode->obj;
+			for (ObjectListNode *objectListNode = gObjectListHeadByTile[tile]; objectListNode != NULL; objectListNode = objectListNode->next) {
+				Object *object = objectListNode->obj;
 				if (object->elevation != elevation) {
 					continue;
 				}
@@ -687,8 +725,8 @@ int objectSaveAll(File* stream) {
 					continue;
 				}
 
-				CritterCombatData* combatData = NULL;
-				Object* whoHitMe = NULL;
+				CritterCombatData *combatData = NULL;
+				Object *whoHitMe = NULL;
 				if (PID_TYPE(object->pid) == OBJ_TYPE_CRITTER) {
 					combatData = &(object->data.critter.combat);
 					whoHitMe = combatData->whoHitMe;
@@ -709,9 +747,9 @@ int objectSaveAll(File* stream) {
 					combatData->whoHitMe = whoHitMe;
 				}
 
-				Inventory* inventory = &(object->data.inventory);
+				Inventory *inventory = &(object->data.inventory);
 				for (int index = 0; index < inventory->length; index++) {
-					InventoryItem* inventoryItem = &(inventory->items[index]);
+					InventoryItem *inventoryItem = &(inventory->items[index]);
 
 					if (fileWriteInt32(stream, inventoryItem->quantity) == -1) {
 						return -1;
@@ -743,7 +781,7 @@ int objectSaveAll(File* stream) {
 }
 
 // 0x489550
-void _obj_render_pre_roof(Rect* rect, int elevation) {
+void _obj_render_pre_roof(Rect *rect, int elevation) {
 	if (!gObjectsInitialized) {
 		return;
 	}
@@ -770,14 +808,12 @@ void _obj_render_pre_roof(Rect* rect, int elevation) {
 		int offsetIndex = _orderTable[parity][i];
 		if (updateAreaHexHeight > _offsetDivTable[offsetIndex] && updateAreaHexWidth > _offsetModTable[offsetIndex]) {
 			int tile = upperLeftTile + _offsetTable[parity][offsetIndex];
-			ObjectListNode* objectListNode = hexGridTileIsValid(tile)
-			                                 ? gObjectListHeadByTile[tile]
-			                                 : NULL;
+			ObjectListNode *objectListNode = hexGridTileIsValid(tile) ? gObjectListHeadByTile[tile] : NULL;
 
 			int lightIntensity;
 			if (objectListNode != NULL) {
 				// NOTE: Calls `lightGetTileIntensity` twice.
-				lightIntensity = std::max(ambientIntensity, lightGetTileIntensity(elevation, objectListNode->obj->tile));
+				lightIntensity = MAX(ambientIntensity, lightGetTileIntensity(elevation, objectListNode->obj->tile));
 			}
 
 			while (objectListNode != NULL) {
@@ -813,14 +849,14 @@ void _obj_render_pre_roof(Rect* rect, int elevation) {
 	for (int i = 0; i < renderCount; i++) {
 		int lightIntensity;
 
-		ObjectListNode* objectListNode = _renderTable[i];
+		ObjectListNode *objectListNode = _renderTable[i];
 		if (objectListNode != NULL) {
 			// NOTE: Calls `lightGetTileIntensity` twice.
-			lightIntensity = std::max(ambientIntensity, lightGetTileIntensity(elevation, objectListNode->obj->tile));
+			lightIntensity = MAX(ambientIntensity, lightGetTileIntensity(elevation, objectListNode->obj->tile));
 		}
 
 		while (objectListNode != NULL) {
-			Object* object = objectListNode->obj;
+			Object *object = objectListNode->obj;
 			if (elevation < object->elevation) {
 				break;
 			}
@@ -843,7 +879,7 @@ void _obj_render_pre_roof(Rect* rect, int elevation) {
 }
 
 // 0x4897EC
-void _obj_render_post_roof(Rect* rect, int elevation) {
+void _obj_render_post_roof(Rect *rect, int elevation) {
 	if (!gObjectsInitialized) {
 		return;
 	}
@@ -859,9 +895,9 @@ void _obj_render_post_roof(Rect* rect, int elevation) {
 
 	textObjectsRenderInRect(&updatedRect);
 
-	ObjectListNode* objectListNode = gObjectListHead;
+	ObjectListNode *objectListNode = gObjectListHead;
 	while (objectListNode != NULL) {
-		Object* object = objectListNode->obj;
+		Object *object = objectListNode->obj;
 		if ((object->flags & OBJECT_HIDDEN) == 0) {
 			_obj_render_object(object, &updatedRect, 0x10000);
 		}
@@ -870,8 +906,8 @@ void _obj_render_post_roof(Rect* rect, int elevation) {
 }
 
 // 0x489A84
-int objectCreateWithFidPid(Object** objectPtr, int fid, int pid) {
-	ObjectListNode* objectListNode;
+int objectCreateWithFidPid(Object **objectPtr, int fid, int pid) {
+	ObjectListNode *objectListNode;
 
 	// NOTE: Uninline;
 	if (objectListNodeCreate(&objectListNode) == -1) {
@@ -892,18 +928,19 @@ int objectCreateWithFidPid(Object** objectPtr, int fid, int pid) {
 	}
 
 	objectListNode->obj->pid = pid;
-	objectListNode->obj->id = scriptsNewObjectId();
+//	objectListNode->obj->id = scriptsNewObjectId();  TODO script.cpp
 
 	if (pid == -1 || PID_TYPE(pid) == OBJ_TYPE_TILE) {
-		Inventory* inventory = &(objectListNode->obj->data.inventory);
+		Inventory *inventory = &(objectListNode->obj->data.inventory);
 		inventory->length = 0;
 		inventory->items = NULL;
 		return 0;
 	}
 
+	/* TODO proto.cpp
 	_proto_update_init(objectListNode->obj);
 
-	Proto* proto = NULL;
+	Proto *proto = NULL;
 	if (protoGetProto(pid, &proto) == -1) {
 		return 0;
 	}
@@ -955,30 +992,32 @@ int objectCreateWithFidPid(Object** objectPtr, int fid, int pid) {
 	}
 
 	_obj_new_sid(objectListNode->obj, &(objectListNode->obj->sid));
-
+*/
 	return 0;
 }
 
 // 0x489C9C
-int objectCreateWithPid(Object** objectPtr, int pid) {
-	Proto* proto;
+int objectCreateWithPid(Object **objectPtr, int pid) {
+	Proto *proto;
 
-	*objectPtr = NULL;
+/*	*objectPtr = NULL;   TODO: proto.cpp
 
 	if (protoGetProto(pid, &proto) == -1) {
 		return -1;
 	}
 
 	return objectCreateWithFidPid(objectPtr, proto->fid, pid);
+*/
+	return -1;
 }
 
 // 0x489CCC
-int _obj_copy(Object** a1, Object* a2) {
+int _obj_copy(Object **a1, Object *a2) {
 	if (a2 == NULL) {
 		return -1;
 	}
 
-	ObjectListNode* objectListNode;
+	ObjectListNode *objectListNode;
 
 	// NOTE: Uninline.
 	if (objectListNodeCreate(&objectListNode) == -1) {
@@ -1001,12 +1040,12 @@ int _obj_copy(Object** a1, Object* a2) {
 
 	_obj_insert(objectListNode);
 
-	objectListNode->obj->id = scriptsNewObjectId();
+//	objectListNode->obj->id = scriptsNewObjectId();  TODO script.cpp
 
-	if (objectListNode->obj->sid != -1) {
+/*	if (objectListNode->obj->sid != -1) {  TODO proto.cpp
 		objectListNode->obj->sid = -1;
 		_obj_new_sid(objectListNode->obj, &(objectListNode->obj->sid));
-	}
+	} */
 
 	if (objectSetRotation(objectListNode->obj, a2->rotation, NULL) == -1) {
 		// TODO: Probably leaking object allocated with objectAllocate.
@@ -1017,15 +1056,15 @@ int _obj_copy(Object** a1, Object* a2) {
 
 	objectListNode->obj->flags &= ~OBJECT_QUEUED;
 
-	Inventory* newInventory = &(objectListNode->obj->data.inventory);
+	Inventory *newInventory = &(objectListNode->obj->data.inventory);
 	newInventory->length = 0;
 	newInventory->capacity = 0;
 
-	Inventory* oldInventory = &(a2->data.inventory);
+	Inventory *oldInventory = &(a2->data.inventory);
 	for (int index = 0; index < oldInventory->length; index++) {
-		InventoryItem* oldInventoryItem = &(oldInventory->items[index]);
+		InventoryItem *oldInventoryItem = &(oldInventory->items[index]);
 
-		Object* newItem;
+		Object *newItem;
 		if (_obj_copy(&newItem, oldInventoryItem->item) == -1) {
 			// TODO: Probably leaking object allocated with objectAllocate.
 			// NOTE: Uninline.
@@ -1045,7 +1084,7 @@ int _obj_copy(Object** a1, Object* a2) {
 }
 
 // 0x489EC4
-int _obj_connect(Object* object, int tile, int elevation, Rect* rect) {
+int _obj_connect(Object *object, int tile, int elevation, Rect *rect) {
 	if (object == NULL) {
 		return -1;
 	}
@@ -1058,7 +1097,7 @@ int _obj_connect(Object* object, int tile, int elevation, Rect* rect) {
 		return -1;
 	}
 
-	ObjectListNode* objectListNode;
+	ObjectListNode *objectListNode;
 
 	// NOTE: Uninline.
 	if (objectListNodeCreate(&objectListNode) == -1) {
@@ -1071,13 +1110,13 @@ int _obj_connect(Object* object, int tile, int elevation, Rect* rect) {
 }
 
 // 0x489F34
-int _obj_disconnect(Object* obj, Rect* rect) {
+int _obj_disconnect(Object *obj, Rect *rect) {
 	if (obj == NULL) {
 		return -1;
 	}
 
-	ObjectListNode* node;
-	ObjectListNode* prev_node;
+	ObjectListNode *node;
+	ObjectListNode *prev_node;
 	if (objectGetListNode(obj, &node, &prev_node) != 0) {
 		return -1;
 	}
@@ -1109,13 +1148,13 @@ int _obj_disconnect(Object* obj, Rect* rect) {
 }
 
 // 0x489FF8
-int _obj_offset(Object* obj, int x, int y, Rect* rect) {
+int _obj_offset(Object *obj, int x, int y, Rect *rect) {
 	if (obj == NULL) {
 		return -1;
 	}
 
-	ObjectListNode* node = NULL;
-	ObjectListNode* previousNode = NULL;
+	ObjectListNode *node = NULL;
+	ObjectListNode *previousNode = NULL;
 	if (objectGetListNode(obj, &node, &previousNode) == -1) {
 		return -1;
 	}
@@ -1226,14 +1265,14 @@ int _obj_offset(Object* obj, int x, int y, Rect* rect) {
 }
 
 // 0x48A324
-int _obj_move(Object* a1, int a2, int a3, int elevation, Rect* a5) {
+int _obj_move(Object *a1, int a2, int a3, int elevation, Rect *a5) {
 	if (a1 == NULL) {
 		return -1;
 	}
 
 	// TODO: Get rid of initialization.
-	ObjectListNode* node = NULL;
-	ObjectListNode* previousNode;
+	ObjectListNode *node = NULL;
+	ObjectListNode *previousNode;
 	int v22 = 0;
 
 	int tile = a1->tile;
@@ -1292,10 +1331,10 @@ int _obj_move(Object* a1, int a2, int a3, int elevation, Rect* a5) {
 		}
 	}
 
-	CacheEntry* cacheHandle;
+	CacheEntry *cacheHandle;
 	int width;
 	int height;
-	Art* art = artLock(a1->fid, &cacheHandle);
+	Art *art = artLock(a1->fid, &cacheHandle);
 	if (art != NULL) {
 		artGetSize(art, a1->frame, a1->rotation, &width, &height);
 		a1->sx = a2 - width / 2;
@@ -1327,7 +1366,7 @@ int _obj_move(Object* a1, int a2, int a3, int elevation, Rect* a5) {
 }
 
 // 0x48A568
-int objectSetLocation(Object* obj, int tile, int elevation, Rect* rect) {
+int objectSetLocation(Object *obj, int tile, int elevation, Rect *rect) {
 	if (obj == NULL) {
 		return -1;
 	}
@@ -1340,8 +1379,8 @@ int objectSetLocation(Object* obj, int tile, int elevation, Rect* rect) {
 		return -1;
 	}
 
-	ObjectListNode* node;
-	ObjectListNode* prevNode;
+	ObjectListNode *node;
+	ObjectListNode *prevNode;
 	if (objectGetListNode(obj, &node, &prevNode) == -1) {
 		return -1;
 	}
@@ -1375,7 +1414,7 @@ int objectSetLocation(Object* obj, int tile, int elevation, Rect* rect) {
 	if (isInCombat()) {
 		if (FID_TYPE(obj->fid) == OBJ_TYPE_CRITTER) {
 			bool v8 = obj->outline != 0 && (obj->outline & OUTLINE_DISABLED) == 0;
-			_combat_update_critter_outline_for_los(obj, v8);
+//			_combat_update_critter_outline_for_los(obj, v8);  TODO combat.cpp
 		}
 	}
 
@@ -1384,9 +1423,9 @@ int objectSetLocation(Object* obj, int tile, int elevation, Rect* rect) {
 	}
 
 	if (obj == gDude) {
-		ObjectListNode* objectListNode = gObjectListHeadByTile[tile];
+		ObjectListNode *objectListNode = gObjectListHeadByTile[tile];
 		while (objectListNode != NULL) {
-			Object* obj = objectListNode->obj;
+			Object *obj = objectListNode->obj;
 			int elev = obj->elevation;
 			if (elevation < elev) {
 				break;
@@ -1394,8 +1433,8 @@ int objectSetLocation(Object* obj, int tile, int elevation, Rect* rect) {
 
 			if (elevation == elev) {
 				if (FID_TYPE(obj->fid) == OBJ_TYPE_MISC) {
-					if (isExitGridPid(obj->pid)) {
-						ObjectData* data = &(obj->data);
+				/*	if (isExitGridPid(obj->pid)) {  TODO map.cpp
+						ObjectData *data = &(obj->data);
 
 						MapTransition transition;
 						memset(&transition, 0, sizeof(transition));
@@ -1407,7 +1446,7 @@ int objectSetLocation(Object* obj, int tile, int elevation, Rect* rect) {
 						mapSetTransition(&transition);
 
 						wmMapMarkMapEntranceState(transition.map, transition.elevation, 1);
-					}
+					}*/
 				}
 			}
 
@@ -1424,8 +1463,8 @@ int objectSetLocation(Object* obj, int tile, int elevation, Rect* rect) {
 			int currentSquareFid = buildFid(OBJ_TYPE_TILE, (currentSquare >> 16) & 0xFFF, 0, 0, 0);
 			// CE: Add additional checks for -1 to prevent array lookup at index -101.
 			int previousSquare = _obj_last_roof_x != -1 && _obj_last_roof_y != -1
-			                     ? _square[elevation]->field_0[_obj_last_roof_x + 100 * _obj_last_roof_y]
-			                     : 0;
+									 ? _square[elevation]->field_0[_obj_last_roof_x + 100 * _obj_last_roof_y]
+									 : 0;
 			bool isEmpty = buildFid(OBJ_TYPE_TILE, 1, 0, 0, 0) == currentSquareFid;
 
 			if (isEmpty != _obj_last_is_empty || (((currentSquare >> 16) & 0xF000) >> 12) != (((previousSquare >> 16) & 0xF000) >> 12)) {
@@ -1457,15 +1496,15 @@ int objectSetLocation(Object* obj, int tile, int elevation, Rect* rect) {
 		}
 
 		if (elevation != oldElevation) {
-			mapSetElevation(elevation);
+			// mapSetElevation(elevation); TODO map.cpp
 			tileSetCenter(tile, TILE_SET_CENTER_REFRESH_WINDOW | TILE_SET_CENTER_FLAG_IGNORE_SCROLL_RESTRICTIONS);
-			if (isInCombat()) {
+			if (/*isInCombat()*/ 0) {  // TODO combat.cpp
 				_game_user_wants_to_quit = 1;
 			}
 		}
 	} else {
 		if (elevation != _obj_last_elev && PID_TYPE(obj->pid) == OBJ_TYPE_CRITTER) {
-			_combat_delete_critter(obj);
+		//	_combat_delete_critter(obj); TODO combat.cpp
 		}
 	}
 
@@ -1484,7 +1523,7 @@ int _obj_reset_roof() {
 // Sets object fid.
 //
 // 0x48AA3C
-int objectSetFid(Object* obj, int fid, Rect* dirtyRect) {
+int objectSetFid(Object *obj, int fid, Rect *dirtyRect) {
 	Rect new_rect;
 
 	if (obj == NULL) {
@@ -1508,10 +1547,10 @@ int objectSetFid(Object* obj, int fid, Rect* dirtyRect) {
 // Sets object frame.
 //
 // 0x48AA84
-int objectSetFrame(Object* obj, int frame, Rect* rect) {
+int objectSetFrame(Object *obj, int frame, Rect *rect) {
 	Rect new_rect;
-	Art* art;
-	CacheEntry* cache_entry;
+	Art *art;
+	CacheEntry *cache_entry;
 	int framesPerDirection;
 
 	if (obj == NULL) {
@@ -1544,9 +1583,9 @@ int objectSetFrame(Object* obj, int frame, Rect* rect) {
 }
 
 // 0x48AAF0
-int objectSetNextFrame(Object* obj, Rect* dirtyRect) {
-	Art* art;
-	CacheEntry* cache_entry;
+int objectSetNextFrame(Object *obj, Rect *dirtyRect) {
+	Art *art;
+	CacheEntry *cache_entry;
 	int framesPerDirection;
 	int nextFrame;
 
@@ -1586,9 +1625,9 @@ int objectSetNextFrame(Object* obj, Rect* dirtyRect) {
 
 // 0x48AB60
 //
-int objectSetPrevFrame(Object* obj, Rect* dirtyRect) {
-	Art* art;
-	CacheEntry* cache_entry;
+int objectSetPrevFrame(Object *obj, Rect *dirtyRect) {
+	Art *art;
+	CacheEntry *cache_entry;
 	int framesPerDirection;
 	int prevFrame;
 	Rect newRect;
@@ -1624,7 +1663,7 @@ int objectSetPrevFrame(Object* obj, Rect* dirtyRect) {
 }
 
 // 0x48ABD4
-int objectSetRotation(Object* obj, int direction, Rect* dirtyRect) {
+int objectSetRotation(Object *obj, int direction, Rect *dirtyRect) {
 	if (obj == NULL) {
 		return -1;
 	}
@@ -1648,7 +1687,7 @@ int objectSetRotation(Object* obj, int direction, Rect* dirtyRect) {
 }
 
 // 0x48AC20
-int objectRotateClockwise(Object* obj, Rect* dirtyRect) {
+int objectRotateClockwise(Object *obj, Rect *dirtyRect) {
 	int rotation = obj->rotation + 1;
 	if (rotation >= ROTATION_COUNT) {
 		rotation = ROTATION_NE;
@@ -1658,7 +1697,7 @@ int objectRotateClockwise(Object* obj, Rect* dirtyRect) {
 }
 
 // 0x48AC38
-int objectRotateCounterClockwise(Object* obj, Rect* dirtyRect) {
+int objectRotateCounterClockwise(Object *obj, Rect *dirtyRect) {
 	int rotation = obj->rotation - 1;
 	if (rotation < 0) {
 		rotation = ROTATION_NW;
@@ -1672,7 +1711,7 @@ void _obj_rebuild_all_light() {
 	lightResetTileIntensity();
 
 	for (int tile = 0; tile < HEX_GRID_SIZE; tile++) {
-		ObjectListNode* objectListNode = gObjectListHeadByTile[tile];
+		ObjectListNode *objectListNode = gObjectListHeadByTile[tile];
 		while (objectListNode != NULL) {
 			_obj_adjust_light(objectListNode->obj, 0, NULL);
 			objectListNode = objectListNode->next;
@@ -1681,14 +1720,14 @@ void _obj_rebuild_all_light() {
 }
 
 // 0x48AC90
-int objectSetLight(Object* obj, int lightDistance, int lightIntensity, Rect* rect) {
+int objectSetLight(Object *obj, int lightDistance, int lightIntensity, Rect *rect) {
 	if (obj == NULL) {
 		return -1;
 	}
 
 	int rc = _obj_turn_off_light(obj, rect);
 	if (lightIntensity > 0) {
-		obj->lightDistance = std::min(lightDistance, 8);
+		obj->lightDistance = MIN(lightDistance, 8);
 		obj->lightIntensity = lightIntensity;
 
 		if (rect != NULL) {
@@ -1707,7 +1746,7 @@ int objectSetLight(Object* obj, int lightDistance, int lightIntensity, Rect* rec
 }
 
 // 0x48AD04
-int objectGetLightIntensity(Object* obj) {
+int objectGetLightIntensity(Object *obj) {
 	int ambientIntensity = lightGetAmbientIntensity();
 	int tileIntensity = lightGetTrueTileIntensity(obj->elevation, obj->tile);
 
@@ -1727,7 +1766,7 @@ int objectGetLightIntensity(Object* obj) {
 }
 
 // 0x48AD48
-int _obj_turn_on_light(Object* obj, Rect* rect) {
+int _obj_turn_on_light(Object *obj, Rect *rect) {
 	if (obj == NULL) {
 		return -1;
 	}
@@ -1751,7 +1790,7 @@ int _obj_turn_on_light(Object* obj, Rect* rect) {
 }
 
 // 0x48AD9C
-int _obj_turn_off_light(Object* obj, Rect* rect) {
+int _obj_turn_off_light(Object *obj, Rect *rect) {
 	if (obj == NULL) {
 		return -1;
 	}
@@ -1775,7 +1814,7 @@ int _obj_turn_off_light(Object* obj, Rect* rect) {
 }
 
 // 0x48ADF0
-int objectShow(Object* obj, Rect* rect) {
+int objectShow(Object *obj, Rect *rect) {
 	if (obj == NULL) {
 		return -1;
 	}
@@ -1805,7 +1844,7 @@ int objectShow(Object* obj, Rect* rect) {
 }
 
 // 0x48AE68
-int objectHide(Object* object, Rect* rect) {
+int objectHide(Object *object, Rect *rect) {
 	if (object == NULL) {
 		return -1;
 	}
@@ -1838,7 +1877,7 @@ int objectHide(Object* object, Rect* rect) {
 }
 
 // 0x48AEE4
-int objectEnableOutline(Object* object, Rect* rect) {
+int objectEnableOutline(Object *object, Rect *rect) {
 	if (object == NULL) {
 		return -1;
 	}
@@ -1853,7 +1892,7 @@ int objectEnableOutline(Object* object, Rect* rect) {
 }
 
 // 0x48AF00
-int objectDisableOutline(Object* object, Rect* rect) {
+int objectDisableOutline(Object *object, Rect *rect) {
 	if (object == NULL) {
 		return -1;
 	}
@@ -1870,15 +1909,15 @@ int objectDisableOutline(Object* object, Rect* rect) {
 }
 
 // 0x48AF2C
-int _obj_toggle_flat(Object* object, Rect* rect) {
+int _obj_toggle_flat(Object *object, Rect *rect) {
 	Rect v1;
 
 	if (object == NULL) {
 		return -1;
 	}
 
-	ObjectListNode* node;
-	ObjectListNode* previousNode;
+	ObjectListNode *node;
+	ObjectListNode *previousNode;
 	if (objectGetListNode(object, &node, &previousNode) == -1) {
 		return -1;
 	}
@@ -1923,15 +1962,15 @@ int _obj_toggle_flat(Object* object, Rect* rect) {
 }
 
 // 0x48B0FC
-int objectDestroy(Object* object, Rect* rect) {
+int objectDestroy(Object *object, Rect *rect) {
 	if (object == NULL) {
 		return -1;
 	}
 
-	_gmouse_remove_item_outline(object);
+	// _gmouse_remove_item_outline(object);  TODO game_mouse.cpp
 
-	ObjectListNode* node;
-	ObjectListNode* previousNode;
+	ObjectListNode *node;
+	ObjectListNode *previousNode;
 	if (objectGetListNode(object, &node, &previousNode) == 0) {
 		if (_obj_adjust_light(object, 1, rect) == -1) {
 			if (rect != NULL) {
@@ -1961,11 +2000,11 @@ int objectDestroy(Object* object, Rect* rect) {
 }
 
 // 0x48B1B0
-int _obj_inven_free(Inventory* inventory) {
+int _obj_inven_free(Inventory *inventory) {
 	for (int index = 0; index < inventory->length; index++) {
-		InventoryItem* inventoryItem = &(inventory->items[index]);
+		InventoryItem *inventoryItem = &(inventory->items[index]);
 
-		ObjectListNode* node;
+		ObjectListNode *node;
 		// NOTE: Uninline.
 		objectListNodeCreate(&node);
 
@@ -1987,38 +2026,40 @@ int _obj_inven_free(Inventory* inventory) {
 }
 
 // 0x48B24C
-bool _obj_action_can_use(Object* obj) {
+bool _obj_action_can_use(Object *obj) {
 	int pid = obj->pid;
 	// SFALL
-	if (pid != PROTO_ID_LIT_FLARE && !explosiveIsActiveExplosive(pid)) {
+/*	if (pid != PROTO_ID_LIT_FLARE && !explosiveIsActiveExplosive(pid)) {  TODO: item.cpp proto.cpp
 		return _proto_action_can_use(pid);
 	} else {
 		return false;
-	}
+	}*/
 }
 
 // 0x48B278
-bool _obj_action_can_talk_to(Object* obj) {
-	return _proto_action_can_talk_to(obj->pid) && (PID_TYPE(obj->pid) == OBJ_TYPE_CRITTER) && critterIsActive(obj);
+bool _obj_action_can_talk_to(Object *obj) {
+//	return _proto_action_can_talk_to(obj->pid) && (PID_TYPE(obj->pid) == OBJ_TYPE_CRITTER) && critterIsActive(obj); TODO proto.cpp
+	return false;  // FIXME remove
 }
 
 // 0x48B2A8
-bool _obj_portal_is_walk_thru(Object* obj) {
+bool _obj_portal_is_walk_thru(Object *obj) {
 	if (PID_TYPE(obj->pid) != OBJ_TYPE_SCENERY) {
 		return false;
 	}
 
-	Proto* proto;
+/*	Proto *proto;  TODO proto.cpp
 	if (protoGetProto(obj->pid, &proto) == -1) {
 		return false;
 	}
 
-	return (proto->scenery.data.generic.field_0 & 0x04) != 0;
+	return (proto->scenery.data.generic.field_0 & 0x04) != 0;*/
+	return false; // FIXME remove
 }
 
 // 0x48B2E8
-Object* objectFindById(int a1) {
-	Object* obj = objectFindFirst();
+Object *objectFindById(int a1) {
+	Object *obj = objectFindFirst();
 	while (obj != NULL) {
 		if (obj->id == a1) {
 			return obj;
@@ -2032,8 +2073,8 @@ Object* objectFindById(int a1) {
 // Returns root owner of given object.
 //
 // 0x48B304
-Object* objectGetOwner(Object* object) {
-	Object* owner = object->owner;
+Object *objectGetOwner(Object *object) {
+	Object *owner = object->owner;
 	if (owner == NULL) {
 		return NULL;
 	}
@@ -2047,11 +2088,11 @@ Object* objectGetOwner(Object* object) {
 
 // 0x48B318
 void _obj_remove_all() {
-	ObjectListNode* node;
-	ObjectListNode* prev;
-	ObjectListNode* next;
+	ObjectListNode *node;
+	ObjectListNode *prev;
+	ObjectListNode *next;
 
-	_scr_remove_all();
+	// _scr_remove_all();  TODO script.cpp
 
 	for (int tile = 0; tile < HEX_GRID_SIZE; tile++) {
 		node = gObjectListHeadByTile[tile];
@@ -2084,10 +2125,10 @@ void _obj_remove_all() {
 }
 
 // 0x48B3A8
-Object* objectFindFirst() {
+Object *objectFindFirst() {
 	gObjectFindElevation = 0;
 
-	ObjectListNode* objectListNode;
+	ObjectListNode *objectListNode;
 	for (gObjectFindTile = 0; gObjectFindTile < HEX_GRID_SIZE; gObjectFindTile++) {
 		objectListNode = gObjectListHeadByTile[gObjectFindTile];
 		if (objectListNode) {
@@ -2113,12 +2154,12 @@ Object* objectFindFirst() {
 }
 
 // 0x48B41C
-Object* objectFindNext() {
+Object *objectFindNext() {
 	if (gObjectFindLastObjectListNode == NULL) {
 		return NULL;
 	}
 
-	ObjectListNode* objectListNode = gObjectFindLastObjectListNode->next;
+	ObjectListNode *objectListNode = gObjectFindLastObjectListNode->next;
 
 	while (gObjectFindTile < HEX_GRID_SIZE) {
 		if (objectListNode == NULL) {
@@ -2126,7 +2167,7 @@ Object* objectFindNext() {
 		}
 
 		while (objectListNode != NULL) {
-			Object* object = objectListNode->obj;
+			Object *object = objectListNode->obj;
 			if (!artIsObjectTypeHidden(FID_TYPE(object->fid))) {
 				gObjectFindLastObjectListNode = objectListNode;
 				return object;
@@ -2140,14 +2181,14 @@ Object* objectFindNext() {
 }
 
 // 0x48B48C
-Object* objectFindFirstAtElevation(int elevation) {
+Object *objectFindFirstAtElevation(int elevation) {
 	gObjectFindElevation = elevation;
 	gObjectFindTile = 0;
 
 	for (gObjectFindTile = 0; gObjectFindTile < HEX_GRID_SIZE; gObjectFindTile++) {
-		ObjectListNode* objectListNode = gObjectListHeadByTile[gObjectFindTile];
+		ObjectListNode *objectListNode = gObjectListHeadByTile[gObjectFindTile];
 		while (objectListNode != NULL) {
-			Object* object = objectListNode->obj;
+			Object *object = objectListNode->obj;
 			if (object->elevation == elevation) {
 				if (!artIsObjectTypeHidden(FID_TYPE(object->fid))) {
 					gObjectFindLastObjectListNode = objectListNode;
@@ -2163,12 +2204,12 @@ Object* objectFindFirstAtElevation(int elevation) {
 }
 
 // 0x48B510
-Object* objectFindNextAtElevation() {
+Object *objectFindNextAtElevation() {
 	if (gObjectFindLastObjectListNode == NULL) {
 		return NULL;
 	}
 
-	ObjectListNode* objectListNode = gObjectFindLastObjectListNode->next;
+	ObjectListNode *objectListNode = gObjectFindLastObjectListNode->next;
 
 	while (gObjectFindTile < HEX_GRID_SIZE) {
 		if (objectListNode == NULL) {
@@ -2176,7 +2217,7 @@ Object* objectFindNextAtElevation() {
 		}
 
 		while (objectListNode != NULL) {
-			Object* object = objectListNode->obj;
+			Object *object = objectListNode->obj;
 			if (object->elevation == gObjectFindElevation) {
 				if (!artIsObjectTypeHidden(FID_TYPE(object->fid))) {
 					gObjectFindLastObjectListNode = objectListNode;
@@ -2192,13 +2233,13 @@ Object* objectFindNextAtElevation() {
 }
 
 // 0x48B5A8
-Object* objectFindFirstAtLocation(int elevation, int tile) {
+Object *objectFindFirstAtLocation(int elevation, int tile) {
 	gObjectFindElevation = elevation;
 	gObjectFindTile = tile;
 
-	ObjectListNode* objectListNode = gObjectListHeadByTile[tile];
+	ObjectListNode *objectListNode = gObjectListHeadByTile[tile];
 	while (objectListNode != NULL) {
-		Object* object = objectListNode->obj;
+		Object *object = objectListNode->obj;
 		if (object->elevation == elevation) {
 			if (!artIsObjectTypeHidden(FID_TYPE(object->fid))) {
 				gObjectFindLastObjectListNode = objectListNode;
@@ -2213,15 +2254,15 @@ Object* objectFindFirstAtLocation(int elevation, int tile) {
 }
 
 // 0x48B608
-Object* objectFindNextAtLocation() {
+Object *objectFindNextAtLocation() {
 	if (gObjectFindLastObjectListNode == NULL) {
 		return NULL;
 	}
 
-	ObjectListNode* objectListNode = gObjectFindLastObjectListNode->next;
+	ObjectListNode *objectListNode = gObjectFindLastObjectListNode->next;
 
 	while (objectListNode != NULL) {
-		Object* object = objectListNode->obj;
+		Object *object = objectListNode->obj;
 		if (object->elevation == gObjectFindElevation) {
 			if (!artIsObjectTypeHidden(FID_TYPE(object->fid))) {
 				gObjectFindLastObjectListNode = objectListNode;
@@ -2236,7 +2277,7 @@ Object* objectFindNextAtLocation() {
 }
 
 // 0x0x48B66C
-void objectGetRect(Object* obj, Rect* rect) {
+void objectGetRect(Object *obj, Rect *rect) {
 	if (obj == NULL) {
 		return;
 	}
@@ -2250,8 +2291,8 @@ void objectGetRect(Object* obj, Rect* rect) {
 		isOutlined = true;
 	}
 
-	CacheEntry* artHandle;
-	Art* art = artLock(obj->fid, &artHandle);
+	CacheEntry *artHandle;
+	Art *art = artLock(obj->fid, &artHandle);
 	if (art == NULL) {
 		rect->left = 0;
 		rect->top = 0;
@@ -2307,11 +2348,9 @@ void objectGetRect(Object* obj, Rect* rect) {
 
 // 0x48B7F8
 bool _obj_occupied(int tile, int elevation) {
-	ObjectListNode* objectListNode = gObjectListHeadByTile[tile];
+	ObjectListNode *objectListNode = gObjectListHeadByTile[tile];
 	while (objectListNode != NULL) {
-		if (objectListNode->obj->elevation == elevation
-		        && objectListNode->obj != gGameMouseBouncingCursor
-		        && objectListNode->obj != gGameMouseHexCursor) {
+		if (objectListNode->obj->elevation == elevation && objectListNode->obj != gGameMouseBouncingCursor && objectListNode->obj != gGameMouseHexCursor) {
 			return true;
 		}
 		objectListNode = objectListNode->next;
@@ -2321,9 +2360,9 @@ bool _obj_occupied(int tile, int elevation) {
 }
 
 // 0x48B848
-Object* _obj_blocking_at(Object* a1, int tile, int elev) {
-	ObjectListNode* objectListNode;
-	Object* v7;
+Object *_obj_blocking_at(Object *a1, int tile, int elev) {
+	ObjectListNode *objectListNode;
+	Object *v7;
 	int type;
 
 	if (!hexGridTileIsValid(tile)) {
@@ -2336,9 +2375,7 @@ Object* _obj_blocking_at(Object* a1, int tile, int elev) {
 		if (v7->elevation == elev) {
 			if ((v7->flags & OBJECT_HIDDEN) == 0 && (v7->flags & OBJECT_NO_BLOCK) == 0 && v7 != a1) {
 				type = FID_TYPE(v7->fid);
-				if (type == OBJ_TYPE_CRITTER
-				        || type == OBJ_TYPE_SCENERY
-				        || type == OBJ_TYPE_WALL) {
+				if (type == OBJ_TYPE_CRITTER || type == OBJ_TYPE_SCENERY || type == OBJ_TYPE_WALL) {
 					return v7;
 				}
 			}
@@ -2356,9 +2393,7 @@ Object* _obj_blocking_at(Object* a1, int tile, int elev) {
 					if (v7->elevation == elev) {
 						if ((v7->flags & OBJECT_HIDDEN) == 0 && (v7->flags & OBJECT_NO_BLOCK) == 0 && v7 != a1) {
 							type = FID_TYPE(v7->fid);
-							if (type == OBJ_TYPE_CRITTER
-							        || type == OBJ_TYPE_SCENERY
-							        || type == OBJ_TYPE_WALL) {
+							if (type == OBJ_TYPE_CRITTER || type == OBJ_TYPE_SCENERY || type == OBJ_TYPE_WALL) {
 								return v7;
 							}
 						}
@@ -2373,24 +2408,22 @@ Object* _obj_blocking_at(Object* a1, int tile, int elev) {
 }
 
 // 0x48B930
-Object* _obj_shoot_blocking_at(Object* obj, int tile, int elev) {
+Object *_obj_shoot_blocking_at(Object *obj, int tile, int elev) {
 	if (!hexGridTileIsValid(tile)) {
 		return NULL;
 	}
 
-	ObjectListNode* objectListItem = gObjectListHeadByTile[tile];
+	ObjectListNode *objectListItem = gObjectListHeadByTile[tile];
 	while (objectListItem != NULL) {
-		Object* candidate = objectListItem->obj;
+		Object *candidate = objectListItem->obj;
 		if (candidate->elevation == elev) {
 			unsigned int flags = candidate->flags;
 			if ((flags & OBJECT_HIDDEN) == 0 && ((flags & OBJECT_NO_BLOCK) == 0 || (flags & OBJECT_SHOOT_THRU) == 0) && candidate != obj) {
 				int type = FID_TYPE(candidate->fid);
 				// SFALL: Fix to prevent corpses from blocking line of fire.
-				if ((type == OBJ_TYPE_CRITTER && !critterIsDead(candidate))
-				        || type == OBJ_TYPE_SCENERY
-				        || type == OBJ_TYPE_WALL) {
-					return candidate;
-				}
+//				if ((type == OBJ_TYPE_CRITTER && !critterIsDead(candidate)) || type == OBJ_TYPE_SCENERY || type == OBJ_TYPE_WALL) {  TODO critter.cpp
+//					return candidate;
+//				}
 			}
 		}
 		objectListItem = objectListItem->next;
@@ -2402,9 +2435,9 @@ Object* _obj_shoot_blocking_at(Object* obj, int tile, int elev) {
 			continue;
 		}
 
-		ObjectListNode* objectListItem = gObjectListHeadByTile[adjacentTile];
+		ObjectListNode *objectListItem = gObjectListHeadByTile[adjacentTile];
 		while (objectListItem != NULL) {
-			Object* candidate = objectListItem->obj;
+			Object *candidate = objectListItem->obj;
 			unsigned int flags = candidate->flags;
 			if ((flags & OBJECT_MULTIHEX) != 0) {
 				if (candidate->elevation == elev) {
@@ -2412,11 +2445,9 @@ Object* _obj_shoot_blocking_at(Object* obj, int tile, int elev) {
 						int type = FID_TYPE(candidate->fid);
 						// SFALL: Fix to prevent corpses from blocking line of
 						// fire.
-						if ((type == OBJ_TYPE_CRITTER && !critterIsDead(candidate))
-						        || type == OBJ_TYPE_SCENERY
-						        || type == OBJ_TYPE_WALL) {
-							return candidate;
-						}
+//						if ((type == OBJ_TYPE_CRITTER && !critterIsDead(candidate)) || type == OBJ_TYPE_SCENERY || type == OBJ_TYPE_WALL) { TODO critter.cpp
+//							return candidate;
+//						}
 					}
 				}
 			}
@@ -2428,22 +2459,18 @@ Object* _obj_shoot_blocking_at(Object* obj, int tile, int elev) {
 }
 
 // 0x48BA20
-Object* _obj_ai_blocking_at(Object* a1, int tile, int elevation) {
+Object *_obj_ai_blocking_at(Object *a1, int tile, int elevation) {
 	if (!hexGridTileIsValid(tile)) {
 		return NULL;
 	}
 
-	ObjectListNode* objectListNode = gObjectListHeadByTile[tile];
+	ObjectListNode *objectListNode = gObjectListHeadByTile[tile];
 	while (objectListNode != NULL) {
-		Object* object = objectListNode->obj;
+		Object *object = objectListNode->obj;
 		if (object->elevation == elevation) {
-			if ((object->flags & OBJECT_HIDDEN) == 0
-			        && (object->flags & OBJECT_NO_BLOCK) == 0
-			        && object != a1) {
+			if ((object->flags & OBJECT_HIDDEN) == 0 && (object->flags & OBJECT_NO_BLOCK) == 0 && object != a1) {
 				int objectType = FID_TYPE(object->fid);
-				if (objectType == OBJ_TYPE_CRITTER
-				        || objectType == OBJ_TYPE_SCENERY
-				        || objectType == OBJ_TYPE_WALL) {
+				if (objectType == OBJ_TYPE_CRITTER || objectType == OBJ_TYPE_SCENERY || objectType == OBJ_TYPE_WALL) {
 					if (_moveBlockObj != NULL || objectType != OBJ_TYPE_CRITTER) {
 						return object;
 					}
@@ -2463,16 +2490,12 @@ Object* _obj_ai_blocking_at(Object* a1, int tile, int elevation) {
 
 		objectListNode = gObjectListHeadByTile[candidate];
 		while (objectListNode != NULL) {
-			Object* object = objectListNode->obj;
+			Object *object = objectListNode->obj;
 			if ((object->flags & OBJECT_MULTIHEX) != 0) {
 				if (object->elevation == elevation) {
-					if ((object->flags & OBJECT_HIDDEN) == 0
-					        && (object->flags & OBJECT_NO_BLOCK) == 0
-					        && object != a1) {
+					if ((object->flags & OBJECT_HIDDEN) == 0 && (object->flags & OBJECT_NO_BLOCK) == 0 && object != a1) {
 						int objectType = FID_TYPE(object->fid);
-						if (objectType == OBJ_TYPE_CRITTER
-						        || objectType == OBJ_TYPE_SCENERY
-						        || objectType == OBJ_TYPE_WALL) {
+						if (objectType == OBJ_TYPE_CRITTER || objectType == OBJ_TYPE_SCENERY || objectType == OBJ_TYPE_WALL) {
 							if (_moveBlockObj != NULL || objectType != OBJ_TYPE_CRITTER) {
 								return object;
 							}
@@ -2496,7 +2519,7 @@ int _obj_scroll_blocking_at(int tile, int elev) {
 		return -1;
 	}
 
-	ObjectListNode* objectListNode = gObjectListHeadByTile[tile];
+	ObjectListNode *objectListNode = gObjectListHeadByTile[tile];
 	while (objectListNode != NULL) {
 		if (elev < objectListNode->obj->elevation) {
 			break;
@@ -2513,14 +2536,11 @@ int _obj_scroll_blocking_at(int tile, int elev) {
 }
 
 // 0x48BB88
-Object* _obj_sight_blocking_at(Object* a1, int tile, int elevation) {
-	ObjectListNode* objectListNode = gObjectListHeadByTile[tile];
+Object *_obj_sight_blocking_at(Object *a1, int tile, int elevation) {
+	ObjectListNode *objectListNode = gObjectListHeadByTile[tile];
 	while (objectListNode != NULL) {
-		Object* object = objectListNode->obj;
-		if (object->elevation == elevation
-		        && (object->flags & OBJECT_HIDDEN) == 0
-		        && (object->flags & OBJECT_LIGHT_THRU) == 0
-		        && object != a1) {
+		Object *object = objectListNode->obj;
+		if (object->elevation == elevation && (object->flags & OBJECT_HIDDEN) == 0 && (object->flags & OBJECT_LIGHT_THRU) == 0 && object != a1) {
 			int objectType = FID_TYPE(object->fid);
 			if (objectType == OBJ_TYPE_SCENERY || objectType == OBJ_TYPE_WALL) {
 				return object;
@@ -2533,7 +2553,7 @@ Object* _obj_sight_blocking_at(Object* a1, int tile, int elevation) {
 }
 
 // 0x48BBD4
-int objectGetDistanceBetween(Object* object1, Object* object2) {
+int objectGetDistanceBetween(Object *object1, Object *object2) {
 	if (object1 == NULL || object2 == NULL) {
 		return 0;
 	}
@@ -2556,7 +2576,7 @@ int objectGetDistanceBetween(Object* object1, Object* object2) {
 }
 
 // 0x48BC08
-int objectGetDistanceBetweenTiles(Object* object1, int tile1, Object* object2, int tile2) {
+int objectGetDistanceBetweenTiles(Object *object1, int tile1, Object *object2, int tile2) {
 	if (object1 == NULL || object2 == NULL) {
 		return 0;
 	}
@@ -2579,7 +2599,7 @@ int objectGetDistanceBetweenTiles(Object* object1, int tile1, Object* object2, i
 }
 
 // 0x48BC38
-int objectListCreate(int tile, int elevation, int objectType, Object*** objectListPtr) {
+int objectListCreate(int tile, int elevation, int objectType, Object ***objectListPtr) {
 	if (objectListPtr == NULL) {
 		return -1;
 	}
@@ -2587,24 +2607,20 @@ int objectListCreate(int tile, int elevation, int objectType, Object*** objectLi
 	int count = 0;
 	if (tile == -1) {
 		for (int index = 0; index < HEX_GRID_SIZE; index++) {
-			ObjectListNode* objectListNode = gObjectListHeadByTile[index];
+			ObjectListNode *objectListNode = gObjectListHeadByTile[index];
 			while (objectListNode != NULL) {
-				Object* obj = objectListNode->obj;
-				if ((obj->flags & OBJECT_HIDDEN) == 0
-				        && obj->elevation == elevation
-				        && FID_TYPE(obj->fid) == objectType) {
+				Object *obj = objectListNode->obj;
+				if ((obj->flags & OBJECT_HIDDEN) == 0 && obj->elevation == elevation && FID_TYPE(obj->fid) == objectType) {
 					count++;
 				}
 				objectListNode = objectListNode->next;
 			}
 		}
 	} else {
-		ObjectListNode* objectListNode = gObjectListHeadByTile[tile];
+		ObjectListNode *objectListNode = gObjectListHeadByTile[tile];
 		while (objectListNode != NULL) {
-			Object* obj = objectListNode->obj;
-			if ((obj->flags & OBJECT_HIDDEN) == 0
-			        && obj->elevation == elevation
-			        && FID_TYPE(objectListNode->obj->fid) == objectType) {
+			Object *obj = objectListNode->obj;
+			if ((obj->flags & OBJECT_HIDDEN) == 0 && obj->elevation == elevation && FID_TYPE(objectListNode->obj->fid) == objectType) {
 				count++;
 			}
 			objectListNode = objectListNode->next;
@@ -2615,31 +2631,27 @@ int objectListCreate(int tile, int elevation, int objectType, Object*** objectLi
 		return 0;
 	}
 
-	Object** objects = *objectListPtr = (Object**)internal_malloc(sizeof(*objects) * count);
+	Object **objects = *objectListPtr = (Object **)internal_malloc(sizeof(*objects) * count);
 	if (objects == NULL) {
 		return -1;
 	}
 
 	if (tile == -1) {
 		for (int index = 0; index < HEX_GRID_SIZE; index++) {
-			ObjectListNode* objectListNode = gObjectListHeadByTile[index];
+			ObjectListNode *objectListNode = gObjectListHeadByTile[index];
 			while (objectListNode) {
-				Object* obj = objectListNode->obj;
-				if ((obj->flags & OBJECT_HIDDEN) == 0
-				        && obj->elevation == elevation
-				        && FID_TYPE(obj->fid) == objectType) {
+				Object *obj = objectListNode->obj;
+				if ((obj->flags & OBJECT_HIDDEN) == 0 && obj->elevation == elevation && FID_TYPE(obj->fid) == objectType) {
 					*objects++ = obj;
 				}
 				objectListNode = objectListNode->next;
 			}
 		}
 	} else {
-		ObjectListNode* objectListNode = gObjectListHeadByTile[tile];
+		ObjectListNode *objectListNode = gObjectListHeadByTile[tile];
 		while (objectListNode != NULL) {
-			Object* obj = objectListNode->obj;
-			if ((obj->flags & OBJECT_HIDDEN) == 0
-			        && obj->elevation == elevation
-			        && FID_TYPE(obj->fid) == objectType) {
+			Object *obj = objectListNode->obj;
+			if ((obj->flags & OBJECT_HIDDEN) == 0 && obj->elevation == elevation && FID_TYPE(obj->fid) == objectType) {
 				*objects++ = obj;
 			}
 			objectListNode = objectListNode->next;
@@ -2650,14 +2662,14 @@ int objectListCreate(int tile, int elevation, int objectType, Object*** objectLi
 }
 
 // 0x48BDCC
-void objectListFree(Object** objectList) {
+void objectListFree(Object **objectList) {
 	if (objectList != NULL) {
 		internal_free(objectList);
 	}
 }
 
 // 0x48BDD8
-void _translucent_trans_buf_to_buf(unsigned char* src, int srcWidth, int srcHeight, int srcPitch, unsigned char* dest, int destX, int destY, int destPitch, unsigned char* a9, unsigned char* a10) {
+void _translucent_trans_buf_to_buf(unsigned char *src, int srcWidth, int srcHeight, int srcPitch, unsigned char *dest, int destX, int destY, int destPitch, unsigned char *a9, unsigned char *a10) {
 	dest += destPitch * destY + destX;
 	int srcStep = srcPitch - srcWidth;
 	int destStep = destPitch - srcWidth;
@@ -2666,7 +2678,7 @@ void _translucent_trans_buf_to_buf(unsigned char* src, int srcWidth, int srcHeig
 		for (int x = 0; x < srcWidth; x++) {
 			// TODO: Probably wrong.
 			unsigned char v1 = a10[*src];
-			unsigned char* v2 = a9 + (v1 << 8);
+			unsigned char *v2 = a9 + (v1 << 8);
 			unsigned char v3 = *dest;
 
 			*dest = v2[v3];
@@ -2681,9 +2693,9 @@ void _translucent_trans_buf_to_buf(unsigned char* src, int srcWidth, int srcHeig
 }
 
 // 0x48BEFC
-void _dark_trans_buf_to_buf(unsigned char* src, int srcWidth, int srcHeight, int srcPitch, unsigned char* dest, int destX, int destY, int destPitch, int intensity) {
-	unsigned char* sp = src;
-	unsigned char* dp = dest + destPitch * destY + destX;
+void _dark_trans_buf_to_buf(unsigned char *src, int srcWidth, int srcHeight, int srcPitch, unsigned char *dest, int destX, int destY, int destPitch, int intensity) {
+	unsigned char *sp = src;
+	unsigned char *dp = dest + destPitch * destY + destX;
 
 	int srcStep = srcPitch - srcWidth;
 	int destStep = destPitch - srcWidth;
@@ -2710,7 +2722,7 @@ void _dark_trans_buf_to_buf(unsigned char* src, int srcWidth, int srcHeight, int
 }
 
 // 0x48BF88
-void _dark_translucent_trans_buf_to_buf(unsigned char* src, int srcWidth, int srcHeight, int srcPitch, unsigned char* dest, int destX, int destY, int destPitch, int intensity, unsigned char* a10, unsigned char* a11) {
+void _dark_translucent_trans_buf_to_buf(unsigned char *src, int srcWidth, int srcHeight, int srcPitch, unsigned char *dest, int destX, int destY, int destPitch, int intensity, unsigned char *a10, unsigned char *a11) {
 	int srcStep = srcPitch - srcWidth;
 	int destStep = destPitch - srcWidth;
 	int intensityIndex = intensity / 512;
@@ -2737,7 +2749,7 @@ void _dark_translucent_trans_buf_to_buf(unsigned char* src, int srcWidth, int sr
 }
 
 // 0x48C03C
-void _intensity_mask_buf_to_buf(unsigned char* src, int srcWidth, int srcHeight, int srcPitch, unsigned char* dest, int destPitch, unsigned char* mask, int maskPitch, int intensity) {
+void _intensity_mask_buf_to_buf(unsigned char *src, int srcWidth, int srcHeight, int srcPitch, unsigned char *dest, int destPitch, unsigned char *mask, int maskPitch, int intensity) {
 	int srcStep = srcPitch - srcWidth;
 	int destStep = destPitch - srcWidth;
 	int maskStep = maskPitch - srcWidth;
@@ -2768,7 +2780,7 @@ void _intensity_mask_buf_to_buf(unsigned char* src, int srcWidth, int srcHeight,
 }
 
 // 0x48C2B4
-int objectSetOutline(Object* obj, int outlineType, Rect* rect) {
+int objectSetOutline(Object *obj, int outlineType, Rect *rect) {
 	if (obj == NULL) {
 		return -1;
 	}
@@ -2795,7 +2807,7 @@ int objectSetOutline(Object* obj, int outlineType, Rect* rect) {
 }
 
 // 0x48C2F0
-int objectClearOutline(Object* object, Rect* rect) {
+int objectClearOutline(Object *object, Rect *rect) {
 	if (object == NULL) {
 		return -1;
 	}
@@ -2810,12 +2822,12 @@ int objectClearOutline(Object* object, Rect* rect) {
 }
 
 // 0x48C340
-int _obj_intersects_with(Object* object, int x, int y) {
+int _obj_intersects_with(Object *object, int x, int y) {
 	int flags = 0;
 
 	if (object == gEgg || (object->flags & OBJECT_HIDDEN) == 0) {
-		CacheEntry* handle;
-		Art* art = artLock(object->fid, &handle);
+		CacheEntry *handle;
+		Art *art = artLock(object->fid, &handle);
 		if (art != NULL) {
 			int width;
 			int height;
@@ -2851,7 +2863,7 @@ int _obj_intersects_with(Object* object, int x, int y) {
 			}
 
 			if (x >= minX && x <= maxX && y >= minY && y <= maxY) {
-				unsigned char* data = artGetFrameData(art, object->frame, object->rotation);
+				unsigned char *data = artGetFrameData(art, object->frame, object->rotation);
 				if (data != NULL) {
 					if (data[width * (y - minY) + x - minX] != 0) {
 						flags |= 0x01;
@@ -2864,7 +2876,7 @@ int _obj_intersects_with(Object* object, int x, int y) {
 						} else {
 							int type = FID_TYPE(object->fid);
 							if (type == OBJ_TYPE_SCENERY || type == OBJ_TYPE_WALL) {
-								Proto* proto;
+							/*	Proto *proto;  TODO proto.cpp
 								protoGetProto(object->pid, &proto);
 
 								bool v20;
@@ -2885,7 +2897,7 @@ int _obj_intersects_with(Object* object, int x, int y) {
 									if (_obj_intersects_with(gEgg, x, y) != 0) {
 										flags |= 0x04;
 									}
-								}
+								} */
 							}
 						}
 					}
@@ -2900,7 +2912,7 @@ int _obj_intersects_with(Object* object, int x, int y) {
 }
 
 // 0x48C5C4
-int _obj_create_intersect_list(int x, int y, int elevation, int objectType, ObjectWithFlags** entriesPtr) {
+int _obj_create_intersect_list(int x, int y, int elevation, int objectType, ObjectWithFlags **entriesPtr) {
 	int upperLeftTile = tileFromScreenXY(x - 320, y - 240, elevation, true);
 	*entriesPtr = NULL;
 
@@ -2915,21 +2927,17 @@ int _obj_create_intersect_list(int x, int y, int elevation, int objectType, Obje
 		int offsetIndex = _orderTable[parity][index];
 		if (_offsetDivTable[offsetIndex] < 30 && _offsetModTable[offsetIndex] < 20) {
 			int tile = _offsetTable[parity][offsetIndex] + upperLeftTile;
-			ObjectListNode* objectListNode = hexGridTileIsValid(tile)
-			                                 ? gObjectListHeadByTile[tile]
-			                                 : NULL;
+			ObjectListNode *objectListNode = hexGridTileIsValid(tile) ? gObjectListHeadByTile[tile] : NULL;
 			while (objectListNode != NULL) {
-				Object* object = objectListNode->obj;
+				Object *object = objectListNode->obj;
 				if (object->elevation > elevation) {
 					break;
 				}
 
-				if (object->elevation == elevation
-				        && (objectType == -1 || FID_TYPE(object->fid) == objectType)
-				        && object != gEgg) {
+				if (object->elevation == elevation && (objectType == -1 || FID_TYPE(object->fid) == objectType) && object != gEgg) {
 					int flags = _obj_intersects_with(object, x, y);
 					if (flags != 0) {
-						ObjectWithFlags* entries = (ObjectWithFlags*)internal_realloc(*entriesPtr, sizeof(*entries) * (count + 1));
+						ObjectWithFlags *entries = (ObjectWithFlags *)internal_realloc(*entriesPtr, sizeof(*entries) * (count + 1));
 						if (entries != NULL) {
 							*entriesPtr = entries;
 							entries[count].object = object;
@@ -2948,7 +2956,7 @@ int _obj_create_intersect_list(int x, int y, int elevation, int objectType, Obje
 }
 
 // 0x48C74C
-void _obj_delete_intersect_list(ObjectWithFlags** entriesPtr) {
+void _obj_delete_intersect_list(ObjectWithFlags **entriesPtr) {
 	if (entriesPtr != NULL && *entriesPtr != NULL) {
 		internal_free(*entriesPtr);
 		*entriesPtr = NULL;
@@ -2975,7 +2983,7 @@ void _obj_process_seen() {
 	int v5;
 	int v0;
 	int v3;
-	ObjectListNode* obj_entry;
+	ObjectListNode *obj_entry;
 
 	memset(_obj_seen_check, 0, 5001);
 
@@ -3027,25 +3035,25 @@ void _obj_process_seen() {
 }
 
 // 0x48C8E4
-char* objectGetName(Object* obj) {
+char *objectGetName(Object *obj) {
 	int objectType = FID_TYPE(obj->fid);
-	switch (objectType) {
+/*	switch (objectType) {  TODO item.cpp critter.cpp proto.cpp
 	case OBJ_TYPE_ITEM:
 		return itemGetName(obj);
 	case OBJ_TYPE_CRITTER:
 		return critterGetName(obj);
 	default:
 		return protoGetName(obj->pid);
-	}
+	}*/
 }
 
 // 0x48C914
-char* objectGetDescription(Object* obj) {
+char *objectGetDescription(Object *obj) {
 	if (FID_TYPE(obj->fid) == OBJ_TYPE_ITEM) {
-		return itemGetDescription(obj);
+//		return itemGetDescription(obj); TODO item.cpp
 	}
 
-	return protoGetDescription(obj->pid);
+//	return protoGetDescription(obj->pid); TODO proto.cpp
 }
 
 // Warm objects cache?
@@ -3098,7 +3106,7 @@ void _obj_preload_art_cache(int flags) {
 		v11++;
 	}
 
-	CacheEntry* cache_handle;
+	CacheEntry *cache_handle;
 	if (artLock(*gObjectFids, &cache_handle) != NULL) {
 		artUnlock(cache_handle);
 	}
@@ -3146,12 +3154,12 @@ static int _obj_offset_table_init() {
 		return -1;
 	}
 
-	_offsetTable[0] = (int*)internal_malloc(sizeof(int) * gObjectsUpdateAreaHexSize);
+	_offsetTable[0] = (int *)internal_malloc(sizeof(int) * gObjectsUpdateAreaHexSize);
 	if (_offsetTable[0] == NULL) {
 		goto err;
 	}
 
-	_offsetTable[1] = (int*)internal_malloc(sizeof(int) * gObjectsUpdateAreaHexSize);
+	_offsetTable[1] = (int *)internal_malloc(sizeof(int) * gObjectsUpdateAreaHexSize);
 	if (_offsetTable[1] == NULL) {
 		goto err;
 	}
@@ -3159,7 +3167,7 @@ static int _obj_offset_table_init() {
 	for (int parity = 0; parity < 2; parity++) {
 		int originTile = tileFromScreenXY(gObjectsUpdateAreaPixelBounds.left, gObjectsUpdateAreaPixelBounds.top, 0);
 		if (originTile != -1) {
-			int* offsets = _offsetTable[gCenterTile & 1];
+			int *offsets = _offsetTable[gCenterTile & 1];
 			int originTileX;
 			int originTileY;
 			tileToScreenXY(originTile, &originTileX, &originTileY, 0);
@@ -3194,7 +3202,7 @@ static int _obj_offset_table_init() {
 		}
 	}
 
-	_offsetDivTable = (int*)internal_malloc(sizeof(int) * gObjectsUpdateAreaHexSize);
+	_offsetDivTable = (int *)internal_malloc(sizeof(int) * gObjectsUpdateAreaHexSize);
 	if (_offsetDivTable == NULL) {
 		goto err;
 	}
@@ -3203,7 +3211,7 @@ static int _obj_offset_table_init() {
 		_offsetDivTable[i] = i / gObjectsUpdateAreaHexWidth;
 	}
 
-	_offsetModTable = (int*)internal_malloc(sizeof(int) * gObjectsUpdateAreaHexSize);
+	_offsetModTable = (int *)internal_malloc(sizeof(int) * gObjectsUpdateAreaHexSize);
 	if (_offsetModTable == NULL) {
 		goto err;
 	}
@@ -3249,12 +3257,12 @@ static int _obj_order_table_init() {
 		return -1;
 	}
 
-	_orderTable[0] = (int*)internal_malloc(sizeof(int) * gObjectsUpdateAreaHexSize);
+	_orderTable[0] = (int *)internal_malloc(sizeof(int) * gObjectsUpdateAreaHexSize);
 	if (_orderTable[0] == NULL) {
 		goto err;
 	}
 
-	_orderTable[1] = (int*)internal_malloc(sizeof(int) * gObjectsUpdateAreaHexSize);
+	_orderTable[1] = (int *)internal_malloc(sizeof(int) * gObjectsUpdateAreaHexSize);
 	if (_orderTable[1] == NULL) {
 		goto err;
 	}
@@ -3278,16 +3286,16 @@ err:
 }
 
 // 0x48CF20
-static int _obj_order_comp_func_even(const void* a1, const void* a2) {
-	int v1 = *(int*)a1;
-	int v2 = *(int*)a2;
+static int _obj_order_comp_func_even(const void *a1, const void *a2) {
+	int v1 = *(int *)a1;
+	int v2 = *(int *)a2;
 	return _offsetTable[0][v1] - _offsetTable[0][v2];
 }
 
 // 0x48CF38
-static int _obj_order_comp_func_odd(const void* a1, const void* a2) {
-	int v1 = *(int*)a1;
-	int v2 = *(int*)a2;
+static int _obj_order_comp_func_odd(const void *a1, const void *a2) {
+	int v1 = *(int *)a1;
+	int v2 = *(int *)a2;
 	return _offsetTable[1][v1] - _offsetTable[1][v2];
 }
 
@@ -3312,7 +3320,7 @@ static int _obj_render_table_init() {
 		return -1;
 	}
 
-	_renderTable = (ObjectListNode**)internal_malloc(sizeof(*_renderTable) * gObjectsUpdateAreaHexSize);
+	_renderTable = (ObjectListNode **)internal_malloc(sizeof(*_renderTable) * gObjectsUpdateAreaHexSize);
 	if (_renderTable == NULL) {
 		return -1;
 	}
@@ -3340,7 +3348,7 @@ static void _obj_light_table_init() {
 		int v4 = gCenterTile + s;
 		for (int i = 0; i < ROTATION_COUNT; i++) {
 			int v15 = 8;
-			int* p = _light_offsets[v4 & 1][i];
+			int *p = _light_offsets[v4 & 1][i];
 			for (int j = 0; j < 8; j++) {
 				int tile = tileGetTileInDirection(v4, (i + 1) % ROTATION_COUNT, j);
 
@@ -3386,13 +3394,13 @@ static void _obj_blend_table_exit() {
 }
 
 // 0x48D348
-static int _obj_save_obj(File* stream, Object* object) {
+static int _obj_save_obj(File *stream, Object *object) {
 	if ((object->flags & OBJECT_NO_SAVE) != 0) {
 		return 0;
 	}
 
-	CritterCombatData* combatData = NULL;
-	Object* whoHitMe = NULL;
+	CritterCombatData *combatData = NULL;
+	Object *whoHitMe = NULL;
 	if (PID_TYPE(object->pid) == OBJ_TYPE_CRITTER) {
 		combatData = &(object->data.critter.combat);
 		whoHitMe = combatData->whoHitMe;
@@ -3413,9 +3421,9 @@ static int _obj_save_obj(File* stream, Object* object) {
 		combatData->whoHitMe = whoHitMe;
 	}
 
-	Inventory* inventory = &(object->data.inventory);
+	Inventory *inventory = &(object->data.inventory);
 	for (int index = 0; index < inventory->length; index++) {
-		InventoryItem* inventoryItem = &(inventory->items[index]);
+		InventoryItem *inventoryItem = &(inventory->items[index]);
 
 		if (fileWriteInt32(stream, inventoryItem->quantity) == -1) {
 			return -1;
@@ -3434,8 +3442,8 @@ static int _obj_save_obj(File* stream, Object* object) {
 }
 
 // 0x48D414
-static int _obj_load_obj(File* stream, Object** objectPtr, int elevation, Object* owner) {
-	Object* obj;
+static int _obj_load_obj(File *stream, Object **objectPtr, int elevation, Object *owner) {
+	Object *obj;
 
 	if (objectAllocate(&obj) == -1) {
 		*objectPtr = NULL;
@@ -3447,14 +3455,14 @@ static int _obj_load_obj(File* stream, Object** objectPtr, int elevation, Object
 		return -1;
 	}
 
-	if (obj->sid != -1) {
-		Script* script;
+/*	if (obj->sid != -1) {  TODO script.cpp
+		Script *script;
 		if (scriptGetScript(obj->sid, &script) == -1) {
 			obj->sid = -1;
 		} else {
 			script->owner = obj;
 		}
-	}
+	} */
 
 	_obj_fix_violence_settings(&(obj->fid));
 
@@ -3473,7 +3481,7 @@ static int _obj_load_obj(File* stream, Object** objectPtr, int elevation, Object
 
 	obj->owner = owner;
 
-	Inventory* inventory = &(obj->data.inventory);
+	Inventory *inventory = &(obj->data.inventory);
 	if (inventory->length <= 0) {
 		inventory->capacity = 0;
 		inventory->items = NULL;
@@ -3481,13 +3489,13 @@ static int _obj_load_obj(File* stream, Object** objectPtr, int elevation, Object
 		return 0;
 	}
 
-	InventoryItem* inventoryItems = inventory->items = (InventoryItem*)internal_malloc(sizeof(*inventoryItems) * inventory->capacity);
+	InventoryItem *inventoryItems = inventory->items = (InventoryItem *)internal_malloc(sizeof(*inventoryItems) * inventory->capacity);
 	if (inventoryItems == NULL) {
 		return -1;
 	}
 
 	for (int inventoryItemIndex = 0; inventoryItemIndex < inventory->length; inventoryItemIndex++) {
-		InventoryItem* inventoryItem = &(inventoryItems[inventoryItemIndex]);
+		InventoryItem *inventoryItem = &(inventoryItems[inventoryItemIndex]);
 		if (fileReadInt32(stream, &(inventoryItem->quantity)) != 0) {
 			return -1;
 		}
@@ -3504,7 +3512,7 @@ static int _obj_load_obj(File* stream, Object** objectPtr, int elevation, Object
 
 // obj_save_dude
 // 0x48D59C
-int _obj_save_dude(File* stream) {
+int _obj_save_dude(File *stream) {
 	int field_78 = gDude->sid;
 
 	gDude->flags &= ~OBJECT_NO_SAVE;
@@ -3525,26 +3533,26 @@ int _obj_save_dude(File* stream) {
 
 // obj_load_dude
 // 0x48D600
-int _obj_load_dude(File* stream) {
+int _obj_load_dude(File *stream) {
 	int savedTile = gDude->tile;
 	int savedElevation = gDude->elevation;
 	int savedRotation = gDude->rotation;
 	int savedOid = gDude->id;
 
-	scriptsClearDudeScript();
+//	scriptsClearDudeScript();  TODO scripts.cpp
 
-	Object* temp;
+	Object *temp;
 	int rc = _obj_load_obj(stream, &temp, -1, NULL);
 
 	memcpy(gDude, temp, sizeof(*gDude));
 
 	gDude->flags |= OBJECT_NO_SAVE;
 
-	scriptsClearDudeScript();
+//	scriptsClearDudeScript();  TODO scripts.cpp
 
 	gDude->id = savedOid;
 
-	scriptsSetDudeScript();
+//	scriptsSetDudeScript(); TODO scripts.cpp
 
 	int newTile = gDude->tile;
 	gDude->tile = savedTile;
@@ -3555,7 +3563,7 @@ int _obj_load_dude(File* stream) {
 	int newRotation = gDude->rotation;
 	gDude->rotation = newRotation;
 
-	scriptsSetDudeScript();
+//	scriptsSetDudeScript();  TODO scripts.cpp
 
 	if (rc != -1) {
 		objectSetLocation(gDude, newTile, newElevation, NULL);
@@ -3563,16 +3571,16 @@ int _obj_load_dude(File* stream) {
 	}
 
 	// Set ownership of inventory items from temporary instance to dude.
-	Inventory* inventory = &(gDude->data.inventory);
+	Inventory *inventory = &(gDude->data.inventory);
 	for (int index = 0; index < inventory->length; index++) {
-		InventoryItem* inventoryItem = &(inventory->items[index]);
+		InventoryItem *inventoryItem = &(inventory->items[index]);
 		inventoryItem->item->owner = gDude;
 	}
 
 	// Dude has claimed ownership of items in temporary instance's inventory.
 	// We don't need object's dealloc routine to remove these items from the
 	// game, so simply nullify temporary inventory as if nothing was there.
-	Inventory* tempInventory = &(temp->data.inventory);
+	Inventory *tempInventory = &(temp->data.inventory);
 	tempInventory->length = 0;
 	tempInventory->capacity = 0;
 	tempInventory->items = NULL;
@@ -3583,7 +3591,7 @@ int _obj_load_dude(File* stream) {
 		debugPrint("\nError: obj_load_dude: Can't destroy temp object!\n");
 	}
 
-	_inven_reset_dude();
+//	_inven_reset_dude();  TODO inventory.cpp
 
 	int tile;
 	if (fileReadInt32(stream, &tile) == -1) {
@@ -3597,12 +3605,12 @@ int _obj_load_dude(File* stream) {
 }
 
 // 0x48D778
-static int objectAllocate(Object** objectPtr) {
+static int objectAllocate(Object **objectPtr) {
 	if (objectPtr == NULL) {
 		return -1;
 	}
 
-	Object* object = *objectPtr = (Object*)internal_malloc(sizeof(Object));
+	Object *object = *objectPtr = (Object *)internal_malloc(sizeof(Object));
 	if (object == NULL) {
 		return -1;
 	}
@@ -3624,7 +3632,7 @@ static int objectAllocate(Object** objectPtr) {
 // NOTE: Inlined.
 //
 // 0x48D7F8
-static void objectDeallocate(Object** objectPtr) {
+static void objectDeallocate(Object **objectPtr) {
 	if (objectPtr == NULL) {
 		return;
 	}
@@ -3641,12 +3649,12 @@ static void objectDeallocate(Object** objectPtr) {
 // NOTE: Inlined.
 //
 // 0x48D818
-static int objectListNodeCreate(ObjectListNode** nodePtr) {
+static int objectListNodeCreate(ObjectListNode **nodePtr) {
 	if (nodePtr == NULL) {
 		return -1;
 	}
 
-	ObjectListNode* node = *nodePtr = (ObjectListNode*)internal_malloc(sizeof(*node));
+	ObjectListNode *node = *nodePtr = (ObjectListNode *)internal_malloc(sizeof(*node));
 	if (node == NULL) {
 		return -1;
 	}
@@ -3660,7 +3668,7 @@ static int objectListNodeCreate(ObjectListNode** nodePtr) {
 // NOTE: Inlined.
 //
 // 0x48D84C
-static void objectListNodeDestroy(ObjectListNode** nodePtr) {
+static void objectListNodeDestroy(ObjectListNode **nodePtr) {
 	if (nodePtr == NULL) {
 		return;
 	}
@@ -3675,7 +3683,7 @@ static void objectListNodeDestroy(ObjectListNode** nodePtr) {
 }
 
 // 0x48D86C
-static int objectGetListNode(Object* object, ObjectListNode** nodePtr, ObjectListNode** previousNodePtr) {
+static int objectGetListNode(Object *object, ObjectListNode **nodePtr, ObjectListNode **previousNodePtr) {
 	if (object == NULL) {
 		return -1;
 	}
@@ -3720,8 +3728,8 @@ static int objectGetListNode(Object* object, ObjectListNode** nodePtr, ObjectLis
 }
 
 // 0x48D8E8
-static void _obj_insert(ObjectListNode* objectListNode) {
-	ObjectListNode** objectListNodePtr;
+static void _obj_insert(ObjectListNode *objectListNode) {
+	ObjectListNode **objectListNodePtr;
 
 	if (objectListNode == NULL) {
 		return;
@@ -3730,13 +3738,13 @@ static void _obj_insert(ObjectListNode* objectListNode) {
 	if (objectListNode->obj->tile == -1) {
 		objectListNodePtr = &gObjectListHead;
 	} else {
-		Art* art = NULL;
-		CacheEntry* cacheHandle = NULL;
+		Art *art = NULL;
+		CacheEntry *cacheHandle = NULL;
 
 		objectListNodePtr = &(gObjectListHeadByTile[objectListNode->obj->tile]);
 
 		while (*objectListNodePtr != NULL) {
-			Object* obj = (*objectListNodePtr)->obj;
+			Object *obj = (*objectListNodePtr)->obj;
 			if (obj->elevation > objectListNode->obj->elevation) {
 				break;
 			}
@@ -3748,8 +3756,8 @@ static void _obj_insert(ObjectListNode* objectListNode) {
 
 				if ((obj->flags & OBJECT_FLAT) == (objectListNode->obj->flags & OBJECT_FLAT)) {
 					bool v11 = false;
-					CacheEntry* a2;
-					Art* v12 = artLock(obj->fid, &a2);
+					CacheEntry *a2;
+					Art *v12 = artLock(obj->fid, &a2);
 					if (v12 != NULL) {
 
 						if (art == NULL) {
@@ -3780,7 +3788,7 @@ static void _obj_insert(ObjectListNode* objectListNode) {
 }
 
 // 0x48DA58
-static int _obj_remove(ObjectListNode* a1, ObjectListNode* a2) {
+static int _obj_remove(ObjectListNode *a1, ObjectListNode *a2) {
 	if (a1->obj == NULL) {
 		return -1;
 	}
@@ -3791,10 +3799,10 @@ static int _obj_remove(ObjectListNode* a1, ObjectListNode* a2) {
 
 	_obj_inven_free(&(a1->obj->data.inventory));
 
-	if (a1->obj->sid != -1) {
+/*	if (a1->obj->sid != -1) {  TODO script.cpp
 		scriptExecProc(a1->obj->sid, SCRIPT_PROC_DESTROY);
 		scriptRemove(a1->obj->sid);
-	}
+	} */
 
 	if (a1 != a2) {
 		if (a2 != NULL) {
@@ -3819,7 +3827,7 @@ static int _obj_remove(ObjectListNode* a1, ObjectListNode* a2) {
 }
 
 // 0x48DB28
-static int _obj_connect_to_tile(ObjectListNode* node, int tile, int elevation, Rect* rect) {
+static int _obj_connect_to_tile(ObjectListNode *node, int tile, int elevation, Rect *rect) {
 	if (node == NULL) {
 		return -1;
 	}
@@ -3850,7 +3858,7 @@ static int _obj_connect_to_tile(ObjectListNode* node, int tile, int elevation, R
 }
 
 // 0x48DC28
-static int _obj_adjust_light(Object* obj, int a2, Rect* rect) {
+static int _obj_adjust_light(Object *obj, int a2, Rect *rect) {
 	if (obj == NULL) {
 		return -1;
 	}
@@ -3871,7 +3879,7 @@ static int _obj_adjust_light(Object* obj, int a2, Rect* rect) {
 		return -1;
 	}
 
-	AdjustLightIntensityProc* adjustLightIntensity = a2 ? lightDecreaseTileIntensity : lightIncreaseTileIntensity;
+	AdjustLightIntensityProc *adjustLightIntensity = a2 ? lightDecreaseTileIntensity : lightIncreaseTileIntensity;
 	adjustLightIntensity(obj->elevation, obj->tile, obj->lightIntensity);
 
 	Rect objectRect;
@@ -4061,8 +4069,7 @@ static int _obj_adjust_light(Object* obj, int a2, Rect* rect) {
 					v14 = ebx;
 					break;
 				case 21:
-					v14 = (_light_blocked[rotation][8] & _light_blocked[nextRotation][1])
-					      | (_light_blocked[rotation][15] & _light_blocked[nextRotation][2]);
+					v14 = (_light_blocked[rotation][8] & _light_blocked[nextRotation][1]) | (_light_blocked[rotation][15] & _light_blocked[nextRotation][2]);
 					break;
 				case 22:
 					edx = _light_blocked[nextRotation][1];
@@ -4424,7 +4431,7 @@ static int _obj_adjust_light(Object* obj, int a2, Rect* rect) {
 					if (hexGridTileIsValid(tile)) {
 						bool v12 = true;
 
-						ObjectListNode* objectListNode = gObjectListHeadByTile[tile];
+						ObjectListNode *objectListNode = gObjectListHeadByTile[tile];
 						while (objectListNode != NULL) {
 							if ((objectListNode->obj->flags & OBJECT_HIDDEN) == 0) {
 								if (objectListNode->obj->elevation > obj->elevation) {
@@ -4439,14 +4446,11 @@ static int _obj_adjust_light(Object* obj, int a2, Rect* rect) {
 									v14 = (objectListNode->obj->flags & OBJECT_LIGHT_THRU) == 0;
 
 									if (FID_TYPE(objectListNode->obj->fid) == OBJ_TYPE_WALL) {
-										if ((objectListNode->obj->flags & OBJECT_FLAT) == 0) {
-											Proto* proto;
+/*										if ((objectListNode->obj->flags & OBJECT_FLAT) == 0) {  TODO proto.cpp
+											Proto *proto;
 											protoGetProto(objectListNode->obj->pid, &proto);
 											if ((proto->wall.extendedFlags & 0x8000000) != 0 || (proto->wall.extendedFlags & 0x40000000) != 0) {
-												if (rotation != ROTATION_W
-												        && rotation != ROTATION_NW
-												        && (rotation != ROTATION_NE || index >= 8)
-												        && (rotation != ROTATION_SW || index <= 15)) {
+												if (rotation != ROTATION_W && rotation != ROTATION_NW && (rotation != ROTATION_NE || index >= 8) && (rotation != ROTATION_SW || index <= 15)) {
 													v12 = false;
 												}
 											} else if ((proto->wall.extendedFlags & 0x10000000) != 0) {
@@ -4454,21 +4458,15 @@ static int _obj_adjust_light(Object* obj, int a2, Rect* rect) {
 													v12 = false;
 												}
 											} else if ((proto->wall.extendedFlags & 0x20000000) != 0) {
-												if (rotation != ROTATION_NE
-												        && rotation != ROTATION_E
-												        && rotation != ROTATION_W
-												        && rotation != ROTATION_NW
-												        && (rotation != ROTATION_SW || index <= 15)) {
+												if (rotation != ROTATION_NE && rotation != ROTATION_E && rotation != ROTATION_W && rotation != ROTATION_NW && (rotation != ROTATION_SW || index <= 15)) {
 													v12 = false;
 												}
 											} else {
-												if (rotation != ROTATION_NE
-												        && rotation != ROTATION_E
-												        && (rotation != ROTATION_NW || index <= 7)) {
+												if (rotation != ROTATION_NE && rotation != ROTATION_E && (rotation != ROTATION_NW || index <= 7)) {
 													v12 = false;
 												}
 											}
-										}
+										}*/
 									} else {
 										if (v14 && rotation >= ROTATION_E && rotation <= ROTATION_SW) {
 											v12 = false;
@@ -4495,7 +4493,7 @@ static int _obj_adjust_light(Object* obj, int a2, Rect* rect) {
 	}
 
 	if (rect != NULL) {
-		Rect* lightDistanceRect = &(_light_rect[obj->lightDistance]);
+		Rect *lightDistanceRect = &(_light_rect[obj->lightDistance]);
 		memcpy(rect, lightDistanceRect, sizeof(*lightDistanceRect));
 
 		int x;
@@ -4515,9 +4513,9 @@ static int _obj_adjust_light(Object* obj, int a2, Rect* rect) {
 }
 
 // 0x48EABC
-static void objectDrawOutline(Object* object, Rect* rect) {
-	CacheEntry* cacheEntry;
-	Art* art = artLock(object->fid, &cacheEntry);
+static void objectDrawOutline(Object *object, Rect *rect) {
+	CacheEntry *cacheEntry;
+	Art *art = artLock(object->fid, &cacheEntry);
 	if (art == NULL) {
 		return;
 	}
@@ -4580,14 +4578,14 @@ static void objectDrawOutline(Object* object, Rect* rect) {
 		v49.right = v49.left + (objectRect.right - objectRect.left);
 		v49.bottom = v49.top + (objectRect.bottom - objectRect.top);
 
-		unsigned char* src = artGetFrameData(art, object->frame, object->rotation);
+		unsigned char *src = artGetFrameData(art, object->frame, object->rotation);
 
-		unsigned char* dest = gObjectsWindowBuffer + gObjectsWindowPitch * object->sy + object->sx;
+		unsigned char *dest = gObjectsWindowBuffer + gObjectsWindowPitch * object->sy + object->sx;
 		int destStep = gObjectsWindowPitch - frameWidth;
 
 		unsigned char color;
-		unsigned char* v47 = NULL;
-		unsigned char* v48 = NULL;
+		unsigned char *v47 = NULL;
+		unsigned char *v48 = NULL;
 		int v53 = object->outline & OUTLINE_PALETTED;
 		int outlineType = object->outline & OUTLINE_TYPE_MASK;
 		int v43;
@@ -4644,8 +4642,8 @@ static void objectDrawOutline(Object* object, Rect* rect) {
 		}
 
 		unsigned char v54 = color;
-		unsigned char* dest14 = dest;
-		unsigned char* src15 = src;
+		unsigned char *dest14 = dest;
+		unsigned char *src15 = src;
 		for (int y = 0; y < frameHeight; y++) {
 			bool cycle = true;
 			if (v44 != 0) {
@@ -4707,8 +4705,8 @@ static void objectDrawOutline(Object* object, Rect* rect) {
 		for (int x = 0; x < frameWidth; x++) {
 			bool cycle = true;
 			unsigned char v28 = color;
-			unsigned char* dest27 = dest + x;
-			unsigned char* src27 = src + x;
+			unsigned char *dest27 = dest + x;
+			unsigned char *src27 = src + x;
 			for (int y = 0; y < frameHeight; y++) {
 				if (v44 != 0) {
 					if (y % v44 == 0) {
@@ -4722,7 +4720,7 @@ static void objectDrawOutline(Object* object, Rect* rect) {
 
 				if (*src27 != 0 && cycle) {
 					if (x >= v49.left && x <= v49.right && y >= v49.top && y <= v49.bottom) {
-						unsigned char* v29 = dest27 - gObjectsWindowPitch;
+						unsigned char *v29 = dest27 - gObjectsWindowPitch;
 						if (v29 >= gObjectsWindowBuffer) {
 							if (v53) {
 								*v29 = v48[(v47[v28] << 8) + *v29];
@@ -4766,14 +4764,14 @@ static void objectDrawOutline(Object* object, Rect* rect) {
 }
 
 // 0x48F1B0
-static void _obj_render_object(Object* object, Rect* rect, int light) {
+static void _obj_render_object(Object *object, Rect *rect, int light) {
 	int type = FID_TYPE(object->fid);
 	if (artIsObjectTypeHidden(type)) {
 		return;
 	}
 
-	CacheEntry* cacheEntry;
-	Art* art = artLock(object->fid, &cacheEntry);
+	CacheEntry *cacheEntry;
+	Art *art = artLock(object->fid, &cacheEntry);
 	if (art == NULL) {
 		return;
 	}
@@ -4814,8 +4812,8 @@ static void _obj_render_object(Object* object, Rect* rect, int light) {
 		return;
 	}
 
-	unsigned char* src = artGetFrameData(art, object->frame, object->rotation);
-	unsigned char* src2 = src;
+	unsigned char *src = artGetFrameData(art, object->frame, object->rotation);
+	unsigned char *src2 = src;
 	int v50 = objectRect.left - object->sx;
 	int v49 = objectRect.top - object->sy;
 	src += frameWidth * v49 + v50;
@@ -4824,18 +4822,18 @@ static void _obj_render_object(Object* object, Rect* rect, int light) {
 
 	if (type == 6) {
 		blitBufferToBufferTrans(src,
-		                        objectWidth,
-		                        objectHeight,
-		                        frameWidth,
-		                        gObjectsWindowBuffer + gObjectsWindowPitch * objectRect.top + objectRect.left,
-		                        gObjectsWindowPitch);
+								objectWidth,
+								objectHeight,
+								frameWidth,
+								gObjectsWindowBuffer + gObjectsWindowPitch * objectRect.top + objectRect.left,
+								gObjectsWindowPitch);
 		artUnlock(cacheEntry);
 		return;
 	}
 
 	if (type == 2 || type == 3) {
 		if ((gDude->flags & OBJECT_HIDDEN) == 0 && (object->flags & OBJECT_FLAG_0xFC000) == 0) {
-			Proto* proto;
+/*			Proto *proto;  TODO proto.cpp
 			protoGetProto(object->pid, &proto);
 
 			bool v17;
@@ -4843,32 +4841,26 @@ static void _obj_render_object(Object* object, Rect* rect, int light) {
 			if ((extendedFlags & 0x8000000) != 0 || (extendedFlags & 0x80000000) != 0) {
 				// TODO: Probably wrong.
 				v17 = tileIsInFrontOf(object->tile, gDude->tile);
-				if (!v17
-				        || !tileIsToRightOf(object->tile, gDude->tile)
-				        || (object->flags & OBJECT_WALL_TRANS_END) == 0) {
+				if (!v17 || !tileIsToRightOf(object->tile, gDude->tile) || (object->flags & OBJECT_WALL_TRANS_END) == 0) {
 					// nothing
 				} else {
 					v17 = false;
 				}
 			} else if ((extendedFlags & 0x10000000) != 0) {
 				// NOTE: Uses bitwise OR, so both functions are evaluated.
-				v17 = tileIsInFrontOf(object->tile, gDude->tile)
-				      || tileIsToRightOf(gDude->tile, object->tile);
+				v17 = tileIsInFrontOf(object->tile, gDude->tile) || tileIsToRightOf(gDude->tile, object->tile);
 			} else if ((extendedFlags & 0x20000000) != 0) {
-				v17 = tileIsInFrontOf(object->tile, gDude->tile)
-				      && tileIsToRightOf(gDude->tile, object->tile);
+				v17 = tileIsInFrontOf(object->tile, gDude->tile) && tileIsToRightOf(gDude->tile, object->tile);
 			} else {
 				v17 = tileIsToRightOf(gDude->tile, object->tile);
-				if (v17
-				        && tileIsInFrontOf(gDude->tile, object->tile)
-				        && (object->flags & OBJECT_WALL_TRANS_END) != 0) {
+				if (v17 && tileIsInFrontOf(gDude->tile, object->tile) && (object->flags & OBJECT_WALL_TRANS_END) != 0) {
 					v17 = 0;
 				}
-			}
-
+			}*/
+			bool v17 = true;  // FIXME remove!!!
 			if (v17) {
-				CacheEntry* eggHandle;
-				Art* egg = artLock(gEgg->fid, &eggHandle);
+				CacheEntry *eggHandle;
+				Art *egg = artLock(gEgg->fid, &eggHandle);
 				if (egg == NULL) {
 					return;
 				}
@@ -4923,24 +4915,24 @@ static void _obj_render_object(Object* object, Rect* rect, int light) {
 					rects[3].bottom = objectRect.bottom;
 
 					for (int i = 0; i < 4; i++) {
-						Rect* v21 = &(rects[i]);
+						Rect *v21 = &(rects[i]);
 						if (v21->left <= v21->right && v21->top <= v21->bottom) {
-							unsigned char* sp = src + frameWidth * (v21->top - objectRect.top) + (v21->left - objectRect.left);
+							unsigned char *sp = src + frameWidth * (v21->top - objectRect.top) + (v21->left - objectRect.left);
 							_dark_trans_buf_to_buf(sp, v21->right - v21->left + 1, v21->bottom - v21->top + 1, frameWidth, gObjectsWindowBuffer, v21->left, v21->top, gObjectsWindowPitch, light);
 						}
 					}
 
-					unsigned char* mask = artGetFrameData(egg, 0, 0);
+					unsigned char *mask = artGetFrameData(egg, 0, 0);
 					_intensity_mask_buf_to_buf(
-					    src + frameWidth * (updatedEggRect.top - objectRect.top) + (updatedEggRect.left - objectRect.left),
-					    updatedEggRect.right - updatedEggRect.left + 1,
-					    updatedEggRect.bottom - updatedEggRect.top + 1,
-					    frameWidth,
-					    gObjectsWindowBuffer + gObjectsWindowPitch * updatedEggRect.top + updatedEggRect.left,
-					    gObjectsWindowPitch,
-					    mask + eggWidth * (updatedEggRect.top - eggRect.top) + (updatedEggRect.left - eggRect.left),
-					    eggWidth,
-					    light);
+						src + frameWidth * (updatedEggRect.top - objectRect.top) + (updatedEggRect.left - objectRect.left),
+						updatedEggRect.right - updatedEggRect.left + 1,
+						updatedEggRect.bottom - updatedEggRect.top + 1,
+						frameWidth,
+						gObjectsWindowBuffer + gObjectsWindowPitch * updatedEggRect.top + updatedEggRect.left,
+						gObjectsWindowPitch,
+						mask + eggWidth * (updatedEggRect.top - eggRect.top) + (updatedEggRect.left - eggRect.left),
+						eggWidth,
+						light);
 					artUnlock(eggHandle);
 					artUnlock(cacheEntry);
 					return;
@@ -4978,7 +4970,7 @@ static void _obj_render_object(Object* object, Rect* rect, int light) {
 // Updates fid according to current violence level.
 //
 // 0x48FA14
-void _obj_fix_violence_settings(int* fid) {
+void _obj_fix_violence_settings(int *fid) {
 	if (FID_TYPE(*fid) != OBJ_TYPE_CRITTER) {
 		return;
 	}
@@ -5014,9 +5006,7 @@ void _obj_fix_violence_settings(int* fid) {
 
 	int anim = FID_ANIM_TYPE(*fid);
 	if (anim >= start && anim <= end) {
-		anim = (anim == ANIM_FALL_BACK_BLOOD_SF)
-		       ? ANIM_FALL_BACK_SF
-		       : ANIM_FALL_FRONT_SF;
+		anim = (anim == ANIM_FALL_BACK_BLOOD_SF) ? ANIM_FALL_BACK_SF : ANIM_FALL_FRONT_SF;
 		*fid = buildFid(OBJ_TYPE_CRITTER, *fid & 0xFFF, anim, (*fid & 0xF000) >> 12, (*fid & 0x70000000) >> 28);
 	}
 
@@ -5026,9 +5016,9 @@ void _obj_fix_violence_settings(int* fid) {
 }
 
 // 0x48FB08
-static int _obj_preload_sort(const void* a1, const void* a2) {
-	int v1 = *(int*)a1;
-	int v2 = *(int*)a2;
+static int _obj_preload_sort(const void *a1, const void *a2) {
+	int v1 = *(int *)a1;
+	int v2 = *(int *)a2;
 
 	int v3 = _cd_order[FID_TYPE(v1)];
 	int v4 = _cd_order[FID_TYPE(v2)];
@@ -5052,8 +5042,8 @@ static int _obj_preload_sort(const void* a1, const void* a2) {
 	return cmp;
 }
 
-Object* objectTypedFindById(int id, int type) {
-	Object* obj = objectFindFirst();
+Object *objectTypedFindById(int id, int type) {
+	Object *obj = objectFindFirst();
 	while (obj != NULL) {
 		if (obj->id == id && PID_TYPE(obj->pid) == type) {
 			return obj;
@@ -5065,9 +5055,9 @@ Object* objectTypedFindById(int id, int type) {
 }
 
 bool isExitGridAt(int tile, int elevation) {
-	ObjectListNode* objectListNode = gObjectListHeadByTile[tile];
+	ObjectListNode *objectListNode = gObjectListHeadByTile[tile];
 	while (objectListNode != NULL) {
-		Object* obj = objectListNode->obj;
+		Object *obj = objectListNode->obj;
 		if (obj->elevation == elevation) {
 			if ((obj->flags & OBJECT_HIDDEN) == 0) {
 				if (isExitGridPid(obj->pid)) {
@@ -5081,4 +5071,4 @@ bool isExitGridAt(int tile, int elevation) {
 	return false;
 }
 
-} // namespace fallout
+} // namespace Fallout2

@@ -29,6 +29,7 @@ MODULE_OBJS = \
 	memory.o \
 	memory_manager.o \
 	message.o \
+	object.o \
 	palette.o \
 	pcx.o \
 	platform_compat.o \
