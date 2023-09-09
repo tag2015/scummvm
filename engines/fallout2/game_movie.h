@@ -1,9 +1,9 @@
-#ifndef GAME_MOVIE_H
-#define GAME_MOVIE_H
+#ifndef FALLOUT2_GAME_MOVIE_H
+#define FALLOUT2_GAME_MOVIE_H
 
-#include "db.h"
+#include "fallout2/db.h"
 
-namespace fallout {
+namespace Fallout2 {
 
 typedef enum GameMovieFlags {
 	GAME_MOVIE_FADE_IN = 0x01,
@@ -35,13 +35,13 @@ typedef enum GameMovie {
 
 int gameMoviesInit();
 void gameMoviesReset();
-int gameMoviesLoad(File* stream);
-int gameMoviesSave(File* stream);
+int gameMoviesLoad(File *stream);
+int gameMoviesSave(File *stream);
 int gameMoviePlay(int movie, int flags);
 void gameMovieFadeOut();
 bool gameMovieIsSeen(int movie);
 bool gameMovieIsPlaying();
 
-} // namespace fallout
+} // namespace Fallout2
 
-#endif /* GAME_MOVIE_H */
+#endif
