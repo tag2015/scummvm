@@ -25,6 +25,7 @@ MODULE_OBJS = \
 	graph_lib.o \
 	heap.o \
 	interpreter.o \
+	light.o \
 	memory.o \
 	memory_manager.o \
 	message.o \
