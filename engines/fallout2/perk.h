@@ -1,28 +1,28 @@
-#ifndef PERK_H
-#define PERK_H
+#ifndef FALLOUT2_PERK_H
+#define FALLOUT2_PERK_H
 
-#include "db.h"
-#include "obj_types.h"
-#include "perk_defs.h"
+#include "fallout2/db.h"
+#include "fallout2/obj_types.h"
+#include "fallout2/perk_defs.h"
 
-namespace fallout {
+namespace Fallout2 {
 
 int perksInit();
 void perksReset();
 void perksExit();
-int perksLoad(File* stream);
-int perksSave(File* stream);
-int perkAdd(Object* critter, int perk);
-int perkAddForce(Object* critter, int perk);
-int perkRemove(Object* critter, int perk);
-int perkGetAvailablePerks(Object* critter, int* perks);
-int perkGetRank(Object* critter, int perk);
-char* perkGetName(int perk);
-char* perkGetDescription(int perk);
+int perksLoad(File *stream);
+int perksSave(File *stream);
+int perkAdd(Object *critter, int perk);
+int perkAddForce(Object *critter, int perk);
+int perkRemove(Object *critter, int perk);
+int perkGetAvailablePerks(Object *critter, int *perks);
+int perkGetRank(Object *critter, int perk);
+char *perkGetName(int perk);
+char *perkGetDescription(int perk);
 int perkGetFrmId(int perk);
-void perkAddEffect(Object* critter, int perk);
-void perkRemoveEffect(Object* critter, int perk);
-int perkGetSkillModifier(Object* critter, int skill);
+void perkAddEffect(Object *critter, int perk);
+void perkRemoveEffect(Object *critter, int perk);
+int perkGetSkillModifier(Object *critter, int skill);
 
 // Returns true if perk is valid.
 static inline bool perkIsValid(int perk) {
@@ -39,10 +39,10 @@ static inline bool perkIsValid(int perk) {
 // the actual value for displaying. So a macro could exist, or this very
 // function, but due to similarity to [perkGetRank] it could have been
 // collapsed by compiler.
-static inline bool perkHasRank(Object* critter, int perk) {
+static inline bool perkHasRank(Object *critter, int perk) {
 	return perkGetRank(critter, perk) != 0;
 }
 
-} // namespace fallout
+} // namespace Fallout2
 
-#endif /* PERK_H */
+#endif
