@@ -1,7 +1,7 @@
 #ifndef FALLOUT2_COLOR_H
 #define FALLOUT2_COLOR_H
 
-#include "memory_defs.h"
+#include "fallout2/memory_defs.h"
 
 namespace Fallout2 {
 

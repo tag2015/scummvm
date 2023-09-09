@@ -1,9 +1,9 @@
-#ifndef WORLD_MAP_H
-#define WORLD_MAP_H
+#ifndef FALLOUT2_WORLD_MAP_H
+#define FALLOUT2_WORLD_MAP_H
 
-#include "db.h"
+#include "fallout2/db.h"
 
-namespace fallout {
+namespace Fallout2 {
 
 #define CAR_FUEL_MAX (80000)
 
@@ -229,16 +229,16 @@ typedef enum Map {
 	MAP_IN_GAME_MOVIE1 = 149,
 } Map;
 
-extern unsigned char* circleBlendTable;
+extern unsigned char *circleBlendTable;
 
 int wmWorldMap_init();
 void wmWorldMap_exit();
 int wmWorldMap_reset();
-int wmWorldMap_save(File* stream);
-int wmWorldMap_load(File* stream);
+int wmWorldMap_save(File *stream);
+int wmWorldMap_load(File *stream);
 int wmMapMaxCount();
-int wmMapIdxToName(int mapIdx, char* dest, size_t size);
-int wmMapMatchNameToIdx(char* name);
+int wmMapIdxToName(int mapIdx, char *dest, size_t size);
+int wmMapMatchNameToIdx(char *name);
 bool wmMapIdxIsSaveable(int mapIdx);
 bool wmMapIsSaveable();
 bool wmMapDeadBodiesAge();
@@ -251,8 +251,8 @@ int wmCheckGameAreaEvents();
 int wmSetupRandomEncounter();
 bool wmEvalTileNumForPlacement(int tile);
 int wmSubTileMarkRadiusVisited(int x, int y, int radius);
-int wmSubTileGetVisitedState(int x, int y, int* statePtr);
-int wmGetAreaIdxName(int areaIdx, char* name);
+int wmSubTileGetVisitedState(int x, int y, int *statePtr);
+int wmGetAreaIdxName(int areaIdx, char *name);
 bool wmAreaIsKnown(int areaIdx);
 int wmAreaVisitedState(int areaIdx);
 bool wmMapIsKnown(int mapIdx);
@@ -260,8 +260,8 @@ int wmAreaMarkVisited(int areaIdx);
 bool wmAreaMarkVisitedState(int areaIdx, int state);
 bool wmAreaSetVisibleState(int areaIdx, int state, bool force);
 int wmAreaSetWorldPos(int areaIdx, int x, int y);
-int wmGetPartyWorldPos(int* xPtr, int* yPtr);
-int wmGetPartyCurArea(int* areaIdxPtr);
+int wmGetPartyWorldPos(int *xPtr, int *yPtr);
+int wmGetPartyCurArea(int *areaIdxPtr);
 void wmTownMap();
 int wmCarUseGas(int amount);
 int wmCarFillGas(int amount);
@@ -271,15 +271,15 @@ int wmCarCurrentArea();
 int wmCarGiveToParty();
 int wmSfxMaxCount();
 int wmSfxRollNextIdx();
-int wmSfxIdxName(int sfxIdx, char** namePtr);
+int wmSfxIdxName(int sfxIdx, char **namePtr);
 int wmMapMusicStart();
-int wmSetMapMusic(int mapIdx, const char* name);
-int wmMatchAreaContainingMapIdx(int mapIdx, int* areaIdxPtr);
+int wmSetMapMusic(int mapIdx, const char *name);
+int wmMatchAreaContainingMapIdx(int mapIdx, int *areaIdxPtr);
 int wmTeleportToArea(int areaIdx);
 
 void wmSetPartyWorldPos(int x, int y);
 void wmCarSetCurrentArea(int area);
 
-} // namespace fallout
+} // namespace Fallout2
 
-#endif /* WORLD_MAP_H */
+#endif
