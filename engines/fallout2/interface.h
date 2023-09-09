@@ -1,10 +1,10 @@
-#ifndef INTERFACE_H
-#define INTERFACE_H
+#ifndef FALLOUT2_INTERFACE_H
+#define FALLOUT2_INTERFACE_H
 
-#include "db.h"
-#include "obj_types.h"
+#include "fallout2/db.h"
+#include "fallout2/obj_types.h"
 
-namespace fallout {
+namespace Fallout2 {
 
 typedef enum Hand {
 	// Item1 (Punch)
@@ -42,8 +42,8 @@ extern bool gInterfaceSidePanelsExtendFromScreenEdge;
 int interfaceInit();
 void interfaceReset();
 void interfaceFree();
-int interfaceLoad(File* stream);
-int interfaceSave(File* stream);
+int interfaceLoad(File *stream);
+int interfaceSave(File *stream);
 void interfaceBarHide();
 void interfaceBarShow();
 void interfaceBarEnable();
@@ -53,14 +53,14 @@ void interfaceBarRefresh();
 void interfaceRenderHitPoints(bool animate);
 void interfaceRenderArmorClass(bool animate);
 void interfaceRenderActionPoints(int actionPointsLeft, int bonusActionPoints);
-int interfaceGetCurrentHitMode(int* hitMode, bool* aiming);
+int interfaceGetCurrentHitMode(int *hitMode, bool *aiming);
 int interfaceUpdateItems(bool animated, int leftItemAction, int rightItemAction);
 int interfaceBarSwapHands(bool animated);
-int interfaceGetItemActions(int* leftItemAction, int* rightItemAction);
+int interfaceGetItemActions(int *leftItemAction, int *rightItemAction);
 int interfaceCycleItemAction();
 void _intface_use_item();
 int interfaceGetCurrentHand();
-int interfaceGetActiveItem(Object** a1);
+int interfaceGetActiveItem(Object **a1);
 int _intface_update_ammo_lights();
 void interfaceBarEndButtonsShow(bool animated);
 void interfaceBarEndButtonsHide(bool animated);
@@ -69,10 +69,10 @@ void interfaceBarEndButtonsRenderRedLights();
 int indicatorBarRefresh();
 bool indicatorBarShow();
 bool indicatorBarHide();
-bool interface_get_current_attack_mode(int* hit_mode);
+bool interface_get_current_attack_mode(int *hit_mode);
 
-unsigned char* customInterfaceBarGetBackgroundImageData();
+unsigned char *customInterfaceBarGetBackgroundImageData();
 
-} // namespace fallout
+} // namespace Fallout2
 
-#endif /* INTERFACE_H */
+#endif
