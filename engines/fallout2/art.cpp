@@ -129,8 +129,6 @@ static int *_anon_alias;
 // 0x56CAF0
 static int *gArtCritterFidShoudRunData;
 
-// TODO move back to proto.cpp
-char _cd_path_base[COMPAT_MAX_PATH] = "";
 
 // 0x418840
 int artInit() {
