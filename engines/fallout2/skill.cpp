@@ -1,33 +1,33 @@
-#include "skill.h"
+#include "fallout2/skill.h"
 
-#include <stdio.h>
+/*#include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
+#include <string.h>*/
 
-#include "actions.h"
-#include "color.h"
-#include "combat.h"
-#include "critter.h"
-#include "debug.h"
-#include "display_monitor.h"
-#include "game.h"
-#include "interface.h"
-#include "item.h"
-#include "message.h"
-#include "object.h"
-#include "palette.h"
-#include "party_member.h"
-#include "perk.h"
-#include "pipboy.h"
-#include "platform_compat.h"
-#include "proto.h"
-#include "random.h"
-#include "scripts.h"
-#include "settings.h"
-#include "stat.h"
-#include "trait.h"
+#include "fallout2/actions.h"
+#include "fallout2/color.h"
+#include "fallout2/combat.h"
+#include "fallout2/critter.h"
+#include "fallout2/debug.h"
+#include "fallout2/display_monitor.h"
+#include "fallout2/game.h"
+#include "fallout2/interface.h"
+#include "fallout2/item.h"
+#include "fallout2/message.h"
+#include "fallout2/object.h"
+#include "fallout2/palette.h"
+#include "fallout2/party_member.h"
+#include "fallout2/perk.h"
+#include "fallout2/pipboy.h"
+#include "fallout2/platform_compat.h"
+#include "fallout2/proto.h"
+#include "fallout2/random.h"
+#include "fallout2/scripts.h"
+#include "fallout2/settings.h"
+#include "fallout2/stat.h"
+#include "fallout2/trait.h"
 
-namespace fallout {
+namespace Fallout2 {
 
 #define SKILLS_MAX_USES_PER_DAY (3)
 
@@ -35,9 +35,9 @@ namespace fallout {
 #define HEALABLE_DAMAGE_FLAGS_LENGTH (5)
 
 typedef struct SkillDescription {
-	char* name;
-	char* description;
-	char* attributes;
+	char *name;
+	char *description;
+	char *attributes;
 	int frmId;
 	int defaultValue;
 	int statModifier;
@@ -48,7 +48,7 @@ typedef struct SkillDescription {
 	int field_28;
 } SkillDescription;
 
-static void _show_skill_use_messages(Object* obj, int skill, Object* a3, int a4, int a5);
+static void _show_skill_use_messages(Object *obj, int skill, Object *a3, int a4, int a5);
 static int skillGetFreeUsageSlot(int skill);
 static int skill_use_slot_clear();
 
@@ -76,24 +76,24 @@ static const int gHealableDamageFlags[HEALABLE_DAMAGE_FLAGS_LENGTH] = {
 
 // 0x51D118
 static SkillDescription gSkillDescriptions[SKILL_COUNT] = {
-	{ NULL, NULL, NULL, 28, 5, 4, STAT_AGILITY, STAT_INVALID, 1, 0, 0 },
-	{ NULL, NULL, NULL, 29, 0, 2, STAT_AGILITY, STAT_INVALID, 1, 0, 0 },
-	{ NULL, NULL, NULL, 30, 0, 2, STAT_AGILITY, STAT_INVALID, 1, 0, 0 },
-	{ NULL, NULL, NULL, 31, 30, 2, STAT_AGILITY, STAT_STRENGTH, 1, 0, 0 },
-	{ NULL, NULL, NULL, 32, 20, 2, STAT_AGILITY, STAT_STRENGTH, 1, 0, 0 },
-	{ NULL, NULL, NULL, 33, 0, 4, STAT_AGILITY, STAT_INVALID, 1, 0, 0 },
-	{ NULL, NULL, NULL, 34, 0, 2, STAT_PERCEPTION, STAT_INTELLIGENCE, 1, 25, 0 },
-	{ NULL, NULL, NULL, 35, 5, 1, STAT_PERCEPTION, STAT_INTELLIGENCE, 1, 50, 0 },
-	{ NULL, NULL, NULL, 36, 5, 3, STAT_AGILITY, STAT_INVALID, 1, 0, 0 },
-	{ NULL, NULL, NULL, 37, 10, 1, STAT_PERCEPTION, STAT_AGILITY, 1, 25, 1 },
-	{ NULL, NULL, NULL, 38, 0, 3, STAT_AGILITY, STAT_INVALID, 1, 25, 1 },
-	{ NULL, NULL, NULL, 39, 10, 1, STAT_PERCEPTION, STAT_AGILITY, 1, 25, 1 },
-	{ NULL, NULL, NULL, 40, 0, 4, STAT_INTELLIGENCE, STAT_INVALID, 1, 0, 0 },
-	{ NULL, NULL, NULL, 41, 0, 3, STAT_INTELLIGENCE, STAT_INVALID, 1, 0, 0 },
-	{ NULL, NULL, NULL, 42, 0, 5, STAT_CHARISMA, STAT_INVALID, 1, 0, 0 },
-	{ NULL, NULL, NULL, 43, 0, 4, STAT_CHARISMA, STAT_INVALID, 1, 0, 0 },
-	{ NULL, NULL, NULL, 44, 0, 5, STAT_LUCK, STAT_INVALID, 1, 0, 0 },
-	{ NULL, NULL, NULL, 45, 0, 2, STAT_ENDURANCE, STAT_INTELLIGENCE, 1, 100, 0 },
+	{NULL, NULL, NULL, 28, 5, 4, STAT_AGILITY, STAT_INVALID, 1, 0, 0},
+	{NULL, NULL, NULL, 29, 0, 2, STAT_AGILITY, STAT_INVALID, 1, 0, 0},
+	{NULL, NULL, NULL, 30, 0, 2, STAT_AGILITY, STAT_INVALID, 1, 0, 0},
+	{NULL, NULL, NULL, 31, 30, 2, STAT_AGILITY, STAT_STRENGTH, 1, 0, 0},
+	{NULL, NULL, NULL, 32, 20, 2, STAT_AGILITY, STAT_STRENGTH, 1, 0, 0},
+	{NULL, NULL, NULL, 33, 0, 4, STAT_AGILITY, STAT_INVALID, 1, 0, 0},
+	{NULL, NULL, NULL, 34, 0, 2, STAT_PERCEPTION, STAT_INTELLIGENCE, 1, 25, 0},
+	{NULL, NULL, NULL, 35, 5, 1, STAT_PERCEPTION, STAT_INTELLIGENCE, 1, 50, 0},
+	{NULL, NULL, NULL, 36, 5, 3, STAT_AGILITY, STAT_INVALID, 1, 0, 0},
+	{NULL, NULL, NULL, 37, 10, 1, STAT_PERCEPTION, STAT_AGILITY, 1, 25, 1},
+	{NULL, NULL, NULL, 38, 0, 3, STAT_AGILITY, STAT_INVALID, 1, 25, 1},
+	{NULL, NULL, NULL, 39, 10, 1, STAT_PERCEPTION, STAT_AGILITY, 1, 25, 1},
+	{NULL, NULL, NULL, 40, 0, 4, STAT_INTELLIGENCE, STAT_INVALID, 1, 0, 0},
+	{NULL, NULL, NULL, 41, 0, 3, STAT_INTELLIGENCE, STAT_INVALID, 1, 0, 0},
+	{NULL, NULL, NULL, 42, 0, 5, STAT_CHARISMA, STAT_INVALID, 1, 0, 0},
+	{NULL, NULL, NULL, 43, 0, 4, STAT_CHARISMA, STAT_INVALID, 1, 0, 0},
+	{NULL, NULL, NULL, 44, 0, 5, STAT_LUCK, STAT_INVALID, 1, 0, 0},
+	{NULL, NULL, NULL, 45, 0, 2, STAT_ENDURANCE, STAT_INTELLIGENCE, 1, 100, 0},
 };
 
 // 0x51D430
@@ -179,31 +179,31 @@ void skillsExit() {
 }
 
 // 0x4AA488
-int skillsLoad(File* stream) {
+int skillsLoad(File *stream) {
 	return fileReadInt32List(stream, gTaggedSkills, NUM_TAGGED_SKILLS);
 }
 
 // 0x4AA4A8
-int skillsSave(File* stream) {
+int skillsSave(File *stream) {
 	return fileWriteInt32List(stream, gTaggedSkills, NUM_TAGGED_SKILLS);
 }
 
 // 0x4AA4C8
-void protoCritterDataResetSkills(CritterProtoData* data) {
+void protoCritterDataResetSkills(CritterProtoData *data) {
 	for (int skill = 0; skill < SKILL_COUNT; skill++) {
 		data->skills[skill] = 0;
 	}
 }
 
 // 0x4AA4E4
-void skillsSetTagged(int* skills, int count) {
+void skillsSetTagged(int *skills, int count) {
 	for (int index = 0; index < count; index++) {
 		gTaggedSkills[index] = skills[index];
 	}
 }
 
 // 0x4AA508
-void skillsGetTagged(int* skills, int count) {
+void skillsGetTagged(int *skills, int count) {
 	for (int index = 0; index < count; index++) {
 		skills[index] = gTaggedSkills[index];
 	}
@@ -211,14 +211,11 @@ void skillsGetTagged(int* skills, int count) {
 
 // 0x4AA52C
 bool skillIsTagged(int skill) {
-	return skill == gTaggedSkills[0]
-	       || skill == gTaggedSkills[1]
-	       || skill == gTaggedSkills[2]
-	       || skill == gTaggedSkills[3];
+	return skill == gTaggedSkills[0] || skill == gTaggedSkills[1] || skill == gTaggedSkills[2] || skill == gTaggedSkills[3];
 }
 
 // 0x4AA558
-int skillGetValue(Object* critter, int skill) {
+int skillGetValue(Object *critter, int skill) {
 	if (!skillIsValid(skill)) {
 		return -5;
 	}
@@ -228,12 +225,13 @@ int skillGetValue(Object* critter, int skill) {
 		return baseValue;
 	}
 
-	SkillDescription* skillDescription = &(gSkillDescriptions[skill]);
+	SkillDescription *skillDescription = &(gSkillDescriptions[skill]);
 
-	int v7 = critterGetStat(critter, skillDescription->stat1);
+	int v7 = 0;  // TODO remove
+/*	int v7 = critterGetStat(critter, skillDescription->stat1);  TODO critter.cpp
 	if (skillDescription->stat2 != -1) {
 		v7 += critterGetStat(critter, skillDescription->stat2);
-	}
+	}*/
 
 	int value = skillDescription->defaultValue + skillDescription->statModifier * v7 + baseValue * skillDescription->field_20;
 
@@ -241,13 +239,13 @@ int skillGetValue(Object* critter, int skill) {
 		if (skillIsTagged(skill)) {
 			value += baseValue * skillDescription->field_20;
 
-			if (!perkGetRank(critter, PERK_TAG) || skill != gTaggedSkills[3]) {
+			if (/*!perkGetRank(critter, PERK_TAG) || */ skill != gTaggedSkills[3]) {  // TODO perk.cpp
 				value += 20;
 			}
 		}
 
-		value += traitGetSkillModifier(skill);
-		value += perkGetSkillModifier(critter, skill);
+//		value += traitGetSkillModifier(skill);  TODO trait.cpp
+//		value += perkGetSkillModifier(critter, skill); TODO perk.cpp
 		value += skillGetGameDifficultyModifier(skill);
 	}
 
@@ -264,19 +262,19 @@ int skillGetDefaultValue(int skill) {
 }
 
 // 0x4AA680
-int skillGetBaseValue(Object* obj, int skill) {
+int skillGetBaseValue(Object *obj, int skill) {
 	if (!skillIsValid(skill)) {
 		return 0;
 	}
 
-	Proto* proto;
+	Proto *proto;
 	protoGetProto(obj->pid, &proto);
 
 	return proto->critter.data.skills[skill];
 }
 
 // 0x4AA6BC
-int skillAdd(Object* obj, int skill) {
+int skillAdd(Object *obj, int skill) {
 	if (obj != gDude) {
 		return -5;
 	}
@@ -285,10 +283,10 @@ int skillAdd(Object* obj, int skill) {
 		return -5;
 	}
 
-	Proto* proto;
+	Proto *proto;
 	protoGetProto(obj->pid, &proto);
 
-	int unspentSp = pcGetStat(PC_STAT_UNSPENT_SKILL_POINTS);
+	int unspentSp = 0; //pcGetStat(PC_STAT_UNSPENT_SKILL_POINTS);  TODO stat.cpp
 	if (unspentSp <= 0) {
 		return -4;
 	}
@@ -305,7 +303,7 @@ int skillAdd(Object* obj, int skill) {
 		return -4;
 	}
 
-	int rc = pcSetStat(PC_STAT_UNSPENT_SKILL_POINTS, unspentSp - requiredSp);
+	int rc = 0; // pcSetStat(PC_STAT_UNSPENT_SKILL_POINTS, unspentSp - requiredSp); TODO stat.cpp
 	if (rc == 0) {
 		proto->critter.data.skills[skill] += 1;
 	}
@@ -314,7 +312,7 @@ int skillAdd(Object* obj, int skill) {
 }
 
 // 0x4AA7F8
-int skillAddForce(Object* obj, int skill) {
+int skillAddForce(Object *obj, int skill) {
 	if (obj != gDude) {
 		return -5;
 	}
@@ -323,7 +321,7 @@ int skillAddForce(Object* obj, int skill) {
 		return -5;
 	}
 
-	Proto* proto;
+	Proto *proto;
 	protoGetProto(obj->pid, &proto);
 
 	if (skillGetValue(obj, skill) >= 300) {
@@ -358,7 +356,7 @@ int skillsGetCost(int skillValue) {
 // unspent skill points.
 //
 // 0x4AA8C4
-int skillSub(Object* critter, int skill) {
+int skillSub(Object *critter, int skill) {
 	if (critter != gDude) {
 		return -5;
 	}
@@ -367,21 +365,21 @@ int skillSub(Object* critter, int skill) {
 		return -5;
 	}
 
-	Proto* proto;
+	Proto *proto;
 	protoGetProto(critter->pid, &proto);
 
 	if (proto->critter.data.skills[skill] <= 0) {
 		return -2;
 	}
 
-	int unspentSp = pcGetStat(PC_STAT_UNSPENT_SKILL_POINTS);
+	int unspentSp = 0; // pcGetStat(PC_STAT_UNSPENT_SKILL_POINTS); TODO stat.cpp
 	int skillValue = skillGetValue(critter, skill) - 1;
 
 	// NOTE: Uninline.
 	int requiredSp = skillsGetCost(skillValue);
 
 	int newUnspentSp = unspentSp + requiredSp;
-	int rc = pcSetStat(PC_STAT_UNSPENT_SKILL_POINTS, newUnspentSp);
+	int rc = 0; // pcSetStat(PC_STAT_UNSPENT_SKILL_POINTS, newUnspentSp); TODO stat.cpp
 	if (rc != 0) {
 		return rc;
 	}
@@ -392,7 +390,7 @@ int skillSub(Object* critter, int skill) {
 		int oldSkillCost = skillsGetCost(skillValue);
 		int newSkillCost = skillsGetCost(skillGetValue(critter, skill));
 		if (oldSkillCost != newSkillCost) {
-			rc = pcSetStat(PC_STAT_UNSPENT_SKILL_POINTS, newUnspentSp - 1);
+			rc = 0; // pcSetStat(PC_STAT_UNSPENT_SKILL_POINTS, newUnspentSp - 1);  TODO stat.cpp
 			if (rc != 0) {
 				return rc;
 			}
@@ -409,8 +407,8 @@ int skillSub(Object* critter, int skill) {
 // Decrements specified skill value by one.
 //
 // 0x4AAA34
-int skillSubForce(Object* obj, int skill) {
-	Proto* proto;
+int skillSubForce(Object *obj, int skill) {
+	Proto *proto;
 
 	if (obj != gDude) {
 		return -5;
@@ -432,46 +430,46 @@ int skillSubForce(Object* obj, int skill) {
 }
 
 // 0x4AAAA4
-int skillRoll(Object* critter, int skill, int modifier, int* howMuch) {
+int skillRoll(Object *critter, int skill, int modifier, int *howMuch) {
 	if (!skillIsValid(skill)) {
 		return ROLL_FAILURE;
 	}
 
-	if (critter == gDude && skill != SKILL_STEAL) {
-		Object* partyMember = partyMemberGetBestInSkill(skill);
+/*	if (critter == gDude && skill != SKILL_STEAL) {  TODO party_member.cpp
+		Object *partyMember = partyMemberGetBestInSkill(skill);
 		if (partyMember != NULL) {
 			if (partyMemberGetBestSkill(partyMember) == skill) {
 				critter = partyMember;
 			}
 		}
-	}
+	}*/
 
 	int skillValue = skillGetValue(critter, skill);
 
-	if (critter == gDude && skill == SKILL_STEAL) {
+/*	if (critter == gDude && skill == SKILL_STEAL) {  TODO critter.cpp
 		if (dudeHasState(DUDE_STATE_SNEAKING)) {
 			if (dudeIsSneaking()) {
 				skillValue += 30;
 			}
 		}
-	}
+	}*/
 
-	int criticalChance = critterGetStat(critter, STAT_CRITICAL_CHANCE);
+	int criticalChance = 0; // critterGetStat(critter, STAT_CRITICAL_CHANCE); TODO
 	return randomRoll(skillValue + modifier, criticalChance, howMuch);
 }
 
 // 0x4AAB9C
-char* skillGetName(int skill) {
+char *skillGetName(int skill) {
 	return skillIsValid(skill) ? gSkillDescriptions[skill].name : NULL;
 }
 
 // 0x4AABC0
-char* skillGetDescription(int skill) {
+char *skillGetDescription(int skill) {
 	return skillIsValid(skill) ? gSkillDescriptions[skill].description : NULL;
 }
 
 // 0x4AABE4
-char* skillGetAttributes(int skill) {
+char *skillGetAttributes(int skill) {
 	return skillIsValid(skill) ? gSkillDescriptions[skill].attributes : NULL;
 }
 
@@ -481,7 +479,7 @@ int skillGetFrmId(int skill) {
 }
 
 // 0x4AAC2C
-static void _show_skill_use_messages(Object* obj, int skill, Object* a3, int a4, int criticalChanceModifier) {
+static void _show_skill_use_messages(Object *obj, int skill, Object *a3, int a4, int criticalChanceModifier) {
 	if (obj != gDude) {
 		return;
 	}
@@ -490,7 +488,7 @@ static void _show_skill_use_messages(Object* obj, int skill, Object* a3, int a4,
 		return;
 	}
 
-	SkillDescription* skillDescription = &(gSkillDescriptions[skill]);
+	SkillDescription *skillDescription = &(gSkillDescriptions[skill]);
 
 	int baseExperience = skillDescription->experience;
 	if (baseExperience == 0) {
@@ -498,12 +496,12 @@ static void _show_skill_use_messages(Object* obj, int skill, Object* a3, int a4,
 	}
 
 	if (skillDescription->field_28 && criticalChanceModifier < 0) {
-		baseExperience += abs(criticalChanceModifier);
+		baseExperience += ABS(criticalChanceModifier);
 	}
 
 	int xpToAdd = a4 * baseExperience;
 
-	int before = pcGetStat(PC_STAT_EXPERIENCE);
+/*	int before = pcGetStat(PC_STAT_EXPERIENCE);  TODO stat.cpp
 
 	if (pcAddExperience(xpToAdd) == 0 && a4 > 0) {
 		MessageListItem messageListItem;
@@ -515,12 +513,13 @@ static void _show_skill_use_messages(Object* obj, int skill, Object* a3, int a4,
 			snprintf(text, sizeof(text), messageListItem.text, after - before);
 			displayMonitorAddMessage(text);
 		}
-	}
+	}*/
 }
 
 // skill_use
 // 0x4AAD08
-int skillUse(Object* obj, Object* a2, int skill, int criticalChanceModifier) {
+int skillUse(Object *obj, Object *a2, int skill, int criticalChanceModifier) {
+	/* TODO critter, party...
 	MessageListItem messageListItem;
 	char text[60];
 
@@ -1000,11 +999,13 @@ int skillUse(Object* obj, Object* a2, int skill, int criticalChanceModifier) {
 		scriptsExecMapUpdateProc();
 	}
 
-	return 0;
+	return 0;*/
+	return -1; // TODO remove
 }
 
 // 0x4ABBE4
-int skillsPerformStealing(Object* a1, Object* a2, Object* item, bool isPlanting) {
+int skillsPerformStealing(Object *a1, Object *a2, Object *item, bool isPlanting) {
+	/* TODO perk, citter...
 	int howMuch;
 
 	int stealModifier = _gStealCount;
@@ -1083,7 +1084,8 @@ int skillsPerformStealing(Object* a1, Object* a2, Object* item, bool isPlanting)
 		displayMonitorAddMessage(text);
 
 		return 0;
-	}
+	}*/
+	return -1; //TODO remove
 }
 
 // 0x4ABDEC
@@ -1124,7 +1126,7 @@ static int skillGetFreeUsageSlot(int skill) {
 		}
 	}
 
-	int time = gameTimeGetTime();
+	int time = GAME_TIME_TICKS_PER_HOUR; // gameTimeGetTime(); TODO script.cpp
 	int hoursSinceLastUsage = (time - _timesSkillUsed[skill][0]) / GAME_TIME_TICKS_PER_HOUR;
 	if (hoursSinceLastUsage <= 24) {
 		return -1;
@@ -1146,7 +1148,7 @@ int skillUpdateLastUse(int skill) {
 		}
 	}
 
-	_timesSkillUsed[skill][slot] = gameTimeGetTime();
+	_timesSkillUsed[skill][slot] = /*gameTimeGetTime();*/ GAME_TIME_TICKS_PER_HOUR; // TODO script.cpp
 
 	return 0;
 }
@@ -1160,17 +1162,17 @@ int skill_use_slot_clear() {
 }
 
 // 0x4ABF3C
-int skillsUsageSave(File* stream) {
-	return fileWriteInt32List(stream, (int*)_timesSkillUsed, SKILL_COUNT * SKILLS_MAX_USES_PER_DAY);
+int skillsUsageSave(File *stream) {
+	return fileWriteInt32List(stream, (int *)_timesSkillUsed, SKILL_COUNT * SKILLS_MAX_USES_PER_DAY);
 }
 
 // 0x4ABF5C
-int skillsUsageLoad(File* stream) {
-	return fileReadInt32List(stream, (int*)_timesSkillUsed, SKILL_COUNT * SKILLS_MAX_USES_PER_DAY);
+int skillsUsageLoad(File *stream) {
+	return fileReadInt32List(stream, (int *)_timesSkillUsed, SKILL_COUNT * SKILLS_MAX_USES_PER_DAY);
 }
 
 // 0x4ABF7C
-char* skillsGetGenericResponse(Object* critter, bool isDude) {
+char *skillsGetGenericResponse(Object *critter, bool isDude) {
 	int baseMessageId;
 	int count;
 
@@ -1185,8 +1187,8 @@ char* skillsGetGenericResponse(Object* critter, bool isDude) {
 	int messageId = randomBetween(0, count);
 
 	MessageListItem messageListItem;
-	char* msg = getmsg(&gSkillsMessageList, &messageListItem, baseMessageId + messageId);
+	char *msg = getmsg(&gSkillsMessageList, &messageListItem, baseMessageId + messageId);
 	return msg;
 }
 
-} // namespace fallout
+} // namespace Fallout2
