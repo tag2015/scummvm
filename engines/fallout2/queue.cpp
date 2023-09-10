@@ -51,6 +51,8 @@ static QueueListNode *gLastFoundQueueListNode = NULL;
 static QueueListNode *gQueueListHead;
 
 // 0x51C540
+static EventTypeDescription gEventTypeDescriptions[EVENT_TYPE_COUNT] = {};
+/* TODO later
 static EventTypeDescription gEventTypeDescriptions[EVENT_TYPE_COUNT] = {
 	{drugEffectEventProcess, internal_free, drugEffectEventRead, drugEffectEventWrite, true, _item_d_clear},
 	{knockoutEventProcess, NULL, NULL, NULL, true, _critter_wake_clear},
@@ -66,7 +68,7 @@ static EventTypeDescription gEventTypeDescriptions[EVENT_TYPE_COUNT] = {
 	{explosionFailureEventProcess, NULL, NULL, NULL, true, _queue_explode_exit},
 	{mapUpdateEventProcess, NULL, NULL, NULL, true, NULL},
 	{ambientSoundEffectEventProcess, internal_free, NULL, NULL, true, NULL},
-};
+};*/
 
 // 0x4A2320
 void queueInit() {
@@ -124,7 +126,7 @@ int queueLoad(File *stream) {
 		} else {
 			obj = objectFindFirst();
 			while (obj != NULL) {
-				obj = _inven_find_id(obj, objectId);
+				obj = NULL; // _inven_find_id(obj, objectId);  TODO inventory.cpp
 				if (obj != NULL) {
 					break;
 				}
@@ -245,7 +247,7 @@ int queueAddEvent(int delay, Object *obj, void *data, int eventType) {
 		return -1;
 	}
 
-	int v1 = gameTimeGetTime();
+	int v1 = 0; // gameTimeGetTime();  TODO scripts.cpp
 	int v2 = v1 + delay;
 	newQueueListNode->time = v2;
 	newQueueListNode->type = eventType;
@@ -348,7 +350,7 @@ bool queueHasEvent(Object *owner, int eventType) {
 
 // 0x4A26D0
 int queueProcessEvents() {
-	int time = gameTimeGetTime();
+	int time = 0; // gameTimeGetTime(); TODO scripts.cpp
 	int v1 = 0;
 
 	while (gQueueListHead != NULL) {
@@ -439,7 +441,7 @@ int queueGetNextEventTime() {
 
 // 0x4A281C
 static int flareEventProcess(Object *obj, void *data) {
-	_obj_destroy(obj);
+//	_obj_destroy(obj);  TODO proto_instance
 	return 1;
 }
 
