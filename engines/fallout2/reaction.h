@@ -1,9 +1,9 @@
-#ifndef REACTION_H
-#define REACTION_H
+#ifndef FALLOUT2_REACTION_H
+#define FALLOUT2_REACTION_H
 
-#include "obj_types.h"
+#include "fallout2/obj_types.h"
 
-namespace fallout {
+namespace Fallout2 {
 
 typedef enum NpcReaction {
 	NPC_REACTION_BAD,
@@ -11,11 +11,11 @@ typedef enum NpcReaction {
 	NPC_REACTION_GOOD,
 } NpcReaction;
 
-int reactionSetValue(Object* critter, int a2);
+int reactionSetValue(Object *critter, int a2);
 int reactionTranslateValue(int a1);
 int _reaction_influence_();
-int reactionGetValue(Object* critter);
+int reactionGetValue(Object *critter);
 
-} // namespace fallout
+} // namespace Fallout2
 
-#endif /* REACTION_H */
+#endif
