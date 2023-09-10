@@ -245,7 +245,7 @@ int strParseKeyValue(char **stringPtr, char *key, int *valuePtr, const char *del
 	tmp2 = *(str + v4);
 	*(str + v4) = '\0';
 
-	strncpy(key, str, sizeof(key) - 1);
+	strncpy(key, str, strlen(str) + 1);
 
 	*stringPtr = *stringPtr + v3;
 	*valuePtr = atoi(str + v4 + 1);

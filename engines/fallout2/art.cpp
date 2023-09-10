@@ -517,7 +517,7 @@ int artCopyFileName(int objectType, int id, char *dest) {
 		return -1;
 	}
 
-	strncpy(dest, ptr->fileNames + id * 13, sizeof(dest) - 1);
+	strncpy(dest, ptr->fileNames + id * 13, 15);
 
 	return 0;
 }
