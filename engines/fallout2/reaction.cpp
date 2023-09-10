@@ -1,15 +1,15 @@
-#include "reaction.h"
+#include "fallout2/reaction.h"
 
-#include "scripts.h"
+#include "fallout2/scripts.h"
 
-namespace fallout {
+namespace Fallout2 {
 
 // 0x4A29D0
-int reactionSetValue(Object* critter, int value) {
+int reactionSetValue(Object *critter, int value) {
 	ProgramValue programValue;
 	programValue.opcode = VALUE_TYPE_INT;
 	programValue.integerValue = value;
-	scriptSetLocalVar(critter->sid, 0, programValue);
+//	scriptSetLocalVar(critter->sid, 0, programValue);  TODO script.cpp
 	return 0;
 }
 
@@ -36,14 +36,14 @@ int _reaction_influence_() {
 }
 
 // 0x4A2B28
-int reactionGetValue(Object* critter) {
+int reactionGetValue(Object *critter) {
 	ProgramValue programValue;
 
-	if (scriptGetLocalVar(critter->sid, 0, programValue) == -1) {
+//	if (scriptGetLocalVar(critter->sid, 0, programValue) == -1) {  TODO script.cpp
 		return -1;
-	}
+//	}
 
-	return programValue.integerValue;
+//	return programValue.integerValue;
 }
 
-} // namespace fallout
+} // namespace Fallout2
