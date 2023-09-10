@@ -1,10 +1,10 @@
-#ifndef QUEUE_H
-#define QUEUE_H
+#ifndef FALLOUT2_QUEUE_H
+#define FALLOUT2_QUEUE_H
 
-#include "db.h"
-#include "obj_types.h"
+#include "fallout2/db.h"
+#include "fallout2/obj_types.h"
 
-namespace fallout {
+namespace Fallout2 {
 
 typedef enum EventType {
 	EVENT_TYPE_DRUG = 0,
@@ -50,28 +50,28 @@ typedef struct AmbientSoundEffectEvent {
 	int ambientSoundEffectIndex;
 } AmbientSoundEffectEvent;
 
-typedef int QueueEventHandler(Object* owner, void* data);
-typedef void QueueEventDataFreeProc(void* data);
-typedef int QueueEventDataReadProc(File* stream, void** dataPtr);
-typedef int QueueEventDataWriteProc(File* stream, void* data);
+typedef int QueueEventHandler(Object *owner, void *data);
+typedef void QueueEventDataFreeProc(void *data);
+typedef int QueueEventDataReadProc(File *stream, void **dataPtr);
+typedef int QueueEventDataWriteProc(File *stream, void *data);
 
 void queueInit();
 int queueExit();
-int queueLoad(File* stream);
-int queueSave(File* stream);
-int queueAddEvent(int delay, Object* owner, void* data, int eventType);
-int queueRemoveEvents(Object* owner);
-int queueRemoveEventsByType(Object* owner, int eventType);
-bool queueHasEvent(Object* owner, int eventType);
+int queueLoad(File *stream);
+int queueSave(File *stream);
+int queueAddEvent(int delay, Object *owner, void *data, int eventType);
+int queueRemoveEvents(Object *owner);
+int queueRemoveEventsByType(Object *owner, int eventType);
+bool queueHasEvent(Object *owner, int eventType);
 int queueProcessEvents();
 void queueClear();
-void _queue_clear_type(int eventType, QueueEventHandler* fn);
+void _queue_clear_type(int eventType, QueueEventHandler *fn);
 int queueGetNextEventTime();
 void _queue_leaving_map();
 bool queueIsEmpty();
-void* queueFindFirstEvent(Object* owner, int eventType);
-void* queueFindNextEvent(Object* owner, int eventType);
+void *queueFindFirstEvent(Object *owner, int eventType);
+void *queueFindNextEvent(Object *owner, int eventType);
 
-} // namespace fallout
+} // namespace Fallout2
 
-#endif /* QUEUE_H */
+#endif
