@@ -429,8 +429,8 @@ static bool configParseKeyValue(char *string, char *key, char *value) {
 
 	*pch = '\0';
 
-	strncpy(key, string, sizeof(key) - 1);
-	strncpy(value, pch + 1, sizeof(key) - 1);
+	strncpy(key, string, 259);
+	strncpy(value, pch + 1, 259);
 
 	*pch = '=';
 
