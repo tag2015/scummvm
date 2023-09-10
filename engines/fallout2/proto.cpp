@@ -388,7 +388,7 @@ static int _proto_critter_init(Proto *a1, int a2) {
 	data->experience = 60;
 	data->killType = 0;
 	data->damageType = 0;
-//	protoCritterDataResetStats(data);  TODO stat.cpp
+	protoCritterDataResetStats(data);
 	protoCritterDataResetSkills(data);
 
 	return 0;
@@ -778,9 +778,9 @@ int _proto_update_init(Object *obj) {
 	data->inventory.capacity = 0;
 	data->inventory.items = NULL;
 	// _combat_data_init(obj);  TODO combat.cpp
-	data->critter.hp = STAT_MAXIMUM_HIT_POINTS; //  critterGetStat(obj, STAT_MAXIMUM_HIT_POINTS); TODO stat.cpp
-	data->critter.combat.ap = STAT_MAXIMUM_ACTION_POINTS; // critterGetStat(obj, STAT_MAXIMUM_ACTION_POINTS);  TODO stat.cpp
-	// critterUpdateDerivedStats(obj);  // stat.cpp
+	data->critter.hp = critterGetStat(obj, STAT_MAXIMUM_HIT_POINTS);
+	data->critter.combat.ap = critterGetStat(obj, STAT_MAXIMUM_ACTION_POINTS);
+	critterUpdateDerivedStats(obj);
 	obj->data.critter.combat.whoHitMe = NULL;
 
 	Proto *proto;
@@ -805,7 +805,7 @@ int _proto_dude_update_gender() {
 //	}
 
 	int frmId;
-	if (/* critterGetStat(gDude, STAT_GENDER) == GENDER_MALE*/ 1) {  // TODO stat.cpp
+	if (critterGetStat(gDude, STAT_GENDER) == GENDER_MALE) {
 		frmId = _art_vault_person_nums[nativeLook][GENDER_MALE];
 	} else {
 		frmId = _art_vault_person_nums[nativeLook][GENDER_FEMALE];
@@ -872,7 +872,7 @@ int _proto_dude_init(const char *path) {
 		gDude->flags &= ~OBJECT_NO_BLOCK;
 	}
 
-	// critterUpdateDerivedStats(gDude); TODO stat.cpp
+	critterUpdateDerivedStats(gDude);
 	// critterAdjustHitPoints(gDude, 10000);  TODO critter.cpp
 
 	if (_retval) {
@@ -1177,7 +1177,7 @@ int protoInit() {
 	_critter_stats_list = _critter_stats_list_strs;
 	_critter_stats_list_None = _aNone_1;
 	for (i = 0; i < STAT_COUNT; i++) {
-		_critter_stats_list_strs[i] = ""; //statGetName(i);  TODO stat.cpp
+		_critter_stats_list_strs[i] = statGetName(i);
 		if (_critter_stats_list_strs[i] == NULL) {
 			debugPrint("\nError: Finding stat names!");
 			return -1;
@@ -2107,8 +2107,8 @@ int _ResetPlayer() {
 	Proto *proto;
 	protoGetProto(gDude->pid, &proto);
 
-	// pcStatsReset();  TODO stat.cpp
-	// protoCritterDataResetStats(&(proto->critter.data));
+	pcStatsReset();
+	protoCritterDataResetStats(&(proto->critter.data));
 
 	// SFALL: Fix base EMP DR not being properly initialized.
 	proto->critter.data.baseStats[STAT_DAMAGE_RESISTANCE_EMP] = 100;
@@ -2119,7 +2119,7 @@ int _ResetPlayer() {
 	skillsReset();
 	// perksReset();  TODO perks.cpp
 	// traitsReset();  TODO traits.cpp
-	// critterUpdateDerivedStats(gDude);  TODO stat.cpp
+	critterUpdateDerivedStats(gDude);
 	return 0;
 }
 
