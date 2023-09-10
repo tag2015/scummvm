@@ -459,7 +459,7 @@ Program *programCreateByPath(const char *path) {
 	memset(program, 0, sizeof(Program));
 
 	program->name = (char *)internal_malloc_safe(strlen(path) + 1, __FILE__, __LINE__); // ..\\int\\INTRPRET.C, 466
-	strncpy(program->name, path, sizeof(program->name) - 1);
+	strncpy(program->name, path, strlen(path) + 1);
 
 	program->child = NULL;
 	program->parent = NULL;
@@ -600,7 +600,7 @@ int programPushString(Program *program, char *string) {
 					}
 
 					*(short *)(heap + 2) = 0;
-					strncpy((char *)(heap + 4), string, sizeof(string)); // TODO check
+					strncpy((char *)(heap + 4), string, strlen(string) + 1); // TODO check
 
 					*(heap + v27 + 3) = '\0';
 					return (heap + 4) - (program->dynamicStrings + 4);
@@ -627,7 +627,7 @@ int programPushString(Program *program, char *string) {
 	*(short *)(v20) = v27;
 	*(short *)(v20 + 2) = 0;
 
-	strncpy((char *)(v20 + 4), string, sizeof(string));
+	strncpy((char *)(v20 + 4), string, strlen(string) + 1);
 
 	v23 = v20 + v27;
 	*(v23 + 3) = '\0';
@@ -1369,7 +1369,7 @@ static void opAdd(Program *program) {
 		case VALUE_TYPE_DYNAMIC_STRING:
 			tempString = programGetString(program, value[0].opcode, value[0].integerValue);
 			strings[0] = (char *)internal_malloc_safe(strlen(tempString) + 1, __FILE__, __LINE__); // "..\\int\\INTRPRET.C", 1002
-			strncpy(strings[0], tempString, sizeof(strings[0]) - 1);
+			strncpy(strings[0], tempString, strlen(tempString) + 1);
 			break;
 		case VALUE_TYPE_FLOAT:
 			strings[0] = (char *)internal_malloc_safe(80, __FILE__, __LINE__); // "..\\int\\INTRPRET.C", 1011
@@ -1386,7 +1386,7 @@ static void opAdd(Program *program) {
 		}
 
 		tempString = (char *)internal_malloc_safe(strlen(strings[1]) + strlen(strings[0]) + 1, __FILE__, __LINE__); // "..\\int\\INTRPRET.C", 1015
-		strncpy(tempString, strings[1], sizeof(tempString) - 1);
+		strncpy(tempString, strings[1], strlen(strings[1]) + 1);
 		strcat_s(tempString, sizeof(tempString), strings[0]);
 
 		programStackPushString(program, tempString);
