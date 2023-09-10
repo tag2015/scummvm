@@ -219,7 +219,7 @@ int dictionaryAddValue(Dictionary *dictionary, const char *key, const void *valu
 		return -1;
 	}
 
-	strncpy(keyCopy, key, sizeof(keyCopy) - 1);
+	strncpy(keyCopy, key, strlen(key) + 1);
 
 	// Make a copy of the value.
 	void *valueCopy = NULL;
