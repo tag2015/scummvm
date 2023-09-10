@@ -43,6 +43,7 @@
 #include "fallout2/random.h"
 #include "fallout2/settings.h"
 #include "fallout2/skill.h"
+#include "fallout2/stat.h"
 #include "fallout2/tile.h"
 #include "fallout2/version.h"
 #include "fallout2/win32.h"
@@ -296,10 +297,16 @@ Common::Error Fallout2Engine::run() {
 	badwordsInit();
 
 	// init skills messagelist
-	if(skillsInit() == 0)
+	if (skillsInit() == 0)
 		debug("Initialized skills!");
 	else
 		debug("Error initializing skills!");
+
+	// init stats messagelist
+	if (statsInit() == 0)
+		debug("Initialized stats!");
+	else
+		debug("Error initializing stats!");
 
 	// throw a dice (yay!)
 	debugPrint("RandomRoll (diff= 70) result: %d", randomRoll(70, 5, NULL));
