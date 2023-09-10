@@ -189,7 +189,7 @@ static char **_critter_stats_list;
 
 // NOTE: Inlined.
 void _proto_make_path(char *path, int pid) {
-	strncpy(path, _cd_path_base, sizeof(path) - 1);
+	strncpy(path, _cd_path_base, 259);
 	strcat_s(path, sizeof(path), _proto_path_base);
 	if (pid != -1) {
 		strcat_s(path, sizeof(path), artGetObjectTypeName(PID_TYPE(pid)));
@@ -242,7 +242,7 @@ int _proto_list_str(int pid, char *proto_path) {
 		*pch = '\0';
 	}
 
-	strncpy(proto_path, string, sizeof(proto_path) - 1);
+	strncpy(proto_path, string, strlen(string) + 1);
 
 	return 0;
 }
