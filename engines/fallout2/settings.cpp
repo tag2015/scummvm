@@ -16,7 +16,6 @@ static void settingsWrite(const char *section, const char *key, double &value);
 Settings settings;
 
 bool settingsInit(bool isMapper, int argc, char **argv) {
-	warning("initializing settings, gGameConfigInitialized: %d", gGameConfigInitialized);
 	if (!gameConfigInit(isMapper, argc, argv)) {
 		return false;
 	}
