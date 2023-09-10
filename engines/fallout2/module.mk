@@ -34,6 +34,7 @@ MODULE_OBJS = \
 	pcx.o \
 	platform_compat.o \
 	proto.o \
+	queue.o \
 	random.o \
 	region.o \
 	settings.o \
