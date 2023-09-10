@@ -1,16 +1,16 @@
-#include "string_parsers.h"
+#include "fallout2/string_parsers.h"
 
-#include <stdlib.h>
-#include <string.h>
+/*#include <stdlib.h>
+#include <string.h>*/
 
-#include "debug.h"
-#include "platform_compat.h"
+#include "fallout2/debug.h"
+#include "fallout2/platform_compat.h"
 
-namespace fallout {
+namespace Fallout2 {
 
 // strParseInt
 // 0x4AFD10
-int strParseInt(char** stringPtr, int* valuePtr) {
+int strParseInt(char **stringPtr, int *valuePtr) {
 	char *str, *remaining_str;
 	size_t v1, v2, v3;
 	char tmp;
@@ -52,7 +52,7 @@ int strParseInt(char** stringPtr, int* valuePtr) {
 
 // strParseStrFromList
 // 0x4AFE08
-int strParseStrFromList(char** stringPtr, int* valuePtr, const char** stringList, int stringListLength) {
+int strParseStrFromList(char **stringPtr, int *valuePtr, const char **stringList, int stringListLength) {
 	int i;
 	char *str, *remaining_str;
 	size_t v1, v2, v3;
@@ -107,7 +107,7 @@ int strParseStrFromList(char** stringPtr, int* valuePtr, const char** stringList
 
 // strParseStrFromFunc
 // 0x4AFEDC
-int strParseStrFromFunc(char** stringPtr, int* valuePtr, StringParserCallback* callback) {
+int strParseStrFromFunc(char **stringPtr, int *valuePtr, StringParserCallback *callback) {
 	char *str, *remaining_str;
 	size_t v1, v2, v3;
 	char tmp;
@@ -155,8 +155,8 @@ int strParseStrFromFunc(char** stringPtr, int* valuePtr, StringParserCallback* c
 }
 
 // 0x4AFF7C
-int strParseIntWithKey(char** stringPtr, const char* key, int* valuePtr, const char* delimeter) {
-	char* str;
+int strParseIntWithKey(char **stringPtr, const char *key, int *valuePtr, const char *delimeter) {
+	char *str;
 	size_t v1, v2, v3, v4, v5;
 	char tmp1, tmp2;
 	int result;
@@ -208,8 +208,8 @@ int strParseIntWithKey(char** stringPtr, const char* key, int* valuePtr, const c
 }
 
 // 0x4B005C
-int strParseKeyValue(char** stringPtr, char* key, int* valuePtr, const char* delimiter) {
-	char* str;
+int strParseKeyValue(char **stringPtr, char *key, int *valuePtr, const char *delimiter) {
+	char *str;
 	size_t v1, v2, v3, v4, v5;
 	char tmp1, tmp2;
 
@@ -245,7 +245,7 @@ int strParseKeyValue(char** stringPtr, char* key, int* valuePtr, const char* del
 	tmp2 = *(str + v4);
 	*(str + v4) = '\0';
 
-	strcpy(key, str);
+	strncpy(key, str, sizeof(key) - 1);
 
 	*stringPtr = *stringPtr + v3;
 	*valuePtr = atoi(str + v4 + 1);
@@ -256,4 +256,4 @@ int strParseKeyValue(char** stringPtr, char* key, int* valuePtr, const char* del
 	return 0;
 }
 
-} // namespace fallout
+} // namespace Fallout2
