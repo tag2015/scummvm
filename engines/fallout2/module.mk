@@ -38,6 +38,7 @@ MODULE_OBJS = \
 	region.o \
 	settings.o \
 	sfall_config.o \
+	skill.o \
 	text_font.o \
 	text_object.o \
 	tile.o \
