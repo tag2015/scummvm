@@ -389,7 +389,7 @@ static int _proto_critter_init(Proto *a1, int a2) {
 	data->killType = 0;
 	data->damageType = 0;
 //	protoCritterDataResetStats(data);  TODO stat.cpp
-//	protoCritterDataResetSkills(data);  TODO skill.cpp
+	protoCritterDataResetSkills(data);
 
 	return 0;
 }
@@ -2115,8 +2115,8 @@ int _ResetPlayer() {
 
 	// critterReset();  TODO critter.cpp
 	// characterEditorReset();  TODO character_editor.cpp
-	// protoCritterDataResetSkills(&(proto->critter.data));  TODO skill.cpp
-	// skillsReset(); TODO skill.cpp
+	protoCritterDataResetSkills(&(proto->critter.data));
+	skillsReset();
 	// perksReset();  TODO perks.cpp
 	// traitsReset();  TODO traits.cpp
 	// critterUpdateDerivedStats(gDude);  TODO stat.cpp
