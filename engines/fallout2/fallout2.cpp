@@ -42,6 +42,7 @@
 #include "fallout2/platform_compat.h"
 #include "fallout2/random.h"
 #include "fallout2/settings.h"
+#include "fallout2/skill.h"
 #include "fallout2/tile.h"
 #include "fallout2/version.h"
 #include "fallout2/win32.h"
@@ -293,6 +294,12 @@ Common::Error Fallout2Engine::run() {
 	tileDisable();
 
 	badwordsInit();
+
+	// init skills messagelist
+	if(skillsInit() == 0)
+		debug("Initialized skills!");
+	else
+		debug("Error initializing skills!");
 
 	// throw a dice (yay!)
 	debugPrint("RandomRoll (diff= 70) result: %d", randomRoll(70, 5, NULL));
