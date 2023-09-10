@@ -41,6 +41,7 @@ MODULE_OBJS = \
 	sfall_config.o \
 	skill.o \
 	stat.o \
+	string_parsers.o \
 	text_font.o \
 	text_object.o \
 	tile.o \
