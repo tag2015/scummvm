@@ -39,6 +39,7 @@
 #include "fallout2/memory.h"
 #include "fallout2/message.h"
 #include "fallout2/palette.h"
+#include "fallout2/party_member.h"
 #include "fallout2/platform_compat.h"
 #include "fallout2/random.h"
 #include "fallout2/settings.h"
@@ -300,13 +301,18 @@ Common::Error Fallout2Engine::run() {
 	if (skillsInit() == 0)
 		debug("Initialized skills!");
 	else
-		debug("Error initializing skills!");
+		warning("Error initializing skills");
 
 	// init stats messagelist
 	if (statsInit() == 0)
 		debug("Initialized stats!");
 	else
-		debug("Error initializing stats!");
+		warning("Error initializing stats");
+
+	if (partyMembersInit() != 0)
+		warning("Failed on partyMember_init");
+	else
+		debug("Initialized party members!");
 
 	// throw a dice (yay!)
 	debugPrint("RandomRoll (diff= 70) result: %d", randomRoll(70, 5, NULL));

@@ -31,6 +31,7 @@ MODULE_OBJS = \
 	message.o \
 	object.o \
 	palette.o \
+	party_member.o \
 	pcx.o \
 	platform_compat.o \
 	proto.o \
