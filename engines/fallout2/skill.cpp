@@ -286,7 +286,7 @@ int skillAdd(Object *obj, int skill) {
 	Proto *proto;
 	protoGetProto(obj->pid, &proto);
 
-	int unspentSp = 0; //pcGetStat(PC_STAT_UNSPENT_SKILL_POINTS);  TODO stat.cpp
+	int unspentSp = pcGetStat(PC_STAT_UNSPENT_SKILL_POINTS);
 	if (unspentSp <= 0) {
 		return -4;
 	}
@@ -303,7 +303,7 @@ int skillAdd(Object *obj, int skill) {
 		return -4;
 	}
 
-	int rc = 0; // pcSetStat(PC_STAT_UNSPENT_SKILL_POINTS, unspentSp - requiredSp); TODO stat.cpp
+	int rc = pcSetStat(PC_STAT_UNSPENT_SKILL_POINTS, unspentSp - requiredSp);
 	if (rc == 0) {
 		proto->critter.data.skills[skill] += 1;
 	}
@@ -372,14 +372,14 @@ int skillSub(Object *critter, int skill) {
 		return -2;
 	}
 
-	int unspentSp = 0; // pcGetStat(PC_STAT_UNSPENT_SKILL_POINTS); TODO stat.cpp
+	int unspentSp = pcGetStat(PC_STAT_UNSPENT_SKILL_POINTS);
 	int skillValue = skillGetValue(critter, skill) - 1;
 
 	// NOTE: Uninline.
 	int requiredSp = skillsGetCost(skillValue);
 
 	int newUnspentSp = unspentSp + requiredSp;
-	int rc = 0; // pcSetStat(PC_STAT_UNSPENT_SKILL_POINTS, newUnspentSp); TODO stat.cpp
+	int rc = pcSetStat(PC_STAT_UNSPENT_SKILL_POINTS, newUnspentSp);
 	if (rc != 0) {
 		return rc;
 	}
@@ -390,7 +390,7 @@ int skillSub(Object *critter, int skill) {
 		int oldSkillCost = skillsGetCost(skillValue);
 		int newSkillCost = skillsGetCost(skillGetValue(critter, skill));
 		if (oldSkillCost != newSkillCost) {
-			rc = 0; // pcSetStat(PC_STAT_UNSPENT_SKILL_POINTS, newUnspentSp - 1);  TODO stat.cpp
+			rc = pcSetStat(PC_STAT_UNSPENT_SKILL_POINTS, newUnspentSp - 1);
 			if (rc != 0) {
 				return rc;
 			}
@@ -454,7 +454,7 @@ int skillRoll(Object *critter, int skill, int modifier, int *howMuch) {
 		}
 	}*/
 
-	int criticalChance = 0; // critterGetStat(critter, STAT_CRITICAL_CHANCE); TODO
+	int criticalChance = critterGetStat(critter, STAT_CRITICAL_CHANCE);
 	return randomRoll(skillValue + modifier, criticalChance, howMuch);
 }
 
@@ -501,7 +501,7 @@ static void _show_skill_use_messages(Object *obj, int skill, Object *a3, int a4,
 
 	int xpToAdd = a4 * baseExperience;
 
-/*	int before = pcGetStat(PC_STAT_EXPERIENCE);  TODO stat.cpp
+	int before = pcGetStat(PC_STAT_EXPERIENCE);
 
 	if (pcAddExperience(xpToAdd) == 0 && a4 > 0) {
 		MessageListItem messageListItem;
@@ -511,9 +511,9 @@ static void _show_skill_use_messages(Object *obj, int skill, Object *a3, int a4,
 
 			char text[60];
 			snprintf(text, sizeof(text), messageListItem.text, after - before);
-			displayMonitorAddMessage(text);
+//			displayMonitorAddMessage(text);  TODO: display_monitor.cpp
 		}
-	}*/
+	}
 }
 
 // skill_use
