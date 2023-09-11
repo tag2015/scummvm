@@ -343,10 +343,10 @@ int objectsInit(unsigned char *buf, int width, int height, int pitch) {
 	gDude->flags |= OBJECT_LIGHT_THRU;
 	objectSetLight(gDude, 4, 0x10000, NULL);
 
-//	if (partyMemberAdd(gDude) == -1) {  TODO party_member.cpp
-//		debugPrint("\n  Error: Can't add Player into party!");
-//		exit(1);
-//	}
+	if (partyMemberAdd(gDude) == -1) {
+		debugPrint("\n  Error: Can't add Player into party!");
+		error("partyMemberAdd failed");
+	}
 
 	eggFid = buildFid(OBJ_TYPE_INTERFACE, 2, 0, 0, 0);
 	objectCreateWithFidPid(&gEgg, eggFid, -1);
@@ -2041,8 +2041,7 @@ bool _obj_action_can_use(Object *obj) {
 
 // 0x48B278
 bool _obj_action_can_talk_to(Object *obj) {
-//	return _proto_action_can_talk_to(obj->pid) && (PID_TYPE(obj->pid) == OBJ_TYPE_CRITTER) && critterIsActive(obj); TODO critter.cpp
-	return false;  // FIXME remove
+	return _proto_action_can_talk_to(obj->pid) && (PID_TYPE(obj->pid) == OBJ_TYPE_CRITTER) && critterIsActive(obj);
 }
 
 // 0x48B2A8
@@ -2423,9 +2422,9 @@ Object *_obj_shoot_blocking_at(Object *obj, int tile, int elev) {
 			if ((flags & OBJECT_HIDDEN) == 0 && ((flags & OBJECT_NO_BLOCK) == 0 || (flags & OBJECT_SHOOT_THRU) == 0) && candidate != obj) {
 				int type = FID_TYPE(candidate->fid);
 				// SFALL: Fix to prevent corpses from blocking line of fire.
-//				if ((type == OBJ_TYPE_CRITTER && !critterIsDead(candidate)) || type == OBJ_TYPE_SCENERY || type == OBJ_TYPE_WALL) {  TODO critter.cpp
-//					return candidate;
-//				}
+				if ((type == OBJ_TYPE_CRITTER && !critterIsDead(candidate)) || type == OBJ_TYPE_SCENERY || type == OBJ_TYPE_WALL) {
+					return candidate;
+				}
 			}
 		}
 		objectListItem = objectListItem->next;
@@ -2447,9 +2446,9 @@ Object *_obj_shoot_blocking_at(Object *obj, int tile, int elev) {
 						int type = FID_TYPE(candidate->fid);
 						// SFALL: Fix to prevent corpses from blocking line of
 						// fire.
-//						if ((type == OBJ_TYPE_CRITTER && !critterIsDead(candidate)) || type == OBJ_TYPE_SCENERY || type == OBJ_TYPE_WALL) { TODO critter.cpp
-//							return candidate;
-//						}
+						if ((type == OBJ_TYPE_CRITTER && !critterIsDead(candidate)) || type == OBJ_TYPE_SCENERY || type == OBJ_TYPE_WALL) {
+							return candidate;
+						}
 					}
 				}
 			}
@@ -3039,14 +3038,14 @@ void _obj_process_seen() {
 // 0x48C8E4
 char *objectGetName(Object *obj) {
 	int objectType = FID_TYPE(obj->fid);
-/*	switch (objectType) {  TODO item.cpp critter.cpp proto.cpp
-	case OBJ_TYPE_ITEM:
-		return itemGetName(obj);
+	switch (objectType) {  // TODO item.cpp
+//	case OBJ_TYPE_ITEM:
+//		return itemGetName(obj);
 	case OBJ_TYPE_CRITTER:
 		return critterGetName(obj);
 	default:
 		return protoGetName(obj->pid);
-	}*/
+	}
 }
 
 // 0x48C914
