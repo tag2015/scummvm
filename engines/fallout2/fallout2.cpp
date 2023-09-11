@@ -321,7 +321,7 @@ Common::Error Fallout2Engine::run() {
 	else
 		warning("Error initializing perks");
 
-	if (traitsInit() == 0)
+	if (traitsInit() == true)
 		debug("Initialized traits!");
 	else
 		warning("Error initializing traits");
