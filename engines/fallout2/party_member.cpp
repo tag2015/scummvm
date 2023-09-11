@@ -380,8 +380,7 @@ int partyMemberAdd(Object *object) {
 	}
 
 	if (_partyStatePrepped) {
-//		debugPrint("\npartyMemberAdd DENIED: %s\n", critterGetName(object));  TODO critter.cpp
-		debugPrint("partyMemberAdd DENIED");
+		debugPrint("\npartyMemberAdd DENIED: %s\n", critterGetName(object));
 		return -1;
 	}
 
@@ -404,7 +403,7 @@ int partyMemberAdd(Object *object) {
 		script->sid = object->sid;
 	}*/
 
-//	critterSetTeam(object, 0);  TODO critter.cpp
+	critterSetTeam(object, 0);
 	queueRemoveEventsByType(object, EVENT_TYPE_SCRIPT);
 
 /*	if (_gdialogActive()) {  TODO game_dialog.cpp
@@ -635,7 +634,7 @@ int _partyMemberRecoverLoad() {
 			return -1;
 		}
 
-//		debugPrint("[Party Member %d]: %s\n", index, critterGetName(gPartyMembers[index].object));  TODO critter.cpp
+		debugPrint("[Party Member %d]: %s\n", index, critterGetName(gPartyMembers[index].object));
 	}
 
 	STRUCT_519DA8 *v6 = _itemSaveListHead;
@@ -832,7 +831,7 @@ int _partyMemberRestingHeal(int a1) {
 		STRUCT_519DA8 *partyMember = &(gPartyMembers[index]);
 		if (PID_TYPE(partyMember->object->pid) == OBJ_TYPE_CRITTER) {
 			int healingRate = critterGetStat(partyMember->object, STAT_HEALING_RATE);
-//			critterAdjustHitPoints(partyMember->object, v1 * healingRate);  TODO critter.cpp
+			critterAdjustHitPoints(partyMember->object, v1 * healingRate);
 		}
 	}
 
@@ -896,7 +895,7 @@ int _getPartyMemberCount() {
 	for (int index = 1; index < gPartyMembersLength; index++) {
 		Object *object = gPartyMembers[index].object;
 
-		if (PID_TYPE(object->pid) != OBJ_TYPE_CRITTER /*|| critterIsDead(object)*/ || (object->flags & OBJECT_HIDDEN) != 0) {  // TODO critter.cpp
+		if (PID_TYPE(object->pid) != OBJ_TYPE_CRITTER || critterIsDead(object) || (object->flags & OBJECT_HIDDEN) != 0) {
 			count--;
 		}
 	}
@@ -1200,7 +1199,7 @@ static int _partyFixMultipleMembers() {
 			continue;
 		}
 
-//		debugPrint("\n   PM: %s", critterGetName(obj));  TODO critter.cpp
+		debugPrint("\n   PM: %s", critterGetName(obj));
 
 		bool v19 = false;
 		if (obj->sid == -1) {
@@ -1464,8 +1463,8 @@ int _partyMemberIncLevels() {
 			continue;
 		}
 
-//		name = critterGetName(obj);  TODO critter.cpp
-//		debugPrint("\npartyMemberIncLevels: %s", name);
+		name = critterGetName(obj);
+		debugPrint("\npartyMemberIncLevels: %s", name);
 
 		if (party_member->level_up_every == 0) {
 			continue;
@@ -1508,10 +1507,10 @@ int _partyMemberIncLevels() {
 						return -1;
 					}
 
-//					name = critterGetName(obj);  TODO critter.cpp
+					name = critterGetName(obj);
 					// %s has gained in some abilities.
 					text = getmsg(&gMiscMessageList, &msg, 9000);
-//					snprintf(str, sizeof(str), text, name);
+					snprintf(str, sizeof(str), text, name);
 //					displayMonitorAddMessage(str);  TODO display_monitor.cpp
 
 					debugPrint(str);
@@ -1519,8 +1518,8 @@ int _partyMemberIncLevels() {
 					// Individual message
 					msg.num = 9000 + 10 * v0 + ptr_519DBC->field_0 - 1;
 					if (messageListGetItem(&gMiscMessageList, &msg)) {
-//						name = critterGetName(obj);
-//						snprintf(str, sizeof(str), msg.text, name);
+						name = critterGetName(obj);
+						snprintf(str, sizeof(str), msg.text, name);
 						textObjectAdd(obj, str, 101, _colorTable[0x7FFF], _colorTable[0], &v19);
 						tileWindowRefreshRect(&v19, obj->elevation);
 					}
@@ -1536,7 +1535,7 @@ int _partyMemberIncLevels() {
 
 // 0x495EA8
 static int _partyMemberCopyLevelInfo(Object *critter, int a2) {
-/*	if (critter == NULL) {  TODO critter inventory item
+	if (critter == NULL) {  // TODO inventory item
 		return -1;
 	}
 
@@ -1554,7 +1553,7 @@ static int _partyMemberCopyLevelInfo(Object *critter, int a2) {
 		return -1;
 	}
 
-	Object *item2 = critterGetItem2(critter);
+/*	Object *item2 = critterGetItem2(critter);
 	_invenUnwieldFunc(critter, 1, 0);
 
 	Object *armor = critterGetArmor(critter);
@@ -1608,14 +1607,14 @@ bool partyIsAnyoneCanBeHealedByRest() {
 
 		if (PID_TYPE(object->pid) != OBJ_TYPE_CRITTER)
 			continue;
-//		if (critterIsDead(object))  TODO critter.cpp
-//			continue;
+		if (critterIsDead(object))
+			continue;
 		if ((object->flags & OBJECT_HIDDEN) != 0)
 			continue;
-//		if (critterGetKillType(object) == KILL_TYPE_ROBOT)
-//			continue;
+		if (critterGetKillType(object) == KILL_TYPE_ROBOT)
+			continue;
 
-		int currentHp = 1; // critterGetHitPoints(object);  TODO critter.cpp
+		int currentHp = critterGetHitPoints(object);
 		int maximumHp = critterGetStat(object, STAT_MAXIMUM_HIT_POINTS);
 		if (currentHp < maximumHp) {
 			return true;
@@ -1638,14 +1637,14 @@ int partyGetMaxWoundToHealByRest() {
 
 		if (PID_TYPE(object->pid) != OBJ_TYPE_CRITTER)
 			continue;
-//		if (critterIsDead(object))  TODO critter
-//			continue;
+		if (critterIsDead(object))
+			continue;
 		if ((object->flags & OBJECT_HIDDEN) != 0)
 			continue;
-//		if (critterGetKillType(object) == KILL_TYPE_ROBOT)
-//			continue;
+		if (critterGetKillType(object) == KILL_TYPE_ROBOT)
+			continue;
 
-		int currentHp = 1; // critterGetHitPoints(object); TODO critter
+		int currentHp = critterGetHitPoints(object);
 		int maximumHp = critterGetStat(object, STAT_MAXIMUM_HIT_POINTS);
 		int wound = maximumHp - currentHp;
 		if (wound > 0) {
