@@ -1006,10 +1006,10 @@ int gcdLoad(const char *path) {
 		return -1;
 	}*/
 
-	if (fileReadInt32(stream, &gCharacterEditorRemainingCharacterPoints) == -1) {
+/*	if (fileReadInt32(stream, &gCharacterEditorRemainingCharacterPoints) == -1) {  TODO character_editor.cpp
 		fileClose(stream);
 		return -1;
-	}
+	}*/
 
 	proto->critter.data.baseStats[STAT_DAMAGE_RESISTANCE_EMP] = 100;
 	proto->critter.data.bodyType = 0;
@@ -1083,10 +1083,10 @@ int gcdSave(const char *path) {
 		return -1;
 	}*/
 
-	if (fileWriteInt32(stream, gCharacterEditorRemainingCharacterPoints) == -1) {
+/*	if (fileWriteInt32(stream, gCharacterEditorRemainingCharacterPoints) == -1) {  TODO character_editor.cpp
 		fileClose(stream);
 		return -1;
-	}
+	}*/
 
 	fileClose(stream);
 	return 0;
@@ -1217,7 +1217,7 @@ int knockoutEventProcess(Object *obj, void *data) {
 	obj->data.critter.combat.results &= ~(DAM_KNOCKED_OUT | DAM_KNOCKED_DOWN);
 	obj->data.critter.combat.results |= DAM_KNOCKED_DOWN;
 
-	if (isInCombat()) {
+	if (/*isInCombat()*/0) {  // TODO combat.cpp
 		obj->data.critter.combat.maneuver |= CRITTER_MANEUVER_ENGAGING;
 	} else {
 //		_dude_standup(obj);  TODO animation.cpp
