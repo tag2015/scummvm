@@ -49,6 +49,7 @@ MODULE_OBJS = \
 	text_font.o \
 	text_object.o \
 	tile.o \
+	trait.o \
 	version.o \
 	widget.o \
 	window.o \
