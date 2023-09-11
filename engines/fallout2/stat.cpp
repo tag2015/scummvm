@@ -365,7 +365,7 @@ int critterGetStat(Object *critter, int stat) {
 		value = clamp(value, gStatDescriptions[stat].minimumValue, gStatDescriptions[stat].maximumValue);
 	} else {
 		switch (stat) {
-/*		case STAT_CURRENT_HIT_POINTS:  TODO critter.cpp
+		case STAT_CURRENT_HIT_POINTS:
 			value = critterGetHitPoints(critter);
 			break;
 		case STAT_CURRENT_POISON_LEVEL:
@@ -373,7 +373,7 @@ int critterGetStat(Object *critter, int stat) {
 			break;
 		case STAT_CURRENT_RADIATION_LEVEL:
 			value = critterGetRadiation(critter);
-			break;*/
+			break;
 		default:
 			value = 0;
 			break;
@@ -404,14 +404,14 @@ int critterGetBaseStat(Object *critter, int stat) {
 		protoGetProto(critter->pid, &proto);
 		return proto->critter.data.baseStats[stat];
 	} else {
-		/*switch (stat) {
+		switch (stat) {
 		case STAT_CURRENT_HIT_POINTS:
-			return critterGetHitPoints(critter);  TODO critter.cpp
+			return critterGetHitPoints(critter);
 		case STAT_CURRENT_POISON_LEVEL:
 			return critterGetPoison(critter);
 		case STAT_CURRENT_RADIATION_LEVEL:
 			return critterGetRadiation(critter);
-		}*/
+		}
 	}
 
 	return 0;
@@ -464,14 +464,14 @@ int critterSetBaseStat(Object *critter, int stat, int value) {
 		return 0;
 	}
 
-/*	switch (stat) {
+	switch (stat) {
 	case STAT_CURRENT_HIT_POINTS:
-		return critterAdjustHitPoints(critter, value - critterGetHitPoints(critter));  TODO critter.cpp
+		return critterAdjustHitPoints(critter, value - critterGetHitPoints(critter));
 	case STAT_CURRENT_POISON_LEVEL:
 		return critterAdjustPoison(critter, value - critterGetPoison(critter));
 	case STAT_CURRENT_RADIATION_LEVEL:
 		return critterAdjustRadiation(critter, value - critterGetRadiation(critter));
-	}*/
+	}
 
 	// Should be unreachable
 	return 0;
@@ -516,14 +516,14 @@ int critterSetBonusStat(Object *critter, int stat, int value) {
 
 		return 0;
 	} else {
-/*		switch (stat) {
+		switch (stat) {
 		case STAT_CURRENT_HIT_POINTS:
-			return critterAdjustHitPoints(critter, value);  TODO critter.cpp
+			return critterAdjustHitPoints(critter, value);
 		case STAT_CURRENT_POISON_LEVEL:
 			return critterAdjustPoison(critter, value);
 		case STAT_CURRENT_RADIATION_LEVEL:
 			return critterAdjustRadiation(critter, value);
-		}*/
+		}
 	}
 
 	// Should be unreachable
@@ -734,7 +734,7 @@ int pcAddExperienceWithOptions(int xp, bool a2, int *xpGained) {
 //				displayMonitorAddMessage(messageListItem.text);  TODO display_monitor.cpp
 			}
 
-//			dudeEnableState(DUDE_STATE_LEVEL_UP_AVAILABLE);  TODO critter.cpp
+			dudeEnableState(DUDE_STATE_LEVEL_UP_AVAILABLE);
 
 //			soundPlayFile("levelup");  TODO game_sound.cpp
 
@@ -748,7 +748,7 @@ int pcAddExperienceWithOptions(int xp, bool a2, int *xpGained) {
 			critterSetBonusStat(gDude, STAT_MAXIMUM_HIT_POINTS, bonusHp + hpPerLevel);
 
 			int maxHpAfter = critterGetStat(gDude, STAT_MAXIMUM_HIT_POINTS);
-//			critterAdjustHitPoints(gDude, maxHpAfter - maxHpBefore);  TODO critter.cpp
+			critterAdjustHitPoints(gDude, maxHpAfter - maxHpBefore);
 
 //			interfaceRenderHitPoints(false);  TODO interface.cpp
 
@@ -759,7 +759,7 @@ int pcAddExperienceWithOptions(int xp, bool a2, int *xpGained) {
 //			interfaceUpdateItems(false, leftItemAction, rightItemAction);
 
 			if (a2) {
-//				_partyMemberIncLevels();  TODO party_member.cpp
+				_partyMemberIncLevels();
 			}
 		}
 	}
@@ -784,7 +784,7 @@ int pcSetExperience(int xp) {
 	int newLevel = level - 1;
 
 	pcSetStat(PC_STAT_LEVEL, newLevel);
-//	dudeDisableState(DUDE_STATE_LEVEL_UP_AVAILABLE);  TODO critter.cpp
+	dudeDisableState(DUDE_STATE_LEVEL_UP_AVAILABLE);
 
 	// NOTE: Uninline.
 	int endurance = critterGetBaseStatWithTraitModifier(gDude, STAT_ENDURANCE);
@@ -793,7 +793,7 @@ int pcSetExperience(int xp) {
 //	hpPerLevel += perkGetRank(gDude, PERK_LIFEGIVER) * 4;  TODO perk.cpp
 
 	int deltaHp = (oldLevel - newLevel) * hpPerLevel;
-//	critterAdjustHitPoints(gDude, -deltaHp);  TODO critter.cpp
+	critterAdjustHitPoints(gDude, -deltaHp);
 
 	int bonusHp = critterGetBonusStat(gDude, STAT_MAXIMUM_HIT_POINTS);
 
