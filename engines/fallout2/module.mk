@@ -8,6 +8,7 @@ MODULE_OBJS = \
 	cache.o \
 	color.o \
 	config.o \
+	critter.o \
 	cycle.o \
 	datafile.o \
 	db.o \
@@ -37,6 +38,7 @@ MODULE_OBJS = \
 	proto.o \
 	queue.o \
 	random.o \
+	reaction.o \
 	region.o \
 	settings.o \
 	sfall_config.o \
