@@ -242,7 +242,7 @@ int critterGetStat(Object *critter, int stat) {
 			break;
 		}
 
-/*		if (critter == gDude) {  TODO perk.cpp
+		if (critter == gDude) {
 			switch (stat) {
 			case STAT_STRENGTH:
 				if (perkGetRank(critter, PERK_GAIN_STRENGTH)) {
@@ -271,7 +271,7 @@ int critterGetStat(Object *critter, int stat) {
 						value++;
 					}
 
-					bool hasMirrorShades = false;
+/*					bool hasMirrorShades = false;  TODO inventory.cpp
 
 					Object *item2 = critterGetItem2(critter);
 					if (item2 != NULL && item2->pid == PROTO_ID_MIRRORED_SHADES) {
@@ -285,7 +285,7 @@ int critterGetStat(Object *critter, int stat) {
 
 					if (hasMirrorShades) {
 						value++;
-					}
+					}*/
 				}
 				break;
 			case STAT_INTELLIGENCE:
@@ -360,7 +360,7 @@ int critterGetStat(Object *critter, int stat) {
 				}
 				break;
 			}
-		}*/
+		}
 
 		value = clamp(value, gStatDescriptions[stat].minimumValue, gStatDescriptions[stat].maximumValue);
 	} else {
@@ -390,7 +390,7 @@ int critterGetBaseStatWithTraitModifier(Object *critter, int stat) {
 	int value = critterGetBaseStat(critter, stat);
 
 	if (critter == gDude) {
-//		value += traitGetStatModifier(stat);  TODO trait.cpp
+		value += traitGetStatModifier(stat);
 	}
 
 	return value;
@@ -443,7 +443,7 @@ int critterSetBaseStat(Object *critter, int stat, int value) {
 		}
 
 		if (critter == gDude) {
-//			value -= traitGetStatModifier(stat);  TODO trait.cpp
+			value -= traitGetStatModifier(stat);
 		}
 
 		if (value < gStatDescriptions[stat].minimumValue) {
@@ -482,7 +482,7 @@ int critterIncBaseStat(Object *critter, int stat) {
 	int value = critterGetBaseStat(critter, stat);
 
 	if (critter == gDude) {
-//		value += traitGetStatModifier(stat);  TODO trait.cpp
+		value += traitGetStatModifier(stat);
 	}
 
 	return critterSetBaseStat(critter, stat, value + 1);
@@ -493,7 +493,7 @@ int critterDecBaseStat(Object *critter, int stat) {
 	int value = critterGetBaseStat(critter, stat);
 
 	if (critter == gDude) {
-//		value += traitGetStatModifier(stat); TODO trait.cpp
+		value += traitGetStatModifier(stat);
 	}
 
 	return critterSetBaseStat(critter, stat, value - 1);
@@ -707,7 +707,7 @@ int pcAddExperienceWithOptions(int xp, bool a2, int *xpGained) {
 
 	int newXp = gPcStatValues[PC_STAT_EXPERIENCE];
 	newXp += xp;
-//	newXp += perkGetRank(gDude, PERK_SWIFT_LEARNER) * 5 * xp / 100;  TODO: perk.cpp
+	newXp += perkGetRank(gDude, PERK_SWIFT_LEARNER) * 5 * xp / 100;
 
 	if (newXp < gPcStatDescriptions[PC_STAT_EXPERIENCE].minimumValue) {
 		newXp = gPcStatDescriptions[PC_STAT_EXPERIENCE].minimumValue;
@@ -742,7 +742,7 @@ int pcAddExperienceWithOptions(int xp, bool a2, int *xpGained) {
 			int endurance = critterGetBaseStatWithTraitModifier(gDude, STAT_ENDURANCE);
 
 			int hpPerLevel = endurance / 2 + 2;
-//			hpPerLevel += perkGetRank(gDude, PERK_LIFEGIVER) * 4;  TODO perk.cpp
+			hpPerLevel += perkGetRank(gDude, PERK_LIFEGIVER) * 4;
 
 			int bonusHp = critterGetBonusStat(gDude, STAT_MAXIMUM_HIT_POINTS);
 			critterSetBonusStat(gDude, STAT_MAXIMUM_HIT_POINTS, bonusHp + hpPerLevel);
@@ -790,7 +790,7 @@ int pcSetExperience(int xp) {
 	int endurance = critterGetBaseStatWithTraitModifier(gDude, STAT_ENDURANCE);
 
 	int hpPerLevel = endurance / 2 + 2;
-//	hpPerLevel += perkGetRank(gDude, PERK_LIFEGIVER) * 4;  TODO perk.cpp
+	hpPerLevel += perkGetRank(gDude, PERK_LIFEGIVER) * 4;
 
 	int deltaHp = (oldLevel - newLevel) * hpPerLevel;
 	critterAdjustHitPoints(gDude, -deltaHp);
