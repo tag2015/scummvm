@@ -1,8 +1,7 @@
 #include "fallout2/game.h"
 
-//#include <stdio.h>
-//#include <string.h>
-
+// #include <stdio.h>
+// #include <string.h>
 
 // #include "actions.h"
 // #include "animation.h"
@@ -51,7 +50,7 @@
 // #include "random.h"
 // #include "scripts.h"
 #include "fallout2/settings.h"
-// #include "sfall_config.h"
+#include "fallout2/sfall_config.h"
 // #include "sfall_global_vars.h"
 // #include "sfall_lists.h"
 // #include "skill.h"
@@ -78,11 +77,11 @@ namespace Fallout2 {
 #define SPLASH_COUNT (10)
 
 static int gameLoadGlobalVars();
-static int gameTakeScreenshot(int width, int height, unsigned char* buffer, unsigned char* palette);
+static int gameTakeScreenshot(int width, int height, unsigned char *buffer, unsigned char *palette);
 static void gameFreeGlobalVars();
 static void showHelp();
-//static int gameDbInit();  TODO: reenable
-//static void showSplash();
+// static int gameDbInit();  TODO: reenable
+// static void showSplash();
 
 // 0x501C9C
 static char _aGame_0[] = "game\\";
@@ -100,13 +99,13 @@ static int gGameState = GAME_STATE_0;
 static bool gIsMapper = false;
 
 // 0x5186C0
-int* gGameGlobalVars = NULL;
+int *gGameGlobalVars = NULL;
 
 // 0x5186C4
 int gGameGlobalVarsLength = 0;
 
 // 0x5186C8
-const char* asc_5186C8 = _aGame_0;
+const char *asc_5186C8 = _aGame_0;
 
 // 0x5186CC
 int _game_user_wants_to_quit = 0;
@@ -117,9 +116,9 @@ int _game_user_wants_to_quit = 0;
 MessageList gMiscMessageList;
 
 // CE: Sonora folks like to store objects in global variables.
-static void** gGameGlobalPointers = nullptr;
+static void **gGameGlobalPointers = nullptr;
 
-// TODO
+// TODO moving to fallout2.cpp
 #if 0
 // 0x442580
 int gameInitWithOptions(const char* windowTitle, bool isMapper, int font, int a4, int argc, char** argv) {
@@ -357,9 +356,10 @@ int gameInitWithOptions(const char* windowTitle, bool isMapper, int font, int a4
 
 	return 0;
 }
+#endif
 
-
-
+// TODO reset and quit
+#if 0
 // 0x442B84
 void gameReset() {
 	tileDisable();
@@ -452,7 +452,10 @@ void gameExit() {
 	settingsExit(true);
 	sfallConfigExit();
 }
+#endif
 
+// TODO keyboard shortcuts
+#if 0
 // 0x442D44
 int gameHandleKey(int eventCode, bool isInCombatMode) {
 	// NOTE: Uninline.
@@ -914,7 +917,10 @@ int gameHandleKey(int eventCode, bool isInCombatMode) {
 
 	return 0;
 }
+#endif
 
+// TODO game ui on/off
+#if 0
 // game_ui_disable
 // 0x443BFC
 void gameUiDisable(int a1) {
@@ -945,6 +951,7 @@ void gameUiEnable() {
 bool gameUiIsDisabled() {
 	return gGameUiDisabled;
 }
+#endif
 
 // 0x443C68
 int gameGetGlobalVar(int var) {
@@ -976,7 +983,7 @@ int gameSetGlobalVar(int var, int value) {
 				} else {
 					snprintf(formattedMessage, sizeof(formattedMessage), "You lost %d karma.", -diff);
 				}
-				displayMonitorAddMessage(formattedMessage);
+				//				displayMonitorAddMessage(formattedMessage);  TODO display_monitor.cpp
 			}
 		}
 	}
@@ -993,7 +1000,7 @@ static int gameLoadGlobalVars() {
 		return -1;
 	}
 
-	gGameGlobalPointers = reinterpret_cast<void**>(internal_malloc(sizeof(*gGameGlobalPointers) * gGameGlobalVarsLength));
+	gGameGlobalPointers = reinterpret_cast<void **>(internal_malloc(sizeof(*gGameGlobalPointers) * gGameGlobalVarsLength));
 	if (gGameGlobalPointers == nullptr) {
 		return -1;
 	}
@@ -1004,10 +1011,10 @@ static int gameLoadGlobalVars() {
 }
 
 // 0x443CE8
-int globalVarsRead(const char* path, const char* section, int* variablesListLengthPtr, int** variablesListPtr) {
-	_inven_reset_dude();
+int globalVarsRead(const char *path, const char *section, int *variablesListLengthPtr, int **variablesListPtr) {
+	//	_inven_reset_dude();  TODO inventory.cpp
 
-	File* stream = fileOpen(path, "rt");
+	File *stream = fileOpen(path, "rt");
 	if (stream == NULL) {
 		return -1;
 	}
@@ -1036,19 +1043,19 @@ int globalVarsRead(const char* path, const char* section, int* variablesListLeng
 			continue;
 		}
 
-		char* semicolon = strchr(string, ';');
+		char *semicolon = strchr(string, ';');
 		if (semicolon != NULL) {
 			*semicolon = '\0';
 		}
 
 		*variablesListLengthPtr = *variablesListLengthPtr + 1;
-		*variablesListPtr = (int*)internal_realloc(*variablesListPtr, sizeof(int) * *variablesListLengthPtr);
+		*variablesListPtr = (int *)internal_realloc(*variablesListPtr, sizeof(int) * *variablesListLengthPtr);
 
 		if (*variablesListPtr == NULL) {
-			exit(1);
+			error("Global variables list is null");
 		}
 
-		char* equals = strchr(string, '=');
+		char *equals = strchr(string, '=');
 		if (equals != NULL) {
 			sscanf(equals + 1, "%d", *variablesListPtr + *variablesListLengthPtr - 1);
 		} else {
@@ -1103,8 +1110,10 @@ void gameUpdateState() {
 	}
 }
 
+// TODO screenshot
+#if 0
 // 0x443EF0
-static int gameTakeScreenshot(int width, int height, unsigned char* buffer, unsigned char* palette) {
+static int gameTakeScreenshot(int width, int height, unsigned char *buffer, unsigned char *palette) {
 	MessageListItem messageListItem;
 
 	if (screenshotHandlerDefaultImpl(width, height, buffer, palette) != 0) {
@@ -1125,6 +1134,7 @@ static int gameTakeScreenshot(int width, int height, unsigned char* buffer, unsi
 
 	return 0;
 }
+#endif
 
 // NOTE: Inlined.
 //
@@ -1142,6 +1152,8 @@ static void gameFreeGlobalVars() {
 	}
 }
 
+// TODO show help
+#if 0
 // 0x443F74
 static void showHelp() {
 	ScopedGameMode gm(GameMode::kHelp);
@@ -1162,7 +1174,7 @@ static void showHelp() {
 	int helpWindowY = (screenGetHeight() - HELP_SCREEN_HEIGHT) / 2;
 	int win = windowCreate(helpWindowX, helpWindowY, HELP_SCREEN_WIDTH, HELP_SCREEN_HEIGHT, 0, WINDOW_HIDDEN | WINDOW_MOVE_ON_TOP);
 	if (win != -1) {
-		unsigned char* windowBuffer = windowGetBuffer(win);
+		unsigned char *windowBuffer = windowGetBuffer(win);
 		if (windowBuffer != NULL) {
 			FrmImage backgroundFrmImage;
 			int backgroundFid = buildFid(OBJ_TYPE_INTERFACE, 297, 0, 0, 0);
@@ -1176,10 +1188,10 @@ static void showHelp() {
 				// CE: Fill overlay with darkest color in the palette. It might
 				// not be completely black, but at least it's uniform.
 				bufferFill(windowGetBuffer(overlay),
-				           screenGetWidth(),
-				           screenGetHeight(),
-				           screenGetWidth(),
-				           intensityColorTable[_colorTable[0]][0]);
+						   screenGetWidth(),
+						   screenGetHeight(),
+						   screenGetWidth(),
+						   intensityColorTable[_colorTable[0]][0]);
 
 				windowShow(overlay);
 				windowShow(win);
@@ -1219,7 +1231,10 @@ static void showHelp() {
 		isoEnable();
 	}
 }
+#endif
 
+// TODO quit yes/no win
+#if 0
 // 0x4440B8
 int showQuitConfirmationDialog() {
 	bool isoWasEnabled = isoDisable();
@@ -1277,8 +1292,8 @@ int showQuitConfirmationDialog() {
 
 // 0x44418C
 /*static*/ int gameDbInit() {
-	const char* main_file_name;
-	const char* patch_file_name;
+	const char *main_file_name;
+	const char *patch_file_name;
 	int patch_index;
 	char filename[COMPAT_MAX_PATH];
 
@@ -1297,7 +1312,7 @@ int showQuitConfirmationDialog() {
 
 	int master_db_handle = dbOpen(main_file_name, 0, patch_file_name, 1);
 	if (master_db_handle == -1) {
-//		showMesageBox("Could not find the master datafile. Please make sure the FALLOUT CD is in the drive and that you are running FALLOUT from the directory you installed it to.");
+		//		showMesageBox("Could not find the master datafile. Please make sure the FALLOUT CD is in the drive and that you are running FALLOUT from the directory you installed it to.");
 		warning("Could not find the master datafile. Please make sure the FALLOUT CD is in the drive and that you are running FALLOUT from the directory you installed it to.");
 		return -1;
 	}
@@ -1314,7 +1329,7 @@ int showQuitConfirmationDialog() {
 
 	int critter_db_handle = dbOpen(main_file_name, 0, patch_file_name, 1);
 	if (critter_db_handle == -1) {
-//		showMesageBox("Could not find the critter datafile. Please make sure the FALLOUT CD is in the drive and that you are running FALLOUT from the directory you installed it to.");
+		//		showMesageBox("Could not find the critter datafile. Please make sure the FALLOUT CD is in the drive and that you are running FALLOUT from the directory you installed it to.");
 		warning("Could not find the critter datafile. Please make sure the FALLOUT CD is in the drive and that you are running FALLOUT from the directory you installed it to.");
 		return -1;
 	}
@@ -1334,6 +1349,7 @@ int showQuitConfirmationDialog() {
 	return 0;
 }
 
+// TODO showsplash (move back here)?
 #if 0
 // 0x444384
 /*static*/ void showSplash() {
@@ -1456,6 +1472,7 @@ int showQuitConfirmationDialog() {
 }
 #endif
 
+// TODO death screen
 #if 0
 int gameShowDeathDialog(const char* message) {
 	bool isoWasEnabled = isoDisable();
@@ -1504,7 +1521,7 @@ int gameShowDeathDialog(const char* message) {
 }
 #endif
 
-void* gameGetGlobalPointer(int var) {
+void *gameGetGlobalPointer(int var) {
 	if (var < 0 || var >= gGameGlobalVarsLength) {
 		debugPrint("ERROR: attempt to reference global pointer out of range: %d", var);
 		return nullptr;
@@ -1513,7 +1530,7 @@ void* gameGetGlobalPointer(int var) {
 	return gGameGlobalPointers[var];
 }
 
-int gameSetGlobalPointer(int var, void* value) {
+int gameSetGlobalPointer(int var, void *value) {
 	if (var < 0 || var >= gGameGlobalVarsLength) {
 		debugPrint("ERROR: attempt to reference global var out of range: %d", var);
 		return -1;
