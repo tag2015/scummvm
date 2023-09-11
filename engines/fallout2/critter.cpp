@@ -1001,10 +1001,10 @@ int gcdLoad(const char *path) {
 		return -1;
 	}
 
-/*	if (traitsLoad(stream) == -1) {  TODO trait.cpp
+	if (traitsLoad(stream) == -1) {
 		fileClose(stream);
 		return -1;
-	}*/
+	}
 
 /*	if (fileReadInt32(stream, &gCharacterEditorRemainingCharacterPoints) == -1) {  TODO character_editor.cpp
 		fileClose(stream);
@@ -1078,10 +1078,10 @@ int gcdSave(const char *path) {
 		return -1;
 	}
 
-/*	if (traitsSave(stream) == -1) {  TODO trait.cpp
+	if (traitsSave(stream) == -1) {
 		fileClose(stream);
 		return -1;
-	}*/
+	}
 
 /*	if (fileWriteInt32(stream, gCharacterEditorRemainingCharacterPoints) == -1) {  TODO character_editor.cpp
 		fileClose(stream);
