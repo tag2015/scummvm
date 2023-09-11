@@ -1,14 +1,14 @@
-#include "mouse.h"
+#include "fallout2/mouse.h"
 
-#include "color.h"
-#include "dinput.h"
-#include "input.h"
-#include "kb.h"
-#include "memory.h"
-#include "svga.h"
-#include "vcr.h"
+#include "fallout2/color.h"
+#include "fallout2/dinput.h"
+#include "fallout2/input.h"
+#include "fallout2/kb.h"
+#include "fallout2/memory.h"
+#include "fallout2/svga.h"
+// #include "fallout2/vcr.h" TODO vcr
 
-namespace fallout {
+namespace Fallout2 {
 
 static void mousePrepareDefaultCursor();
 static void _mouse_anim();
@@ -42,13 +42,13 @@ static unsigned char gMouseDefaultCursor[MOUSE_DEFAULT_CURSOR_SIZE] = {
 static int _mouse_idling = 0;
 
 // 0x51E294
-static unsigned char* gMouseCursorData = NULL;
+static unsigned char *gMouseCursorData = NULL;
 
 // 0x51E298
-static unsigned char* _mouse_shape = NULL;
+static unsigned char *_mouse_shape = NULL;
 
 // 0x51E29C
-static unsigned char* _mouse_fptr = NULL;
+static unsigned char *_mouse_fptr = NULL;
 
 // 0x51E2A0
 static double gMouseSensitivity = 1.0;
@@ -111,7 +111,7 @@ static int _mouse_hotx;
 static unsigned int _mouse_idle_start_time;
 
 // 0x6AC7D8
-WindowDrawingProc2* _mouse_blit_trans;
+WindowDrawingProc2 *_mouse_blit_trans;
 
 // 0x6AC7DC
 WINDOWDRAWINGPROC _mouse_blit;
@@ -140,11 +140,11 @@ int mouseInit() {
 	}
 
 	gMouseInitialized = true;
-	gMouseCursorX = _scr_size.right / 2;
-	gMouseCursorY = _scr_size.bottom / 2;
-	_raw_x = _scr_size.right / 2;
-	_raw_y = _scr_size.bottom / 2;
-	_mouse_idle_start_time = getTicks();
+	gMouseCursorX = 320; // _scr_size.right / 2;  TODO svga.cpp
+	gMouseCursorY = 240; // _scr_size.bottom / 2;
+	_raw_x = 320; // _scr_size.right / 2;
+	_raw_y = 240; // _scr_size.bottom / 2;
+	_mouse_idle_start_time = g_system->getMillis(); // getTicks();  TODO input.cpp
 
 	return 0;
 }
@@ -159,7 +159,7 @@ void mouseFree() {
 	}
 
 	if (_mouse_fptr != NULL) {
-		tickersRemove(_mouse_anim);
+//		tickersRemove(_mouse_anim);  TODO input.cpp
 		_mouse_fptr = NULL;
 	}
 }
@@ -182,9 +182,9 @@ static void mousePrepareDefaultCursor() {
 }
 
 // 0x4CA0AC
-int mouseSetFrame(unsigned char* a1, int width, int height, int pitch, int a5, int a6, char a7) {
+int mouseSetFrame(unsigned char *a1, int width, int height, int pitch, int a5, int a6, char a7) {
 	Rect rect;
-	unsigned char* v9;
+	unsigned char *v9;
 	int v11, v12;
 	int v7, v8;
 
@@ -201,11 +201,11 @@ int mouseSetFrame(unsigned char* a1, int width, int height, int pitch, int a5, i
 	if (!gCursorIsHidden && gMouseInitialized) {
 		gCursorIsHidden = true;
 		mouseGetRect(&rect);
-		windowRefreshAll(&rect);
+//		windowRefreshAll(&rect);  TODO window_manager.cpp
 	}
 
 	if (width != gMouseCursorWidth || height != gMouseCursorHeight) {
-		unsigned char* buf = (unsigned char*)internal_malloc(width * height);
+		unsigned char *buf = (unsigned char *)internal_malloc(width * height);
 		if (buf == NULL) {
 			if (!cursorWasHidden) {
 				mouseShowCursor();
@@ -278,7 +278,7 @@ static void _mouse_anim() {
 // 0x4CA34C
 void mouseShowCursor() {
 	int i;
-	unsigned char* v2;
+	unsigned char *v2;
 	int v7, v8;
 	int v9, v10;
 	int v4;
@@ -288,7 +288,7 @@ void mouseShowCursor() {
 	v2 = gMouseCursorData;
 	if (gMouseInitialized) {
 		if (!_mouse_blit_trans || !gCursorIsHidden) {
-			_win_get_mouse_buf(gMouseCursorData);
+//			_win_get_mouse_buf(gMouseCursorData);  TODO window_manager
 			v2 = gMouseCursorData;
 			v3 = 0;
 
@@ -303,30 +303,30 @@ void mouseShowCursor() {
 			}
 		}
 
-		if (gMouseCursorX >= _scr_size.left) {
-			if (gMouseCursorWidth + gMouseCursorX - 1 <= _scr_size.right) {
+		if (gMouseCursorX >= /*_scr_size.left*/ 0) {  // TODO svga.cpp
+			if (gMouseCursorWidth + gMouseCursorX - 1 <= /*_scr_size.right*/ 640) {
 				v8 = gMouseCursorWidth;
 				v7 = 0;
 			} else {
 				v7 = 0;
-				v8 = _scr_size.right - gMouseCursorX + 1;
+				v8 = /*_scr_size.right*/ 640 - gMouseCursorX + 1;
 			}
 		} else {
-			v7 = _scr_size.left - gMouseCursorX;
-			v8 = gMouseCursorWidth - (_scr_size.left - gMouseCursorX);
+			v7 = /*_scr_size.left*/ 0 - gMouseCursorX;
+			v8 = gMouseCursorWidth - (/*_scr_size.left*/ 0 - gMouseCursorX);
 		}
 
-		if (gMouseCursorY >= _scr_size.top) {
-			if (gMouseCursorHeight + gMouseCursorY - 1 <= _scr_size.bottom) {
+		if (gMouseCursorY >= 0 /*_scr_size.top*/) {
+			if (gMouseCursorHeight + gMouseCursorY - 1 <= /*_scr_size.bottom*/ 480) {
 				v9 = 0;
 				v10 = gMouseCursorHeight;
 			} else {
 				v9 = 0;
-				v10 = _scr_size.bottom - gMouseCursorY + 1;
+				v10 = /*_scr_size.bottom*/ 480 - gMouseCursorY + 1;
 			}
 		} else {
-			v9 = _scr_size.top - gMouseCursorY;
-			v10 = gMouseCursorHeight - (_scr_size.top - gMouseCursorY);
+			v9 = /*_scr_size.top*/ 0 - gMouseCursorY;
+			v10 = gMouseCursorHeight - (/*_scr_size.top*/ 0 - gMouseCursorY);
 		}
 
 		gMouseCursorData = v2;
@@ -354,7 +354,7 @@ void mouseHideCursor() {
 			rect.bottom = gMouseCursorY + gMouseCursorHeight - 1;
 
 			gCursorIsHidden = true;
-			windowRefreshAll(&rect);
+//			windowRefreshAll(&rect);  TODO window_manager.cpp
 		}
 	}
 }
@@ -398,9 +398,8 @@ void _mouse_info() {
 	x = (int)(x * gMouseSensitivity);
 	y = (int)(y * gMouseSensitivity);
 
-	if (gVcrState == VCR_STATE_PLAYING) {
-		if (((gVcrTerminateFlags & VCR_TERMINATE_ON_MOUSE_PRESS) != 0 && buttons != 0)
-		        || ((gVcrTerminateFlags & VCR_TERMINATE_ON_MOUSE_MOVE) != 0 && (x != 0 || y != 0))) {
+/*	if (gVcrState == VCR_STATE_PLAYING) { TODO vcr.cpp
+		if (((gVcrTerminateFlags & VCR_TERMINATE_ON_MOUSE_PRESS) != 0 && buttons != 0) || ((gVcrTerminateFlags & VCR_TERMINATE_ON_MOUSE_MOVE) != 0 && (x != 0 || y != 0))) {
 			gVcrPlaybackCompletionReason = VCR_PLAYBACK_COMPLETION_REASON_TERMINATED;
 			vcrStop();
 			return;
@@ -408,7 +407,7 @@ void _mouse_info() {
 		x = 0;
 		y = 0;
 		buttons = last_buttons;
-	}
+	}*/
 
 	_mouse_simulate_input(x, y, buttons);
 
@@ -439,12 +438,12 @@ void _mouse_simulate_input(int delta_x, int delta_y, int buttons) {
 	}
 
 	if (delta_x || delta_y || buttons != last_buttons) {
-		if (gVcrState == 0) {
+/*		if (gVcrState == 0) {
 			if (_vcr_buffer_index == VCR_BUFFER_CAPACITY - 1) {
 				vcrDump();
 			}
 
-			VcrEntry* vcrEntry = &(_vcr_buffer[_vcr_buffer_index]);
+			VcrEntry *vcrEntry = &(_vcr_buffer[_vcr_buffer_index]);
 			vcrEntry->type = VCR_ENTRY_TYPE_MOUSE_EVENT;
 			vcrEntry->time = _vcr_time;
 			vcrEntry->counter = _vcr_counter;
@@ -453,7 +452,7 @@ void _mouse_simulate_input(int delta_x, int delta_y, int buttons) {
 			vcrEntry->mouseEvent.buttons = buttons;
 
 			_vcr_buffer_index++;
-		}
+		}*/
 	} else {
 		if (last_buttons == 0) {
 			if (!_mouse_idling) {
@@ -522,7 +521,7 @@ void _mouse_simulate_input(int delta_x, int delta_y, int buttons) {
 		gMouseCursorY += delta_y;
 		_mouse_clip();
 
-		windowRefreshAll(&mouseRect);
+//		windowRefreshAll(&mouseRect);  TODO window_manager.cpp
 
 		mouseShowCursor();
 
@@ -537,10 +536,7 @@ bool _mouse_in(int left, int top, int right, int bottom) {
 		return false;
 	}
 
-	return gMouseCursorHeight + gMouseCursorY > top
-	       && right >= gMouseCursorX
-	       && gMouseCursorWidth + gMouseCursorX > left
-	       && bottom >= gMouseCursorY;
+	return gMouseCursorHeight + gMouseCursorY > top && right >= gMouseCursorX && gMouseCursorWidth + gMouseCursorX > left && bottom >= gMouseCursorY;
 }
 
 // 0x4CA934
@@ -549,14 +545,11 @@ bool _mouse_click_in(int left, int top, int right, int bottom) {
 		return false;
 	}
 
-	return _mouse_hoty + gMouseCursorY >= top
-	       && _mouse_hotx + gMouseCursorX <= right
-	       && _mouse_hotx + gMouseCursorX >= left
-	       && _mouse_hoty + gMouseCursorY <= bottom;
+	return _mouse_hoty + gMouseCursorY >= top && _mouse_hotx + gMouseCursorX <= right && _mouse_hotx + gMouseCursorX >= left && _mouse_hoty + gMouseCursorY <= bottom;
 }
 
 // 0x4CA9A0
-void mouseGetRect(Rect* rect) {
+void mouseGetRect(Rect *rect) {
 	rect->left = gMouseCursorX;
 	rect->top = gMouseCursorY;
 	rect->right = gMouseCursorWidth + gMouseCursorX - 1;
@@ -564,7 +557,7 @@ void mouseGetRect(Rect* rect) {
 }
 
 // 0x4CA9DC
-void mouseGetPosition(int* xPtr, int* yPtr) {
+void mouseGetPosition(int *xPtr, int *yPtr) {
 	*xPtr = _mouse_hotx + gMouseCursorX;
 	*yPtr = _mouse_hoty + gMouseCursorY;
 }
@@ -579,17 +572,17 @@ void _mouse_set_position(int a1, int a2) {
 }
 
 // 0x4CAA38
-static void _mouse_clip() {
-	if (_mouse_hotx + gMouseCursorX < _scr_size.left) {
-		gMouseCursorX = _scr_size.left - _mouse_hotx;
-	} else if (_mouse_hotx + gMouseCursorX > _scr_size.right) {
-		gMouseCursorX = _scr_size.right - _mouse_hotx;
+static void _mouse_clip() {  // TODO svga.cpp
+	if (_mouse_hotx + gMouseCursorX < 0 /*_scr_size.left*/) {
+		gMouseCursorX = /*_scr_size.left*/ 0 - _mouse_hotx;
+	} else if (_mouse_hotx + gMouseCursorX > /*_scr_size.right*/ 640) {
+		gMouseCursorX = /*_scr_size.right*/ 640 - _mouse_hotx;
 	}
 
-	if (_mouse_hoty + gMouseCursorY < _scr_size.top) {
-		gMouseCursorY = _scr_size.top - _mouse_hoty;
-	} else if (_mouse_hoty + gMouseCursorY > _scr_size.bottom) {
-		gMouseCursorY = _scr_size.bottom - _mouse_hoty;
+	if (_mouse_hoty + gMouseCursorY < /*_scr_size.top*/ 0) {
+		gMouseCursorY = /*_scr_size.top*/ 0 - _mouse_hoty;
+	} else if (_mouse_hoty + gMouseCursorY > /*_scr_size.bottom*/ 480) {
+		gMouseCursorY = /*_scr_size.bottom*/ 480 - _mouse_hoty;
 	}
 }
 
@@ -604,7 +597,7 @@ bool cursorIsHidden() {
 }
 
 // 0x4CAB5C
-void _mouse_get_raw_state(int* out_x, int* out_y, int* out_buttons) {
+void _mouse_get_raw_state(int *out_x, int *out_y, int *out_buttons) {
 	MouseData mouseData;
 	if (!mouseDeviceGetData(&mouseData)) {
 		mouseData.x = 0;
@@ -637,35 +630,35 @@ void mouseSetSensitivity(double value) {
 	}
 }
 
-void mouseGetPositionInWindow(int win, int* x, int* y) {
+void mouseGetPositionInWindow(int win, int *x, int *y) {
 	mouseGetPosition(x, y);
 
-	Window* window = windowGetWindow(win);
+/*	Window *window = windowGetWindow(win);  TODO window_manager.cpp
 	if (window != NULL) {
 		*x -= window->rect.left;
 		*y -= window->rect.top;
-	}
+	}*/
 }
 
 bool mouseHitTestInWindow(int win, int left, int top, int right, int bottom) {
-	Window* window = windowGetWindow(win);
+/*	Window *window = windowGetWindow(win); TODO window_manager.cpp
 	if (window != NULL) {
 		left += window->rect.left;
 		top += window->rect.top;
 		right += window->rect.left;
 		bottom += window->rect.top;
 	}
-
+*/
 	return _mouse_click_in(left, top, right, bottom);
 }
 
-void mouseGetWheel(int* x, int* y) {
+void mouseGetWheel(int *x, int *y) {
 	*x = gMouseWheelX;
 	*y = gMouseWheelY;
 }
 
-void convertMouseWheelToArrowKey(int* keyCodePtr) {
-	if (*keyCodePtr == -1) {
+void convertMouseWheelToArrowKey(int *keyCodePtr) {
+/*	if (*keyCodePtr == -1) {  TODO kb.cpp
 		if ((mouseGetEvent() & MOUSE_EVENT_WHEEL) != 0) {
 			int wheelX;
 			int wheelY;
@@ -677,11 +670,11 @@ void convertMouseWheelToArrowKey(int* keyCodePtr) {
 				*keyCodePtr = KEY_ARROW_DOWN;
 			}
 		}
-	}
+	}*/
 }
 
 int mouse_get_last_buttons() {
 	return last_buttons;
 }
 
-} // namespace fallout
+} // namespace Fallout2
