@@ -1,27 +1,28 @@
-#ifndef POINTER_REGISTRY_H
-#define POINTER_REGISTRY_H
+#ifndef FALLOUT2_POINTER_REGISTRY_H
+#define FALLOUT2_POINTER_REGISTRY_H
 
-#include <unordered_map>
+// #include <unordered_map>
+#include "fallout2/lib/std/map.h"
 
-namespace fallout {
+namespace Fallout2 {
 
 class PointerRegistry {
-  public:
-	static PointerRegistry* shared();
+public:
+	static PointerRegistry *shared();
 
 	PointerRegistry();
 
-	int store(void* ptr);
-	void* fetch(int ref, bool remove = false);
+	int store(void *ptr);
+	void *fetch(int ref, bool remove = false);
 
-  private:
-	std::unordered_map<int, void*> _map;
+private:
+	std::unordered_map<int, void *> _map;
 	int _next;
 };
 
-int ptrToInt(void* ptr);
-void* intToPtr(int ref, bool remove = false);
+int ptrToInt(void *ptr);
+void *intToPtr(int ref, bool remove = false);
 
-} // namespace fallout
+} // namespace Fallout2
 
-#endif /* POINTER_REGISTRY_H */
+#endif

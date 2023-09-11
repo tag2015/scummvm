@@ -36,6 +36,7 @@ MODULE_OBJS = \
 	pcx.o \
 	perk.o \
 	platform_compat.o \
+	pointer_registry.o \
 	proto.o \
 	queue.o \
 	random.o \
