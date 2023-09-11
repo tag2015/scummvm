@@ -1,26 +1,26 @@
-#include "trait.h"
+#include "fallout2/trait.h"
 
-#include <stdio.h>
+// #include <stdio.h>
 
-#include "game.h"
-#include "message.h"
-#include "object.h"
-#include "platform_compat.h"
-#include "skill.h"
-#include "stat.h"
+#include "fallout2/game.h"
+#include "fallout2/message.h"
+#include "fallout2/object.h"
+#include "fallout2/platform_compat.h"
+#include "fallout2/skill.h"
+#include "fallout2/stat.h"
 
-namespace fallout {
+namespace Fallout2 {
 
 // Provides metadata about traits.
 typedef struct TraitDescription {
 	// The name of trait.
-	char* name;
+	char *name;
 
 	// The description of trait.
 	//
 	// The description is only used in character editor to inform player about
 	// effects of this trait.
-	char* description;
+	char *description;
 
 	// Identifier of art in [intrface.lst].
 	int frmId;
@@ -36,22 +36,22 @@ static int gSelectedTraits[TRAITS_MAX_SELECTED_COUNT];
 
 // 0x51DB84
 static TraitDescription gTraitDescriptions[TRAIT_COUNT] = {
-	{ NULL, NULL, 55 },
-	{ NULL, NULL, 56 },
-	{ NULL, NULL, 57 },
-	{ NULL, NULL, 58 },
-	{ NULL, NULL, 59 },
-	{ NULL, NULL, 60 },
-	{ NULL, NULL, 61 },
-	{ NULL, NULL, 62 },
-	{ NULL, NULL, 63 },
-	{ NULL, NULL, 64 },
-	{ NULL, NULL, 65 },
-	{ NULL, NULL, 66 },
-	{ NULL, NULL, 67 },
-	{ NULL, NULL, 94 },
-	{ NULL, NULL, 69 },
-	{ NULL, NULL, 70 },
+	{NULL, NULL, 55},
+	{NULL, NULL, 56},
+	{NULL, NULL, 57},
+	{NULL, NULL, 58},
+	{NULL, NULL, 59},
+	{NULL, NULL, 60},
+	{NULL, NULL, 61},
+	{NULL, NULL, 62},
+	{NULL, NULL, 63},
+	{NULL, NULL, 64},
+	{NULL, NULL, 65},
+	{NULL, NULL, 66},
+	{NULL, NULL, 67},
+	{NULL, NULL, 94},
+	{NULL, NULL, 69},
+	{NULL, NULL, 70},
 };
 
 // 0x4B39F0
@@ -105,14 +105,14 @@ void traitsExit() {
 // Loads trait system state from save game.
 //
 // 0x4B3B08
-int traitsLoad(File* stream) {
+int traitsLoad(File *stream) {
 	return fileReadInt32List(stream, gSelectedTraits, TRAITS_MAX_SELECTED_COUNT);
 }
 
 // Saves trait system state to save game.
 //
 // 0x4B3B28
-int traitsSave(File* stream) {
+int traitsSave(File *stream) {
 	return fileWriteInt32List(stream, gSelectedTraits, TRAITS_MAX_SELECTED_COUNT);
 }
 
@@ -127,7 +127,7 @@ void traitsSetSelected(int trait1, int trait2) {
 // Returns selected traits.
 //
 // 0x4B3B54
-void traitsGetSelected(int* trait1, int* trait2) {
+void traitsGetSelected(int *trait1, int *trait2) {
 	*trait1 = gSelectedTraits[0];
 	*trait2 = gSelectedTraits[1];
 }
@@ -136,7 +136,7 @@ void traitsGetSelected(int* trait1, int* trait2) {
 // out of range.
 //
 // 0x4B3B68
-char* traitGetName(int trait) {
+char *traitGetName(int trait) {
 	return trait >= 0 && trait < TRAIT_COUNT ? gTraitDescriptions[trait].name : NULL;
 }
 
@@ -144,7 +144,7 @@ char* traitGetName(int trait) {
 // trait is out of range.
 //
 // 0x4B3B88
-char* traitGetDescription(int trait) {
+char *traitGetDescription(int trait) {
 	return trait >= 0 && trait < TRAIT_COUNT ? gTraitDescriptions[trait].description : NULL;
 }
 
@@ -298,4 +298,4 @@ int traitGetSkillModifier(int skill) {
 	return modifier;
 }
 
-} // namespace fallout
+} // namespace Fallout2
