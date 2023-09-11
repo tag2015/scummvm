@@ -1187,7 +1187,7 @@ int protoInit() {
 	_mp_perk_code_None = _aNone_1;
 	_perk_code_strs = _mp_perk_code_strs;
 	for (i = 0; i < PERK_COUNT; i++) {
-		_mp_perk_code_strs[i] = ""; // perkGetName(i); TODO perk.cpp
+		_mp_perk_code_strs[i] = perkGetName(i);
 		if (_mp_perk_code_strs[i] == NULL) {
 			debugPrint("\nError: Finding perk names!");
 			return -1;
@@ -2117,8 +2117,8 @@ int _ResetPlayer() {
 	// characterEditorReset();  TODO character_editor.cpp
 	protoCritterDataResetSkills(&(proto->critter.data));
 	skillsReset();
-	// perksReset();  TODO perks.cpp
-	// traitsReset();  TODO traits.cpp
+	perksReset();
+	traitsReset();
 	critterUpdateDerivedStats(gDude);
 	return 0;
 }
