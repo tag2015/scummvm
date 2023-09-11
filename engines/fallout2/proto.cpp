@@ -349,7 +349,7 @@ char *protoGetMessage(int pid, int message) {
 // 0x49EAFC
 char *protoGetName(int pid) {
 	if (pid == 0x1000000) {
-		return ""; // critterGetName(gDude);  TODO critter.cpp
+		return critterGetName(gDude);
 	}
 
 	return protoGetMessage(pid, PROTOTYPE_MESSAGE_NAME);
@@ -851,7 +851,7 @@ int _proto_dude_init(const char *path) {
 	gDude->data.critter.combat.team = 0;
 	_ResetPlayer();
 
-	if (/*gcdLoad(path) == -1*/ 0) {  // TODO critter.cpp
+	if (gcdLoad(path) == -1) {
 		_retval = -1;
 	}
 
@@ -873,7 +873,7 @@ int _proto_dude_init(const char *path) {
 	}
 
 	critterUpdateDerivedStats(gDude);
-	// critterAdjustHitPoints(gDude, 10000);  TODO critter.cpp
+	critterAdjustHitPoints(gDude, 10000);
 
 	if (_retval) {
 		debugPrint("\n ** Error in proto_dude_init()! **\n");
@@ -1551,8 +1551,8 @@ static int protoRead(Proto *proto, File *stream) {
 		if (fileReadInt32(stream, &(proto->critter.team)) == -1)
 			return -1;
 
-//		if (protoCritterDataRead(stream, &(proto->critter.data)) == -1)  TODO critter.cpp
-//			return -1;
+		if (protoCritterDataRead(stream, &(proto->critter.data)) == -1)
+			return -1;
 
 		return 0;
 	case OBJ_TYPE_SCENERY:
@@ -1834,8 +1834,8 @@ static int protoWrite(Proto *proto, File *stream) {
 			return -1;
 		if (fileWriteInt32(stream, proto->critter.team) == -1)
 			return -1;
-//		if (protoCritterDataWrite(stream, &(proto->critter.data)) == -1)  TODO critter.cpp
-//			return -1;
+		if (protoCritterDataWrite(stream, &(proto->critter.data)) == -1)
+			return -1;
 
 		return 0;
 	case OBJ_TYPE_SCENERY:
@@ -2113,7 +2113,7 @@ int _ResetPlayer() {
 	// SFALL: Fix base EMP DR not being properly initialized.
 	proto->critter.data.baseStats[STAT_DAMAGE_RESISTANCE_EMP] = 100;
 
-	// critterReset();  TODO critter.cpp
+	critterReset();
 	// characterEditorReset();  TODO character_editor.cpp
 	protoCritterDataResetSkills(&(proto->critter.data));
 	skillsReset();
