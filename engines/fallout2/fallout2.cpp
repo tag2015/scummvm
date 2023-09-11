@@ -47,6 +47,7 @@
 #include "fallout2/skill.h"
 #include "fallout2/stat.h"
 #include "fallout2/tile.h"
+#include "fallout2/trait.h"
 #include "fallout2/version.h"
 #include "fallout2/win32.h"
 #include "fallout2/window.h"
@@ -319,6 +320,11 @@ Common::Error Fallout2Engine::run() {
 		debug("Initialized perks!");
 	else
 		warning("Error initializing perks");
+
+	if (traitsInit() == 0)
+		debug("Initialized traits!");
+	else
+		warning("Error initializing traits");
 
 	// throw a dice (yay!)
 	debugPrint("RandomRoll (diff= 70) result: %d", randomRoll(70, 5, NULL));
