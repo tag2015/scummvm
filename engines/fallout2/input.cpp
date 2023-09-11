@@ -1,20 +1,20 @@
-#include "input.h"
+#include "fallout2/input.h"
 
-#include <SDL.h>
+// #include <SDL.h>
 
-#include "audio_engine.h"
-#include "color.h"
-#include "dinput.h"
-#include "draw.h"
-#include "kb.h"
-#include "memory.h"
-#include "mouse.h"
-#include "svga.h"
-#include "text_font.h"
-#include "vcr.h"
-#include "win32.h"
+// #include "audio_engine.h"  TODO audio_engine
+#include "fallout2/color.h"
+#include "fallout2/dinput.h"
+#include "fallout2/draw.h"
+#include "fallout2/kb.h"
+#include "fallout2/memory.h"
+#include "fallout2/mouse.h"
+#include "fallout2/svga.h"
+#include "fallout2/text_font.h"
+// #include "vcr.h" TODO vcr
+#include "fallout2/win32.h"
 
-namespace fallout {
+namespace Fallout2 {
 
 typedef struct InputEvent {
 	// This is either logical key or input event id, which can be either
@@ -33,24 +33,24 @@ typedef struct RepeatInfo {
 
 typedef struct TickerListNode {
 	int flags;
-	TickerProc* proc;
-	struct TickerListNode* next;
+	TickerProc *proc;
+	struct TickerListNode *next;
 } TickerListNode;
 
 static int dequeueInputEvent();
 static void pauseGame();
 static int pauseHandlerDefaultImpl();
-static void screenshotBlitter(unsigned char* src, int src_pitch, int a3, int x, int y, int width, int height, int dest_x, int dest_y);
+static void screenshotBlitter(unsigned char *src, int src_pitch, int a3, int x, int y, int width, int height, int dest_x, int dest_y);
 static void buildNormalizedQwertyKeys();
-static void _GNW95_process_key(KeyboardData* data);
+static void _GNW95_process_key(KeyboardData *data);
 
 static void idleImpl();
 
 // 0x51E234
-static IdleFunc* _idle_func = NULL;
+static IdleFunc *_idle_func = NULL;
 
 // 0x51E238
-static FocusFunc* _focus_func = NULL;
+static FocusFunc *_focus_func = NULL;
 
 // 0x51E23C
 static int gKeyboardKeyRepeatRate = 80;
@@ -93,16 +93,16 @@ static int _using_msec_timer;
 static int gPauseKeyCode;
 
 // 0x6AC76C
-static ScreenshotHandler* gScreenshotHandler;
+static ScreenshotHandler *gScreenshotHandler;
 
 // 0x6AC770
 static int gInputEventQueueReadIndex;
 
 // 0x6AC774
-static unsigned char* gScreenshotBuffer;
+static unsigned char *gScreenshotBuffer;
 
 // 0x6AC778
-static PauseHandler* gPauseHandler;
+static PauseHandler *gPauseHandler;
 
 // 0x6AC77C
 static int gInputEventQueueWriteIndex;
@@ -111,7 +111,7 @@ static int gInputEventQueueWriteIndex;
 static bool gRunLoopDisabled;
 
 // 0x6AC784
-static TickerListNode* gTickerListHead;
+static TickerListNode *gTickerListHead;
 
 // 0x6AC788
 static unsigned int gTickerLastTimestamp;
@@ -122,19 +122,19 @@ int inputInit(int a1) {
 		return -1;
 	}
 
-	if (keyboardInit() == -1) {
+/*	if (keyboardInit() == -1) { TODO kb.cpp
 		return -1;
 	}
 
-	if (mouseInit() == -1) {
+	if (mouseInit() == -1) { TODO mouse.cpp
 		return -1;
-	}
+	}*/
 
 	if (_GNW95_input_init() == -1) {
 		return -1;
 	}
 
-	buildNormalizedQwertyKeys();
+//	buildNormalizedQwertyKeys();  TODO
 	_GNW95_clear_time_stamps();
 
 	_using_msec_timer = a1;
@@ -160,13 +160,13 @@ int inputInit(int a1) {
 // 0x4C8B40
 void inputExit() {
 	_GNW95_input_init();
-	mouseFree();
-	keyboardFree();
+	// mouseFree();  TODO mouse.cpp
+	// keyboardFree(); TODO kb.cpp
 	directInputFree();
 
-	TickerListNode* curr = gTickerListHead;
+	TickerListNode *curr = gTickerListHead;
 	while (curr != NULL) {
-		TickerListNode* next = curr->next;
+		TickerListNode *next = curr->next;
 		internal_free(curr);
 		curr = next;
 	}
@@ -185,8 +185,8 @@ int inputGetInput() {
 	_process_bk();
 
 	v3 = dequeueInputEvent();
-	if (v3 == -1 && mouseGetEvent() & 0x33) {
-		mouseGetPosition(&_input_mx, &_input_my);
+	if (v3 == -1 /* && mouseGetEvent() & 0x33 */) {  //TODO mouse.cpp
+//		mouseGetPosition(&_input_mx, &_input_my);
 		return -2;
 	} else {
 		return _GNW_check_menu_bars(v3);
@@ -201,21 +201,21 @@ void _process_bk() {
 
 	tickersExecute();
 
-	if (vcrUpdate() != 3) {
+/*	if (vcrUpdate() != 3) {  TODO vcr.cpp
 		_mouse_info();
-	}
+	}*/
 
-	v1 = _win_check_all_buttons();
+/*	v1 = _win_check_all_buttons();  TODO window_manager.cpp
 	if (v1 != -1) {
 		enqueueInputEvent(v1);
 		return;
-	}
+	}*/
 
-	v1 = _kb_getch();
+/*	v1 = _kb_getch();  TODO kb.cpp
 	if (v1 != -1) {
 		enqueueInputEvent(v1);
 		return;
-	}
+	}*/
 }
 
 // 0x4C8C04
@@ -238,10 +238,10 @@ void enqueueInputEvent(int a1) {
 		return;
 	}
 
-	InputEvent* inputEvent = &(gInputEventQueue[gInputEventQueueWriteIndex]);
+	InputEvent *inputEvent = &(gInputEventQueue[gInputEventQueueWriteIndex]);
 	inputEvent->logicalKey = a1;
 
-	mouseGetPosition(&(inputEvent->mouseX), &(inputEvent->mouseY));
+//	mouseGetPosition(&(inputEvent->mouseX), &(inputEvent->mouseY)); TODO mouse.cpp
 
 	gInputEventQueueWriteIndex++;
 
@@ -261,7 +261,7 @@ static int dequeueInputEvent() {
 		return -1;
 	}
 
-	InputEvent* inputEvent = &(gInputEventQueue[gInputEventQueueReadIndex]);
+	InputEvent *inputEvent = &(gInputEventQueue[gInputEventQueueReadIndex]);
 	int eventCode = inputEvent->logicalKey;
 	_input_mx = inputEvent->mouseX;
 	_input_my = inputEvent->mouseY;
@@ -296,13 +296,13 @@ void tickersExecute() {
 		return;
 	}
 
-	gTickerLastTimestamp = SDL_GetTicks();
+	gTickerLastTimestamp = /*SDL_GetTicks();*/  g_system->getMillis();
 
-	TickerListNode* curr = gTickerListHead;
-	TickerListNode** currPtr = &(gTickerListHead);
+	TickerListNode *curr = gTickerListHead;
+	TickerListNode **currPtr = &(gTickerListHead);
 
 	while (curr != NULL) {
-		TickerListNode* next = curr->next;
+		TickerListNode *next = curr->next;
 		if (curr->flags & 1) {
 			*currPtr = next;
 
@@ -316,8 +316,8 @@ void tickersExecute() {
 }
 
 // 0x4C8D74
-void tickersAdd(TickerProc* proc) {
-	TickerListNode* curr = gTickerListHead;
+void tickersAdd(TickerProc *proc) {
+	TickerListNode *curr = gTickerListHead;
 	while (curr != NULL) {
 		if (curr->proc == proc) {
 			if ((curr->flags & 0x01) != 0) {
@@ -328,7 +328,7 @@ void tickersAdd(TickerProc* proc) {
 		curr = curr->next;
 	}
 
-	curr = (TickerListNode*)internal_malloc(sizeof(*curr));
+	curr = (TickerListNode *)internal_malloc(sizeof(*curr));
 	curr->flags = 0;
 	curr->proc = proc;
 	curr->next = gTickerListHead;
@@ -336,8 +336,8 @@ void tickersAdd(TickerProc* proc) {
 }
 
 // 0x4C8DC4
-void tickersRemove(TickerProc* proc) {
-	TickerListNode* curr = gTickerListHead;
+void tickersRemove(TickerProc *proc) {
+	TickerListNode *curr = gTickerListHead;
 	while (curr != NULL) {
 		if (curr->proc == proc) {
 			curr->flags |= 0x01;
@@ -368,51 +368,51 @@ static void pauseGame() {
 		}
 
 		gPaused = false;
-		windowDestroy(win);
+//		windowDestroy(win);  TODO window_manager.cpp
 	}
 }
 
 // 0x4C8E38
 static int pauseHandlerDefaultImpl() {
-	int windowWidth = fontGetStringWidth("Paused") + 32;
+/*	int windowWidth = fontGetStringWidth("Paused") + 32; TODO pause window_manager.cpp
 	int windowHeight = 3 * fontGetLineHeight() + 16;
 
 	int win = windowCreate((rectGetWidth(&_scr_size) - windowWidth) / 2,
-	                       (rectGetHeight(&_scr_size) - windowHeight) / 2,
-	                       windowWidth,
-	                       windowHeight,
-	                       256,
-	                       WINDOW_MODAL | WINDOW_MOVE_ON_TOP);
+						   (rectGetHeight(&_scr_size) - windowHeight) / 2,
+						   windowWidth,
+						   windowHeight,
+						   256,
+						   WINDOW_MODAL | WINDOW_MOVE_ON_TOP);
 	if (win == -1) {
 		return -1;
 	}
 
 	windowDrawBorder(win);
 
-	unsigned char* windowBuffer = windowGetBuffer(win);
+	unsigned char *windowBuffer = windowGetBuffer(win);
 	fontDrawText(windowBuffer + 8 * windowWidth + 16,
-	             "Paused",
-	             windowWidth,
-	             windowWidth,
-	             _colorTable[31744]);
+				 "Paused",
+				 windowWidth,
+				 windowWidth,
+				 _colorTable[31744]);
 
 	_win_register_text_button(win,
-	                          (windowWidth - fontGetStringWidth("Done") - 16) / 2,
-	                          windowHeight - 8 - fontGetLineHeight() - 6,
-	                          -1,
-	                          -1,
-	                          -1,
-	                          KEY_ESCAPE,
-	                          "Done",
-	                          0);
+							  (windowWidth - fontGetStringWidth("Done") - 16) / 2,
+							  windowHeight - 8 - fontGetLineHeight() - 6,
+							  -1,
+							  -1,
+							  -1,
+							  KEY_ESCAPE,
+							  "Done",
+							  0);
 
 	windowRefresh(win);
 
-	return win;
+	return win; */
 }
 
 // 0x4C8F34
-void pauseHandlerConfigure(int keyCode, PauseHandler* handler) {
+void pauseHandlerConfigure(int keyCode, PauseHandler *handler) {
 	gPauseKeyCode = keyCode;
 
 	if (handler == NULL) {
@@ -424,9 +424,9 @@ void pauseHandlerConfigure(int keyCode, PauseHandler* handler) {
 
 // 0x4C8F4C
 void takeScreenshot() {
-	int width = _scr_size.right - _scr_size.left + 1;
+/*	int width = _scr_size.right - _scr_size.left + 1;  TODO screenshot
 	int height = _scr_size.bottom - _scr_size.top + 1;
-	gScreenshotBuffer = (unsigned char*)internal_malloc(width * height);
+	gScreenshotBuffer = (unsigned char *)internal_malloc(width * height);
 	if (gScreenshotBuffer == NULL) {
 		return;
 	}
@@ -437,7 +437,7 @@ void takeScreenshot() {
 	WINDOWDRAWINGPROC v2 = _mouse_blit;
 	_mouse_blit = screenshotBlitter;
 
-	WindowDrawingProc2* v1 = _mouse_blit_trans;
+	WindowDrawingProc2 *v1 = _mouse_blit_trans;
 	_mouse_blit_trans = NULL;
 
 	windowRefreshAll(&_scr_size);
@@ -446,21 +446,21 @@ void takeScreenshot() {
 	_mouse_blit = v2;
 	_scr_blit = v0;
 
-	unsigned char* palette = _getSystemPalette();
+	unsigned char *palette = _getSystemPalette();
 	gScreenshotHandler(width, height, gScreenshotBuffer, palette);
-	internal_free(gScreenshotBuffer);
+	internal_free(gScreenshotBuffer); */
 }
 
 // 0x4C8FF0
-static void screenshotBlitter(unsigned char* src, int srcPitch, int a3, int srcX, int srcY, int width, int height, int destX, int destY) {
+static void screenshotBlitter(unsigned char *src, int srcPitch, int a3, int srcX, int srcY, int width, int height, int destX, int destY) {
 	int destWidth = _scr_size.right - _scr_size.left + 1;
 	blitBufferToBuffer(src + srcPitch * srcY + srcX, width, height, srcPitch, gScreenshotBuffer + destWidth * destY + destX, destWidth);
 }
 
 // 0x4C9048
-int screenshotHandlerDefaultImpl(int width, int height, unsigned char* data, unsigned char* palette) {
-	char fileName[16];
-	FILE* stream;
+int screenshotHandlerDefaultImpl(int width, int height, unsigned char *data, unsigned char *palette) {
+/*	char fileName[16]; TODO screenshot
+	FILE *stream;
 	int index;
 	unsigned int intValue;
 	unsigned short shortValue;
@@ -565,18 +565,18 @@ int screenshotHandlerDefaultImpl(int width, int height, unsigned char* data, uns
 	}
 
 	for (int y = height - 1; y >= 0; y--) {
-		unsigned char* dataPtr = data + y * width;
+		unsigned char *dataPtr = data + y * width;
 		fwrite(dataPtr, 1, width, stream);
 	}
 
 	fflush(stream);
 	fclose(stream);
-
+*/
 	return 0;
 }
 
 // 0x4C9358
-void screenshotHandlerConfigure(int keyCode, ScreenshotHandler* handler) {
+void screenshotHandlerConfigure(int keyCode, ScreenshotHandler *handler) {
 	gScreenshotKeyCode = keyCode;
 
 	if (handler == NULL) {
@@ -588,7 +588,7 @@ void screenshotHandlerConfigure(int keyCode, ScreenshotHandler* handler) {
 
 // 0x4C9370
 unsigned int getTicks() {
-	return SDL_GetTicks();
+	return /*SDL_GetTicks();*/  g_system->getMillis();
 }
 
 // 0x4C937C
@@ -611,7 +611,7 @@ void inputPauseForTocks(unsigned int delay) {
 
 // 0x4C93B8
 void inputBlockForTocks(unsigned int ms) {
-	unsigned int start = SDL_GetTicks();
+	unsigned int start = /*SDL_GetTicks();*/ g_system->getMillis();
 	unsigned int diff;
 	do {
 		// NOTE: Uninline
@@ -621,7 +621,7 @@ void inputBlockForTocks(unsigned int ms) {
 
 // 0x4C93E0
 unsigned int getTicksSince(unsigned int start) {
-	unsigned int end = SDL_GetTicks();
+	unsigned int end = /*SDL_GetTicks();*/ g_system->getMillis();
 
 	// NOTE: Uninline.
 	return getTicksBetween(end, start);
@@ -672,34 +672,34 @@ int inputGetKeyboardKeyRepeatDelay() {
 // NOTE: Unused.
 //
 // 0x4C9438
-void inputSetFocusFunc(FocusFunc* func) {
+void inputSetFocusFunc(FocusFunc *func) {
 	_focus_func = func;
 }
 
 // NOTE: Unused.
 //
 // 0x4C9440
-FocusFunc* inputGetFocusFunc() {
+FocusFunc *inputGetFocusFunc() {
 	return _focus_func;
 }
 
 // NOTE: Unused.
 //
 // 0x4C9448
-void inputSetIdleFunc(IdleFunc* func) {
+void inputSetIdleFunc(IdleFunc *func) {
 	_idle_func = func;
 }
 
 // NOTE: Unused.
 //
 // 0x4C9450
-IdleFunc* inputGetIdleFunc() {
+IdleFunc *inputGetIdleFunc() {
 	return _idle_func;
 }
 
 // 0x4C9490
 static void buildNormalizedQwertyKeys() {
-	int* keys = gNormalizedQwertyKeys;
+/*	int *keys = gNormalizedQwertyKeys; TODO
 	int k;
 
 	keys[SDL_SCANCODE_ESCAPE] = SDL_SCANCODE_ESCAPE;
@@ -1023,7 +1023,7 @@ static void buildNormalizedQwertyKeys() {
 	keys[SDL_SCANCODE_DELETE] = SDL_SCANCODE_DELETE;
 	keys[SDL_SCANCODE_LGUI] = -1;
 	keys[SDL_SCANCODE_RGUI] = -1;
-	keys[SDL_SCANCODE_APPLICATION] = -1;
+	keys[SDL_SCANCODE_APPLICATION] = -1;*/
 }
 
 // 0x4C9C20
@@ -1038,29 +1038,33 @@ void _GNW95_process_message() {
 	// it again.
 
 	KeyboardData keyboardData;
-	SDL_Event e;
-	while (SDL_PollEvent(&e)) {
+
+//	SDL_Event e;
+	Common::Event e;
+//	while (SDL_PollEvent(&e)) {
+	while (g_system->getEventManager()->pollEvent(e)) {
 		switch (e.type) {
-		case SDL_MOUSEMOTION:
-		case SDL_MOUSEBUTTONDOWN:
-		case SDL_MOUSEBUTTONUP:
-		case SDL_MOUSEWHEEL:
+		case /*SDL_MOUSEMOTION:*/ Common::EVENT_MOUSEMOVE:
+		case /*SDL_MOUSEBUTTONDOWN:*/ Common::EVENT_MBUTTONDOWN:
+		case /*SDL_MOUSEBUTTONUP:*/ Common::EVENT_MBUTTONUP:
+		case /*SDL_MOUSEWHEEL:*/ Common::EVENT_WHEELDOWN:
+		case /*SDL_MOUSEWHEEL:*/ Common::EVENT_WHEELUP:
 			handleMouseEvent(&e);
 			break;
-		case SDL_FINGERDOWN:
+		/*case SDL_FINGERDOWN:  TODO SDL Touch
 		case SDL_FINGERMOTION:
 		case SDL_FINGERUP:
 			handleTouchEvent(&e);
-			break;
-		case SDL_KEYDOWN:
-		case SDL_KEYUP:
-			if (!keyboardIsDisabled()) {
+			break;*/
+		case /*SDL_KEYDOWN:*/ Common::EVENT_KEYDOWN:
+		case /*SDL_KEYUP:*/  Common::EVENT_KEYUP:
+/*			if (!keyboardIsDisabled()) {  TODO kb.cpp
 				keyboardData.key = e.key.keysym.scancode;
 				keyboardData.down = (e.key.state & SDL_PRESSED) != 0;
 				_GNW95_process_key(&keyboardData);
-			}
+			}*/
 			break;
-		case SDL_WINDOWEVENT:
+/*		case SDL_WINDOWEVENT:
 			switch (e.window.event) {
 			case SDL_WINDOWEVENT_EXPOSED:
 				windowRefreshAll(&_scr_size);
@@ -1081,16 +1085,16 @@ void _GNW95_process_message() {
 			break;
 		case SDL_QUIT:
 			exit(EXIT_SUCCESS);
-			break;
+			break;*/
 		}
 	}
 
-	if (gProgramIsActive && !keyboardIsDisabled()) {
+	if (gProgramIsActive/* && !keyboardIsDisabled()*/) {  // TODO kb.cpp
 		// NOTE: Uninline
 		int tick = getTicks();
 
 		for (int key = 0; key < SDL_NUM_SCANCODES; key++) {
-			RepeatInfo* ptr = &(_GNW95_key_time_stamps[key]);
+			RepeatInfo *ptr = &(_GNW95_key_time_stamps[key]);
 			if (ptr->tick != -1) {
 				int elapsedTime = ptr->tick > tick ? INT_MAX : tick - ptr->tick;
 				int delay = ptr->repeatCount == 0 ? gKeyboardKeyRepeatDelay : gKeyboardKeyRepeatRate;
@@ -1116,12 +1120,12 @@ void _GNW95_clear_time_stamps() {
 }
 
 // 0x4C9E14
-static void _GNW95_process_key(KeyboardData* data) {
+static void _GNW95_process_key(KeyboardData *data) {
 	// Use originally pressed scancode, not qwerty-remapped one, for tracking
 	// timestamps, see usage from |_GNW95_process_message|.
 	int scanCode = data->key;
 
-	data->key = gNormalizedQwertyKeys[data->key];
+/*	data->key = gNormalizedQwertyKeys[data->key]; TODO vcr.cpp kb.cpp
 
 	if (gVcrState == VCR_STATE_PLAYING) {
 		if ((gVcrTerminateFlags & VCR_TERMINATE_ON_KEY_PRESS) != 0) {
@@ -1129,7 +1133,7 @@ static void _GNW95_process_key(KeyboardData* data) {
 			vcrStop();
 		}
 	} else {
-		RepeatInfo* ptr = &(_GNW95_key_time_stamps[scanCode]);
+		RepeatInfo *ptr = &(_GNW95_key_time_stamps[scanCode]);
 		if (data->down == 1) {
 			ptr->tick = getTicks();
 			ptr->repeatCount = 0;
@@ -1143,7 +1147,7 @@ static void _GNW95_process_key(KeyboardData* data) {
 		}
 
 		_kb_simulate_key(data);
-	}
+	}*/
 }
 
 // 0x4C9EEC
@@ -1166,15 +1170,16 @@ void _GNW95_lost_focus() {
 }
 
 static void idleImpl() {
-	SDL_Delay(125);
+	//	SDL_Delay(125);
+	g_system->delayMillis(125);
 }
 
 void beginTextInput() {
-	SDL_StartTextInput();
+//	SDL_StartTextInput();  TODO SDL
 }
 
 void endTextInput() {
-	SDL_StopTextInput();
+//	SDL_StopTextInput();  TODO SDL
 }
 
-} // namespace fallout
+} // namespace Fallout2
