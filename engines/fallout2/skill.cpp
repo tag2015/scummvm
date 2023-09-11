@@ -238,13 +238,13 @@ int skillGetValue(Object *critter, int skill) {
 		if (skillIsTagged(skill)) {
 			value += baseValue * skillDescription->field_20;
 
-			if (/*!perkGetRank(critter, PERK_TAG) || */ skill != gTaggedSkills[3]) {  // TODO perk.cpp
+			if (!perkGetRank(critter, PERK_TAG) || skill != gTaggedSkills[3]) {
 				value += 20;
 			}
 		}
 
-//		value += traitGetSkillModifier(skill);  TODO trait.cpp
-//		value += perkGetSkillModifier(critter, skill); TODO perk.cpp
+		value += traitGetSkillModifier(skill);
+		value += perkGetSkillModifier(critter, skill);
 		value += skillGetGameDifficultyModifier(skill);
 	}
 
