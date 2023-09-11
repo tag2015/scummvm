@@ -34,6 +34,7 @@ MODULE_OBJS = \
 	palette.o \
 	party_member.o \
 	pcx.o \
+	perk.o \
 	platform_compat.o \
 	proto.o \
 	queue.o \
