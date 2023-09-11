@@ -25,6 +25,7 @@ MODULE_OBJS = \
 	geometry.o \
 	graph_lib.o \
 	heap.o \
+	input.o \
 	interpreter.o \
 	light.o \
 	memory.o \
