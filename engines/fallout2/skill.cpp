@@ -227,11 +227,10 @@ int skillGetValue(Object *critter, int skill) {
 
 	SkillDescription *skillDescription = &(gSkillDescriptions[skill]);
 
-	int v7 = 0;  // TODO remove
-/*	int v7 = critterGetStat(critter, skillDescription->stat1);  TODO critter.cpp
+	int v7 = critterGetStat(critter, skillDescription->stat1);
 	if (skillDescription->stat2 != -1) {
 		v7 += critterGetStat(critter, skillDescription->stat2);
-	}*/
+	}
 
 	int value = skillDescription->defaultValue + skillDescription->statModifier * v7 + baseValue * skillDescription->field_20;
 
@@ -435,24 +434,24 @@ int skillRoll(Object *critter, int skill, int modifier, int *howMuch) {
 		return ROLL_FAILURE;
 	}
 
-/*	if (critter == gDude && skill != SKILL_STEAL) {  TODO party_member.cpp
+	if (critter == gDude && skill != SKILL_STEAL) {
 		Object *partyMember = partyMemberGetBestInSkill(skill);
 		if (partyMember != NULL) {
 			if (partyMemberGetBestSkill(partyMember) == skill) {
 				critter = partyMember;
 			}
 		}
-	}*/
+	}
 
 	int skillValue = skillGetValue(critter, skill);
 
-/*	if (critter == gDude && skill == SKILL_STEAL) {  TODO critter.cpp
+	if (critter == gDude && skill == SKILL_STEAL) {
 		if (dudeHasState(DUDE_STATE_SNEAKING)) {
 			if (dudeIsSneaking()) {
 				skillValue += 30;
 			}
 		}
-	}*/
+	}
 
 	int criticalChance = critterGetStat(critter, STAT_CRITICAL_CHANCE);
 	return randomRoll(skillValue + modifier, criticalChance, howMuch);
