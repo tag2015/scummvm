@@ -403,7 +403,7 @@ int partyMemberAdd(Object *object) {
 		script->sid = object->sid;
 	}*/
 
-	critterSetTeam(object, 0);
+//	critterSetTeam(object, 0); TODO combat_ai.cpp
 	queueRemoveEventsByType(object, EVENT_TYPE_SCRIPT);
 
 /*	if (_gdialogActive()) {  TODO game_dialog.cpp
