@@ -119,9 +119,6 @@ static void *_GNW_texture;
 static ButtonGroup gButtonGroups[BUTTON_GROUP_LIST_CAPACITY];
 
 
-// TODO REMOVE!!! after svga implementation
-Rect _scr_size;
-
 // 0x4D5C30
 int windowManagerInit(VideoSystemInitProc *videoSystemInitProc, VideoSystemExitProc *videoSystemExitProc, int a3) {
 //#ifdef _WIN32
@@ -148,9 +145,9 @@ int windowManagerInit(VideoSystemInitProc *videoSystemInitProc, VideoSystemExitP
 	}
 
 	if (_db_total() == 0) {
-		if (dbOpen(NULL, 0, _path_patches, 1) == -1) {
-			return WINDOW_MANAGER_ERR_INITIALIZING_DEFAULT_DATABASE;
-		}
+//		if (dbOpen(NULL, 0, _path_patches, 1) == -1) {  TODO implement directory opening in xfile
+//			return WINDOW_MANAGER_ERR_INITIALIZING_DEFAULT_DATABASE;
+//		}
 	}
 
 	if (textFontsInit() == -1) {
@@ -176,10 +173,10 @@ int windowManagerInit(VideoSystemInitProc *videoSystemInitProc, VideoSystemExitP
 	}
 
 	// TODO REMOVE !!!
-	_scr_size.left = 0;
-	_scr_size.top = 0;
-	_scr_size.right = 640;
-	_scr_size.bottom = 480;
+	//_scr_size.left = 0;
+	//_scr_size.top = 0;
+	//_scr_size.right = 640;
+	//_scr_size.bottom = 480;
 
 	if (a3 & 1) {
 		_screen_buffer = (unsigned char *)internal_malloc((_scr_size.bottom - _scr_size.top + 1) * (_scr_size.right - _scr_size.left + 1));
