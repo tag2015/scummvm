@@ -60,6 +60,7 @@ MODULE_OBJS = \
 	win32.o \
 	window.o \
 	window_manager.o \
+	window_manager_private.o \
 	word_wrap.o \
 	xfile.o \
 	third_party/fpattern/fpattern.o
