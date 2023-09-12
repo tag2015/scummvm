@@ -124,11 +124,11 @@ int inputInit(int a1) {
 
 /*	if (keyboardInit() == -1) { TODO kb.cpp
 		return -1;
-	}
-
-	if (mouseInit() == -1) { TODO mouse.cpp
-		return -1;
 	}*/
+
+	if (mouseInit() == -1) {
+		return -1;
+	}
 
 	if (_GNW95_input_init() == -1) {
 		return -1;
@@ -160,7 +160,7 @@ int inputInit(int a1) {
 // 0x4C8B40
 void inputExit() {
 	_GNW95_input_init();
-	// mouseFree();  TODO mouse.cpp
+	mouseFree();
 	// keyboardFree(); TODO kb.cpp
 	directInputFree();
 
@@ -185,8 +185,8 @@ int inputGetInput() {
 	_process_bk();
 
 	v3 = dequeueInputEvent();
-	if (v3 == -1 /* && mouseGetEvent() & 0x33 */) {  //TODO mouse.cpp
-//		mouseGetPosition(&_input_mx, &_input_my);
+	if (v3 == -1 && mouseGetEvent() & 0x33) {
+		mouseGetPosition(&_input_mx, &_input_my);
 		return -2;
 	} else {
 		return _GNW_check_menu_bars(v3);
@@ -241,7 +241,7 @@ void enqueueInputEvent(int a1) {
 	InputEvent *inputEvent = &(gInputEventQueue[gInputEventQueueWriteIndex]);
 	inputEvent->logicalKey = a1;
 
-//	mouseGetPosition(&(inputEvent->mouseX), &(inputEvent->mouseY)); TODO mouse.cpp
+	mouseGetPosition(&(inputEvent->mouseX), &(inputEvent->mouseY));
 
 	gInputEventQueueWriteIndex++;
 
