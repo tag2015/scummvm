@@ -5,6 +5,8 @@
 
 #include "fallout2/geometry.h"
 
+#include "common/system.h"
+
 namespace Fallout2 {
 
 typedef struct MenuBar MenuBar;
