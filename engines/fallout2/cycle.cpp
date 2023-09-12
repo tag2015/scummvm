@@ -1,10 +1,10 @@
 #include "fallout2/cycle.h"
 
 #include "fallout2/color.h"
-// #include "fallout2/input.h" TODO for tickers
+#include "fallout2/input.h"
 #include "fallout2/palette.h"
-// #include "fallout2/settings.h" TODO speed options
-//  #include "fallout2/svga.h"
+#include "fallout2/settings.h"
+//  #include "fallout2/svga.h"  TODO svga.cpp
 
 namespace Fallout2 {
 
@@ -100,10 +100,9 @@ void colorCycleInit() {
 		return;
 	}
 
-	// TODO settings
-	//	if (!settings.system.color_cycling) {
-	//		return;
-	//	}
+	if (!settings.system.color_cycling) {
+		return;
+	}
 
 	for (int index = 0; index < 12; index++) {
 		slime[index] >>= 2;
@@ -125,14 +124,12 @@ void colorCycleInit() {
 		monitors[index] >>= 2;
 	}
 
-	// TODO tickers
-	//	tickersAdd(colorCycleTicker);
+	tickersAdd(colorCycleTicker);
 
 	gColorCycleInitialized = true;
 	gColorCycleEnabled = true;
 
-	// TODO settings
-	//	cycleSetSpeedFactor(settings.system.cycle_speed_factor);
+	cycleSetSpeedFactor(settings.system.cycle_speed_factor);
 }
 
 // 0x42E8CC
@@ -142,8 +139,7 @@ void colorCycleReset() {
 		last_cycle_medium = 0;
 		last_cycle_fast = 0;
 		last_cycle_very_fast = 0;
-		// TODO tickers
-		// tickersAdd(colorCycleTicker);
+		tickersAdd(colorCycleTicker);
 		gColorCycleEnabled = true;
 	}
 }
@@ -151,8 +147,7 @@ void colorCycleReset() {
 // 0x42E90C
 void colorCycleFree() {
 	if (gColorCycleInitialized) {
-		// TODO tickers
-		// tickersRemove(colorCycleTicker);
+		tickersRemove(colorCycleTicker);
 		gColorCycleInitialized = false;
 		gColorCycleEnabled = false;
 	}
@@ -176,8 +171,7 @@ bool colorCycleEnabled() {
 // 0x42E950
 void cycleSetSpeedFactor(int value) {
 	gColorCycleSpeedFactor = value;
-	// TODO settings
-	//	settings.system.cycle_speed_factor = value;
+	settings.system.cycle_speed_factor = value;
 }
 
 // 0x42E97C
@@ -210,7 +204,7 @@ void colorCycleTicker() {
 	bool changed = false;
 
 	unsigned char *palette = _getSystemPalette();
-	unsigned int time = /*getTicks();*/ g_system->getMillis();
+	unsigned int time = getTicks();
 
 	if (getTicksBetween(time, last_cycle_slow) >= kSlowCyclePeriod * gColorCycleSpeedFactor) {
 		changed = true;
@@ -321,15 +315,6 @@ void colorCycleTicker() {
 
 	if (changed) {
 		paletteSetEntriesInRange(palette + 229 * 3, 229, 255);
-	}
-}
-
-// TODO duplicated from input
-unsigned int getTicksBetween(unsigned int end, unsigned int start) {
-	if (start > end) {
-		return INT_MAX;
-	} else {
-		return end - start;
 	}
 }
 

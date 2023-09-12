@@ -12,8 +12,6 @@ bool colorCycleEnabled();
 void cycleSetSpeedFactor(int value);
 void colorCycleTicker();
 
-unsigned int getTicksBetween(unsigned int end, unsigned int start); // TODO: remove
-
 } // namespace Fallout2
 
 #endif
