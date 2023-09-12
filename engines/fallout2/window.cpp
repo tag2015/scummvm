@@ -15,7 +15,7 @@
 #include "fallout2/memory_manager.h"
 #include "fallout2/mouse.h"
 #include "fallout2/mouse_manager.h"
-#include "fallout2/movie.h"
+// #include "fallout2/movie.h" TODO movie.cpp
 #include "fallout2/platform_compat.h"
 #include "fallout2/svga.h"
 #include "fallout2/text_font.h"
@@ -476,7 +476,7 @@ bool _windowActivateRegion(const char *regionName, int a2) {
 int _getInput() {
 	int keyCode = inputGetInput();
 	if (keyCode == KEY_CTRL_Q || keyCode == KEY_CTRL_X || keyCode == KEY_F10) {
-		showQuitConfirmationDialog();
+//		showQuitConfirmationDialog();  TODO game.cpp
 	}
 
 	if (_game_user_wants_to_quit != 0) {
@@ -1263,7 +1263,7 @@ void _initWindow(int resolution, int a2) {
 	int rc;
 	int i, j;
 
-	intLibRegisterProgramDeleteCallback(_removeProgramReferences_3);
+//	intLibRegisterProgramDeleteCallback(_removeProgramReferences_3);  TODO interpreter_lib
 
 	_currentTextColorR = 0;
 	_currentTextColorG = 0;
@@ -2169,7 +2169,7 @@ bool _windowDeleteRegion(const char *regionName) {
 
 // 0x4BB220
 void _updateWindows() {
-	_movieUpdate();
+//	_movieUpdate(); TODO movie
 	mouseManagerUpdate();
 	_checkAllRegions();
 	_update_widgets();
@@ -2177,39 +2177,39 @@ void _updateWindows() {
 
 // 0x4BB234
 int _windowMoviePlaying() {
-	return _moviePlaying();
+//	return _moviePlaying(); TODO movie
 }
 
 // 0x4BB23C
 bool _windowSetMovieFlags(int flags) {
-	if (movieSetFlags(flags) != 0) {
+/*	if (movieSetFlags(flags) != 0) {  TODO movie
 		return false;
 	}
-
+*/
 	return true;
 }
 
 // 0x4BB24C
 bool _windowPlayMovie(char *filePath) {
-	if (_movieRun(gManagedWindows[gCurrentManagedWindowIndex].window, filePath) != 0) {
+/*	if (_movieRun(gManagedWindows[gCurrentManagedWindowIndex].window, filePath) != 0) {  // TODO movie
 		return false;
 	}
-
+*/
 	return true;
 }
 
 // 0x4BB280
 bool _windowPlayMovieRect(char *filePath, int a2, int a3, int a4, int a5) {
-	if (_movieRunRect(gManagedWindows[gCurrentManagedWindowIndex].window, filePath, a2, a3, a4, a5) != 0) {
+/*	if (_movieRunRect(gManagedWindows[gCurrentManagedWindowIndex].window, filePath, a2, a3, a4, a5) != 0) {  TODO movie
 		return false;
 	}
-
+*/
 	return true;
 }
 
 // 0x4BB2C4
 void _windowStopMovie() {
-	_movieStop();
+//	_movieStop(); TODO movie
 }
 
 // 0x4BB3A8
