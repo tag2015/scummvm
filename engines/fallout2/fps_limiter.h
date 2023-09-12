@@ -1,19 +1,19 @@
-#ifndef FPS_LIMITER_H
-#define FPS_LIMITER_H
+#ifndef FALLOUT2_FPS_LIMITER_H
+#define FALLOUT2_FPS_LIMITER_H
 
-namespace fallout {
+namespace Fallout2 {
 
 class FpsLimiter {
-  public:
+public:
 	FpsLimiter(unsigned int fps = 60);
 	void mark();
 	void throttle() const;
 
-  private:
+private:
 	const unsigned int _fps;
 	unsigned int _ticks;
 };
 
-} // namespace fallout
+} // namespace Fallout2
 
-#endif /* FPS_LIMITER_H */
+#endif

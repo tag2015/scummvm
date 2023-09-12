@@ -19,6 +19,7 @@ MODULE_OBJS = \
 	export.o \
 	file_find.o \
 	font_manager.o \
+	fps_limiter.o \
 	game.o \
 	game_config.o \
 	game_memory.o \
