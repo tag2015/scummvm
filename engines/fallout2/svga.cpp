@@ -201,7 +201,7 @@ int directDrawInit(int width, int height, int bpp) {
 
 		return 0;
 	}
-
+	gSdlSurface = new Graphics::Surface();
 	gSdlSurface->create(width, height,Graphics::PixelFormat(4, 8, 8, 8, 8, 0, 8, 16, 24));
 //	 = SDL_CreateRGBSurface(0, width, height, bpp, 0, 0, 0, 0);
 
@@ -371,6 +371,7 @@ static bool createRenderer(int width, int height) {
 		return false;
 	}*/
 
+	gSdlTextureSurface = new Graphics::ManagedSurface();
 	gSdlTextureSurface->create(width, height, Graphics::PixelFormat(4, 8, 8, 8, 8, 0, 8, 16, 24));
 //	 = SDL_CreateRGBSurfaceWithFormat(0, width, height, SDL_BITSPERPIXEL(format), format);
 	if (gSdlTextureSurface == NULL) {
