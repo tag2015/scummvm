@@ -1,22 +1,23 @@
-#include "fps_limiter.h"
+#include "fallout2/fps_limiter.h"
 
-#include <SDL.h>
+#include "fallout2/fallout2.h"
 
-namespace fallout {
+// #include <SDL.h>
+
+namespace Fallout2 {
 
 FpsLimiter::FpsLimiter(unsigned int fps)
-	: _fps(fps)
-	, _ticks(0) {
+	: _fps(fps), _ticks(0) {
 }
 
 void FpsLimiter::mark() {
-	_ticks = SDL_GetTicks();
+	_ticks = g_system->getMillis();
 }
 
 void FpsLimiter::throttle() const {
-	if (1000 / _fps > SDL_GetTicks() - _ticks) {
-		SDL_Delay(1000 / _fps - (SDL_GetTicks() - _ticks));
+	if (1000 / _fps > g_system->getMillis() - _ticks) {
+		g_system->delayMillis(1000 / _fps - (g_system->getMillis() - _ticks));
 	}
 }
 
-} // namespace fallout
+} // namespace Fallout2
