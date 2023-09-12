@@ -51,6 +51,7 @@
 #include "fallout2/version.h"
 #include "fallout2/win32.h"
 #include "fallout2/window.h"
+#include "fallout2/window_manager.h"
 
 #define SPLASH_COUNT (10)
 
@@ -331,15 +332,18 @@ Common::Error Fallout2Engine::run() {
 	debugPrint("RandomRoll (diff= 10) result: %d", randomRoll(10, 5, NULL));
 	debugPrint("RandomRoll (diff= 150) result: %d", randomRoll(150, 5, NULL));
 
-	while (!shouldQuit()) {
+	bool msgshown = false;
+	while (!shouldQuit() && !msgshown) {
 		while (g_system->getEventManager()->pollEvent(e)) {
 		}
-		if(e.type == Common::EVENT_SCREEN_CHANGED)
+		if (e.type == Common::EVENT_SCREEN_CHANGED)
 			_screen->update();
 
 		// Delay for a bit. All events loops should have a delay
 		// to prevent the system being unduly loaded
 		g_system->delayMillis(10);
+		showMesageBox("CONGLATURATION, YOU WIN!");
+		msgshown = true;
 	}
 
 	return Common::kNoError;
