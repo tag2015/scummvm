@@ -278,6 +278,10 @@ Common::Error Fallout2Engine::run() {
 	else
 		warning("Couldn't initialize message repository");
 
+	// init main window
+	_initWindow(1, 0);
+	debug("Initialized window manager!");
+
 	// init game palette
 	paletteInit();
 
