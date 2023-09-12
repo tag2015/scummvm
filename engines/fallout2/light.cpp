@@ -43,7 +43,7 @@ int lightGetAmbientIntensity() {
 
 // 0x47A908
 void lightSetAmbientIntensity(int intensity, bool shouldUpdateScreen) {
-	int adjustedIntensity = intensity; // + perkGetRank(gDude, PERK_NIGHT_VISION) * LIGHT_LEVEL_NIGHT_VISION_BONUS;  TODO: perk.cpp
+	int adjustedIntensity = intensity + perkGetRank(gDude, PERK_NIGHT_VISION) * LIGHT_LEVEL_NIGHT_VISION_BONUS;
 	int normalizedIntensity = clamp(adjustedIntensity, LIGHT_INTENSITY_MIN, LIGHT_INTENSITY_MAX);
 
 	int oldAmbientIntensity = gAmbientIntensity;
