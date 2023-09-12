@@ -3,8 +3,10 @@
 
 // #include <SDL.h>
 
-// #include "fps_limiter.h"
+#include "fallout2/fps_limiter.h"
 #include "fallout2/geometry.h"
+
+#include "graphics/screen.h"
 
 namespace Fallout2 {
 
@@ -18,8 +20,13 @@ extern SDL_Surface* gSdlSurface;
 extern SDL_Renderer* gSdlRenderer;
 extern SDL_Texture* gSdlTexture;
 extern SDL_Surface* gSdlTextureSurface;
-extern FpsLimiter sharedFpsLimiter;
 */
+
+extern Graphics::Surface *gSdlSurface;
+extern Graphics::ManagedSurface *gSdlTexture;
+extern Graphics::ManagedSurface *gSdlTextureSurface;
+
+extern FpsLimiter sharedFpsLimiter;
 
 int _init_mode_320_200();
 int _init_mode_320_400();

@@ -51,6 +51,7 @@ MODULE_OBJS = \
 	skill.o \
 	stat.o \
 	string_parsers.o \
+	svga.o \
 	text_font.o \
 	text_object.o \
 	tile.o \
