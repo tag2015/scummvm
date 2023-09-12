@@ -32,6 +32,7 @@ MODULE_OBJS = \
 	memory_manager.o \
 	message.o \
 	mouse.o \
+	mouse_manager.o \
 	object.o \
 	palette.o \
 	party_member.o \
