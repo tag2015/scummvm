@@ -1,8 +1,8 @@
-/* DELETE */
+/* TODO: Move to fallout2.cpp */
 
-#include "win32.h"
+#include "fallout2/win32.h"
 
-#include <stdlib.h>
+/*#include <stdlib.h>
 
 #include <SDL.h>
 
@@ -16,10 +16,11 @@
 
 #if __APPLE__ && TARGET_OS_IOS
 #include "platform/ios/paths.h"
-#endif
+#endif*/
 
-namespace fallout {
+namespace Fallout2 {
 
+#if 0
 #ifdef _WIN32
 // 0x51E444
 bool gProgramIsActive = false;
@@ -67,9 +68,8 @@ int main(int argc, char* argv[]) {
 	return falloutMain(argc, argv);
 }
 #endif
+#endif
 
-} // namespace fallout
+bool gProgramIsActive = true;
 
-int main(int argc, char* argv[]) {
-	return fallout::main(argc, argv);
-}
+} // namespace Fallout2

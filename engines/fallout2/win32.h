@@ -7,12 +7,12 @@
 
 namespace Fallout2 {
 
-/*#ifdef _WIN32
+// #ifdef _WIN32
 extern bool gProgramIsActive;
-extern HANDLE _GNW95_mutex;
-#else*/
+// extern HANDLE _GNW95_mutex;
+// #else
 
-bool gProgramIsActive;
+// bool gProgramIsActive;
 
 } // namespace Fallout2
 
