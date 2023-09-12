@@ -66,14 +66,14 @@ void randomExit() {
 }
 
 // NOTE: Uncollapsed 0x4A2FFC.
-// int randomSave(File* stream) {
-//	return _roll_reset_();
-//}
+int randomSave(File *stream) {
+	return _roll_reset_();
+}
 
 // NOTE: Uncollapsed 0x4A2FFC.
-// int randomLoad(File* stream) {
-//	return _roll_reset_();
-//}
+int randomLoad(File *stream) {
+	return _roll_reset_();
+}
 
 // Rolls d% against [difficulty].
 //
