@@ -58,7 +58,7 @@ bool sfallConfigInit(int argc, char **argv) {
 	configSetInt(&gSfallConfig, SFALL_CONFIG_MISC_KEY, SFALL_CONFIG_MOVIE_TIMER_ARTIMER4, 360);
 
 	char path[COMPAT_MAX_PATH];
-	char *executable = argv[0];
+	char *executable = "fallout2.exe" /*argv[0]*/;
 	char *ch = strrchr(executable, '\\');
 	if (ch != NULL) {
 		*ch = '\0';
@@ -68,9 +68,10 @@ bool sfallConfigInit(int argc, char **argv) {
 		strncpy(path, SFALL_CONFIG_FILE_NAME, sizeof(path) - 1);
 	}
 
-	configRead(&gSfallConfig, path, false);
+//  TODO read sfall configuration
+//	configRead(&gSfallConfig, path, false);
 
-	configParseCommandLineArguments(&gSfallConfig, argc, argv);
+//	configParseCommandLineArguments(&gSfallConfig, argc, argv);
 
 	gSfallConfigInitialized = true;
 
