@@ -1,16 +1,14 @@
 #include "fallout2/palette.h"
 
-/// #include <string.h>
+// #include <string.h>
 
 #include "common/debug.h"
+
 #include "fallout2/color.h"
 #include "fallout2/cycle.h"
-
-// #include "debug.h"
-
-// #include "game_sound.h" TODO
-// #include "input.h" TODO
-// #include "svga.h" TODO
+// #include "game_sound.h" TODO audio
+#include "fallout2/input.h"
+// #include "svga.h" TODO svga.cpp
 
 namespace Fallout2 {
 
@@ -34,7 +32,7 @@ void paletteInit() {
 	memset(gPaletteWhite, 63, 256 * 3);
 	memcpy(gPalette, _cmap, 256 * 3);
 
-	unsigned int tick = /* getTicks();*/ g_system->getMillis();
+	unsigned int tick = getTicks();
 	// TODO audio
 	//	if (backgroundSoundIsEnabled() || speechIsEnabled()) {
 	//  colorPaletteSetTransitionCallback(soundContinueAll);
@@ -46,9 +44,7 @@ void paletteInit() {
 
 	// Actual fade duration will never be 0 since |colorPaletteFadeBetween| uses
 	// frame rate throttling.
-	// TODO
-	// unsigned int actualFadeDuration = getTicksSince(tick);
-	unsigned int actualFadeDuration = getTicksBetween(g_system->getMillis(), tick);
+	unsigned int actualFadeDuration = getTicksSince(tick);
 
 	// TODO: The game performs the fading as a benchmark to find how many ms it takes
 	// Since it's currently skipped it's instantaneous and forces actualFadeDuration to zero
@@ -82,7 +78,7 @@ void paletteFadeTo(unsigned char *palette) {
 	bool colorCycleWasEnabled = colorCycleEnabled();
 	colorCycleDisable();
 
-	// TODO sound
+	// TODO audio
 	//	if (backgroundSoundIsEnabled() || speechIsEnabled()) {
 	//		colorPaletteSetTransitionCallback(soundContinueAll);
 	//	}
