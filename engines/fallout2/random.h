@@ -1,7 +1,7 @@
 #ifndef FALLOUT2_RANDOM_H
 #define FALLOUT2_RANDOM_H
 
-// #include "db.h"  TODO
+#include "fallout2/db.h"
 
 namespace Fallout2 {
 
@@ -15,8 +15,8 @@ typedef enum Roll {
 void randomInit();
 void randomReset();
 void randomExit();
-// int randomSave(File* stream);  TODO
-// int randomLoad(File* stream);  TODO
+int randomSave(File* stream);
+int randomLoad(File* stream);
 int randomRoll(int difficulty, int criticalSuccessModifier, int *howMuchPtr);
 int randomBetween(int min, int max);
 void randomSeedPrerandom(int seed);
