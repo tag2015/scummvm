@@ -44,6 +44,7 @@
 #include "fallout2/platform_compat.h"
 #include "fallout2/random.h"
 #include "fallout2/settings.h"
+#include "fallout2/sfall_config.h"
 #include "fallout2/skill.h"
 #include "fallout2/stat.h"
 #include "fallout2/tile.h"
@@ -257,6 +258,10 @@ Common::Error Fallout2Engine::run() {
 		warning("Error allocating memory");
 	else
 		debug("Memory allocation successful!");
+
+	// Sfall config should be initialized before game config, since it can
+	// override it's file name.
+	sfallConfigInit(1, nullptr);
 
 	// Init game settings
 	if (settingsInit(false, 1, nullptr))
