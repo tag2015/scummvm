@@ -1,27 +1,31 @@
-#include "window_manager.h"
+#include "fallout2/window_manager.h"
 
-#include <string.h>
+// #include <string.h>
+// #include <algorithm>
+// #include <SDL.h>
 
-#include <algorithm>
+#include "fallout2/fallout2.h"
 
-#include <SDL.h>
+#include "fallout2/color.h"
+#include "fallout2/db.h"
+#include "fallout2/debug.h"
+#include "fallout2/dinput.h"
+#include "fallout2/draw.h"
+#include "fallout2/input.h"
+#include "fallout2/memory.h"
+#include "fallout2/mouse.h"
+#include "fallout2/palette.h"
+#include "fallout2/pointer_registry.h"
+#include "fallout2/svga.h"
+#include "fallout2/text_font.h"
+// #include "fallout2/vcr.h" TODO vcr
+#include "fallout2/win32.h"
+#include "fallout2/window_manager_private.h"
 
-#include "color.h"
-#include "debug.h"
-#include "dinput.h"
-#include "draw.h"
-#include "input.h"
-#include "memory.h"
-#include "mouse.h"
-#include "palette.h"
-#include "pointer_registry.h"
-#include "svga.h"
-#include "text_font.h"
-#include "vcr.h"
-#include "win32.h"
-#include "window_manager_private.h"
+#include "common/translation.h"
+#include "gui/message.h"
 
-namespace fallout {
+namespace Fallout2 {
 
 #define MAX_WINDOW_COUNT (50)
 
@@ -31,22 +35,22 @@ namespace fallout {
 static void windowFree(int win);
 static void _win_buffering(bool a1);
 static void _win_move(int win_index, int x, int y);
-static void _win_clip(Window* window, RectListNode** rect, unsigned char* a3);
+static void _win_clip(Window *window, RectListNode **rect, unsigned char *a3);
 static void _win_drag(int win);
-static void _refresh_all(Rect* rect, unsigned char* a2);
-static Button* buttonGetButton(int btn, Window** out_win);
-static int paletteOpenFileImpl(const char* path, int flags);
-static int paletteReadFileImpl(int fd, void* buf, size_t count);
+static void _refresh_all(Rect *rect, unsigned char *a2);
+static Button *buttonGetButton(int btn, Window **out_win);
+static int paletteOpenFileImpl(const char *path, int flags);
+static int paletteReadFileImpl(int fd, void *buf, size_t count);
 static int paletteCloseFileImpl(int fd);
-static Button* buttonCreateInternal(int win, int x, int y, int width, int height, int mouseEnterEventCode, int mouseExitEventCode, int mouseDownEventCode, int mouseUpEventCode, int flags, unsigned char* up, unsigned char* dn, unsigned char* hover);
-static int _GNW_check_buttons(Window* window, int* keyCodePtr);
-static bool _button_under_mouse(Button* button, Rect* rect);
-static void buttonFree(Button* ptr);
+static Button *buttonCreateInternal(int win, int x, int y, int width, int height, int mouseEnterEventCode, int mouseExitEventCode, int mouseDownEventCode, int mouseUpEventCode, int flags, unsigned char *up, unsigned char *dn, unsigned char *hover);
+static int _GNW_check_buttons(Window *window, int *keyCodePtr);
+static bool _button_under_mouse(Button *button, Rect *rect);
+static void buttonFree(Button *ptr);
 static int button_new_id();
-static int _win_group_check_buttons(int buttonCount, int* btns, int maxChecked, RadioButtonCallback* func);
-static int _button_check_group(Button* button);
-static void _button_draw(Button* button, Window* window, unsigned char* data, bool draw, Rect* bound, bool sound);
-static void _GNW_button_refresh(Window* window, Rect* rect);
+static int _win_group_check_buttons(int buttonCount, int *btns, int maxChecked, RadioButtonCallback *func);
+static int _button_check_group(Button *button);
+static void _button_draw(Button *button, Window *window, unsigned char *data, bool draw, Rect *bound, bool sound);
+static void _GNW_button_refresh(Window *window, Rect *rect);
 
 // 0x50FA30
 static char _path_patches[] = "";
@@ -54,10 +58,10 @@ static char _path_patches[] = "";
 // 0x51E3D8
 static bool _GNW95_already_running = false;
 
-#ifdef _WIN32
+//#ifdef _WIN32
 // 0x51E3DC
-static HANDLE _GNW95_title_mutex = INVALID_HANDLE_VALUE;
-#endif
+//static HANDLE _GNW95_title_mutex = INVALID_HANDLE_VALUE;
+//#endif
 
 // 0x51E3E0
 bool gWindowSystemInitialized = false;
@@ -73,7 +77,7 @@ int _GNW_wcolor[6] = {
 };
 
 // 0x51E3FC
-static unsigned char* _screen_buffer = NULL;
+static unsigned char *_screen_buffer = NULL;
 
 // 0x51E400
 static bool _insideWinExit = false;
@@ -85,10 +89,10 @@ static int _last_button_winID = -1;
 static int gWindowIndexes[MAX_WINDOW_COUNT];
 
 // 0x6ADE58
-static Window* gWindows[MAX_WINDOW_COUNT];
+static Window *gWindows[MAX_WINDOW_COUNT];
 
 // 0x6ADF20
-static VideoSystemExitProc* gVideoSystemExitProc;
+static VideoSystemExitProc *gVideoSystemExitProc;
 
 // 0x6ADF24
 static int gWindowsLength;
@@ -103,33 +107,37 @@ static bool _buffering;
 static int _bk_color;
 
 // 0x6ADF34
-static VideoSystemInitProc* gVideoSystemInitProc;
+static VideoSystemInitProc *gVideoSystemInitProc;
 
 // 0x6ADF38
 static int _doing_refresh_all;
 
 // 0x6ADF3C
-static void* _GNW_texture;
+static void *_GNW_texture;
 
 // 0x6ADF40
 static ButtonGroup gButtonGroups[BUTTON_GROUP_LIST_CAPACITY];
 
+
+// TODO REMOVE!!! after svga implementation
+Rect _scr_size;
+
 // 0x4D5C30
-int windowManagerInit(VideoSystemInitProc* videoSystemInitProc, VideoSystemExitProc* videoSystemExitProc, int a3) {
-#ifdef _WIN32
-	CloseHandle(_GNW95_mutex);
-	_GNW95_mutex = INVALID_HANDLE_VALUE;
-#endif
+int windowManagerInit(VideoSystemInitProc *videoSystemInitProc, VideoSystemExitProc *videoSystemExitProc, int a3) {
+//#ifdef _WIN32
+//	CloseHandle(_GNW95_mutex);
+//	_GNW95_mutex = INVALID_HANDLE_VALUE;
+//#endif
 
 	if (_GNW95_already_running) {
 		return WINDOW_MANAGER_ERR_ALREADY_RUNNING;
 	}
 
-#ifdef _WIN32
-	if (_GNW95_title_mutex == INVALID_HANDLE_VALUE) {
-		return WINDOW_MANAGER_ERR_TITLE_NOT_SET;
-	}
-#endif
+//#ifdef _WIN32
+//	if (_GNW95_title_mutex == INVALID_HANDLE_VALUE) {
+//		return WINDOW_MANAGER_ERR_TITLE_NOT_SET;
+//	}
+//#endif
 
 	if (gWindowSystemInitialized) {
 		return WINDOW_MANAGER_ERR_WINDOW_SYSTEM_ALREADY_INITIALIZED;
@@ -149,7 +157,7 @@ int windowManagerInit(VideoSystemInitProc* videoSystemInitProc, VideoSystemExitP
 		return WINDOW_MANAGER_ERR_INITIALIZING_TEXT_FONTS;
 	}
 
-	_get_start_mode_();
+//	_get_start_mode_();
 
 	gVideoSystemInitProc = videoSystemInitProc;
 	gVideoSystemExitProc = directInputFree;
@@ -167,13 +175,19 @@ int windowManagerInit(VideoSystemInitProc* videoSystemInitProc, VideoSystemExitP
 		return WINDOW_MANAGER_ERR_8;
 	}
 
+	// TODO REMOVE !!!
+	_scr_size.left = 0;
+	_scr_size.top = 0;
+	_scr_size.right = 640;
+	_scr_size.bottom = 480;
+
 	if (a3 & 1) {
-		_screen_buffer = (unsigned char*)internal_malloc((_scr_size.bottom - _scr_size.top + 1) * (_scr_size.right - _scr_size.left + 1));
+		_screen_buffer = (unsigned char *)internal_malloc((_scr_size.bottom - _scr_size.top + 1) * (_scr_size.right - _scr_size.left + 1));
 		if (_screen_buffer == NULL) {
 			if (gVideoSystemExitProc != NULL) {
 				gVideoSystemExitProc();
 			} else {
-				directDrawFree();
+//				directDrawFree();  TODO svga.cpp
 			}
 
 			return WINDOW_MANAGER_ERR_NO_MEMORY;
@@ -187,12 +201,12 @@ int windowManagerInit(VideoSystemInitProc* videoSystemInitProc, VideoSystemExitP
 	colorPaletteSetMemoryProcs(internal_malloc, internal_realloc, internal_free);
 
 	if (!_initColors()) {
-		unsigned char* palette = (unsigned char*)internal_malloc(768);
+		unsigned char *palette = (unsigned char *)internal_malloc(768);
 		if (palette == NULL) {
 			if (gVideoSystemExitProc != NULL) {
 				gVideoSystemExitProc();
 			} else {
-				directDrawFree();
+//				directDrawFree();  TODO svga.cpp
 			}
 
 			if (_screen_buffer != NULL) {
@@ -210,20 +224,20 @@ int windowManagerInit(VideoSystemInitProc* videoSystemInitProc, VideoSystemExitP
 		internal_free(palette);
 	}
 
-	_GNW_debug_init();
+//	_GNW_debug_init();
 
 	if (inputInit(a3) == -1) {
 		return WINDOW_MANAGER_ERR_INITIALIZING_INPUT;
 	}
 
-	_GNW_intr_init();
+//	_GNW_intr_init(); TODO window_manager_private
 
-	Window* window = gWindows[0] = (Window*)internal_malloc(sizeof(*window));
+	Window *window = gWindows[0] = (Window *)internal_malloc(sizeof(*window));
 	if (window == NULL) {
 		if (gVideoSystemExitProc != NULL) {
 			gVideoSystemExitProc();
 		} else {
-			directDrawFree();
+//			directDrawFree();  TODO svga.cpp
 		}
 
 		if (_screen_buffer != NULL) {
@@ -262,7 +276,7 @@ int windowManagerInit(VideoSystemInitProc* videoSystemInitProc, VideoSystemExitP
 	_GNW_wcolor[2] = 8456;
 	_GNW_wcolor[1] = 15855;
 
-	atexit(windowManagerExit);
+//	atexit(windowManagerExit);
 
 	return WINDOW_MANAGER_OK;
 }
@@ -272,7 +286,7 @@ void windowManagerExit(void) {
 	if (!_insideWinExit) {
 		_insideWinExit = true;
 		if (gWindowSystemInitialized) {
-			_GNW_intr_exit();
+//			_GNW_intr_exit(); TODO window_manager_private
 
 			for (int index = gWindowsLength - 1; index >= 0; index--) {
 				windowFree(gWindows[index]->id);
@@ -295,14 +309,14 @@ void windowManagerExit(void) {
 			textFontsExit();
 			_colorsClose();
 
-			SDL_DestroyWindow(gSdlWindow);
+//			SDL_DestroyWindow(gSdlWindow); TODO SDL
 
 			gWindowSystemInitialized = false;
 
-#ifdef _WIN32
-			CloseHandle(_GNW95_title_mutex);
-			_GNW95_title_mutex = INVALID_HANDLE_VALUE;
-#endif
+//#ifdef _WIN32
+//			CloseHandle(_GNW95_title_mutex);
+//			_GNW95_title_mutex = INVALID_HANDLE_VALUE;
+//#endif
 		}
 		_insideWinExit = false;
 	}
@@ -313,7 +327,7 @@ void windowManagerExit(void) {
 int windowCreate(int x, int y, int width, int height, int color, int flags) {
 	int v23;
 	int v25, v26;
-	Window* tmp;
+	Window *tmp;
 
 	if (!gWindowSystemInitialized) {
 		return -1;
@@ -331,12 +345,12 @@ int windowCreate(int x, int y, int width, int height, int color, int flags) {
 		return -1;
 	}
 
-	Window* window = gWindows[gWindowsLength] = (Window*)internal_malloc(sizeof(*window));
+	Window *window = gWindows[gWindowsLength] = (Window *)internal_malloc(sizeof(*window));
 	if (window == NULL) {
 		return -1;
 	}
 
-	window->buffer = (unsigned char*)internal_malloc(width * height);
+	window->buffer = (unsigned char *)internal_malloc(width * height);
 	if (window->buffer == NULL) {
 		internal_free(window);
 		return -1;
@@ -356,8 +370,8 @@ int windowCreate(int x, int y, int width, int height, int color, int flags) {
 	window->width = width;
 	window->height = height;
 	window->flags = flags;
-	window->tx = rand() & 0xFFFE;
-	window->ty = rand() & 0xFFFE;
+	window->tx = g_engine->getRandomNumber(RAND_MAX) & 0xFFFE;
+	window->ty = g_engine->getRandomNumber(RAND_MAX) & 0xFFFE;
 
 	if (color == 256) {
 		if (_GNW_texture == NULL) {
@@ -413,7 +427,7 @@ int windowCreate(int x, int y, int width, int height, int color, int flags) {
 // win_remove
 // 0x4D6468
 void windowDestroy(int win) {
-	Window* window = windowGetWindow(win);
+	Window *window = windowGetWindow(win);
 
 	if (!gWindowSystemInitialized) {
 		return;
@@ -444,7 +458,7 @@ void windowDestroy(int win) {
 
 // 0x4D650C
 void windowFree(int win) {
-	Window* window = windowGetWindow(win);
+	Window *window = windowGetWindow(win);
 	if (window == NULL) {
 		return;
 	}
@@ -457,9 +471,9 @@ void windowFree(int win) {
 		internal_free(window->menuBar);
 	}
 
-	Button* curr = window->buttonListHead;
+	Button *curr = window->buttonListHead;
 	while (curr != NULL) {
-		Button* next = curr->next;
+		Button *next = curr->next;
 		buttonFree(curr);
 		curr = next;
 	}
@@ -480,7 +494,7 @@ void windowDrawBorder(int win) {
 		return;
 	}
 
-	Window* window = windowGetWindow(win);
+	Window *window = windowGetWindow(win);
 	if (window == NULL) {
 		return;
 	}
@@ -497,11 +511,11 @@ void windowDrawBorder(int win) {
 }
 
 // 0x4D684C
-void windowDrawText(int win, const char* str, int width, int x, int y, int color) {
-	unsigned char* buf;
+void windowDrawText(int win, const char *str, int width, int x, int y, int color) {
+	unsigned char *buf;
 	int textColor;
 
-	Window* window = windowGetWindow(win);
+	Window *window = windowGetWindow(win);
 
 	if (!gWindowSystemInitialized) {
 		return;
@@ -563,7 +577,7 @@ void windowDrawText(int win, const char* str, int width, int x, int y, int color
 
 // 0x4D6B24
 void windowDrawLine(int win, int left, int top, int right, int bottom, int color) {
-	Window* window = windowGetWindow(win);
+	Window *window = windowGetWindow(win);
 
 	if (!gWindowSystemInitialized) {
 		return;
@@ -583,7 +597,7 @@ void windowDrawLine(int win, int left, int top, int right, int bottom, int color
 
 // 0x4D6B88
 void windowDrawRect(int win, int left, int top, int right, int bottom, int color) {
-	Window* window = windowGetWindow(win);
+	Window *window = windowGetWindow(win);
 
 	if (!gWindowSystemInitialized) {
 		return;
@@ -615,7 +629,7 @@ void windowDrawRect(int win, int left, int top, int right, int bottom, int color
 
 // 0x4D6CC8
 void windowFill(int win, int x, int y, int width, int height, int color) {
-	Window* window = windowGetWindow(win);
+	Window *window = windowGetWindow(win);
 
 	if (!gWindowSystemInitialized) {
 		return;
@@ -643,7 +657,7 @@ void windowFill(int win, int x, int y, int width, int height, int color) {
 
 // 0x4D6DAC
 void windowShow(int win) {
-	Window* window = windowGetWindow(win);
+	Window *window = windowGetWindow(win);
 	int index = gWindowIndexes[window->id];
 
 	if (!gWindowSystemInitialized) {
@@ -659,7 +673,7 @@ void windowShow(int win) {
 
 	if (index < gWindowsLength - 1 && (window->flags & WINDOW_DONT_MOVE_TOP) == 0) {
 		while (index < gWindowsLength - 1) {
-			Window* nextWindow = gWindows[index + 1];
+			Window *nextWindow = gWindows[index + 1];
 			if ((window->flags & WINDOW_MOVE_ON_TOP) == 0 && (nextWindow->flags & WINDOW_MOVE_ON_TOP) != 0) {
 				break;
 			}
@@ -686,7 +700,7 @@ void windowHide(int win) {
 		return;
 	}
 
-	Window* window = windowGetWindow(win);
+	Window *window = windowGetWindow(win);
 	if (window == NULL) {
 		return;
 	}
@@ -699,7 +713,7 @@ void windowHide(int win) {
 
 // 0x4D6EA0
 void _win_move(int win, int x, int y) {
-	Window* window = windowGetWindow(win);
+	Window *window = windowGetWindow(win);
 
 	if (!gWindowSystemInitialized) {
 		return;
@@ -753,7 +767,7 @@ void _win_move(int win, int x, int y) {
 
 // 0x4D6F5C
 void windowRefresh(int win) {
-	Window* window = windowGetWindow(win);
+	Window *window = windowGetWindow(win);
 
 	if (!gWindowSystemInitialized) {
 		return;
@@ -767,8 +781,8 @@ void windowRefresh(int win) {
 }
 
 // 0x4D6F80
-void windowRefreshRect(int win, const Rect* rect) {
-	Window* window = windowGetWindow(win);
+void windowRefreshRect(int win, const Rect *rect) {
+	Window *window = windowGetWindow(win);
 
 	if (!gWindowSystemInitialized) {
 		return;
@@ -786,7 +800,7 @@ void windowRefreshRect(int win, const Rect* rect) {
 }
 
 // 0x4D6FD8
-void _GNW_win_refresh(Window* window, Rect* rect, unsigned char* a3) {
+void _GNW_win_refresh(Window *window, Rect *rect, unsigned char *a3) {
 	RectListNode *v26, *v20, *v23, *v24;
 	int dest_pitch;
 
@@ -807,10 +821,10 @@ void _GNW_win_refresh(Window* window, Rect* rect, unsigned char* a3) {
 
 		v26->next = NULL;
 
-		v26->rect.left = std::max(window->rect.left, rect->left);
-		v26->rect.top = std::max(window->rect.top, rect->top);
-		v26->rect.right = std::min(window->rect.right, rect->right);
-		v26->rect.bottom = std::min(window->rect.bottom, rect->bottom);
+		v26->rect.left = MAX(window->rect.left, rect->left);
+		v26->rect.top = MAX(window->rect.top, rect->top);
+		v26->rect.right = MIN(window->rect.right, rect->right);
+		v26->rect.bottom = MIN(window->rect.bottom, rect->bottom);
 
 		if (v26->rect.right >= v26->rect.left && v26->rect.bottom >= v26->rect.top) {
 			if (a3) {
@@ -827,81 +841,81 @@ void _GNW_win_refresh(Window* window, Rect* rect, unsigned char* a3) {
 					if (a3) {
 						if (_buffering && (window->flags & WINDOW_TRANSPARENT)) {
 							window->blitProc(window->buffer + v20->rect.left - window->rect.left + (v20->rect.top - window->rect.top) * window->width,
-							                 v20->rect.right - v20->rect.left + 1,
-							                 v20->rect.bottom - v20->rect.top + 1,
-							                 window->width,
-							                 a3 + dest_pitch * (v20->rect.top - rect->top) + v20->rect.left - rect->left,
-							                 dest_pitch);
+											 v20->rect.right - v20->rect.left + 1,
+											 v20->rect.bottom - v20->rect.top + 1,
+											 window->width,
+											 a3 + dest_pitch * (v20->rect.top - rect->top) + v20->rect.left - rect->left,
+											 dest_pitch);
 						} else {
 							blitBufferToBuffer(
-							    window->buffer + v20->rect.left - window->rect.left + (v20->rect.top - window->rect.top) * window->width,
-							    v20->rect.right - v20->rect.left + 1,
-							    v20->rect.bottom - v20->rect.top + 1,
-							    window->width,
-							    a3 + dest_pitch * (v20->rect.top - rect->top) + v20->rect.left - rect->left,
-							    dest_pitch);
+								window->buffer + v20->rect.left - window->rect.left + (v20->rect.top - window->rect.top) * window->width,
+								v20->rect.right - v20->rect.left + 1,
+								v20->rect.bottom - v20->rect.top + 1,
+								window->width,
+								a3 + dest_pitch * (v20->rect.top - rect->top) + v20->rect.left - rect->left,
+								dest_pitch);
 						}
 					} else {
 						if (_buffering) {
 							if (window->flags & WINDOW_TRANSPARENT) {
 								window->blitProc(
-								    window->buffer + v20->rect.left - window->rect.left + (v20->rect.top - window->rect.top) * window->width,
-								    v20->rect.right - v20->rect.left + 1,
-								    v20->rect.bottom - v20->rect.top + 1,
-								    window->width,
-								    _screen_buffer + v20->rect.top * (_scr_size.right - _scr_size.left + 1) + v20->rect.left,
-								    _scr_size.right - _scr_size.left + 1);
+									window->buffer + v20->rect.left - window->rect.left + (v20->rect.top - window->rect.top) * window->width,
+									v20->rect.right - v20->rect.left + 1,
+									v20->rect.bottom - v20->rect.top + 1,
+									window->width,
+									_screen_buffer + v20->rect.top * (_scr_size.right - _scr_size.left + 1) + v20->rect.left,
+									_scr_size.right - _scr_size.left + 1);
 							} else {
 								blitBufferToBuffer(
-								    window->buffer + v20->rect.left - window->rect.left + (v20->rect.top - window->rect.top) * window->width,
-								    v20->rect.right - v20->rect.left + 1,
-								    v20->rect.bottom - v20->rect.top + 1,
-								    window->width,
-								    _screen_buffer + v20->rect.top * (_scr_size.right - _scr_size.left + 1) + v20->rect.left,
-								    _scr_size.right - _scr_size.left + 1);
+									window->buffer + v20->rect.left - window->rect.left + (v20->rect.top - window->rect.top) * window->width,
+									v20->rect.right - v20->rect.left + 1,
+									v20->rect.bottom - v20->rect.top + 1,
+									window->width,
+									_screen_buffer + v20->rect.top * (_scr_size.right - _scr_size.left + 1) + v20->rect.left,
+									_scr_size.right - _scr_size.left + 1);
 							}
 						} else {
-							_scr_blit(
-							    window->buffer + v20->rect.left - window->rect.left + (v20->rect.top - window->rect.top) * window->width,
-							    window->width,
-							    v20->rect.bottom - v20->rect.bottom + 1,
-							    0,
-							    0,
-							    v20->rect.right - v20->rect.left + 1,
-							    v20->rect.bottom - v20->rect.top + 1,
-							    v20->rect.left,
-							    v20->rect.top);
+/*							_scr_blit(
+								window->buffer + v20->rect.left - window->rect.left + (v20->rect.top - window->rect.top) * window->width,
+								window->width,
+								v20->rect.bottom - v20->rect.bottom + 1,
+								0,
+								0,
+								v20->rect.right - v20->rect.left + 1,
+								v20->rect.bottom - v20->rect.top + 1,
+								v20->rect.left,
+								v20->rect.top);   TODO svga.cpp */
 						}
 					}
 
 					v20 = v20->next;
 				}
 			} else {
-				RectListNode* v16 = v26;
+				RectListNode *v16 = v26;
 				while (v16 != NULL) {
 					int width = v16->rect.right - v16->rect.left + 1;
 					int height = v16->rect.bottom - v16->rect.top + 1;
-					unsigned char* buf = (unsigned char*)internal_malloc(width * height);
+					unsigned char *buf = (unsigned char *)internal_malloc(width * height);
 					if (buf != NULL) {
 						bufferFill(buf, width, height, width, _bk_color);
 						if (dest_pitch != 0) {
 							blitBufferToBuffer(
-							    buf,
-							    width,
-							    height,
-							    width,
-							    a3 + dest_pitch * (v16->rect.top - rect->top) + v16->rect.left - rect->left,
-							    dest_pitch);
+								buf,
+								width,
+								height,
+								width,
+								a3 + dest_pitch * (v16->rect.top - rect->top) + v16->rect.left - rect->left,
+								dest_pitch);
 						} else {
 							if (_buffering) {
 								blitBufferToBuffer(buf,
-								                   width,
-								                   height,
-								                   width,
-								                   _screen_buffer + v16->rect.top * (_scr_size.right - _scr_size.left + 1) + v16->rect.left,
-								                   _scr_size.right - _scr_size.left + 1);
+												   width,
+												   height,
+												   width,
+												   _screen_buffer + v16->rect.top * (_scr_size.right - _scr_size.left + 1) + v16->rect.left,
+												   _scr_size.right - _scr_size.left + 1);
 							} else {
-								_scr_blit(buf, width, height, 0, 0, width, height, v16->rect.left, v16->rect.top);
+//								_scr_blit(buf, width, height, 0, 0, width, height, v16->rect.left, v16->rect.top); TODO svga.cpp
 							}
 						}
 
@@ -916,16 +930,16 @@ void _GNW_win_refresh(Window* window, Rect* rect, unsigned char* a3) {
 				v24 = v23->next;
 
 				if (_buffering && !a3) {
-					_scr_blit(
-					    _screen_buffer + v23->rect.left + (_scr_size.right - _scr_size.left + 1) * v23->rect.top,
-					    _scr_size.right - _scr_size.left + 1,
-					    v23->rect.bottom - v23->rect.top + 1,
-					    0,
-					    0,
-					    v23->rect.right - v23->rect.left + 1,
-					    v23->rect.bottom - v23->rect.top + 1,
-					    v23->rect.left,
-					    v23->rect.top);
+/*					_scr_blit(
+						_screen_buffer + v23->rect.left + (_scr_size.right - _scr_size.left + 1) * v23->rect.top,
+						_scr_size.right - _scr_size.left + 1,
+						v23->rect.bottom - v23->rect.top + 1,
+						0,
+						0,
+						v23->rect.right - v23->rect.left + 1,
+						v23->rect.bottom - v23->rect.top + 1,
+						v23->rect.left,
+						v23->rect.top);  TODO svga.cpp */
 				}
 
 				_rect_free(v23);
@@ -945,20 +959,20 @@ void _GNW_win_refresh(Window* window, Rect* rect, unsigned char* a3) {
 }
 
 // 0x4D759C
-void windowRefreshAll(Rect* rect) {
+void windowRefreshAll(Rect *rect) {
 	if (gWindowSystemInitialized) {
 		_refresh_all(rect, NULL);
 	}
 }
 
 // 0x4D75B0
-void _win_clip(Window* window, RectListNode** rectListNodePtr, unsigned char* a3) {
+void _win_clip(Window *window, RectListNode **rectListNodePtr, unsigned char *a3) {
 	for (int index = gWindowIndexes[window->id] + 1; index < gWindowsLength; index++) {
 		if (*rectListNodePtr == NULL) {
 			break;
 		}
 
-		Window* window = gWindows[index];
+		Window *window = gWindows[index];
 		if (!(window->flags & WINDOW_HIDDEN)) {
 			if (!_buffering || !(window->flags & WINDOW_TRANSPARENT)) {
 				_rect_clip_list(rectListNodePtr, &(window->rect));
@@ -983,7 +997,7 @@ void _win_clip(Window* window, RectListNode** rectListNodePtr, unsigned char* a3
 // 0x4D765C
 void _win_drag(int win) {
 	// TODO: Probably somehow related to self-run functionality, skip for now.
-	Window* window = windowGetWindow(win);
+	Window *window = windowGetWindow(win);
 
 	if (!gWindowSystemInitialized) {
 		return;
@@ -1000,9 +1014,9 @@ void _win_drag(int win) {
 
 	tickersExecute();
 
-	if (vcrUpdate() != 3) {
+/*	if (vcrUpdate() != 3) {  TODO vcr.cpp
 		_mouse_info();
-	}
+	}*/
 
 	if ((window->flags & WINDOW_MANAGED) && (window->rect.left & 3)) {
 		_win_move(window->id, window->rect.left, window->rect.top);
@@ -1010,14 +1024,14 @@ void _win_drag(int win) {
 }
 
 // 0x4D77F8
-void _win_get_mouse_buf(unsigned char* a1) {
+void _win_get_mouse_buf(unsigned char *a1) {
 	Rect rect;
 	mouseGetRect(&rect);
 	_refresh_all(&rect, a1);
 }
 
 // 0x4D7814
-void _refresh_all(Rect* rect, unsigned char* a2) {
+void _refresh_all(Rect *rect, unsigned char *a2) {
 	_doing_refresh_all = 1;
 
 	for (int index = 0; index < gWindowsLength; index++) {
@@ -1036,7 +1050,7 @@ void _refresh_all(Rect* rect, unsigned char* a2) {
 }
 
 // 0x4D7888
-Window* windowGetWindow(int win) {
+Window *windowGetWindow(int win) {
 	if (win == -1) {
 		return NULL;
 	}
@@ -1051,8 +1065,8 @@ Window* windowGetWindow(int win) {
 
 // win_get_buf
 // 0x4D78B0
-unsigned char* windowGetBuffer(int win) {
-	Window* window = windowGetWindow(win);
+unsigned char *windowGetBuffer(int win) {
+	Window *window = windowGetWindow(win);
 
 	if (!gWindowSystemInitialized) {
 		return NULL;
@@ -1068,9 +1082,8 @@ unsigned char* windowGetBuffer(int win) {
 // 0x4D78CC
 int windowGetAtPoint(int x, int y) {
 	for (int index = gWindowsLength - 1; index >= 0; index--) {
-		Window* window = gWindows[index];
-		if (x >= window->rect.left && x <= window->rect.right
-		        && y >= window->rect.top && y <= window->rect.bottom) {
+		Window *window = gWindows[index];
+		if (x >= window->rect.left && x <= window->rect.right && y >= window->rect.top && y <= window->rect.bottom) {
 			return window->id;
 		}
 	}
@@ -1080,7 +1093,7 @@ int windowGetAtPoint(int x, int y) {
 
 // 0x4D7918
 int windowGetWidth(int win) {
-	Window* window = windowGetWindow(win);
+	Window *window = windowGetWindow(win);
 
 	if (!gWindowSystemInitialized) {
 		return -1;
@@ -1095,7 +1108,7 @@ int windowGetWidth(int win) {
 
 // 0x4D7934
 int windowGetHeight(int win) {
-	Window* window = windowGetWindow(win);
+	Window *window = windowGetWindow(win);
 
 	if (!gWindowSystemInitialized) {
 		return -1;
@@ -1110,8 +1123,8 @@ int windowGetHeight(int win) {
 
 // win_get_rect
 // 0x4D7950
-int windowGetRect(int win, Rect* rect) {
-	Window* window = windowGetWindow(win);
+int windowGetRect(int win, Rect *rect) {
+	Window *window = windowGetWindow(win);
 
 	if (!gWindowSystemInitialized) {
 		return -1;
@@ -1147,10 +1160,10 @@ int _win_check_all_buttons() {
 }
 
 // 0x4D79DC
-Button* buttonGetButton(int btn, Window** windowPtr) {
+Button *buttonGetButton(int btn, Window **windowPtr) {
 	for (int index = 0; index < gWindowsLength; index++) {
-		Window* window = gWindows[index];
-		Button* button = window->buttonListHead;
+		Window *window = gWindows[index];
+		Button *button = window->buttonListHead;
 		while (button != NULL) {
 			if (button->id == btn) {
 				if (windowPtr != NULL) {
@@ -1174,11 +1187,11 @@ int _GNW_check_menu_bars(int a1) {
 
 	int v1 = a1;
 	for (int index = gWindowsLength - 1; index >= 1; index--) {
-		Window* window = gWindows[index];
+		Window *window = gWindows[index];
 		if (window->menuBar != NULL) {
 			for (int pulldownIndex = 0; pulldownIndex < window->menuBar->pulldownsLength; pulldownIndex++) {
 				if (v1 == window->menuBar->pulldowns[pulldownIndex].keyCode) {
-					v1 = _GNW_process_menu(window->menuBar, pulldownIndex);
+//					v1 = _GNW_process_menu(window->menuBar, pulldownIndex);  TODO window_manager_private
 					break;
 				}
 			}
@@ -1193,8 +1206,8 @@ int _GNW_check_menu_bars(int a1) {
 }
 
 // 0x4D69DC
-void _win_text(int win, char** fileNameList, int fileNameListLength, int maxWidth, int x, int y, int flags) {
-	Window* window = windowGetWindow(win);
+void _win_text(int win, char **fileNameList, int fileNameListLength, int maxWidth, int x, int y, int flags) {
+	Window *window = windowGetWindow(win);
 
 	if (!gWindowSystemInitialized) {
 		return;
@@ -1205,7 +1218,7 @@ void _win_text(int win, char** fileNameList, int fileNameListLength, int maxWidt
 	}
 
 	int width = window->width;
-	unsigned char* ptr = window->buffer + y * width + x;
+	unsigned char *ptr = window->buffer + y * width + x;
 	int lineHeight = fontGetLineHeight();
 
 	int step = width * lineHeight;
@@ -1214,7 +1227,7 @@ void _win_text(int win, char** fileNameList, int fileNameListLength, int maxWidt
 	int v3 = maxWidth - 1;
 
 	for (int index = 0; index < fileNameListLength; index++) {
-		char* fileName = fileNameList[index];
+		char *fileName = fileNameList[index];
 		if (*fileName != '\0') {
 			windowDrawText(win, fileName, maxWidth, x, y, flags);
 		} else {
@@ -1230,7 +1243,8 @@ void _win_text(int win, char** fileNameList, int fileNameListLength, int maxWidt
 }
 
 // 0x4D80D8
-void programWindowSetTitle(const char* title) {
+void programWindowSetTitle(const char *title) {
+#if 0
 	if (title == NULL) {
 		return;
 	}
@@ -1251,12 +1265,13 @@ void programWindowSetTitle(const char* title) {
 	if (gSdlWindow != nullptr) {
 		SDL_SetWindowTitle(gSdlWindow, gProgramWindowTitle);
 	}
+#endif
 }
 
 // [open] implementation for palette operations backed by [XFile].
 //
 // 0x4D8174
-int paletteOpenFileImpl(const char* path, int flags) {
+int paletteOpenFileImpl(const char *path, int flags) {
 	char mode[4];
 	memset(mode, 0, sizeof(mode));
 
@@ -1274,7 +1289,7 @@ int paletteOpenFileImpl(const char* path, int flags) {
 		mode[1] = 'b';
 	}
 
-	File* stream = fileOpen(path, mode);
+	File *stream = fileOpen(path, mode);
 	if (stream != NULL) {
 		return ptrToInt(stream);
 	}
@@ -1285,33 +1300,37 @@ int paletteOpenFileImpl(const char* path, int flags) {
 // [read] implementation for palette file operations backed by [XFile].
 //
 // 0x4D81E8
-int paletteReadFileImpl(int fd, void* buf, size_t count) {
-	return fileRead(buf, 1, count, (File*)intToPtr(fd));
+int paletteReadFileImpl(int fd, void *buf, size_t count) {
+	return fileRead(buf, 1, count, (File *)intToPtr(fd));
 }
 
 // [close] implementation for palette file operations backed by [XFile].
 //
 // 0x4D81E0
 int paletteCloseFileImpl(int fd) {
-	return fileClose((File*)intToPtr(fd));
+	return fileClose((File *)intToPtr(fd));
 }
 
 // 0x4D8200
-bool showMesageBox(const char* text) {
-	SDL_Cursor* prev = SDL_GetCursor();
-	SDL_Cursor* cursor = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_ARROW);
+bool showMesageBox(const char *text) {
+/*	SDL_Cursor *prev = SDL_GetCursor();
+	SDL_Cursor *cursor = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_ARROW);
 	SDL_SetCursor(cursor);
 	SDL_ShowCursor(SDL_ENABLE);
 	SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, NULL, text, NULL);
 	SDL_ShowCursor(SDL_DISABLE);
 	SDL_SetCursor(prev);
-	SDL_FreeCursor(cursor);
+	SDL_FreeCursor(cursor);*/
+
+	Common::U32String msg = _(text);
+	GUI::MessageDialog dialog(msg);
+	dialog.runModal();
 	return true;
 }
 
 // 0x4D8260
-int buttonCreate(int win, int x, int y, int width, int height, int mouseEnterEventCode, int mouseExitEventCode, int mouseDownEventCode, int mouseUpEventCode, unsigned char* up, unsigned char* dn, unsigned char* hover, int flags) {
-	Window* window = windowGetWindow(win);
+int buttonCreate(int win, int x, int y, int width, int height, int mouseEnterEventCode, int mouseExitEventCode, int mouseDownEventCode, int mouseUpEventCode, unsigned char *up, unsigned char *dn, unsigned char *hover, int flags) {
+	Window *window = windowGetWindow(win);
 
 	if (!gWindowSystemInitialized) {
 		return -1;
@@ -1325,7 +1344,7 @@ int buttonCreate(int win, int x, int y, int width, int height, int mouseEnterEve
 		return -1;
 	}
 
-	Button* button = buttonCreateInternal(win, x, y, width, height, mouseEnterEventCode, mouseExitEventCode, mouseDownEventCode, mouseUpEventCode, flags | BUTTON_FLAG_GRAPHIC, up, dn, hover);
+	Button *button = buttonCreateInternal(win, x, y, width, height, mouseEnterEventCode, mouseExitEventCode, mouseDownEventCode, mouseUpEventCode, flags | BUTTON_FLAG_GRAPHIC, up, dn, hover);
 	if (button == NULL) {
 		return -1;
 	}
@@ -1336,8 +1355,8 @@ int buttonCreate(int win, int x, int y, int width, int height, int mouseEnterEve
 }
 
 // 0x4D8308
-int _win_register_text_button(int win, int x, int y, int mouseEnterEventCode, int mouseExitEventCode, int mouseDownEventCode, int mouseUpEventCode, const char* title, int flags) {
-	Window* window = windowGetWindow(win);
+int _win_register_text_button(int win, int x, int y, int mouseEnterEventCode, int mouseExitEventCode, int mouseDownEventCode, int mouseUpEventCode, const char *title, int flags) {
+	Window *window = windowGetWindow(win);
 
 	if (!gWindowSystemInitialized) {
 		return -1;
@@ -1349,12 +1368,12 @@ int _win_register_text_button(int win, int x, int y, int mouseEnterEventCode, in
 
 	int buttonWidth = fontGetStringWidth(title) + 16;
 	int buttonHeight = fontGetLineHeight() + 7;
-	unsigned char* normal = (unsigned char*)internal_malloc(buttonWidth * buttonHeight);
+	unsigned char *normal = (unsigned char *)internal_malloc(buttonWidth * buttonHeight);
 	if (normal == NULL) {
 		return -1;
 	}
 
-	unsigned char* pressed = (unsigned char*)internal_malloc(buttonWidth * buttonHeight);
+	unsigned char *pressed = (unsigned char *)internal_malloc(buttonWidth * buttonHeight);
 	if (pressed == NULL) {
 		internal_free(normal);
 		return -1;
@@ -1371,55 +1390,55 @@ int _win_register_text_button(int win, int x, int y, int mouseEnterEventCode, in
 
 	fontDrawText(normal + buttonWidth * 3 + 8, title, buttonWidth, buttonWidth, _colorTable[_GNW_wcolor[3]]);
 	bufferDrawRectShadowed(normal,
-	                       buttonWidth,
-	                       2,
-	                       2,
-	                       buttonWidth - 3,
-	                       buttonHeight - 3,
-	                       _colorTable[_GNW_wcolor[1]],
-	                       _colorTable[_GNW_wcolor[2]]);
+						   buttonWidth,
+						   2,
+						   2,
+						   buttonWidth - 3,
+						   buttonHeight - 3,
+						   _colorTable[_GNW_wcolor[1]],
+						   _colorTable[_GNW_wcolor[2]]);
 	bufferDrawRectShadowed(normal,
-	                       buttonWidth,
-	                       1,
-	                       1,
-	                       buttonWidth - 2,
-	                       buttonHeight - 2,
-	                       _colorTable[_GNW_wcolor[1]],
-	                       _colorTable[_GNW_wcolor[2]]);
+						   buttonWidth,
+						   1,
+						   1,
+						   buttonWidth - 2,
+						   buttonHeight - 2,
+						   _colorTable[_GNW_wcolor[1]],
+						   _colorTable[_GNW_wcolor[2]]);
 	bufferDrawRect(normal, buttonWidth, 0, 0, buttonWidth - 1, buttonHeight - 1, _colorTable[0]);
 
 	fontDrawText(pressed + buttonWidth * 4 + 9, title, buttonWidth, buttonWidth, _colorTable[_GNW_wcolor[3]]);
 	bufferDrawRectShadowed(pressed,
-	                       buttonWidth,
-	                       2,
-	                       2,
-	                       buttonWidth - 3,
-	                       buttonHeight - 3,
-	                       _colorTable[_GNW_wcolor[2]],
-	                       _colorTable[_GNW_wcolor[1]]);
+						   buttonWidth,
+						   2,
+						   2,
+						   buttonWidth - 3,
+						   buttonHeight - 3,
+						   _colorTable[_GNW_wcolor[2]],
+						   _colorTable[_GNW_wcolor[1]]);
 	bufferDrawRectShadowed(pressed,
-	                       buttonWidth,
-	                       1,
-	                       1,
-	                       buttonWidth - 2,
-	                       buttonHeight - 2,
-	                       _colorTable[_GNW_wcolor[2]],
-	                       _colorTable[_GNW_wcolor[1]]);
+						   buttonWidth,
+						   1,
+						   1,
+						   buttonWidth - 2,
+						   buttonHeight - 2,
+						   _colorTable[_GNW_wcolor[2]],
+						   _colorTable[_GNW_wcolor[1]]);
 	bufferDrawRect(pressed, buttonWidth, 0, 0, buttonWidth - 1, buttonHeight - 1, _colorTable[0]);
 
-	Button* button = buttonCreateInternal(win,
-	                                      x,
-	                                      y,
-	                                      buttonWidth,
-	                                      buttonHeight,
-	                                      mouseEnterEventCode,
-	                                      mouseExitEventCode,
-	                                      mouseDownEventCode,
-	                                      mouseUpEventCode,
-	                                      flags,
-	                                      normal,
-	                                      pressed,
-	                                      NULL);
+	Button *button = buttonCreateInternal(win,
+										  x,
+										  y,
+										  buttonWidth,
+										  buttonHeight,
+										  mouseEnterEventCode,
+										  mouseExitEventCode,
+										  mouseDownEventCode,
+										  mouseUpEventCode,
+										  flags,
+										  normal,
+										  pressed,
+										  NULL);
 	if (button == NULL) {
 		internal_free(normal);
 		internal_free(pressed);
@@ -1432,12 +1451,12 @@ int _win_register_text_button(int win, int x, int y, int mouseEnterEventCode, in
 }
 
 // 0x4D8674
-int _win_register_button_disable(int btn, unsigned char* up, unsigned char* down, unsigned char* hover) {
+int _win_register_button_disable(int btn, unsigned char *up, unsigned char *down, unsigned char *hover) {
 	if (!gWindowSystemInitialized) {
 		return -1;
 	}
 
-	Button* button = buttonGetButton(btn, NULL);
+	Button *button = buttonGetButton(btn, NULL);
 	if (button == NULL) {
 		return -1;
 	}
@@ -1450,7 +1469,7 @@ int _win_register_button_disable(int btn, unsigned char* up, unsigned char* down
 }
 
 // 0x4D86A8
-int _win_register_button_image(int btn, unsigned char* up, unsigned char* down, unsigned char* hover, bool draw) {
+int _win_register_button_image(int btn, unsigned char *up, unsigned char *down, unsigned char *hover, bool draw) {
 	if (!gWindowSystemInitialized) {
 		return -1;
 	}
@@ -1459,8 +1478,8 @@ int _win_register_button_image(int btn, unsigned char* up, unsigned char* down, 
 		return -1;
 	}
 
-	Window* window;
-	Button* button = buttonGetButton(btn, &window);
+	Window *window;
+	Button *button = buttonGetButton(btn, &window);
 	if (button == NULL) {
 		return -1;
 	}
@@ -1469,7 +1488,7 @@ int _win_register_button_image(int btn, unsigned char* up, unsigned char* down, 
 		return -1;
 	}
 
-	unsigned char* data = button->currentImage;
+	unsigned char *data = button->currentImage;
 	if (data == button->normalImage) {
 		button->currentImage = up;
 	} else if (data == button->pressedImage) {
@@ -1490,12 +1509,12 @@ int _win_register_button_image(int btn, unsigned char* up, unsigned char* down, 
 // Sets primitive callbacks on the button.
 //
 // 0x4D8758
-int buttonSetMouseCallbacks(int btn, ButtonCallback* mouseEnterProc, ButtonCallback* mouseExitProc, ButtonCallback* mouseDownProc, ButtonCallback* mouseUpProc) {
+int buttonSetMouseCallbacks(int btn, ButtonCallback *mouseEnterProc, ButtonCallback *mouseExitProc, ButtonCallback *mouseDownProc, ButtonCallback *mouseUpProc) {
 	if (!gWindowSystemInitialized) {
 		return -1;
 	}
 
-	Button* button = buttonGetButton(btn, NULL);
+	Button *button = buttonGetButton(btn, NULL);
 	if (button == NULL) {
 		return -1;
 	}
@@ -1509,12 +1528,12 @@ int buttonSetMouseCallbacks(int btn, ButtonCallback* mouseEnterProc, ButtonCallb
 }
 
 // 0x4D8798
-int buttonSetRightMouseCallbacks(int btn, int rightMouseDownEventCode, int rightMouseUpEventCode, ButtonCallback* rightMouseDownProc, ButtonCallback* rightMouseUpProc) {
+int buttonSetRightMouseCallbacks(int btn, int rightMouseDownEventCode, int rightMouseUpEventCode, ButtonCallback *rightMouseDownProc, ButtonCallback *rightMouseUpProc) {
 	if (!gWindowSystemInitialized) {
 		return -1;
 	}
 
-	Button* button = buttonGetButton(btn, NULL);
+	Button *button = buttonGetButton(btn, NULL);
 	if (button == NULL) {
 		return -1;
 	}
@@ -1543,12 +1562,12 @@ int buttonSetRightMouseCallbacks(int btn, int rightMouseDownEventCode, int right
 // These callbacks can be triggered several times during tracking if mouse leaves button's rectangle without releasing mouse buttons.
 //
 // 0x4D87F8
-int buttonSetCallbacks(int btn, ButtonCallback* pressSoundFunc, ButtonCallback* releaseSoundFunc) {
+int buttonSetCallbacks(int btn, ButtonCallback *pressSoundFunc, ButtonCallback *releaseSoundFunc) {
 	if (!gWindowSystemInitialized) {
 		return -1;
 	}
 
-	Button* button = buttonGetButton(btn, NULL);
+	Button *button = buttonGetButton(btn, NULL);
 	if (button == NULL) {
 		return -1;
 	}
@@ -1560,12 +1579,12 @@ int buttonSetCallbacks(int btn, ButtonCallback* pressSoundFunc, ButtonCallback* 
 }
 
 // 0x4D8828
-int buttonSetMask(int btn, unsigned char* mask) {
+int buttonSetMask(int btn, unsigned char *mask) {
 	if (!gWindowSystemInitialized) {
 		return -1;
 	}
 
-	Button* button = buttonGetButton(btn, NULL);
+	Button *button = buttonGetButton(btn, NULL);
 	if (button == NULL) {
 		return -1;
 	}
@@ -1576,13 +1595,13 @@ int buttonSetMask(int btn, unsigned char* mask) {
 }
 
 // 0x4D8854
-Button* buttonCreateInternal(int win, int x, int y, int width, int height, int mouseEnterEventCode, int mouseExitEventCode, int mouseDownEventCode, int mouseUpEventCode, int flags, unsigned char* up, unsigned char* dn, unsigned char* hover) {
-	Window* window = windowGetWindow(win);
+Button *buttonCreateInternal(int win, int x, int y, int width, int height, int mouseEnterEventCode, int mouseExitEventCode, int mouseDownEventCode, int mouseUpEventCode, int flags, unsigned char *up, unsigned char *dn, unsigned char *hover) {
+	Window *window = windowGetWindow(win);
 	if (window == NULL) {
 		return NULL;
 	}
 
-	Button* button = (Button*)internal_malloc(sizeof(*button));
+	Button *button = (Button *)internal_malloc(sizeof(*button));
 	if (button == NULL) {
 		return NULL;
 	}
@@ -1646,7 +1665,7 @@ bool _win_button_down(int btn) {
 		return false;
 	}
 
-	Button* button = buttonGetButton(btn, NULL);
+	Button *button = buttonGetButton(btn, NULL);
 	if (button == NULL) {
 		return false;
 	}
@@ -1659,11 +1678,11 @@ bool _win_button_down(int btn) {
 }
 
 // 0x4D8A10
-int _GNW_check_buttons(Window* window, int* keyCodePtr) {
+int _GNW_check_buttons(Window *window, int *keyCodePtr) {
 	Rect v58;
-	Button* prevHoveredButton;
-	Button* prevClickedButton;
-	Button* button;
+	Button *prevHoveredButton;
+	Button *prevClickedButton;
+	Button *button;
 
 	if ((window->flags & WINDOW_HIDDEN) != 0) {
 		return -1;
@@ -1750,11 +1769,11 @@ int _GNW_check_buttons(Window* window, int* keyCodePtr) {
 
 		int v25 = _last_button_winID;
 		if (_last_button_winID != -1 && _last_button_winID != window->id) {
-			Window* v26 = windowGetWindow(_last_button_winID);
+			Window *v26 = windowGetWindow(_last_button_winID);
 			if (v26 != NULL) {
 				_last_button_winID = -1;
 
-				Button* v28 = v26->hoveredButton;
+				Button *v28 = v26->hoveredButton;
 				if (v28 != NULL) {
 					if (!(v28->flags & BUTTON_FLAG_DISABLED)) {
 						*keyCodePtr = v28->mouseExitEventCode;
@@ -1782,7 +1801,7 @@ int _GNW_check_buttons(Window* window, int* keyCodePtr) {
 			}
 		}
 
-		ButtonCallback* cb = NULL;
+		ButtonCallback *cb = NULL;
 
 		while (button != NULL) {
 			if (!(button->flags & BUTTON_FLAG_DISABLED)) {
@@ -1857,7 +1876,7 @@ int _GNW_check_buttons(Window* window, int* keyCodePtr) {
 							break;
 						}
 
-						Button* v49 = window->clickedButton;
+						Button *v49 = window->clickedButton;
 						if (button == v49 && (mouseEvent & MOUSE_EVENT_ANY_BUTTON_UP) != 0) {
 							window->clickedButton = NULL;
 							window->hoveredButton = v49;
@@ -1939,16 +1958,13 @@ int _GNW_check_buttons(Window* window, int* keyCodePtr) {
 		}
 
 		if (button != NULL) {
-			if ((button->flags & BUTTON_FLAG_0x10) != 0
-			        && (mouseEvent & MOUSE_EVENT_ANY_BUTTON_DOWN) != 0
-			        && (mouseEvent & MOUSE_EVENT_ANY_BUTTON_REPEAT) == 0) {
+			if ((button->flags & BUTTON_FLAG_0x10) != 0 && (mouseEvent & MOUSE_EVENT_ANY_BUTTON_DOWN) != 0 && (mouseEvent & MOUSE_EVENT_ANY_BUTTON_REPEAT) == 0) {
 				_win_drag(window->id);
 				_button_draw(button, window, button->normalImage, true, NULL, true);
 			}
 		} else if ((window->flags & WINDOW_FLAG_0x80) != 0) {
 			v25 |= mouseEvent << 8;
-			if ((mouseEvent & MOUSE_EVENT_ANY_BUTTON_DOWN) != 0
-			        && (mouseEvent & MOUSE_EVENT_ANY_BUTTON_REPEAT) == 0) {
+			if ((mouseEvent & MOUSE_EVENT_ANY_BUTTON_DOWN) != 0 && (mouseEvent & MOUSE_EVENT_ANY_BUTTON_REPEAT) == 0) {
 				_win_drag(window->id);
 			}
 		}
@@ -1970,7 +1986,7 @@ int _GNW_check_buttons(Window* window, int* keyCodePtr) {
 	if (prevHoveredButton != NULL) {
 		*keyCodePtr = prevHoveredButton->mouseExitEventCode;
 
-		unsigned char* data;
+		unsigned char *data;
 		if ((prevHoveredButton->flags & BUTTON_FLAG_0x01) && (prevHoveredButton->flags & BUTTON_FLAG_CHECKED)) {
 			data = prevHoveredButton->pressedImage;
 		} else {
@@ -2008,7 +2024,7 @@ int _GNW_check_buttons(Window* window, int* keyCodePtr) {
 }
 
 // 0x4D9214
-bool _button_under_mouse(Button* button, Rect* rect) {
+bool _button_under_mouse(Button *button, Rect *rect) {
 	if (!_mouse_click_in(rect->left, rect->top, rect->right, rect->bottom)) {
 		return false;
 	}
@@ -2033,7 +2049,7 @@ int buttonGetWindowId(int btn) {
 		return -1;
 	}
 
-	Window* window;
+	Window *window;
 	if (buttonGetButton(btn, &window) == NULL) {
 		return -1;
 	}
@@ -2052,8 +2068,8 @@ int buttonDestroy(int btn) {
 		return -1;
 	}
 
-	Window* window;
-	Button* button = buttonGetButton(btn, &window);
+	Window *window;
+	Button *button = buttonGetButton(btn, &window);
 	if (button == NULL) {
 		return -1;
 	}
@@ -2084,7 +2100,7 @@ int buttonDestroy(int btn) {
 }
 
 // 0x4D9374
-void buttonFree(Button* button) {
+void buttonFree(Button *button) {
 	if ((button->flags & BUTTON_FLAG_GRAPHIC) == 0) {
 		if (button->normalImage != NULL) {
 			internal_free(button->normalImage);
@@ -2111,7 +2127,7 @@ void buttonFree(Button* button) {
 		}
 	}
 
-	ButtonGroup* buttonGroup = button->buttonGroup;
+	ButtonGroup *buttonGroup = button->buttonGroup;
 	if (buttonGroup != NULL) {
 		for (int index = 0; index < buttonGroup->buttonsLength; index++) {
 			if (button == buttonGroup->buttons[index]) {
@@ -2149,8 +2165,8 @@ int buttonEnable(int btn) {
 		return -1;
 	}
 
-	Window* window;
-	Button* button = buttonGetButton(btn, &window);
+	Window *window;
+	Button *button = buttonGetButton(btn, &window);
 	if (button == NULL) {
 		return -1;
 	}
@@ -2169,8 +2185,8 @@ int buttonDisable(int btn) {
 		return -1;
 	}
 
-	Window* window;
-	Button* button = buttonGetButton(btn, &window);
+	Window *window;
+	Button *button = buttonGetButton(btn, &window);
 	if (button == NULL) {
 		return -1;
 	}
@@ -2197,8 +2213,8 @@ int _win_set_button_rest_state(int btn, bool checked, int flags) {
 		return -1;
 	}
 
-	Window* window;
-	Button* button = buttonGetButton(btn, &window);
+	Window *window;
+	Button *button = buttonGetButton(btn, &window);
 	if (button == NULL) {
 		return -1;
 	}
@@ -2247,7 +2263,7 @@ int _win_set_button_rest_state(int btn, bool checked, int flags) {
 }
 
 // 0x4D962C
-int _win_group_check_buttons(int buttonCount, int* btns, int maxChecked, RadioButtonCallback* func) {
+int _win_group_check_buttons(int buttonCount, int *btns, int maxChecked, RadioButtonCallback *func) {
 	if (!gWindowSystemInitialized) {
 		return -1;
 	}
@@ -2257,12 +2273,12 @@ int _win_group_check_buttons(int buttonCount, int* btns, int maxChecked, RadioBu
 	}
 
 	for (int groupIndex = 0; groupIndex < BUTTON_GROUP_LIST_CAPACITY; groupIndex++) {
-		ButtonGroup* buttonGroup = &(gButtonGroups[groupIndex]);
+		ButtonGroup *buttonGroup = &(gButtonGroups[groupIndex]);
 		if (buttonGroup->buttonsLength == 0) {
 			buttonGroup->currChecked = 0;
 
 			for (int buttonIndex = 0; buttonIndex < buttonCount; buttonIndex++) {
-				Button* button = buttonGetButton(btns[buttonIndex], NULL);
+				Button *button = buttonGetButton(btns[buttonIndex], NULL);
 				if (button == NULL) {
 					return -1;
 				}
@@ -2287,7 +2303,7 @@ int _win_group_check_buttons(int buttonCount, int* btns, int maxChecked, RadioBu
 }
 
 // 0x4D96EC
-int _win_group_radio_buttons(int count, int* btns) {
+int _win_group_radio_buttons(int count, int *btns) {
 	if (!gWindowSystemInitialized) {
 		return -1;
 	}
@@ -2296,11 +2312,11 @@ int _win_group_radio_buttons(int count, int* btns) {
 		return -1;
 	}
 
-	Button* button = buttonGetButton(btns[0], NULL);
-	ButtonGroup* buttonGroup = button->buttonGroup;
+	Button *button = buttonGetButton(btns[0], NULL);
+	ButtonGroup *buttonGroup = button->buttonGroup;
 
 	for (int index = 0; index < buttonGroup->buttonsLength; index++) {
-		Button* v1 = buttonGroup->buttons[index];
+		Button *v1 = buttonGroup->buttons[index];
 		v1->flags |= BUTTON_FLAG_RADIO;
 	}
 
@@ -2308,7 +2324,7 @@ int _win_group_radio_buttons(int count, int* btns) {
 }
 
 // 0x4D9744
-int _button_check_group(Button* button) {
+int _button_check_group(Button *button) {
 	if (button->buttonGroup == NULL) {
 		return 0;
 	}
@@ -2316,11 +2332,11 @@ int _button_check_group(Button* button) {
 	if ((button->flags & BUTTON_FLAG_RADIO) != 0) {
 		if (button->buttonGroup->currChecked > 0) {
 			for (int index = 0; index < button->buttonGroup->buttonsLength; index++) {
-				Button* v1 = button->buttonGroup->buttons[index];
+				Button *v1 = button->buttonGroup->buttons[index];
 				if ((v1->flags & BUTTON_FLAG_CHECKED) != 0) {
 					v1->flags &= ~BUTTON_FLAG_CHECKED;
 
-					Window* window;
+					Window *window;
 					buttonGetButton(v1->id, &window);
 					_button_draw(v1, window, v1->normalImage, true, NULL, true);
 
@@ -2354,8 +2370,8 @@ int _button_check_group(Button* button) {
 }
 
 // 0x4D9808
-void _button_draw(Button* button, Window* window, unsigned char* data, bool draw, Rect* bound, bool sound) {
-	unsigned char* previousImage = NULL;
+void _button_draw(Button *button, Window *window, unsigned char *data, bool draw, Rect *bound, bool sound) {
+	unsigned char *previousImage = NULL;
 	if (data != NULL) {
 		Rect v2;
 		rectCopy(&v2, &(button->rect));
@@ -2400,20 +2416,20 @@ void _button_draw(Button* button, Window* window, unsigned char* data, bool draw
 				int width = button->rect.right - button->rect.left + 1;
 				if ((button->flags & BUTTON_FLAG_TRANSPARENT) != 0) {
 					blitBufferToBufferTrans(
-					    data + (v3.top - button->rect.top) * width + v3.left - button->rect.left,
-					    v3.right - v3.left + 1,
-					    v3.bottom - v3.top + 1,
-					    width,
-					    window->buffer + window->width * v3.top + v3.left,
-					    window->width);
+						data + (v3.top - button->rect.top) * width + v3.left - button->rect.left,
+						v3.right - v3.left + 1,
+						v3.bottom - v3.top + 1,
+						width,
+						window->buffer + window->width * v3.top + v3.left,
+						window->width);
 				} else {
 					blitBufferToBuffer(
-					    data + (v3.top - button->rect.top) * width + v3.left - button->rect.left,
-					    v3.right - v3.left + 1,
-					    v3.bottom - v3.top + 1,
-					    width,
-					    window->buffer + window->width * v3.top + v3.left,
-					    window->width);
+						data + (v3.top - button->rect.top) * width + v3.left - button->rect.left,
+						v3.right - v3.left + 1,
+						v3.bottom - v3.top + 1,
+						width,
+						window->buffer + window->width * v3.top + v3.left,
+						window->width);
 				}
 			}
 
@@ -2438,8 +2454,8 @@ void _button_draw(Button* button, Window* window, unsigned char* data, bool draw
 }
 
 // 0x4D9A58
-void _GNW_button_refresh(Window* window, Rect* rect) {
-	Button* button = window->buttonListHead;
+void _GNW_button_refresh(Window *window, Rect *rect) {
+	Button *button = window->buttonListHead;
 	if (button != NULL) {
 		while (button->next != NULL) {
 			button = button->next;
@@ -2458,8 +2474,8 @@ int _win_button_press_and_release(int btn) {
 		return -1;
 	}
 
-	Window* window;
-	Button* button = buttonGetButton(btn, &window);
+	Window *window;
+	Button *button = buttonGetButton(btn, &window);
 	if (button == NULL) {
 		return -1;
 	}
@@ -2495,4 +2511,4 @@ int _win_button_press_and_release(int btn) {
 	return 0;
 }
 
-} // namespace fallout
+} // namespace Fallout2
