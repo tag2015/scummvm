@@ -79,7 +79,7 @@ int textObjectsInit(unsigned char *windowBuffer, int width, int height) {
 	gTextObjectsWindowHeight = height;
 	gTextObjectsCount = 0;
 
-	// tickersAdd(textObjectsTicker); TODO input.cpp
+	tickersAdd(textObjectsTicker);
 
 	gTextObjectsBaseDelay = (unsigned int)(settings.preferences.text_base_delay * 1000.0);
 	gTextObjectsLineDelay = (unsigned int)(settings.preferences.text_line_delay * 1000.0);
@@ -102,7 +102,7 @@ int textObjectsReset() {
 	}
 
 	gTextObjectsCount = 0;
-	// tickersAdd(textObjectsTicker); TODO input.cpp
+	tickersAdd(textObjectsTicker);
 
 	return 0;
 }
@@ -111,7 +111,7 @@ int textObjectsReset() {
 void textObjectsFree() {
 	if (gTextObjectsInitialized) {
 		textObjectsReset();
-		// tickersRemove(textObjectsTicker); TODO input.cpp
+		tickersRemove(textObjectsTicker);
 		gTextObjectsInitialized = false;
 	}
 }
@@ -268,7 +268,7 @@ int textObjectAdd(Object *object, char *string, int font, int color, int outline
 	textObjectsRemoveByOwner(object);
 
 	textObject->owner = object;
-	textObject->time = 0; // _get_bk_time();  TODO input.cpp
+	textObject->time = _get_bk_time();
 
 	gTextObjects[gTextObjectsCount] = textObject;
 	gTextObjectsCount++;
@@ -324,7 +324,7 @@ static void textObjectsTicker() {
 		TextObject *textObject = gTextObjects[index];
 
 		unsigned int delay = gTextObjectsLineDelay * textObject->linesCount + gTextObjectsBaseDelay;
-//		if ((textObject->flags & TEXT_OBJECT_MARKED_FOR_REMOVAL) != 0 || (getTicksBetween(_get_bk_time(), textObject->time) > delay)) {  TODO input.cpp
+		if ((textObject->flags & TEXT_OBJECT_MARKED_FOR_REMOVAL) != 0 || (getTicksBetween(_get_bk_time(), textObject->time) > delay)) {
 			tileToScreenXY(textObject->tile, &(textObject->x), &(textObject->y), gElevation);
 			textObject->x += textObject->sx;
 			textObject->y += textObject->sy;
@@ -349,7 +349,7 @@ static void textObjectsTicker() {
 
 			gTextObjectsCount--;
 			index--;
-//		}  TODO input.cpp
+		}
 	}
 
 	if (textObjectsRemoved) {

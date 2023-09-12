@@ -144,7 +144,7 @@ int mouseInit() {
 	gMouseCursorY = 240; // _scr_size.bottom / 2;
 	_raw_x = 320; // _scr_size.right / 2;
 	_raw_y = 240; // _scr_size.bottom / 2;
-	_mouse_idle_start_time = g_system->getMillis(); // getTicks();  TODO input.cpp
+	_mouse_idle_start_time = getTicks();
 
 	return 0;
 }
@@ -159,7 +159,7 @@ void mouseFree() {
 	}
 
 	if (_mouse_fptr != NULL) {
-//		tickersRemove(_mouse_anim);  TODO input.cpp
+		tickersRemove(_mouse_anim);
 		_mouse_fptr = NULL;
 	}
 }
