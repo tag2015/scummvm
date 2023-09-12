@@ -56,7 +56,9 @@ MODULE_OBJS = \
 	trait.o \
 	version.o \
 	widget.o \
+	win32.o \
 	window.o \
+	window_manager.o \
 	word_wrap.o \
 	xfile.o \
 	third_party/fpattern/fpattern.o
