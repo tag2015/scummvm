@@ -205,11 +205,11 @@ void _process_bk() {
 		_mouse_info();
 	}*/
 
-/*	v1 = _win_check_all_buttons();  TODO window_manager.cpp
+	v1 = _win_check_all_buttons();
 	if (v1 != -1) {
 		enqueueInputEvent(v1);
 		return;
-	}*/
+	}
 
 /*	v1 = _kb_getch();  TODO kb.cpp
 	if (v1 != -1) {
@@ -368,7 +368,7 @@ static void pauseGame() {
 		}
 
 		gPaused = false;
-//		windowDestroy(win);  TODO window_manager.cpp
+		windowDestroy(win);
 	}
 }
 
