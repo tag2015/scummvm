@@ -3,11 +3,10 @@
 
 /*#include <math.h>
 #include <string.h>
-
 #include <algorithm>
 */
 
-// #include "svga.h"
+// #include "svga.h" TODO svga.cpp
 
 namespace Fallout2 {
 
@@ -184,8 +183,7 @@ int Color2RGB(Color c) {
 // 0x4C7320
 void colorPaletteFadeBetween(unsigned char *oldPalette, unsigned char *newPalette, int steps) {
 	for (int step = 0; step < steps; step++) {
-		// TODO
-		//		sharedFpsLimiter.mark();
+		// sharedFpsLimiter.mark();  TODO svga.cpp
 
 		unsigned char palette[768];
 
@@ -200,13 +198,13 @@ void colorPaletteFadeBetween(unsigned char *oldPalette, unsigned char *newPalett
 		}
 
 		_setSystemPalette(palette);
-		//		renderPresent(); TODO
-		//		sharedFpsLimiter.throttle();
+		//  renderPresent(); TODO svga.cpp
+		//  sharedFpsLimiter.throttle();
 	}
 
-	//	sharedFpsLimiter.mark();
+	//	sharedFpsLimiter.mark(); TODO svga.cpp
 	_setSystemPalette(newPalette);
-	//	renderPresent();  TODO
+	//	renderPresent();
 	//	sharedFpsLimiter.throttle();
 }
 
@@ -224,7 +222,7 @@ void _setSystemPalette(unsigned char *palette) {
 		_systemCmap[index] = palette[index];
 	}
 
-	// directDrawSetPalette(newPalette); TODO
+	// directDrawSetPalette(newPalette); TODO svga.cpp
 }
 
 // 0x4C7420
@@ -247,7 +245,7 @@ void _setSystemPaletteEntries(unsigned char *palette, int start, int end) {
 		_systemCmap[start * 3 + index * 3 + 2] = palette[index * 3 + 2];
 	}
 
-	//	directDrawSetPaletteInRange(newPalette, start, end - start + 1); TODO
+	//	directDrawSetPaletteInRange(newPalette, start, end - start + 1);  TODO svga.cpp
 }
 
 // 0x4C7550
