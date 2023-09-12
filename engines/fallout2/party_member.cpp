@@ -581,7 +581,7 @@ static int _partyMemberPrepLoadInstance(STRUCT_519DA8 *a1) {
 
 	a1->script = (Script *)internal_malloc(sizeof(*script));
 	if (a1->script == NULL) {
-//		showMesageBox("\n  Error!: partyMemberPrepLoad: Out of memory!");  TODO window_manager.cpp
+		showMesageBox("\n  Error!: partyMemberPrepLoad: Out of memory!");
 		error("partyMemberPrepLoad: Out of memory!");
 	}
 

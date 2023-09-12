@@ -201,7 +201,7 @@ int mouseSetFrame(unsigned char *a1, int width, int height, int pitch, int a5, i
 	if (!gCursorIsHidden && gMouseInitialized) {
 		gCursorIsHidden = true;
 		mouseGetRect(&rect);
-//		windowRefreshAll(&rect);  TODO window_manager.cpp
+		windowRefreshAll(&rect);
 	}
 
 	if (width != gMouseCursorWidth || height != gMouseCursorHeight) {
@@ -288,7 +288,7 @@ void mouseShowCursor() {
 	v2 = gMouseCursorData;
 	if (gMouseInitialized) {
 		if (!_mouse_blit_trans || !gCursorIsHidden) {
-//			_win_get_mouse_buf(gMouseCursorData);  TODO window_manager
+			_win_get_mouse_buf(gMouseCursorData);
 			v2 = gMouseCursorData;
 			v3 = 0;
 
@@ -354,7 +354,7 @@ void mouseHideCursor() {
 			rect.bottom = gMouseCursorY + gMouseCursorHeight - 1;
 
 			gCursorIsHidden = true;
-//			windowRefreshAll(&rect);  TODO window_manager.cpp
+			windowRefreshAll(&rect);
 		}
 	}
 }
@@ -521,7 +521,7 @@ void _mouse_simulate_input(int delta_x, int delta_y, int buttons) {
 		gMouseCursorY += delta_y;
 		_mouse_clip();
 
-//		windowRefreshAll(&mouseRect);  TODO window_manager.cpp
+		windowRefreshAll(&mouseRect);
 
 		mouseShowCursor();
 
@@ -633,22 +633,22 @@ void mouseSetSensitivity(double value) {
 void mouseGetPositionInWindow(int win, int *x, int *y) {
 	mouseGetPosition(x, y);
 
-/*	Window *window = windowGetWindow(win);  TODO window_manager.cpp
+	Window *window = windowGetWindow(win);
 	if (window != NULL) {
 		*x -= window->rect.left;
 		*y -= window->rect.top;
-	}*/
+	}
 }
 
 bool mouseHitTestInWindow(int win, int left, int top, int right, int bottom) {
-/*	Window *window = windowGetWindow(win); TODO window_manager.cpp
+	Window *window = windowGetWindow(win);
 	if (window != NULL) {
 		left += window->rect.left;
 		top += window->rect.top;
 		right += window->rect.left;
 		bottom += window->rect.top;
 	}
-*/
+
 	return _mouse_click_in(left, top, right, bottom);
 }
 
