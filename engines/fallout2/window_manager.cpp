@@ -230,7 +230,7 @@ int windowManagerInit(VideoSystemInitProc *videoSystemInitProc, VideoSystemExitP
 		return WINDOW_MANAGER_ERR_INITIALIZING_INPUT;
 	}
 
-//	_GNW_intr_init(); TODO window_manager_private
+	_GNW_intr_init();
 
 	Window *window = gWindows[0] = (Window *)internal_malloc(sizeof(*window));
 	if (window == NULL) {
@@ -286,7 +286,7 @@ void windowManagerExit(void) {
 	if (!_insideWinExit) {
 		_insideWinExit = true;
 		if (gWindowSystemInitialized) {
-//			_GNW_intr_exit(); TODO window_manager_private
+			_GNW_intr_exit();
 
 			for (int index = gWindowsLength - 1; index >= 0; index--) {
 				windowFree(gWindows[index]->id);
@@ -1191,7 +1191,7 @@ int _GNW_check_menu_bars(int a1) {
 		if (window->menuBar != NULL) {
 			for (int pulldownIndex = 0; pulldownIndex < window->menuBar->pulldownsLength; pulldownIndex++) {
 				if (v1 == window->menuBar->pulldowns[pulldownIndex].keyCode) {
-//					v1 = _GNW_process_menu(window->menuBar, pulldownIndex);  TODO window_manager_private
+					v1 = _GNW_process_menu(window->menuBar, pulldownIndex);
 					break;
 				}
 			}
