@@ -4,7 +4,7 @@
 #include "fallout2/input.h"
 #include "fallout2/palette.h"
 #include "fallout2/settings.h"
-//  #include "fallout2/svga.h"  TODO svga.cpp
+#include "fallout2/svga.h"
 
 namespace Fallout2 {
 
