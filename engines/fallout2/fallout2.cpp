@@ -303,7 +303,7 @@ Common::Error Fallout2Engine::run() {
 	interfaceFontsInit();
 	fontManagerAdd(&gModernFontManager);
 	fontSetCurrent(0);  // this does nothing, font IDs are >100
-	debug("Fonts initialized!");
+	debug("Initialized interface fonts!");
 
 	tileDisable();
 
