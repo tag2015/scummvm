@@ -1,24 +1,24 @@
-#include "mainmenu.h"
+#include "fallout2/mainmenu.h"
 
-#include <ctype.h>
+// #include <ctype.h>
 
-#include "art.h"
-#include "color.h"
-#include "draw.h"
-#include "game.h"
-#include "game_sound.h"
-#include "input.h"
-#include "kb.h"
-#include "mouse.h"
-#include "palette.h"
-#include "preferences.h"
-#include "sfall_config.h"
-#include "svga.h"
-#include "text_font.h"
-#include "version.h"
-#include "window_manager.h"
+#include "fallout2/art.h"
+#include "fallout2/color.h"
+#include "fallout2/draw.h"
+#include "fallout2/game.h"
+// #include "game_sound.h"  TODO audio
+#include "fallout2/input.h"
+#include "fallout2/kb.h" // TODO kb
+#include "fallout2/mouse.h"
+#include "fallout2/palette.h"
+// #include "preferences.h" TODO prefs
+#include "fallout2/sfall_config.h"
+#include "fallout2/svga.h"
+#include "fallout2/text_font.h"
+#include "fallout2/version.h"
+#include "fallout2/window_manager.h"
 
-namespace fallout {
+namespace Fallout2 {
 
 #define MAIN_MENU_WINDOW_WIDTH 640
 #define MAIN_MENU_WINDOW_HEIGHT 480
@@ -34,13 +34,13 @@ typedef enum MainMenuButton {
 } MainMenuButton;
 
 static int main_menu_fatal_error();
-static void main_menu_play_sound(const char* fileName);
+static void main_menu_play_sound(const char *fileName);
 
 // 0x5194F0
 static int gMainMenuWindow = -1;
 
 // 0x5194F4
-static unsigned char* gMainMenuWindowBuffer = NULL;
+static unsigned char *gMainMenuWindowBuffer = NULL;
 
 // 0x519504
 static bool _in_main_menu = false;
@@ -96,11 +96,11 @@ int mainMenuWindowInit() {
 	int mainMenuWindowX = (screenGetWidth() - MAIN_MENU_WINDOW_WIDTH) / 2;
 	int mainMenuWindowY = (screenGetHeight() - MAIN_MENU_WINDOW_HEIGHT) / 2;
 	gMainMenuWindow = windowCreate(mainMenuWindowX,
-	                               mainMenuWindowY,
-	                               MAIN_MENU_WINDOW_WIDTH,
-	                               MAIN_MENU_WINDOW_HEIGHT,
-	                               0,
-	                               WINDOW_HIDDEN | WINDOW_MOVE_ON_TOP);
+								   mainMenuWindowY,
+								   MAIN_MENU_WINDOW_WIDTH,
+								   MAIN_MENU_WINDOW_HEIGHT,
+								   0,
+								   WINDOW_HIDDEN | WINDOW_MOVE_ON_TOP);
 	if (gMainMenuWindow == -1) {
 		// NOTE: Uninline.
 		return main_menu_fatal_error();
@@ -178,18 +178,18 @@ int mainMenuWindowInit() {
 
 	for (int index = 0; index < MAIN_MENU_BUTTON_COUNT; index++) {
 		gMainMenuButtons[index] = buttonCreate(gMainMenuWindow,
-		                                       offsetX + 30,
-		                                       offsetY + 19 + index * 42 - index,
-		                                       26,
-		                                       26,
-		                                       -1,
-		                                       -1,
-		                                       1111,
-		                                       gMainMenuButtonKeyBindings[index],
-		                                       _mainMenuButtonNormalFrmImage.getData(),
-		                                       _mainMenuButtonPressedFrmImage.getData(),
-		                                       0,
-		                                       BUTTON_FLAG_TRANSPARENT);
+											   offsetX + 30,
+											   offsetY + 19 + index * 42 - index,
+											   26,
+											   26,
+											   -1,
+											   -1,
+											   1111,
+											   gMainMenuButtonKeyBindings[index],
+											   _mainMenuButtonNormalFrmImage.getData(),
+											   _mainMenuButtonPressedFrmImage.getData(),
+											   0,
+											   BUTTON_FLAG_TRANSPARENT);
 		if (gMainMenuButtons[index] == -1) {
 			// NOTE: Uninline.
 			return main_menu_fatal_error();
@@ -256,11 +256,11 @@ void mainMenuWindowHide(bool animate) {
 		return;
 	}
 
-	soundContinueAll();
+//	soundContinueAll();  TODO audio
 
 	if (animate) {
 		paletteFadeTo(gPaletteBlack);
-		soundContinueAll();
+//		soundContinueAll();  TODO audio
 	}
 
 	windowHide(gMainMenuWindow);
@@ -317,9 +317,9 @@ int mainMenuWindowHandleEvents() {
 
 				rc = _return_values[buttonIndex];
 
-				if (buttonIndex == MAIN_MENU_BUTTON_CREDITS && (gPressedPhysicalKeys[SDL_SCANCODE_RSHIFT] != KEY_STATE_UP || gPressedPhysicalKeys[SDL_SCANCODE_LSHIFT] != KEY_STATE_UP)) {
-					rc = MAIN_MENU_QUOTES;
-				}
+//				if (buttonIndex == MAIN_MENU_BUTTON_CREDITS && (gPressedPhysicalKeys[SDL_SCANCODE_RSHIFT] != KEY_STATE_UP || gPressedPhysicalKeys[SDL_SCANCODE_LSHIFT] != KEY_STATE_UP)) {
+//					rc = MAIN_MENU_QUOTES;  TODO kb.cpp
+//				}
 
 				break;
 			}
@@ -330,9 +330,9 @@ int mainMenuWindowHandleEvents() {
 				rc = MAIN_MENU_SELFRUN;
 				continue;
 			} else if (keyCode == KEY_PLUS || keyCode == KEY_EQUAL) {
-				brightnessIncrease();
+//				brightnessIncrease();  TODO prefs
 			} else if (keyCode == KEY_MINUS || keyCode == KEY_UNDERSCORE) {
-				brightnessDecrease();
+//				brightnessDecrease();  TODO prefs
 			} else if (keyCode == KEY_UPPERCASE_D || keyCode == KEY_LOWERCASE_D) {
 				rc = MAIN_MENU_SCREENSAVER;
 				continue;
@@ -384,8 +384,8 @@ static int main_menu_fatal_error() {
 // NOTE: Inlined.
 //
 // 0x481C94
-static void main_menu_play_sound(const char* fileName) {
-	soundPlayFile(fileName);
+static void main_menu_play_sound(const char *fileName) {
+//	soundPlayFile(fileName);  TODO audio
 }
 
-} // namespace fallout
+} // namespace Fallout2
