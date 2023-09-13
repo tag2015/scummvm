@@ -150,9 +150,6 @@ void Fallout2Engine::showSplash() {
 	debug("Loaded splash screen!");
 	fileClose(stream);
 
-	// set image palette
-	paletteSetEntries(palette);
-
 	int size = 0;
 
 	// TODO: Move to settings.
@@ -187,12 +184,12 @@ void Fallout2Engine::showSplash() {
 
 		unsigned char *scaled = reinterpret_cast<unsigned char *>(internal_malloc(scaledWidth * scaledHeight));
 		if (scaled != NULL) {
-			// blitBufferToBufferStretch(data, width, height, width, scaled, scaledWidth, scaledHeight, scaledWidth);  TODO svga
+			blitBufferToBufferStretch(data, width, height, width, scaled, scaledWidth, scaledHeight, scaledWidth);
 
 			int x = screenWidth > scaledWidth ? (screenWidth - scaledWidth) / 2 : 0;
 			int y = screenHeight > scaledHeight ? (screenHeight - scaledHeight) / 2 : 0;
-			// _scr_blit(scaled, scaledWidth, scaledHeight, 0, 0, scaledWidth, scaledHeight, x, y);  TODO svga
-			// paletteFadeTo(palette);
+			_scr_blit(scaled, scaledWidth, scaledHeight, 0, 0, scaledWidth, scaledHeight, x, y);
+			paletteFadeTo(palette);
 
 			internal_free(scaled);
 		}
@@ -201,18 +198,11 @@ void Fallout2Engine::showSplash() {
 		int y = (screenHeight - height) / 2;
 		int i = 0;
 
-		// Draw splash screen
-		for (y = 0, i = 0; y < screenHeight; y++)
-			for (x = 0; x < screenWidth; x++) {
-				_screen->setPixel(x, y, data[i]);
-				i++;
-			}
-
-		g_system->updateScreen();
-
-//		_scr_blit(data, width, height, 0, 0, width, height, x, y);  TODO svga
-//		paletteFadeTo(palette);
+		_scr_blit(data, width, height, 0, 0, width, height, x, y);
+		paletteFadeTo(palette);
 	}
+
+	g_system->delayMillis(3000);
 
 	internal_free(data);
 	internal_free(palette);
