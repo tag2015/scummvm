@@ -1478,7 +1478,7 @@ int objectSetLocation(Object *obj, int tile, int elevation, Rect *rect) {
 				}
 
 				if (rect != NULL) {
-//					rectUnion(rect, &_scr_size, rect);  TODO svga.cpp
+					rectUnion(rect, &_scr_size, rect);
 					Rect scr_size = { 0, 0, 640, 480 };
 					rectUnion(rect, &scr_size, rect);
 				}
