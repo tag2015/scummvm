@@ -1,7 +1,7 @@
-#ifndef FALLOUT_MAINMENU_H_
-#define FALLOUT_MAINMENU_H_
+#ifndef FALLOUT2_MAINMENU_H
+#define FALLOUT2_MAINMENU_H
 
-namespace fallout {
+namespace Fallout2 {
 
 typedef enum MainMenuOption {
 	MAIN_MENU_INTRO,
@@ -23,6 +23,6 @@ void mainMenuWindowUnhide(bool animate);
 int _main_menu_is_enabled();
 int mainMenuWindowHandleEvents();
 
-} // namespace fallout
+} // namespace Fallout2
 
-#endif /* FALLOUT_MAINMENU_H_ */
+#endif
