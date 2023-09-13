@@ -316,7 +316,7 @@ void mouseShowCursor() {
 			v8 = gMouseCursorWidth - (_scr_size.left - gMouseCursorX);
 		}
 
-		if (gMouseCursorY >= 0 _scr_size.top) {
+		if (gMouseCursorY >= _scr_size.top) {
 			if (gMouseCursorHeight + gMouseCursorY - 1 <= _scr_size.bottom) {
 				v9 = 0;
 				v10 = gMouseCursorHeight;
