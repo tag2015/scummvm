@@ -1410,12 +1410,12 @@ int objectSetLocation(Object *obj, int tile, int elevation, Rect *rect) {
 		return -1;
 	}
 
-	if (isInCombat()) {
+/*	if (isInCombat()) {
 		if (FID_TYPE(obj->fid) == OBJ_TYPE_CRITTER) {
 			bool v8 = obj->outline != 0 && (obj->outline & OUTLINE_DISABLED) == 0;
-//			_combat_update_critter_outline_for_los(obj, v8);  TODO combat.cpp
+			_combat_update_critter_outline_for_los(obj, v8);  TODO combat.cpp
 		}
-	}
+	}*/
 
 	if (rect != NULL) {
 		rectUnion(rect, &v23, rect);
