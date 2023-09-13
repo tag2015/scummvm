@@ -173,19 +173,13 @@ int windowManagerInit(VideoSystemInitProc *videoSystemInitProc, VideoSystemExitP
 		return WINDOW_MANAGER_ERR_8;
 	}
 
-	// TODO REMOVE !!!
-	//_scr_size.left = 0;
-	//_scr_size.top = 0;
-	//_scr_size.right = 640;
-	//_scr_size.bottom = 480;
-
 	if (a3 & 1) {
 		_screen_buffer = (unsigned char *)internal_malloc((_scr_size.bottom - _scr_size.top + 1) * (_scr_size.right - _scr_size.left + 1));
 		if (_screen_buffer == NULL) {
 			if (gVideoSystemExitProc != NULL) {
 				gVideoSystemExitProc();
 			} else {
-//				directDrawFree();  TODO svga.cpp
+				directDrawFree();
 			}
 
 			return WINDOW_MANAGER_ERR_NO_MEMORY;
@@ -204,7 +198,7 @@ int windowManagerInit(VideoSystemInitProc *videoSystemInitProc, VideoSystemExitP
 			if (gVideoSystemExitProc != NULL) {
 				gVideoSystemExitProc();
 			} else {
-//				directDrawFree();  TODO svga.cpp
+				directDrawFree();
 			}
 
 			if (_screen_buffer != NULL) {
@@ -235,7 +229,7 @@ int windowManagerInit(VideoSystemInitProc *videoSystemInitProc, VideoSystemExitP
 		if (gVideoSystemExitProc != NULL) {
 			gVideoSystemExitProc();
 		} else {
-//			directDrawFree();  TODO svga.cpp
+			directDrawFree();
 		}
 
 		if (_screen_buffer != NULL) {
@@ -873,7 +867,7 @@ void _GNW_win_refresh(Window *window, Rect *rect, unsigned char *a3) {
 									_scr_size.right - _scr_size.left + 1);
 							}
 						} else {
-/*							_scr_blit(
+							_scr_blit(
 								window->buffer + v20->rect.left - window->rect.left + (v20->rect.top - window->rect.top) * window->width,
 								window->width,
 								v20->rect.bottom - v20->rect.bottom + 1,
@@ -882,7 +876,7 @@ void _GNW_win_refresh(Window *window, Rect *rect, unsigned char *a3) {
 								v20->rect.right - v20->rect.left + 1,
 								v20->rect.bottom - v20->rect.top + 1,
 								v20->rect.left,
-								v20->rect.top);   TODO svga.cpp */
+								v20->rect.top);
 						}
 					}
 
@@ -913,7 +907,7 @@ void _GNW_win_refresh(Window *window, Rect *rect, unsigned char *a3) {
 												   _screen_buffer + v16->rect.top * (_scr_size.right - _scr_size.left + 1) + v16->rect.left,
 												   _scr_size.right - _scr_size.left + 1);
 							} else {
-//								_scr_blit(buf, width, height, 0, 0, width, height, v16->rect.left, v16->rect.top); TODO svga.cpp
+								_scr_blit(buf, width, height, 0, 0, width, height, v16->rect.left, v16->rect.top);
 							}
 						}
 
@@ -928,7 +922,7 @@ void _GNW_win_refresh(Window *window, Rect *rect, unsigned char *a3) {
 				v24 = v23->next;
 
 				if (_buffering && !a3) {
-/*					_scr_blit(
+					_scr_blit(
 						_screen_buffer + v23->rect.left + (_scr_size.right - _scr_size.left + 1) * v23->rect.top,
 						_scr_size.right - _scr_size.left + 1,
 						v23->rect.bottom - v23->rect.top + 1,
@@ -937,7 +931,7 @@ void _GNW_win_refresh(Window *window, Rect *rect, unsigned char *a3) {
 						v23->rect.right - v23->rect.left + 1,
 						v23->rect.bottom - v23->rect.top + 1,
 						v23->rect.left,
-						v23->rect.top);  TODO svga.cpp */
+						v23->rect.top);
 				}
 
 				_rect_free(v23);
