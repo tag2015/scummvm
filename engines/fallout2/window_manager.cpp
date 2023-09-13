@@ -150,9 +150,10 @@ int windowManagerInit(VideoSystemInitProc *videoSystemInitProc, VideoSystemExitP
 //		}
 	}
 
-	if (textFontsInit() == -1) {
+	if (textFontsInit() == -1)
 		return WINDOW_MANAGER_ERR_INITIALIZING_TEXT_FONTS;
-	}
+
+	debug("Initialized text fonts!");
 
 //	_get_start_mode_();
 
