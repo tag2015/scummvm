@@ -322,7 +322,7 @@ int _win_list_select_at(const char *title, char **items, int itemsLength, ListSe
 	// Relative to `scrollOffset`.
 	int previousSelectedItemIndex = -1;
 	while (1) {
-//		sharedFpsLimiter.mark();  TODO svga.cpp
+		sharedFpsLimiter.mark();
 
 		int keyCode = inputGetInput();
 		int mouseX;
@@ -526,8 +526,8 @@ int _win_list_select_at(const char *title, char **items, int itemsLength, ListSe
 			}
 		}
 
-//		renderPresent();  TODO svga.cpp
-//		sharedFpsLimiter.throttle();
+		renderPresent();
+		sharedFpsLimiter.throttle();
 	}
 
 	windowDestroy(win);
@@ -662,9 +662,9 @@ int _win_msg(const char *string, int x, int y, int color) {
 	windowRefresh(win);
 
 	while (inputGetInput() != KEY_ESCAPE) {
-//		sharedFpsLimiter.mark();  TODO svga.cpp
-//		renderPresent();
-//		sharedFpsLimiter.throttle();
+		sharedFpsLimiter.mark();
+		renderPresent();
+		sharedFpsLimiter.throttle();
 	}
 
 	windowDestroy(win);
@@ -1017,7 +1017,7 @@ int _win_input_str(int win, char *dest, int maxLength, int x, int y, int textCol
 	// decremented in the loop body when key is not handled.
 	bool isFirstKey = true;
 	for (; cursorPos <= maxLength; cursorPos++) {
-//		sharedFpsLimiter.mark();  TODO svga.cpp
+		sharedFpsLimiter.mark();
 
 		int keyCode = inputGetInput();
 		if (keyCode != -1) {
@@ -1094,8 +1094,8 @@ int _win_input_str(int win, char *dest, int maxLength, int x, int y, int textCol
 			cursorPos--;
 		}
 
-//		renderPresent();  TODO svga.cpp
-//		sharedFpsLimiter.throttle();
+		renderPresent();
+		sharedFpsLimiter.throttle();
 	}
 
 	dest[cursorPos] = '\0';
