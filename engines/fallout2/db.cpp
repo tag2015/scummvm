@@ -213,7 +213,7 @@ size_t fileRead(void *ptr, size_t size, size_t count, File *stream) {
 				if (stream->dfile->decompressedData == NULL) {
 					bytesRead = xfileRead(byteBuffer, sizeof(*byteBuffer), chunkSize, stream);
 				}
-				debug("DB: Fetching compressed data");
+				debug(5, "DB: Fetching compressed data");
 				memcpy(ptr, (stream->dfile->decompressedData + stream->dfile->decompressed_position), size * count);
 				stream->dfile->decompressed_position += count;
 				stream->dfile->position += (size * count);
@@ -242,8 +242,8 @@ size_t fileRead(void *ptr, size_t size, size_t count, File *stream) {
 	if (stream->type == XFILE_TYPE_DFILE && stream->dfile->entry->compressed) {
 		if (stream->dfile->decompressedData == NULL)
 			xfileRead(ptr, size, count, stream);
-		debug(5, "DB: Fetching compressed data! Requested %lld items of size %lld bytes", count, size);
-		debug(5, "DB: Fetching compressed data - current ptr: %u", *(stream->dfile->decompressedData + stream->dfile->decompressed_position));
+		debug(6, "DB: Fetching compressed data! Requested %lld items of size %lld bytes", count, size);
+		debug(6, "DB: Fetching compressed data - current ptr: %u", *(stream->dfile->decompressedData + stream->dfile->decompressed_position));
 		memcpy(ptr, (stream->dfile->decompressedData + stream->dfile->decompressed_position), size * count);
 		stream->dfile->decompressed_position += (size * count);
 		stream->dfile->position += size;
@@ -327,7 +327,7 @@ int fileReadInt32(File *stream, int *valuePtr) {
 	int value;
 
 	if (xfileRead(&value, 4, 1, stream) == -1) {
-		debug("DB: Error reading int32");
+		debug(5, "DB: Error reading int32");
 		return -1;
 	} else {
 		if (stream->dfile->entry->compressed) { // FIXME idk why compressed entries lose the pointer, for now just do it here
@@ -339,7 +339,7 @@ int fileReadInt32(File *stream, int *valuePtr) {
 						  *(stream->dfile->decompressedData + 2) << 8 |
 						  *(stream->dfile->decompressedData + 3));
 			//			value = (int*) ptr;
-			debug("DB: Read Int32: %d", value);
+			debug(6, "DB: Read Int32: %d", value);
 			stream->dfile->decompressed_position += 4;
 		}
 	}
