@@ -202,7 +202,7 @@ int directDrawInit(int width, int height, int bpp) {
 		return 0;
 	}
 	gSdlSurface = new Graphics::Surface();
-	gSdlSurface->create(width, height,Graphics::PixelFormat(4, 8, 8, 8, 8, 0, 8, 16, 24));
+	gSdlSurface->create(width, height,Graphics::PixelFormat(Graphics::PixelFormat::createFormatCLUT8()));
 //	 = SDL_CreateRGBSurface(0, width, height, bpp, 0, 0, 0, 0);
 
 //	SDL_Color colors[256];
@@ -306,12 +306,15 @@ void _GNW95_ShowRect(unsigned char *src, int srcPitch, int a3, int srcX, int src
 	srcRect.right = srcWidth;
 	srcRect.bottom = srcHeight;
 
-	Common::Rect destRect;
-	destRect.left = destX;
-	destRect.top = destY;
-//	SDL_BlitSurface(gSdlSurface, &srcRect, gSdlTextureSurface, &destRect);
+	const Common::Point destPos(destX, destY);
 
-	gSdlTextureSurface->blitFrom(gSdlSurface, srcRect, destRect);
+	byte palette[256 * 3];
+	g_system->getPaletteManager()->grabPalette(palette, 0, 256);
+
+	const Graphics::Surface &newSurf = *gSdlSurface;
+	gSdlTextureSurface->blitFrom(newSurf, srcRect, destPos, palette);
+
+	//	SDL_BlitSurface(gSdlSurface, &srcRect, gSdlTextureSurface, &destRect);
 }
 
 // Clears drawing surface.
@@ -371,9 +374,10 @@ static bool createRenderer(int width, int height) {
 		return false;
 	}*/
 
+//	gSdlTextureSurface = SDL_CreateRGBSurfaceWithFormat(0, width, height, SDL_BITSPERPIXEL(format), format);
 	gSdlTextureSurface = new Graphics::ManagedSurface();
-	gSdlTextureSurface->create(width, height, Graphics::PixelFormat(4, 8, 8, 8, 8, 0, 8, 16, 24));
-//	 = SDL_CreateRGBSurfaceWithFormat(0, width, height, SDL_BITSPERPIXEL(format), format);
+	gSdlTextureSurface->create(width, height, Graphics::PixelFormat(Graphics::PixelFormat::createFormatCLUT8()));
+
 	if (gSdlTextureSurface == NULL) {
 		return false;
 	}
@@ -404,14 +408,15 @@ void handleWindowSizeChanged() {
 }
 
 void renderPresent() {
-//	SDL_UpdateTexture(gSdlTexture, NULL, gSdlTextureSurface->pixels, gSdlTextureSurface->pitch);
-//	SDL_RenderClear(gSdlRenderer);
-//	SDL_RenderCopy(gSdlRenderer, gSdlTexture, NULL, NULL);
+	//	SDL_UpdateTexture(gSdlTexture, NULL, gSdlTextureSurface->pixels, gSdlTextureSurface->pitch);
+	//	SDL_RenderClear(gSdlRenderer);
+	//	SDL_RenderCopy(gSdlRenderer, gSdlTexture, NULL, NULL);
+	//	SDL_RenderPresent(gSdlRenderer);
+
 	const Graphics::ManagedSurface &newScreen = *gSdlTextureSurface;
 
 	g_engine->_screen->copyFrom(newScreen);
-	g_system->updateScreen();
-//	SDL_RenderPresent(gSdlRenderer);
+	g_engine->_screen->update();
 }
 
 } // namespace Fallout2
