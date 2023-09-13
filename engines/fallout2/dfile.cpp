@@ -311,7 +311,7 @@ int dfileClose(DFile *stream) {
 	free(stream);
 
 	if (!rc)
-		debug("Freed stream");
+		debug(5, "Freed stream");
 	return rc;
 }
 
@@ -389,7 +389,7 @@ char *dfileReadString(char *string, int size, DFile *stream) {
 	// terminator.
 	for (int index = 0; index < size - 1; index++) {
 		int ch = dfileReadCharInternal(stream);
-		debug(5, "ReadString: pos: %d - char: %c", index, ch);
+		debug(6, "ReadString: pos: %d - char: %c", index, ch);
 		if (ch == -1) {
 			break;
 		}
@@ -687,7 +687,7 @@ static DFile *dfileOpenInternal(DBase *dbase, const char *filePath, const char *
 	}
 
 	if (entry->compressed == 1) {
-		debug("DFILE entry is compressed");
+		debug(5, "DFILE entry is compressed");
 		// Entry is compressed, setup decompression stream and decompression
 		// buffer. This step is not needed when previous instance of dfile is
 		// passed via parameter, which might already have stream and
@@ -829,7 +829,7 @@ static bool dfileReadCompressed(DFile *stream, void *ptr, size_t size) {
 	}
 
 	if (stream->decompressedData != NULL) {
-		debug("Already decompressed, returning");
+		debug(5, "Already decompressed, returning");
 		return true;
 	}
 
@@ -845,13 +845,13 @@ static bool dfileReadCompressed(DFile *stream, void *ptr, size_t size) {
 
 	unsigned long uncomp_size = stream->entry->uncompressedSize;
 
-	debug("Using inflate in dfileReadCompressed!");
-	debug("Full Compressed size: %d - Full Expected size: %d", stream->entry->dataSize, stream->entry->uncompressedSize);
+	debug(6, "Using inflate in dfileReadCompressed!");
+	debug(6, "Full Compressed size: %d - Full Expected size: %d", stream->entry->dataSize, stream->entry->uncompressedSize);
 
 	Common::inflateZlib(stream->decompressedData, &uncomp_size, stream->decompressionBuffer, stream->entry->dataSize); // OK
-	debug("Successfully uncompressed data: %ld", uncomp_size);
+	debug(6, "Successfully uncompressed data: %ld", uncomp_size);
 
-	debug("Uncompressed initial byte %u", *(stream->decompressedData));
+	debug(6, "Uncompressed initial byte %u", *(stream->decompressedData));
 
 //	for (int i = 0; i < 10; i++)
 //		debug("Uncompressed byte at address %d: %u", i, *(stream->decompressedData + i));
