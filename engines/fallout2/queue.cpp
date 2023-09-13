@@ -473,7 +473,7 @@ static int _queue_do_explosion_(Object *explosive, bool a2) {
 	int minDamage;
 
 	// SFALL
-	explosiveGetDamage(explosive->pid, &minDamage, &maxDamage);
+//	explosiveGetDamage(explosive->pid, &minDamage, &maxDamage);  TODO item.cpp
 
 	// FIXME: I guess this is a little bit wrong, dude can never be null, I
 	// guess it needs to check if owner is dude.
@@ -484,11 +484,11 @@ static int _queue_do_explosion_(Object *explosive, bool a2) {
 		}
 	}
 
-	if (actionExplode(tile, elevation, minDamage, maxDamage, gDude, a2) == -2) {
-		queueAddEvent(50, explosive, NULL, EVENT_TYPE_EXPLOSION);
+/*	if (actionExplode(tile, elevation, minDamage, maxDamage, gDude, a2) == -2) {
+		queueAddEvent(50, explosive, NULL, EVENT_TYPE_EXPLOSION);  TODO actions.cpp
 	} else {
-		_obj_destroy(explosive);
-	}
+		_obj_destroy(explosive); TODO proto_instance
+	}*/
 
 	return 1;
 }
@@ -500,7 +500,7 @@ static int explosionFailureEventProcess(Object *obj, void *data) {
 	// Due to your inept handling, the explosive detonates prematurely.
 	msg.num = 4000;
 	if (messageListGetItem(&gMiscMessageList, &msg)) {
-		displayMonitorAddMessage(msg.text);
+//		displayMonitorAddMessage(msg.text);  TODO display_monitor
 	}
 
 	return _queue_do_explosion_(obj, true);
