@@ -8,7 +8,7 @@
 #include "fallout2/cycle.h"
 // #include "game_sound.h" TODO audio
 #include "fallout2/input.h"
-// #include "svga.h" TODO svga.cpp
+#include "fallout2/svga.h"
 
 namespace Fallout2 {
 
@@ -38,7 +38,8 @@ void paletteInit() {
 	//  colorPaletteSetTransitionCallback(soundContinueAll);
 	//	}
 
-	colorPaletteFadeBetween(gPalette, gPalette, 60);
+	// TODO this call is a benchmark
+//	colorPaletteFadeBetween(gPalette, gPalette, 60);
 
 	colorPaletteSetTransitionCallback(NULL);
 
