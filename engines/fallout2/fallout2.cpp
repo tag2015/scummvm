@@ -33,6 +33,7 @@
 
 #include "fallout2/db.h"
 #include "fallout2/debug.h"
+#include "fallout2/draw.h"
 #include "fallout2/font_manager.h"
 #include "fallout2/game.h"
 #include "fallout2/game_memory.h"
@@ -47,6 +48,7 @@
 #include "fallout2/sfall_config.h"
 #include "fallout2/skill.h"
 #include "fallout2/stat.h"
+#include "fallout2/svga.h"
 #include "fallout2/tile.h"
 #include "fallout2/trait.h"
 #include "fallout2/version.h"
@@ -148,13 +150,10 @@ void Fallout2Engine::showSplash() {
 	debug("Loaded splash screen!");
 	fileClose(stream);
 
+	// set image palette
+	paletteSetEntries(palette);
 
 	int size = 0;
-
-	// set image palette
-	for (int i = 0; i < 768; i++)
-		palette[i] = palette[i] << 2;  // the standard palette is too dark
-	g_system->getPaletteManager()->setPalette(palette, 0, 256);
 
 	// TODO: Move to settings.
 	/*	Config config;
@@ -166,8 +165,8 @@ void Fallout2Engine::showSplash() {
 		configFree(&config);
 	}*/
 
-	int screenWidth = 640; // screenGetWidth(); TODO svga
-	int screenHeight = 480; // screenGetHeight();
+	int screenWidth = screenGetWidth();
+	int screenHeight = screenGetHeight();
 
 	if (size != 0 || screenWidth < width || screenHeight < height) {
 		int scaledWidth;
@@ -188,29 +187,30 @@ void Fallout2Engine::showSplash() {
 
 		unsigned char *scaled = reinterpret_cast<unsigned char *>(internal_malloc(scaledWidth * scaledHeight));
 		if (scaled != NULL) {
-			// blitBufferToBufferStretch(data, width, height, width, scaled, scaledWidth, scaledHeight, scaledWidth);
+			// blitBufferToBufferStretch(data, width, height, width, scaled, scaledWidth, scaledHeight, scaledWidth);  TODO svga
 
 			int x = screenWidth > scaledWidth ? (screenWidth - scaledWidth) / 2 : 0;
 			int y = screenHeight > scaledHeight ? (screenHeight - scaledHeight) / 2 : 0;
-			// _scr_blit(scaled, scaledWidth, scaledHeight, 0, 0, scaledWidth, scaledHeight, x, y);  TODO
-			paletteFadeTo(palette);
+			// _scr_blit(scaled, scaledWidth, scaledHeight, 0, 0, scaledWidth, scaledHeight, x, y);  TODO svga
+			// paletteFadeTo(palette);
 
 			internal_free(scaled);
 		}
 	} else {
 		int x = (screenWidth - width) / 2;
 		int y = (screenHeight - height) / 2;
+		int i = 0;
 
 		// Draw splash screen
-		for (int y_pix = 0, i = 0; y_pix < 480; y_pix++)
-			for (int x_pix = 0; x_pix < 640; x_pix++) {
-				_screen->setPixel(x_pix, y_pix, data[i]);
+		for (y = 0, i = 0; y < screenHeight; y++)
+			for (x = 0; x < screenWidth; x++) {
+				_screen->setPixel(x, y, data[i]);
 				i++;
 			}
 
 		g_system->updateScreen();
 
-//		_scr_blit(data, width, height, 0, 0, width, height, x, y);  TODO
+//		_scr_blit(data, width, height, 0, 0, width, height, x, y);  TODO svga
 //		paletteFadeTo(palette);
 	}
 
