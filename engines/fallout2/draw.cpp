@@ -1,8 +1,7 @@
 #include "fallout2/draw.h"
 
 #include "fallout2/color.h"
-
-// #include "svga.h"  TODO svga.cpp
+#include "fallout2/svga.h"
 
 namespace Fallout2 {
 
