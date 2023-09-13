@@ -29,6 +29,7 @@ MODULE_OBJS = \
 	input.o \
 	interpreter.o \
 	light.o \
+	mainmenu.o \
 	memory.o \
 	memory_manager.o \
 	message.o \
