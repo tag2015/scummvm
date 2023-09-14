@@ -1,39 +1,40 @@
-#include "item.h"
+#include "fallout2/item.h"
 
-#include <string.h>
+// #include <string.h>
 
-#include <algorithm>
-#include <vector>
+// #include <algorithm>
+// #include <vector>
 
-#include "animation.h"
-#include "art.h"
-#include "automap.h"
-#include "combat.h"
-#include "critter.h"
-#include "debug.h"
-#include "display_monitor.h"
-#include "game.h"
-#include "interface.h"
-#include "inventory.h"
-#include "light.h"
-#include "map.h"
-#include "memory.h"
-#include "message.h"
-#include "object.h"
-#include "party_member.h"
-#include "perk.h"
-#include "platform_compat.h"
-#include "proto.h"
-#include "proto_instance.h"
-#include "queue.h"
-#include "random.h"
-#include "sfall_config.h"
-#include "skill.h"
-#include "stat.h"
-#include "tile.h"
-#include "trait.h"
+#include "fallout2/fallout2.h"
+#include "fallout2/animation.h"
+#include "fallout2/art.h"
+// #include "fallout2/automap.h" TODO automap.cpp
+#include "fallout2/combat.h"
+#include "fallout2/critter.h"
+#include "fallout2/debug.h"
+#include "fallout2/display_monitor.h"
+#include "fallout2/game.h"
+#include "fallout2/interface.h"
+#include "fallout2/inventory.h"
+#include "fallout2/light.h"
+#include "fallout2/map.h"
+#include "fallout2/memory.h"
+#include "fallout2/message.h"
+#include "fallout2/object.h"
+#include "fallout2/party_member.h"
+#include "fallout2/perk.h"
+#include "fallout2/platform_compat.h"
+#include "fallout2/proto.h"
+#include "fallout2/proto_instance.h"
+#include "fallout2/queue.h"
+#include "fallout2/random.h"
+#include "fallout2/sfall_config.h"
+#include "fallout2/skill.h"
+#include "fallout2/stat.h"
+#include "fallout2/tile.h"
+#include "fallout2/trait.h"
 
-namespace fallout {
+namespace Fallout2 {
 
 #define ADDICTION_COUNT (9)
 
@@ -41,19 +42,19 @@ namespace fallout {
 // by Sfall.
 #define BOOKS_MAX 50
 
-static int _item_load_(File* stream);
-static void _item_compact(int inventoryItemIndex, Inventory* inventory);
-static int _item_move_func(Object* a1, Object* a2, Object* a3, int quantity, bool a5);
-static bool _item_identical(Object* a1, Object* a2);
-static int stealthBoyTurnOn(Object* object);
-static int stealthBoyTurnOff(Object* critter, Object* item);
-static int _insert_drug_effect(Object* critter_obj, Object* item_obj, int a3, int* stats, int* mods);
-static void _perform_drug_effect(Object* critter_obj, int* stats, int* mods, bool is_immediate);
-static bool _drug_effect_allowed(Object* critter, int pid);
-static int _insert_withdrawal(Object* obj, int a2, int a3, int a4, int a5);
-static int _item_wd_clear_all(Object* a1, void* data);
-static void performWithdrawalStart(Object* obj, int perk, int a3);
-static void performWithdrawalEnd(Object* obj, int a2);
+static int _item_load_(File *stream);
+static void _item_compact(int inventoryItemIndex, Inventory *inventory);
+static int _item_move_func(Object *a1, Object *a2, Object *a3, int quantity, bool a5);
+static bool _item_identical(Object *a1, Object *a2);
+static int stealthBoyTurnOn(Object *object);
+static int stealthBoyTurnOff(Object *critter, Object *item);
+static int _insert_drug_effect(Object *critter_obj, Object *item_obj, int a3, int *stats, int *mods);
+static void _perform_drug_effect(Object *critter_obj, int *stats, int *mods, bool is_immediate);
+static bool _drug_effect_allowed(Object *critter, int pid);
+static int _insert_withdrawal(Object *obj, int a2, int a3, int a4, int a5);
+static int _item_wd_clear_all(Object *a1, void *data);
+static void performWithdrawalStart(Object *obj, int perk, int a3);
+static void performWithdrawalEnd(Object *obj, int a2);
 static int drugGetAddictionGvarByPid(int drugPid);
 static void dudeSetAddiction(int drugPid);
 static void dudeClearAddiction(int drugPid);
@@ -129,32 +130,32 @@ static const int _attack_anim[9] = {
 //
 // 0x5191A8
 static const int _attack_subtype[9] = {
-	ATTACK_TYPE_NONE, // 0 // None
+	ATTACK_TYPE_NONE,    // 0 // None
 	ATTACK_TYPE_UNARMED, // 1 // Punch // Brass Knuckles, Power First
 	ATTACK_TYPE_UNARMED, // 2 // Kick?
-	ATTACK_TYPE_MELEE, // 3 // Swing //  Sledgehammer (prim), Club, Knife (prim), Spear (prim), Crowbar
-	ATTACK_TYPE_MELEE, // 4 // Thrust // Sledgehammer (sec), Knife (sec), Spear (sec)
-	ATTACK_TYPE_THROW, // 5 // Throw // Rock,
-	ATTACK_TYPE_RANGED, // 6 // Single // 10mm SMG (prim), Rocket Launcher, Hunting Rifle, Plasma Rifle, Laser Pistol
-	ATTACK_TYPE_RANGED, // 7 // Burst // 10mm SMG (sec), Minigun
-	ATTACK_TYPE_RANGED, // 8 // Continous // Only: Flamer, Improved Flamer, Flame Breath
+	ATTACK_TYPE_MELEE,   // 3 // Swing //  Sledgehammer (prim), Club, Knife (prim), Spear (prim), Crowbar
+	ATTACK_TYPE_MELEE,   // 4 // Thrust // Sledgehammer (sec), Knife (sec), Spear (sec)
+	ATTACK_TYPE_THROW,   // 5 // Throw // Rock,
+	ATTACK_TYPE_RANGED,  // 6 // Single // 10mm SMG (prim), Rocket Launcher, Hunting Rifle, Plasma Rifle, Laser Pistol
+	ATTACK_TYPE_RANGED,  // 7 // Burst // 10mm SMG (sec), Minigun
+	ATTACK_TYPE_RANGED,  // 8 // Continous // Only: Flamer, Improved Flamer, Flame Breath
 };
 
 // 0x5191CC
 static DrugDescription gDrugDescriptions[ADDICTION_COUNT] = {
-	{ PROTO_ID_NUKA_COLA, GVAR_NUKA_COLA_ADDICT, 0 },
-	{ PROTO_ID_BUFF_OUT, GVAR_BUFF_OUT_ADDICT, 4 },
-	{ PROTO_ID_MENTATS, GVAR_MENTATS_ADDICT, 4 },
-	{ PROTO_ID_PSYCHO, GVAR_PSYCHO_ADDICT, 4 },
-	{ PROTO_ID_RADAWAY, GVAR_RADAWAY_ADDICT, 0 },
-	{ PROTO_ID_BEER, GVAR_ALCOHOL_ADDICT, 0 },
-	{ PROTO_ID_BOOZE, GVAR_ALCOHOL_ADDICT, 0 },
-	{ PROTO_ID_JET, GVAR_ADDICT_JET, 4 },
-	{ PROTO_ID_DECK_OF_TRAGIC_CARDS, GVAR_ADDICT_TRAGIC, 0 },
+	{PROTO_ID_NUKA_COLA, GVAR_NUKA_COLA_ADDICT, 0},
+	{PROTO_ID_BUFF_OUT, GVAR_BUFF_OUT_ADDICT, 4},
+	{PROTO_ID_MENTATS, GVAR_MENTATS_ADDICT, 4},
+	{PROTO_ID_PSYCHO, GVAR_PSYCHO_ADDICT, 4},
+	{PROTO_ID_RADAWAY, GVAR_RADAWAY_ADDICT, 0},
+	{PROTO_ID_BEER, GVAR_ALCOHOL_ADDICT, 0},
+	{PROTO_ID_BOOZE, GVAR_ALCOHOL_ADDICT, 0},
+	{PROTO_ID_JET, GVAR_ADDICT_JET, 4},
+	{PROTO_ID_DECK_OF_TRAGIC_CARDS, GVAR_ADDICT_TRAGIC, 0},
 };
 
 // 0x519238
-static char* _name_item = _aItem_1;
+static char *_name_item = _aItem_1;
 
 // item.msg
 //
@@ -165,12 +166,12 @@ static MessageList gItemsMessageList;
 static int _wd_onset;
 
 // 0x59E98C
-static Object* _wd_obj;
+static Object *_wd_obj;
 
 // 0x59E990
 static int _wd_gvar;
 
-static std::vector<BookDescription> gBooks;
+static Common::Array<BookDescription> gBooks;  // originally std::vector
 static bool gExplosionEmitsLight;
 static int gGrenadeExplosionRadius;
 static int gRocketExplosionRadius;
@@ -178,7 +179,7 @@ static int gDynamiteMinDamage;
 static int gDynamiteMaxDamage;
 static int gPlasticExplosiveMinDamage;
 static int gPlasticExplosiveMaxDamage;
-static std::vector<ExplosiveDescription> gExplosives;
+static Common::Array<ExplosiveDescription> gExplosives;  // originally std::vector
 static int gExplosionStartRotation;
 static int gExplosionEndRotation;
 static int gExplosionFrm;
@@ -229,22 +230,22 @@ void itemsExit() {
 // NOTE: Collapsed.
 //
 // 0x477154
-static int _item_load_(File* stream) {
+static int _item_load_(File *stream) {
 	return 0;
 }
 
 // NOTE: Uncollapsed 0x477154.
-int itemsLoad(File* stream) {
+int itemsLoad(File *stream) {
 	return _item_load_(stream);
 }
 
 // NOTE: Uncollapsed 0x477154.
-int itemsSave(File* stream) {
+int itemsSave(File *stream) {
 	return _item_load_(stream);
 }
 
 // 0x477158
-int itemAttemptAdd(Object* owner, Object* itemToAdd, int quantity) {
+int itemAttemptAdd(Object *owner, Object *itemToAdd, int quantity) {
 	if (quantity < 1) {
 		return -1;
 	}
@@ -263,7 +264,7 @@ int itemAttemptAdd(Object* owner, Object* itemToAdd, int quantity) {
 				return -6;
 			}
 
-			Object* containerOwner = objectGetOwner(owner);
+			Object *containerOwner = objectGetOwner(owner);
 			if (containerOwner != NULL) {
 				if (FID_TYPE(containerOwner->fid) == OBJ_TYPE_CRITTER) {
 					int weightToAdd = itemGetWeight(itemToAdd);
@@ -289,7 +290,7 @@ int itemAttemptAdd(Object* owner, Object* itemToAdd, int quantity) {
 		if (critterGetBodyType(owner) != BODY_TYPE_BIPED) {
 			// SFALL: Fix for being unable to plant items on non-biped critters
 			// with the "Barter" flag set (e.g. Skynet and Goris).
-			Proto* proto;
+			Proto *proto;
 			if (protoGetProto(owner->pid, &proto) == -1) {
 				return -5;
 			}
@@ -314,12 +315,12 @@ int itemAttemptAdd(Object* owner, Object* itemToAdd, int quantity) {
 
 // item_add
 // 0x4772B8
-int itemAdd(Object* owner, Object* itemToAdd, int quantity) {
+int itemAdd(Object *owner, Object *itemToAdd, int quantity) {
 	if (quantity < 1) {
 		return -1;
 	}
 
-	Inventory* inventory = &(owner->data.inventory);
+	Inventory *inventory = &(owner->data.inventory);
 
 	int index;
 	for (index = 0; index < inventory->length; index++) {
@@ -330,7 +331,7 @@ int itemAdd(Object* owner, Object* itemToAdd, int quantity) {
 
 	if (index == inventory->length) {
 		if (inventory->length == inventory->capacity || inventory->items == NULL) {
-			InventoryItem* inventoryItems = (InventoryItem*)internal_realloc(inventory->items, sizeof(InventoryItem) * (inventory->capacity + 10));
+			InventoryItem *inventoryItems = (InventoryItem *)internal_realloc(inventory->items, sizeof(InventoryItem) * (inventory->capacity + 10));
 			if (inventoryItems == NULL) {
 				return -1;
 			}
@@ -390,14 +391,14 @@ int itemAdd(Object* owner, Object* itemToAdd, int quantity) {
 }
 
 // 0x477490
-int itemRemove(Object* owner, Object* itemToRemove, int quantity) {
-	Inventory* inventory = &(owner->data.inventory);
-	Object* item1 = critterGetItem1(owner);
-	Object* item2 = critterGetItem2(owner);
+int itemRemove(Object *owner, Object *itemToRemove, int quantity) {
+/*	Inventory *inventory = &(owner->data.inventory);  TODO inventory.cpp
+	Object *item1 = critterGetItem1(owner);
+	Object *item2 = critterGetItem2(owner);
 
 	int index = 0;
 	for (; index < inventory->length; index++) {
-		InventoryItem* inventoryItem = &(inventory->items[index]);
+		InventoryItem *inventoryItem = &(inventory->items[index]);
 		if (inventoryItem->item == itemToRemove) {
 			break;
 		}
@@ -413,7 +414,7 @@ int itemRemove(Object* owner, Object* itemToRemove, int quantity) {
 		return -1;
 	}
 
-	InventoryItem* inventoryItem = &(inventory->items[index]);
+	InventoryItem *inventoryItem = &(inventory->items[index]);
 	if (inventoryItem->quantity < quantity) {
 		return -1;
 	}
@@ -439,7 +440,7 @@ int itemRemove(Object* owner, Object* itemToRemove, int quantity) {
 
 	if (itemToRemove->pid == PROTO_ID_STEALTH_BOY_I || itemToRemove->pid == PROTO_ID_STEALTH_BOY_II) {
 		if (itemToRemove == item1 || itemToRemove == item2) {
-			Object* owner = objectGetOwner(itemToRemove);
+			Object *owner = objectGetOwner(itemToRemove);
 			if (owner != NULL) {
 				stealthBoyTurnOff(owner, itemToRemove);
 			}
@@ -448,24 +449,24 @@ int itemRemove(Object* owner, Object* itemToRemove, int quantity) {
 
 	itemToRemove->owner = NULL;
 	itemToRemove->flags &= ~OBJECT_EQUIPPED;
-
+*/
 	return 0;
 }
 
 // NOTE: Inlined.
 //
 // 0x4775D8
-static void _item_compact(int inventoryItemIndex, Inventory* inventory) {
+static void _item_compact(int inventoryItemIndex, Inventory *inventory) {
 	for (int index = inventoryItemIndex + 1; index < inventory->length; index++) {
-		InventoryItem* prev = &(inventory->items[index - 1]);
-		InventoryItem* curr = &(inventory->items[index]);
+		InventoryItem *prev = &(inventory->items[index - 1]);
+		InventoryItem *curr = &(inventory->items[index]);
 		memcpy(prev, curr, sizeof(*prev));
 	}
 	inventory->length--;
 }
 
 // 0x477608
-static int _item_move_func(Object* a1, Object* a2, Object* a3, int quantity, bool a5) {
+static int _item_move_func(Object *a1, Object *a2, Object *a3, int quantity, bool a5) {
 	if (itemRemove(a1, a3, quantity) == -1) {
 		return -1;
 	}
@@ -479,7 +480,7 @@ static int _item_move_func(Object* a1, Object* a2, Object* a3, int quantity, boo
 
 	if (rc != 0) {
 		if (itemAdd(a1, a3, quantity) != 0) {
-			Object* owner = objectGetOwner(a1);
+			Object *owner = objectGetOwner(a1);
 			if (owner == NULL) {
 				owner = a1;
 			}
@@ -499,30 +500,30 @@ static int _item_move_func(Object* a1, Object* a2, Object* a3, int quantity, boo
 }
 
 // 0x47769C
-int itemMove(Object* from, Object* to, Object* item, int quantity) {
+int itemMove(Object *from, Object *to, Object *item, int quantity) {
 	return _item_move_func(from, to, item, quantity, false);
 }
 
 // 0x4776A4
-int itemMoveForce(Object* from, Object* to, Object* item, int quantity) {
+int itemMoveForce(Object *from, Object *to, Object *item, int quantity) {
 	return _item_move_func(from, to, item, quantity, true);
 }
 
 // 0x4776AC
-void itemMoveAll(Object* from, Object* to) {
-	Inventory* inventory = &(from->data.inventory);
+void itemMoveAll(Object *from, Object *to) {
+	Inventory *inventory = &(from->data.inventory);
 	while (inventory->length > 0) {
-		InventoryItem* inventoryItem = &(inventory->items[0]);
+		InventoryItem *inventoryItem = &(inventory->items[0]);
 		// NOTE: Uninline.
 		itemMoveForce(from, to, inventoryItem->item, inventoryItem->quantity);
 	}
 }
 
 // 0x4776E0
-int itemMoveAllHidden(Object* from, Object* to) {
-	Inventory* inventory = &(from->data.inventory);
+int itemMoveAllHidden(Object *from, Object *to) {
+	Inventory *inventory = &(from->data.inventory);
 	for (int index = 0; index < inventory->length;) {
-		InventoryItem* inventoryItem = &(inventory->items[index]);
+		InventoryItem *inventoryItem = &(inventory->items[index]);
 		// NOTE: Uninline.
 		if (itemIsHidden(inventoryItem->item)) {
 			// NOTE: Uninline.
@@ -535,14 +536,14 @@ int itemMoveAllHidden(Object* from, Object* to) {
 }
 
 // 0x477770
-int itemDestroyAllHidden(Object* owner) {
-	Inventory* inventory = &(owner->data.inventory);
+int itemDestroyAllHidden(Object *owner) {
+	Inventory *inventory = &(owner->data.inventory);
 	for (int index = 0; index < inventory->length;) {
-		InventoryItem* inventoryItem = &(inventory->items[index]);
+		InventoryItem *inventoryItem = &(inventory->items[index]);
 		// NOTE: Uninline.
 		if (itemIsHidden(inventoryItem->item)) {
 			itemRemove(owner, inventoryItem->item, 1);
-			_obj_destroy(inventoryItem->item);
+//			_obj_destroy(inventoryItem->item); TODO proto_instance
 		} else {
 			index++;
 		}
@@ -551,15 +552,15 @@ int itemDestroyAllHidden(Object* owner) {
 }
 
 // 0x477804
-int itemDropAll(Object* critter, int tile) {
+int itemDropAll(Object *critter, int tile) {
 	bool hasEquippedItems = false;
 
 	int frmId = critter->fid & 0xFFF;
 
-	Inventory* inventory = &(critter->data.inventory);
+	Inventory *inventory = &(critter->data.inventory);
 	while (inventory->length > 0) {
-		InventoryItem* inventoryItem = &(inventory->items[0]);
-		Object* item = inventoryItem->item;
+		InventoryItem *inventoryItem = &(inventory->items[0]);
+		Object *item = inventoryItem->item;
 		if (item->pid == PROTO_ID_MONEY) {
 			if (itemRemove(critter, item, inventoryItem->quantity) != 0) {
 				return -1;
@@ -567,7 +568,7 @@ int itemDropAll(Object* critter, int tile) {
 
 			if (_obj_connect(item, tile, critter->elevation, NULL) != 0) {
 				if (itemAdd(critter, item, 1) != 0) {
-					_obj_destroy(item);
+//					_obj_destroy(item); TODO proto_instance
 				}
 				return -1;
 			}
@@ -578,13 +579,13 @@ int itemDropAll(Object* critter, int tile) {
 				hasEquippedItems = true;
 
 				if ((item->flags & OBJECT_WORN) != 0) {
-					Proto* proto;
+					Proto *proto;
 					if (protoGetProto(critter->pid, &proto) == -1) {
 						return -1;
 					}
 
 					frmId = proto->fid & 0xFFF;
-					_adjust_ac(critter, item, NULL);
+//					_adjust_ac(critter, item, NULL);  TODO inventory
 				}
 			}
 
@@ -607,7 +608,7 @@ int itemDropAll(Object* critter, int tile) {
 
 				if (_obj_connect(item, tile, critter->elevation, NULL) != 0) {
 					if (itemAdd(critter, item, 1) != 0) {
-						_obj_destroy(item);
+//						_obj_destroy(item); TODO proto_instance
 					}
 					return -1;
 				}
@@ -628,7 +629,7 @@ int itemDropAll(Object* critter, int tile) {
 }
 
 // 0x4779F0
-static bool _item_identical(Object* a1, Object* a2) {
+static bool _item_identical(Object *a1, Object *a2) {
 	if (a1->pid != a2->pid) {
 		return false;
 	}
@@ -645,14 +646,14 @@ static bool _item_identical(Object* a1, Object* a2) {
 		return false;
 	}
 
-	Proto* proto;
+	Proto *proto;
 	protoGetProto(a1->pid, &proto);
 	if (proto->item.type == ITEM_TYPE_CONTAINER) {
 		return false;
 	}
 
-	Inventory* inventory1 = &(a1->data.inventory);
-	Inventory* inventory2 = &(a2->data.inventory);
+	Inventory *inventory1 = &(a1->data.inventory);
+	Inventory *inventory2 = &(a2->data.inventory);
 	if (inventory1->length != 0 || inventory2->length != 0) {
 		return false;
 	}
@@ -680,18 +681,18 @@ static bool _item_identical(Object* a1, Object* a2) {
 }
 
 // 0x477AE4
-char* itemGetName(Object* obj) {
+char *itemGetName(Object *obj) {
 	_name_item = protoGetName(obj->pid);
 	return _name_item;
 }
 
 // 0x477AF4
-char* itemGetDescription(Object* obj) {
+char *itemGetDescription(Object *obj) {
 	return protoGetDescription(obj->pid);
 }
 
 // 0x477AFC
-int itemGetType(Object* item) {
+int itemGetType(Object *item) {
 	if (item == NULL) {
 		return ITEM_TYPE_MISC;
 	}
@@ -704,7 +705,7 @@ int itemGetType(Object* item) {
 		return ITEM_TYPE_MISC;
 	}
 
-	Proto* proto;
+	Proto *proto;
 	protoGetProto(item->pid, &proto);
 
 	return proto->item.type;
@@ -713,32 +714,32 @@ int itemGetType(Object* item) {
 // NOTE: Unused.
 //
 // 0x477B4C
-int itemGetMaterial(Object* item) {
-	Proto* proto;
+int itemGetMaterial(Object *item) {
+	Proto *proto;
 	protoGetProto(item->pid, &proto);
 
 	return proto->item.material;
 }
 
 // 0x477B68
-int itemGetSize(Object* item) {
+int itemGetSize(Object *item) {
 	if (item == NULL) {
 		return 0;
 	}
 
-	Proto* proto;
+	Proto *proto;
 	protoGetProto(item->pid, &proto);
 
 	return proto->item.size;
 }
 
 // 0x477B88
-int itemGetWeight(Object* item) {
+int itemGetWeight(Object *item) {
 	if (item == NULL) {
 		return 0;
 	}
 
-	Proto* proto;
+	Proto *proto;
 	protoGetProto(item->pid, &proto);
 	int weight = proto->item.weight;
 
@@ -766,7 +767,7 @@ int itemGetWeight(Object* item) {
 			// NOTE: Uninline.
 			int ammoTypePid = weaponGetAmmoTypePid(item);
 			if (ammoTypePid != -1) {
-				Proto* ammoProto;
+				Proto *ammoProto;
 				if (protoGetProto(ammoTypePid, &ammoProto) != -1) {
 					weight += ammoProto->item.weight * ((ammoQuantity - 1) / ammoProto->item.data.ammo.quantity + 1);
 				}
@@ -788,14 +789,14 @@ int itemGetWeight(Object* item) {
 // When [item] is an ammo it's cost is calculated from ratio of fullness.
 //
 // 0x477CAC
-int itemGetCost(Object* obj) {
+int itemGetCost(Object *obj) {
 	// TODO: This function needs review. A lot of functionality is inlined.
 	// Find these functions and use them.
 	if (obj == NULL) {
 		return 0;
 	}
 
-	Proto* proto;
+	Proto *proto;
 	protoGetProto(obj->pid, &proto);
 
 	int cost = proto->item.cost;
@@ -812,7 +813,7 @@ int itemGetCost(Object* obj) {
 				// NOTE: Uninline.
 				int ammoTypePid = weaponGetAmmoTypePid(obj);
 				if (ammoTypePid != -1) {
-					Proto* ammoProto;
+					Proto *ammoProto;
 					protoGetProto(ammoTypePid, &ammoProto);
 
 					cost += ammoQuantity * ammoProto->item.cost / ammoProto->item.data.ammo.quantity;
@@ -838,18 +839,18 @@ int itemGetCost(Object* obj) {
 // Returns cost of object's items.
 //
 // 0x477DAC
-int objectGetCost(Object* obj) {
+int objectGetCost(Object *obj) {
 	if (obj == NULL) {
 		return 0;
 	}
 
 	int cost = 0;
 
-	Inventory* inventory = &(obj->data.inventory);
+	Inventory *inventory = &(obj->data.inventory);
 	for (int index = 0; index < inventory->length; index++) {
-		InventoryItem* inventoryItem = &(inventory->items[index]);
+		InventoryItem *inventoryItem = &(inventory->items[index]);
 		if (itemGetType(inventoryItem->item) == ITEM_TYPE_AMMO) {
-			Proto* proto;
+			Proto *proto;
 			protoGetProto(inventoryItem->item->pid, &proto);
 
 			// Ammo stack in inventory is a bit special. It is counted in clips,
@@ -869,22 +870,22 @@ int objectGetCost(Object* obj) {
 		}
 	}
 
-	if (FID_TYPE(obj->fid) == OBJ_TYPE_CRITTER) {
-		Object* item2 = critterGetItem2(obj);
+/*	if (FID_TYPE(obj->fid) == OBJ_TYPE_CRITTER) { TODO inventory
+		Object *item2 = critterGetItem2(obj);
 		if (item2 != NULL && (item2->flags & OBJECT_IN_RIGHT_HAND) == 0) {
 			cost += itemGetCost(item2);
 		}
 
-		Object* item1 = critterGetItem1(obj);
+		Object *item1 = critterGetItem1(obj);
 		if (item1 != NULL && (item1->flags & OBJECT_IN_LEFT_HAND) == 0) {
 			cost += itemGetCost(item1);
 		}
 
-		Object* armor = critterGetArmor(obj);
+		Object *armor = critterGetArmor(obj);
 		if (armor != NULL && (armor->flags & OBJECT_WORN) == 0) {
 			cost += itemGetCost(armor);
 		}
-	}
+	}*/
 
 	return cost;
 }
@@ -892,48 +893,48 @@ int objectGetCost(Object* obj) {
 // Calculates total weight of the items in inventory.
 //
 // 0x477E98
-int objectGetInventoryWeight(Object* obj) {
+int objectGetInventoryWeight(Object *obj) {
 	if (obj == NULL) {
 		return 0;
 	}
 
 	int weight = 0;
-
-	Inventory* inventory = &(obj->data.inventory);
+/* TODO inventory
+	Inventory *inventory = &(obj->data.inventory);
 	for (int index = 0; index < inventory->length; index++) {
-		InventoryItem* inventoryItem = &(inventory->items[index]);
-		Object* item = inventoryItem->item;
+		InventoryItem *inventoryItem = &(inventory->items[index]);
+		Object *item = inventoryItem->item;
 		weight += itemGetWeight(item) * inventoryItem->quantity;
 	}
 
 	if (FID_TYPE(obj->fid) == OBJ_TYPE_CRITTER) {
-		Object* item2 = critterGetItem2(obj);
+		Object *item2 = critterGetItem2(obj);
 		if (item2 != NULL) {
 			if ((item2->flags & OBJECT_IN_RIGHT_HAND) == 0) {
 				weight += itemGetWeight(item2);
 			}
 		}
 
-		Object* item1 = critterGetItem1(obj);
+		Object *item1 = critterGetItem1(obj);
 		if (item1 != NULL) {
 			if ((item1->flags & OBJECT_IN_LEFT_HAND) == 0) {
 				weight += itemGetWeight(item1);
 			}
 		}
 
-		Object* armor = critterGetArmor(obj);
+		Object *armor = critterGetArmor(obj);
 		if (armor != NULL) {
 			if ((armor->flags & OBJECT_WORN) == 0) {
 				weight += itemGetWeight(armor);
 			}
 		}
 	}
-
+*/
 	return weight;
 }
 
 // 0x477F3C
-bool dudeIsWeaponDisabled(Object* weapon) {
+bool dudeIsWeaponDisabled(Object *weapon) {
 	if (weapon == NULL) {
 		return false;
 	}
@@ -959,40 +960,40 @@ bool dudeIsWeaponDisabled(Object* weapon) {
 }
 
 // 0x477FB0
-int itemGetInventoryFid(Object* item) {
+int itemGetInventoryFid(Object *item) {
 	if (item == NULL) {
 		return -1;
 	}
 
-	Proto* proto;
+	Proto *proto;
 	protoGetProto(item->pid, &proto);
 
 	return proto->item.inventoryFid;
 }
 
 // 0x477FF8
-Object* critterGetWeaponForHitMode(Object* critter, int hitMode) {
+Object *critterGetWeaponForHitMode(Object *critter, int hitMode) {
 	switch (hitMode) {
 	case HIT_MODE_LEFT_WEAPON_PRIMARY:
 	case HIT_MODE_LEFT_WEAPON_SECONDARY:
 	case HIT_MODE_LEFT_WEAPON_RELOAD:
-		return critterGetItem1(critter);
+{};//		return critterGetItem1(critter); TODO inventory
 	case HIT_MODE_RIGHT_WEAPON_PRIMARY:
 	case HIT_MODE_RIGHT_WEAPON_SECONDARY:
 	case HIT_MODE_RIGHT_WEAPON_RELOAD:
-		return critterGetItem2(critter);
+{};//		return critterGetItem2(critter);
 	}
 
 	return NULL;
 }
 
 // 0x478040
-int itemGetActionPointCost(Object* obj, int hitMode, bool aiming) {
+int itemGetActionPointCost(Object *obj, int hitMode, bool aiming) {
 	if (obj == NULL) {
 		return 0;
 	}
 
-	Object* item_obj = critterGetWeaponForHitMode(obj, hitMode);
+	Object *item_obj = critterGetWeaponForHitMode(obj, hitMode);
 
 	if (item_obj != NULL && itemGetType(item_obj) != ITEM_TYPE_WEAPON) {
 		return 2;
@@ -1004,12 +1005,12 @@ int itemGetActionPointCost(Object* obj, int hitMode, bool aiming) {
 // Returns quantity of [item] in [obj]s inventory.
 //
 // 0x47808C
-int itemGetQuantity(Object* obj, Object* item) {
+int itemGetQuantity(Object *obj, Object *item) {
 	int quantity = 0;
 
-	Inventory* inventory = &(obj->data.inventory);
+	Inventory *inventory = &(obj->data.inventory);
 	for (int index = 0; index < inventory->length; index++) {
-		InventoryItem* inventoryItem = &(inventory->items[index]);
+		InventoryItem *inventoryItem = &(inventory->items[index]);
 		if (inventoryItem->item == item) {
 			quantity = inventoryItem->quantity;
 
@@ -1032,7 +1033,7 @@ int itemGetQuantity(Object* obj, Object* item) {
 // Returns true if [a1] posesses an item with 0x2000 flag.
 //
 // 0x4780E4
-int itemIsQueued(Object* obj) {
+int itemIsQueued(Object *obj) {
 	if (obj == NULL) {
 		return false;
 	}
@@ -1041,9 +1042,9 @@ int itemIsQueued(Object* obj) {
 		return true;
 	}
 
-	Inventory* inventory = &(obj->data.inventory);
+	Inventory *inventory = &(obj->data.inventory);
 	for (int index = 0; index < inventory->length; index++) {
-		InventoryItem* inventoryItem = &(inventory->items[index]);
+		InventoryItem *inventoryItem = &(inventory->items[index]);
 		if ((inventoryItem->item->flags & OBJECT_QUEUED) != 0) {
 			return true;
 		}
@@ -1059,7 +1060,7 @@ int itemIsQueued(Object* obj) {
 }
 
 // 0x478154
-Object* itemReplace(Object* owner, Object* itemToReplace, int flags) {
+Object *itemReplace(Object *owner, Object *itemToReplace, int flags) {
 	if (owner == NULL) {
 		return NULL;
 	}
@@ -1068,11 +1069,11 @@ Object* itemReplace(Object* owner, Object* itemToReplace, int flags) {
 		return NULL;
 	}
 
-	Inventory* inventory = &(owner->data.inventory);
+	Inventory *inventory = &(owner->data.inventory);
 	for (int index = 0; index < inventory->length; index++) {
-		InventoryItem* inventoryItem = &(inventory->items[index]);
+		InventoryItem *inventoryItem = &(inventory->items[index]);
 		if (_item_identical(inventoryItem->item, itemToReplace)) {
-			Object* item = inventoryItem->item;
+			Object *item = inventoryItem->item;
 			if (itemRemove(owner, item, 1) == 0) {
 				item->flags |= flags;
 				if (itemAdd(owner, item, 1) == 0) {
@@ -1081,13 +1082,13 @@ Object* itemReplace(Object* owner, Object* itemToReplace, int flags) {
 
 				item->flags &= ~flags;
 				if (itemAdd(owner, item, 1) != 0) {
-					_obj_destroy(item);
+//					_obj_destroy(item); TODO proto_instance
 				}
 			}
 		}
 
 		if (itemGetType(inventoryItem->item) == ITEM_TYPE_CONTAINER) {
-			Object* obj = itemReplace(inventoryItem->item, itemToReplace, flags);
+			Object *obj = itemReplace(inventoryItem->item, itemToReplace, flags);
 			if (obj != NULL) {
 				return obj;
 			}
@@ -1098,12 +1099,12 @@ Object* itemReplace(Object* owner, Object* itemToReplace, int flags) {
 }
 
 // 0x478244
-bool itemIsHidden(Object* item) {
+bool itemIsHidden(Object *item) {
 	if (PID_TYPE(item->pid) != OBJ_TYPE_ITEM) {
 		return false;
 	}
 
-	Proto* proto;
+	Proto *proto;
 	if (protoGetProto(item->pid, &proto) == -1) {
 		return false;
 	}
@@ -1112,12 +1113,12 @@ bool itemIsHidden(Object* item) {
 }
 
 // 0x478280
-int weaponGetAttackTypeForHitMode(Object* weapon, int hitMode) {
+int weaponGetAttackTypeForHitMode(Object *weapon, int hitMode) {
 	if (weapon == NULL) {
 		return ATTACK_TYPE_UNARMED;
 	}
 
-	Proto* proto;
+	Proto *proto;
 	protoGetProto(weapon->pid, &proto);
 
 	int index;
@@ -1131,12 +1132,12 @@ int weaponGetAttackTypeForHitMode(Object* weapon, int hitMode) {
 }
 
 // 0x4782CC
-int weaponGetSkillForHitMode(Object* weapon, int hitMode) {
+int weaponGetSkillForHitMode(Object *weapon, int hitMode) {
 	if (weapon == NULL) {
 		return SKILL_UNARMED;
 	}
 
-	Proto* proto;
+	Proto *proto;
 	protoGetProto(weapon->pid, &proto);
 
 	int index;
@@ -1165,7 +1166,7 @@ int weaponGetSkillForHitMode(Object* weapon, int hitMode) {
 // Returns skill value when critter is about to perform hitMode.
 //
 // 0x478370
-int weaponGetSkillValue(Object* critter, int hitMode) {
+int weaponGetSkillValue(Object *critter, int hitMode) {
 	if (critter == NULL) {
 		return 0;
 	}
@@ -1173,7 +1174,7 @@ int weaponGetSkillValue(Object* critter, int hitMode) {
 	int skill;
 
 	// NOTE: Uninline.
-	Object* weapon = critterGetWeaponForHitMode(critter, hitMode);
+	Object *weapon = critterGetWeaponForHitMode(critter, hitMode);
 	if (weapon != NULL) {
 		skill = weaponGetSkillForHitMode(weapon, hitMode);
 	} else {
@@ -1184,12 +1185,12 @@ int weaponGetSkillValue(Object* critter, int hitMode) {
 }
 
 // 0x4783B8
-int weaponGetDamageMinMax(Object* weapon, int* minDamagePtr, int* maxDamagePtr) {
+int weaponGetDamageMinMax(Object *weapon, int *minDamagePtr, int *maxDamagePtr) {
 	if (weapon == NULL) {
 		return -1;
 	}
 
-	Proto* proto;
+	Proto *proto;
 	protoGetProto(weapon->pid, &proto);
 
 	if (minDamagePtr != NULL) {
@@ -1204,7 +1205,7 @@ int weaponGetDamageMinMax(Object* weapon, int* minDamagePtr, int* maxDamagePtr) 
 }
 
 // 0x478448
-int weaponGetDamage(Object* critter, int hitMode) {
+int weaponGetDamage(Object *critter, int hitMode) {
 	if (critter == NULL) {
 		return 0;
 	}
@@ -1215,7 +1216,7 @@ int weaponGetDamage(Object* critter, int hitMode) {
 	int bonusDamage = 0;
 
 	// NOTE: Uninline.
-	Object* weapon = critterGetWeaponForHitMode(critter, hitMode);
+	Object *weapon = critterGetWeaponForHitMode(critter, hitMode);
 
 	if (weapon != NULL) {
 		// NOTE: Uninline.
@@ -1226,35 +1227,35 @@ int weaponGetDamage(Object* critter, int hitMode) {
 			meleeDamage = critterGetStat(critter, STAT_MELEE_DAMAGE);
 
 			// SFALL: Bonus HtH Damage fix.
-			if (damageModGetBonusHthDamageFix()) {
+/*			if (damageModGetBonusHthDamageFix()) { TODO combat
 				if (critter == gDude) {
 					// See explanation below.
 					minDamage += 2 * perkGetRank(gDude, PERK_BONUS_HTH_DAMAGE);
 				}
-			}
+			}*/
 		}
 	} else {
 		// SFALL
-		bonusDamage = unarmedGetDamage(hitMode, &minDamage, &maxDamage);
+//		bonusDamage = unarmedGetDamage(hitMode, &minDamage, &maxDamage); TODO combat
 		meleeDamage = critterGetStat(critter, STAT_MELEE_DAMAGE);
 
 		// SFALL: Bonus HtH Damage fix.
-		if (damageModGetBonusHthDamageFix()) {
+/*		if (damageModGetBonusHthDamageFix()) { TODO combat
 			if (critter == gDude) {
 				// Increase only min damage. Max damage should not be changed.
 				// It is calculated later by adding `meleeDamage` which already
 				// includes damage bonus (via `perkAddEffect`).
 				minDamage += 2 * perkGetRank(gDude, PERK_BONUS_HTH_DAMAGE);
 			}
-		}
+		}*/
 	}
 
 	return randomBetween(bonusDamage + minDamage, bonusDamage + meleeDamage + maxDamage);
 }
 
 // 0x478570
-int weaponGetDamageType(Object* critter, Object* weapon) {
-	Proto* proto;
+int weaponGetDamageType(Object *critter, Object *weapon) {
+	Proto *proto;
 
 	if (weapon != NULL) {
 		protoGetProto(weapon->pid, &proto);
@@ -1270,8 +1271,8 @@ int weaponGetDamageType(Object* critter, Object* weapon) {
 }
 
 // 0x478598
-int weaponIsTwoHanded(Object* weapon) {
-	Proto* proto;
+int weaponIsTwoHanded(Object *weapon) {
+	Proto *proto;
 
 	if (weapon == NULL) {
 		return 0;
@@ -1283,14 +1284,14 @@ int weaponIsTwoHanded(Object* weapon) {
 }
 
 // 0x4785DC
-int critterGetAnimationForHitMode(Object* critter, int hitMode) {
+int critterGetAnimationForHitMode(Object *critter, int hitMode) {
 	// NOTE: Uninline.
-	Object* weapon = critterGetWeaponForHitMode(critter, hitMode);
+	Object *weapon = critterGetWeaponForHitMode(critter, hitMode);
 	return weaponGetAnimationForHitMode(weapon, hitMode);
 }
 
 // 0x47860C
-int weaponGetAnimationForHitMode(Object* weapon, int hitMode) {
+int weaponGetAnimationForHitMode(Object *weapon, int hitMode) {
 	if (hitMode == HIT_MODE_KICK || (hitMode >= FIRST_ADVANCED_KICK_HIT_MODE && hitMode <= LAST_ADVANCED_KICK_HIT_MODE)) {
 		return ANIM_KICK_LEG;
 	}
@@ -1299,7 +1300,7 @@ int weaponGetAnimationForHitMode(Object* weapon, int hitMode) {
 		return ANIM_THROW_PUNCH;
 	}
 
-	Proto* proto;
+	Proto *proto;
 	protoGetProto(weapon->pid, &proto);
 
 	int index;
@@ -1313,12 +1314,12 @@ int weaponGetAnimationForHitMode(Object* weapon, int hitMode) {
 }
 
 // 0x478674
-int ammoGetCapacity(Object* ammoOrWeapon) {
+int ammoGetCapacity(Object *ammoOrWeapon) {
 	if (ammoOrWeapon == NULL) {
 		return 0;
 	}
 
-	Proto* proto;
+	Proto *proto;
 	protoGetProto(ammoOrWeapon->pid, &proto);
 
 	if (proto->item.type == ITEM_TYPE_AMMO) {
@@ -1329,12 +1330,12 @@ int ammoGetCapacity(Object* ammoOrWeapon) {
 }
 
 // 0x4786A0
-int ammoGetQuantity(Object* ammoOrWeapon) {
+int ammoGetQuantity(Object *ammoOrWeapon) {
 	if (ammoOrWeapon == NULL) {
 		return 0;
 	}
 
-	Proto* proto;
+	Proto *proto;
 	protoGetProto(ammoOrWeapon->pid, &proto);
 
 	// NOTE: Looks like the condition jumps were erased during compilation only
@@ -1348,8 +1349,8 @@ int ammoGetQuantity(Object* ammoOrWeapon) {
 }
 
 // 0x4786C8
-int ammoGetCaliber(Object* ammoOrWeapon) {
-	Proto* proto;
+int ammoGetCaliber(Object *ammoOrWeapon) {
+	Proto *proto;
 
 	if (ammoOrWeapon == NULL) {
 		return 0;
@@ -1367,7 +1368,7 @@ int ammoGetCaliber(Object* ammoOrWeapon) {
 }
 
 // 0x478714
-void ammoSetQuantity(Object* ammoOrWeapon, int quantity) {
+void ammoSetQuantity(Object *ammoOrWeapon, int quantity) {
 	if (ammoOrWeapon == NULL) {
 		return;
 	}
@@ -1378,7 +1379,7 @@ void ammoSetQuantity(Object* ammoOrWeapon, int quantity) {
 		quantity = capacity;
 	}
 
-	Proto* proto;
+	Proto *proto;
 	protoGetProto(ammoOrWeapon->pid, &proto);
 
 	if (proto->item.type == ITEM_TYPE_AMMO) {
@@ -1389,7 +1390,7 @@ void ammoSetQuantity(Object* ammoOrWeapon, int quantity) {
 }
 
 // 0x478768
-int weaponAttemptReload(Object* critter, Object* weapon) {
+int weaponAttemptReload(Object *critter, Object *weapon) {
 	// NOTE: Uninline.
 	int quantity = ammoGetQuantity(weapon);
 	int capacity = ammoGetCapacity(weapon);
@@ -1400,7 +1401,7 @@ int weaponAttemptReload(Object* critter, Object* weapon) {
 	if (weapon->pid != PROTO_ID_SOLAR_SCORCHER) {
 		int inventoryItemIndex = -1;
 		for (;;) {
-			Object* ammo = _inven_find_type(critter, ITEM_TYPE_AMMO, &inventoryItemIndex);
+			Object *ammo = NULL; // _inven_find_type(critter, ITEM_TYPE_AMMO, &inventoryItemIndex);  TODO inventory
 			if (ammo == NULL) {
 				break;
 			}
@@ -1409,7 +1410,7 @@ int weaponAttemptReload(Object* critter, Object* weapon) {
 				if (weaponCanBeReloadedWith(weapon, ammo) != 0) {
 					int rc = weaponReload(weapon, ammo);
 					if (rc == 0) {
-						_obj_destroy(ammo);
+//						_obj_destroy(ammo); TODO proto_instance
 					}
 
 					if (rc == -1) {
@@ -1423,7 +1424,7 @@ int weaponAttemptReload(Object* critter, Object* weapon) {
 
 		inventoryItemIndex = -1;
 		for (;;) {
-			Object* ammo = _inven_find_type(critter, ITEM_TYPE_AMMO, &inventoryItemIndex);
+			Object *ammo = NULL; //_inven_find_type(critter, ITEM_TYPE_AMMO, &inventoryItemIndex); TODO inventory
 			if (ammo == NULL) {
 				break;
 			}
@@ -1431,7 +1432,7 @@ int weaponAttemptReload(Object* critter, Object* weapon) {
 			if (weaponCanBeReloadedWith(weapon, ammo) != 0) {
 				int rc = weaponReload(weapon, ammo);
 				if (rc == 0) {
-					_obj_destroy(ammo);
+//					_obj_destroy(ammo); TODO proto_instance
 				}
 
 				if (rc == -1) {
@@ -1453,7 +1454,7 @@ int weaponAttemptReload(Object* critter, Object* weapon) {
 // Checks if weapon can be reloaded with the specified ammo.
 //
 // 0x478874
-bool weaponCanBeReloadedWith(Object* weapon, Object* ammo) {
+bool weaponCanBeReloadedWith(Object *weapon, Object *ammo) {
 	if (weapon->pid == PROTO_ID_SOLAR_SCORCHER) {
 		// Check light level to recharge solar scorcher.
 		if (lightGetAmbientIntensity() > LIGHT_INTENSITY_MAX * 0.95) {
@@ -1462,8 +1463,8 @@ bool weaponCanBeReloadedWith(Object* weapon, Object* ammo) {
 
 		// There is not enough light to recharge this item.
 		MessageListItem messageListItem;
-		char* msg = getmsg(&gItemsMessageList, &messageListItem, 500);
-		displayMonitorAddMessage(msg);
+		char *msg = getmsg(&gItemsMessageList, &messageListItem, 500);
+//		displayMonitorAddMessage(msg); TODO display_monitor
 
 		return false;
 	}
@@ -1472,10 +1473,10 @@ bool weaponCanBeReloadedWith(Object* weapon, Object* ammo) {
 		return false;
 	}
 
-	Proto* weaponProto;
+	Proto *weaponProto;
 	protoGetProto(weapon->pid, &weaponProto);
 
-	Proto* ammoProto;
+	Proto *ammoProto;
 	protoGetProto(ammo->pid, &ammoProto);
 
 	if (weaponProto->item.type != ITEM_TYPE_WEAPON) {
@@ -1502,7 +1503,7 @@ bool weaponCanBeReloadedWith(Object* weapon, Object* ammo) {
 }
 
 // 0x478918
-int weaponReload(Object* weapon, Object* ammo) {
+int weaponReload(Object *weapon, Object *ammo) {
 	if (!weaponCanBeReloadedWith(weapon, ammo)) {
 		return -1;
 	}
@@ -1542,15 +1543,15 @@ int weaponReload(Object* weapon, Object* ammo) {
 }
 
 // 0x478A1C
-int weaponGetRange(Object* critter, int hitMode) {
+int weaponGetRange(Object *critter, int hitMode) {
 	int range;
 	int effectiveStrength;
 
 	// NOTE: Uninline.
-	Object* weapon = critterGetWeaponForHitMode(critter, hitMode);
+	Object *weapon = critterGetWeaponForHitMode(critter, hitMode);
 
 	if (weapon != NULL && hitMode != 4 && hitMode != 5 && (hitMode < 8 || hitMode > 19)) {
-		Proto* proto;
+		Proto *proto;
 		protoGetProto(weapon->pid, &proto);
 		if (hitMode == HIT_MODE_LEFT_WEAPON_PRIMARY || hitMode == HIT_MODE_RIGHT_WEAPON_PRIMARY) {
 			range = proto->item.data.weapon.maxRange1;
@@ -1590,15 +1591,15 @@ int weaponGetRange(Object* critter, int hitMode) {
 // Returns action points required for hit mode.
 //
 // 0x478B24
-int weaponGetActionPointCost(Object* critter, int hitMode, bool aiming) {
+int weaponGetActionPointCost(Object *critter, int hitMode, bool aiming) {
 	int actionPoints;
 
 	// NOTE: Uninline.
-	Object* weapon = critterGetWeaponForHitMode(critter, hitMode);
+	Object *weapon = critterGetWeaponForHitMode(critter, hitMode);
 
 	if (hitMode == HIT_MODE_LEFT_WEAPON_RELOAD || hitMode == HIT_MODE_RIGHT_WEAPON_RELOAD) {
 		if (weapon != NULL) {
-			Proto* proto;
+			Proto *proto;
 			protoGetProto(weapon->pid, &proto);
 			if (proto->item.data.weapon.perk == PERK_WEAPON_FAST_RELOAD) {
 				return 1;
@@ -1613,7 +1614,7 @@ int weaponGetActionPointCost(Object* critter, int hitMode, bool aiming) {
 
 	// CE: The entire function is different in Sfall.
 	if (isUnarmedHitMode(hitMode)) {
-		actionPoints = unarmedGetActionPointCost(hitMode);
+//		actionPoints = unarmedGetActionPointCost(hitMode); TODO combat
 	} else {
 		if (weapon != NULL) {
 			if (hitMode == HIT_MODE_LEFT_WEAPON_PRIMARY || hitMode == HIT_MODE_RIGHT_WEAPON_PRIMARY) {
@@ -1664,79 +1665,79 @@ int weaponGetActionPointCost(Object* critter, int hitMode, bool aiming) {
 }
 
 // 0x478D08
-int weaponGetMinStrengthRequired(Object* weapon) {
+int weaponGetMinStrengthRequired(Object *weapon) {
 	if (weapon == NULL) {
 		return -1;
 	}
 
-	Proto* proto;
+	Proto *proto;
 	protoGetProto(weapon->pid, &proto);
 
 	return proto->item.data.weapon.minStrength;
 }
 
 // 0x478D30
-int weaponGetCriticalFailureType(Object* weapon) {
+int weaponGetCriticalFailureType(Object *weapon) {
 	if (weapon == NULL) {
 		return -1;
 	}
 
-	Proto* proto;
+	Proto *proto;
 	protoGetProto(weapon->pid, &proto);
 
 	return proto->item.data.weapon.criticalFailureType;
 }
 
 // 0x478D58
-int weaponGetPerk(Object* weapon) {
+int weaponGetPerk(Object *weapon) {
 	if (weapon == NULL) {
 		return -1;
 	}
 
-	Proto* proto;
+	Proto *proto;
 	protoGetProto(weapon->pid, &proto);
 
 	return proto->item.data.weapon.perk;
 }
 
 // 0x478D80
-int weaponGetBurstRounds(Object* weapon) {
+int weaponGetBurstRounds(Object *weapon) {
 	if (weapon == NULL) {
 		return -1;
 	}
 
-	Proto* proto;
+	Proto *proto;
 	protoGetProto(weapon->pid, &proto);
 
 	return proto->item.data.weapon.rounds;
 }
 
 // 0x478DA8
-int weaponGetAnimationCode(Object* weapon) {
+int weaponGetAnimationCode(Object *weapon) {
 	if (weapon == NULL) {
 		return -1;
 	}
 
-	Proto* proto;
+	Proto *proto;
 	protoGetProto(weapon->pid, &proto);
 
 	return proto->item.data.weapon.animationCode;
 }
 
 // 0x478DD0
-int weaponGetProjectilePid(Object* weapon) {
+int weaponGetProjectilePid(Object *weapon) {
 	if (weapon == NULL) {
 		return -1;
 	}
 
-	Proto* proto;
+	Proto *proto;
 	protoGetProto(weapon->pid, &proto);
 
 	return proto->item.data.weapon.projectilePid;
 }
 
 // 0x478DF8
-int weaponGetAmmoTypePid(Object* weapon) {
+int weaponGetAmmoTypePid(Object *weapon) {
 	if (weapon == NULL) {
 		return -1;
 	}
@@ -1749,19 +1750,19 @@ int weaponGetAmmoTypePid(Object* weapon) {
 }
 
 // 0x478E18
-char weaponGetSoundId(Object* weapon) {
+char weaponGetSoundId(Object *weapon) {
 	if (weapon == NULL) {
 		return '\0';
 	}
 
-	Proto* proto;
+	Proto *proto;
 	protoGetProto(weapon->pid, &proto);
 
 	return proto->item.data.weapon.soundCode & 0xFF;
 }
 
 // 0x478E5C
-bool critterCanAim(Object* critter, int hitMode) {
+bool critterCanAim(Object *critter, int hitMode) {
 	if (critter == gDude && traitIsSelected(TRAIT_FAST_SHOT)) {
 		return false;
 	}
@@ -1773,17 +1774,14 @@ bool critterCanAim(Object* critter, int hitMode) {
 	}
 
 	// NOTE: Uninline.
-	Object* weapon = critterGetWeaponForHitMode(critter, hitMode);
+	Object *weapon = critterGetWeaponForHitMode(critter, hitMode);
 	int damageType = weaponGetDamageType(critter, weapon);
 
-	return damageType != DAMAGE_TYPE_EXPLOSION
-	       && damageType != DAMAGE_TYPE_FIRE
-	       && damageType != DAMAGE_TYPE_EMP
-	       && (damageType != DAMAGE_TYPE_PLASMA || anim != ANIM_THROW_ANIM);
+	return damageType != DAMAGE_TYPE_EXPLOSION && damageType != DAMAGE_TYPE_FIRE && damageType != DAMAGE_TYPE_EMP && (damageType != DAMAGE_TYPE_PLASMA || anim != ANIM_THROW_ANIM);
 }
 
 // 0x478EF4
-int weaponCanBeUnloaded(Object* weapon) {
+int weaponCanBeUnloaded(Object *weapon) {
 	if (weapon == NULL) {
 		return false;
 	}
@@ -1816,7 +1814,7 @@ int weaponCanBeUnloaded(Object* weapon) {
 }
 
 // 0x478F80
-Object* weaponUnload(Object* weapon) {
+Object *weaponUnload(Object *weapon) {
 	if (!weaponCanBeUnloaded(weapon)) {
 		return NULL;
 	}
@@ -1827,7 +1825,7 @@ Object* weaponUnload(Object* weapon) {
 		return NULL;
 	}
 
-	Object* ammo;
+	Object *ammo;
 	if (objectCreateWithPid(&ammo, ammoTypePid) != 0) {
 		return NULL;
 	}
@@ -1854,12 +1852,12 @@ Object* weaponUnload(Object* weapon) {
 }
 
 // 0x47905C
-int weaponGetPrimaryActionPointCost(Object* weapon) {
+int weaponGetPrimaryActionPointCost(Object *weapon) {
 	if (weapon == NULL) {
 		return -1;
 	}
 
-	Proto* proto;
+	Proto *proto;
 	protoGetProto(weapon->pid, &proto);
 
 	return proto->item.data.weapon.actionPointCost1;
@@ -1868,19 +1866,19 @@ int weaponGetPrimaryActionPointCost(Object* weapon) {
 // NOTE: Inlined.
 //
 // 0x479084
-int weaponGetSecondaryActionPointCost(Object* weapon) {
+int weaponGetSecondaryActionPointCost(Object *weapon) {
 	if (weapon == NULL) {
 		return -1;
 	}
 
-	Proto* proto;
+	Proto *proto;
 	protoGetProto(weapon->pid, &proto);
 
 	return proto->item.data.weapon.actionPointCost2;
 }
 
 // 0x4790AC
-int _item_w_compute_ammo_cost(Object* obj, int* inout_a2) {
+int _item_w_compute_ammo_cost(Object *obj, int *inout_a2) {
 	int pid;
 
 	if (inout_a2 == NULL) {
@@ -1900,13 +1898,13 @@ int _item_w_compute_ammo_cost(Object* obj, int* inout_a2) {
 }
 
 // 0x4790E8
-bool weaponIsGrenade(Object* weapon) {
+bool weaponIsGrenade(Object *weapon) {
 	int damageType = weaponGetDamageType(NULL, weapon);
 	return damageType == DAMAGE_TYPE_EXPLOSION || damageType == DAMAGE_TYPE_PLASMA || damageType == DAMAGE_TYPE_EMP;
 }
 
 // 0x47910C
-int weaponGetDamageRadius(Object* weapon, int hitMode) {
+int weaponGetDamageRadius(Object *weapon, int hitMode) {
 	int attackType = weaponGetAttackTypeForHitMode(weapon, hitMode);
 	int anim = weaponGetAnimationForHitMode(weapon, hitMode);
 	int damageType = weaponGetDamageType(NULL, weapon);
@@ -1928,7 +1926,7 @@ int weaponGetDamageRadius(Object* weapon, int hitMode) {
 }
 
 // 0x479180
-int weaponGetGrenadeExplosionRadius(Object* weapon) {
+int weaponGetGrenadeExplosionRadius(Object *weapon) {
 	// SFALL
 	if (gExplosionRadius != -1) {
 		return gExplosionRadius;
@@ -1938,7 +1936,7 @@ int weaponGetGrenadeExplosionRadius(Object* weapon) {
 }
 
 // 0x479188
-int weaponGetRocketExplosionRadius(Object* weapon) {
+int weaponGetRocketExplosionRadius(Object *weapon) {
 	// SFALL
 	if (gExplosionRadius != -1) {
 		return gExplosionRadius;
@@ -1948,14 +1946,14 @@ int weaponGetRocketExplosionRadius(Object* weapon) {
 }
 
 // 0x479190
-int weaponGetAmmoArmorClassModifier(Object* weapon) {
+int weaponGetAmmoArmorClassModifier(Object *weapon) {
 	// NOTE: Uninline.
 	int ammoTypePid = weaponGetAmmoTypePid(weapon);
 	if (ammoTypePid == -1) {
 		return 0;
 	}
 
-	Proto* proto;
+	Proto *proto;
 	if (protoGetProto(ammoTypePid, &proto) == -1) {
 		return 0;
 	}
@@ -1964,14 +1962,14 @@ int weaponGetAmmoArmorClassModifier(Object* weapon) {
 }
 
 // 0x4791E0
-int weaponGetAmmoDamageResistanceModifier(Object* weapon) {
+int weaponGetAmmoDamageResistanceModifier(Object *weapon) {
 	// NOTE: Uninline.
 	int ammoTypePid = weaponGetAmmoTypePid(weapon);
 	if (ammoTypePid == -1) {
 		return 0;
 	}
 
-	Proto* proto;
+	Proto *proto;
 	if (protoGetProto(ammoTypePid, &proto) == -1) {
 		return 0;
 	}
@@ -1980,14 +1978,14 @@ int weaponGetAmmoDamageResistanceModifier(Object* weapon) {
 }
 
 // 0x479230
-int weaponGetAmmoDamageMultiplier(Object* weapon) {
+int weaponGetAmmoDamageMultiplier(Object *weapon) {
 	// NOTE: Uninline.
 	int ammoTypePid = weaponGetAmmoTypePid(weapon);
 	if (ammoTypePid == -1) {
 		return 1;
 	}
 
-	Proto* proto;
+	Proto *proto;
 	if (protoGetProto(ammoTypePid, &proto) == -1) {
 		return 1;
 	}
@@ -1996,14 +1994,14 @@ int weaponGetAmmoDamageMultiplier(Object* weapon) {
 }
 
 // 0x479294
-int weaponGetAmmoDamageDivisor(Object* weapon) {
+int weaponGetAmmoDamageDivisor(Object *weapon) {
 	// NOTE: Uninline.
 	int ammoTypePid = weaponGetAmmoTypePid(weapon);
 	if (ammoTypePid == -1) {
 		return 1;
 	}
 
-	Proto* proto;
+	Proto *proto;
 	if (protoGetProto(ammoTypePid, &proto) == -1) {
 		return 1;
 	}
@@ -2012,91 +2010,91 @@ int weaponGetAmmoDamageDivisor(Object* weapon) {
 }
 
 // 0x4792F8
-int armorGetArmorClass(Object* armor) {
+int armorGetArmorClass(Object *armor) {
 	if (armor == NULL) {
 		return 0;
 	}
 
-	Proto* proto;
+	Proto *proto;
 	protoGetProto(armor->pid, &proto);
 
 	return proto->item.data.armor.armorClass;
 }
 
 // 0x479318
-int armorGetDamageResistance(Object* armor, int damageType) {
+int armorGetDamageResistance(Object *armor, int damageType) {
 	if (armor == NULL) {
 		return 0;
 	}
 
-	Proto* proto;
+	Proto *proto;
 	protoGetProto(armor->pid, &proto);
 
 	return proto->item.data.armor.damageResistance[damageType];
 }
 
 // 0x479338
-int armorGetDamageThreshold(Object* armor, int damageType) {
+int armorGetDamageThreshold(Object *armor, int damageType) {
 	if (armor == NULL) {
 		return 0;
 	}
 
-	Proto* proto;
+	Proto *proto;
 	protoGetProto(armor->pid, &proto);
 
 	return proto->item.data.armor.damageThreshold[damageType];
 }
 
 // 0x479358
-int armorGetPerk(Object* armor) {
+int armorGetPerk(Object *armor) {
 	if (armor == NULL) {
 		return -1;
 	}
 
-	Proto* proto;
+	Proto *proto;
 	protoGetProto(armor->pid, &proto);
 
 	return proto->item.data.armor.perk;
 }
 
 // 0x479380
-int armorGetMaleFid(Object* armor) {
+int armorGetMaleFid(Object *armor) {
 	if (armor == NULL) {
 		return -1;
 	}
 
-	Proto* proto;
+	Proto *proto;
 	protoGetProto(armor->pid, &proto);
 
 	return proto->item.data.armor.maleFid;
 }
 
 // 0x4793A8
-int armorGetFemaleFid(Object* armor) {
+int armorGetFemaleFid(Object *armor) {
 	if (armor == NULL) {
 		return -1;
 	}
 
-	Proto* proto;
+	Proto *proto;
 	protoGetProto(armor->pid, &proto);
 
 	return proto->item.data.armor.femaleFid;
 }
 
 // 0x4793D0
-int miscItemGetMaxCharges(Object* miscItem) {
+int miscItemGetMaxCharges(Object *miscItem) {
 	if (miscItem == NULL) {
 		return 0;
 	}
 
-	Proto* proto;
+	Proto *proto;
 	protoGetProto(miscItem->pid, &proto);
 
 	return proto->item.data.misc.charges;
 }
 
 // 0x4793F0
-int miscItemGetCharges(Object* miscItem) {
+int miscItemGetCharges(Object *miscItem) {
 	if (miscItem == NULL) {
 		return 0;
 	}
@@ -2105,7 +2103,7 @@ int miscItemGetCharges(Object* miscItem) {
 }
 
 // 0x4793F8
-int miscItemSetCharges(Object* miscItem, int charges) {
+int miscItemSetCharges(Object *miscItem, int charges) {
 	// NOTE: Uninline.
 	int maxCharges = miscItemGetMaxCharges(miscItem);
 
@@ -2121,12 +2119,12 @@ int miscItemSetCharges(Object* miscItem, int charges) {
 // NOTE: Unused.
 //
 // 0x479434
-int miscItemGetPowerType(Object* miscItem) {
+int miscItemGetPowerType(Object *miscItem) {
 	if (miscItem == NULL) {
 		return 0;
 	}
 
-	Proto* proto;
+	Proto *proto;
 	protoGetProto(miscItem->pid, &proto);
 
 	return proto->item.data.misc.powerType;
@@ -2135,36 +2133,33 @@ int miscItemGetPowerType(Object* miscItem) {
 // NOTE: Inlined.
 //
 // 0x479454
-int miscItemGetPowerTypePid(Object* miscItem) {
+int miscItemGetPowerTypePid(Object *miscItem) {
 	if (miscItem == NULL) {
 		return -1;
 	}
 
-	Proto* proto;
+	Proto *proto;
 	protoGetProto(miscItem->pid, &proto);
 
 	return proto->item.data.misc.powerTypePid;
 }
 
 // 0x47947C
-bool miscItemIsConsumable(Object* miscItem) {
+bool miscItemIsConsumable(Object *miscItem) {
 	if (miscItem == NULL) {
 		return false;
 	}
 
-	Proto* proto;
+	Proto *proto;
 	protoGetProto(miscItem->pid, &proto);
 
 	return proto->item.data.misc.charges != 0;
 }
 
 // 0x4794A4
-int _item_m_use_charged_item(Object* critter, Object* miscItem) {
+int _item_m_use_charged_item(Object *critter, Object *miscItem) {
 	int pid = miscItem->pid;
-	if (pid == PROTO_ID_STEALTH_BOY_I
-	        || pid == PROTO_ID_GEIGER_COUNTER_I
-	        || pid == PROTO_ID_STEALTH_BOY_II
-	        || pid == PROTO_ID_GEIGER_COUNTER_II) {
+	if (pid == PROTO_ID_STEALTH_BOY_I || pid == PROTO_ID_GEIGER_COUNTER_I || pid == PROTO_ID_STEALTH_BOY_II || pid == PROTO_ID_GEIGER_COUNTER_II) {
 		// NOTE: Uninline.
 		bool isOn = miscItemIsOn(miscItem);
 
@@ -2176,16 +2171,16 @@ int _item_m_use_charged_item(Object* critter, Object* miscItem) {
 	} else if (pid == PROTO_ID_MOTION_SENSOR) {
 		// NOTE: Uninline.
 		if (miscItemConsumeCharge(miscItem) == 0) {
-			automapShow(true, true);
+//			automapShow(true, true); TODO automap
 		} else {
 			MessageListItem messageListItem;
 			// %s has no charges left.
 			messageListItem.num = 5;
 			if (messageListGetItem(&gItemsMessageList, &messageListItem)) {
 				char text[80];
-				const char* itemName = objectGetName(miscItem);
+				const char *itemName = objectGetName(miscItem);
 				snprintf(text, sizeof(text), messageListItem.text, itemName);
-				displayMonitorAddMessage(text);
+//				displayMonitorAddMessage(text); TODO display_monitor
 			}
 		}
 	}
@@ -2194,7 +2189,7 @@ int _item_m_use_charged_item(Object* critter, Object* miscItem) {
 }
 
 // 0x4795A4
-int miscItemConsumeCharge(Object* item) {
+int miscItemConsumeCharge(Object *item) {
 	// NOTE: Uninline.
 	int charges = miscItemGetCharges(item);
 	if (charges <= 0) {
@@ -2208,7 +2203,7 @@ int miscItemConsumeCharge(Object* item) {
 }
 
 // 0x4795F0
-int miscItemTrickleEventProcess(Object* item, void* data) {
+int miscItemTrickleEventProcess(Object *item, void *data) {
 	// NOTE: Uninline.
 	if (miscItemConsumeCharge(item) == 0) {
 		int delay;
@@ -2220,16 +2215,16 @@ int miscItemTrickleEventProcess(Object* item, void* data) {
 
 		queueAddEvent(delay, item, NULL, EVENT_TYPE_ITEM_TRICKLE);
 	} else {
-		Object* critter = objectGetOwner(item);
+		Object *critter = objectGetOwner(item);
 		if (critter == gDude) {
 			MessageListItem messageListItem;
 			// %s has no charges left.
 			messageListItem.num = 5;
 			if (messageListGetItem(&gItemsMessageList, &messageListItem)) {
 				char text[80];
-				const char* itemName = objectGetName(item);
+				const char *itemName = objectGetName(item);
 				snprintf(text, sizeof(text), messageListItem.text, itemName);
-				displayMonitorAddMessage(text);
+//				displayMonitorAddMessage(text); TODO display_monitor
 			}
 		}
 		miscItemTurnOff(item);
@@ -2239,7 +2234,7 @@ int miscItemTrickleEventProcess(Object* item, void* data) {
 }
 
 // 0x4796A8
-bool miscItemIsOn(Object* obj) {
+bool miscItemIsOn(Object *obj) {
 	if (obj == NULL) {
 		return false;
 	}
@@ -2254,16 +2249,16 @@ bool miscItemIsOn(Object* obj) {
 // Turns on geiger counter or stealth boy.
 //
 // 0x4796D0
-int miscItemTurnOn(Object* item) {
+int miscItemTurnOn(Object *item) {
 	MessageListItem messageListItem;
 	char text[80];
 
-	Object* critter = objectGetOwner(item);
+	Object *critter = objectGetOwner(item);
 	if (critter == NULL) {
 		// This item can only be used from the interface bar.
 		messageListItem.num = 9;
 		if (messageListGetItem(&gItemsMessageList, &messageListItem)) {
-			displayMonitorAddMessage(messageListItem.text);
+//			displayMonitorAddMessage(messageListItem.text); TODO display_monitor
 		}
 
 		return -1;
@@ -2274,9 +2269,9 @@ int miscItemTurnOn(Object* item) {
 		if (critter == gDude) {
 			messageListItem.num = 5;
 			if (messageListGetItem(&gItemsMessageList, &messageListItem)) {
-				char* name = objectGetName(item);
+				char *name = objectGetName(item);
 				snprintf(text, sizeof(text), messageListItem.text, name);
-				displayMonitorAddMessage(text);
+//				displayMonitorAddMessage(text); TODO display_monitor
 			}
 		}
 
@@ -2300,9 +2295,9 @@ int miscItemTurnOn(Object* item) {
 		// %s is on.
 		messageListItem.num = 6;
 		if (messageListGetItem(&gItemsMessageList, &messageListItem)) {
-			char* name = objectGetName(item);
+			char *name = objectGetName(item);
 			snprintf(text, sizeof(text), messageListItem.text, name);
-			displayMonitorAddMessage(text);
+//			displayMonitorAddMessage(text); TODO display_monitor
 		}
 
 		if (item->pid == PROTO_ID_GEIGER_COUNTER_II) {
@@ -2311,7 +2306,7 @@ int miscItemTurnOn(Object* item) {
 			if (messageListGetItem(&gItemsMessageList, &messageListItem)) {
 				int radiation = critterGetRadiation(critter);
 				snprintf(text, sizeof(text), messageListItem.text, radiation);
-				displayMonitorAddMessage(text);
+//				displayMonitorAddMessage(text); TODO display_monitor
 			}
 		}
 	}
@@ -2322,8 +2317,8 @@ int miscItemTurnOn(Object* item) {
 // Turns off geiger counter or stealth boy.
 //
 // 0x479898
-int miscItemTurnOff(Object* item) {
-	Object* owner = objectGetOwner(item);
+int miscItemTurnOff(Object *item) {
+	Object *owner = objectGetOwner(item);
 
 	queueRemoveEventsByType(item, EVENT_TYPE_ITEM_TRICKLE);
 
@@ -2338,7 +2333,7 @@ int miscItemTurnOff(Object* item) {
 	}
 
 	if (owner == gDude) {
-		interfaceUpdateItems(false, INTERFACE_ITEM_ACTION_DEFAULT, INTERFACE_ITEM_ACTION_DEFAULT);
+//		interfaceUpdateItems(false, INTERFACE_ITEM_ACTION_DEFAULT, INTERFACE_ITEM_ACTION_DEFAULT); TODO interface
 	}
 
 	if (owner == gDude) {
@@ -2346,10 +2341,10 @@ int miscItemTurnOff(Object* item) {
 		MessageListItem messageListItem;
 		messageListItem.num = 7;
 		if (messageListGetItem(&gItemsMessageList, &messageListItem)) {
-			const char* name = objectGetName(item);
+			const char *name = objectGetName(item);
 			char text[80];
 			snprintf(text, sizeof(text), messageListItem.text, name);
-			displayMonitorAddMessage(text);
+//			displayMonitorAddMessage(text); TODO display_monitor
 		}
 	}
 
@@ -2357,7 +2352,7 @@ int miscItemTurnOff(Object* item) {
 }
 
 // 0x479954
-int _item_m_turn_off_from_queue(Object* obj, void* data) {
+int _item_m_turn_off_from_queue(Object *obj, void *data) {
 	miscItemTurnOff(obj);
 	return 1;
 }
@@ -2365,7 +2360,7 @@ int _item_m_turn_off_from_queue(Object* obj, void* data) {
 // NOTE: Inlined.
 //
 // 0x479960
-static int stealthBoyTurnOn(Object* object) {
+static int stealthBoyTurnOn(Object *object) {
 	if ((object->flags & OBJECT_TRANS_GLASS) != 0) {
 		return -1;
 	}
@@ -2380,13 +2375,14 @@ static int stealthBoyTurnOn(Object* object) {
 }
 
 // 0x479998
-static int stealthBoyTurnOff(Object* critter, Object* item) {
-	Object* item1 = critterGetItem1(critter);
+static int stealthBoyTurnOff(Object *critter, Object *item) {
+/* TODO inventory
+	Object *item1 = critterGetItem1(critter);
 	if (item1 != NULL && item1 != item && item1->pid == PROTO_ID_STEALTH_BOY_II) {
 		return -1;
 	}
 
-	Object* item2 = critterGetItem2(critter);
+	Object *item2 = critterGetItem2(critter);
 	if (item2 != NULL && item2 != item && item2->pid == PROTO_ID_STEALTH_BOY_II) {
 		return -1;
 	}
@@ -2400,33 +2396,33 @@ static int stealthBoyTurnOff(Object* critter, Object* item) {
 	Rect rect;
 	objectGetRect(critter, &rect);
 	tileWindowRefreshRect(&rect, critter->elevation);
-
+*/
 	return 0;
 }
 
 // 0x479A00
-int containerGetMaxSize(Object* container) {
+int containerGetMaxSize(Object *container) {
 	if (container == NULL) {
 		return 0;
 	}
 
-	Proto* proto;
+	Proto *proto;
 	protoGetProto(container->pid, &proto);
 
 	return proto->item.data.container.maxSize;
 }
 
 // 0x479A20
-int containerGetTotalSize(Object* container) {
+int containerGetTotalSize(Object *container) {
 	if (container == NULL) {
 		return 0;
 	}
 
 	int totalSize = 0;
 
-	Inventory* inventory = &(container->data.inventory);
+	Inventory *inventory = &(container->data.inventory);
 	for (int index = 0; index < inventory->length; index++) {
-		InventoryItem* inventoryItem = &(inventory->items[index]);
+		InventoryItem *inventoryItem = &(inventory->items[index]);
 
 		int size = itemGetSize(inventoryItem->item);
 		totalSize += inventory->items[index].quantity * size;
@@ -2436,12 +2432,12 @@ int containerGetTotalSize(Object* container) {
 }
 
 // 0x479A74
-int ammoGetArmorClassModifier(Object* armor) {
+int ammoGetArmorClassModifier(Object *armor) {
 	if (armor == NULL) {
 		return 0;
 	}
 
-	Proto* proto;
+	Proto *proto;
 	if (protoGetProto(armor->pid, &proto) == -1) {
 		return 0;
 	}
@@ -2450,12 +2446,12 @@ int ammoGetArmorClassModifier(Object* armor) {
 }
 
 // 0x479AA4
-int ammoGetDamageResistanceModifier(Object* armor) {
+int ammoGetDamageResistanceModifier(Object *armor) {
 	if (armor == NULL) {
 		return 0;
 	}
 
-	Proto* proto;
+	Proto *proto;
 	if (protoGetProto(armor->pid, &proto) == -1) {
 		return 0;
 	}
@@ -2464,12 +2460,12 @@ int ammoGetDamageResistanceModifier(Object* armor) {
 }
 
 // 0x479AD4
-int ammoGetDamageMultiplier(Object* armor) {
+int ammoGetDamageMultiplier(Object *armor) {
 	if (armor == NULL) {
 		return 0;
 	}
 
-	Proto* proto;
+	Proto *proto;
 	if (protoGetProto(armor->pid, &proto) == -1) {
 		return 0;
 	}
@@ -2478,12 +2474,12 @@ int ammoGetDamageMultiplier(Object* armor) {
 }
 
 // 0x479B04
-int ammoGetDamageDivisor(Object* armor) {
+int ammoGetDamageDivisor(Object *armor) {
 	if (armor == NULL) {
 		return 0;
 	}
 
-	Proto* proto;
+	Proto *proto;
 	if (protoGetProto(armor->pid, &proto) == -1) {
 		return 0;
 	}
@@ -2492,7 +2488,7 @@ int ammoGetDamageDivisor(Object* armor) {
 }
 
 // 0x479B44
-static int _insert_drug_effect(Object* critter, Object* item, int a3, int* stats, int* mods) {
+static int _insert_drug_effect(Object *critter, Object *item, int a3, int *stats, int *mods) {
 	int index;
 	for (index = 0; index < 3; index++) {
 		if (mods[index] != 0) {
@@ -2504,7 +2500,7 @@ static int _insert_drug_effect(Object* critter, Object* item, int a3, int* stats
 		return -1;
 	}
 
-	DrugEffectEvent* drugEffectEvent = (DrugEffectEvent*)internal_malloc(sizeof(*drugEffectEvent));
+	DrugEffectEvent *drugEffectEvent = (DrugEffectEvent *)internal_malloc(sizeof(*drugEffectEvent));
 	if (drugEffectEvent == NULL) {
 		return -1;
 	}
@@ -2532,13 +2528,13 @@ static int _insert_drug_effect(Object* critter, Object* item, int a3, int* stats
 }
 
 // 0x479C20
-static void _perform_drug_effect(Object* critter, int* stats, int* mods, bool isImmediate) {
+static void _perform_drug_effect(Object *critter, int *stats, int *mods, bool isImmediate) {
 	int v10;
 	int v11;
 	int v12;
 	MessageListItem messageListItem;
-	const char* name;
-	const char* text;
+	const char *name;
+	const char *text;
 	char v24[92]; // TODO: Size is probably wrong.
 	char str[92]; // TODO: Size is probably wrong.
 
@@ -2582,7 +2578,7 @@ static void _perform_drug_effect(Object* critter, int* stats, int* mods, bool is
 				// %s succumbs to the adverse effects of chems.
 				text = getmsg(&gItemsMessageList, &messageListItem, 600);
 				snprintf(v24, sizeof(v24), text, name);
-				_combatKillCritterOutsideCombat(critter, v24);
+//				_combatKillCritterOutsideCombat(critter, v24); TODO combat
 			}
 		}
 
@@ -2590,7 +2586,7 @@ static void _perform_drug_effect(Object* critter, int* stats, int* mods, bool is
 
 		if (critter == gDude) {
 			if (stat == STAT_CURRENT_HIT_POINTS) {
-				interfaceRenderHitPoints(true);
+//				interfaceRenderHitPoints(true); TODO interface
 			}
 
 			int after = critterGetStat(critter, stat);
@@ -2599,9 +2595,9 @@ static void _perform_drug_effect(Object* critter, int* stats, int* mods, bool is
 				// 2 - You lost %d %s.
 				messageListItem.num = after < before ? 2 : 1;
 				if (messageListGetItem(&gItemsMessageList, &messageListItem)) {
-					char* statName = statGetName(stat);
+					char *statName = statGetName(stat);
 					snprintf(str, sizeof(str), messageListItem.text, after < before ? before - after : after - before, statName);
-					displayMonitorAddMessage(str);
+//					displayMonitorAddMessage(str); TODO display_monitor
 					statsChanged = true;
 				}
 			}
@@ -2613,7 +2609,7 @@ static void _perform_drug_effect(Object* critter, int* stats, int* mods, bool is
 			// Nothing happens.
 			messageListItem.num = 10;
 			if (messageListGetItem(&gItemsMessageList, &messageListItem)) {
-				displayMonitorAddMessage(messageListItem.text);
+//				displayMonitorAddMessage(messageListItem.text); TODO display_monitor
 			}
 		}
 	} else {
@@ -2621,23 +2617,23 @@ static void _perform_drug_effect(Object* critter, int* stats, int* mods, bool is
 			// You suffer a fatal heart attack from chem overdose.
 			messageListItem.num = 4;
 			if (messageListGetItem(&gItemsMessageList, &messageListItem)) {
-				strcpy(v24, messageListItem.text);
+//				strcpy(v24, messageListItem.text);
 				// TODO: Why message is ignored?
 			}
 		} else {
 			name = critterGetName(critter);
 			// %s succumbs to the adverse effects of chems.
 			text = getmsg(&gItemsMessageList, &messageListItem, 600);
-			snprintf(v24, sizeof(v24), text, name);
+//			snprintf(v24, sizeof(v24), text, name);
 			// TODO: Why message is ignored?
 		}
 	}
 }
 
 // 0x479EE4
-static bool _drug_effect_allowed(Object* critter, int pid) {
+static bool _drug_effect_allowed(Object *critter, int pid) {
 	int index;
-	DrugDescription* drugDescription;
+	DrugDescription *drugDescription;
 	for (index = 0; index < ADDICTION_COUNT; index++) {
 		drugDescription = &(gDrugDescriptions[index]);
 		if (drugDescription->drugPid == pid) {
@@ -2655,7 +2651,7 @@ static bool _drug_effect_allowed(Object* critter, int pid) {
 
 	// TODO: Probably right, but let's check it once.
 	int count = 0;
-	DrugEffectEvent* drugEffectEvent = (DrugEffectEvent*)queueFindFirstEvent(critter, EVENT_TYPE_DRUG);
+	DrugEffectEvent *drugEffectEvent = (DrugEffectEvent *)queueFindFirstEvent(critter, EVENT_TYPE_DRUG);
 	while (drugEffectEvent != NULL) {
 		if (drugEffectEvent->drugPid == pid) {
 			count++;
@@ -2663,14 +2659,14 @@ static bool _drug_effect_allowed(Object* critter, int pid) {
 				return false;
 			}
 		}
-		drugEffectEvent = (DrugEffectEvent*)queueFindNextEvent(critter, EVENT_TYPE_DRUG);
+		drugEffectEvent = (DrugEffectEvent *)queueFindNextEvent(critter, EVENT_TYPE_DRUG);
 	}
 
 	return true;
 }
 
 // 0x479F60
-int _item_d_take_drug(Object* critter, Object* item) {
+int _item_d_take_drug(Object *critter, Object *item) {
 	if (critterIsDead(critter)) {
 		return -1;
 	}
@@ -2679,7 +2675,7 @@ int _item_d_take_drug(Object* critter, Object* item) {
 		return -1;
 	}
 
-	Proto* proto;
+	Proto *proto;
 	protoGetProto(item->pid, &proto);
 
 	if (item->pid == PROTO_ID_JET_ANTIDOTE) {
@@ -2710,8 +2706,8 @@ int _item_d_take_drug(Object* critter, Object* item) {
 		if (critter == gDude) {
 			MessageListItem messageListItem;
 			// That didn't seem to do that much.
-			char* msg = getmsg(&gItemsMessageList, &messageListItem, 50);
-			displayMonitorAddMessage(msg);
+			char *msg = getmsg(&gItemsMessageList, &messageListItem, 50);
+//			displayMonitorAddMessage(msg);  TODO display_monitor
 		}
 	}
 
@@ -2745,7 +2741,7 @@ int _item_d_take_drug(Object* critter, Object* item) {
 }
 
 // 0x47A178
-int _item_d_clear(Object* obj, void* data) {
+int _item_d_clear(Object *obj, void *data) {
 	if (objectIsPartyMember(obj)) {
 		return 0;
 	}
@@ -2756,8 +2752,8 @@ int _item_d_clear(Object* obj, void* data) {
 }
 
 // 0x47A198
-int drugEffectEventProcess(Object* obj, void* data) {
-	DrugEffectEvent* drugEffectEvent = (DrugEffectEvent*)data;
+int drugEffectEventProcess(Object *obj, void *data) {
+	DrugEffectEvent *drugEffectEvent = (DrugEffectEvent *)data;
 
 	if (obj == NULL) {
 		return 0;
@@ -2777,14 +2773,16 @@ int drugEffectEventProcess(Object* obj, void* data) {
 }
 
 // 0x47A1D0
-int drugEffectEventRead(File* stream, void** dataPtr) {
-	DrugEffectEvent* drugEffectEvent = (DrugEffectEvent*)internal_malloc(sizeof(*drugEffectEvent));
+int drugEffectEventRead(File *stream, void **dataPtr) {
+	DrugEffectEvent *drugEffectEvent = (DrugEffectEvent *)internal_malloc(sizeof(*drugEffectEvent));
 	if (drugEffectEvent == NULL) {
 		return -1;
 	}
 
-	if (fileReadInt32List(stream, drugEffectEvent->stats, 3) == -1) goto err;
-	if (fileReadInt32List(stream, drugEffectEvent->modifiers, 3) == -1) goto err;
+	if (fileReadInt32List(stream, drugEffectEvent->stats, 3) == -1)
+		goto err;
+	if (fileReadInt32List(stream, drugEffectEvent->modifiers, 3) == -1)
+		goto err;
 
 	*dataPtr = drugEffectEvent;
 	return 0;
@@ -2796,18 +2794,20 @@ err:
 }
 
 // 0x47A254
-int drugEffectEventWrite(File* stream, void* data) {
-	DrugEffectEvent* drugEffectEvent = (DrugEffectEvent*)data;
+int drugEffectEventWrite(File *stream, void *data) {
+	DrugEffectEvent *drugEffectEvent = (DrugEffectEvent *)data;
 
-	if (fileWriteInt32List(stream, drugEffectEvent->stats, 3) == -1) return -1;
-	if (fileWriteInt32List(stream, drugEffectEvent->modifiers, 3) == -1) return -1;
+	if (fileWriteInt32List(stream, drugEffectEvent->stats, 3) == -1)
+		return -1;
+	if (fileWriteInt32List(stream, drugEffectEvent->modifiers, 3) == -1)
+		return -1;
 
 	return 0;
 }
 
 // 0x47A290
-static int _insert_withdrawal(Object* obj, int a2, int duration, int perk, int pid) {
-	WithdrawalEvent* withdrawalEvent = (WithdrawalEvent*)internal_malloc(sizeof(*withdrawalEvent));
+static int _insert_withdrawal(Object *obj, int a2, int duration, int perk, int pid) {
+	WithdrawalEvent *withdrawalEvent = (WithdrawalEvent *)internal_malloc(sizeof(*withdrawalEvent));
 	if (withdrawalEvent == NULL) {
 		return -1;
 	}
@@ -2825,8 +2825,8 @@ static int _insert_withdrawal(Object* obj, int a2, int duration, int perk, int p
 }
 
 // 0x47A2FC
-int _item_wd_clear(Object* obj, void* data) {
-	WithdrawalEvent* withdrawalEvent = (WithdrawalEvent*)data;
+int _item_wd_clear(Object *obj, void *data) {
+	WithdrawalEvent *withdrawalEvent = (WithdrawalEvent *)data;
 
 	if (objectIsPartyMember(obj)) {
 		return 0;
@@ -2840,8 +2840,8 @@ int _item_wd_clear(Object* obj, void* data) {
 }
 
 // 0x47A324
-static int _item_wd_clear_all(Object* a1, void* data) {
-	WithdrawalEvent* withdrawalEvent = (WithdrawalEvent*)data;
+static int _item_wd_clear_all(Object *a1, void *data) {
+	WithdrawalEvent *withdrawalEvent = (WithdrawalEvent *)data;
 
 	if (a1 != _wd_obj) {
 		return 0;
@@ -2863,8 +2863,8 @@ static int _item_wd_clear_all(Object* a1, void* data) {
 }
 
 // 0x47A384
-int withdrawalEventProcess(Object* obj, void* data) {
-	WithdrawalEvent* withdrawalEvent = (WithdrawalEvent*)data;
+int withdrawalEventProcess(Object *obj, void *data) {
+	WithdrawalEvent *withdrawalEvent = (WithdrawalEvent *)data;
 
 	if (withdrawalEvent->field_0) {
 		performWithdrawalStart(obj, withdrawalEvent->perk, withdrawalEvent->pid);
@@ -2890,15 +2890,18 @@ int withdrawalEventProcess(Object* obj, void* data) {
 
 // read withdrawal event
 // 0x47A404
-int withdrawalEventRead(File* stream, void** dataPtr) {
-	WithdrawalEvent* withdrawalEvent = (WithdrawalEvent*)internal_malloc(sizeof(*withdrawalEvent));
+int withdrawalEventRead(File *stream, void **dataPtr) {
+	WithdrawalEvent *withdrawalEvent = (WithdrawalEvent *)internal_malloc(sizeof(*withdrawalEvent));
 	if (withdrawalEvent == NULL) {
 		return -1;
 	}
 
-	if (fileReadInt32(stream, &(withdrawalEvent->field_0)) == -1) goto err;
-	if (fileReadInt32(stream, &(withdrawalEvent->pid)) == -1) goto err;
-	if (fileReadInt32(stream, &(withdrawalEvent->perk)) == -1) goto err;
+	if (fileReadInt32(stream, &(withdrawalEvent->field_0)) == -1)
+		goto err;
+	if (fileReadInt32(stream, &(withdrawalEvent->pid)) == -1)
+		goto err;
+	if (fileReadInt32(stream, &(withdrawalEvent->perk)) == -1)
+		goto err;
 
 	*dataPtr = withdrawalEvent;
 	return 0;
@@ -2910,19 +2913,22 @@ err:
 }
 
 // 0x47A484
-int withdrawalEventWrite(File* stream, void* data) {
-	WithdrawalEvent* withdrawalEvent = (WithdrawalEvent*)data;
+int withdrawalEventWrite(File *stream, void *data) {
+	WithdrawalEvent *withdrawalEvent = (WithdrawalEvent *)data;
 
-	if (fileWriteInt32(stream, withdrawalEvent->field_0) == -1) return -1;
-	if (fileWriteInt32(stream, withdrawalEvent->pid) == -1) return -1;
-	if (fileWriteInt32(stream, withdrawalEvent->perk) == -1) return -1;
+	if (fileWriteInt32(stream, withdrawalEvent->field_0) == -1)
+		return -1;
+	if (fileWriteInt32(stream, withdrawalEvent->pid) == -1)
+		return -1;
+	if (fileWriteInt32(stream, withdrawalEvent->perk) == -1)
+		return -1;
 
 	return 0;
 }
 
 // perform_withdrawal_start
 // 0x47A4C4
-static void performWithdrawalStart(Object* obj, int perk, int pid) {
+static void performWithdrawalStart(Object *obj, int perk, int pid) {
 	if (PID_TYPE(obj->pid) != OBJ_TYPE_CRITTER) {
 		debugPrint("\nERROR: perform_withdrawal_start: Was called on non-critter!");
 		return;
@@ -2931,10 +2937,10 @@ static void performWithdrawalStart(Object* obj, int perk, int pid) {
 	perkAddEffect(obj, perk);
 
 	if (obj == gDude) {
-		char* description = perkGetDescription(perk);
+		char *description = perkGetDescription(perk);
 		// SFALL: Fix crash when description is missing.
 		if (description != NULL) {
-			displayMonitorAddMessage(description);
+//			displayMonitorAddMessage(description); TODO display_monitor
 		}
 	}
 
@@ -2954,7 +2960,7 @@ static void performWithdrawalStart(Object* obj, int perk, int pid) {
 
 // perform_withdrawal_end
 // 0x47A558
-static void performWithdrawalEnd(Object* obj, int perk) {
+static void performWithdrawalEnd(Object *obj, int perk) {
 	if (PID_TYPE(obj->pid) != OBJ_TYPE_CRITTER) {
 		debugPrint("\nERROR: perform_withdrawal_end: Was called on non-critter!");
 		return;
@@ -2966,7 +2972,7 @@ static void performWithdrawalEnd(Object* obj, int perk) {
 		MessageListItem messageListItem;
 		messageListItem.num = 3;
 		if (messageListGetItem(&gItemsMessageList, &messageListItem)) {
-			displayMonitorAddMessage(messageListItem.text);
+//			displayMonitorAddMessage(messageListItem.text); TODO display_message
 		}
 	}
 }
@@ -2974,7 +2980,7 @@ static void performWithdrawalEnd(Object* obj, int perk) {
 // 0x47A5B4
 static int drugGetAddictionGvarByPid(int drugPid) {
 	for (int index = 0; index < ADDICTION_COUNT; index++) {
-		DrugDescription* drugDescription = &(gDrugDescriptions[index]);
+		DrugDescription *drugDescription = &(gDrugDescriptions[index]);
 		if (drugDescription->drugPid == drugPid) {
 			return drugDescription->gvar;
 		}
@@ -3015,7 +3021,7 @@ static void dudeClearAddiction(int drugPid) {
 // 0x47A640
 static bool dudeIsAddicted(int drugPid) {
 	for (int index = 0; index < ADDICTION_COUNT; index++) {
-		DrugDescription* drugDescription = &(gDrugDescriptions[index]);
+		DrugDescription *drugDescription = &(gDrugDescriptions[index]);
 		if (drugPid == -1 || drugPid == drugDescription->drugPid) {
 			if (gGameGlobalVars[drugDescription->gvar] != 0) {
 				return true;
@@ -3030,13 +3036,13 @@ static bool dudeIsAddicted(int drugPid) {
 
 // item_caps_total
 // 0x47A6A8
-int itemGetTotalCaps(Object* obj) {
+int itemGetTotalCaps(Object *obj) {
 	int amount = 0;
 
-	Inventory* inventory = &(obj->data.inventory);
+	Inventory *inventory = &(obj->data.inventory);
 	for (int i = 0; i < inventory->length; i++) {
-		InventoryItem* inventoryItem = &(inventory->items[i]);
-		Object* item = inventoryItem->item;
+		InventoryItem *inventoryItem = &(inventory->items[i]);
+		Object *item = inventoryItem->item;
 
 		if (item->pid == PROTO_ID_MONEY) {
 			amount += inventoryItem->quantity;
@@ -3053,18 +3059,18 @@ int itemGetTotalCaps(Object* obj) {
 
 // item_caps_adjust
 // 0x47A6F8
-int itemCapsAdjust(Object* obj, int amount) {
+int itemCapsAdjust(Object *obj, int amount) {
 	int caps = itemGetTotalCaps(obj);
 	if (amount < 0 && caps < -amount) {
 		return -1;
 	}
 
 	if (amount <= 0 || caps != 0) {
-		Inventory* inventory = &(obj->data.inventory);
+		Inventory *inventory = &(obj->data.inventory);
 
 		for (int index = 0; index < inventory->length && amount != 0; index++) {
-			InventoryItem* inventoryItem = &(inventory->items[index]);
-			Object* item = inventoryItem->item;
+			InventoryItem *inventoryItem = &(inventory->items[index]);
+			Object *item = inventoryItem->item;
 			if (item->pid == PROTO_ID_MONEY) {
 				if (amount <= 0 && -amount >= inventoryItem->quantity) {
 					objectDestroy(item, NULL);
@@ -3083,8 +3089,8 @@ int itemCapsAdjust(Object* obj, int amount) {
 		}
 
 		for (int index = 0; index < inventory->length && amount != 0; index++) {
-			InventoryItem* inventoryItem = &(inventory->items[index]);
-			Object* item = inventoryItem->item;
+			InventoryItem *inventoryItem = &(inventory->items[index]);
+			Object *item = inventoryItem->item;
 			if (itemGetType(item) == ITEM_TYPE_CONTAINER) {
 				int capsInContainer = itemGetTotalCaps(item);
 				if (amount <= 0 || capsInContainer <= 0) {
@@ -3110,7 +3116,7 @@ int itemCapsAdjust(Object* obj, int amount) {
 		return 0;
 	}
 
-	Object* item;
+	Object *item;
 	if (objectCreateWithPid(&item, PROTO_ID_MONEY) == 0) {
 		_obj_disconnect(item, NULL);
 		if (itemAdd(obj, item, amount) != 0) {
@@ -3123,7 +3129,7 @@ int itemCapsAdjust(Object* obj, int amount) {
 }
 
 // 0x47A8C8
-int itemGetMoney(Object* item) {
+int itemGetMoney(Object *item) {
 	if (item->pid != PROTO_ID_MONEY) {
 		return -1;
 	}
@@ -3132,7 +3138,7 @@ int itemGetMoney(Object* item) {
 }
 
 // 0x47A8D8
-int itemSetMoney(Object* item, int amount) {
+int itemSetMoney(Object *item, int amount) {
 	if (item->pid != PROTO_ID_MONEY) {
 		return -1;
 	}
@@ -3169,7 +3175,7 @@ static void booksInitVanilla() {
 }
 
 static void booksInitCustom() {
-	char* booksFilePath;
+	char *booksFilePath;
 	configGetString(&gSfallConfig, SFALL_CONFIG_MISC_KEY, SFALL_CONFIG_BOOKS_FILE_KEY, &booksFilePath);
 	if (booksFilePath != NULL && *booksFilePath == '\0') {
 		booksFilePath = NULL;
@@ -3197,13 +3203,16 @@ static void booksInitCustom() {
 					snprintf(sectionKey, sizeof(sectionKey), "%d", index + 1);
 
 					int bookPid;
-					if (!configGetInt(&booksConfig, sectionKey, "PID", &bookPid)) continue;
+					if (!configGetInt(&booksConfig, sectionKey, "PID", &bookPid))
+						continue;
 
 					int messageId;
-					if (!configGetInt(&booksConfig, sectionKey, "TextID", &messageId)) continue;
+					if (!configGetInt(&booksConfig, sectionKey, "TextID", &messageId))
+						continue;
 
 					int skill;
-					if (!configGetInt(&booksConfig, sectionKey, "Skill", &skill)) continue;
+					if (!configGetInt(&booksConfig, sectionKey, "Skill", &skill))
+						continue;
 
 					booksAdd(bookPid, messageId, skill);
 				}
@@ -3219,11 +3228,12 @@ static void booksAdd(int bookPid, int messageId, int skill) {
 	bookDescription.bookPid = bookPid;
 	bookDescription.messageId = messageId;
 	bookDescription.skill = skill;
-	gBooks.emplace_back(std::move(bookDescription));
+//	gBooks.emplace_back(std::move(bookDescription));
+	gBooks.push_back(bookDescription);
 }
 
-bool booksGetInfo(int bookPid, int* messageIdPtr, int* skillPtr) {
-	for (auto& bookDescription : gBooks) {
+bool booksGetInfo(int bookPid, int *messageIdPtr, int *skillPtr) {
+	for (auto &bookDescription : gBooks) {
 		if (bookDescription.bookPid == bookPid) {
 			*messageIdPtr = bookDescription.messageId;
 			*skillPtr = bookDescription.skill;
@@ -3250,19 +3260,19 @@ static void explosionsReset() {
 	gPlasticExplosiveMaxDamage = 80;
 
 	if (configGetInt(&gSfallConfig, SFALL_CONFIG_MISC_KEY, SFALL_CONFIG_DYNAMITE_MAX_DAMAGE_KEY, &gDynamiteMaxDamage)) {
-		gDynamiteMaxDamage = std::clamp(gDynamiteMaxDamage, 0, 9999);
+		gDynamiteMaxDamage = clamp(gDynamiteMaxDamage, 0, 9999);
 	}
 
 	if (configGetInt(&gSfallConfig, SFALL_CONFIG_MISC_KEY, SFALL_CONFIG_DYNAMITE_MIN_DAMAGE_KEY, &gDynamiteMinDamage)) {
-		gDynamiteMinDamage = std::clamp(gDynamiteMinDamage, 0, gDynamiteMaxDamage);
+		gDynamiteMinDamage = clamp(gDynamiteMinDamage, 0, gDynamiteMaxDamage);
 	}
 
 	if (configGetInt(&gSfallConfig, SFALL_CONFIG_MISC_KEY, SFALL_CONFIG_PLASTIC_EXPLOSIVE_MAX_DAMAGE_KEY, &gPlasticExplosiveMaxDamage)) {
-		gPlasticExplosiveMaxDamage = std::clamp(gPlasticExplosiveMaxDamage, 0, 9999);
+		gPlasticExplosiveMaxDamage = clamp(gPlasticExplosiveMaxDamage, 0, 9999);
 	}
 
 	if (configGetInt(&gSfallConfig, SFALL_CONFIG_MISC_KEY, SFALL_CONFIG_PLASTIC_EXPLOSIVE_MIN_DAMAGE_KEY, &gPlasticExplosiveMinDamage)) {
-		gPlasticExplosiveMinDamage = std::clamp(gPlasticExplosiveMinDamage, 0, gPlasticExplosiveMaxDamage);
+		gPlasticExplosiveMinDamage = clamp(gPlasticExplosiveMinDamage, 0, gPlasticExplosiveMaxDamage);
 	}
 
 	gExplosives.clear();
@@ -3292,32 +3302,39 @@ void explosiveAdd(int pid, int activePid, int minDamage, int maxDamage) {
 	explosiveDescription.activePid = activePid;
 	explosiveDescription.minDamage = minDamage;
 	explosiveDescription.maxDamage = maxDamage;
-	gExplosives.push_back(std::move(explosiveDescription));
+//	gExplosives.push_back(std::move(explosiveDescription));
+	gExplosives.push_back(explosiveDescription);
 }
 
 bool explosiveIsExplosive(int pid) {
-	if (pid == PROTO_ID_DYNAMITE_I) return true;
-	if (pid == PROTO_ID_PLASTIC_EXPLOSIVES_I) return true;
+	if (pid == PROTO_ID_DYNAMITE_I)
+		return true;
+	if (pid == PROTO_ID_PLASTIC_EXPLOSIVES_I)
+		return true;
 
-	for (const auto& explosive : gExplosives) {
-		if (explosive.pid == pid) return true;
+	for (const auto &explosive : gExplosives) {
+		if (explosive.pid == pid)
+			return true;
 	}
 
 	return false;
 }
 
 bool explosiveIsActiveExplosive(int pid) {
-	if (pid == PROTO_ID_DYNAMITE_II) return true;
-	if (pid == PROTO_ID_PLASTIC_EXPLOSIVES_II) return true;
+	if (pid == PROTO_ID_DYNAMITE_II)
+		return true;
+	if (pid == PROTO_ID_PLASTIC_EXPLOSIVES_II)
+		return true;
 
-	for (const auto& explosive : gExplosives) {
-		if (explosive.activePid == pid) return true;
+	for (const auto &explosive : gExplosives) {
+		if (explosive.activePid == pid)
+			return true;
 	}
 
 	return false;
 }
 
-bool explosiveActivate(int* pidPtr) {
+bool explosiveActivate(int *pidPtr) {
 	if (*pidPtr == PROTO_ID_DYNAMITE_I) {
 		*pidPtr = PROTO_ID_DYNAMITE_II;
 		return true;
@@ -3328,7 +3345,7 @@ bool explosiveActivate(int* pidPtr) {
 		return true;
 	}
 
-	for (const auto& explosive : gExplosives) {
+	for (const auto &explosive : gExplosives) {
 		if (explosive.pid == *pidPtr) {
 			*pidPtr = explosive.activePid;
 			return true;
@@ -3358,7 +3375,7 @@ bool explosiveSetDamage(int pid, int minDamage, int maxDamage) {
 	return false;
 }
 
-bool explosiveGetDamage(int pid, int* minDamagePtr, int* maxDamagePtr) {
+bool explosiveGetDamage(int pid, int *minDamagePtr, int *maxDamagePtr) {
 	if (pid == PROTO_ID_DYNAMITE_I) {
 		*minDamagePtr = gDynamiteMinDamage;
 		*maxDamagePtr = gDynamiteMaxDamage;
@@ -3371,7 +3388,7 @@ bool explosiveGetDamage(int pid, int* minDamagePtr, int* maxDamagePtr) {
 		return true;
 	}
 
-	for (const auto& explosive : gExplosives) {
+	for (const auto &explosive : gExplosives) {
 		if (explosive.pid == pid) {
 			*minDamagePtr = explosive.minDamage;
 			*maxDamagePtr = explosive.maxDamage;
@@ -3391,7 +3408,7 @@ void explosionSettingsReset() {
 	gExplosionMaxTargets = 6;
 }
 
-void explosionGetPattern(int* startRotationPtr, int* endRotationPtr) {
+void explosionGetPattern(int *startRotationPtr, int *endRotationPtr) {
 	*startRotationPtr = gExplosionStartRotation;
 	*endRotationPtr = gExplosionEndRotation;
 }
@@ -3441,7 +3458,7 @@ static void healingItemsInitVanilla() {
 }
 
 static void healingItemsInitCustom() {
-	char* tweaksFilePath = NULL;
+	char *tweaksFilePath = NULL;
 	configGetString(&gSfallConfig, SFALL_CONFIG_MISC_KEY, SFALL_CONFIG_TWEAKS_FILE_KEY, &tweaksFilePath);
 	if (tweaksFilePath != NULL && *tweaksFilePath == '\0') {
 		tweaksFilePath = NULL;
@@ -3473,4 +3490,4 @@ bool itemIsHealing(int pid) {
 	return false;
 }
 
-} // namespace fallout
+} // namespace Fallout2
