@@ -16,6 +16,7 @@ MODULE_OBJS = \
 	dfile.o \
 	dictionary.o \
 	dinput.o \
+	display_monitor.o \
 	draw.o \
 	export.o \
 	file_find.o \
@@ -28,6 +29,7 @@ MODULE_OBJS = \
 	graph_lib.o \
 	heap.o \
 	input.o \
+	interface.o \
 	interpreter.o \
 	item.o \
 	light.o \
