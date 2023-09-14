@@ -8,6 +8,7 @@ MODULE_OBJS = \
 	cache.o \
 	color.o \
 	config.o \
+	credits.o \
 	critter.o \
 	cycle.o \
 	datafile.o \
