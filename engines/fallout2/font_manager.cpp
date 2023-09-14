@@ -198,7 +198,7 @@ static int interfaceFontLoad(int font_index) {
 		return -1;
 	}
 
-	debug("Font %d loaded properly", font_index);
+	debug(5, "Font %d loaded properly", font_index);
 	fileClose(stream);
 	return 0;
 }
