@@ -5,63 +5,63 @@
 
 // #include "actions.h"
 // #include "animation.h"
-// #include "art.h"
+#include "fallout2/art.h"
 // #include "automap.h"
 // #include "character_editor.h"
 // #include "character_selector.h"
-// #include "color.h"
+#include "fallout2/color.h"
 // #include "combat.h"
 // #include "combat_ai.h"
-// #include "critter.h"
-// #include "cycle.h"
+#include "fallout2/critter.h"
+#include "fallout2/cycle.h"
 #include "fallout2/db.h"
 // #include "dbox.h"
 #include "fallout2/debug.h"
 // #include "display_monitor.h"
 #include "fallout2/draw.h"
 // #include "endgame.h"
-// #include "font_manager.h"
+#include "fallout2/font_manager.h"
 // #include "game_dialog.h"
 // #include "game_memory.h"
 // #include "game_mouse.h"
 // #include "game_movie.h"
 // #include "game_sound.h"
-// #include "input.h"
+#include "fallout2/input.h"
 // #include "interface.h"
 // #include "inventory.h"
-// #include "item.h"
+#include "fallout2/item.h"
 // #include "kb.h"
 // #include "loadsave.h"
 // #include "map.h"
 #include "fallout2/memory.h"
-// #include "mouse.h"
+#include "fallout2/mouse.h"
 // #include "movie.h"
 // #include "movie_effect.h"
-// #include "object.h"
+#include "fallout2/object.h"
 // #include "options.h"
 #include "fallout2/palette.h"
-// #include "party_member.h"
-// #include "perk.h"
+#include "fallout2/party_member.h"
+#include "fallout2/perk.h"
 // #include "pipboy.h"
-// #include "platform_compat.h"
+#include "fallout2/platform_compat.h"
 // #include "preferences.h"
-// #include "proto.h"
-// #include "queue.h"
-// #include "random.h"
+#include "fallout2/proto.h"
+#include "fallout2/queue.h"
+#include "fallout2/random.h"
 // #include "scripts.h"
 #include "fallout2/settings.h"
 #include "fallout2/sfall_config.h"
 // #include "sfall_global_vars.h"
 // #include "sfall_lists.h"
-// #include "skill.h"
+#include "fallout2/skill.h"
 // #include "skilldex.h"
-// #include "stat.h"
-// #include "svga.h"
-// #include "text_font.h"
-// #include "tile.h"
-// #include "trait.h"
+#include "fallout2/stat.h"
+#include "fallout2/svga.h"
+#include "fallout2/text_font.h"
+#include "fallout2/tile.h"
+#include "fallout2/trait.h"
 #include "fallout2/version.h"
-// #include "window_manager.h"
+#include "fallout2/window_manager.h"
 // #include "worldmap.h"
 
 #include "graphics/palette.h"
@@ -403,35 +403,37 @@ void gameReset() {
 	messageListRepositoryReset();
 }
 
+#endif
+
 // 0x442C34
 void gameExit() {
 	debugPrint("\nGame Exit\n");
 
 	// SFALL
-	sfallListsExit();
-	sfallGlobalVarsExit();
-	premadeCharactersExit();
+//	sfallListsExit();
+//	sfallGlobalVarsExit();
+//	premadeCharactersExit();
 
 	tileDisable();
 	messageListRepositorySetStandardMessageList(STANDARD_MESSAGE_LIST_MISC, nullptr);
 	messageListFree(&gMiscMessageList);
-	combatExit();
-	gameDialogExit();
-	_scr_game_exit();
+//	combatExit();
+//	gameDialogExit();
+//	_scr_game_exit();
 
 	// NOTE: Uninline.
-	gameFreeGlobalVars();
+//	gameFreeGlobalVars();
 
-	scriptsExit();
-	animationExit();
-	protoExit();
-	gameMouseExit();
-	isoExit();
-	movieEffectsExit();
-	movieExit();
-	gameSoundExit();
-	aiExit();
-	critterExit();
+//	scriptsExit();
+//	animationExit();
+//	protoExit();
+//	gameMouseExit();
+//	isoExit();
+//	movieEffectsExit();
+//	movieExit();
+//	gameSoundExit();
+//	aiExit();
+//	critterExit();
 	itemsExit();
 	queueExit();
 	perksExit();
@@ -440,11 +442,11 @@ void gameExit() {
 	traitsExit();
 	randomExit();
 	badwordsExit();
-	automapExit();
+//	automapExit();
 	paletteExit();
-	wmWorldMap_exit();
+//	wmWorldMap_exit();
 	partyMembersExit();
-	endgameDeathEndingExit();
+//	endgameDeathEndingExit();
 	interfaceFontsExit();
 	_windowClose();
 	messageListRepositoryExit();
@@ -452,7 +454,6 @@ void gameExit() {
 	settingsExit(true);
 	sfallConfigExit();
 }
-#endif
 
 // TODO keyboard shortcuts
 #if 0
