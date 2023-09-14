@@ -1043,9 +1043,9 @@ int interfaceGetCurrentHitMode(int *hitMode, bool *aiming) {
 
 // 0x45EFEC
 int interfaceUpdateItems(bool animated, int leftItemAction, int rightItemAction) {
-	if (isoIsDisabled()) {
+//	if (isoIsDisabled()) {  TODO map
 		animated = false;
-	}
+//	}
 
 	if (gInterfaceBarWindow == -1) {
 		return -1;
@@ -1054,8 +1054,8 @@ int interfaceUpdateItems(bool animated, int leftItemAction, int rightItemAction)
 	Object *oldCurrentItem = gInterfaceItemStates[gInterfaceCurrentHand].item;
 
 	InterfaceItemState *leftItemState = &(gInterfaceItemStates[HAND_LEFT]);
-	Object *item1 = critterGetItem1(gDude);
-	if (item1 == leftItemState->item && leftItemState->item != NULL) {
+/*	Object *item1 = critterGetItem1(gDude);
+	if (item1 == leftItemState->item && leftItemState->item != NULL) {  TODO inventory
 		if (leftItemState->item != NULL) {
 			leftItemState->isDisabled = dudeIsWeaponDisabled(item1);
 			leftItemState->itemFid = itemGetInventoryFid(item1);
@@ -1099,11 +1099,11 @@ int interfaceUpdateItems(bool animated, int leftItemAction, int rightItemAction)
 				leftItemState->action = oldAction;
 			}
 		}
-	}
+	}*/
 
 	InterfaceItemState *rightItemState = &(gInterfaceItemStates[HAND_RIGHT]);
 
-	Object *item2 = critterGetItem2(gDude);
+/*	Object *item2 = critterGetItem2(gDude); TODO inventory
 	if (item2 == rightItemState->item && rightItemState->item != NULL) {
 		if (rightItemState->item != NULL) {
 			rightItemState->isDisabled = dudeIsWeaponDisabled(rightItemState->item);
@@ -1138,8 +1138,8 @@ int interfaceUpdateItems(bool animated, int leftItemAction, int rightItemAction)
 			rightItemState->itemFid = -1;
 
 			// SFALL
-			rightItemState->primaryHitMode = unarmedGetKickHitMode(false);
-			rightItemState->secondaryHitMode = unarmedGetKickHitMode(true);
+//			rightItemState->primaryHitMode = unarmedGetKickHitMode(false); TODO combat
+//			rightItemState->secondaryHitMode = unarmedGetKickHitMode(true);
 
 			// SFALL: Keep selected attack mode.
 			// CE: Implementation is different.
@@ -1147,7 +1147,7 @@ int interfaceUpdateItems(bool animated, int leftItemAction, int rightItemAction)
 				rightItemState->action = oldAction;
 			}
 		}
-	}
+	}*/
 
 	if (animated) {
 		Object *newCurrentItem = gInterfaceItemStates[gInterfaceCurrentHand].item;
@@ -1192,10 +1192,10 @@ int interfaceBarSwapHands(bool animated) {
 		interfaceBarRefreshMainAction();
 	}
 
-	int mode = gameMouseGetMode();
+/*	int mode = gameMouseGetMode(); TODO mouse
 	if (mode == GAME_MOUSE_MODE_CROSSHAIR || mode == GAME_MOUSE_MODE_USE_CROSSHAIR) {
 		gameMouseSetMode(GAME_MOUSE_MODE_MOVE);
-	}
+	}*/
 
 	return 0;
 }
@@ -1268,7 +1268,7 @@ void _intface_use_item() {
 
 	if (ptr->isWeapon != 0) {
 		if (ptr->action == INTERFACE_ITEM_ACTION_RELOAD) {
-			if (isInCombat()) {
+			if (/*isInCombat()*/ 0) { // TODO combat
 				int hitMode = gInterfaceCurrentHand == HAND_LEFT
 								  ? HIT_MODE_LEFT_WEAPON_RELOAD
 								  : HIT_MODE_RIGHT_WEAPON_RELOAD;
@@ -1281,27 +1281,27 @@ void _intface_use_item() {
 						} else {
 							gDude->data.critter.combat.ap -= actionPointsRequired;
 						}
-						interfaceRenderActionPoints(gDude->data.critter.combat.ap, _combat_free_move);
+//						interfaceRenderActionPoints(gDude->data.critter.combat.ap, _combat_free_move); TODO combat
 					}
 				}
 			} else {
 				_intface_item_reload();
 			}
 		} else {
-			gameMouseSetCursor(MOUSE_CURSOR_CROSSHAIR);
-			gameMouseSetMode(GAME_MOUSE_MODE_CROSSHAIR);
-			if (!isInCombat()) {
-				_combat(NULL);
-			}
+//			gameMouseSetCursor(MOUSE_CURSOR_CROSSHAIR); TODO mouse
+//			gameMouseSetMode(GAME_MOUSE_MODE_CROSSHAIR);
+//			if (!isInCombat()) { TODO combat
+//				_combat(NULL);
+//			}
 		}
 	} else if (_proto_action_can_use_on(ptr->item->pid)) {
-		gameMouseSetCursor(MOUSE_CURSOR_USE_CROSSHAIR);
-		gameMouseSetMode(GAME_MOUSE_MODE_USE_CROSSHAIR);
+//		gameMouseSetCursor(MOUSE_CURSOR_USE_CROSSHAIR); TODO mouse
+//		gameMouseSetMode(GAME_MOUSE_MODE_USE_CROSSHAIR);
 	} else if (_obj_action_can_use(ptr->item)) {
-		if (isInCombat()) {
+		if (/*isInCombat()*/ 0) { // TODO combat
 			int actionPointsRequired = itemGetActionPointCost(gDude, ptr->secondaryHitMode, false);
 			if (actionPointsRequired <= gDude->data.critter.combat.ap) {
-				_obj_use_item(gDude, ptr->item);
+//				_obj_use_item(gDude, ptr->item); TODO proto_instance
 				interfaceUpdateItems(false, INTERFACE_ITEM_ACTION_DEFAULT, INTERFACE_ITEM_ACTION_DEFAULT);
 				if (actionPointsRequired > gDude->data.critter.combat.ap) {
 					gDude->data.critter.combat.ap = 0;
@@ -1309,10 +1309,10 @@ void _intface_use_item() {
 					gDude->data.critter.combat.ap -= actionPointsRequired;
 				}
 
-				interfaceRenderActionPoints(gDude->data.critter.combat.ap, _combat_free_move);
+//				interfaceRenderActionPoints(gDude->data.critter.combat.ap, _combat_free_move); TODO combat
 			}
 		} else {
-			_obj_use_item(gDude, ptr->item);
+//			_obj_use_item(gDude, ptr->item); TODO proto_instance
 			interfaceUpdateItems(false, INTERFACE_ITEM_ACTION_DEFAULT, INTERFACE_ITEM_ACTION_DEFAULT);
 		}
 	}
@@ -1402,7 +1402,7 @@ void interfaceBarEndButtonsShow(bool animated) {
 				time = getTicks();
 				frame++;
 			}
-			gameMouseRefresh();
+//			gameMouseRefresh(); TODO mouse
 
 			renderPresent();
 			sharedFpsLimiter.throttle();
@@ -1461,7 +1461,7 @@ void interfaceBarEndButtonsHide(bool animated) {
 				time = getTicks();
 				frame--;
 			}
-			gameMouseRefresh();
+//			gameMouseRefresh(); TODO mouse
 
 			renderPresent();
 			sharedFpsLimiter.throttle();
@@ -1797,44 +1797,44 @@ static int _intface_change_fid_callback(Object *a1, Object *a2) {
 static void interfaceBarSwapHandsAnimatePutAwayTakeOutSequence(int previousWeaponAnimationCode, int weaponAnimationCode) {
 	gInterfaceBarSwapHandsInProgress = true;
 
-	reg_anim_clear(gDude);
-	reg_anim_begin(ANIMATION_REQUEST_RESERVED);
-	animationRegisterSetLightDistance(gDude, 4, 0);
+//	reg_anim_clear(gDude); TODO animation
+//	reg_anim_begin(ANIMATION_REQUEST_RESERVED);
+//	animationRegisterSetLightDistance(gDude, 4, 0);
 
 	if (previousWeaponAnimationCode != 0) {
 //		const char *sfx = sfxBuildCharName(gDude, ANIM_PUT_AWAY, CHARACTER_SOUND_EFFECT_UNUSED); TODO audio
 //		animationRegisterPlaySoundEffect(gDude, sfx, 0); TODO animation
-		animationRegisterAnimate(gDude, ANIM_PUT_AWAY, 0);
+//		animationRegisterAnimate(gDude, ANIM_PUT_AWAY, 0);
 	}
 
 	// TODO: Get rid of cast.
-	animationRegisterCallbackForced(NULL, NULL, (AnimationCallback *)_intface_redraw_items_callback, -1);
+//	animationRegisterCallbackForced(NULL, NULL, (AnimationCallback *)_intface_redraw_items_callback, -1);
 
 	Object *item = gInterfaceItemStates[gInterfaceCurrentHand].item;
 	if (item != NULL && item->lightDistance > 4) {
-		animationRegisterSetLightDistance(gDude, item->lightDistance, 0);
+//		animationRegisterSetLightDistance(gDude, item->lightDistance, 0);
 	}
 
 	if (weaponAnimationCode != 0) {
-		animationRegisterTakeOutWeapon(gDude, weaponAnimationCode, -1);
+//		animationRegisterTakeOutWeapon(gDude, weaponAnimationCode, -1);
 	} else {
 		int fid = buildFid(OBJ_TYPE_CRITTER, gDude->fid & 0xFFF, ANIM_STAND, 0, gDude->rotation + 1);
-		animationRegisterSetFid(gDude, fid, -1);
+//		animationRegisterSetFid(gDude, fid, -1);
 	}
 
 	// TODO: Get rid of cast.
-	animationRegisterCallbackForced(NULL, NULL, (AnimationCallback *)_intface_change_fid_callback, -1);
+//	animationRegisterCallbackForced(NULL, NULL, (AnimationCallback *)_intface_change_fid_callback, -1);
 
-	if (reg_anim_end() == -1) {
-		return;
-	}
+//	if (reg_anim_end() == -1) { TODO anim
+//		return;
+//	}
 
 	bool interfaceBarWasEnabled = gInterfaceBarEnabled;
 
 	interfaceBarDisable();
-	_gmouse_disable(0);
+//	_gmouse_disable(0);  TODO mouse
 
-	gameMouseSetCursor(MOUSE_CURSOR_WAIT_WATCH);
+//	gameMouseSetCursor(MOUSE_CURSOR_WAIT_WATCH); TODO mouse
 
 	while (gInterfaceBarSwapHandsInProgress) {
 		sharedFpsLimiter.mark();
@@ -1849,9 +1849,9 @@ static void interfaceBarSwapHandsAnimatePutAwayTakeOutSequence(int previousWeapo
 		sharedFpsLimiter.throttle();
 	}
 
-	gameMouseSetCursor(MOUSE_CURSOR_NONE);
+//	gameMouseSetCursor(MOUSE_CURSOR_NONE); TODO mouse
 
-	_gmouse_enable();
+//	_gmouse_enable(); TODO mouse
 
 	if (interfaceBarWasEnabled) {
 		interfaceBarEnable();
@@ -2077,7 +2077,7 @@ static void interfaceRenderCounter(int x, int y, int previousValue, int value, i
 
 				blitBufferToBuffer(upSrc, 9, 17, 360, onesDest, gInterfaceBarWidth);
 				_mouse_info();
-				gameMouseRefresh();
+//				gameMouseRefresh();  TODO mouse
 				renderPresent();
 				inputBlockForTocks(delay);
 				windowRefreshRect(gInterfaceBarWindow, &numbersRect);
@@ -2087,7 +2087,7 @@ static void interfaceRenderCounter(int x, int y, int previousValue, int value, i
 				if (ones > 9 || ones < 0) {
 					blitBufferToBuffer(upSrc, 9, 17, 360, tensDest, gInterfaceBarWidth);
 					_mouse_info();
-					gameMouseRefresh();
+//					gameMouseRefresh(); TODO mouse
 					renderPresent();
 					inputBlockForTocks(delay);
 					windowRefreshRect(gInterfaceBarWindow, &numbersRect);
@@ -2097,7 +2097,7 @@ static void interfaceRenderCounter(int x, int y, int previousValue, int value, i
 					if (tens == 10 || tens == -1) {
 						blitBufferToBuffer(upSrc, 9, 17, 360, hundredsDest, gInterfaceBarWidth);
 						_mouse_info();
-						gameMouseRefresh();
+//						gameMouseRefresh(); TODO mouse
 						renderPresent();
 						inputBlockForTocks(delay);
 						windowRefreshRect(gInterfaceBarWindow, &numbersRect);
@@ -2110,7 +2110,7 @@ static void interfaceRenderCounter(int x, int y, int previousValue, int value, i
 
 						blitBufferToBuffer(downSrc, 9, 17, 360, hundredsDest, gInterfaceBarWidth);
 						_mouse_info();
-						gameMouseRefresh();
+//						gameMouseRefresh(); TODO mouse
 						renderPresent();
 						inputBlockForTocks(delay);
 						windowRefreshRect(gInterfaceBarWindow, &numbersRect);
@@ -2124,7 +2124,7 @@ static void interfaceRenderCounter(int x, int y, int previousValue, int value, i
 
 				blitBufferToBuffer(downSrc, 9, 17, 360, onesDest, gInterfaceBarWidth);
 				_mouse_info();
-				gameMouseRefresh();
+//				gameMouseRefresh(); TODO mouse
 				renderPresent();
 				inputBlockForTocks(delay);
 				windowRefreshRect(gInterfaceBarWindow, &numbersRect);
@@ -2137,7 +2137,7 @@ static void interfaceRenderCounter(int x, int y, int previousValue, int value, i
 
 				blitBufferToBuffer(previousValue >= 0 ? plusSrc : minusSrc, 6, 17, 360, signDest, gInterfaceBarWidth);
 				_mouse_info();
-				gameMouseRefresh();
+//				gameMouseRefresh(); TODO mouse
 				renderPresent();
 				inputBlockForTocks(delay);
 				windowRefreshRect(gInterfaceBarWindow, &numbersRect);
