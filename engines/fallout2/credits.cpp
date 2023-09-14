@@ -1,35 +1,35 @@
-#include "credits.h"
+#include "fallout2/credits.h"
 
-#include <string.h>
+// #include <string.h>
 
-#include <algorithm>
+// #include <algorithm>
 
-#include "art.h"
-#include "color.h"
-#include "cycle.h"
-#include "db.h"
-#include "debug.h"
-#include "draw.h"
-#include "game_mouse.h"
-#include "input.h"
-#include "memory.h"
-#include "message.h"
-#include "mouse.h"
-#include "palette.h"
-#include "platform_compat.h"
-#include "sound.h"
-#include "svga.h"
-#include "text_font.h"
-#include "window_manager.h"
+#include "fallout2/art.h"
+#include "fallout2/color.h"
+#include "fallout2/cycle.h"
+#include "fallout2/db.h"
+#include "fallout2/debug.h"
+#include "fallout2/draw.h"
+#include "fallout2/game_mouse.h"
+#include "fallout2/input.h"
+#include "fallout2/memory.h"
+#include "fallout2/message.h"
+#include "fallout2/mouse.h"
+#include "fallout2/palette.h"
+#include "fallout2/platform_compat.h"
+// #include "fallout2/sound.h" TODO audio
+#include "fallout2/svga.h"
+#include "fallout2/text_font.h"
+#include "fallout2/window_manager.h"
 
-namespace fallout {
+namespace Fallout2 {
 
 #define CREDITS_WINDOW_SCROLLING_DELAY (38)
 
-static bool creditsFileParseNextLine(char* dest, int* font, int* color);
+static bool creditsFileParseNextLine(char *dest, int *font, int *color);
 
 // 0x56D740
-static File* gCreditsFile;
+static File *gCreditsFile;
 
 // 0x56D744
 static int gCreditsWindowNameColor;
@@ -44,7 +44,7 @@ static int gCreditsWindowNameFont;
 static int gCreditsWindowTitleColor;
 
 // 0x42C860
-void creditsOpen(const char* filePath, int backgroundFid, bool useReversedStyle) {
+void creditsOpen(const char *filePath, int backgroundFid, bool useReversedStyle) {
 	int oldFont = fontGetCurrent();
 
 	colorPaletteLoad("color.pal");
@@ -61,32 +61,32 @@ void creditsOpen(const char* filePath, int backgroundFid, bool useReversedStyle)
 		gCreditsWindowNameColor = _colorTable[18917];
 	}
 
-	soundContinueAll();
+//	soundContinueAll(); TODO audio
 
 	char localizedPath[COMPAT_MAX_PATH];
 	if (_message_make_path(localizedPath, sizeof(localizedPath), filePath)) {
 		gCreditsFile = fileOpen(localizedPath, "rt");
 		if (gCreditsFile != NULL) {
-			soundContinueAll();
+//			soundContinueAll();  TODO audio
 
 			colorCycleDisable();
-			gameMouseSetCursor(MOUSE_CURSOR_NONE);
+/*			gameMouseSetCursor(MOUSE_CURSOR_NONE); TODO game_mouse
 
 			bool cursorWasHidden = cursorIsHidden();
 			if (cursorWasHidden) {
 				mouseShowCursor();
-			}
+			}*/
 
 			int windowWidth = screenGetWidth();
 			int windowHeight = screenGetHeight();
 			int window = windowCreate(0, 0, windowWidth, windowHeight, _colorTable[0], 20);
-			soundContinueAll();
+//			soundContinueAll();  TODO audio
 			if (window != -1) {
-				unsigned char* windowBuffer = windowGetBuffer(window);
+				unsigned char *windowBuffer = windowGetBuffer(window);
 				if (windowBuffer != NULL) {
-					unsigned char* backgroundBuffer = (unsigned char*)internal_malloc(windowWidth * windowHeight);
+					unsigned char *backgroundBuffer = (unsigned char *)internal_malloc(windowWidth * windowHeight);
 					if (backgroundBuffer) {
-						soundContinueAll();
+//						soundContinueAll(); TODO audio
 
 						memset(backgroundBuffer, _colorTable[0], windowWidth * windowHeight);
 
@@ -94,16 +94,16 @@ void creditsOpen(const char* filePath, int backgroundFid, bool useReversedStyle)
 							FrmImage backgroundFrmImage;
 							if (backgroundFrmImage.lock(backgroundFid)) {
 								blitBufferToBuffer(backgroundFrmImage.getData(),
-								                   backgroundFrmImage.getWidth(),
-								                   backgroundFrmImage.getHeight(),
-								                   backgroundFrmImage.getWidth(),
-								                   backgroundBuffer + windowWidth * ((windowHeight - backgroundFrmImage.getHeight()) / 2) + (windowWidth - backgroundFrmImage.getWidth()) / 2,
-								                   windowWidth);
+												   backgroundFrmImage.getWidth(),
+												   backgroundFrmImage.getHeight(),
+												   backgroundFrmImage.getWidth(),
+												   backgroundBuffer + windowWidth * ((windowHeight - backgroundFrmImage.getHeight()) / 2) + (windowWidth - backgroundFrmImage.getWidth()) / 2,
+												   windowWidth);
 								backgroundFrmImage.unlock();
 							}
 						}
 
-						unsigned char* intermediateBuffer = (unsigned char*)internal_malloc(windowWidth * windowHeight);
+						unsigned char *intermediateBuffer = (unsigned char *)internal_malloc(windowWidth * windowHeight);
 						if (intermediateBuffer != NULL) {
 							memset(intermediateBuffer, 0, windowWidth * windowHeight);
 
@@ -113,17 +113,18 @@ void creditsOpen(const char* filePath, int backgroundFid, bool useReversedStyle)
 							fontSetCurrent(gCreditsWindowNameFont);
 							int nameFontLineHeight = fontGetLineHeight();
 
-							int lineHeight = std::max(titleFontLineHeight, nameFontLineHeight);
+							int lineHeight = MAX(titleFontLineHeight, nameFontLineHeight);
 							int stringBufferSize = windowWidth * lineHeight;
-							unsigned char* stringBuffer = (unsigned char*)internal_malloc(stringBufferSize);
+							unsigned char *stringBuffer = (unsigned char *)internal_malloc(stringBufferSize);
 							if (stringBuffer != NULL) {
 								blitBufferToBuffer(backgroundBuffer,
-								                   windowWidth,
-								                   windowHeight,
-								                   windowWidth,
-								                   windowBuffer,
-								                   windowWidth);
+												   windowWidth,
+												   windowHeight,
+												   windowWidth,
+												   windowBuffer,
+												   windowWidth);
 
+								debug("BLITTTED");
 								windowRefresh(window);
 
 								paletteFadeTo(_cmap);
@@ -144,8 +145,8 @@ void creditsOpen(const char* filePath, int backgroundFid, bool useReversedStyle)
 									memset(stringBuffer, 0, stringBufferSize);
 									fontDrawText(stringBuffer, str, windowWidth, windowWidth, color);
 
-									unsigned char* dest = intermediateBuffer + windowWidth * windowHeight - windowWidth + (windowWidth - stringWidth) / 2;
-									unsigned char* src = stringBuffer;
+									unsigned char *dest = intermediateBuffer + windowWidth * windowHeight - windowWidth + (windowWidth - stringWidth) / 2;
+									unsigned char *src = stringBuffer;
 									for (int index = 0; index < lineHeight; index++) {
 										sharedFpsLimiter.mark();
 
@@ -158,18 +159,18 @@ void creditsOpen(const char* filePath, int backgroundFid, bool useReversedStyle)
 										memcpy(dest, src, stringWidth);
 
 										blitBufferToBuffer(backgroundBuffer,
-										                   windowWidth,
-										                   windowHeight,
-										                   windowWidth,
-										                   windowBuffer,
-										                   windowWidth);
+														   windowWidth,
+														   windowHeight,
+														   windowWidth,
+														   windowBuffer,
+														   windowWidth);
 
 										blitBufferToBufferTrans(intermediateBuffer,
-										                        windowWidth,
-										                        windowHeight,
-										                        windowWidth,
-										                        windowBuffer,
-										                        windowWidth);
+																windowWidth,
+																windowHeight,
+																windowWidth,
+																windowBuffer,
+																windowWidth);
 
 										while (getTicksSince(tick) < CREDITS_WINDOW_SCROLLING_DELAY) {
 										}
@@ -201,18 +202,18 @@ void creditsOpen(const char* filePath, int backgroundFid, bool useReversedStyle)
 										memset(intermediateBuffer + windowWidth * windowHeight - windowWidth, 0, windowWidth);
 
 										blitBufferToBuffer(backgroundBuffer,
-										                   windowWidth,
-										                   windowHeight,
-										                   windowWidth,
-										                   windowBuffer,
-										                   windowWidth);
+														   windowWidth,
+														   windowHeight,
+														   windowWidth,
+														   windowBuffer,
+														   windowWidth);
 
 										blitBufferToBufferTrans(intermediateBuffer,
-										                        windowWidth,
-										                        windowHeight,
-										                        windowWidth,
-										                        windowBuffer,
-										                        windowWidth);
+																windowWidth,
+																windowHeight,
+																windowWidth,
+																windowBuffer,
+																windowWidth);
 
 										while (getTicksSince(tick) < CREDITS_WINDOW_SCROLLING_DELAY) {
 										}
@@ -234,17 +235,17 @@ void creditsOpen(const char* filePath, int backgroundFid, bool useReversedStyle)
 					}
 				}
 
-				soundContinueAll();
+//				soundContinueAll();  TODO audio
 				paletteFadeTo(gPaletteBlack);
-				soundContinueAll();
+//				soundContinueAll();  TODO audio
 				windowDestroy(window);
 			}
 
-			if (cursorWasHidden) {
-				mouseHideCursor();
-			}
+//			if (cursorWasHidden) {  TODO game_mouse
+//				mouseHideCursor();
+//			}
 
-			gameMouseSetCursor(MOUSE_CURSOR_ARROW);
+//			gameMouseSetCursor(MOUSE_CURSOR_ARROW); TODO game_mouse
 			colorCycleEnable();
 			fileClose(gCreditsFile);
 		}
@@ -254,10 +255,10 @@ void creditsOpen(const char* filePath, int backgroundFid, bool useReversedStyle)
 }
 
 // 0x42CE6C
-static bool creditsFileParseNextLine(char* dest, int* font, int* color) {
+static bool creditsFileParseNextLine(char *dest, int *font, int *color) {
 	char string[256];
 	while (fileReadString(string, 256, gCreditsFile)) {
-		char* pch;
+		char *pch;
 		if (string[0] == ';') {
 			continue;
 		} else if (string[0] == '@') {
@@ -274,7 +275,7 @@ static bool creditsFileParseNextLine(char* dest, int* font, int* color) {
 			pch = string;
 		}
 
-		strcpy(dest, pch);
+		strncpy(dest, pch, 256);
 
 		return true;
 	}
@@ -282,4 +283,4 @@ static bool creditsFileParseNextLine(char* dest, int* font, int* color) {
 	return false;
 }
 
-} // namespace fallout
+} // namespace Fallout2

@@ -1,10 +1,10 @@
-#ifndef CREDITS_H
-#define CREDITS_H
+#ifndef FALLOUT2_CREDITS_H
+#define FALLOUT2_CREDITS_H
 
-namespace fallout {
+namespace Fallout2 {
 
-void creditsOpen(const char* path, int fid, bool useReversedStyle);
+void creditsOpen(const char *path, int fid, bool useReversedStyle);
 
-} // namespace fallout
+} // namespace Fallout2
 
-#endif /* CREDITS_H */
+#endif
