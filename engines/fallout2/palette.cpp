@@ -38,19 +38,14 @@ void paletteInit() {
 	//  colorPaletteSetTransitionCallback(soundContinueAll);
 	//	}
 
-	// TODO this call is a benchmark
-//	colorPaletteFadeBetween(gPalette, gPalette, 60);
+	// This call is a benchmark
+	colorPaletteFadeBetween(gPalette, gPalette, 60);
 
 	colorPaletteSetTransitionCallback(NULL);
 
 	// Actual fade duration will never be 0 since |colorPaletteFadeBetween| uses
 	// frame rate throttling.
 	unsigned int actualFadeDuration = getTicksSince(tick);
-
-	// TODO: The game performs the fading as a benchmark to find how many ms it takes
-	// Since it's currently skipped it's instantaneous and forces actualFadeDuration to zero
-	// Just set a safe 500ms time for now
-	actualFadeDuration = 500;
 
 	// Calculate fade steps needed to perform fading in about 700 ms.
 	gPaletteFadeSteps = 60 * 700 / actualFadeDuration;
