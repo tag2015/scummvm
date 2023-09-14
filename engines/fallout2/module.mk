@@ -28,6 +28,7 @@ MODULE_OBJS = \
 	heap.o \
 	input.o \
 	interpreter.o \
+	item.o \
 	light.o \
 	mainmenu.o \
 	memory.o \
