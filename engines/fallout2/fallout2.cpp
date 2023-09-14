@@ -31,18 +31,21 @@
 #include "graphics/palette.h"
 #include "graphics/surface.h"
 
+#include "fallout2/critter.h"
 #include "fallout2/db.h"
 #include "fallout2/debug.h"
 #include "fallout2/draw.h"
 #include "fallout2/font_manager.h"
 #include "fallout2/game.h"
 #include "fallout2/game_memory.h"
+#include "fallout2/item.h"
 #include "fallout2/memory.h"
 #include "fallout2/message.h"
 #include "fallout2/palette.h"
 #include "fallout2/party_member.h"
 #include "fallout2/perk.h"
 #include "fallout2/platform_compat.h"
+#include "fallout2/queue.h"
 #include "fallout2/random.h"
 #include "fallout2/settings.h"
 #include "fallout2/sfall_config.h"
@@ -202,8 +205,6 @@ void Fallout2Engine::showSplash() {
 		paletteFadeTo(palette);
 	}
 
-	g_system->delayMillis(3000);
-
 	internal_free(data);
 	internal_free(palette);
 
@@ -326,11 +327,24 @@ Common::Error Fallout2Engine::run() {
 	else
 		warning("Error initializing traits");
 
+	if(itemsInit() == 0)
+		debug("Initialized items!");
+	else
+		warning("Error initializing items!");
+
+	queueInit();
+
+	if(critterInit() == 0)
+		debug("Initialized critters!");
+	else
+		warning("Error initializing critters");
+
 	// throw a dice (yay!)
 	debugPrint("RandomRoll (diff= 70) result: %d", randomRoll(70, 5, NULL));
 	debugPrint("RandomRoll (diff= 10) result: %d", randomRoll(10, 5, NULL));
 	debugPrint("RandomRoll (diff= 150) result: %d", randomRoll(150, 5, NULL));
 
+	g_system->delayMillis(1000);
 	bool msgshown = false;
 	while (!shouldQuit() && !msgshown) {
 		while (g_system->getEventManager()->pollEvent(e)) {
