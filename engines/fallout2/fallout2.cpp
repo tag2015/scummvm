@@ -360,6 +360,7 @@ Common::Error Fallout2Engine::run() {
 		msgshown = true;
 	}
 
+	gameExit();
 	return Common::kNoError;
 }
 
