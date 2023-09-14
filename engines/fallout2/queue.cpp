@@ -51,14 +51,16 @@ static QueueListNode *gLastFoundQueueListNode = NULL;
 static QueueListNode *gQueueListHead;
 
 // 0x51C540
-static EventTypeDescription gEventTypeDescriptions[EVENT_TYPE_COUNT] = {};
-/* TODO later
+// TODO combat scripts game_sound
 static EventTypeDescription gEventTypeDescriptions[EVENT_TYPE_COUNT] = {
 	{drugEffectEventProcess, internal_free, drugEffectEventRead, drugEffectEventWrite, true, _item_d_clear},
-	{knockoutEventProcess, NULL, NULL, NULL, true, _critter_wake_clear},
+	// {knockoutEventProcess, NULL, NULL, NULL, true, _critter_wake_clear}, TODO combat
+	{NULL, NULL, NULL, NULL, true, NULL},  // TODO remove
 	{withdrawalEventProcess, internal_free, withdrawalEventRead, withdrawalEventWrite, true, _item_wd_clear},
-	{scriptEventProcess, internal_free, scriptEventRead, scriptEventWrite, true, NULL},
-	{gameTimeEventProcess, NULL, NULL, NULL, true, NULL},
+	// {scriptEventProcess, internal_free, scriptEventRead, scriptEventWrite, true, NULL}, TODO scripts
+	{NULL, NULL, NULL, NULL, true, NULL},  // TODO remove
+	// {gameTimeEventProcess, NULL, NULL, NULL, true, NULL}, TODO scripts
+	{NULL, NULL, NULL, NULL, true, NULL},  // TODO remove
 	{poisonEventProcess, NULL, NULL, NULL, false, NULL},
 	{radiationEventProcess, internal_free, radiationEventRead, radiationEventWrite, false, NULL},
 	{flareEventProcess, NULL, NULL, NULL, true, flareEventProcess},
@@ -66,9 +68,11 @@ static EventTypeDescription gEventTypeDescriptions[EVENT_TYPE_COUNT] = {
 	{miscItemTrickleEventProcess, NULL, NULL, NULL, true, _item_m_turn_off_from_queue},
 	{sneakEventProcess, NULL, NULL, NULL, true, _critter_sneak_clear},
 	{explosionFailureEventProcess, NULL, NULL, NULL, true, _queue_explode_exit},
-	{mapUpdateEventProcess, NULL, NULL, NULL, true, NULL},
-	{ambientSoundEffectEventProcess, internal_free, NULL, NULL, true, NULL},
-};*/
+	// {mapUpdateEventProcess, NULL, NULL, NULL, true, NULL}, TODO scripts
+	{NULL, NULL, NULL, NULL, true, NULL},  // TODO remove
+	// {ambientSoundEffectEventProcess, internal_free, NULL, NULL, true, NULL}, TODO game_sound
+	{NULL, NULL, NULL, NULL, true, NULL},  // TODO remove
+};
 
 // 0x4A2320
 void queueInit() {
@@ -473,7 +477,7 @@ static int _queue_do_explosion_(Object *explosive, bool a2) {
 	int minDamage;
 
 	// SFALL
-//	explosiveGetDamage(explosive->pid, &minDamage, &maxDamage);  TODO item.cpp
+	explosiveGetDamage(explosive->pid, &minDamage, &maxDamage);
 
 	// FIXME: I guess this is a little bit wrong, dude can never be null, I
 	// guess it needs to check if owner is dude.
