@@ -4,6 +4,8 @@
 
 // #include <algorithm>
 
+#include "common/events.h"
+
 #include "fallout2/art.h"
 #include "fallout2/color.h"
 #include "fallout2/cycle.h"
@@ -124,7 +126,6 @@ void creditsOpen(const char *filePath, int backgroundFid, bool useReversedStyle)
 												   windowBuffer,
 												   windowWidth);
 
-								debug("BLITTTED");
 								windowRefresh(window);
 
 								paletteFadeTo(_cmap);
@@ -150,9 +151,17 @@ void creditsOpen(const char *filePath, int backgroundFid, bool useReversedStyle)
 									for (int index = 0; index < lineHeight; index++) {
 										sharedFpsLimiter.mark();
 
-										if (inputGetInput() != -1) {
+										/* if (inputGetInput() != -1) {  TODO input
 											stop = true;
 											break;
+										} */
+
+										Common::Event e;
+										if (g_system->getEventManager()->pollEvent(e)) {
+											if (e.type == Common::EVENT_LBUTTONDOWN) {
+												stop = true;
+												break;
+											}
 										}
 
 										memmove(intermediateBuffer, intermediateBuffer + windowWidth, windowWidth * windowHeight - windowWidth);
