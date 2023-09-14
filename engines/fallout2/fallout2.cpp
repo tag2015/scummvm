@@ -31,6 +31,7 @@
 #include "graphics/palette.h"
 #include "graphics/surface.h"
 
+#include "fallout2/credits.h"
 #include "fallout2/critter.h"
 #include "fallout2/db.h"
 #include "fallout2/debug.h"
@@ -345,6 +346,7 @@ Common::Error Fallout2Engine::run() {
 	debugPrint("RandomRoll (diff= 150) result: %d", randomRoll(150, 5, NULL));
 
 	g_system->delayMillis(1000);
+	paletteFadeTo(gPaletteBlack);
 	bool msgshown = false;
 	while (!shouldQuit() && !msgshown) {
 		while (g_system->getEventManager()->pollEvent(e)) {
@@ -355,7 +357,8 @@ Common::Error Fallout2Engine::run() {
 		// Delay for a bit. All events loops should have a delay
 		// to prevent the system being unduly loaded
 		g_system->delayMillis(10);
-		showMesageBox("CONGLATURATION, YOU WIN!");
+//		showMesageBox("CONGLATURATION, YOU WIN!");
+		creditsOpen("credits.txt", -1, false);
 		msgshown = true;
 	}
 
