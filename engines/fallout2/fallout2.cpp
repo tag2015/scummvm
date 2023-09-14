@@ -98,7 +98,7 @@ void Fallout2Engine::showSplash() {
 	for (int index = 0; index < SPLASH_COUNT; index++) {
 		char filePath[64];
 		snprintf(filePath, sizeof(filePath), "%ssplash%d.rix", path, splash);
-		debug("Splash screen path: %s", filePath);
+		debug(5, "Splash screen path: %s", filePath);
 		stream = fileOpen(filePath, "rb");
 		if (stream != NULL) {
 			break;
@@ -128,15 +128,13 @@ void Fallout2Engine::showSplash() {
 		fileClose(stream);
 		return;
 	} else
-		debug("Found RIX3 image signature!");
+		debug(6, "Found RIX3 image signature!");
 
 	short width;
 	fileRead(&width, sizeof(width), 1, stream);
 
 	short height;
 	fileRead(&height, sizeof(height), 1, stream);
-
-	debug("Splash screen width: %d height: %d", width, height);
 
 	unsigned char *data = reinterpret_cast<unsigned char *>(internal_malloc(width * height));
 	if (data == NULL) {
