@@ -235,12 +235,12 @@ static void randomValidatePrerandom() {
 		v1 += v2;
 	}
 
-	debug("Chi squared is %f, P = %f at 0.05", v1, dbl_50D4C2);
+	debug(5, "Chi squared is %f, P = %f at 0.05", v1, dbl_50D4C2);
 
 	if (v1 < dbl_50D4BA) {
-		debug("Sequence is random, 95%% confidence.");
+		debug(5, "Sequence is random, 95%% confidence.");
 	} else {
-		debug("Warning! Sequence is not random, 95%% confidence.");
+		warning("Sequence is not random, 95%% confidence");
 	}
 }
 

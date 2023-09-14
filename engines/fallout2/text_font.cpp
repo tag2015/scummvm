@@ -285,7 +285,7 @@ void fontSetCurrent(int font) {
 		gCurrentFont = font;
 
 		fontManager->setCurrentProc(font);
-		debug("Set font %d!", font);
+		debug(6, "Set font %d!", font);
 	}
 }
 
