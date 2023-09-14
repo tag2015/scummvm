@@ -1,25 +1,27 @@
-#include "display_monitor.h"
+#include "fallout2/display_monitor.h"
 
-#include <string.h>
+// #include <string.h>
 
-#include <fstream>
+// #include <fstream>
 
-#include "art.h"
-#include "color.h"
-#include "combat.h"
-#include "draw.h"
-#include "game_mouse.h"
-#include "game_sound.h"
-#include "geometry.h"
-#include "input.h"
-#include "interface.h"
-#include "memory.h"
-#include "sfall_config.h"
-#include "svga.h"
-#include "text_font.h"
-#include "window_manager.h"
+#include "fallout2/art.h"
+#include "fallout2/color.h"
+#include "fallout2/combat.h"
+#include "fallout2/draw.h"
+// #include "fallout2/game_mouse.h" TODO game_mouse
+// #include "fallout2/game_sound.h" TODO audio
+#include "fallout2/geometry.h"
+#include "fallout2/input.h"
+#include "fallout2/interface.h"
+#include "fallout2/memory.h"
+#include "fallout2/sfall_config.h"
+#include "fallout2/svga.h"
+#include "fallout2/text_font.h"
+#include "fallout2/window_manager.h"
 
-namespace fallout {
+#include "common/stream.h"
+
+namespace Fallout2 {
 
 // The maximum number of lines display monitor can hold. Once this value
 // is reached earlier messages are thrown away.
@@ -50,7 +52,7 @@ static void displayMonitorOnMouseExit(int btn, int keyCode);
 static void consoleFileInit();
 static void consoleFileReset();
 static void consoleFileExit();
-static void consoleFileAddMessage(const char* message);
+static void consoleFileAddMessage(const char *message);
 static void consoleFileFlush();
 
 // 0x51850C
@@ -71,7 +73,7 @@ static int gDisplayMonitorScrollUpButton = -1;
 static char gDisplayMonitorLines[DISPLAY_MONITOR_LINES_CAPACITY][DISPLAY_MONITOR_LINE_LENGTH];
 
 // 0x56FB3C
-static unsigned char* gDisplayMonitorBackgroundFrmData;
+static unsigned char *gDisplayMonitorBackgroundFrmData;
 
 // 0x56FB40
 static int _max_disp;
@@ -94,7 +96,7 @@ static int _disp_start;
 // 0x56FB58
 static unsigned int gDisplayMonitorLastBeepTimestamp;
 
-static std::ofstream gConsoleFileStream;
+// static std::ofstream gConsoleFileStream;  TODO sfall
 static int gConsoleFilePrintCount = 0;
 
 // 0x431610
@@ -116,7 +118,7 @@ int displayMonitorInit() {
 		_disp_curr = 0;
 		fontSetCurrent(oldFont);
 
-		gDisplayMonitorBackgroundFrmData = (unsigned char*)internal_malloc(DISPLAY_MONITOR_WIDTH * DISPLAY_MONITOR_HEIGHT);
+		gDisplayMonitorBackgroundFrmData = (unsigned char *)internal_malloc(DISPLAY_MONITOR_WIDTH * DISPLAY_MONITOR_HEIGHT);
 		if (gDisplayMonitorBackgroundFrmData == NULL) {
 			return -1;
 		}
@@ -124,11 +126,11 @@ int displayMonitorInit() {
 		if (gInterfaceBarIsCustom) {
 			_intface_full_width = gInterfaceBarWidth;
 			blitBufferToBuffer(customInterfaceBarGetBackgroundImageData() + gInterfaceBarWidth * DISPLAY_MONITOR_Y + DISPLAY_MONITOR_X,
-			                   DISPLAY_MONITOR_WIDTH,
-			                   DISPLAY_MONITOR_HEIGHT,
-			                   gInterfaceBarWidth,
-			                   gDisplayMonitorBackgroundFrmData,
-			                   DISPLAY_MONITOR_WIDTH);
+							   DISPLAY_MONITOR_WIDTH,
+							   DISPLAY_MONITOR_HEIGHT,
+							   gInterfaceBarWidth,
+							   gDisplayMonitorBackgroundFrmData,
+							   DISPLAY_MONITOR_WIDTH);
 		} else {
 			FrmImage backgroundFrmImage;
 			int backgroundFid = buildFid(OBJ_TYPE_INTERFACE, 16, 0, 0, 0);
@@ -137,57 +139,57 @@ int displayMonitorInit() {
 				return -1;
 			}
 
-			unsigned char* backgroundFrmData = backgroundFrmImage.getData();
+			unsigned char *backgroundFrmData = backgroundFrmImage.getData();
 			_intface_full_width = backgroundFrmImage.getWidth();
 
 			blitBufferToBuffer(backgroundFrmData + _intface_full_width * DISPLAY_MONITOR_Y + DISPLAY_MONITOR_X,
-			                   DISPLAY_MONITOR_WIDTH,
-			                   DISPLAY_MONITOR_HEIGHT,
-			                   _intface_full_width,
-			                   gDisplayMonitorBackgroundFrmData,
-			                   DISPLAY_MONITOR_WIDTH);
+							   DISPLAY_MONITOR_WIDTH,
+							   DISPLAY_MONITOR_HEIGHT,
+							   _intface_full_width,
+							   gDisplayMonitorBackgroundFrmData,
+							   DISPLAY_MONITOR_WIDTH);
 		}
 
 		gDisplayMonitorScrollUpButton = buttonCreate(gInterfaceBarWindow,
-		                                DISPLAY_MONITOR_X,
-		                                DISPLAY_MONITOR_Y,
-		                                DISPLAY_MONITOR_WIDTH,
-		                                DISPLAY_MONITOR_HALF_HEIGHT,
-		                                -1,
-		                                -1,
-		                                -1,
-		                                -1,
-		                                NULL,
-		                                NULL,
-		                                NULL,
-		                                0);
+													 DISPLAY_MONITOR_X,
+													 DISPLAY_MONITOR_Y,
+													 DISPLAY_MONITOR_WIDTH,
+													 DISPLAY_MONITOR_HALF_HEIGHT,
+													 -1,
+													 -1,
+													 -1,
+													 -1,
+													 NULL,
+													 NULL,
+													 NULL,
+													 0);
 		if (gDisplayMonitorScrollUpButton != -1) {
 			buttonSetMouseCallbacks(gDisplayMonitorScrollUpButton,
-			                        displayMonitorScrollUpOnMouseEnter,
-			                        displayMonitorOnMouseExit,
-			                        displayMonitorScrollUpOnMouseDown,
-			                        NULL);
+									displayMonitorScrollUpOnMouseEnter,
+									displayMonitorOnMouseExit,
+									displayMonitorScrollUpOnMouseDown,
+									NULL);
 		}
 
 		gDisplayMonitorScrollDownButton = buttonCreate(gInterfaceBarWindow,
-		                                  DISPLAY_MONITOR_X,
-		                                  DISPLAY_MONITOR_Y + DISPLAY_MONITOR_HALF_HEIGHT,
-		                                  DISPLAY_MONITOR_WIDTH,
-		                                  DISPLAY_MONITOR_HEIGHT - DISPLAY_MONITOR_HALF_HEIGHT,
-		                                  -1,
-		                                  -1,
-		                                  -1,
-		                                  -1,
-		                                  NULL,
-		                                  NULL,
-		                                  NULL,
-		                                  0);
+													   DISPLAY_MONITOR_X,
+													   DISPLAY_MONITOR_Y + DISPLAY_MONITOR_HALF_HEIGHT,
+													   DISPLAY_MONITOR_WIDTH,
+													   DISPLAY_MONITOR_HEIGHT - DISPLAY_MONITOR_HALF_HEIGHT,
+													   -1,
+													   -1,
+													   -1,
+													   -1,
+													   NULL,
+													   NULL,
+													   NULL,
+													   0);
 		if (gDisplayMonitorScrollDownButton != -1) {
 			buttonSetMouseCallbacks(gDisplayMonitorScrollDownButton,
-			                        displayMonitorScrollDownOnMouseEnter,
-			                        displayMonitorOnMouseExit,
-			                        displayMonitorScrollDownOnMouseDown,
-			                        NULL);
+									displayMonitorScrollDownOnMouseEnter,
+									displayMonitorOnMouseExit,
+									displayMonitorScrollDownOnMouseDown,
+									NULL);
 		}
 
 		gDisplayMonitorEnabled = true;
@@ -226,7 +228,7 @@ void displayMonitorExit() {
 }
 
 // 0x43186C
-void displayMonitorAddMessage(char* str) {
+void displayMonitorAddMessage(char *str) {
 	if (!gDisplayMonitorInitialized) {
 		return;
 	}
@@ -244,19 +246,19 @@ void displayMonitorAddMessage(char* str) {
 	knobString[1] = '\0';
 	int knobWidth = fontGetStringWidth(knobString);
 
-	if (!isInCombat()) {
+/*	if (!isInCombat()) { TODO combat
 		unsigned int now = _get_bk_time();
 		if (getTicksBetween(now, gDisplayMonitorLastBeepTimestamp) >= DISPLAY_MONITOR_BEEP_DELAY) {
 			gDisplayMonitorLastBeepTimestamp = now;
-			soundPlayFile("monitor");
+			soundPlayFile("monitor"); TODO audio
 		}
-	}
+	}*/
 
 	// TODO: Refactor these two loops.
-	char* v1 = NULL;
+	char *v1 = NULL;
 	while (true) {
 		while (fontGetStringWidth(str) < DISPLAY_MONITOR_WIDTH - _max_disp - knobWidth) {
-			char* temp = gDisplayMonitorLines[_disp_start];
+			char *temp = gDisplayMonitorLines[_disp_start];
 			int length;
 			if (knob != '\0') {
 				*temp++ = knob;
@@ -282,7 +284,7 @@ void displayMonitorAddMessage(char* str) {
 			v1 = NULL;
 		}
 
-		char* space = strrchr(str, ' ');
+		char *space = strrchr(str, ' ');
 		if (space == NULL) {
 			break;
 		}
@@ -297,7 +299,7 @@ void displayMonitorAddMessage(char* str) {
 		}
 	}
 
-	char* temp = gDisplayMonitorLines[_disp_start];
+	char *temp = gDisplayMonitorLines[_disp_start];
 	int length;
 	if (knob != '\0') {
 		temp++;
@@ -340,18 +342,18 @@ static void displayMonitorRefresh() {
 		return;
 	}
 
-	unsigned char* buf = windowGetBuffer(gInterfaceBarWindow);
+	unsigned char *buf = windowGetBuffer(gInterfaceBarWindow);
 	if (buf == NULL) {
 		return;
 	}
 
 	buf += _intface_full_width * DISPLAY_MONITOR_Y + DISPLAY_MONITOR_X;
 	blitBufferToBuffer(gDisplayMonitorBackgroundFrmData,
-	                   DISPLAY_MONITOR_WIDTH,
-	                   DISPLAY_MONITOR_HEIGHT,
-	                   DISPLAY_MONITOR_WIDTH,
-	                   buf,
-	                   _intface_full_width);
+					   DISPLAY_MONITOR_WIDTH,
+					   DISPLAY_MONITOR_HEIGHT,
+					   DISPLAY_MONITOR_WIDTH,
+					   buf,
+					   _intface_full_width);
 
 	int oldFont = fontGetCurrent();
 	fontSetCurrent(DISPLAY_MONITOR_FONT);
@@ -390,17 +392,17 @@ static void displayMonitorScrollDownOnMouseDown(int btn, int keyCode) {
 
 // 0x431BC8
 static void displayMonitorScrollUpOnMouseEnter(int btn, int keyCode) {
-	gameMouseSetCursor(MOUSE_CURSOR_SMALL_ARROW_UP);
+	// gameMouseSetCursor(MOUSE_CURSOR_SMALL_ARROW_UP); TODO game_mouse
 }
 
 // 0x431BD4
 static void displayMonitorScrollDownOnMouseEnter(int btn, int keyCode) {
-	gameMouseSetCursor(MOUSE_CURSOR_SMALL_ARROW_DOWN);
+	// gameMouseSetCursor(MOUSE_CURSOR_SMALL_ARROW_DOWN); TODO game_mouse
 }
 
 // 0x431BE0
 static void displayMonitorOnMouseExit(int btn, int keyCode) {
-	gameMouseSetCursor(MOUSE_CURSOR_ARROW);
+	// gameMouseSetCursor(MOUSE_CURSOR_ARROW); TODO game_mouse
 }
 
 // 0x431BEC
@@ -422,46 +424,46 @@ void displayMonitorEnable() {
 }
 
 static void consoleFileInit() {
-	char* consoleFilePath;
+	char *consoleFilePath;
 	configGetString(&gSfallConfig, SFALL_CONFIG_MISC_KEY, SFALL_CONFIG_CONSOLE_OUTPUT_FILE_KEY, &consoleFilePath);
 	if (consoleFilePath != NULL && *consoleFilePath == '\0') {
 		consoleFilePath = NULL;
 	}
 
 	if (consoleFilePath != NULL) {
-		gConsoleFileStream.open(consoleFilePath);
+//		gConsoleFileStream.open(consoleFilePath); TODO sfall
 	}
 }
 
 static void consoleFileReset() {
-	if (gConsoleFileStream.is_open()) {
+/*	if (gConsoleFileStream.is_open()) { TODO sfall
 		gConsoleFilePrintCount = 0;
 		gConsoleFileStream.flush();
-	}
+	}*/
 }
 
 static void consoleFileExit() {
-	if (gConsoleFileStream.is_open()) {
+/*	if (gConsoleFileStream.is_open()) { TODO sfall
 		gConsoleFileStream.close();
-	}
+	}*/
 }
 
-static void consoleFileAddMessage(const char* message) {
-	if (gConsoleFileStream.is_open()) {
+static void consoleFileAddMessage(const char *message) {
+/*	if (gConsoleFileStream.is_open()) { TODO sfall
 		gConsoleFileStream << message << '\n';
 
 		gConsoleFilePrintCount++;
 		if (gConsoleFilePrintCount >= 20) {
 			consoleFileFlush();
 		}
-	}
+	}*/
 }
 
 static void consoleFileFlush() {
-	if (gConsoleFileStream.is_open()) {
+/*	if (gConsoleFileStream.is_open()) { TODO sfall
 		gConsoleFilePrintCount = 0;
 		gConsoleFileStream.flush();
-	}
+	}*/
 }
 
-} // namespace fallout
+} // namespace Fallout2
