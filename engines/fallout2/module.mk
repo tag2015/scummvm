@@ -36,6 +36,7 @@ MODULE_OBJS = \
 	mainmenu.o \
 	memory.o \
 	memory_manager.o \
+	map.o \
 	message.o \
 	mouse.o \
 	mouse_manager.o \
