@@ -348,9 +348,9 @@ int screenGetHeight() {
 int screenGetVisibleHeight() {
 	int windowBottomMargin = 0;
 
-//	if (!gInterfaceBarMode) {  TODO interface.cpp
-//		windowBottomMargin = INTERFACE_BAR_HEIGHT;
-//	}
+	if (!gInterfaceBarMode) {
+		windowBottomMargin = INTERFACE_BAR_HEIGHT;
+	}
 	return screenGetHeight() - windowBottomMargin;
 }
 
