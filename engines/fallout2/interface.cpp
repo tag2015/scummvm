@@ -574,10 +574,10 @@ int interfaceInit() {
 
 	blitBufferToBuffer(gInterfaceWindowBuffer + gInterfaceBarWidth * 14 + 316 + gInterfaceBarContentOffset, 90, 5, gInterfaceBarWidth, gInterfaceActionPointsBarBackground, 90);
 
-	if (indicatorBarInit() == -1) {
+//	if (indicatorBarInit() == -1) {
 		// NOTE: Uninline.
-		return intface_fatal_error(-1);
-	}
+//		return intface_fatal_error(-1);
+//	}
 
 	gInterfaceCurrentHand = HAND_LEFT;
 
@@ -587,7 +587,7 @@ int interfaceInit() {
 	displayMonitorInit();
 
 	// SFALL
-	sidePanelsInit();
+//	sidePanelsInit();
 
 	gInterfaceBarEnabled = true;
 	gInterfaceBarInitialized = false;
