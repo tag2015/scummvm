@@ -351,11 +351,11 @@ int critterAdjustPoison(Object *critter, int amount) {
 	}
 
 	if (messageListGetItem(&gMiscMessageList, &messageListItem)) {
-//		displayMonitorAddMessage(messageListItem.text);  TODO display_monitor.cpp
+		displayMonitorAddMessage(messageListItem.text);
 	}
 
 	if (critter == gDude) {
-//		indicatorBarRefresh();  TODO interface.cpp
+		indicatorBarRefresh();
 	}
 
 	return 0;
@@ -370,13 +370,13 @@ int poisonEventProcess(Object *obj, void *data) {
 	critterAdjustPoison(obj, -2);
 	critterAdjustHitPoints(obj, -1);
 
-//	interfaceRenderHitPoints(false);  TODO interface.cpp
+	interfaceRenderHitPoints(false);
 
 	MessageListItem messageListItem;
 	// You take damage from poison.
 	messageListItem.num = 3001;
 	if (messageListGetItem(&gMiscMessageList, &messageListItem)) {
-//		displayMonitorAddMessage(messageListItem.text);  TODO display_monitor.cpp
+		displayMonitorAddMessage(messageListItem.text);
 	}
 
 	// NOTE: Uninline.
@@ -412,7 +412,7 @@ int critterAdjustRadiation(Object *obj, int amount) {
 		proto->critter.data.flags |= CRITTER_RADIATED;
 	}
 
-/*	if (amount > 0) { TODO item.cpp
+/*	if (amount > 0) { TODO inventory.cpp
 		Object *geigerCounter = NULL;
 
 		Object *item1 = critterGetItem1(gDude);
@@ -451,7 +451,7 @@ int critterAdjustRadiation(Object *obj, int amount) {
 		messageListItem.num = 1007;
 
 		if (messageListGetItem(&gMiscMessageList, &messageListItem)) {
-//			displayMonitorAddMessage(messageListItem.text);  TODO display_monitor.cpp
+			displayMonitorAddMessage(messageListItem.text);
 		}
 	}
 
@@ -461,7 +461,7 @@ int critterAdjustRadiation(Object *obj, int amount) {
 	}
 
 	if (obj == gDude) {
-//		indicatorBarRefresh();  TODO interface.cpp
+		indicatorBarRefresh();
 	}
 
 	return 0;
@@ -565,7 +565,7 @@ void _process_rads(Object *obj, int radiationLevel, bool isHealing) {
 		}
 
 		if (messageListGetItem(&gMiscMessageList, &messageListItem)) {
-//			displayMonitorAddMessage(messageListItem.text);  TODO display_monitor.cpp
+			displayMonitorAddMessage(messageListItem.text);
 		}
 	}
 
@@ -871,7 +871,7 @@ void critterKill(Object *critter, int anim, bool a3) {
 	_critterClearObj = critter;
 	_queue_clear_type(EVENT_TYPE_DRUG, _critterClearObjDrugs);
 
-//	itemDestroyAllHidden(critter); TODO item.cpp
+	itemDestroyAllHidden(critter);
 
 	if (a3) {
 		tileWindowRefreshRect(&updatedRect, elevation);
@@ -1125,7 +1125,7 @@ void dudeDisableState(int state) {
 		queueRemoveEventsByType(gDude, EVENT_TYPE_SNEAK);
 	}
 
-//	indicatorBarRefresh(); TODO interface.cpp
+	indicatorBarRefresh();
 }
 
 // 0x42E26C
@@ -1139,7 +1139,7 @@ void dudeEnableState(int state) {
 		sneakEventProcess(NULL, NULL);
 	}
 
-//	indicatorBarRefresh(); TODO interface.cpp
+	indicatorBarRefresh();
 }
 
 // 0x42E2B0
@@ -1325,7 +1325,7 @@ int critterGetMovementPointCostAdjustedForCrippledLegs(Object *critter, int acti
 // 0x42E66C
 bool critterIsEncumbered(Object *critter) {
 	int maxWeight = critterGetStat(critter, STAT_CARRY_WEIGHT);
-	int currentWeight = 0; // objectGetInventoryWeight(critter); TODO item.cpp
+	int currentWeight = objectGetInventoryWeight(critter);
 	return maxWeight < currentWeight;
 }
 
