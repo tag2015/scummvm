@@ -290,8 +290,6 @@ static int gTileWindowWidth;
 // 0x66BE34
 int gCenterTile;
 
-// TODO: gElevation in map
-int gElevation = 0;
 
 // 0x4B0C40
 int tileInit(TileData **a1, int squareGridWidth, int squareGridHeight, int hexGridWidth, int hexGridHeight, unsigned char *buf, int windowWidth, int windowHeight, int windowPitch, TileWindowRefreshProc *windowRefreshProc) {
