@@ -400,6 +400,22 @@ Common::Error Fallout2Engine::run() {
 	if (isoInit() != 0)
 		warning("Failed on iso_init");
 
+	char path[COMPAT_MAX_PATH];
+
+	if (!messageListInit(&gMiscMessageList))
+		warning("Failed on message_init\n");
+	else
+		debug("Initialized messages list!");
+
+	snprintf(path, sizeof(path), "%s%s", asc_5186C8, "misc.msg");
+
+	if (!messageListLoad(&gMiscMessageList, path))
+		warning("Failed on message_load\n");
+	else
+		debug("Loaded messages list: %s!", path);
+
+	messageListRepositorySetStandardMessageList(STANDARD_MESSAGE_LIST_MISC, &gMiscMessageList);
+
 	if (mainMenuWindowInit() == 0)
 		debug("Initialized main menu!");
 	else
