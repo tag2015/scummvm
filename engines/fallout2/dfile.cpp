@@ -389,7 +389,7 @@ char *dfileReadString(char *string, int size, DFile *stream) {
 	// terminator.
 	for (int index = 0; index < size - 1; index++) {
 		int ch = dfileReadCharInternal(stream);
-		debug(6, "ReadString: pos: %d - char: %c", index, ch);
+		debug(8, "ReadString: pos: %d - char: %c", index, ch);
 		if (ch == -1) {
 			break;
 		}
