@@ -385,41 +385,25 @@ Common::Error Fallout2Engine::run() {
 	else
 		warning("Error initializing traits");
 
-	if(itemsInit() == 0)
+	if (itemsInit() == 0)
 		debug("Initialized items!");
 	else
 		warning("Error initializing items!");
 
 	queueInit();
 
-	if(critterInit() == 0)
+	if (critterInit() == 0)
 		debug("Initialized critters!");
 	else
 		warning("Error initializing critters");
 
-	// TODO the following lines are part of IsoInit, remove when implemented in map.cpp
-	tileScrollLimitingDisable();
-	tileScrollBlockingDisable();
-
-	if (artInit() != 0) {
-		debugPrint("art_init failed in iso_init\n");
-	}
-	debugPrint(">art_init\t\t");
-
-	colorCycleInit();
-	debugPrint(">cycle_init\t\t");
-
-	tileScrollBlockingEnable();
-	tileScrollLimitingEnable();
-
-	if (interfaceInit() != 0) {
-		debugPrint("intface_init failed in iso_init\n");
-	}
-	debugPrint(">intface_init\t\t");
-	// TODO art/interface init ends here
+	if (isoInit() != 0)
+		warning("Failed on iso_init");
 
 	if (mainMenuWindowInit() == 0)
-		debug("Initialized main menu");
+		debug("Initialized main menu!");
+	else
+		warning("Couldn't load main menu");
 
 	// throw a dice (yay!)
 	debugPrint("RandomRoll (diff= 70) result: %d", randomRoll(70, 5, NULL));
