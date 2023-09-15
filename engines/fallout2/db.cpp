@@ -334,10 +334,10 @@ int fileReadInt32(File *stream, int *valuePtr) {
 
 			//			void *ptr = (byte *) malloc(sizeof(byte)*4);
 			//			memcpy( ptr, stream->dfile->decompressedData, sizeof(byte)*4);
-			value = (int)(*(stream->dfile->decompressedData) << 24 |
-						  *(stream->dfile->decompressedData + 1) << 16 |
-						  *(stream->dfile->decompressedData + 2) << 8 |
-						  *(stream->dfile->decompressedData + 3));
+			value = (int)(*(stream->dfile->decompressedData + stream->dfile->decompressed_position) << 24 |
+						  *(stream->dfile->decompressedData + stream->dfile->decompressed_position + 1) << 16 |
+						  *(stream->dfile->decompressedData + stream->dfile->decompressed_position + 2) << 8 |
+						  *(stream->dfile->decompressedData + stream->dfile->decompressed_position + 3));
 			//			value = (int*) ptr;
 			debug(6, "DB: Read Int32: %d", value);
 			stream->dfile->decompressed_position += 4;
