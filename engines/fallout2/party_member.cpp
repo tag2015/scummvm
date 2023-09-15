@@ -1511,7 +1511,7 @@ int _partyMemberIncLevels() {
 					// %s has gained in some abilities.
 					text = getmsg(&gMiscMessageList, &msg, 9000);
 					snprintf(str, sizeof(str), text, name);
-//					displayMonitorAddMessage(str);  TODO display_monitor.cpp
+					displayMonitorAddMessage(str);
 
 					debugPrint(str);
 
