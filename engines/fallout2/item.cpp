@@ -1464,7 +1464,7 @@ bool weaponCanBeReloadedWith(Object *weapon, Object *ammo) {
 		// There is not enough light to recharge this item.
 		MessageListItem messageListItem;
 		char *msg = getmsg(&gItemsMessageList, &messageListItem, 500);
-//		displayMonitorAddMessage(msg); TODO display_monitor
+		displayMonitorAddMessage(msg);
 
 		return false;
 	}
@@ -2180,7 +2180,7 @@ int _item_m_use_charged_item(Object *critter, Object *miscItem) {
 				char text[80];
 				const char *itemName = objectGetName(miscItem);
 				snprintf(text, sizeof(text), messageListItem.text, itemName);
-//				displayMonitorAddMessage(text); TODO display_monitor
+				displayMonitorAddMessage(text);
 			}
 		}
 	}
@@ -2224,7 +2224,7 @@ int miscItemTrickleEventProcess(Object *item, void *data) {
 				char text[80];
 				const char *itemName = objectGetName(item);
 				snprintf(text, sizeof(text), messageListItem.text, itemName);
-//				displayMonitorAddMessage(text); TODO display_monitor
+				displayMonitorAddMessage(text);
 			}
 		}
 		miscItemTurnOff(item);
@@ -2258,7 +2258,7 @@ int miscItemTurnOn(Object *item) {
 		// This item can only be used from the interface bar.
 		messageListItem.num = 9;
 		if (messageListGetItem(&gItemsMessageList, &messageListItem)) {
-//			displayMonitorAddMessage(messageListItem.text); TODO display_monitor
+			displayMonitorAddMessage(messageListItem.text);
 		}
 
 		return -1;
@@ -2271,7 +2271,7 @@ int miscItemTurnOn(Object *item) {
 			if (messageListGetItem(&gItemsMessageList, &messageListItem)) {
 				char *name = objectGetName(item);
 				snprintf(text, sizeof(text), messageListItem.text, name);
-//				displayMonitorAddMessage(text); TODO display_monitor
+				displayMonitorAddMessage(text);
 			}
 		}
 
@@ -2297,7 +2297,7 @@ int miscItemTurnOn(Object *item) {
 		if (messageListGetItem(&gItemsMessageList, &messageListItem)) {
 			char *name = objectGetName(item);
 			snprintf(text, sizeof(text), messageListItem.text, name);
-//			displayMonitorAddMessage(text); TODO display_monitor
+			displayMonitorAddMessage(text);
 		}
 
 		if (item->pid == PROTO_ID_GEIGER_COUNTER_II) {
@@ -2306,7 +2306,7 @@ int miscItemTurnOn(Object *item) {
 			if (messageListGetItem(&gItemsMessageList, &messageListItem)) {
 				int radiation = critterGetRadiation(critter);
 				snprintf(text, sizeof(text), messageListItem.text, radiation);
-//				displayMonitorAddMessage(text); TODO display_monitor
+				displayMonitorAddMessage(text);
 			}
 		}
 	}
@@ -2333,7 +2333,7 @@ int miscItemTurnOff(Object *item) {
 	}
 
 	if (owner == gDude) {
-//		interfaceUpdateItems(false, INTERFACE_ITEM_ACTION_DEFAULT, INTERFACE_ITEM_ACTION_DEFAULT); TODO interface
+		interfaceUpdateItems(false, INTERFACE_ITEM_ACTION_DEFAULT, INTERFACE_ITEM_ACTION_DEFAULT);
 	}
 
 	if (owner == gDude) {
@@ -2344,7 +2344,7 @@ int miscItemTurnOff(Object *item) {
 			const char *name = objectGetName(item);
 			char text[80];
 			snprintf(text, sizeof(text), messageListItem.text, name);
-//			displayMonitorAddMessage(text); TODO display_monitor
+			displayMonitorAddMessage(text);
 		}
 	}
 
@@ -2586,7 +2586,7 @@ static void _perform_drug_effect(Object *critter, int *stats, int *mods, bool is
 
 		if (critter == gDude) {
 			if (stat == STAT_CURRENT_HIT_POINTS) {
-//				interfaceRenderHitPoints(true); TODO interface
+				interfaceRenderHitPoints(true);
 			}
 
 			int after = critterGetStat(critter, stat);
@@ -2597,7 +2597,7 @@ static void _perform_drug_effect(Object *critter, int *stats, int *mods, bool is
 				if (messageListGetItem(&gItemsMessageList, &messageListItem)) {
 					char *statName = statGetName(stat);
 					snprintf(str, sizeof(str), messageListItem.text, after < before ? before - after : after - before, statName);
-//					displayMonitorAddMessage(str); TODO display_monitor
+					displayMonitorAddMessage(str);
 					statsChanged = true;
 				}
 			}
@@ -2609,7 +2609,7 @@ static void _perform_drug_effect(Object *critter, int *stats, int *mods, bool is
 			// Nothing happens.
 			messageListItem.num = 10;
 			if (messageListGetItem(&gItemsMessageList, &messageListItem)) {
-//				displayMonitorAddMessage(messageListItem.text); TODO display_monitor
+				displayMonitorAddMessage(messageListItem.text);
 			}
 		}
 	} else {
@@ -2707,7 +2707,7 @@ int _item_d_take_drug(Object *critter, Object *item) {
 			MessageListItem messageListItem;
 			// That didn't seem to do that much.
 			char *msg = getmsg(&gItemsMessageList, &messageListItem, 50);
-//			displayMonitorAddMessage(msg);  TODO display_monitor
+			displayMonitorAddMessage(msg);
 		}
 	}
 
@@ -2940,7 +2940,7 @@ static void performWithdrawalStart(Object *obj, int perk, int pid) {
 		char *description = perkGetDescription(perk);
 		// SFALL: Fix crash when description is missing.
 		if (description != NULL) {
-//			displayMonitorAddMessage(description); TODO display_monitor
+			displayMonitorAddMessage(description);
 		}
 	}
 
@@ -2972,7 +2972,7 @@ static void performWithdrawalEnd(Object *obj, int perk) {
 		MessageListItem messageListItem;
 		messageListItem.num = 3;
 		if (messageListGetItem(&gItemsMessageList, &messageListItem)) {
-//			displayMonitorAddMessage(messageListItem.text); TODO display_message
+			displayMonitorAddMessage(messageListItem.text);
 		}
 	}
 }
