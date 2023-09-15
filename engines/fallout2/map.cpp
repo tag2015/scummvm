@@ -203,24 +203,24 @@ int isoInit() {
 		return -1;
 	}
 
-	debugPrint(">art_init\t\t");
+	debug("ISO - Initialized Art repository!");
 
 	if (tileInit(_square, SQUARE_GRID_WIDTH, SQUARE_GRID_HEIGHT, HEX_GRID_WIDTH, HEX_GRID_HEIGHT, gIsoWindowBuffer, screenGetWidth(), screenGetVisibleHeight(), screenGetWidth(), isoWindowRefreshRect) != 0) {
 		debugPrint("tile_init failed in iso_init\n");
 		return -1;
 	}
 
-	debugPrint(">tile_init\t\t");
+	debug("ISO - Initialized tiles!");
 
 	if (objectsInit(gIsoWindowBuffer, screenGetWidth(), screenGetVisibleHeight(), screenGetWidth()) != 0) {
 		debugPrint("obj_init failed in iso_init\n");
 		return -1;
 	}
 
-	debugPrint(">obj_init\t\t");
+	debug("ISO - Initialized objects!");
 
 	colorCycleInit();
-	debugPrint(">cycle_init\t\t");
+	debug("ISO - Initialized color cycler!");
 
 	tileScrollBlockingEnable();
 	tileScrollLimitingEnable();
@@ -230,7 +230,7 @@ int isoInit() {
 		return -1;
 	}
 
-	debugPrint(">intface_init\t\t");
+	debug("ISO - Initialized user interface!");
 
 	// SFALL
 //	elevatorsInit(); TODO elevators
