@@ -31,21 +31,28 @@
 #include "graphics/palette.h"
 #include "graphics/surface.h"
 
+#include "fallout2/art.h"
 #include "fallout2/credits.h"
 #include "fallout2/critter.h"
+#include "fallout2/cycle.h"
 #include "fallout2/db.h"
 #include "fallout2/debug.h"
 #include "fallout2/draw.h"
 #include "fallout2/font_manager.h"
 #include "fallout2/game.h"
 #include "fallout2/game_memory.h"
+#include "fallout2/interface.h"
 #include "fallout2/item.h"
+#include "fallout2/map.h"
+#include "fallout2/mainmenu.h"
 #include "fallout2/memory.h"
 #include "fallout2/message.h"
+#include "fallout2/object.h"
 #include "fallout2/palette.h"
 #include "fallout2/party_member.h"
 #include "fallout2/perk.h"
 #include "fallout2/platform_compat.h"
+#include "fallout2/proto.h"
 #include "fallout2/queue.h"
 #include "fallout2/random.h"
 #include "fallout2/settings.h"
@@ -210,6 +217,58 @@ void Fallout2Engine::showSplash() {
 	settings.system.splash = splash + 1;
 }
 
+
+/*
+int isoInit() {
+	tileScrollLimitingDisable();
+	tileScrollBlockingDisable();
+
+	// NOTE: Uninline.
+	//square_init();
+
+	if (artInit() != 0) {
+		debugPrint("art_init failed in iso_init\n");
+		return -1;
+	}
+
+	debugPrint(">art_init\t\t");
+
+//	if (tileInit(_square, SQUARE_GRID_WIDTH, SQUARE_GRID_HEIGHT, HEX_GRID_WIDTH, HEX_GRID_HEIGHT, gIsoWindowBuffer, screenGetWidth(), screenGetVisibleHeight(), screenGetWidth(), isoWindowRefreshRect) != 0) {
+//		debugPrint("tile_init failed in iso_init\n");
+//		return -1;
+//	}
+
+//	debugPrint(">tile_init\t\t");
+
+	// if (objectsInit(gIsoWindowBuffer, screenGetWidth(), screenGetVisibleHeight(), screenGetWidth()) != 0) {
+	// 	debugPrint("obj_init failed in iso_init\n");
+	// 	return -1;
+	// }
+
+	// debugPrint(">obj_init\t\t");
+
+	// colorCycleInit();
+	// debugPrint(">cycle_init\t\t");
+
+	// tileScrollBlockingEnable();
+	// tileScrollLimitingEnable();
+
+	if (interfaceInit() != 0) {
+		debugPrint("intface_init failed in iso_init\n");
+		return -1;
+	}
+
+	debugPrint(">intface_init\t\t");
+
+	// SFALL
+//	mapMakeMapsDirectory();
+
+	// NOTE: Uninline.
+//	mapSetEnteringLocation(-1, -1, -1);
+
+	return 0;
+}*/
+
 Common::Error Fallout2Engine::run() {
 	// Initialize 640x480 paletted graphics mode
 	initGraphics(640, 480);
@@ -338,6 +397,30 @@ Common::Error Fallout2Engine::run() {
 	else
 		warning("Error initializing critters");
 
+	// TODO the following lines are part of IsoInit, remove when implemented in map.cpp
+	tileScrollLimitingDisable();
+	tileScrollBlockingDisable();
+
+	if (artInit() != 0) {
+		debugPrint("art_init failed in iso_init\n");
+	}
+	debugPrint(">art_init\t\t");
+
+	colorCycleInit();
+	debugPrint(">cycle_init\t\t");
+
+	tileScrollBlockingEnable();
+	tileScrollLimitingEnable();
+
+	if (interfaceInit() != 0) {
+		debugPrint("intface_init failed in iso_init\n");
+	}
+	debugPrint(">intface_init\t\t");
+	// TODO art/interface init ends here
+
+	if (mainMenuWindowInit() == 0)
+		debug("Initialized main menu");
+
 	// throw a dice (yay!)
 	debugPrint("RandomRoll (diff= 70) result: %d", randomRoll(70, 5, NULL));
 	debugPrint("RandomRoll (diff= 10) result: %d", randomRoll(10, 5, NULL));
@@ -345,21 +428,26 @@ Common::Error Fallout2Engine::run() {
 
 	g_system->delayMillis(1000);
 	paletteFadeTo(gPaletteBlack);
-	bool msgshown = false;
-	while (!shouldQuit() && !msgshown) {
+
+	bool exit = false;
+	mainMenuWindowUnhide(1);
+	while (!shouldQuit() && !exit) {
 		while (g_system->getEventManager()->pollEvent(e)) {
+
+			if (e.type == Common::EVENT_SCREEN_CHANGED)
+				_screen->update();
+			if (e.type == Common::EVENT_LBUTTONDOWN) {
+				exit = true;
+				break;
+			}
+
+			// Delay for a bit. All events loops should have a delay
+			// to prevent the system being unduly loaded
+			g_system->delayMillis(10);
 		}
-		if (e.type == Common::EVENT_SCREEN_CHANGED)
-			_screen->update();
-
-		// Delay for a bit. All events loops should have a delay
-		// to prevent the system being unduly loaded
-		g_system->delayMillis(10);
-//		showMesageBox("CONGLATURATION, YOU WIN!");
-		creditsOpen("credits.txt", -1, false);
-		msgshown = true;
 	}
-
+	mainMenuWindowHide(1);
+	creditsOpen("credits.txt", -1, false);
 	gameExit();
 	return Common::kNoError;
 }
