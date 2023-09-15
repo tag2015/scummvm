@@ -1,7 +1,7 @@
-#ifndef ELEVATOR_H
-#define ELEVATOR_H
+#ifndef FALLOUT2_ELEVATOR_H
+#define FALLOUT2_ELEVATOR_H
 
-namespace fallout {
+namespace Fallout2 {
 
 typedef enum Elevator {
 	ELEVATOR_BROTHERHOOD_OF_STEEL_MAIN,
@@ -31,10 +31,10 @@ typedef enum Elevator {
 	ELEVATOR_COUNT,
 } Elevator;
 
-int elevatorSelectLevel(int elevator, int* mapPtr, int* elevationPtr, int* tilePtr);
+int elevatorSelectLevel(int elevator, int *mapPtr, int *elevationPtr, int *tilePtr);
 
 void elevatorsInit();
 
-} // namespace fallout
+} // namespace Fallout2
 
-#endif /* ELEVATOR_H */
+#endif
