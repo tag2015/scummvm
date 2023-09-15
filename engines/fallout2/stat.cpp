@@ -731,7 +731,7 @@ int pcAddExperienceWithOptions(int xp, bool a2, int *xpGained) {
 			MessageListItem messageListItem;
 			messageListItem.num = 600;
 			if (messageListGetItem(&gStatsMessageList, &messageListItem)) {
-//				displayMonitorAddMessage(messageListItem.text);  TODO display_monitor.cpp
+				displayMonitorAddMessage(messageListItem.text);
 			}
 
 			dudeEnableState(DUDE_STATE_LEVEL_UP_AVAILABLE);
@@ -750,13 +750,13 @@ int pcAddExperienceWithOptions(int xp, bool a2, int *xpGained) {
 			int maxHpAfter = critterGetStat(gDude, STAT_MAXIMUM_HIT_POINTS);
 			critterAdjustHitPoints(gDude, maxHpAfter - maxHpBefore);
 
-//			interfaceRenderHitPoints(false);  TODO interface.cpp
+			interfaceRenderHitPoints(false);
 
 			// SFALL: Update unarmed attack after leveling up.
 			int leftItemAction;
 			int rightItemAction;
-//			interfaceGetItemActions(&leftItemAction, &rightItemAction);  // TODO: interface.cpp
-//			interfaceUpdateItems(false, leftItemAction, rightItemAction);
+			interfaceGetItemActions(&leftItemAction, &rightItemAction);
+			interfaceUpdateItems(false, leftItemAction, rightItemAction);
 
 			if (a2) {
 				_partyMemberIncLevels();
@@ -799,7 +799,7 @@ int pcSetExperience(int xp) {
 
 	critterSetBonusStat(gDude, STAT_MAXIMUM_HIT_POINTS, bonusHp - deltaHp);
 
-//	interfaceRenderHitPoints(false);  TODO interface.cpp
+	interfaceRenderHitPoints(false);
 
 	return 0;
 }
