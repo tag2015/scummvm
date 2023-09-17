@@ -238,7 +238,7 @@ int critterGetStat(Object *critter, int stat) {
 			}*/
 			break;
 		case STAT_AGE:
-//			value += gameTimeGetTime() / GAME_TIME_TICKS_PER_YEAR;  TODO scripts.cpp
+			value += gameTimeGetTime() / GAME_TIME_TICKS_PER_YEAR;
 			break;
 		}
 
