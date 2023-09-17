@@ -538,7 +538,7 @@ static int objectLoadAllInternal(File *stream) {
 			objectListNode->obj->outline = 0;
 			gObjectFids[gObjectFidsLength++] = objectListNode->obj->fid;
 
-			if (/*objectListNode->obj->sid != -1*/ 0) {  // TODO script.cpp
+			if (objectListNode->obj->sid != -1) {
 				Script *script;
 				if (scriptGetScript(objectListNode->obj->sid, &script) == -1) {
 					objectListNode->obj->sid = -1;
@@ -928,7 +928,7 @@ int objectCreateWithFidPid(Object **objectPtr, int fid, int pid) {
 	}
 
 	objectListNode->obj->pid = pid;
-//	objectListNode->obj->id = scriptsNewObjectId();  TODO script.cpp
+	objectListNode->obj->id = scriptsNewObjectId();
 
 	if (pid == -1 || PID_TYPE(pid) == OBJ_TYPE_TILE) {
 		Inventory *inventory = &(objectListNode->obj->data.inventory);
@@ -1039,7 +1039,7 @@ int _obj_copy(Object **a1, Object *a2) {
 
 	_obj_insert(objectListNode);
 
-//	objectListNode->obj->id = scriptsNewObjectId();  TODO script.cpp
+	objectListNode->obj->id = scriptsNewObjectId();
 
 	if (objectListNode->obj->sid != -1) {
 		objectListNode->obj->sid = -1;
@@ -2093,7 +2093,7 @@ void _obj_remove_all() {
 	ObjectListNode *prev;
 	ObjectListNode *next;
 
-	// _scr_remove_all();  TODO script.cpp
+	_scr_remove_all();
 
 	for (int tile = 0; tile < HEX_GRID_SIZE; tile++) {
 		node = gObjectListHeadByTile[tile];
@@ -3456,14 +3456,14 @@ static int _obj_load_obj(File *stream, Object **objectPtr, int elevation, Object
 		return -1;
 	}
 
-/*	if (obj->sid != -1) {  TODO script.cpp
+	if (obj->sid != -1) {
 		Script *script;
 		if (scriptGetScript(obj->sid, &script) == -1) {
 			obj->sid = -1;
 		} else {
 			script->owner = obj;
 		}
-	} */
+	}
 
 	_obj_fix_violence_settings(&(obj->fid));
 
@@ -3540,7 +3540,7 @@ int _obj_load_dude(File *stream) {
 	int savedRotation = gDude->rotation;
 	int savedOid = gDude->id;
 
-//	scriptsClearDudeScript();  TODO scripts.cpp
+	scriptsClearDudeScript();
 
 	Object *temp;
 	int rc = _obj_load_obj(stream, &temp, -1, NULL);
@@ -3549,11 +3549,11 @@ int _obj_load_dude(File *stream) {
 
 	gDude->flags |= OBJECT_NO_SAVE;
 
-//	scriptsClearDudeScript();  TODO scripts.cpp
+	scriptsClearDudeScript();
 
 	gDude->id = savedOid;
 
-//	scriptsSetDudeScript(); TODO scripts.cpp
+	scriptsSetDudeScript();
 
 	int newTile = gDude->tile;
 	gDude->tile = savedTile;
@@ -3564,7 +3564,7 @@ int _obj_load_dude(File *stream) {
 	int newRotation = gDude->rotation;
 	gDude->rotation = newRotation;
 
-//	scriptsSetDudeScript();  TODO scripts.cpp
+	scriptsSetDudeScript();
 
 	if (rc != -1) {
 		objectSetLocation(gDude, newTile, newElevation, NULL);
@@ -3800,10 +3800,10 @@ static int _obj_remove(ObjectListNode *a1, ObjectListNode *a2) {
 
 	_obj_inven_free(&(a1->obj->data.inventory));
 
-/*	if (a1->obj->sid != -1) {  TODO script.cpp
+	if (a1->obj->sid != -1) {
 		scriptExecProc(a1->obj->sid, SCRIPT_PROC_DESTROY);
 		scriptRemove(a1->obj->sid);
-	} */
+	}
 
 	if (a1 != a2) {
 		if (a2 != NULL) {
