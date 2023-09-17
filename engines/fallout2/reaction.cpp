@@ -9,7 +9,7 @@ int reactionSetValue(Object *critter, int value) {
 	ProgramValue programValue;
 	programValue.opcode = VALUE_TYPE_INT;
 	programValue.integerValue = value;
-//	scriptSetLocalVar(critter->sid, 0, programValue);  TODO script.cpp
+	scriptSetLocalVar(critter->sid, 0, programValue);
 	return 0;
 }
 
@@ -39,11 +39,11 @@ int _reaction_influence_() {
 int reactionGetValue(Object *critter) {
 	ProgramValue programValue;
 
-//	if (scriptGetLocalVar(critter->sid, 0, programValue) == -1) {  TODO script.cpp
+	if (scriptGetLocalVar(critter->sid, 0, programValue) == -1) {
 		return -1;
-//	}
+	}
 
-//	return programValue.integerValue;
+	return programValue.integerValue;
 }
 
 } // namespace Fallout2
