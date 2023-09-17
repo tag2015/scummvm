@@ -1125,7 +1125,7 @@ static int skillGetFreeUsageSlot(int skill) {
 		}
 	}
 
-	int time = GAME_TIME_TICKS_PER_HOUR; // gameTimeGetTime(); TODO script.cpp
+	int time = gameTimeGetTime();
 	int hoursSinceLastUsage = (time - _timesSkillUsed[skill][0]) / GAME_TIME_TICKS_PER_HOUR;
 	if (hoursSinceLastUsage <= 24) {
 		return -1;
@@ -1147,7 +1147,7 @@ int skillUpdateLastUse(int skill) {
 		}
 	}
 
-	_timesSkillUsed[skill][slot] = /*gameTimeGetTime();*/ GAME_TIME_TICKS_PER_HOUR; // TODO script.cpp
+	_timesSkillUsed[skill][slot] = gameTimeGetTime();
 
 	return 0;
 }
