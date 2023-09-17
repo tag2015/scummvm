@@ -303,8 +303,8 @@ void _GNW95_ShowRect(unsigned char *src, int srcPitch, int a3, int srcX, int src
 	Common::Rect srcRect;
 	srcRect.left = destX;
 	srcRect.top = destY;
-	srcRect.right = srcWidth;
-	srcRect.bottom = srcHeight;
+	srcRect.right = srcRect.left + srcWidth;
+	srcRect.bottom = srcRect.top + srcHeight;
 
 	const Common::Point destPos(destX, destY);
 
