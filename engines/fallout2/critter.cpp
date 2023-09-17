@@ -233,10 +233,10 @@ char *critterGetName(Object *obj) {
 
 	if (obj->field_80 == -1) {
 		if (obj->sid != -1) {
-/*			Script *script;  TODO script.cpp
+			Script *script;
 			if (scriptGetScript(obj->sid, &script) != -1) {
 				obj->field_80 = script->field_14;
-			}*/
+			}
 		}
 	}
 
@@ -864,7 +864,7 @@ void critterKill(Object *critter, int anim, bool a3) {
 	critter->data.critter.combat.results |= DAM_DEAD;
 
 	if (critter->sid != -1) {
-//		scriptRemove(critter->sid);  TODO script.cpp
+		scriptRemove(critter->sid);
 		critter->sid = -1;
 	}
 
