@@ -1,40 +1,43 @@
-#include "character_selector.h"
+#include "fallout2/character_selector.h"
 
-#include <stdio.h>
+/*#include <stdio.h>
 #include <string.h>
 
 #include <algorithm>
-#include <vector>
+#include <vector>*/
 
-#include "art.h"
-#include "character_editor.h"
-#include "color.h"
-#include "critter.h"
-#include "db.h"
-#include "debug.h"
-#include "draw.h"
-#include "game.h"
-#include "game_sound.h"
-#include "input.h"
-#include "kb.h"
-#include "memory.h"
-#include "message.h"
-#include "mouse.h"
-#include "object.h"
-#include "palette.h"
-#include "platform_compat.h"
-#include "preferences.h"
-#include "proto.h"
-#include "settings.h"
-#include "sfall_config.h"
-#include "skill.h"
-#include "stat.h"
-#include "svga.h"
-#include "text_font.h"
-#include "trait.h"
-#include "window_manager.h"
+#include "common/array.h"
+#include "common/events.h"
 
-namespace fallout {
+#include "fallout2/art.h"
+// #include "fallout2/character_editor.h" TODO character_editor
+#include "fallout2/color.h"
+#include "fallout2/critter.h"
+#include "fallout2/db.h"
+#include "fallout2/debug.h"
+#include "fallout2/draw.h"
+#include "fallout2/game.h"
+// #include "fallout2/game_sound.h" TODO audio
+#include "fallout2/input.h"
+#include "fallout2/kb.h"
+#include "fallout2/memory.h"
+#include "fallout2/message.h"
+#include "fallout2/mouse.h"
+#include "fallout2/object.h"
+#include "fallout2/palette.h"
+#include "fallout2/platform_compat.h"
+// #include "fallout2/preferences.h" TODO preferences
+#include "fallout2/proto.h"
+#include "fallout2/settings.h"
+#include "fallout2/sfall_config.h"
+#include "fallout2/skill.h"
+#include "fallout2/stat.h"
+#include "fallout2/svga.h"
+#include "fallout2/text_font.h"
+#include "fallout2/trait.h"
+#include "fallout2/window_manager.h"
+
+namespace Fallout2 {
 
 #define CS_WINDOW_WIDTH (640)
 #define CS_WINDOW_HEIGHT (480)
@@ -88,16 +91,16 @@ static bool characterSelectorWindowRenderStats();
 static bool characterSelectorWindowRenderBio();
 static bool characterSelectorWindowFatalError(bool result);
 
-static void premadeCharactersLocalizePath(char* path);
+static void premadeCharactersLocalizePath(char *path);
 
 // 0x51C84C
 static int gCurrentPremadeCharacter = PREMADE_CHARACTER_NARG;
 
 // 0x51C850
 static PremadeCharacterDescription gPremadeCharacterDescriptions[PREMADE_CHARACTER_COUNT] = {
-	{ "premade\\combat", 201, "VID 208-197-88-125" },
-	{ "premade\\stealth", 202, "VID 208-206-49-229" },
-	{ "premade\\diplomat", 203, "VID 208-206-49-227" },
+	{"premade\\combat", 201, "VID 208-197-88-125"},
+	{"premade\\stealth", 202, "VID 208-206-49-229"},
+	{"premade\\diplomat", 203, "VID 208-206-49-227"},
 };
 
 // 0x51C8D4
@@ -107,10 +110,10 @@ static int gPremadeCharacterCount = PREMADE_CHARACTER_COUNT;
 static int gCharacterSelectorWindow = -1;
 
 // 0x51C7FC
-static unsigned char* gCharacterSelectorWindowBuffer = NULL;
+static unsigned char *gCharacterSelectorWindowBuffer = NULL;
 
 // 0x51C800
-static unsigned char* gCharacterSelectorBackground = NULL;
+static unsigned char *gCharacterSelectorBackground = NULL;
 
 // 0x51C804
 static int gCharacterSelectorWindowPreviousButton = -1;
@@ -143,7 +146,7 @@ static FrmImage _nextButtonPressedFrmImage;
 static FrmImage _previousButtonNormalFrmImage;
 static FrmImage _previousButtonPressedFrmImage;
 
-static std::vector<PremadeCharacterDescription> gCustomPremadeCharacterDescriptions;
+static Common::Array<PremadeCharacterDescription> gCustomPremadeCharacterDescriptions; // originally std::vector
 
 // 0x4A71D0
 int characterSelectorOpen() {
@@ -164,79 +167,64 @@ int characterSelectorOpen() {
 	while (!done) {
 		sharedFpsLimiter.mark();
 
-		if (_game_user_wants_to_quit != 0) {
-			break;
-		}
+		//		if (_game_user_wants_to_quit != 0) {  TODO game
+		//			break;
+		//		}
 
 		int keyCode = inputGetInput();
 
-		switch (keyCode) {
-		case KEY_MINUS:
-		case KEY_UNDERSCORE:
-			brightnessDecrease();
-			break;
-		case KEY_EQUAL:
-		case KEY_PLUS:
-			brightnessIncrease();
-			break;
-		case KEY_UPPERCASE_B:
-		case KEY_LOWERCASE_B:
-		case KEY_ESCAPE:
+		Common::Event e;
+		while (g_system->getEventManager()->pollEvent(e)) {
+			if (e.type == Common::EVENT_KEYDOWN) {
+				break;
+			}
+		}
+		if (e.kbd.keycode == Common::KeyCode::KEYCODE_MINUS ||
+			e.kbd.keycode == Common::KeyCode::KEYCODE_UNDERSCORE) {
+			//	brightnessDecrease(); TODO preferences
+		} else if (e.kbd.keycode == Common::KeyCode::KEYCODE_EQUALS ||
+				   e.kbd.keycode == Common::KeyCode::KEYCODE_PLUS) {
+			//	brightnessIncrease();  TODO preferences
+		} else if (e.kbd.keycode == Common::KeyCode::KEYCODE_b ||
+				   e.kbd.keycode == Common::KeyCode::KEYCODE_ESCAPE) {
 			rc = 3;
 			done = true;
-			break;
-		case KEY_UPPERCASE_C:
-		case KEY_LOWERCASE_C:
-			_ResetPlayer();
-			if (characterEditorShow(1) == 0) {
-				rc = 2;
-				done = true;
-			} else {
-				characterSelectorWindowRefresh();
-			}
-
-			break;
-		case KEY_UPPERCASE_M:
-		case KEY_LOWERCASE_M:
-			if (!characterEditorShow(1)) {
-				rc = 2;
-				done = true;
-			} else {
-				characterSelectorWindowRefresh();
-			}
-
-			break;
-		case KEY_UPPERCASE_T:
-		case KEY_LOWERCASE_T:
+		} else if (e.kbd.keycode == Common::KeyCode::KEYCODE_c) {
+			//  _ResetPlayer();  TODO character_editor
+			// 	if (characterEditorShow(1) == 0) {
+			// 		rc = 2;
+			// 		done = true;
+			// 	} else {
+			// 		characterSelectorWindowRefresh();
+			// 	}
+		} else if (e.kbd.keycode == Common::KeyCode::KEYCODE_m) {
+			// if (!characterEditorShow(1)) { TODO character_editor
+			// 			rc = 2;
+			// 			done = true;
+			// 		} else {
+			// 			characterSelectorWindowRefresh();
+			// 		}
+		} else if (e.kbd.keycode == Common::KeyCode::KEYCODE_t) {
 			rc = 2;
 			done = true;
-
-			break;
-		case KEY_F10:
-			showQuitConfirmationDialog();
-			break;
-		case KEY_ARROW_LEFT:
-			soundPlayFile("ib2p1xx1");
-		// FALLTHROUGH
-		case 500:
+		} else if (e.kbd.keycode == Common::KeyCode::KEYCODE_F10) {
+			//			showQuitConfirmationDialog(); TODO game
+		} else if (e.kbd.keycode == Common::KeyCode::KEYCODE_LEFT) {
+			//			soundPlayFile("ib2p1xx1"); TODO audio
 			gCurrentPremadeCharacter -= 1;
 			if (gCurrentPremadeCharacter < 0) {
 				gCurrentPremadeCharacter = gPremadeCharacterCount - 1;
 			}
 
 			characterSelectorWindowRefresh();
-			break;
-		case KEY_ARROW_RIGHT:
-			soundPlayFile("ib2p1xx1");
-		// FALLTHROUGH
-		case 501:
+		} else if (e.kbd.keycode == Common::KeyCode::KEYCODE_RIGHT) {
+			//			soundPlayFile("ib2p1xx1"); TODO audio
 			gCurrentPremadeCharacter += 1;
 			if (gCurrentPremadeCharacter >= gPremadeCharacterCount) {
 				gCurrentPremadeCharacter = 0;
 			}
 
 			characterSelectorWindowRefresh();
-			break;
 		}
 
 		renderPresent();
@@ -278,22 +266,22 @@ static bool characterSelectorWindowInit() {
 	}
 
 	blitBufferToBuffer(backgroundFrmImage.getData(),
-	                   CS_WINDOW_WIDTH,
-	                   CS_WINDOW_HEIGHT,
-	                   CS_WINDOW_WIDTH,
-	                   gCharacterSelectorWindowBuffer,
-	                   CS_WINDOW_WIDTH);
+					   CS_WINDOW_WIDTH,
+					   CS_WINDOW_HEIGHT,
+					   CS_WINDOW_WIDTH,
+					   gCharacterSelectorWindowBuffer,
+					   CS_WINDOW_WIDTH);
 
-	gCharacterSelectorBackground = (unsigned char*)internal_malloc(CS_WINDOW_BACKGROUND_WIDTH * CS_WINDOW_BACKGROUND_HEIGHT);
+	gCharacterSelectorBackground = (unsigned char *)internal_malloc(CS_WINDOW_BACKGROUND_WIDTH * CS_WINDOW_BACKGROUND_HEIGHT);
 	if (gCharacterSelectorBackground == NULL)
 		return characterSelectorWindowFatalError(false);
 
 	blitBufferToBuffer(backgroundFrmImage.getData() + CS_WINDOW_WIDTH * CS_WINDOW_BACKGROUND_Y + CS_WINDOW_BACKGROUND_X,
-	                   CS_WINDOW_BACKGROUND_WIDTH,
-	                   CS_WINDOW_BACKGROUND_HEIGHT,
-	                   CS_WINDOW_WIDTH,
-	                   gCharacterSelectorBackground,
-	                   CS_WINDOW_BACKGROUND_WIDTH);
+					   CS_WINDOW_BACKGROUND_WIDTH,
+					   CS_WINDOW_BACKGROUND_HEIGHT,
+					   CS_WINDOW_WIDTH,
+					   gCharacterSelectorBackground,
+					   CS_WINDOW_BACKGROUND_WIDTH);
 
 	backgroundFrmImage.unlock();
 
@@ -311,23 +299,23 @@ static bool characterSelectorWindowInit() {
 	}
 
 	gCharacterSelectorWindowPreviousButton = buttonCreate(gCharacterSelectorWindow,
-	        CS_WINDOW_PREVIOUS_BUTTON_X,
-	        CS_WINDOW_PREVIOUS_BUTTON_Y,
-	        20,
-	        18,
-	        -1,
-	        -1,
-	        -1,
-	        500,
-	        _previousButtonNormalFrmImage.getData(),
-	        _previousButtonPressedFrmImage.getData(),
-	        NULL,
-	        0);
+														  CS_WINDOW_PREVIOUS_BUTTON_X,
+														  CS_WINDOW_PREVIOUS_BUTTON_Y,
+														  20,
+														  18,
+														  -1,
+														  -1,
+														  -1,
+														  500,
+														  _previousButtonNormalFrmImage.getData(),
+														  _previousButtonPressedFrmImage.getData(),
+														  NULL,
+														  0);
 	if (gCharacterSelectorWindowPreviousButton == -1) {
 		return characterSelectorWindowFatalError(false);
 	}
 
-	buttonSetCallbacks(gCharacterSelectorWindowPreviousButton, _gsound_med_butt_press, _gsound_med_butt_release);
+	//	buttonSetCallbacks(gCharacterSelectorWindowPreviousButton, _gsound_med_butt_press, _gsound_med_butt_release); TODO audio
 
 	// Setup "Next" button.
 	fid = buildFid(OBJ_TYPE_INTERFACE, 124, 0, 0, 0);
@@ -341,23 +329,23 @@ static bool characterSelectorWindowInit() {
 	}
 
 	gCharacterSelectorWindowNextButton = buttonCreate(gCharacterSelectorWindow,
-	                                     CS_WINDOW_NEXT_BUTTON_X,
-	                                     CS_WINDOW_NEXT_BUTTON_Y,
-	                                     20,
-	                                     18,
-	                                     -1,
-	                                     -1,
-	                                     -1,
-	                                     501,
-	                                     _nextButtonNormalFrmImage.getData(),
-	                                     _nextButtonPressedFrmImage.getData(),
-	                                     NULL,
-	                                     0);
+													  CS_WINDOW_NEXT_BUTTON_X,
+													  CS_WINDOW_NEXT_BUTTON_Y,
+													  20,
+													  18,
+													  -1,
+													  -1,
+													  -1,
+													  501,
+													  _nextButtonNormalFrmImage.getData(),
+													  _nextButtonPressedFrmImage.getData(),
+													  NULL,
+													  0);
 	if (gCharacterSelectorWindowNextButton == -1) {
 		return characterSelectorWindowFatalError(false);
 	}
 
-	buttonSetCallbacks(gCharacterSelectorWindowNextButton, _gsound_med_butt_press, _gsound_med_butt_release);
+	//	buttonSetCallbacks(gCharacterSelectorWindowNextButton, _gsound_med_butt_press, _gsound_med_butt_release); TODO audio
 
 	// Setup "Take" button.
 	fid = buildFid(OBJ_TYPE_INTERFACE, 8, 0, 0, 0);
@@ -371,23 +359,23 @@ static bool characterSelectorWindowInit() {
 	}
 
 	gCharacterSelectorWindowTakeButton = buttonCreate(gCharacterSelectorWindow,
-	                                     CS_WINDOW_TAKE_BUTTON_X,
-	                                     CS_WINDOW_TAKE_BUTTON_Y,
-	                                     15,
-	                                     16,
-	                                     -1,
-	                                     -1,
-	                                     -1,
-	                                     KEY_LOWERCASE_T,
-	                                     _takeButtonNormalFrmImage.getData(),
-	                                     _takeButtonPressedFrmImage.getData(),
-	                                     NULL,
-	                                     BUTTON_FLAG_TRANSPARENT);
+													  CS_WINDOW_TAKE_BUTTON_X,
+													  CS_WINDOW_TAKE_BUTTON_Y,
+													  15,
+													  16,
+													  -1,
+													  -1,
+													  -1,
+													  KEY_LOWERCASE_T,
+													  _takeButtonNormalFrmImage.getData(),
+													  _takeButtonPressedFrmImage.getData(),
+													  NULL,
+													  BUTTON_FLAG_TRANSPARENT);
 	if (gCharacterSelectorWindowTakeButton == -1) {
 		return characterSelectorWindowFatalError(false);
 	}
 
-	buttonSetCallbacks(gCharacterSelectorWindowTakeButton, _gsound_red_butt_press, _gsound_red_butt_release);
+	//	buttonSetCallbacks(gCharacterSelectorWindowTakeButton, _gsound_red_butt_press, _gsound_red_butt_release); TODO audio
 
 	// Setup "Modify" button.
 	fid = buildFid(OBJ_TYPE_INTERFACE, 8, 0, 0, 0);
@@ -400,23 +388,23 @@ static bool characterSelectorWindowInit() {
 	}
 
 	gCharacterSelectorWindowModifyButton = buttonCreate(gCharacterSelectorWindow,
-	                                       CS_WINDOW_MODIFY_BUTTON_X,
-	                                       CS_WINDOW_MODIFY_BUTTON_Y,
-	                                       15,
-	                                       16,
-	                                       -1,
-	                                       -1,
-	                                       -1,
-	                                       KEY_LOWERCASE_M,
-	                                       _modifyButtonNormalFrmImage.getData(),
-	                                       _modifyButtonPressedFrmImage.getData(),
-	                                       NULL,
-	                                       BUTTON_FLAG_TRANSPARENT);
+														CS_WINDOW_MODIFY_BUTTON_X,
+														CS_WINDOW_MODIFY_BUTTON_Y,
+														15,
+														16,
+														-1,
+														-1,
+														-1,
+														KEY_LOWERCASE_M,
+														_modifyButtonNormalFrmImage.getData(),
+														_modifyButtonPressedFrmImage.getData(),
+														NULL,
+														BUTTON_FLAG_TRANSPARENT);
 	if (gCharacterSelectorWindowModifyButton == -1) {
 		return characterSelectorWindowFatalError(false);
 	}
 
-	buttonSetCallbacks(gCharacterSelectorWindowModifyButton, _gsound_red_butt_press, _gsound_red_butt_release);
+	//	buttonSetCallbacks(gCharacterSelectorWindowModifyButton, _gsound_red_butt_press, _gsound_red_butt_release); TODO audio
 
 	// Setup "Create" button.
 	fid = buildFid(OBJ_TYPE_INTERFACE, 8, 0, 0, 0);
@@ -430,23 +418,23 @@ static bool characterSelectorWindowInit() {
 	}
 
 	gCharacterSelectorWindowCreateButton = buttonCreate(gCharacterSelectorWindow,
-	                                       CS_WINDOW_CREATE_BUTTON_X,
-	                                       CS_WINDOW_CREATE_BUTTON_Y,
-	                                       15,
-	                                       16,
-	                                       -1,
-	                                       -1,
-	                                       -1,
-	                                       KEY_LOWERCASE_C,
-	                                       _createButtonNormalFrmImage.getData(),
-	                                       _createButtonPressedFrmImage.getData(),
-	                                       NULL,
-	                                       BUTTON_FLAG_TRANSPARENT);
+														CS_WINDOW_CREATE_BUTTON_X,
+														CS_WINDOW_CREATE_BUTTON_Y,
+														15,
+														16,
+														-1,
+														-1,
+														-1,
+														KEY_LOWERCASE_C,
+														_createButtonNormalFrmImage.getData(),
+														_createButtonPressedFrmImage.getData(),
+														NULL,
+														BUTTON_FLAG_TRANSPARENT);
 	if (gCharacterSelectorWindowCreateButton == -1) {
 		return characterSelectorWindowFatalError(false);
 	}
 
-	buttonSetCallbacks(gCharacterSelectorWindowCreateButton, _gsound_red_butt_press, _gsound_red_butt_release);
+	//	buttonSetCallbacks(gCharacterSelectorWindowCreateButton, _gsound_red_butt_press, _gsound_red_butt_release); TODO audio
 
 	// Setup "Back" button.
 	fid = buildFid(OBJ_TYPE_INTERFACE, 8, 0, 0, 0);
@@ -460,23 +448,23 @@ static bool characterSelectorWindowInit() {
 	}
 
 	gCharacterSelectorWindowBackButton = buttonCreate(gCharacterSelectorWindow,
-	                                     CS_WINDOW_BACK_BUTTON_X,
-	                                     CS_WINDOW_BACK_BUTTON_Y,
-	                                     15,
-	                                     16,
-	                                     -1,
-	                                     -1,
-	                                     -1,
-	                                     KEY_ESCAPE,
-	                                     _backButtonNormalFrmImage.getData(),
-	                                     _backButtonPressedFrmImage.getData(),
-	                                     NULL,
-	                                     BUTTON_FLAG_TRANSPARENT);
+													  CS_WINDOW_BACK_BUTTON_X,
+													  CS_WINDOW_BACK_BUTTON_Y,
+													  15,
+													  16,
+													  -1,
+													  -1,
+													  -1,
+													  KEY_ESCAPE,
+													  _backButtonNormalFrmImage.getData(),
+													  _backButtonPressedFrmImage.getData(),
+													  NULL,
+													  BUTTON_FLAG_TRANSPARENT);
 	if (gCharacterSelectorWindowBackButton == -1) {
 		return characterSelectorWindowFatalError(false);
 	}
 
-	buttonSetCallbacks(gCharacterSelectorWindowBackButton, _gsound_red_butt_press, _gsound_red_butt_release);
+	//	buttonSetCallbacks(gCharacterSelectorWindowBackButton, _gsound_red_butt_press, _gsound_red_butt_release); TODO audio
 
 	gCurrentPremadeCharacter = PREMADE_CHARACTER_NARG;
 
@@ -564,11 +552,11 @@ static bool characterSelectorWindowRefresh() {
 	}
 
 	blitBufferToBuffer(gCharacterSelectorBackground,
-	                   CS_WINDOW_BACKGROUND_WIDTH,
-	                   CS_WINDOW_BACKGROUND_HEIGHT,
-	                   CS_WINDOW_BACKGROUND_WIDTH,
-	                   gCharacterSelectorWindowBuffer + CS_WINDOW_WIDTH * CS_WINDOW_BACKGROUND_Y + CS_WINDOW_BACKGROUND_X,
-	                   CS_WINDOW_WIDTH);
+					   CS_WINDOW_BACKGROUND_WIDTH,
+					   CS_WINDOW_BACKGROUND_HEIGHT,
+					   CS_WINDOW_BACKGROUND_WIDTH,
+					   gCharacterSelectorWindowBuffer + CS_WINDOW_WIDTH * CS_WINDOW_BACKGROUND_Y + CS_WINDOW_BACKGROUND_X,
+					   CS_WINDOW_WIDTH);
 
 	bool success = false;
 	if (characterSelectorWindowRenderFace()) {
@@ -589,7 +577,7 @@ static bool characterSelectorWindowRenderFace() {
 	FrmImage faceFrmImage;
 	int faceFid = buildFid(OBJ_TYPE_INTERFACE, gCustomPremadeCharacterDescriptions[gCurrentPremadeCharacter].face, 0, 0, 0);
 	if (faceFrmImage.lock(faceFid)) {
-		unsigned char* data = faceFrmImage.getData();
+		unsigned char *data = faceFrmImage.getData();
 		if (data != NULL) {
 			int width = faceFrmImage.getWidth();
 			int height = faceFrmImage.getHeight();
@@ -604,7 +592,7 @@ static bool characterSelectorWindowRenderFace() {
 
 // 0x4A7EA8
 static bool characterSelectorWindowRenderStats() {
-	char* str;
+	char *str;
 	char text[260];
 	int length;
 	int value;
@@ -620,7 +608,7 @@ static bool characterSelectorWindowRenderStats() {
 
 	// NAME
 	str = objectGetName(gDude);
-	strcpy(text, str);
+	strncpy(text, str, sizeof(text) - 1);
 
 	length = fontGetStringWidth(text);
 	fontDrawText(gCharacterSelectorWindowBuffer + CS_WINDOW_WIDTH * y + CS_WINDOW_NAME_MID_X - (length / 2), text, 160, CS_WINDOW_WIDTH, _colorTable[992]);
@@ -752,7 +740,7 @@ static bool characterSelectorWindowRenderStats() {
 	messageListItem.num = 16;
 	text[0] = '\0';
 	if (messageListGetItem(&gMiscMessageList, &messageListItem)) {
-		strcpy(text, messageListItem.text);
+		strncpy(text, messageListItem.text, sizeof(text) - 1);
 	}
 
 	length = fontGetStringWidth(text);
@@ -768,7 +756,7 @@ static bool characterSelectorWindowRenderStats() {
 	y += vh;
 
 	str = statGetName(STAT_ARMOR_CLASS);
-	strcpy(text, str);
+	strncpy(text, str, sizeof(text) - 1);
 
 	length = fontGetStringWidth(text);
 	fontDrawText(gCharacterSelectorWindowBuffer + CS_WINDOW_WIDTH * y + CS_WINDOW_SECONDARY_STAT_MID_X - length, text, length, CS_WINDOW_WIDTH, _colorTable[992]);
@@ -785,7 +773,7 @@ static bool characterSelectorWindowRenderStats() {
 	messageListItem.num = 15;
 	text[0] = '\0';
 	if (messageListGetItem(&gMiscMessageList, &messageListItem)) {
-		strcpy(text, messageListItem.text);
+		strncpy(text, messageListItem.text, sizeof(text) - 1);
 	}
 
 	length = fontGetStringWidth(text);
@@ -801,7 +789,7 @@ static bool characterSelectorWindowRenderStats() {
 	y += vh;
 
 	str = statGetName(STAT_MELEE_DAMAGE);
-	strcpy(text, str);
+	strncpy(text, str, sizeof(text) - 1);
 
 	length = fontGetStringWidth(text);
 	fontDrawText(gCharacterSelectorWindowBuffer + CS_WINDOW_WIDTH * y + CS_WINDOW_SECONDARY_STAT_MID_X - length, text, length, CS_WINDOW_WIDTH, _colorTable[992]);
@@ -822,7 +810,7 @@ static bool characterSelectorWindowRenderStats() {
 		y += vh;
 
 		str = skillGetName(skills[index]);
-		strcpy(text, str);
+		strncpy(text, str, sizeof(text) - 1);
 
 		length = fontGetStringWidth(text);
 		fontDrawText(gCharacterSelectorWindowBuffer + CS_WINDOW_WIDTH * y + CS_WINDOW_SECONDARY_STAT_MID_X - length, text, length, CS_WINDOW_WIDTH, _colorTable[992]);
@@ -842,7 +830,7 @@ static bool characterSelectorWindowRenderStats() {
 		y += vh;
 
 		str = traitGetName(traits[index]);
-		strcpy(text, str);
+		strncpy(text, str, sizeof(text) - 1);
 
 		length = fontGetStringWidth(text);
 		fontDrawText(gCharacterSelectorWindowBuffer + CS_WINDOW_WIDTH * y + CS_WINDOW_SECONDARY_STAT_MID_X - length, text, length, CS_WINDOW_WIDTH, _colorTable[992]);
@@ -862,7 +850,7 @@ static bool characterSelectorWindowRenderBio() {
 	snprintf(path, sizeof(path), "%s.bio", gCustomPremadeCharacterDescriptions[gCurrentPremadeCharacter].fileName);
 	premadeCharactersLocalizePath(path);
 
-	File* stream = fileOpen(path, "rt");
+	File *stream = fileOpen(path, "rt");
 	if (stream != NULL) {
 		int y = 40;
 		int lineHeight = fontGetLineHeight();
@@ -890,13 +878,13 @@ static bool characterSelectorWindowFatalError(bool result) {
 }
 
 void premadeCharactersInit() {
-	char* fileNamesString;
+	char *fileNamesString;
 	configGetString(&gSfallConfig, SFALL_CONFIG_MISC_KEY, SFALL_CONFIG_PREMADE_CHARACTERS_FILE_NAMES_KEY, &fileNamesString);
 	if (fileNamesString != NULL && *fileNamesString == '\0') {
 		fileNamesString = NULL;
 	}
 
-	char* faceFidsString;
+	char *faceFidsString;
 	configGetString(&gSfallConfig, SFALL_CONFIG_MISC_KEY, SFALL_CONFIG_PREMADE_CHARACTERS_FACE_FIDS_KEY, &faceFidsString);
 	if (faceFidsString != NULL && *faceFidsString == '\0') {
 		faceFidsString = NULL;
@@ -904,20 +892,20 @@ void premadeCharactersInit() {
 
 	if (fileNamesString != NULL && faceFidsString != NULL) {
 		int fileNamesLength = 0;
-		for (char* pch = fileNamesString; pch != NULL; pch = strchr(pch + 1, ',')) {
+		for (char *pch = fileNamesString; pch != NULL; pch = strchr(pch + 1, ',')) {
 			fileNamesLength++;
 		}
 
 		int faceFidsLength = 0;
-		for (char* pch = faceFidsString; pch != NULL; pch = strchr(pch + 1, ',')) {
+		for (char *pch = faceFidsString; pch != NULL; pch = strchr(pch + 1, ',')) {
 			faceFidsLength++;
 		}
 
-		int premadeCharactersCount = std::min(fileNamesLength, faceFidsLength);
+		int premadeCharactersCount = MIN(fileNamesLength, faceFidsLength);
 		gCustomPremadeCharacterDescriptions.resize(premadeCharactersCount);
 
 		for (int index = 0; index < premadeCharactersCount; index++) {
-			char* pch;
+			char *pch;
 
 			pch = strchr(fileNamesString, ',');
 			if (pch != NULL) {
@@ -958,9 +946,9 @@ void premadeCharactersInit() {
 		gCustomPremadeCharacterDescriptions.resize(PREMADE_CHARACTER_COUNT);
 
 		for (int index = 0; index < PREMADE_CHARACTER_COUNT; index++) {
-			strcpy(gCustomPremadeCharacterDescriptions[index].fileName, gPremadeCharacterDescriptions[index].fileName);
+			strncpy(gCustomPremadeCharacterDescriptions[index].fileName, gPremadeCharacterDescriptions[index].fileName, 19);
 			gCustomPremadeCharacterDescriptions[index].face = gPremadeCharacterDescriptions[index].face;
-			strcpy(gCustomPremadeCharacterDescriptions[index].field_18, gPremadeCharacterDescriptions[index].field_18);
+			strncpy(gCustomPremadeCharacterDescriptions[index].field_18, gPremadeCharacterDescriptions[index].field_18, 19);
 		}
 	}
 
@@ -971,25 +959,25 @@ void premadeCharactersExit() {
 	gCustomPremadeCharacterDescriptions.clear();
 }
 
-static void premadeCharactersLocalizePath(char* path) {
+static void premadeCharactersLocalizePath(char *path) {
 	if (compat_strnicmp(path, "premade\\", 8) != 0) {
 		return;
 	}
 
-	const char* language = settings.system.language.c_str();
+	const char *language = settings.system.language.c_str();
 	if (compat_stricmp(language, ENGLISH) == 0) {
 		return;
 	}
 
 	char localizedPath[COMPAT_MAX_PATH];
 	strncpy(localizedPath, path, 8);
-	strcpy(localizedPath + 8, language);
-	strcpy(localizedPath + 8 + strlen(language), path + 7);
+	strncpy(localizedPath + 8, language, sizeof(localizedPath) - 1);
+	strncpy(localizedPath + 8 + strlen(language), path + 7, sizeof(localizedPath) - 1);
 
 	int fileSize;
 	if (dbGetFileSize(localizedPath, &fileSize) == 0) {
-		strcpy(path, localizedPath);
+		strncpy(path, localizedPath, COMPAT_MAX_PATH - 1);
 	}
 }
 
-} // namespace fallout
+} // namespace Fallout2

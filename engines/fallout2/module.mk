@@ -6,6 +6,7 @@ MODULE_OBJS = \
 	metaengine.o \
 	art.o \
 	cache.o \
+	character_selector.o \
 	color.o \
 	config.o \
 	credits.o \

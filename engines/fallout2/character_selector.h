@@ -1,13 +1,13 @@
-#ifndef CHARACTER_SELECTOR_H
-#define CHARACTER_SELECTOR_H
+#ifndef FALLOUT2_CHARACTER_SELECTOR_H
+#define FALLOUT2_CHARACTER_SELECTOR_H
 
-namespace fallout {
+namespace Fallout2 {
 
 int characterSelectorOpen();
 
 void premadeCharactersInit();
 void premadeCharactersExit();
 
-} // namespace fallout
+} // namespace Fallout2
 
-#endif /* CHARACTER_SELECTOR_H */
+#endif
