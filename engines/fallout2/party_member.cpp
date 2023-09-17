@@ -394,14 +394,14 @@ int partyMemberAdd(Object *object) {
 
 	gPartyMembersLength++;
 
-/*	Script *script;  TODO scripts.cpp
+	Script *script;
 	if (scriptGetScript(object->sid, &script) != -1) {
 		script->flags |= (SCRIPT_FLAG_0x08 | SCRIPT_FLAG_0x10);
 		script->field_1C = object->id;
 
 		object->sid = ((object->pid & 0xFFFFFF) + 18000) | (object->sid & 0xFF000000);
 		script->sid = object->sid;
-	}*/
+	}
 
 //	critterSetTeam(object, 0); TODO combat_ai.cpp
 	queueRemoveEventsByType(object, EVENT_TYPE_SCRIPT);
@@ -452,10 +452,10 @@ int partyMemberRemove(Object *object) {
 
 	gPartyMembersLength--;
 
-/*	Script *script; TODO scripts.cpp
+	Script *script;
 	if (scriptGetScript(object->sid, &script) != -1) {
 		script->flags &= ~(SCRIPT_FLAG_0x08 | SCRIPT_FLAG_0x10);
-	}*/
+	}
 
 	queueRemoveEventsByType(object, EVENT_TYPE_SCRIPT);
 
@@ -479,10 +479,10 @@ int _partyMemberPrepSave() {
 			ptr->object->flags &= ~(OBJECT_NO_REMOVE | OBJECT_NO_SAVE);
 		}
 
-/*		Script *script;  TODO scripts.cpp
+		Script *script;
 		if (scriptGetScript(ptr->object->sid, &script) != -1) {
 			script->flags &= ~(SCRIPT_FLAG_0x08 | SCRIPT_FLAG_0x10);
-		}*/
+		}
 	}
 
 	return 0;
@@ -497,10 +497,10 @@ int _partyMemberUnPrepSave() {
 			ptr->object->flags |= (OBJECT_NO_REMOVE | OBJECT_NO_SAVE);
 		}
 
-/*		Script *script;  TODO scripts.cpp
+		Script *script;
 		if (scriptGetScript(ptr->object->sid, &script) != -1) {
 			script->flags |= (SCRIPT_FLAG_0x08 | SCRIPT_FLAG_0x10);
-		}*/
+		}
 	}
 
 	_partyStatePrepped = 0;
@@ -569,15 +569,15 @@ static int _partyMemberPrepLoadInstance(STRUCT_519DA8 *a1) {
 		obj->data.critter.combat.whoHitMe = NULL;
 	}
 
-	Script *script;  //TODO scripts.cpp
-/*	if (scriptGetScript(obj->sid, &script) == -1) {
+	Script *script;
+	if (scriptGetScript(obj->sid, &script) == -1) {
 		debugPrint("\n  Error!: partyMemberPrepLoadInstance: Can't find script!");
 		debugPrint("\n          partyMemberPrepLoadInstance: script was: (%s)", critterGetName(obj));
 		a1->script = NULL;
 		a1->vars = NULL;
 		a1->next = NULL;
 		return 0;
-	}*/
+	}
 
 	a1->script = (Script *)internal_malloc(sizeof(*script));
 	if (a1->script == NULL) {
@@ -590,7 +590,7 @@ static int _partyMemberPrepLoadInstance(STRUCT_519DA8 *a1) {
 	if (script->localVarsCount != 0 && script->localVarsOffset != -1) {
 		a1->vars = (int *)internal_malloc(sizeof(*a1->vars) * script->localVarsCount);
 		if (a1->vars == NULL) {
-//			showMesageBox("\n  Error!: partyMemberPrepLoad: Out of memory!");  TODO
+			showMesageBox("\n  Error!: partyMemberPrepLoad: Out of memory!");
 			error("partyMemberPrepLoad: Out of memory!");
 		}
 
@@ -610,7 +610,7 @@ static int _partyMemberPrepLoadInstance(STRUCT_519DA8 *a1) {
 
 	script->flags &= ~(SCRIPT_FLAG_0x08 | SCRIPT_FLAG_0x10);
 
-//	scriptRemove(script->sid);  TODO
+	scriptRemove(script->sid);
 
 	if (PID_TYPE(obj->pid) == OBJ_TYPE_CRITTER) {
 //		_dude_stand(obj, obj->rotation, -1);  TODO animation.cpp
@@ -660,7 +660,7 @@ int _partyMemberRecoverLoad() {
 // 0x494A88
 static int _partyMemberRecoverLoadInstance(STRUCT_519DA8 *a1) {
 	if (a1->script == NULL) {
-	//	showMesageBox("\n  Error!: partyMemberRecoverLoadInstance: No script!"); TODO
+		showMesageBox("\n  Error!: partyMemberRecoverLoadInstance: No script!");
 		return 0;
 	}
 
@@ -669,17 +669,17 @@ static int _partyMemberRecoverLoadInstance(STRUCT_519DA8 *a1) {
 		scriptType = SCRIPT_TYPE_ITEM;
 	}
 
-/*	int v1 = -1;  TODO stript.cpp
+	int v1 = -1;
 	if (scriptAdd(&v1, scriptType) == -1) {
 		showMesageBox("\n  Error!: partyMemberRecoverLoad: Can't create script!");
-		exit(1);
-	}*/
+		error("partyMemberRecoverLoad: Can't create script");
+	}
 
 	Script *script;
-/*	if (scriptGetScript(v1, &script) == -1) {
+	if (scriptGetScript(v1, &script) == -1) {
 		showMesageBox("\n  Error!: partyMemberRecoverLoad: Can't find script!");
-		exit(1);
-	}*/
+		error("partyMemberRecoverLoad: Can't find script");
+	}
 
 	memcpy(script, a1->script, sizeof(*script));
 
@@ -783,7 +783,7 @@ void _partyMemberClear() {
 
 	gPartyMembersLength = 1;
 
-//	_scr_remove_all();  TODO scripts.cpp
+	_scr_remove_all();
 	_partyMemberClearItemList();
 
 	_partyStatePrepped = 0;
@@ -978,15 +978,15 @@ int _partyMemberPrepItemSaveAll() {
 
 // partyMemberPrepItemSaveAll
 static int _partyMemberPrepItemSave(Object *object) {
-/*	if (object->sid != -1) { TODO scripts.cpp
+	if (object->sid != -1) {
 		Script *script;
 		if (scriptGetScript(object->sid, &script) == -1) {
 			showMesageBox("\n  Error!: partyMemberPrepItemSaveAll: Can't find script!");
-			exit(1);
+			error("partyMemberPrepItemSaveAll: Can't find script");
 		}
 
 		script->flags |= (SCRIPT_FLAG_0x08 | SCRIPT_FLAG_0x10);
-	}*/
+	}
 
 	Inventory *inventory = &(object->data.inventory);
 	for (int index = 0; index < inventory->length; index++) {
@@ -999,11 +999,11 @@ static int _partyMemberPrepItemSave(Object *object) {
 
 // 0x495234
 static int _partyMemberItemSave(Object *object) {
-/*	if (object->sid != -1) { TODO scripts.cpp
+	if (object->sid != -1) {
 		Script *script;
 		if (scriptGetScript(object->sid, &script) == -1) {
 			showMesageBox("\n  Error!: partyMemberItemSave: Can't find script!");
-			exit(1);
+			error("partyMemberItemSave: Can't find script!");
 		}
 
 		if (object->id < 20000) {
@@ -1014,7 +1014,7 @@ static int _partyMemberItemSave(Object *object) {
 		STRUCT_519DA8 *node = (STRUCT_519DA8 *)internal_malloc(sizeof(*node));
 		if (node == NULL) {
 			showMesageBox("\n  Error!: partyMemberItemSave: Out of memory!");
-			exit(1);
+			error("partyMemberItemSave: Out of memory!");
 		}
 
 		node->object = object;
@@ -1022,7 +1022,7 @@ static int _partyMemberItemSave(Object *object) {
 		node->script = (Script *)internal_malloc(sizeof(*script));
 		if (node->script == NULL) {
 			showMesageBox("\n  Error!: partyMemberItemSave: Out of memory!");
-			exit(1);
+			error("partyMemberItemSave: Out of memory!");
 		}
 
 		memcpy(node->script, script, sizeof(*script));
@@ -1031,7 +1031,7 @@ static int _partyMemberItemSave(Object *object) {
 			node->vars = (int *)internal_malloc(sizeof(*node->vars) * script->localVarsCount);
 			if (node->vars == NULL) {
 				showMesageBox("\n  Error!: partyMemberItemSave: Out of memory!");
-				exit(1);
+				error("partyMemberItemSave: Out of memory!");
 			}
 
 			memcpy(node->vars, gMapLocalVars + script->localVarsOffset, sizeof(int) * script->localVarsCount);
@@ -1042,7 +1042,7 @@ static int _partyMemberItemSave(Object *object) {
 		STRUCT_519DA8 *temp = _itemSaveListHead;
 		_itemSaveListHead = node;
 		node->next = temp;
-	}*/
+	}
 
 	Inventory *inventory = &(object->data.inventory);
 	for (int index = 0; index < inventory->length; index++) {
@@ -1057,15 +1057,15 @@ static int _partyMemberItemSave(Object *object) {
 // 0x495388
 static int _partyMemberItemRecover(STRUCT_519DA8 *a1) {
 	int sid = -1;
-/*	if (scriptAdd(&sid, SCRIPT_TYPE_ITEM) == -1) { TODO scripts.cpp
+	if (scriptAdd(&sid, SCRIPT_TYPE_ITEM) == -1) {
 		showMesageBox("\n  Error!: partyMemberItemRecover: Can't create script!");
-		exit(1);
+		error("partyMemberItemRecover: Can't create script");
 	}
 
 	Script *script;
 	if (scriptGetScript(sid, &script) == -1) {
 		showMesageBox("\n  Error!: partyMemberItemRecover: Can't find script!");
-		exit(1);
+		error("partyMemberItemRecover: Can't find script");
 	}
 
 	memcpy(script, a1->script, sizeof(*script));
@@ -1084,7 +1084,7 @@ static int _partyMemberItemRecover(STRUCT_519DA8 *a1) {
 	if (a1->vars != NULL) {
 		script->localVarsOffset = _map_malloc_local_var(script->localVarsCount);
 		memcpy(gMapLocalVars + script->localVarsOffset, a1->vars, sizeof(int) * script->localVarsCount);
-	}*/
+	}
 
 	return 0;
 }
@@ -1241,7 +1241,7 @@ static int _partyFixMultipleMembers() {
 		debugPrint("\nDestroying evil critter doppleganger!");
 
 		if (obj->sid != -1) {
-//			scriptRemove(obj->sid);  TODO scripts.cpp
+			scriptRemove(obj->sid);
 			obj->sid = -1;
 		} else {
 			if (queueRemoveEventsByType(obj, EVENT_TYPE_SCRIPT) == -1) {
@@ -1255,12 +1255,12 @@ static int _partyFixMultipleMembers() {
 	for (int index = 0; index < gPartyMembersLength; index++) {
 		STRUCT_519DA8 *partyMember = &(gPartyMembers[index]);
 
-/*		Script *script; TODO scripts.cpp
+		Script *script;
 		if (scriptGetScript(partyMember->object->sid, &script) != -1) {
 			script->owner = partyMember->object;
 		} else {
 			debugPrint("\nError: Failed to fix party member critter scripts!");
-		}*/
+		}
 	}
 
 	debugPrint("\nTotal Critter Count: %d\n\n", critterCount);
