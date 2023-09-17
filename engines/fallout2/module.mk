@@ -52,6 +52,7 @@ MODULE_OBJS = \
 	random.o \
 	reaction.o \
 	region.o \
+	scripts.o \
 	settings.o \
 	sfall_config.o \
 	skill.o \
