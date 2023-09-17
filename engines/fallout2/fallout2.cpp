@@ -32,6 +32,7 @@
 #include "graphics/surface.h"
 
 #include "fallout2/art.h"
+#include "fallout2/character_selector.h"
 #include "fallout2/credits.h"
 #include "fallout2/critter.h"
 #include "fallout2/cycle.h"
@@ -411,6 +412,9 @@ Common::Error Fallout2Engine::run() {
 	else
 		debug("Initialized scripts!");
 
+	// SFALL
+	premadeCharactersInit();
+
 	char path[COMPAT_MAX_PATH];
 
 	if (!messageListInit(&gMiscMessageList))
@@ -458,6 +462,8 @@ Common::Error Fallout2Engine::run() {
 		}
 	}
 	mainMenuWindowHide(1);
+	mainMenuWindowFree();
+	characterSelectorOpen();
 	creditsOpen("credits.txt", -1, false);
 	gameExit();
 	return Common::kNoError;
