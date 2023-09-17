@@ -55,6 +55,7 @@
 #include "fallout2/proto.h"
 #include "fallout2/queue.h"
 #include "fallout2/random.h"
+#include "fallout2/scripts.h"
 #include "fallout2/settings.h"
 #include "fallout2/sfall_config.h"
 #include "fallout2/skill.h"
@@ -399,6 +400,16 @@ Common::Error Fallout2Engine::run() {
 
 	if (isoInit() != 0)
 		warning("Failed on iso_init");
+
+	if (protoInit() != 0)
+		warning("Failed on proto_init");
+	else
+		debug("Initialized protos!");
+
+	if (scriptsInit() != 0)
+		warning("Failed on scripts init");
+	else
+		debug("Initialized scripts!");
 
 	char path[COMPAT_MAX_PATH];
 
