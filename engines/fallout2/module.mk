@@ -48,6 +48,7 @@ MODULE_OBJS = \
 	platform_compat.o \
 	pointer_registry.o \
 	proto.o \
+	proto_instance.o \
 	queue.o \
 	random.o \
 	reaction.o \
