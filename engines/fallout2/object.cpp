@@ -990,7 +990,7 @@ int objectCreateWithFidPid(Object **objectPtr, int fid, int pid) {
 		objectListNode->obj->flags |= OBJECT_NO_HIGHLIGHT;
 	}
 
-//	_obj_new_sid(objectListNode->obj, &(objectListNode->obj->sid));  TODO proto_instance.cpp
+	_obj_new_sid(objectListNode->obj, &(objectListNode->obj->sid));
 
 	return 0;
 }
@@ -1043,7 +1043,7 @@ int _obj_copy(Object **a1, Object *a2) {
 
 	if (objectListNode->obj->sid != -1) {
 		objectListNode->obj->sid = -1;
-	//	_obj_new_sid(objectListNode->obj, &(objectListNode->obj->sid));  TODO proto_instance.cpp
+		_obj_new_sid(objectListNode->obj, &(objectListNode->obj->sid));
 	}
 
 	if (objectSetRotation(objectListNode->obj, a2->rotation, NULL) == -1) {

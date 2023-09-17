@@ -543,7 +543,7 @@ int itemDestroyAllHidden(Object *owner) {
 		// NOTE: Uninline.
 		if (itemIsHidden(inventoryItem->item)) {
 			itemRemove(owner, inventoryItem->item, 1);
-//			_obj_destroy(inventoryItem->item); TODO proto_instance
+			_obj_destroy(inventoryItem->item);
 		} else {
 			index++;
 		}
@@ -568,7 +568,7 @@ int itemDropAll(Object *critter, int tile) {
 
 			if (_obj_connect(item, tile, critter->elevation, NULL) != 0) {
 				if (itemAdd(critter, item, 1) != 0) {
-//					_obj_destroy(item); TODO proto_instance
+					_obj_destroy(item);
 				}
 				return -1;
 			}
@@ -608,7 +608,7 @@ int itemDropAll(Object *critter, int tile) {
 
 				if (_obj_connect(item, tile, critter->elevation, NULL) != 0) {
 					if (itemAdd(critter, item, 1) != 0) {
-//						_obj_destroy(item); TODO proto_instance
+						_obj_destroy(item);
 					}
 					return -1;
 				}
@@ -1082,7 +1082,7 @@ Object *itemReplace(Object *owner, Object *itemToReplace, int flags) {
 
 				item->flags &= ~flags;
 				if (itemAdd(owner, item, 1) != 0) {
-//					_obj_destroy(item); TODO proto_instance
+					_obj_destroy(item);
 				}
 			}
 		}
@@ -1410,7 +1410,7 @@ int weaponAttemptReload(Object *critter, Object *weapon) {
 				if (weaponCanBeReloadedWith(weapon, ammo) != 0) {
 					int rc = weaponReload(weapon, ammo);
 					if (rc == 0) {
-//						_obj_destroy(ammo); TODO proto_instance
+						_obj_destroy(ammo);
 					}
 
 					if (rc == -1) {
@@ -1432,7 +1432,7 @@ int weaponAttemptReload(Object *critter, Object *weapon) {
 			if (weaponCanBeReloadedWith(weapon, ammo) != 0) {
 				int rc = weaponReload(weapon, ammo);
 				if (rc == 0) {
-//					_obj_destroy(ammo); TODO proto_instance
+					_obj_destroy(ammo);
 				}
 
 				if (rc == -1) {

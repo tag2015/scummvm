@@ -406,7 +406,7 @@ int gameTimeEventProcess(Object *obj, void *data) {
 //		return 0;
 //	}
 
-//	objectUnjamAll(); TODO proto_instance
+	objectUnjamAll();
 
 //	if (!_gdialogActive()) { TODO game_dialog
 //		_scriptsCheckGameEvents(&movie_index, -1);
@@ -1415,7 +1415,7 @@ int scriptsSetDudeScript() {
 
 	proto->critter.sid = 0x4000000;
 
-//	_obj_new_sid(gDude, &(gDude->sid)); TODO proto_instance
+	_obj_new_sid(gDude, &(gDude->sid));
 
 	Script *script;
 	if (scriptGetScript(gDude->sid, &script) == -1) {
