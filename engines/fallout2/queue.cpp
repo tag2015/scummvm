@@ -442,7 +442,7 @@ int queueGetNextEventTime() {
 
 // 0x4A281C
 static int flareEventProcess(Object *obj, void *data) {
-//	_obj_destroy(obj);  TODO proto_instance
+	_obj_destroy(obj);
 	return 1;
 }
 

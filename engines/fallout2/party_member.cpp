@@ -808,7 +808,7 @@ int _partyMemberSyncPosition() {
 			}
 
 			int tile = tileGetTileInDirection(gDude->tile, rotation, distance / 2);
-//			_objPMAttemptPlacement(partyMemberObj, tile, gDude->elevation); TODO proto_instance.cpp
+			_objPMAttemptPlacement(partyMemberObj, tile, gDude->elevation);
 
 			distance++;
 			n++;

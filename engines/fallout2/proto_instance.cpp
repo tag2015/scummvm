@@ -512,7 +512,7 @@ int _obj_examine_func(Object *critter, Object *target, void (*fn)(char *string))
 			snprintf(formattedText, sizeof(formattedText),
 					 ammoMessageListItem.text,
 					 ammoGetArmorClassModifier(target));
-			if (fn == gameDialogRenderSupplementaryMessage) {
+			if (/*fn == gameDialogRenderSupplementaryMessage*/ 0) {  // TODO game_dialog
 				strcat_s(ammoFormattedText, sizeof(ammoFormattedText), formattedText);
 			} else {
 				fn(formattedText);
@@ -527,7 +527,7 @@ int _obj_examine_func(Object *critter, Object *target, void (*fn)(char *string))
 			snprintf(formattedText, sizeof(formattedText),
 					 ammoMessageListItem.text,
 					 ammoGetDamageResistanceModifier(target));
-			if (fn == gameDialogRenderSupplementaryMessage) {
+			if (/*fn == gameDialogRenderSupplementaryMessage*/ 0) { // TODO game_dialog
 				strcat_s(ammoFormattedText, sizeof(ammoFormattedText), ", ");
 				strcat_s(ammoFormattedText, sizeof(ammoFormattedText), formattedText);
 			} else {
@@ -544,7 +544,7 @@ int _obj_examine_func(Object *critter, Object *target, void (*fn)(char *string))
 					 ammoMessageListItem.text,
 					 ammoGetDamageMultiplier(target),
 					 ammoGetDamageDivisor(target));
-			if (fn == gameDialogRenderSupplementaryMessage) {
+			if (/* fn == gameDialogRenderSupplementaryMessage*/ 0) {  // TODO game_dialog
 				strcat_s(ammoFormattedText, sizeof(ammoFormattedText), ", ");
 				strcat_s(ammoFormattedText, sizeof(ammoFormattedText), formattedText);
 				strcat_s(ammoFormattedText, sizeof(ammoFormattedText), ".");
@@ -866,7 +866,7 @@ static int _obj_use_explosive(Object *explosive) {
 			displayMonitorAddMessage(messageListItem.text);
 		}
 	} else {
-		int seconds = _inven_set_timer(explosive);
+/*		int seconds = _inven_set_timer(explosive);  TODO inventory
 		if (seconds != -1) {
 			// You set the timer.
 			messageListItem.num = 589;
@@ -902,7 +902,7 @@ static int _obj_use_explosive(Object *explosive) {
 			}
 
 			queueAddEvent(delay, explosive, NULL, eventType);
-		}
+		} */
 	}
 
 	return 2;
@@ -2149,9 +2149,9 @@ int _obj_attempt_placement(Object *obj, int tile, int elevation, int a4) {
 
 			for (int rotation = 0; rotation < ROTATION_COUNT; rotation++) {
 				newTile = tileGetTileInDirection(tile, rotation, v6);
-				if (_obj_blocking_at(NULL, newTile, elevation) == NULL && v6 > 1 && _make_path(gDude, gDude->tile, newTile, NULL, 0) != 0) {
-					break;
-				}
+//				if (_obj_blocking_at(NULL, newTile, elevation) == NULL && v6 > 1 && _make_path(gDude, gDude->tile, newTile, NULL, 0) != 0) { TODO animation
+//					break;
+//				}
 			}
 
 			v6++;
