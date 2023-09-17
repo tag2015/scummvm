@@ -51,16 +51,14 @@ static QueueListNode *gLastFoundQueueListNode = NULL;
 static QueueListNode *gQueueListHead;
 
 // 0x51C540
-// TODO combat scripts game_sound
+// TODO combat game_sound
 static EventTypeDescription gEventTypeDescriptions[EVENT_TYPE_COUNT] = {
 	{drugEffectEventProcess, internal_free, drugEffectEventRead, drugEffectEventWrite, true, _item_d_clear},
 	// {knockoutEventProcess, NULL, NULL, NULL, true, _critter_wake_clear}, TODO combat
 	{NULL, NULL, NULL, NULL, true, NULL},  // TODO remove
 	{withdrawalEventProcess, internal_free, withdrawalEventRead, withdrawalEventWrite, true, _item_wd_clear},
-	// {scriptEventProcess, internal_free, scriptEventRead, scriptEventWrite, true, NULL}, TODO scripts
-	{NULL, NULL, NULL, NULL, true, NULL},  // TODO remove
-	// {gameTimeEventProcess, NULL, NULL, NULL, true, NULL}, TODO scripts
-	{NULL, NULL, NULL, NULL, true, NULL},  // TODO remove
+	{scriptEventProcess, internal_free, scriptEventRead, scriptEventWrite, true, NULL},
+	{gameTimeEventProcess, NULL, NULL, NULL, true, NULL},
 	{poisonEventProcess, NULL, NULL, NULL, false, NULL},
 	{radiationEventProcess, internal_free, radiationEventRead, radiationEventWrite, false, NULL},
 	{flareEventProcess, NULL, NULL, NULL, true, flareEventProcess},
@@ -68,8 +66,7 @@ static EventTypeDescription gEventTypeDescriptions[EVENT_TYPE_COUNT] = {
 	{miscItemTrickleEventProcess, NULL, NULL, NULL, true, _item_m_turn_off_from_queue},
 	{sneakEventProcess, NULL, NULL, NULL, true, _critter_sneak_clear},
 	{explosionFailureEventProcess, NULL, NULL, NULL, true, _queue_explode_exit},
-	// {mapUpdateEventProcess, NULL, NULL, NULL, true, NULL}, TODO scripts
-	{NULL, NULL, NULL, NULL, true, NULL},  // TODO remove
+	{mapUpdateEventProcess, NULL, NULL, NULL, true, NULL},
 	// {ambientSoundEffectEventProcess, internal_free, NULL, NULL, true, NULL}, TODO game_sound
 	{NULL, NULL, NULL, NULL, true, NULL},  // TODO remove
 };
@@ -251,7 +248,7 @@ int queueAddEvent(int delay, Object *obj, void *data, int eventType) {
 		return -1;
 	}
 
-	int v1 = 0; // gameTimeGetTime();  TODO scripts.cpp
+	int v1 = gameTimeGetTime();
 	int v2 = v1 + delay;
 	newQueueListNode->time = v2;
 	newQueueListNode->type = eventType;
@@ -354,7 +351,7 @@ bool queueHasEvent(Object *owner, int eventType) {
 
 // 0x4A26D0
 int queueProcessEvents() {
-	int time = 0; // gameTimeGetTime(); TODO scripts.cpp
+	int time = gameTimeGetTime();
 	int v1 = 0;
 
 	while (gQueueListHead != NULL) {

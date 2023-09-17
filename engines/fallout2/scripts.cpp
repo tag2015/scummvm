@@ -2672,9 +2672,9 @@ char *_scr_get_msg_str_speech(int messageListId, int messageId, int a3) {
 		return NULL;
 	}
 
-	if (FID_TYPE(gGameDialogHeadFid) != OBJ_TYPE_HEAD) {
+/*	if (FID_TYPE(gGameDialogHeadFid) != OBJ_TYPE_HEAD) {  TODO game_dialog
 		a3 = 0;
-	}
+	}*/
 
 	MessageListItem messageListItem;
 	messageListItem.num = messageId;
