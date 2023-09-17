@@ -1200,7 +1200,7 @@ int scriptsRequestStealing(Object *a1, Object *a2) {
 // NOTE: Inlined.
 void _script_make_path(char *path) {
 	strncpy(path, _cd_path_base, COMPAT_MAX_PATH - 1);
-	strcat_s(path, sizeof(path), gScriptsBasePath);
+	strcat_s(path, COMPAT_MAX_PATH, gScriptsBasePath);
 }
 
 // exec_script_proc
