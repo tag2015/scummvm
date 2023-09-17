@@ -324,7 +324,7 @@ void isoEnable() {
 //		}
 //		tickersAdd(_object_animate); TODO animation
 //		tickersAdd(_dude_fidget);
-//		_scr_enable_critters(); TODO scripts
+		_scr_enable_critters();
 		gIsoEnabled = true;
 	}
 }
@@ -335,7 +335,7 @@ bool isoDisable() {
 		return false;
 	}
 
-//	_scr_disable_critters(); TODO scripts
+	_scr_disable_critters();
 //	tickersRemove(_dude_fidget); TODO animation
 //	tickersRemove(_object_animate);
 //	_gmouse_disable(0); TODO game_mouse
@@ -376,7 +376,7 @@ int mapSetElevation(int elevation) {
 	_partyMemberSyncPosition();
 
 	if (gMapSid != -1) {
-//		scriptsExecMapUpdateProc(); TODO scripts
+		scriptsExecMapUpdateProc();
 	}
 
 //	if (gameMouseWasVisible) { TODO game_mouse
@@ -774,7 +774,7 @@ int mapLoadByName(char *fileName) {
 
 // 0x482B34
 int mapLoadById(int map) {
-//	scriptSetFixedParam(gMapSid, map); TODO scripts
+	scriptSetFixedParam(gMapSid, map);
 
 /*	char name[16]; TODo world_map
 	if (wmMapIdxToName(map, name, sizeof(name)) == -1) {
@@ -813,7 +813,7 @@ static int mapLoad(File *stream) {
 			   _colorTable[0]);
 	windowRefresh(gIsoWindow);
 //	animationStop(); TODO animations
-//	scriptsDisable(); TODO scripts
+	scriptsDisable();
 
 	gMapSid = -1;
 
@@ -878,9 +878,9 @@ static int mapLoad(File *stream) {
 	}
 
 	error = "Error reading scripts";
-//	if (scriptLoadAll(stream) != 0) { TODO scripts
-//		goto err;
-//	}
+	if (scriptLoadAll(stream) != 0) {
+		goto err;
+	}
 
 	error = "Error reading objects";
 	if (objectLoadAll(stream) != 0) {
@@ -924,7 +924,7 @@ static int mapLoad(File *stream) {
 		gMapHeader.globalVariablesCount = gMapGlobalVarsLength;
 	}
 
-/*	scriptsEnable(); TODO scripts
+	scriptsEnable();
 
 	if (gMapHeader.scriptIndex > 0) {
 		error = "Error creating new map script";
@@ -952,10 +952,10 @@ static int mapLoad(File *stream) {
 		_scr_spatials_enable();
 
 		error = "Error Setting up random encounter";
-		if (wmSetupRandomEncounter() == -1) {
+/*		if (wmSetupRandomEncounter() == -1) {  TODO world_map
 			goto err;
-		}
-	}*/
+		}*/
+	}
 
 	error = NULL;
 
@@ -980,12 +980,12 @@ err:
 //	_gmouse_disable_scrolling();  TODO game_mouse
 //	gameMouseSetCursor(MOUSE_CURSOR_WAIT_PLANET);
 
-/*	if (scriptsExecStartProc() == -1) {  TODO scripts
+	if (scriptsExecStartProc() == -1) {
 		debugPrint("\n   Error: scr_load_all_scripts failed!");
 	}
 
 	scriptsExecMapEnterProc();
-	scriptsExecMapUpdateProc();*/
+	scriptsExecMapUpdateProc();
 	tileEnable();
 
 	if (gMapTransition.map > 0) {
@@ -996,7 +996,7 @@ err:
 		tileWindowRefresh();
 	}
 
-//	gameTimeScheduleUpdateEvent(); TODO scripts
+	gameTimeScheduleUpdateEvent();
 
 //	if (_gsound_sfx_q_start() == -1) { TODO audio
 //		rc = -1;
@@ -1036,7 +1036,7 @@ int mapLoadSaved(char *fileName) {
 
 	int rc = mapLoadByName(mapName);
 
-/*	if (gameTimeGetTime() >= gMapHeader.lastVisitTime) { TODO scripts
+	if (gameTimeGetTime() >= gMapHeader.lastVisitTime) {
 		if (((gameTimeGetTime() - gMapHeader.lastVisitTime) / GAME_TIME_TICKS_PER_HOUR) >= 24) {
 			objectUnjamAll();
 		}
@@ -1045,7 +1045,7 @@ int mapLoadSaved(char *fileName) {
 			debugPrint("\nError: Critter aging failed on map load!");
 			return -1;
 		}
-	}*/
+	}
 
 /*	if (!wmMapIsSaveable()) { TODO world_map
 		debugPrint("\nDestroying RANDOM encounter map.");
@@ -1303,7 +1303,7 @@ static int _map_save() {
 
 // 0x483980
 static int _map_save_file(File *stream) {
-/*	if (stream == NULL) { TODO scripts
+	if (stream == NULL) {
 		return -1;
 	}
 
@@ -1379,17 +1379,17 @@ static int _map_save_file(File *stream) {
 	}
 
 	scriptsEnable();
-*/
+
 	return 0;
 }
 
 // 0x483C98
 int _map_save_in_game(bool a1) {
-/*	if (gMapHeader.name[0] == '\0') { TODO scripts
+	if (gMapHeader.name[0] == '\0') {
 		return 0;
 	}
 
-	animationStop();
+//	animationStop();  TODO animation
 	_partyMemberSaveProtos();
 
 	if (a1) {
@@ -1412,7 +1412,7 @@ int _map_save_in_game(bool a1) {
 
 	char name[16];
 
-	if (a1 && !wmMapIsSaveable()) {
+/*	if (a1 && !wmMapIsSaveable()) { TODO world_map
 		debugPrint("\nNot saving RANDOM encounter map.");
 
 		strcpy(name, gMapHeader.name);
@@ -1439,8 +1439,8 @@ int _map_save_in_game(bool a1) {
 			_square_reset();
 			gameTimeScheduleUpdateEvent();
 		}
-	}
-*/
+	} */
+
 	return 0;
 }
 
