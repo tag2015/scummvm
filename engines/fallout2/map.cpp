@@ -296,8 +296,8 @@ void _map_init() {
 	}
 
 	mapNewMap();
-//	tickersAdd(gameMouseRefresh); TODO game_mouse
-// 	_gmouse_disable(0);
+	tickersAdd(gameMouseRefresh);
+	_gmouse_disable(0);
 	windowShow(gIsoWindow);
 
 	messageListRepositorySetStandardMessageList(STANDARD_MESSAGE_LIST_MAP, &gMapMessageList);
@@ -306,8 +306,8 @@ void _map_init() {
 // 0x482084
 void _map_exit() {
 	windowHide(gIsoWindow);
-//	gameMouseSetCursor(MOUSE_CURSOR_ARROW); TODO game_mouse
-//	tickersRemove(gameMouseRefresh);
+	gameMouseSetCursor(MOUSE_CURSOR_ARROW);
+	tickersRemove(gameMouseRefresh);
 
 	messageListRepositorySetStandardMessageList(STANDARD_MESSAGE_LIST_MAP, nullptr);
 	if (!messageListFree(&gMapMessageList)) {
@@ -319,11 +319,11 @@ void _map_exit() {
 void isoEnable() {
 	if (!gIsoEnabled) {
 		textObjectsEnable();
-//		if (!gameUiIsDisabled()) { TODO game
-//			_gmouse_enable(); TODO game_mouse
-//		}
-//		tickersAdd(_object_animate); TODO animation
-//		tickersAdd(_dude_fidget);
+		if (!gameUiIsDisabled()) {
+			_gmouse_enable();
+		}
+		tickersAdd(_object_animate);
+		tickersAdd(_dude_fidget);
 		_scr_enable_critters();
 		gIsoEnabled = true;
 	}
@@ -336,9 +336,9 @@ bool isoDisable() {
 	}
 
 	_scr_disable_critters();
-//	tickersRemove(_dude_fidget); TODO animation
-//	tickersRemove(_object_animate);
-//	_gmouse_disable(0); TODO game_mouse
+	tickersRemove(_dude_fidget);
+	tickersRemove(_object_animate);
+	_gmouse_disable(0);
 	textObjectsDisable();
 
 	gIsoEnabled = false;
@@ -359,11 +359,11 @@ int mapSetElevation(int elevation) {
 	}
 
 	bool gameMouseWasVisible = false;
-/*	if (gameMouseGetCursor() != MOUSE_CURSOR_WAIT_PLANET) { TODO game_mouse
+	if (gameMouseGetCursor() != MOUSE_CURSOR_WAIT_PLANET) {
 		gameMouseWasVisible = gameMouseObjectsIsVisible();
 		gameMouseObjectsHide();
 		gameMouseSetCursor(MOUSE_CURSOR_NONE);
-	}*/
+	}
 
 	if (elevation != gElevation) {
 //		wmMapMarkMapEntranceState(gMapHeader.field_34, elevation, 1); TODO world_map
@@ -371,17 +371,17 @@ int mapSetElevation(int elevation) {
 
 	gElevation = elevation;
 
-//	reg_anim_clear(gDude); TODO animation
-//	_dude_stand(gDude, gDude->rotation, gDude->fid);
+	reg_anim_clear(gDude);
+	_dude_stand(gDude, gDude->rotation, gDude->fid);
 	_partyMemberSyncPosition();
 
 	if (gMapSid != -1) {
 		scriptsExecMapUpdateProc();
 	}
 
-//	if (gameMouseWasVisible) { TODO game_mouse
-//		gameMouseObjectsShow();
-//	}
+	if (gameMouseWasVisible) {
+		gameMouseObjectsShow();
+	}
 
 	return 0;
 }
@@ -598,7 +598,7 @@ int mapScroll(int dx, int dy) {
 		return -1;
 	}
 
-//	gameMouseObjectsHide(); TODO game_mouse
+	gameMouseObjectsHide();
 
 	int centerScreenX;
 	int centerScreenY;
@@ -717,7 +717,7 @@ void mapNewMap() {
 	gMapHeader.name[0] = '\0';
 	gMapHeader.enteringTile = 20100;
 	_obj_remove_all();
-//	animationStop(); TODO animation
+	animationStop();
 
 	// NOTE: Uninline.
 	mapGlobalVariablesFree();
@@ -796,11 +796,11 @@ static int mapLoad(File *stream) {
 //	backgroundSoundLoad("wind2", 12, 13, 16); TODO audio
 	isoDisable();
 	_partyMemberPrepLoad();
-//	_gmouse_disable_scrolling(); TODO game_mouse
+	_gmouse_disable_scrolling();
 
-//	int savedMouseCursorId = gameMouseGetCursor(); TODO game_mouse
-//	gameMouseSetCursor(MOUSE_CURSOR_WAIT_PLANET);
-//	fileSetReadProgressHandler(gameMouseRefreshImmediately, 32768); TODO game_mouse
+	int savedMouseCursorId = gameMouseGetCursor();
+	gameMouseSetCursor(MOUSE_CURSOR_WAIT_PLANET);
+	fileSetReadProgressHandler(gameMouseRefreshImmediately, 32768);
 	tileDisable();
 
 	int rc = 0;
@@ -812,7 +812,7 @@ static int mapLoad(File *stream) {
 			   windowGetHeight(gIsoWindow),
 			   _colorTable[0]);
 	windowRefresh(gIsoWindow);
-//	animationStop(); TODO animations
+	animationStop();
 	scriptsDisable();
 
 	gMapSid = -1;
@@ -977,8 +977,8 @@ err:
 	_map_place_dude_and_mouse();
 	fileSetReadProgressHandler(NULL, 0);
 	isoEnable();
-//	_gmouse_disable_scrolling();  TODO game_mouse
-//	gameMouseSetCursor(MOUSE_CURSOR_WAIT_PLANET);
+	_gmouse_disable_scrolling();
+	gameMouseSetCursor(MOUSE_CURSOR_WAIT_PLANET);
 
 	if (scriptsExecStartProc() == -1) {
 		debugPrint("\n   Error: scr_load_all_scripts failed!");
@@ -1011,11 +1011,11 @@ err:
 
 	fileSetReadProgressHandler(NULL, 0);
 
-/*	if (gameUiIsDisabled() == 0) { TODO game_mouse
+	if (gameUiIsDisabled() == 0) {
 		_gmouse_enable_scrolling();
 	}
 
-	gameMouseSetCursor(savedMouseCursorId);*/
+	gameMouseSetCursor(savedMouseCursorId);
 
 	// NOTE: Uninline.
 	mapSetEnteringLocation(-1, -1, -1);
@@ -1204,9 +1204,9 @@ int mapHandleTransition() {
 		return 0;
 	}
 
-//	gameMouseObjectsHide(); TODO game_mouse
+	gameMouseObjectsHide();
 
-//	gameMouseSetCursor(MOUSE_CURSOR_NONE);
+	gameMouseSetCursor(MOUSE_CURSOR_NONE);
 
 	if (gMapTransition.map == -1) {
 		if (!isInCombat()) {
@@ -1389,7 +1389,7 @@ int _map_save_in_game(bool a1) {
 		return 0;
 	}
 
-//	animationStop();  TODO animation
+	animationStop();
 	_partyMemberSaveProtos();
 
 	if (a1) {
@@ -1603,12 +1603,12 @@ static void _map_place_dude_and_mouse() {
 		objectSetLight(gDude, 4, 0x10000, 0);
 		gDude->flags |= OBJECT_NO_SAVE;
 
-//		_dude_stand(gDude, gDude->rotation, gDude->fid); TODO animation
+		_dude_stand(gDude, gDude->rotation, gDude->fid);
 		_partyMemberSyncPosition();
 	}
 
-//	gameMouseResetBouncingCursorFid(); TODO game_mouse
-//  gameMouseObjectsShow();
+	gameMouseResetBouncingCursorFid();
+	gameMouseObjectsShow();
 }
 
 // NOTE: Inlined.
