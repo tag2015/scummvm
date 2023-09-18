@@ -423,6 +423,16 @@ Common::Error Fallout2Engine::run() {
 	else
 		debug("Initialized scripts!");
 
+	if (gameLoadGlobalVars() != 0)
+		warning("Failed loading global vars!");
+	else
+		debug("Loaded global vars!");
+
+	if (_scr_game_init() != 0)
+		warning("Failed on scr_game_init");
+	else
+		debugPrint("Loaded game scripts!");
+
 	// SFALL
 	premadeCharactersInit();
 
@@ -439,6 +449,11 @@ Common::Error Fallout2Engine::run() {
 		warning("Failed on message_load\n");
 	else
 		debug("Loaded messages list: %s!", path);
+
+	if (scriptsDisable() != 0)
+		debugPrint("Failed on scr_disable\n");
+	else
+		debug("Disabled scripts!");
 
 	messageListRepositorySetStandardMessageList(STANDARD_MESSAGE_LIST_MISC, &gMiscMessageList);
 
