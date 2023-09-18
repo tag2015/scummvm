@@ -72,12 +72,12 @@ void creditsOpen(const char *filePath, int backgroundFid, bool useReversedStyle)
 //			soundContinueAll();  TODO audio
 
 			colorCycleDisable();
-/*			gameMouseSetCursor(MOUSE_CURSOR_NONE); TODO game_mouse
+			gameMouseSetCursor(MOUSE_CURSOR_NONE);
 
 			bool cursorWasHidden = cursorIsHidden();
 			if (cursorWasHidden) {
 				mouseShowCursor();
-			}*/
+			}
 
 			int windowWidth = screenGetWidth();
 			int windowHeight = screenGetHeight();
@@ -151,17 +151,9 @@ void creditsOpen(const char *filePath, int backgroundFid, bool useReversedStyle)
 									for (int index = 0; index < lineHeight; index++) {
 										sharedFpsLimiter.mark();
 
-										/* if (inputGetInput() != -1) {  TODO input
+										if (inputGetInput() != -1) {
 											stop = true;
 											break;
-										} */
-
-										Common::Event e;
-										if (g_system->getEventManager()->pollEvent(e)) {
-											if (e.type == Common::EVENT_LBUTTONDOWN) {
-												stop = true;
-												break;
-											}
 										}
 
 										memmove(intermediateBuffer, intermediateBuffer + windowWidth, windowWidth * windowHeight - windowWidth);
@@ -250,11 +242,11 @@ void creditsOpen(const char *filePath, int backgroundFid, bool useReversedStyle)
 				windowDestroy(window);
 			}
 
-//			if (cursorWasHidden) {  TODO game_mouse
-//				mouseHideCursor();
-//			}
+			if (cursorWasHidden) {
+				mouseHideCursor();
+			}
 
-//			gameMouseSetCursor(MOUSE_CURSOR_ARROW); TODO game_mouse
+			gameMouseSetCursor(MOUSE_CURSOR_ARROW);
 			colorCycleEnable();
 			fileClose(gCreditsFile);
 		}
