@@ -173,23 +173,33 @@ int characterSelectorOpen() {
 
 		int keyCode = inputGetInput();
 
-		Common::Event e;
-		while (g_system->getEventManager()->pollEvent(e)) {
-			if (e.type == Common::EVENT_KEYDOWN) {
-				break;
-			}
-		}
-		if (e.kbd.keycode == Common::KeyCode::KEYCODE_MINUS ||
-			e.kbd.keycode == Common::KeyCode::KEYCODE_UNDERSCORE) {
+		/*		Common::Event e;
+				while (g_system->getEventManager()->pollEvent(e)) {
+					if (e.type == Common::EVENT_KEYDOWN) {
+						break;
+					}*/
+
+		switch (keyCode) {
+
+		case KEY_MINUS:
+		case KEY_UNDERSCORE:
 			//	brightnessDecrease(); TODO preferences
-		} else if (e.kbd.keycode == Common::KeyCode::KEYCODE_EQUALS ||
-				   e.kbd.keycode == Common::KeyCode::KEYCODE_PLUS) {
+			break;
+
+		case KEY_EQUAL:
+		case KEY_PLUS:
 			//	brightnessIncrease();  TODO preferences
-		} else if (e.kbd.keycode == Common::KeyCode::KEYCODE_b ||
-				   e.kbd.keycode == Common::KeyCode::KEYCODE_ESCAPE) {
+			break;
+
+		case KEY_UPPERCASE_B:
+		case KEY_LOWERCASE_B:
+		case KEY_ESCAPE:
 			rc = 3;
 			done = true;
-		} else if (e.kbd.keycode == Common::KeyCode::KEYCODE_c) {
+			break;
+
+		case KEY_UPPERCASE_C:
+		case KEY_LOWERCASE_C:
 			//  _ResetPlayer();  TODO character_editor
 			// 	if (characterEditorShow(1) == 0) {
 			// 		rc = 2;
@@ -197,38 +207,53 @@ int characterSelectorOpen() {
 			// 	} else {
 			// 		characterSelectorWindowRefresh();
 			// 	}
-		} else if (e.kbd.keycode == Common::KeyCode::KEYCODE_m) {
+			break;
+
+		case KEY_UPPERCASE_M:
+		case KEY_LOWERCASE_M:
 			// if (!characterEditorShow(1)) { TODO character_editor
 			// 			rc = 2;
 			// 			done = true;
 			// 		} else {
 			// 			characterSelectorWindowRefresh();
 			// 		}
-		} else if (e.kbd.keycode == Common::KeyCode::KEYCODE_t) {
-			rc = 2;
-			done = true;
-		} else if (e.kbd.keycode == Common::KeyCode::KEYCODE_F10) {
-			//			showQuitConfirmationDialog(); TODO game
-		} else if (e.kbd.keycode == Common::KeyCode::KEYCODE_LEFT) {
-			//			soundPlayFile("ib2p1xx1"); TODO audio
+			break;
+
+		case KEY_UPPERCASE_T:
+		case KEY_LOWERCASE_T:
+			// rc = 2;
+			// done = true;
+			break;
+
+		case KEY_F10:
+			//	showQuitConfirmationDialog(); TODO game
+			break;
+
+		case KEY_ARROW_LEFT:
+			//  soundPlayFile("ib2p1xx1"); TODO audio
+			// FALLTHROUGH
+		case 500:
 			gCurrentPremadeCharacter -= 1;
 			if (gCurrentPremadeCharacter < 0) {
 				gCurrentPremadeCharacter = gPremadeCharacterCount - 1;
 			}
-
 			characterSelectorWindowRefresh();
-		} else if (e.kbd.keycode == Common::KeyCode::KEYCODE_RIGHT) {
-			//			soundPlayFile("ib2p1xx1"); TODO audio
+			break;
+
+		case KEY_ARROW_RIGHT:
+			//  soundPlayFile("ib2p1xx1"); TODO audio
+			// FALLTHROUGH
+		case 501:
 			gCurrentPremadeCharacter += 1;
 			if (gCurrentPremadeCharacter >= gPremadeCharacterCount) {
 				gCurrentPremadeCharacter = 0;
 			}
-
 			characterSelectorWindowRefresh();
+			break;
 		}
 
-		renderPresent();
-		sharedFpsLimiter.throttle();
+			renderPresent();
+			sharedFpsLimiter.throttle();
 	}
 
 	paletteFadeTo(gPaletteBlack);
