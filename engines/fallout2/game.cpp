@@ -23,11 +23,11 @@
 #include "fallout2/font_manager.h"
 // #include "game_dialog.h"
 // #include "game_memory.h"
-// #include "game_mouse.h"
+#include "fallout2/game_mouse.h"
 // #include "game_movie.h"
 // #include "game_sound.h"
 #include "fallout2/input.h"
-// #include "interface.h"
+#include "fallout2/interface.h"
 // #include "inventory.h"
 #include "fallout2/item.h"
 // #include "kb.h"
@@ -76,7 +76,7 @@ namespace Fallout2 {
 #define SPLASH_HEIGHT (480)
 #define SPLASH_COUNT (10)
 
-static int gameLoadGlobalVars();
+// static int gameLoadGlobalVars();  TODO
 static int gameTakeScreenshot(int width, int height, unsigned char *buffer, unsigned char *palette);
 static void gameFreeGlobalVars();
 static void showHelp();
@@ -920,15 +920,13 @@ int gameHandleKey(int eventCode, bool isInCombatMode) {
 }
 #endif
 
-// TODO game ui on/off
-#if 0
 // game_ui_disable
 // 0x443BFC
 void gameUiDisable(int a1) {
 	if (!gGameUiDisabled) {
 		gameMouseObjectsHide();
 		_gmouse_disable(a1);
-		keyboardDisable();
+//		keyboardDisable(); TODO kb
 		interfaceBarDisable();
 		gGameUiDisabled = true;
 	}
@@ -939,8 +937,8 @@ void gameUiDisable(int a1) {
 void gameUiEnable() {
 	if (gGameUiDisabled) {
 		interfaceBarEnable();
-		keyboardEnable();
-		keyboardReset();
+//		keyboardEnable();  TODO kb
+//		keyboardReset();
 		_gmouse_enable();
 		gameMouseObjectsShow();
 		gGameUiDisabled = false;
@@ -952,7 +950,7 @@ void gameUiEnable() {
 bool gameUiIsDisabled() {
 	return gGameUiDisabled;
 }
-#endif
+
 
 // 0x443C68
 int gameGetGlobalVar(int var) {
@@ -996,7 +994,8 @@ int gameSetGlobalVar(int var, int value) {
 
 // game_load_info
 // 0x443CC8
-static int gameLoadGlobalVars() {
+// TODO move to fallout.cpp?
+/*static*/ int gameLoadGlobalVars() {
 	if (globalVarsRead("data\\vault13.gam", "GAME_GLOBAL_VARS:", &gGameGlobalVarsLength, &gGameGlobalVars) != 0) {
 		return -1;
 	}
