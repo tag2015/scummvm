@@ -520,6 +520,7 @@ void _mouse_simulate_input(int delta_x, int delta_y, int buttons) {
 		gMouseCursorX += delta_x;
 		gMouseCursorY += delta_y;
 		_mouse_clip();
+		debug(6, "Mouse event: gMouseCursorX %d gMouseCursorY %d", gMouseCursorX, gMouseCursorY);
 
 		windowRefreshAll(&mouseRect);
 
