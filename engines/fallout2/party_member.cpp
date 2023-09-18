@@ -594,12 +594,12 @@ static int _partyMemberPrepLoadInstance(STRUCT_519DA8 *a1) {
 			error("partyMemberPrepLoad: Out of memory!");
 		}
 
-//		if (gMapLocalVars != NULL) {  TODO map.cpp
-//			memcpy(a1->vars, gMapLocalVars + script->localVarsOffset, sizeof(int) * script->localVarsCount);
-//		} else {
-//			debugPrint("\nWarning: partyMemberPrepLoadInstance: No map_local_vars found, but script references them!");
-//			memset(a1->vars, 0, sizeof(int) * script->localVarsCount);
-//		}
+		if (gMapLocalVars != NULL) {
+			memcpy(a1->vars, gMapLocalVars + script->localVarsOffset, sizeof(int) * script->localVarsCount);
+		} else {
+			debugPrint("\nWarning: partyMemberPrepLoadInstance: No map_local_vars found, but script references them!");
+			memset(a1->vars, 0, sizeof(int) * script->localVarsCount);
+		}
 	}
 
 	Inventory *inventory = &(obj->data.inventory);
@@ -695,8 +695,8 @@ static int _partyMemberRecoverLoadInstance(STRUCT_519DA8 *a1) {
 	script->flags |= (SCRIPT_FLAG_0x08 | SCRIPT_FLAG_0x10);
 
 	if (a1->vars != NULL) {
-//		script->localVarsOffset = _map_malloc_local_var(script->localVarsCount);  TODO map.cpp
-//		memcpy(gMapLocalVars + script->localVarsOffset, a1->vars, sizeof(int) * script->localVarsCount);
+		script->localVarsOffset = _map_malloc_local_var(script->localVarsCount);
+		memcpy(gMapLocalVars + script->localVarsOffset, a1->vars, sizeof(int) * script->localVarsCount);
 	}
 
 	return 0;
