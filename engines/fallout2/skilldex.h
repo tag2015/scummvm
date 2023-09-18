@@ -1,7 +1,7 @@
-#ifndef SKILLDEX_H
-#define SKILLDEX_H
+#ifndef FALLOUT2_SKILLDEX_H
+#define FALLOUT2_SKILLDEX_H
 
-namespace fallout {
+namespace Fallout2 {
 
 typedef enum SkilldexRC {
 	SKILLDEX_RC_ERROR = -1,
@@ -18,6 +18,6 @@ typedef enum SkilldexRC {
 
 int skilldexOpen();
 
-} // namespace fallout
+} // namespace Fallout2
 
-#endif /* SKILLDEX_H */
+#endif
