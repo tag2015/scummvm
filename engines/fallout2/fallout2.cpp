@@ -31,6 +31,7 @@
 #include "graphics/palette.h"
 #include "graphics/surface.h"
 
+#include "fallout2/animation.h"
 #include "fallout2/art.h"
 #include "fallout2/character_selector.h"
 #include "fallout2/credits.h"
@@ -413,6 +414,9 @@ Common::Error Fallout2Engine::run() {
 		warning("Failed on proto_init");
 	else
 		debug("Initialized protos!");
+
+	animationInit();
+	debug("Initialized animations!");
 
 	if (scriptsInit() != 0)
 		warning("Failed on scripts init");
