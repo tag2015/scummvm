@@ -1970,7 +1970,7 @@ int objectDestroy(Object *object, Rect *rect) {
 		return -1;
 	}
 
-	// _gmouse_remove_item_outline(object);  TODO game_mouse.cpp
+	_gmouse_remove_item_outline(object);
 
 	ObjectListNode *node;
 	ObjectListNode *previousNode;
@@ -2351,7 +2351,7 @@ void objectGetRect(Object *obj, Rect *rect) {
 bool _obj_occupied(int tile, int elevation) {
 	ObjectListNode *objectListNode = gObjectListHeadByTile[tile];
 	while (objectListNode != NULL) {
-		if (objectListNode->obj->elevation == elevation /* && objectListNode->obj != gGameMouseBouncingCursor && objectListNode->obj != gGameMouseHexCursor */) {  // TODO game_mouse.cpp
+		if (objectListNode->obj->elevation == elevation && objectListNode->obj != gGameMouseBouncingCursor && objectListNode->obj != gGameMouseHexCursor) {
 			return true;
 		}
 		objectListNode = objectListNode->next;

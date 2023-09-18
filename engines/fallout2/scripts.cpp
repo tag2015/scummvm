@@ -2454,13 +2454,13 @@ void _scr_spatials_disable() {
 
 // 0x4A6610
 bool scriptsExecSpatialProc(Object *object, int tile, int elevation) {
-	//if (object == gGameMouseBouncingCursor) { TODO game_mouse
-	//	return false;
-	//}
+	if (object == gGameMouseBouncingCursor) {
+		return false;
+	}
 
-	//if (object == gGameMouseHexCursor) {
-	//	return false;
-	//}
+	if (object == gGameMouseHexCursor) {
+		return false;
+	}
 
 	if ((object->flags & OBJECT_HIDDEN) != 0 || (object->flags & OBJECT_FLAT) != 0) {
 		return false;
