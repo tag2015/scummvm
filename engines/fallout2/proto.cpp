@@ -526,7 +526,7 @@ int objectDataRead(Object *obj, File *stream) {
 					return -1;
 				break;
 			case SCENERY_TYPE_LADDER_UP:
-				if (/*gMapHeader.version == 19*/ 0) { // TODO map.cpp
+				if (gMapHeader.version == 19) {
 					if (fileReadInt32(stream, &(obj->data.scenery.ladder.destinationBuiltTile)) == -1)
 						return -1;
 				} else {
@@ -537,7 +537,7 @@ int objectDataRead(Object *obj, File *stream) {
 				}
 				break;
 			case SCENERY_TYPE_LADDER_DOWN:
-				if (/*gMapHeader.version == 19*/ 0) { // TODO map.cpp
+				if (gMapHeader.version == 19) {
 					if (fileReadInt32(stream, &(obj->data.scenery.ladder.destinationBuiltTile)) == -1)
 						return -1;
 				} else {
