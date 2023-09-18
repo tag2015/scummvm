@@ -24,6 +24,9 @@ static bool gTouchGestureHandled = false;
 static int gMouseWheelDeltaX = 0;
 static int gMouseWheelDeltaY = 0;
 
+static int lastMousePosX = -1;
+static int lastMousePosY = -1;
+
 extern int screenGetWidth();
 extern int screenGetHeight();
 
@@ -105,9 +108,20 @@ bool mouseDeviceGetData(MouseData *mouseState) {
 	//		Uint32 buttons = SDL_GetRelativeMouseState(&(mouseState->x), &(mouseState->y));
 	//		mouseState->buttons[0] = (buttons & SDL_BUTTON(SDL_BUTTON_LEFT)) != 0;
 	//		mouseState->buttons[1] = (buttons & SDL_BUTTON(SDL_BUTTON_RIGHT)) != 0;
+	//	}
+
 	Common::Point mousePos = g_engine->getEventManager()->getMousePos();
-	mouseState->x = mousePos.x;
-	mouseState->y = mousePos.y;
+
+	// EventManager can't return the relative mouse position, so keep track manually
+	if (lastMousePosX == -1) { // first time
+		mouseState->x = mousePos.x;
+		mouseState->y = mousePos.y;
+	} else {
+		mouseState->x = mousePos.x - lastMousePosX;
+		mouseState->y = mousePos.y - lastMousePosY;
+	}
+	lastMousePosX = mousePos.x;
+	lastMousePosY = mousePos.y;
 	mouseState->buttons[0] = g_engine->getEventManager()->getButtonState() & 1;
 	mouseState->buttons[1] = g_engine->getEventManager()->getButtonState() & 2;
 
@@ -116,7 +130,6 @@ bool mouseDeviceGetData(MouseData *mouseState) {
 
 	gMouseWheelDeltaX = 0;
 	gMouseWheelDeltaY = 0;
-	//	}
 
 	return true;
 }
