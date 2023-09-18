@@ -1716,7 +1716,7 @@ int _obj_use_door(Object *a1, Object *a2, int a3) {
 			step = 1;
 		}
 
-/*		reg_anim_begin(ANIMATION_REQUEST_RESERVED); TODO animation
+		reg_anim_begin(ANIMATION_REQUEST_RESERVED);
 
 		for (int i = start; i != end; i += step) {
 			if (i != 0) {
@@ -1724,8 +1724,8 @@ int _obj_use_door(Object *a1, Object *a2, int a3) {
 					animationRegisterCallback(a2, a2, (AnimationCallback *)_set_door_state_closed, -1);
 				}
 
-				const char *sfx = sfxBuildOpenName(a2, SCENERY_SOUND_EFFECT_CLOSED);
-				animationRegisterPlaySoundEffect(a2, sfx, -1);
+//				const char *sfx = sfxBuildOpenName(a2, SCENERY_SOUND_EFFECT_CLOSED);  TODO audio
+//				animationRegisterPlaySoundEffect(a2, sfx, -1);
 
 				animationRegisterAnimateReversed(a2, ANIM_STAND, 0);
 			} else {
@@ -1733,8 +1733,8 @@ int _obj_use_door(Object *a1, Object *a2, int a3) {
 					animationRegisterCallback(a2, a2, (AnimationCallback *)_set_door_state_open, -1);
 				}
 
-				const char *sfx = sfxBuildOpenName(a2, SCENERY_SOUND_EFFECT_CLOSED);
-				animationRegisterPlaySoundEffect(a2, sfx, -1);
+//				const char *sfx = sfxBuildOpenName(a2, SCENERY_SOUND_EFFECT_CLOSED); TODO audio
+//				animationRegisterPlaySoundEffect(a2, sfx, -1);
 
 				animationRegisterAnimate(a2, ANIM_STAND, 0);
 			}
@@ -1742,7 +1742,7 @@ int _obj_use_door(Object *a1, Object *a2, int a3) {
 
 		animationRegisterCallbackForced(a2, a2, (AnimationCallback *)_check_door_state, -1);
 
-		reg_anim_end(); */
+		reg_anim_end();
 	}
 
 	return 0;
@@ -1798,19 +1798,19 @@ int _obj_use_container(Object *critter, Object *item) {
 		return -1;
 	}
 
-//	reg_anim_begin(ANIMATION_REQUEST_RESERVED); TODO animation
+	reg_anim_begin(ANIMATION_REQUEST_RESERVED);
 
-//	if (item->frame == 0) {
-//		const char *sfx = sfxBuildOpenName(item, SCENERY_SOUND_EFFECT_OPEN);
+	if (item->frame == 0) {
+//		const char *sfx = sfxBuildOpenName(item, SCENERY_SOUND_EFFECT_OPEN);  TODO audio
 //		animationRegisterPlaySoundEffect(item, sfx, 0);
-//		animationRegisterAnimate(item, ANIM_STAND, 0);
-//	} else {
+		animationRegisterAnimate(item, ANIM_STAND, 0);
+	} else {
 //		const char *sfx = sfxBuildOpenName(item, SCENERY_SOUND_EFFECT_CLOSED);
 //		animationRegisterPlaySoundEffect(item, sfx, 0);
-//		animationRegisterAnimateReversed(item, ANIM_STAND, 0);
-//	}
+		animationRegisterAnimateReversed(item, ANIM_STAND, 0);
+	}
 
-//	reg_anim_end();
+	reg_anim_end();
 
 	if (critter == gDude) {
 		MessageListItem messageListItem;
@@ -2015,27 +2015,27 @@ static int objectOpenClose(Object *obj) {
 
 	objectUnjamLock(obj);
 
-/*	reg_anim_begin(ANIMATION_REQUEST_RESERVED);  TODO animation
+	reg_anim_begin(ANIMATION_REQUEST_RESERVED);
 
 	if (obj->frame != 0) {
 		animationRegisterCallbackForced(obj, obj, (AnimationCallback *)_set_door_state_closed, -1);
 
-		const char *sfx = sfxBuildOpenName(obj, SCENERY_SOUND_EFFECT_CLOSED);
-		animationRegisterPlaySoundEffect(obj, sfx, -1);
+//		const char *sfx = sfxBuildOpenName(obj, SCENERY_SOUND_EFFECT_CLOSED);
+//		animationRegisterPlaySoundEffect(obj, sfx, -1);
 
 		animationRegisterAnimateReversed(obj, ANIM_STAND, 0);
 	} else {
 		animationRegisterCallbackForced(obj, obj, (AnimationCallback *)_set_door_state_open, -1);
 
-		const char *sfx = sfxBuildOpenName(obj, SCENERY_SOUND_EFFECT_OPEN);
-		animationRegisterPlaySoundEffect(obj, sfx, -1);
+//		const char *sfx = sfxBuildOpenName(obj, SCENERY_SOUND_EFFECT_OPEN);
+//		animationRegisterPlaySoundEffect(obj, sfx, -1);
 		animationRegisterAnimate(obj, ANIM_STAND, 0);
 	}
 
 	animationRegisterCallbackForced(obj, obj, (AnimationCallback *)_check_door_state, -1);
 
 	reg_anim_end();
-*/
+
 	return 0;
 }
 
@@ -2149,9 +2149,9 @@ int _obj_attempt_placement(Object *obj, int tile, int elevation, int a4) {
 
 			for (int rotation = 0; rotation < ROTATION_COUNT; rotation++) {
 				newTile = tileGetTileInDirection(tile, rotation, v6);
-//				if (_obj_blocking_at(NULL, newTile, elevation) == NULL && v6 > 1 && _make_path(gDude, gDude->tile, newTile, NULL, 0) != 0) { TODO animation
-//					break;
-//				}
+				if (_obj_blocking_at(NULL, newTile, elevation) == NULL && v6 > 1 && _make_path(gDude, gDude->tile, newTile, NULL, 0) != 0) {
+					break;
+				}
 			}
 
 			v6++;
