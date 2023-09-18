@@ -1220,7 +1220,7 @@ int knockoutEventProcess(Object *obj, void *data) {
 	if (/*isInCombat()*/0) {  // TODO combat.cpp
 		obj->data.critter.combat.maneuver |= CRITTER_MANEUVER_ENGAGING;
 	} else {
-//		_dude_standup(obj);  TODO animation.cpp
+		_dude_standup(obj);
 	}
 
 	return 0;

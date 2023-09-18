@@ -1797,37 +1797,37 @@ static int _intface_change_fid_callback(Object *a1, Object *a2) {
 static void interfaceBarSwapHandsAnimatePutAwayTakeOutSequence(int previousWeaponAnimationCode, int weaponAnimationCode) {
 	gInterfaceBarSwapHandsInProgress = true;
 
-//	reg_anim_clear(gDude); TODO animation
-//	reg_anim_begin(ANIMATION_REQUEST_RESERVED);
-//	animationRegisterSetLightDistance(gDude, 4, 0);
+	reg_anim_clear(gDude);
+	reg_anim_begin(ANIMATION_REQUEST_RESERVED);
+	animationRegisterSetLightDistance(gDude, 4, 0);
 
 	if (previousWeaponAnimationCode != 0) {
 //		const char *sfx = sfxBuildCharName(gDude, ANIM_PUT_AWAY, CHARACTER_SOUND_EFFECT_UNUSED); TODO audio
-//		animationRegisterPlaySoundEffect(gDude, sfx, 0); TODO animation
-//		animationRegisterAnimate(gDude, ANIM_PUT_AWAY, 0);
+//		animationRegisterPlaySoundEffect(gDude, sfx, 0);
+		animationRegisterAnimate(gDude, ANIM_PUT_AWAY, 0);
 	}
 
 	// TODO: Get rid of cast.
-//	animationRegisterCallbackForced(NULL, NULL, (AnimationCallback *)_intface_redraw_items_callback, -1);
+	animationRegisterCallbackForced(NULL, NULL, (AnimationCallback *)_intface_redraw_items_callback, -1);
 
 	Object *item = gInterfaceItemStates[gInterfaceCurrentHand].item;
 	if (item != NULL && item->lightDistance > 4) {
-//		animationRegisterSetLightDistance(gDude, item->lightDistance, 0);
+		animationRegisterSetLightDistance(gDude, item->lightDistance, 0);
 	}
 
 	if (weaponAnimationCode != 0) {
-//		animationRegisterTakeOutWeapon(gDude, weaponAnimationCode, -1);
+		animationRegisterTakeOutWeapon(gDude, weaponAnimationCode, -1);
 	} else {
 		int fid = buildFid(OBJ_TYPE_CRITTER, gDude->fid & 0xFFF, ANIM_STAND, 0, gDude->rotation + 1);
-//		animationRegisterSetFid(gDude, fid, -1);
+		animationRegisterSetFid(gDude, fid, -1);
 	}
 
 	// TODO: Get rid of cast.
-//	animationRegisterCallbackForced(NULL, NULL, (AnimationCallback *)_intface_change_fid_callback, -1);
+	animationRegisterCallbackForced(NULL, NULL, (AnimationCallback *)_intface_change_fid_callback, -1);
 
-//	if (reg_anim_end() == -1) { TODO anim
-//		return;
-//	}
+	if (reg_anim_end() == -1) {
+		return;
+	}
 
 	bool interfaceBarWasEnabled = gInterfaceBarEnabled;
 
