@@ -22,6 +22,8 @@ extern int _game_user_wants_to_quit;
 
 extern MessageList gMiscMessageList;
 
+// TODO move to fallout2?
+int gameLoadGlobalVars();
 int gameDbInit();
 void showSplash();
 
