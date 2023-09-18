@@ -8,7 +8,7 @@
 #include "fallout2/color.h"
 #include "fallout2/combat.h"
 #include "fallout2/draw.h"
-// #include "fallout2/game_mouse.h" TODO game_mouse
+#include "fallout2/game_mouse.h"
 // #include "fallout2/game_sound.h" TODO audio
 #include "fallout2/geometry.h"
 #include "fallout2/input.h"
@@ -392,17 +392,17 @@ static void displayMonitorScrollDownOnMouseDown(int btn, int keyCode) {
 
 // 0x431BC8
 static void displayMonitorScrollUpOnMouseEnter(int btn, int keyCode) {
-	// gameMouseSetCursor(MOUSE_CURSOR_SMALL_ARROW_UP); TODO game_mouse
+	gameMouseSetCursor(MOUSE_CURSOR_SMALL_ARROW_UP);
 }
 
 // 0x431BD4
 static void displayMonitorScrollDownOnMouseEnter(int btn, int keyCode) {
-	// gameMouseSetCursor(MOUSE_CURSOR_SMALL_ARROW_DOWN); TODO game_mouse
+	gameMouseSetCursor(MOUSE_CURSOR_SMALL_ARROW_DOWN);
 }
 
 // 0x431BE0
 static void displayMonitorOnMouseExit(int btn, int keyCode) {
-	// gameMouseSetCursor(MOUSE_CURSOR_ARROW); TODO game_mouse
+	gameMouseSetCursor(MOUSE_CURSOR_ARROW);
 }
 
 // 0x431BEC
