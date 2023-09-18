@@ -793,7 +793,7 @@ void gameMouseRefresh() {
 
 		char formattedActionPoints[8];
 		int color;
-		int distance = 0; // _make_path(gDude, gDude->tile, gGameMouseHexCursor->tile, NULL, 1); TODO animation
+		int distance = _make_path(gDude, gDude->tile, gGameMouseHexCursor->tile, NULL, 1);
 		if (distance != 0) {
 			if (/*!isInCombat()*/ 1) {  // TODO combat
 				formattedActionPoints[0] = '\0';
@@ -922,17 +922,17 @@ void _gmouse_handle_event(int mouseX, int mouseY, int mouseState) {
 
 			if (/*gPressedPhysicalKeys[SDL_SCANCODE_LSHIFT] || gPressedPhysicalKeys[SDL_SCANCODE_RSHIFT]*/ 0) {  // TODO kb sdl
 				if (settings.preferences.running) {
-//					_dude_move(actionPoints);  TODO animation
+					_dude_move(actionPoints);
 					return;
 				}
 			} else {
 				if (!settings.preferences.running) {
-//					_dude_move(actionPoints);  TODO animation
+					_dude_move(actionPoints);
 					return;
 				}
 			}
 
-//			_dude_run(actionPoints); TODO animation
+			_dude_run(actionPoints);
 			return;
 		}
 
