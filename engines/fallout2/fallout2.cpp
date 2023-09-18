@@ -41,6 +41,7 @@
 #include "fallout2/draw.h"
 #include "fallout2/font_manager.h"
 #include "fallout2/game.h"
+#include "fallout2/game_mouse.h"
 #include "fallout2/game_memory.h"
 #include "fallout2/interface.h"
 #include "fallout2/item.h"
@@ -48,6 +49,7 @@
 #include "fallout2/mainmenu.h"
 #include "fallout2/memory.h"
 #include "fallout2/message.h"
+#include "fallout2/mouse.h"
 #include "fallout2/object.h"
 #include "fallout2/palette.h"
 #include "fallout2/party_member.h"
@@ -402,6 +404,11 @@ Common::Error Fallout2Engine::run() {
 	if (isoInit() != 0)
 		warning("Failed on iso_init");
 
+	if (gameMouseInit() != 0)
+		warning("Failed on gmouse_init");
+	else
+		debug("Initialized mouse!");
+
 	if (protoInit() != 0)
 		warning("Failed on proto_init");
 	else
@@ -444,27 +451,46 @@ Common::Error Fallout2Engine::run() {
 	g_system->delayMillis(1000);
 	paletteFadeTo(gPaletteBlack);
 
-	bool exit = false;
-	mainMenuWindowUnhide(1);
-	while (!shouldQuit() && !exit) {
-		while (g_system->getEventManager()->pollEvent(e)) {
+	bool done = false;
 
-			if (e.type == Common::EVENT_SCREEN_CHANGED)
-				_screen->update();
-			if (e.type == Common::EVENT_LBUTTONDOWN) {
-				exit = true;
-				break;
-			}
+	while (!shouldQuit() && !done) {
+		mainMenuWindowUnhide(1);
 
-			// Delay for a bit. All events loops should have a delay
-			// to prevent the system being unduly loaded
-			g_system->delayMillis(10);
+		mouseShowCursor();
+		int mainMenuRc = mainMenuWindowHandleEvents();
+		mouseHideCursor();
+
+		switch (mainMenuRc) {
+		case MAIN_MENU_INTRO:
+			break;
+
+		case MAIN_MENU_NEW_GAME:
+			mainMenuWindowHide(true);
+			mainMenuWindowFree();
+			characterSelectorOpen();
+			mainMenuWindowInit();
+			break;
+
+		case MAIN_MENU_LOAD_GAME:
+			break;
+
+		case MAIN_MENU_OPTIONS:
+			break;
+
+		case MAIN_MENU_CREDITS:
+			mainMenuWindowHide(true);
+			creditsOpen("credits.txt", -1, false);
+			break;
+
+		case MAIN_MENU_EXIT:
+		case -1:
+			done = true;
+			mainMenuWindowHide(true);
+			mainMenuWindowFree();
+//			backgroundSoundDelete(); TODO audio
+			break;
 		}
 	}
-	mainMenuWindowHide(1);
-	mainMenuWindowFree();
-	characterSelectorOpen();
-	creditsOpen("credits.txt", -1, false);
 	gameExit();
 	return Common::kNoError;
 }
