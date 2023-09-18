@@ -5,6 +5,7 @@ MODULE_OBJS = \
 	console.o \
 	metaengine.o \
 	art.o \
+	animation.o \
 	cache.o \
 	character_selector.o \
 	color.o \
