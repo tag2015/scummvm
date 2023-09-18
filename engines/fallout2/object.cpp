@@ -609,14 +609,13 @@ static void _object_fix_weapon_ammo(Object *obj) {
 		return;
 	}
 
-	// TODO item.cpp
 	Proto *proto;
 	if (protoGetProto(obj->pid, &proto) == -1) {
 		debugPrint("\nError: obj_load: proto_ptr failed on pid");
 		error("_object_fix_weapon_ammo");
 	}
 
-/*	int charges;
+	int charges;
 	if (itemGetType(obj) == ITEM_TYPE_WEAPON) {
 		int ammoTypePid = obj->data.item.weapon.ammoTypePid;
 		if (ammoTypePid == 0xCCCCCCCC || ammoTypePid == -1) {
@@ -644,7 +643,7 @@ static void _object_fix_weapon_ammo(Object *obj) {
 				}
 			}
 		}
-	} */
+	}
 }
 
 // 0x489200
@@ -1071,12 +1070,12 @@ int _obj_copy(Object **a1, Object *a2) {
 			return -1;
 		}
 
-	/*	if (itemAdd(objectListNode->obj, newItem, oldInventoryItem->quantity) == 1) { TODO item.cpp
+		if (itemAdd(objectListNode->obj, newItem, oldInventoryItem->quantity) == 1) {
 			// TODO: Probably leaking object allocated with objectAllocate.
 			// NOTE: Uninline.
 			objectListNodeDestroy(&objectListNode);
 			return -1;
-		}*/
+		}
 	}
 
 	return 0;
@@ -3038,9 +3037,9 @@ void _obj_process_seen() {
 // 0x48C8E4
 char *objectGetName(Object *obj) {
 	int objectType = FID_TYPE(obj->fid);
-	switch (objectType) {  // TODO item.cpp
-//	case OBJ_TYPE_ITEM:
-//		return itemGetName(obj);
+	switch (objectType) {
+	case OBJ_TYPE_ITEM:
+		return itemGetName(obj);
 	case OBJ_TYPE_CRITTER:
 		return critterGetName(obj);
 	default:
@@ -3051,7 +3050,7 @@ char *objectGetName(Object *obj) {
 // 0x48C914
 char *objectGetDescription(Object *obj) {
 	if (FID_TYPE(obj->fid) == OBJ_TYPE_ITEM) {
-//		return itemGetDescription(obj); TODO item.cpp
+		return itemGetDescription(obj);
 	}
 
 	return protoGetDescription(obj->pid);
