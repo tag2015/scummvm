@@ -613,7 +613,7 @@ static int _partyMemberPrepLoadInstance(STRUCT_519DA8 *a1) {
 	scriptRemove(script->sid);
 
 	if (PID_TYPE(obj->pid) == OBJ_TYPE_CRITTER) {
-//		_dude_stand(obj, obj->rotation, -1);  TODO animation.cpp
+		_dude_stand(obj, obj->rotation, -1);
 	}
 
 	return 0;
