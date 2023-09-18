@@ -1192,10 +1192,10 @@ int interfaceBarSwapHands(bool animated) {
 		interfaceBarRefreshMainAction();
 	}
 
-/*	int mode = gameMouseGetMode(); TODO mouse
+	int mode = gameMouseGetMode();
 	if (mode == GAME_MOUSE_MODE_CROSSHAIR || mode == GAME_MOUSE_MODE_USE_CROSSHAIR) {
 		gameMouseSetMode(GAME_MOUSE_MODE_MOVE);
-	}*/
+	}
 
 	return 0;
 }
@@ -1288,15 +1288,15 @@ void _intface_use_item() {
 				_intface_item_reload();
 			}
 		} else {
-//			gameMouseSetCursor(MOUSE_CURSOR_CROSSHAIR); TODO mouse
-//			gameMouseSetMode(GAME_MOUSE_MODE_CROSSHAIR);
+			gameMouseSetCursor(MOUSE_CURSOR_CROSSHAIR);
+			gameMouseSetMode(GAME_MOUSE_MODE_CROSSHAIR);
 //			if (!isInCombat()) { TODO combat
 //				_combat(NULL);
 //			}
 		}
 	} else if (_proto_action_can_use_on(ptr->item->pid)) {
-//		gameMouseSetCursor(MOUSE_CURSOR_USE_CROSSHAIR); TODO mouse
-//		gameMouseSetMode(GAME_MOUSE_MODE_USE_CROSSHAIR);
+		gameMouseSetCursor(MOUSE_CURSOR_USE_CROSSHAIR);
+		gameMouseSetMode(GAME_MOUSE_MODE_USE_CROSSHAIR);
 	} else if (_obj_action_can_use(ptr->item)) {
 		if (/*isInCombat()*/ 0) { // TODO combat
 			int actionPointsRequired = itemGetActionPointCost(gDude, ptr->secondaryHitMode, false);
@@ -1402,7 +1402,7 @@ void interfaceBarEndButtonsShow(bool animated) {
 				time = getTicks();
 				frame++;
 			}
-//			gameMouseRefresh(); TODO mouse
+			gameMouseRefresh();
 
 			renderPresent();
 			sharedFpsLimiter.throttle();
@@ -1461,7 +1461,7 @@ void interfaceBarEndButtonsHide(bool animated) {
 				time = getTicks();
 				frame--;
 			}
-//			gameMouseRefresh(); TODO mouse
+			gameMouseRefresh();
 
 			renderPresent();
 			sharedFpsLimiter.throttle();
@@ -1832,9 +1832,9 @@ static void interfaceBarSwapHandsAnimatePutAwayTakeOutSequence(int previousWeapo
 	bool interfaceBarWasEnabled = gInterfaceBarEnabled;
 
 	interfaceBarDisable();
-//	_gmouse_disable(0);  TODO mouse
+	_gmouse_disable(0);
 
-//	gameMouseSetCursor(MOUSE_CURSOR_WAIT_WATCH); TODO mouse
+	gameMouseSetCursor(MOUSE_CURSOR_WAIT_WATCH);
 
 	while (gInterfaceBarSwapHandsInProgress) {
 		sharedFpsLimiter.mark();
@@ -1849,9 +1849,9 @@ static void interfaceBarSwapHandsAnimatePutAwayTakeOutSequence(int previousWeapo
 		sharedFpsLimiter.throttle();
 	}
 
-//	gameMouseSetCursor(MOUSE_CURSOR_NONE); TODO mouse
+	gameMouseSetCursor(MOUSE_CURSOR_NONE);
 
-//	_gmouse_enable(); TODO mouse
+	_gmouse_enable();
 
 	if (interfaceBarWasEnabled) {
 		interfaceBarEnable();
@@ -2077,7 +2077,7 @@ static void interfaceRenderCounter(int x, int y, int previousValue, int value, i
 
 				blitBufferToBuffer(upSrc, 9, 17, 360, onesDest, gInterfaceBarWidth);
 				_mouse_info();
-//				gameMouseRefresh();  TODO mouse
+				gameMouseRefresh();
 				renderPresent();
 				inputBlockForTocks(delay);
 				windowRefreshRect(gInterfaceBarWindow, &numbersRect);
@@ -2087,7 +2087,7 @@ static void interfaceRenderCounter(int x, int y, int previousValue, int value, i
 				if (ones > 9 || ones < 0) {
 					blitBufferToBuffer(upSrc, 9, 17, 360, tensDest, gInterfaceBarWidth);
 					_mouse_info();
-//					gameMouseRefresh(); TODO mouse
+					gameMouseRefresh();
 					renderPresent();
 					inputBlockForTocks(delay);
 					windowRefreshRect(gInterfaceBarWindow, &numbersRect);
@@ -2097,7 +2097,7 @@ static void interfaceRenderCounter(int x, int y, int previousValue, int value, i
 					if (tens == 10 || tens == -1) {
 						blitBufferToBuffer(upSrc, 9, 17, 360, hundredsDest, gInterfaceBarWidth);
 						_mouse_info();
-//						gameMouseRefresh(); TODO mouse
+						gameMouseRefresh();
 						renderPresent();
 						inputBlockForTocks(delay);
 						windowRefreshRect(gInterfaceBarWindow, &numbersRect);
@@ -2110,7 +2110,7 @@ static void interfaceRenderCounter(int x, int y, int previousValue, int value, i
 
 						blitBufferToBuffer(downSrc, 9, 17, 360, hundredsDest, gInterfaceBarWidth);
 						_mouse_info();
-//						gameMouseRefresh(); TODO mouse
+						gameMouseRefresh();
 						renderPresent();
 						inputBlockForTocks(delay);
 						windowRefreshRect(gInterfaceBarWindow, &numbersRect);
@@ -2124,7 +2124,7 @@ static void interfaceRenderCounter(int x, int y, int previousValue, int value, i
 
 				blitBufferToBuffer(downSrc, 9, 17, 360, onesDest, gInterfaceBarWidth);
 				_mouse_info();
-//				gameMouseRefresh(); TODO mouse
+				gameMouseRefresh();
 				renderPresent();
 				inputBlockForTocks(delay);
 				windowRefreshRect(gInterfaceBarWindow, &numbersRect);
@@ -2137,7 +2137,7 @@ static void interfaceRenderCounter(int x, int y, int previousValue, int value, i
 
 				blitBufferToBuffer(previousValue >= 0 ? plusSrc : minusSrc, 6, 17, 360, signDest, gInterfaceBarWidth);
 				_mouse_info();
-//				gameMouseRefresh(); TODO mouse
+				gameMouseRefresh();
 				renderPresent();
 				inputBlockForTocks(delay);
 				windowRefreshRect(gInterfaceBarWindow, &numbersRect);
