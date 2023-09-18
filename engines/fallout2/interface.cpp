@@ -1043,9 +1043,9 @@ int interfaceGetCurrentHitMode(int *hitMode, bool *aiming) {
 
 // 0x45EFEC
 int interfaceUpdateItems(bool animated, int leftItemAction, int rightItemAction) {
-//	if (isoIsDisabled()) {  TODO map
+	if (isoIsDisabled()) {
 		animated = false;
-//	}
+	}
 
 	if (gInterfaceBarWindow == -1) {
 		return -1;
