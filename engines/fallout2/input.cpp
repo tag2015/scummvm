@@ -201,9 +201,9 @@ void _process_bk() {
 
 	tickersExecute();
 
-/*	if (vcrUpdate() != 3) {  TODO vcr.cpp
+	if (/*vcrUpdate() != 3*/ 1) { // TODO vcr.cpp
 		_mouse_info();
-	}*/
+	}
 
 	v1 = _win_check_all_buttons();
 	if (v1 != -1) {
