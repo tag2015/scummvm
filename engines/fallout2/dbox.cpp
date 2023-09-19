@@ -1,28 +1,28 @@
-#include "dbox.h"
+#include "fallout2/dbox.h"
 
-#include <stdio.h>
+/*#include <stdio.h>
 #include <string.h>
 
-#include <algorithm>
+#include <algorithm>*/
 
-#include "art.h"
-#include "character_editor.h"
-#include "color.h"
-#include "debug.h"
-#include "draw.h"
-#include "game.h"
-#include "game_sound.h"
-#include "input.h"
-#include "kb.h"
-#include "message.h"
-#include "mouse.h"
-#include "platform_compat.h"
-#include "svga.h"
-#include "text_font.h"
-#include "window_manager.h"
-#include "word_wrap.h"
+#include "fallout2/art.h"
+// #include "fallout2/character_editor.h" TODO character_editor
+#include "fallout2/color.h"
+#include "fallout2/debug.h"
+#include "fallout2/draw.h"
+#include "fallout2/game.h"
+// #include "fallout2/game_sound.h" TODO game_sound
+#include "fallout2/input.h"
+#include "fallout2/kb.h"
+#include "fallout2/message.h"
+#include "fallout2/mouse.h"
+#include "fallout2/platform_compat.h"
+#include "fallout2/svga.h"
+#include "fallout2/text_font.h"
+#include "fallout2/window_manager.h"
+#include "fallout2/word_wrap.h"
 
-namespace fallout {
+namespace Fallout2 {
 
 #define FILE_DIALOG_LINE_COUNT 12
 
@@ -86,7 +86,7 @@ typedef enum FileDialogScrollDirection {
 	FILE_DIALOG_SCROLL_DIRECTION_DOWN,
 } FileDialogScrollDirection;
 
-static void fileDialogRenderFileList(unsigned char* buffer, char** fileList, int pageOffset, int fileListLength, int selectedIndex, int pitch);
+static void fileDialogRenderFileList(unsigned char *buffer, char **fileList, int pageOffset, int fileListLength, int selectedIndex, int pitch);
 
 // 0x5108C8
 static const int gDialogBoxBackgroundFrmIds[DIALOG_TYPE_COUNT] = {
@@ -127,8 +127,8 @@ static const int _dblines[DIALOG_TYPE_COUNT] = {
 // 0x510900
 static int gLoadFileDialogFrmIds[FILE_DIALOG_FRM_COUNT] = {
 	224, // loadbox.frm - character editor
-	8, // lilredup.frm - little red button up
-	9, // lilreddn.frm - little red button down
+	8,   // lilredup.frm - little red button up
+	9,   // lilreddn.frm - little red button down
 	181, // dnarwoff.frm - character editor
 	182, // dnarwon.frm - character editor
 	199, // uparwoff.frm - character editor
@@ -138,8 +138,8 @@ static int gLoadFileDialogFrmIds[FILE_DIALOG_FRM_COUNT] = {
 // 0x51091C
 static int gSaveFileDialogFrmIds[FILE_DIALOG_FRM_COUNT] = {
 	225, // savebox.frm - character editor
-	8, // lilredup.frm - little red button up
-	9, // lilreddn.frm - little red button down
+	8,   // lilredup.frm - little red button up
+	9,   // lilreddn.frm - little red button down
 	181, // dnarwoff.frm - character editor
 	182, // dnarwon.frm - character editor
 	199, // uparwoff.frm - character editor
@@ -147,7 +147,7 @@ static int gSaveFileDialogFrmIds[FILE_DIALOG_FRM_COUNT] = {
 };
 
 // 0x41CF20
-int showDialogBox(const char* title, const char** body, int bodyLength, int x, int y, int titleColor, const char* a8, int bodyColor, int flags) {
+int showDialogBox(const char *title, const char **body, int bodyLength, int x, int y, int titleColor, const char *a8, int bodyColor, int flags) {
 	MessageList messageList;
 	MessageListItem messageListItem;
 	int savedFont = fontGetCurrent();
@@ -178,7 +178,7 @@ int showDialogBox(const char* title, const char** body, int bodyLength, int x, i
 	int linesCount = 0;
 	for (int index = 0; index < bodyLength; index++) {
 		// NOTE: Originally there is no `max` macro.
-		maximumLineWidth = std::max(fontGetStringWidth(body[index]), maximumLineWidth);
+		maximumLineWidth = MAX(fontGetStringWidth(body[index]), maximumLineWidth);
 		linesCount++;
 	}
 
@@ -193,8 +193,8 @@ int showDialogBox(const char* title, const char** body, int bodyLength, int x, i
 		}
 
 		dialogType = maximumLineWidth > 168 || linesCount > 5
-		             ? DIALOG_TYPE_LARGE
-		             : DIALOG_TYPE_MEDIUM;
+						 ? DIALOG_TYPE_LARGE
+						 : DIALOG_TYPE_MEDIUM;
 	}
 
 	FrmImage backgroundFrmImage;
@@ -208,17 +208,17 @@ int showDialogBox(const char* title, const char** body, int bodyLength, int x, i
 	x += (screenGetWidth() - 640) / 2;
 	y += (screenGetHeight() - 480) / 2;
 	int win = windowCreate(x,
-	                       y,
-	                       backgroundFrmImage.getWidth(),
-	                       backgroundFrmImage.getHeight(),
-	                       256,
-	                       WINDOW_MODAL | WINDOW_MOVE_ON_TOP);
+						   y,
+						   backgroundFrmImage.getWidth(),
+						   backgroundFrmImage.getHeight(),
+						   256,
+						   WINDOW_MODAL | WINDOW_MOVE_ON_TOP);
 	if (win == -1) {
 		fontSetCurrent(savedFont);
 		return -1;
 	}
 
-	unsigned char* windowBuf = windowGetBuffer(win);
+	unsigned char *windowBuf = windowGetBuffer(win);
 	memcpy(windowBuf, backgroundFrmImage.getData(), backgroundFrmImage.getWidth() * backgroundFrmImage.getHeight());
 
 	FrmImage doneBoxFrmImage;
@@ -248,14 +248,14 @@ int showDialogBox(const char* title, const char** body, int bodyLength, int x, i
 		}
 
 		int v27 = hasTwoButtons
-		          ? _doneX[dialogType]
-		          : (backgroundFrmImage.getWidth() - doneBoxFrmImage.getWidth()) / 2;
+					  ? _doneX[dialogType]
+					  : (backgroundFrmImage.getWidth() - doneBoxFrmImage.getWidth()) / 2;
 		blitBufferToBuffer(doneBoxFrmImage.getData(),
-		                   doneBoxFrmImage.getWidth(),
-		                   doneBoxFrmImage.getHeight(),
-		                   doneBoxFrmImage.getWidth(),
-		                   windowBuf + backgroundFrmImage.getWidth() * _doneY[dialogType] + v27,
-		                   backgroundFrmImage.getWidth());
+						   doneBoxFrmImage.getWidth(),
+						   doneBoxFrmImage.getHeight(),
+						   doneBoxFrmImage.getWidth(),
+						   windowBuf + backgroundFrmImage.getWidth() * _doneY[dialogType] + v27,
+						   backgroundFrmImage.getWidth());
 
 		if (!messageListInit(&messageList)) {
 			fontSetCurrent(savedFont);
@@ -279,27 +279,27 @@ int showDialogBox(const char* title, const char** body, int bodyLength, int x, i
 		messageListItem.num = (flags & DIALOG_BOX_YES_NO) == 0 ? 100 : 101;
 		if (messageListGetItem(&messageList, &messageListItem)) {
 			fontDrawText(windowBuf + backgroundFrmImage.getWidth() * (_doneY[dialogType] + 3) + v27 + 35,
-			             messageListItem.text,
-			             backgroundFrmImage.getWidth(),
-			             backgroundFrmImage.getWidth(),
-			             _colorTable[18979]);
+						 messageListItem.text,
+						 backgroundFrmImage.getWidth(),
+						 backgroundFrmImage.getWidth(),
+						 _colorTable[18979]);
 		}
 
 		int btn = buttonCreate(win,
-		                       v27 + 13,
-		                       _doneY[dialogType] + 4,
-		                       buttonPressedFrmImage.getWidth(),
-		                       buttonPressedFrmImage.getHeight(),
-		                       -1,
-		                       -1,
-		                       -1,
-		                       500,
-		                       buttonNormalFrmImage.getData(),
-		                       buttonPressedFrmImage.getData(),
-		                       NULL,
-		                       BUTTON_FLAG_TRANSPARENT);
+							   v27 + 13,
+							   _doneY[dialogType] + 4,
+							   buttonPressedFrmImage.getWidth(),
+							   buttonPressedFrmImage.getHeight(),
+							   -1,
+							   -1,
+							   -1,
+							   500,
+							   buttonNormalFrmImage.getData(),
+							   buttonPressedFrmImage.getData(),
+							   NULL,
+							   BUTTON_FLAG_TRANSPARENT);
 		if (btn != -1) {
-			buttonSetCallbacks(btn, _gsound_red_butt_press, _gsound_red_butt_release);
+//			buttonSetCallbacks(btn, _gsound_red_butt_press, _gsound_red_butt_release); TODO audio
 		}
 
 		v86 = true;
@@ -314,33 +314,33 @@ int showDialogBox(const char* title, const char** body, int bodyLength, int x, i
 			fontSetCurrent(103);
 
 			blitBufferToBufferTrans(doneBoxFrmImage.getData(),
-			                        doneBoxFrmImage.getWidth(),
-			                        doneBoxFrmImage.getHeight(),
-			                        doneBoxFrmImage.getWidth(),
-			                        windowBuf + backgroundFrmImage.getWidth() * _doneY[dialogType] + _doneX[dialogType] + doneBoxFrmImage.getWidth() + 24,
-			                        backgroundFrmImage.getWidth());
+									doneBoxFrmImage.getWidth(),
+									doneBoxFrmImage.getHeight(),
+									doneBoxFrmImage.getWidth(),
+									windowBuf + backgroundFrmImage.getWidth() * _doneY[dialogType] + _doneX[dialogType] + doneBoxFrmImage.getWidth() + 24,
+									backgroundFrmImage.getWidth());
 
 			fontDrawText(windowBuf + backgroundFrmImage.getWidth() * (_doneY[dialogType] + 3) + _doneX[dialogType] + doneBoxFrmImage.getWidth() + 59,
-			             a8,
-			             backgroundFrmImage.getWidth(),
-			             backgroundFrmImage.getWidth(),
-			             _colorTable[18979]);
+						 a8,
+						 backgroundFrmImage.getWidth(),
+						 backgroundFrmImage.getWidth(),
+						 _colorTable[18979]);
 
 			int btn = buttonCreate(win,
-			                       doneBoxFrmImage.getWidth() + _doneX[dialogType] + 37,
-			                       _doneY[dialogType] + 4,
-			                       buttonPressedFrmImage.getWidth(),
-			                       buttonPressedFrmImage.getHeight(),
-			                       -1,
-			                       -1,
-			                       -1,
-			                       501,
-			                       buttonNormalFrmImage.getData(),
-			                       buttonPressedFrmImage.getData(),
-			                       0,
-			                       BUTTON_FLAG_TRANSPARENT);
+								   doneBoxFrmImage.getWidth() + _doneX[dialogType] + 37,
+								   _doneY[dialogType] + 4,
+								   buttonPressedFrmImage.getWidth(),
+								   buttonPressedFrmImage.getHeight(),
+								   -1,
+								   -1,
+								   -1,
+								   501,
+								   buttonNormalFrmImage.getData(),
+								   buttonPressedFrmImage.getData(),
+								   0,
+								   BUTTON_FLAG_TRANSPARENT);
 			if (btn != -1) {
-				buttonSetCallbacks(btn, _gsound_red_butt_press, _gsound_red_butt_release);
+//				buttonSetCallbacks(btn, _gsound_red_butt_press, _gsound_red_butt_release); TODO audio
 			}
 		} else {
 			int doneBoxFid = buildFid(OBJ_TYPE_INTERFACE, 209, 0, 0, 0);
@@ -380,32 +380,32 @@ int showDialogBox(const char* title, const char** body, int bodyLength, int x, i
 			}
 
 			blitBufferToBufferTrans(doneBoxFrmImage.getData(),
-			                        doneBoxFrmImage.getWidth(),
-			                        doneBoxFrmImage.getHeight(),
-			                        doneBoxFrmImage.getWidth(),
-			                        windowBuf + backgroundFrmImage.getWidth() * _doneY[dialogType] + _doneX[dialogType],
-			                        backgroundFrmImage.getWidth());
+									doneBoxFrmImage.getWidth(),
+									doneBoxFrmImage.getHeight(),
+									doneBoxFrmImage.getWidth(),
+									windowBuf + backgroundFrmImage.getWidth() * _doneY[dialogType] + _doneX[dialogType],
+									backgroundFrmImage.getWidth());
 
 			fontSetCurrent(103);
 
 			fontDrawText(windowBuf + backgroundFrmImage.getWidth() * (_doneY[dialogType] + 3) + _doneX[dialogType] + 35,
-			             a8, backgroundFrmImage.getWidth(), backgroundFrmImage.getWidth(), _colorTable[18979]);
+						 a8, backgroundFrmImage.getWidth(), backgroundFrmImage.getWidth(), _colorTable[18979]);
 
 			int btn = buttonCreate(win,
-			                       _doneX[dialogType] + 13,
-			                       _doneY[dialogType] + 4,
-			                       buttonPressedFrmImage.getWidth(),
-			                       buttonPressedFrmImage.getHeight(),
-			                       -1,
-			                       -1,
-			                       -1,
-			                       501,
-			                       buttonNormalFrmImage.getData(),
-			                       buttonPressedFrmImage.getData(),
-			                       NULL,
-			                       BUTTON_FLAG_TRANSPARENT);
+								   _doneX[dialogType] + 13,
+								   _doneY[dialogType] + 4,
+								   buttonPressedFrmImage.getWidth(),
+								   buttonPressedFrmImage.getHeight(),
+								   -1,
+								   -1,
+								   -1,
+								   501,
+								   buttonNormalFrmImage.getData(),
+								   buttonPressedFrmImage.getData(),
+								   NULL,
+								   BUTTON_FLAG_TRANSPARENT);
 			if (btn != -1) {
-				buttonSetCallbacks(btn, _gsound_red_butt_press, _gsound_red_butt_release);
+//				buttonSetCallbacks(btn, _gsound_red_butt_press, _gsound_red_butt_release); TODO audio
 			}
 
 			v86 = true;
@@ -443,17 +443,17 @@ int showDialogBox(const char* title, const char** body, int bodyLength, int x, i
 	if (hasTitle) {
 		if ((flags & DIALOG_BOX_NO_HORIZONTAL_CENTERING) != 0) {
 			fontDrawText(windowBuf + backgroundFrmImage.getWidth() * nextY + _xtable[dialogType],
-			             title,
-			             backgroundFrmImage.getWidth(),
-			             backgroundFrmImage.getWidth(),
-			             titleColor);
+						 title,
+						 backgroundFrmImage.getWidth(),
+						 backgroundFrmImage.getWidth(),
+						 titleColor);
 		} else {
 			int length = fontGetStringWidth(title);
 			fontDrawText(windowBuf + backgroundFrmImage.getWidth() * nextY + (backgroundFrmImage.getWidth() - length) / 2,
-			             title,
-			             backgroundFrmImage.getWidth(),
-			             backgroundFrmImage.getWidth(),
-			             titleColor);
+						 title,
+						 backgroundFrmImage.getWidth(),
+						 backgroundFrmImage.getWidth(),
+						 titleColor);
 		}
 		nextY += fontGetLineHeight();
 	}
@@ -464,17 +464,17 @@ int showDialogBox(const char* title, const char** body, int bodyLength, int x, i
 		if (width <= maxWidth) {
 			if ((flags & DIALOG_BOX_NO_HORIZONTAL_CENTERING) != 0) {
 				fontDrawText(windowBuf + backgroundFrmImage.getWidth() * nextY + _xtable[dialogType],
-				             body[index],
-				             backgroundFrmImage.getWidth(),
-				             backgroundFrmImage.getWidth(),
-				             bodyColor);
+							 body[index],
+							 backgroundFrmImage.getWidth(),
+							 backgroundFrmImage.getWidth(),
+							 bodyColor);
 			} else {
 				int length = fontGetStringWidth(body[index]);
 				fontDrawText(windowBuf + backgroundFrmImage.getWidth() * nextY + (backgroundFrmImage.getWidth() - length) / 2,
-				             body[index],
-				             backgroundFrmImage.getWidth(),
-				             backgroundFrmImage.getWidth(),
-				             bodyColor);
+							 body[index],
+							 backgroundFrmImage.getWidth(),
+							 backgroundFrmImage.getWidth(),
+							 bodyColor);
 			}
 			nextY += fontGetLineHeight();
 		} else {
@@ -502,17 +502,17 @@ int showDialogBox(const char* title, const char** body, int bodyLength, int x, i
 
 				if ((flags & DIALOG_BOX_NO_HORIZONTAL_CENTERING) != 0) {
 					fontDrawText(windowBuf + backgroundFrmImage.getWidth() * nextY + _xtable[dialogType],
-					             string,
-					             backgroundFrmImage.getWidth(),
-					             backgroundFrmImage.getWidth(),
-					             bodyColor);
+								 string,
+								 backgroundFrmImage.getWidth(),
+								 backgroundFrmImage.getWidth(),
+								 bodyColor);
 				} else {
 					int length = fontGetStringWidth(string);
 					fontDrawText(windowBuf + backgroundFrmImage.getWidth() * nextY + (backgroundFrmImage.getWidth() - length) / 2,
-					             string,
-					             backgroundFrmImage.getWidth(),
-					             backgroundFrmImage.getWidth(),
-					             bodyColor);
+								 string,
+								 backgroundFrmImage.getWidth(),
+								 backgroundFrmImage.getWidth(),
+								 bodyColor);
 				}
 				nextY += fontGetLineHeight();
 			}
@@ -530,7 +530,7 @@ int showDialogBox(const char* title, const char** body, int bodyLength, int x, i
 		if (keyCode == 500) {
 			rc = 1;
 		} else if (keyCode == KEY_RETURN) {
-			soundPlayFile("ib1p1xx1");
+//			soundPlayFile("ib1p1xx1");  TODO audio
 			rc = 1;
 		} else if (keyCode == KEY_ESCAPE || keyCode == 501) {
 			rc = 0;
@@ -563,7 +563,7 @@ int showDialogBox(const char* title, const char** body, int bodyLength, int x, i
 }
 
 // 0x41DE90
-int showLoadFileDialog(char* title, char** fileList, char* dest, int fileListLength, int x, int y, int flags) {
+int showLoadFileDialog(char *title, char **fileList, char *dest, int fileListLength, int x, int y, int flags) {
 	int oldFont = fontGetCurrent();
 
 	bool isScrollable = false;
@@ -601,7 +601,7 @@ int showLoadFileDialog(char* title, char** fileList, char* dest, int fileListLen
 		return -1;
 	}
 
-	unsigned char* windowBuffer = windowGetBuffer(win);
+	unsigned char *windowBuffer = windowGetBuffer(win);
 	memcpy(windowBuffer, frmImages[FILE_DIALOG_FRM_BACKGROUND].getData(), backgroundWidth * backgroundHeight);
 
 	MessageList messageList;
@@ -623,95 +623,95 @@ int showLoadFileDialog(char* title, char** fileList, char* dest, int fileListLen
 	fontSetCurrent(103);
 
 	// DONE
-	const char* done = getmsg(&messageList, &messageListItem, 100);
+	const char *done = getmsg(&messageList, &messageListItem, 100);
 	fontDrawText(windowBuffer + LOAD_FILE_DIALOG_DONE_LABEL_Y * backgroundWidth + LOAD_FILE_DIALOG_DONE_LABEL_X, done, backgroundWidth, backgroundWidth, _colorTable[18979]);
 
 	// CANCEL
-	const char* cancel = getmsg(&messageList, &messageListItem, 103);
+	const char *cancel = getmsg(&messageList, &messageListItem, 103);
 	fontDrawText(windowBuffer + LOAD_FILE_DIALOG_CANCEL_LABEL_Y * backgroundWidth + LOAD_FILE_DIALOG_CANCEL_LABEL_X, cancel, backgroundWidth, backgroundWidth, _colorTable[18979]);
 
 	int doneBtn = buttonCreate(win,
-	                           LOAD_FILE_DIALOG_DONE_BUTTON_X,
-	                           LOAD_FILE_DIALOG_DONE_BUTTON_Y,
-	                           frmImages[FILE_DIALOG_FRM_LITTLE_RED_BUTTON_PRESSED].getWidth(),
-	                           frmImages[FILE_DIALOG_FRM_LITTLE_RED_BUTTON_PRESSED].getHeight(),
-	                           -1,
-	                           -1,
-	                           -1,
-	                           500,
-	                           frmImages[FILE_DIALOG_FRM_LITTLE_RED_BUTTON_NORMAL].getData(),
-	                           frmImages[FILE_DIALOG_FRM_LITTLE_RED_BUTTON_PRESSED].getData(),
-	                           NULL,
-	                           BUTTON_FLAG_TRANSPARENT);
+							   LOAD_FILE_DIALOG_DONE_BUTTON_X,
+							   LOAD_FILE_DIALOG_DONE_BUTTON_Y,
+							   frmImages[FILE_DIALOG_FRM_LITTLE_RED_BUTTON_PRESSED].getWidth(),
+							   frmImages[FILE_DIALOG_FRM_LITTLE_RED_BUTTON_PRESSED].getHeight(),
+							   -1,
+							   -1,
+							   -1,
+							   500,
+							   frmImages[FILE_DIALOG_FRM_LITTLE_RED_BUTTON_NORMAL].getData(),
+							   frmImages[FILE_DIALOG_FRM_LITTLE_RED_BUTTON_PRESSED].getData(),
+							   NULL,
+							   BUTTON_FLAG_TRANSPARENT);
 	if (doneBtn != -1) {
-		buttonSetCallbacks(doneBtn, _gsound_red_butt_press, _gsound_red_butt_release);
+//		buttonSetCallbacks(doneBtn, _gsound_red_butt_press, _gsound_red_butt_release); TODO audio
 	}
 
 	int cancelBtn = buttonCreate(win,
-	                             LOAD_FILE_DIALOG_CANCEL_BUTTON_X,
-	                             LOAD_FILE_DIALOG_CANCEL_BUTTON_Y,
-	                             frmImages[FILE_DIALOG_FRM_LITTLE_RED_BUTTON_PRESSED].getWidth(),
-	                             frmImages[FILE_DIALOG_FRM_LITTLE_RED_BUTTON_PRESSED].getHeight(),
-	                             -1,
-	                             -1,
-	                             -1,
-	                             501,
-	                             frmImages[FILE_DIALOG_FRM_LITTLE_RED_BUTTON_NORMAL].getData(),
-	                             frmImages[FILE_DIALOG_FRM_LITTLE_RED_BUTTON_PRESSED].getData(),
-	                             NULL,
-	                             BUTTON_FLAG_TRANSPARENT);
+								 LOAD_FILE_DIALOG_CANCEL_BUTTON_X,
+								 LOAD_FILE_DIALOG_CANCEL_BUTTON_Y,
+								 frmImages[FILE_DIALOG_FRM_LITTLE_RED_BUTTON_PRESSED].getWidth(),
+								 frmImages[FILE_DIALOG_FRM_LITTLE_RED_BUTTON_PRESSED].getHeight(),
+								 -1,
+								 -1,
+								 -1,
+								 501,
+								 frmImages[FILE_DIALOG_FRM_LITTLE_RED_BUTTON_NORMAL].getData(),
+								 frmImages[FILE_DIALOG_FRM_LITTLE_RED_BUTTON_PRESSED].getData(),
+								 NULL,
+								 BUTTON_FLAG_TRANSPARENT);
 	if (cancelBtn != -1) {
-		buttonSetCallbacks(cancelBtn, _gsound_red_butt_press, _gsound_red_butt_release);
+//		buttonSetCallbacks(cancelBtn, _gsound_red_butt_press, _gsound_red_butt_release); TODO audio
 	}
 
 	int scrollUpBtn = buttonCreate(win,
-	                               FILE_DIALOG_SCROLL_BUTTON_X,
-	                               FILE_DIALOG_SCROLL_BUTTON_Y,
-	                               frmImages[FILE_DIALOG_FRM_SCROLL_UP_ARROW_PRESSED].getWidth(),
-	                               frmImages[FILE_DIALOG_FRM_SCROLL_UP_ARROW_PRESSED].getHeight(),
-	                               -1,
-	                               505,
-	                               506,
-	                               505,
-	                               frmImages[FILE_DIALOG_FRM_SCROLL_UP_ARROW_NORMAL].getData(),
-	                               frmImages[FILE_DIALOG_FRM_SCROLL_UP_ARROW_PRESSED].getData(),
-	                               NULL,
-	                               BUTTON_FLAG_TRANSPARENT);
+								   FILE_DIALOG_SCROLL_BUTTON_X,
+								   FILE_DIALOG_SCROLL_BUTTON_Y,
+								   frmImages[FILE_DIALOG_FRM_SCROLL_UP_ARROW_PRESSED].getWidth(),
+								   frmImages[FILE_DIALOG_FRM_SCROLL_UP_ARROW_PRESSED].getHeight(),
+								   -1,
+								   505,
+								   506,
+								   505,
+								   frmImages[FILE_DIALOG_FRM_SCROLL_UP_ARROW_NORMAL].getData(),
+								   frmImages[FILE_DIALOG_FRM_SCROLL_UP_ARROW_PRESSED].getData(),
+								   NULL,
+								   BUTTON_FLAG_TRANSPARENT);
 	if (scrollUpBtn != -1) {
-		buttonSetCallbacks(cancelBtn, _gsound_red_butt_press, _gsound_red_butt_release);
+//		buttonSetCallbacks(cancelBtn, _gsound_red_butt_press, _gsound_red_butt_release); TODO audio
 	}
 
 	int scrollDownButton = buttonCreate(win,
-	                                    FILE_DIALOG_SCROLL_BUTTON_X,
-	                                    FILE_DIALOG_SCROLL_BUTTON_Y + frmImages[FILE_DIALOG_FRM_SCROLL_UP_ARROW_PRESSED].getHeight(),
-	                                    frmImages[FILE_DIALOG_FRM_SCROLL_DOWN_ARROW_PRESSED].getWidth(),
-	                                    frmImages[FILE_DIALOG_FRM_SCROLL_DOWN_ARROW_PRESSED].getHeight(),
-	                                    -1,
-	                                    503,
-	                                    504,
-	                                    503,
-	                                    frmImages[FILE_DIALOG_FRM_SCROLL_DOWN_ARROW_NORMAL].getData(),
-	                                    frmImages[FILE_DIALOG_FRM_SCROLL_DOWN_ARROW_PRESSED].getData(),
-	                                    NULL,
-	                                    BUTTON_FLAG_TRANSPARENT);
+										FILE_DIALOG_SCROLL_BUTTON_X,
+										FILE_DIALOG_SCROLL_BUTTON_Y + frmImages[FILE_DIALOG_FRM_SCROLL_UP_ARROW_PRESSED].getHeight(),
+										frmImages[FILE_DIALOG_FRM_SCROLL_DOWN_ARROW_PRESSED].getWidth(),
+										frmImages[FILE_DIALOG_FRM_SCROLL_DOWN_ARROW_PRESSED].getHeight(),
+										-1,
+										503,
+										504,
+										503,
+										frmImages[FILE_DIALOG_FRM_SCROLL_DOWN_ARROW_NORMAL].getData(),
+										frmImages[FILE_DIALOG_FRM_SCROLL_DOWN_ARROW_PRESSED].getData(),
+										NULL,
+										BUTTON_FLAG_TRANSPARENT);
 	if (scrollUpBtn != -1) {
-		buttonSetCallbacks(cancelBtn, _gsound_red_butt_press, _gsound_red_butt_release);
+//		buttonSetCallbacks(cancelBtn, _gsound_red_butt_press, _gsound_red_butt_release); TODO audio
 	}
 
 	buttonCreate(
-	    win,
-	    FILE_DIALOG_FILE_LIST_X,
-	    FILE_DIALOG_FILE_LIST_Y,
-	    FILE_DIALOG_FILE_LIST_WIDTH,
-	    FILE_DIALOG_FILE_LIST_HEIGHT,
-	    -1,
-	    -1,
-	    -1,
-	    502,
-	    NULL,
-	    NULL,
-	    NULL,
-	    0);
+		win,
+		FILE_DIALOG_FILE_LIST_X,
+		FILE_DIALOG_FILE_LIST_Y,
+		FILE_DIALOG_FILE_LIST_WIDTH,
+		FILE_DIALOG_FILE_LIST_HEIGHT,
+		-1,
+		-1,
+		-1,
+		502,
+		NULL,
+		NULL,
+		NULL,
+		0);
 
 	if (title != NULL) {
 		fontDrawText(windowBuffer + backgroundWidth * FILE_DIALOG_TITLE_Y + FILE_DIALOG_TITLE_X, title, backgroundWidth, backgroundWidth, _colorTable[18979]);
@@ -766,7 +766,7 @@ int showLoadFileDialog(char* title, char** fileList, char* dest, int fileListLen
 
 			selectedFileIndex = selectedLine;
 			if (selectedFileIndex == doubleClickSelectedFileIndex) {
-				soundPlayFile("ib1p1xx1");
+//				soundPlayFile("ib1p1xx1"); TODO audio
 				strncpy(dest, fileList[selectedFileIndex + pageOffset], 16);
 				rc = 0;
 			}
@@ -928,7 +928,7 @@ int showLoadFileDialog(char* title, char** fileList, char* dest, int fileListLen
 }
 
 // 0x41EA78
-int showSaveFileDialog(char* title, char** fileList, char* dest, int fileListLength, int x, int y, int flags) {
+int showSaveFileDialog(char *title, char **fileList, char *dest, int fileListLength, int x, int y, int flags) {
 	int oldFont = fontGetCurrent();
 
 	bool isScrollable = false;
@@ -966,7 +966,7 @@ int showSaveFileDialog(char* title, char** fileList, char* dest, int fileListLen
 		return -1;
 	}
 
-	unsigned char* windowBuffer = windowGetBuffer(win);
+	unsigned char *windowBuffer = windowGetBuffer(win);
 	memcpy(windowBuffer, frmImages[FILE_DIALOG_FRM_BACKGROUND].getData(), backgroundWidth * backgroundHeight);
 
 	MessageList messageList;
@@ -988,95 +988,95 @@ int showSaveFileDialog(char* title, char** fileList, char* dest, int fileListLen
 	fontSetCurrent(103);
 
 	// DONE
-	const char* done = getmsg(&messageList, &messageListItem, 100);
+	const char *done = getmsg(&messageList, &messageListItem, 100);
 	fontDrawText(windowBuffer + backgroundWidth * SAVE_FILE_DIALOG_DONE_LABEL_Y + SAVE_FILE_DIALOG_DONE_LABEL_X, done, backgroundWidth, backgroundWidth, _colorTable[18979]);
 
 	// CANCEL
-	const char* cancel = getmsg(&messageList, &messageListItem, 103);
+	const char *cancel = getmsg(&messageList, &messageListItem, 103);
 	fontDrawText(windowBuffer + backgroundWidth * SAVE_FILE_DIALOG_CANCEL_LABEL_Y + SAVE_FILE_DIALOG_CANCEL_LABEL_X, cancel, backgroundWidth, backgroundWidth, _colorTable[18979]);
 
 	int doneBtn = buttonCreate(win,
-	                           SAVE_FILE_DIALOG_DONE_BUTTON_X,
-	                           SAVE_FILE_DIALOG_DONE_BUTTON_Y,
-	                           frmImages[FILE_DIALOG_FRM_LITTLE_RED_BUTTON_PRESSED].getWidth(),
-	                           frmImages[FILE_DIALOG_FRM_LITTLE_RED_BUTTON_PRESSED].getHeight(),
-	                           -1,
-	                           -1,
-	                           -1,
-	                           500,
-	                           frmImages[FILE_DIALOG_FRM_LITTLE_RED_BUTTON_NORMAL].getData(),
-	                           frmImages[FILE_DIALOG_FRM_LITTLE_RED_BUTTON_PRESSED].getData(),
-	                           NULL,
-	                           BUTTON_FLAG_TRANSPARENT);
+							   SAVE_FILE_DIALOG_DONE_BUTTON_X,
+							   SAVE_FILE_DIALOG_DONE_BUTTON_Y,
+							   frmImages[FILE_DIALOG_FRM_LITTLE_RED_BUTTON_PRESSED].getWidth(),
+							   frmImages[FILE_DIALOG_FRM_LITTLE_RED_BUTTON_PRESSED].getHeight(),
+							   -1,
+							   -1,
+							   -1,
+							   500,
+							   frmImages[FILE_DIALOG_FRM_LITTLE_RED_BUTTON_NORMAL].getData(),
+							   frmImages[FILE_DIALOG_FRM_LITTLE_RED_BUTTON_PRESSED].getData(),
+							   NULL,
+							   BUTTON_FLAG_TRANSPARENT);
 	if (doneBtn != -1) {
-		buttonSetCallbacks(doneBtn, _gsound_red_butt_press, _gsound_red_butt_release);
+//		buttonSetCallbacks(doneBtn, _gsound_red_butt_press, _gsound_red_butt_release); TODO audio
 	}
 
 	int cancelBtn = buttonCreate(win,
-	                             SAVE_FILE_DIALOG_CANCEL_BUTTON_X,
-	                             SAVE_FILE_DIALOG_CANCEL_BUTTON_Y,
-	                             frmImages[FILE_DIALOG_FRM_LITTLE_RED_BUTTON_PRESSED].getWidth(),
-	                             frmImages[FILE_DIALOG_FRM_LITTLE_RED_BUTTON_PRESSED].getHeight(),
-	                             -1,
-	                             -1,
-	                             -1,
-	                             501,
-	                             frmImages[FILE_DIALOG_FRM_LITTLE_RED_BUTTON_NORMAL].getData(),
-	                             frmImages[FILE_DIALOG_FRM_LITTLE_RED_BUTTON_PRESSED].getData(),
-	                             NULL,
-	                             BUTTON_FLAG_TRANSPARENT);
+								 SAVE_FILE_DIALOG_CANCEL_BUTTON_X,
+								 SAVE_FILE_DIALOG_CANCEL_BUTTON_Y,
+								 frmImages[FILE_DIALOG_FRM_LITTLE_RED_BUTTON_PRESSED].getWidth(),
+								 frmImages[FILE_DIALOG_FRM_LITTLE_RED_BUTTON_PRESSED].getHeight(),
+								 -1,
+								 -1,
+								 -1,
+								 501,
+								 frmImages[FILE_DIALOG_FRM_LITTLE_RED_BUTTON_NORMAL].getData(),
+								 frmImages[FILE_DIALOG_FRM_LITTLE_RED_BUTTON_PRESSED].getData(),
+								 NULL,
+								 BUTTON_FLAG_TRANSPARENT);
 	if (cancelBtn != -1) {
-		buttonSetCallbacks(cancelBtn, _gsound_red_butt_press, _gsound_red_butt_release);
+//		buttonSetCallbacks(cancelBtn, _gsound_red_butt_press, _gsound_red_butt_release); TODO audio
 	}
 
 	int scrollUpBtn = buttonCreate(win,
-	                               FILE_DIALOG_SCROLL_BUTTON_X,
-	                               FILE_DIALOG_SCROLL_BUTTON_Y,
-	                               frmImages[FILE_DIALOG_FRM_SCROLL_UP_ARROW_PRESSED].getWidth(),
-	                               frmImages[FILE_DIALOG_FRM_SCROLL_UP_ARROW_PRESSED].getHeight(),
-	                               -1,
-	                               505,
-	                               506,
-	                               505,
-	                               frmImages[FILE_DIALOG_FRM_SCROLL_UP_ARROW_NORMAL].getData(),
-	                               frmImages[FILE_DIALOG_FRM_SCROLL_UP_ARROW_PRESSED].getData(),
-	                               NULL,
-	                               BUTTON_FLAG_TRANSPARENT);
+								   FILE_DIALOG_SCROLL_BUTTON_X,
+								   FILE_DIALOG_SCROLL_BUTTON_Y,
+								   frmImages[FILE_DIALOG_FRM_SCROLL_UP_ARROW_PRESSED].getWidth(),
+								   frmImages[FILE_DIALOG_FRM_SCROLL_UP_ARROW_PRESSED].getHeight(),
+								   -1,
+								   505,
+								   506,
+								   505,
+								   frmImages[FILE_DIALOG_FRM_SCROLL_UP_ARROW_NORMAL].getData(),
+								   frmImages[FILE_DIALOG_FRM_SCROLL_UP_ARROW_PRESSED].getData(),
+								   NULL,
+								   BUTTON_FLAG_TRANSPARENT);
 	if (scrollUpBtn != -1) {
-		buttonSetCallbacks(cancelBtn, _gsound_red_butt_press, _gsound_red_butt_release);
+//		buttonSetCallbacks(cancelBtn, _gsound_red_butt_press, _gsound_red_butt_release); TODO audio
 	}
 
 	int scrollDownButton = buttonCreate(win,
-	                                    FILE_DIALOG_SCROLL_BUTTON_X,
-	                                    FILE_DIALOG_SCROLL_BUTTON_Y + frmImages[FILE_DIALOG_FRM_SCROLL_UP_ARROW_PRESSED].getHeight(),
-	                                    frmImages[FILE_DIALOG_FRM_SCROLL_DOWN_ARROW_PRESSED].getWidth(),
-	                                    frmImages[FILE_DIALOG_FRM_SCROLL_DOWN_ARROW_PRESSED].getHeight(),
-	                                    -1,
-	                                    503,
-	                                    504,
-	                                    503,
-	                                    frmImages[FILE_DIALOG_FRM_SCROLL_DOWN_ARROW_NORMAL].getData(),
-	                                    frmImages[FILE_DIALOG_FRM_SCROLL_DOWN_ARROW_PRESSED].getData(),
-	                                    NULL,
-	                                    BUTTON_FLAG_TRANSPARENT);
+										FILE_DIALOG_SCROLL_BUTTON_X,
+										FILE_DIALOG_SCROLL_BUTTON_Y + frmImages[FILE_DIALOG_FRM_SCROLL_UP_ARROW_PRESSED].getHeight(),
+										frmImages[FILE_DIALOG_FRM_SCROLL_DOWN_ARROW_PRESSED].getWidth(),
+										frmImages[FILE_DIALOG_FRM_SCROLL_DOWN_ARROW_PRESSED].getHeight(),
+										-1,
+										503,
+										504,
+										503,
+										frmImages[FILE_DIALOG_FRM_SCROLL_DOWN_ARROW_NORMAL].getData(),
+										frmImages[FILE_DIALOG_FRM_SCROLL_DOWN_ARROW_PRESSED].getData(),
+										NULL,
+										BUTTON_FLAG_TRANSPARENT);
 	if (scrollUpBtn != -1) {
-		buttonSetCallbacks(cancelBtn, _gsound_red_butt_press, _gsound_red_butt_release);
+//		buttonSetCallbacks(cancelBtn, _gsound_red_butt_press, _gsound_red_butt_release); TODO audio
 	}
 
 	buttonCreate(
-	    win,
-	    FILE_DIALOG_FILE_LIST_X,
-	    FILE_DIALOG_FILE_LIST_Y,
-	    FILE_DIALOG_FILE_LIST_WIDTH,
-	    FILE_DIALOG_FILE_LIST_HEIGHT,
-	    -1,
-	    -1,
-	    -1,
-	    502,
-	    NULL,
-	    NULL,
-	    NULL,
-	    0);
+		win,
+		FILE_DIALOG_FILE_LIST_X,
+		FILE_DIALOG_FILE_LIST_Y,
+		FILE_DIALOG_FILE_LIST_WIDTH,
+		FILE_DIALOG_FILE_LIST_HEIGHT,
+		-1,
+		-1,
+		-1,
+		502,
+		NULL,
+		NULL,
+		NULL,
+		0);
 
 	if (title != NULL) {
 		fontDrawText(windowBuffer + backgroundWidth * FILE_DIALOG_TITLE_Y + FILE_DIALOG_TITLE_X, title, backgroundWidth, backgroundWidth, _colorTable[18979]);
@@ -1089,7 +1089,7 @@ int showSaveFileDialog(char* title, char** fileList, char* dest, int fileListLen
 	fileDialogRenderFileList(windowBuffer, fileList, pageOffset, fileListLength, selectedFileIndex, backgroundWidth);
 
 	int fileNameLength = 0;
-	char* pch = dest;
+	char *pch = dest;
 	while (*pch != '\0' && *pch != '.') {
 		fileNameLength++;
 		if (fileNameLength >= 12) {
@@ -1105,7 +1105,7 @@ int showSaveFileDialog(char* title, char** fileList, char* dest, int fileListLen
 	fileNameCopy[fileNameCopyLength + 1] = '\0';
 	fileNameCopy[fileNameCopyLength] = ' ';
 
-	unsigned char* fileNameBufferPtr = windowBuffer + backgroundWidth * 190 + 57;
+	unsigned char *fileNameBufferPtr = windowBuffer + backgroundWidth * 190 + 57;
 
 	bufferFill(fileNameBufferPtr, fontGetStringWidth(fileNameCopy), cursorHeight, backgroundWidth, 100);
 	fontDrawText(fileNameBufferPtr, fileNameCopy, backgroundWidth, backgroundWidth, _colorTable[992]);
@@ -1135,7 +1135,7 @@ int showSaveFileDialog(char* title, char** fileList, char* dest, int fileListLen
 		if (keyCode == 500) {
 			rc = 0;
 		} else if (keyCode == KEY_RETURN) {
-			soundPlayFile("ib1p1xx1");
+//			soundPlayFile("ib1p1xx1"); TODO audio
 			rc = 0;
 		} else if (keyCode == 501 || keyCode == KEY_ESCAPE) {
 			rc = 1;
@@ -1167,7 +1167,7 @@ int showSaveFileDialog(char* title, char** fileList, char* dest, int fileListLen
 
 				selectedFileIndex = selectedLine;
 				if (selectedFileIndex == doubleClickSelectedFileIndex) {
-					soundPlayFile("ib1p1xx1");
+//					soundPlayFile("ib1p1xx1"); TODO audio
 					strncpy(dest, fileList[selectedFileIndex + pageOffset], 16);
 
 					int index;
@@ -1255,7 +1255,7 @@ int showSaveFileDialog(char* title, char** fileList, char* dest, int fileListLen
 					break;
 				}
 			}
-		} else if (_isdoschar(keyCode)) {
+		} else if (/*_isdoschar(keyCode)*/ 1) { // TODO character_editor
 			bufferFill(fileNameBufferPtr, fontGetStringWidth(fileNameCopy), cursorHeight, backgroundWidth, 100);
 
 			fileNameCopy[fileNameCopyLength] = keyCode & 0xFF;
@@ -1383,7 +1383,7 @@ int showSaveFileDialog(char* title, char** fileList, char* dest, int fileListLen
 	if (rc == 0) {
 		if (fileNameCopyLength != 0) {
 			fileNameCopy[fileNameCopyLength] = '\0';
-			strcpy(dest, fileNameCopy);
+			strncpy(dest, fileNameCopy, COMPAT_MAX_PATH);
 		} else {
 			rc = 1;
 		}
@@ -1401,7 +1401,7 @@ int showSaveFileDialog(char* title, char** fileList, char* dest, int fileListLen
 }
 
 // 0x41FBDC
-static void fileDialogRenderFileList(unsigned char* buffer, char** fileList, int pageOffset, int fileListLength, int selectedIndex, int pitch) {
+static void fileDialogRenderFileList(unsigned char *buffer, char **fileList, int pageOffset, int fileListLength, int selectedIndex, int pitch) {
 	int lineHeight = fontGetLineHeight();
 	int y = FILE_DIALOG_FILE_LIST_Y;
 	bufferFill(buffer + y * pitch + FILE_DIALOG_FILE_LIST_X, FILE_DIALOG_FILE_LIST_WIDTH, FILE_DIALOG_FILE_LIST_HEIGHT, pitch, 100);
@@ -1418,4 +1418,4 @@ static void fileDialogRenderFileList(unsigned char* buffer, char** fileList, int
 	}
 }
 
-} // namespace fallout
+} // namespace Fallout2

@@ -4217,7 +4217,7 @@ int inventoryOpenLooting(Object *a1, Object *a2) {
 					// Sorry, you cannot carry that much.
 					messageListItem.num = 31;
 					if (messageListGetItem(&gInventoryMessageList, &messageListItem)) {
-//						showDialogBox(messageListItem.text, NULL, 0, 169, 117, _colorTable[32328], NULL, _colorTable[32328], 0); TODO game_dialog
+						showDialogBox(messageListItem.text, NULL, 0, 169, 117, _colorTable[32328], NULL, _colorTable[32328], 0);
 					}
 				}
 			}
