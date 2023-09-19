@@ -38,7 +38,7 @@
 // #include "movie.h"
 // #include "movie_effect.h"
 #include "fallout2/object.h"
-// #include "options.h"
+#include "fallout2/options.h"
 #include "fallout2/palette.h"
 #include "fallout2/party_member.h"
 #include "fallout2/perk.h"
@@ -618,7 +618,7 @@ int gameHandleKey(int eventCode, bool isInCombatMode) {
 		// options
 		if (interfaceBarEnabled()) {
 //			soundPlayFile("ib1p1xx1");  TODO audio
-//			showOptions(); TODO options
+			showOptions();
 		}
 		break;
 	case KEY_UPPERCASE_P:
