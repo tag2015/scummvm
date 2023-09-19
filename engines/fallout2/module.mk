@@ -34,6 +34,7 @@ MODULE_OBJS = \
 	input.o \
 	interface.o \
 	interpreter.o \
+	inventory.o \
 	item.o \
 	light.o \
 	mainmenu.o \
