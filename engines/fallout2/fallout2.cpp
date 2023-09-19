@@ -34,6 +34,7 @@
 #include "fallout2/animation.h"
 #include "fallout2/art.h"
 #include "fallout2/character_selector.h"
+#include "fallout2/color.h"
 #include "fallout2/credits.h"
 #include "fallout2/critter.h"
 #include "fallout2/cycle.h"
@@ -45,6 +46,7 @@
 #include "fallout2/game_mouse.h"
 #include "fallout2/game_memory.h"
 #include "fallout2/interface.h"
+#include "fallout2/input.h"
 #include "fallout2/item.h"
 #include "fallout2/map.h"
 #include "fallout2/mainmenu.h"
@@ -52,6 +54,7 @@
 #include "fallout2/message.h"
 #include "fallout2/mouse.h"
 #include "fallout2/object.h"
+#include "fallout2/options.h"
 #include "fallout2/palette.h"
 #include "fallout2/party_member.h"
 #include "fallout2/perk.h"
@@ -94,6 +97,8 @@ uint32 Fallout2Engine::getFeatures() const {
 Common::String Fallout2Engine::getGameId() const {
 	return _gameDescription->gameId;
 }
+
+static char _mainMap[] = "artemple.map";
 
 void Fallout2Engine::showSplash() {
 	int splash = settings.system.splash;
@@ -451,9 +456,14 @@ Common::Error Fallout2Engine::run() {
 		debug("Loaded messages list: %s!", path);
 
 	if (scriptsDisable() != 0)
-		debugPrint("Failed on scr_disable\n");
+		warning("Failed on scr_disable\n");
 	else
 		debug("Disabled scripts!");
+
+	if (_init_options_menu() != 0)
+		warning("Failed on init_options_menu\n");
+	else
+		debug("Initialized options");
 
 	messageListRepositorySetStandardMessageList(STANDARD_MESSAGE_LIST_MISC, &gMiscMessageList);
 
@@ -486,7 +496,56 @@ Common::Error Fallout2Engine::run() {
 		case MAIN_MENU_NEW_GAME:
 			mainMenuWindowHide(true);
 			mainMenuWindowFree();
-			characterSelectorOpen();
+			if (characterSelectorOpen() == 2) {
+				randomSeedPrerandom(-1);
+				char *mapName = NULL;
+				char *mapNameCopy = compat_strdup(mapName != NULL ? mapName : _mainMap);
+
+				gDude->flags &= ~OBJECT_FLAT;
+				objectShow(gDude, NULL);
+				mouseHideCursor();
+				int win = windowCreate(0, 0, screenGetWidth(), screenGetHeight(), _colorTable[0], WINDOW_MODAL | WINDOW_MOVE_ON_TOP);
+				windowRefresh(win);
+
+				colorPaletteLoad("color.pal");
+				paletteFadeTo(_cmap);
+				_map_init();
+				gameMouseSetCursor(MOUSE_CURSOR_NONE);
+				mouseShowCursor();
+				mapLoadByName(mapNameCopy);
+				paletteFadeTo(gPaletteWhite);
+				windowDestroy(win);
+				colorPaletteLoad("color.pal");
+				paletteFadeTo(_cmap);
+				free(mapNameCopy);
+
+				mouseShowCursor();
+				//	scriptsEnable();
+				while (_game_user_wants_to_quit == 0) {
+					sharedFpsLimiter.mark();
+
+					int keyCode = inputGetInput();
+					gameHandleKey(keyCode, false);
+
+					//  scriptsHandleRequests();
+
+					mapHandleTransition();
+
+					//	if (_main_game_paused != 0) {
+					//		_main_game_paused = 0;
+					//	}
+
+					// if ((gDude->data.critter.combat.results & (DAM_DEAD | DAM_KNOCKED_OUT)) != 0) {
+					//		endgameSetupDeathEnding(ENDGAME_DEATH_ENDING_REASON_DEATH);
+					//		_main_show_death_scene = 1;
+					//		_game_user_wants_to_quit = 2;
+					// }
+
+					renderPresent();
+					sharedFpsLimiter.throttle();
+				}
+			}
+
 			mainMenuWindowInit();
 			break;
 
