@@ -1054,8 +1054,8 @@ int interfaceUpdateItems(bool animated, int leftItemAction, int rightItemAction)
 	Object *oldCurrentItem = gInterfaceItemStates[gInterfaceCurrentHand].item;
 
 	InterfaceItemState *leftItemState = &(gInterfaceItemStates[HAND_LEFT]);
-/*	Object *item1 = critterGetItem1(gDude);
-	if (item1 == leftItemState->item && leftItemState->item != NULL) {  TODO inventory
+	Object *item1 = critterGetItem1(gDude);
+	if (item1 == leftItemState->item && leftItemState->item != NULL) {
 		if (leftItemState->item != NULL) {
 			leftItemState->isDisabled = dudeIsWeaponDisabled(item1);
 			leftItemState->itemFid = itemGetInventoryFid(item1);
@@ -1090,8 +1090,8 @@ int interfaceUpdateItems(bool animated, int leftItemAction, int rightItemAction)
 			leftItemState->itemFid = -1;
 
 			// SFALL
-			leftItemState->primaryHitMode = unarmedGetPunchHitMode(false);
-			leftItemState->secondaryHitMode = unarmedGetPunchHitMode(true);
+			leftItemState->primaryHitMode = HIT_MODE_PUNCH; /*unarmedGetPunchHitMode(false);*/ // TODO combat
+			leftItemState->secondaryHitMode = HIT_MODE_KICK; /*unarmedGetPunchHitMode(true);*/
 
 			// SFALL: Keep selected attack mode.
 			// CE: Implementation is different.
@@ -1099,11 +1099,11 @@ int interfaceUpdateItems(bool animated, int leftItemAction, int rightItemAction)
 				leftItemState->action = oldAction;
 			}
 		}
-	}*/
+	}
 
 	InterfaceItemState *rightItemState = &(gInterfaceItemStates[HAND_RIGHT]);
 
-/*	Object *item2 = critterGetItem2(gDude); TODO inventory
+	Object *item2 = critterGetItem2(gDude);
 	if (item2 == rightItemState->item && rightItemState->item != NULL) {
 		if (rightItemState->item != NULL) {
 			rightItemState->isDisabled = dudeIsWeaponDisabled(rightItemState->item);
@@ -1147,7 +1147,7 @@ int interfaceUpdateItems(bool animated, int leftItemAction, int rightItemAction)
 				rightItemState->action = oldAction;
 			}
 		}
-	}*/
+	}
 
 	if (animated) {
 		Object *newCurrentItem = gInterfaceItemStates[gInterfaceCurrentHand].item;
