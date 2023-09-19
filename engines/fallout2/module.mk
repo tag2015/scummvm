@@ -15,6 +15,7 @@ MODULE_OBJS = \
 	cycle.o \
 	datafile.o \
 	db.o \
+	dbox.o \
 	dfile.o \
 	dialog.o \
 	dictionary.o \
@@ -38,6 +39,7 @@ MODULE_OBJS = \
 	inventory.o \
 	item.o \
 	light.o \
+	lips.o \
 	mainmenu.o \
 	memory.o \
 	memory_manager.o \
