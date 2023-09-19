@@ -1,27 +1,27 @@
-#include "options.h"
+#include "fallout2/options.h"
 
-#include "art.h"
-#include "color.h"
-#include "cycle.h"
-#include "debug.h"
-#include "draw.h"
-#include "game.h"
-#include "game_mouse.h"
-#include "game_sound.h"
-#include "graph_lib.h"
-#include "input.h"
-#include "kb.h"
-#include "loadsave.h"
-#include "memory.h"
-#include "message.h"
-#include "mouse.h"
-#include "preferences.h"
-#include "svga.h"
-#include "text_font.h"
-#include "tile.h"
-#include "window_manager.h"
+#include "fallout2/art.h"
+#include "fallout2/color.h"
+#include "fallout2/cycle.h"
+#include "fallout2/debug.h"
+#include "fallout2/draw.h"
+#include "fallout2/game.h"
+#include "fallout2/game_mouse.h"
+// #include "fallout2/game_sound.h" TODO audio
+#include "fallout2/graph_lib.h"
+#include "fallout2/input.h"
+#include "fallout2/kb.h"
+// #include "fallout2/loadsave.h" TODO loadsave
+#include "fallout2/memory.h"
+#include "fallout2/message.h"
+#include "fallout2/mouse.h"
+// #include "fallout2/preferences.h" TODO prefs
+#include "fallout2/svga.h"
+#include "fallout2/text_font.h"
+#include "fallout2/tile.h"
+#include "fallout2/window_manager.h"
 
-namespace fallout {
+namespace Fallout2 {
 
 #define OPTIONS_WINDOW_BUTTONS_COUNT (10)
 
@@ -48,8 +48,8 @@ static void _ShadeScreen(bool a1);
 static const int gPauseWindowFrmIds[PAUSE_WINDOW_FRM_COUNT] = {
 	208, // charwin.frm - character editor
 	209, // donebox.frm - character editor
-	8, // lilredup.frm - little red button up
-	9, // lilreddn.frm - little red button down
+	8,   // lilredup.frm - little red button up
+	9,   // lilreddn.frm - little red button down
 };
 
 // 0x5197C0
@@ -66,7 +66,7 @@ static MessageList gPreferencesMessageList;
 static MessageListItem gPreferencesMessageListItem;
 
 // 0x663878
-static unsigned char* _opbtns[OPTIONS_WINDOW_BUTTONS_COUNT];
+static unsigned char *_opbtns[OPTIONS_WINDOW_BUTTONS_COUNT];
 
 // 0x6638FC
 static bool gOptionsWindowGameMouseObjectsWasVisible;
@@ -75,7 +75,7 @@ static bool gOptionsWindowGameMouseObjectsWasVisible;
 static int gOptionsWindow;
 
 // 0x663908
-static unsigned char* gOptionsWindowBuffer;
+static unsigned char *gOptionsWindowBuffer;
 
 // 0x66398C
 static int gOptionsWindowOldFont;
@@ -109,41 +109,41 @@ int showOptions() {
 			case KEY_LOWERCASE_O:
 			case KEY_UPPERCASE_D:
 			case KEY_LOWERCASE_D:
-				soundPlayFile("ib1p1xx1");
+//				soundPlayFile("ib1p1xx1"); TODO audio
 				rc = 0;
 				break;
 			case KEY_UPPERCASE_S:
 			case KEY_LOWERCASE_S:
 			case 500:
-				if (lsgSaveGame(LOAD_SAVE_MODE_NORMAL) == 1) {
+				if (/*lsgSaveGame(LOAD_SAVE_MODE_NORMAL) == 1*/ 0) { // TODO loadsave
 					rc = 1;
 				}
 				break;
 			case KEY_UPPERCASE_L:
 			case KEY_LOWERCASE_L:
 			case 501:
-				if (lsgLoadGame(LOAD_SAVE_MODE_NORMAL) == 1) {
+				if (/*lsgLoadGame(LOAD_SAVE_MODE_NORMAL) == 1*/ 0) { // TODO loadsave
 					rc = 1;
 				}
 				break;
 			case KEY_UPPERCASE_P:
 			case KEY_LOWERCASE_P:
-				soundPlayFile("ib1p1xx1");
+//				soundPlayFile("ib1p1xx1"); TODO audio
 			// FALLTHROUGH
 			case 502:
 				// PREFERENCES
-				doPreferences(false);
+//				doPreferences(false); TODO prefs
 				break;
 			case KEY_PLUS:
 			case KEY_EQUAL:
-				brightnessIncrease();
+//				brightnessIncrease(); TODO prefs
 				break;
 			case KEY_UNDERSCORE:
 			case KEY_MINUS:
-				brightnessDecrease();
+//				brightnessDecrease(); TODO prefs
 				break;
 			case KEY_F12:
-				takeScreenshot();
+//				takeScreenshot(); TODO game
 				break;
 			case KEY_UPPERCASE_E:
 			case KEY_LOWERCASE_E:
@@ -194,7 +194,7 @@ static int optionsWindowInit() {
 
 	int cycle = 0;
 	for (int index = 0; index < OPTIONS_WINDOW_BUTTONS_COUNT; index++) {
-		_opbtns[index] = (unsigned char*)internal_malloc(_optionsFrmImages[OPTIONS_WINDOW_FRM_BUTTON_ON].getWidth() * _optionsFrmImages[OPTIONS_WINDOW_FRM_BUTTON_ON].getHeight() + 1024);
+		_opbtns[index] = (unsigned char *)internal_malloc(_optionsFrmImages[OPTIONS_WINDOW_FRM_BUTTON_ON].getWidth() * _optionsFrmImages[OPTIONS_WINDOW_FRM_BUTTON_ON].getHeight() + 1024);
 		if (_opbtns[index] == NULL) {
 			while (--index >= 0) {
 				internal_free(_opbtns[index]);
@@ -217,11 +217,11 @@ static int optionsWindowInit() {
 	int optionsWindowX = (screenGetWidth() - _optionsFrmImages[OPTIONS_WINDOW_FRM_BACKGROUND].getWidth()) / 2;
 	int optionsWindowY = (screenGetHeight() - _optionsFrmImages[OPTIONS_WINDOW_FRM_BACKGROUND].getHeight()) / 2 - 60;
 	gOptionsWindow = windowCreate(optionsWindowX,
-	                              optionsWindowY,
-	                              _optionsFrmImages[0].getWidth(),
-	                              _optionsFrmImages[0].getHeight(),
-	                              256,
-	                              WINDOW_MODAL | WINDOW_DONT_MOVE_TOP);
+								  optionsWindowY,
+								  _optionsFrmImages[0].getWidth(),
+								  _optionsFrmImages[0].getHeight(),
+								  256,
+								  WINDOW_MODAL | WINDOW_DONT_MOVE_TOP);
 
 	if (gOptionsWindow == -1) {
 		for (int index = 0; index < OPTIONS_WINDOW_BUTTONS_COUNT; index++) {
@@ -257,8 +257,8 @@ static int optionsWindowInit() {
 	for (int index = 0; index < OPTIONS_WINDOW_BUTTONS_COUNT; index += 2) {
 		char text[128];
 
-		const char* msg = getmsg(&gPreferencesMessageList, &gPreferencesMessageListItem, index / 2);
-		strcpy(text, msg);
+		const char *msg = getmsg(&gPreferencesMessageList, &gPreferencesMessageListItem, index / 2);
+		strncpy(text, msg, sizeof(text) - 1);
 
 		int textX = (_optionsFrmImages[OPTIONS_WINDOW_FRM_BUTTON_ON].getWidth() - fontGetStringWidth(text)) / 2;
 		if (textX < 0) {
@@ -269,20 +269,20 @@ static int optionsWindowInit() {
 		fontDrawText(_opbtns[index + 1] + _optionsFrmImages[OPTIONS_WINDOW_FRM_BUTTON_ON].getWidth() * textY + textX, text, _optionsFrmImages[OPTIONS_WINDOW_FRM_BUTTON_ON].getWidth(), _optionsFrmImages[OPTIONS_WINDOW_FRM_BUTTON_ON].getWidth(), _colorTable[14723]);
 
 		int btn = buttonCreate(gOptionsWindow,
-		                       13,
-		                       buttonY,
-		                       _optionsFrmImages[OPTIONS_WINDOW_FRM_BUTTON_ON].getWidth(),
-		                       _optionsFrmImages[OPTIONS_WINDOW_FRM_BUTTON_ON].getHeight(),
-		                       -1,
-		                       -1,
-		                       -1,
-		                       index / 2 + 500,
-		                       _opbtns[index],
-		                       _opbtns[index + 1],
-		                       NULL,
-		                       BUTTON_FLAG_TRANSPARENT);
+							   13,
+							   buttonY,
+							   _optionsFrmImages[OPTIONS_WINDOW_FRM_BUTTON_ON].getWidth(),
+							   _optionsFrmImages[OPTIONS_WINDOW_FRM_BUTTON_ON].getHeight(),
+							   -1,
+							   -1,
+							   -1,
+							   index / 2 + 500,
+							   _opbtns[index],
+							   _opbtns[index + 1],
+							   NULL,
+							   BUTTON_FLAG_TRANSPARENT);
 		if (btn != -1) {
-			buttonSetCallbacks(btn, _gsound_lrg_butt_press, _gsound_lrg_butt_release);
+//			buttonSetCallbacks(btn, _gsound_lrg_butt_press, _gsound_lrg_butt_release); TODO audio
 		}
 
 		buttonY += _optionsFrmImages[OPTIONS_WINDOW_FRM_BUTTON_ON].getHeight() + 3;
@@ -368,11 +368,11 @@ int showPause(bool a1) {
 	}
 
 	int window = windowCreate(pauseWindowX,
-	                          pauseWindowY,
-	                          frmImages[PAUSE_WINDOW_FRM_BACKGROUND].getWidth(),
-	                          frmImages[PAUSE_WINDOW_FRM_BACKGROUND].getHeight(),
-	                          256,
-	                          WINDOW_MODAL | WINDOW_DONT_MOVE_TOP);
+							  pauseWindowY,
+							  frmImages[PAUSE_WINDOW_FRM_BACKGROUND].getWidth(),
+							  frmImages[PAUSE_WINDOW_FRM_BACKGROUND].getHeight(),
+							  256,
+							  WINDOW_MODAL | WINDOW_DONT_MOVE_TOP);
 	if (window == -1) {
 		messageListFree(&gPreferencesMessageList);
 
@@ -380,57 +380,57 @@ int showPause(bool a1) {
 		return -1;
 	}
 
-	unsigned char* windowBuffer = windowGetBuffer(window);
+	unsigned char *windowBuffer = windowGetBuffer(window);
 	memcpy(windowBuffer,
-	       frmImages[PAUSE_WINDOW_FRM_BACKGROUND].getData(),
-	       frmImages[PAUSE_WINDOW_FRM_BACKGROUND].getWidth() * frmImages[PAUSE_WINDOW_FRM_BACKGROUND].getHeight());
+		   frmImages[PAUSE_WINDOW_FRM_BACKGROUND].getData(),
+		   frmImages[PAUSE_WINDOW_FRM_BACKGROUND].getWidth() * frmImages[PAUSE_WINDOW_FRM_BACKGROUND].getHeight());
 
 	blitBufferToBufferTrans(frmImages[PAUSE_WINDOW_FRM_DONE_BOX].getData(),
-	                        frmImages[PAUSE_WINDOW_FRM_DONE_BOX].getWidth(),
-	                        frmImages[PAUSE_WINDOW_FRM_DONE_BOX].getHeight(),
-	                        frmImages[PAUSE_WINDOW_FRM_DONE_BOX].getWidth(),
-	                        windowBuffer + frmImages[PAUSE_WINDOW_FRM_BACKGROUND].getWidth() * 42 + 13,
-	                        frmImages[PAUSE_WINDOW_FRM_BACKGROUND].getWidth());
+							frmImages[PAUSE_WINDOW_FRM_DONE_BOX].getWidth(),
+							frmImages[PAUSE_WINDOW_FRM_DONE_BOX].getHeight(),
+							frmImages[PAUSE_WINDOW_FRM_DONE_BOX].getWidth(),
+							windowBuffer + frmImages[PAUSE_WINDOW_FRM_BACKGROUND].getWidth() * 42 + 13,
+							frmImages[PAUSE_WINDOW_FRM_BACKGROUND].getWidth());
 
 	gOptionsWindowOldFont = fontGetCurrent();
 	fontSetCurrent(103);
 
-	char* messageItemText;
+	char *messageItemText;
 
 	messageItemText = getmsg(&gPreferencesMessageList, &gPreferencesMessageListItem, 300);
 	fontDrawText(windowBuffer + frmImages[PAUSE_WINDOW_FRM_BACKGROUND].getWidth() * 45 + 52,
-	             messageItemText,
-	             frmImages[PAUSE_WINDOW_FRM_BACKGROUND].getWidth(),
-	             frmImages[PAUSE_WINDOW_FRM_BACKGROUND].getWidth(),
-	             _colorTable[18979]);
+				 messageItemText,
+				 frmImages[PAUSE_WINDOW_FRM_BACKGROUND].getWidth(),
+				 frmImages[PAUSE_WINDOW_FRM_BACKGROUND].getWidth(),
+				 _colorTable[18979]);
 
 	fontSetCurrent(104);
 
 	messageItemText = getmsg(&gPreferencesMessageList, &gPreferencesMessageListItem, 301);
-	strcpy(path, messageItemText);
+	strncpy(path, messageItemText, sizeof(path) - 1);
 
 	int length = fontGetStringWidth(path);
 	fontDrawText(windowBuffer + frmImages[PAUSE_WINDOW_FRM_BACKGROUND].getWidth() * 10 + 2 + (frmImages[PAUSE_WINDOW_FRM_BACKGROUND].getWidth() - length) / 2,
-	             path,
-	             frmImages[PAUSE_WINDOW_FRM_BACKGROUND].getWidth(),
-	             frmImages[PAUSE_WINDOW_FRM_BACKGROUND].getWidth(),
-	             _colorTable[18979]);
+				 path,
+				 frmImages[PAUSE_WINDOW_FRM_BACKGROUND].getWidth(),
+				 frmImages[PAUSE_WINDOW_FRM_BACKGROUND].getWidth(),
+				 _colorTable[18979]);
 
 	int doneBtn = buttonCreate(window,
-	                           26,
-	                           46,
-	                           frmImages[PAUSE_WINDOW_FRM_LITTLE_RED_BUTTON_UP].getWidth(),
-	                           frmImages[PAUSE_WINDOW_FRM_LITTLE_RED_BUTTON_UP].getHeight(),
-	                           -1,
-	                           -1,
-	                           -1,
-	                           504,
-	                           frmImages[PAUSE_WINDOW_FRM_LITTLE_RED_BUTTON_UP].getData(),
-	                           frmImages[PAUSE_WINDOW_FRM_LITTLE_RED_BUTTON_DOWN].getData(),
-	                           NULL,
-	                           BUTTON_FLAG_TRANSPARENT);
+							   26,
+							   46,
+							   frmImages[PAUSE_WINDOW_FRM_LITTLE_RED_BUTTON_UP].getWidth(),
+							   frmImages[PAUSE_WINDOW_FRM_LITTLE_RED_BUTTON_UP].getHeight(),
+							   -1,
+							   -1,
+							   -1,
+							   504,
+							   frmImages[PAUSE_WINDOW_FRM_LITTLE_RED_BUTTON_UP].getData(),
+							   frmImages[PAUSE_WINDOW_FRM_LITTLE_RED_BUTTON_DOWN].getData(),
+							   NULL,
+							   BUTTON_FLAG_TRANSPARENT);
 	if (doneBtn != -1) {
-		buttonSetCallbacks(doneBtn, _gsound_red_butt_press, _gsound_red_butt_release);
+//		buttonSetCallbacks(doneBtn, _gsound_red_butt_press, _gsound_red_butt_release); TODO audio
 	}
 
 	windowRefresh(window);
@@ -443,11 +443,11 @@ int showPause(bool a1) {
 		switch (keyCode) {
 		case KEY_PLUS:
 		case KEY_EQUAL:
-			brightnessIncrease();
+//			brightnessIncrease(); TODO prefs
 			break;
 		case KEY_MINUS:
 		case KEY_UNDERSCORE:
-			brightnessDecrease();
+//			brightnessDecrease(); TODO prefs
 			break;
 		default:
 			if (keyCode != -1 && keyCode != -2) {
@@ -499,7 +499,7 @@ static void _ShadeScreen(bool a1) {
 
 		int windowWidth = windowGetWidth(gIsoWindow);
 		int windowHeight = windowGetHeight(gIsoWindow);
-		unsigned char* windowBuffer = windowGetBuffer(gIsoWindow);
+		unsigned char *windowBuffer = windowGetBuffer(gIsoWindow);
 		grayscalePaletteApply(windowBuffer, windowWidth, windowHeight, windowWidth);
 
 		windowRefresh(gIsoWindow);
@@ -511,11 +511,11 @@ static void _ShadeScreen(bool a1) {
 // init_options_menu
 // 0x4928B8
 int _init_options_menu() {
-	preferencesInit();
+//	preferencesInit(); TODO prefs
 
 	grayscalePaletteUpdate(0, 255);
 
 	return 0;
 }
 
-} // namespace fallout
+} // namespace Fallout2
