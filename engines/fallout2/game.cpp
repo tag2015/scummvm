@@ -4,7 +4,7 @@
 // #include <string.h>
 
 // #include "actions.h"
-// #include "animation.h"
+#include "fallout2/animation.h"
 #include "fallout2/art.h"
 // #include "automap.h"
 // #include "character_editor.h"
@@ -15,9 +15,9 @@
 #include "fallout2/critter.h"
 #include "fallout2/cycle.h"
 #include "fallout2/db.h"
-// #include "dbox.h"
+#include "fallout2/dbox.h"
 #include "fallout2/debug.h"
-// #include "display_monitor.h"
+#include "fallout2/display_monitor.h"
 #include "fallout2/draw.h"
 // #include "endgame.h"
 #include "fallout2/font_manager.h"
@@ -30,9 +30,9 @@
 #include "fallout2/interface.h"
 #include "fallout2/inventory.h"
 #include "fallout2/item.h"
-// #include "kb.h"
+#include "fallout2/kb.h"
 // #include "loadsave.h"
-// #include "map.h"
+#include "fallout2/map.h"
 #include "fallout2/memory.h"
 #include "fallout2/mouse.h"
 // #include "movie.h"
@@ -42,19 +42,19 @@
 #include "fallout2/palette.h"
 #include "fallout2/party_member.h"
 #include "fallout2/perk.h"
-// #include "pipboy.h"
+#include "fallout2/pipboy.h"
 #include "fallout2/platform_compat.h"
 // #include "preferences.h"
 #include "fallout2/proto.h"
 #include "fallout2/queue.h"
 #include "fallout2/random.h"
-// #include "scripts.h"
+#include "fallout2/scripts.h"
 #include "fallout2/settings.h"
 #include "fallout2/sfall_config.h"
 // #include "sfall_global_vars.h"
 // #include "sfall_lists.h"
 #include "fallout2/skill.h"
-// #include "skilldex.h"
+#include "fallout2/skilldex.h"
 #include "fallout2/stat.h"
 #include "fallout2/svga.h"
 #include "fallout2/text_font.h"
@@ -455,13 +455,12 @@ void gameExit() {
 	sfallConfigExit();
 }
 
-// TODO keyboard shortcuts
-#if 0
+
 // 0x442D44
 int gameHandleKey(int eventCode, bool isInCombatMode) {
 	// NOTE: Uninline.
 	if (gameGetState() == GAME_STATE_5) {
-		_gdialogSystemEnter();
+//		_gdialogSystemEnter(); TODO game_dialog
 	}
 
 	if (eventCode == -1) {
@@ -552,33 +551,33 @@ int gameHandleKey(int eventCode, bool isInCombatMode) {
 	case KEY_CTRL_Q:
 	case KEY_CTRL_X:
 	case KEY_F10:
-		soundPlayFile("ib1p1xx1");
+//		soundPlayFile("ib1p1xx1"); TODO audio
 		showQuitConfirmationDialog();
 		break;
 	case KEY_TAB:
-		if (interfaceBarEnabled()
-		        && gPressedPhysicalKeys[SDL_SCANCODE_LALT] == 0
+		if (interfaceBarEnabled()) {
+/*		        && gPressedPhysicalKeys[SDL_SCANCODE_LALT] == 0  TODO automap
 		        && gPressedPhysicalKeys[SDL_SCANCODE_RALT] == 0) {
 			soundPlayFile("ib1p1xx1");
-			automapShow(true, false);
+			automapShow(true, false);*/
 		}
 		break;
 	case KEY_CTRL_P:
-		soundPlayFile("ib1p1xx1");
-		showPause(false);
+//		soundPlayFile("ib1p1xx1"); TODO audio
+//		showPause(false); TODO pause
 		break;
 	case KEY_UPPERCASE_A:
 	case KEY_LOWERCASE_A:
 		if (interfaceBarEnabled()) {
-			if (!isInCombatMode) {
-				_combat(NULL);
-			}
+//			if (!isInCombatMode) { TODO combat
+//				_combat(NULL);
+//			}
 		}
 		break;
 	case KEY_UPPERCASE_N:
 	case KEY_LOWERCASE_N:
 		if (interfaceBarEnabled()) {
-			soundPlayFile("ib1p1xx1");
+//			soundPlayFile("ib1p1xx1");  TODO audio
 			interfaceCycleItemAction();
 		}
 		break;
@@ -590,26 +589,26 @@ int gameHandleKey(int eventCode, bool isInCombatMode) {
 	case KEY_LOWERCASE_B:
 		// change active hand
 		if (interfaceBarEnabled()) {
-			soundPlayFile("ib1p1xx1");
+//			soundPlayFile("ib1p1xx1"); TODO audio
 			interfaceBarSwapHands(true);
 		}
 		break;
 	case KEY_UPPERCASE_C:
 	case KEY_LOWERCASE_C:
 		if (interfaceBarEnabled()) {
-			soundPlayFile("ib1p1xx1");
-			bool isoWasEnabled = isoDisable();
+/*			soundPlayFile("ib1p1xx1"); TODO audio
+			bool isoWasEnabled = isoDisable(); TODO character_editor
 			characterEditorShow(false);
 			if (isoWasEnabled) {
 				isoEnable();
-			}
+			}*/
 		}
 		break;
 	case KEY_UPPERCASE_I:
 	case KEY_LOWERCASE_I:
 		// open inventory
 		if (interfaceBarEnabled()) {
-			soundPlayFile("ib1p1xx1");
+//			soundPlayFile("ib1p1xx1");  TODO audio
 			inventoryOpen();
 		}
 		break;
@@ -618,15 +617,15 @@ int gameHandleKey(int eventCode, bool isInCombatMode) {
 	case KEY_LOWERCASE_O:
 		// options
 		if (interfaceBarEnabled()) {
-			soundPlayFile("ib1p1xx1");
-			showOptions();
+//			soundPlayFile("ib1p1xx1");  TODO audio
+//			showOptions(); TODO options
 		}
 		break;
 	case KEY_UPPERCASE_P:
 	case KEY_LOWERCASE_P:
 		// pipboy
 		if (interfaceBarEnabled()) {
-			if (isInCombatMode) {
+/*			if (isInCombatMode) {  TODO combat pipboy
 				soundPlayFile("iisxxxx1");
 
 				// Pipboy not available in combat!
@@ -637,20 +636,20 @@ int gameHandleKey(int eventCode, bool isInCombatMode) {
 			} else {
 				soundPlayFile("ib1p1xx1");
 				pipboyOpen(PIPBOY_OPEN_INTENT_UNSPECIFIED);
-			}
+			}*/
 		}
 		break;
 	case KEY_UPPERCASE_S:
 	case KEY_LOWERCASE_S:
 		// skilldex
 		if (interfaceBarEnabled()) {
-			soundPlayFile("ib1p1xx1");
+//			soundPlayFile("ib1p1xx1");
 
 			int mode = -1;
 
 			// NOTE: There is an `inc` for this value to build jump table which
 			// is not needed.
-			int rc = skilldexOpen();
+			int rc = 0; //skilldexOpen(); TODO skilldex
 
 			// Remap Skilldex result code to action.
 			switch (rc) {
@@ -658,7 +657,7 @@ int gameHandleKey(int eventCode, bool isInCombatMode) {
 				debugPrint("\n ** Error calling skilldex_select()! ** \n");
 				break;
 			case SKILLDEX_RC_SNEAK:
-				_action_skill_use(SKILL_SNEAK);
+//				_action_skill_use(SKILL_SNEAK); TODO action
 				break;
 			case SKILLDEX_RC_LOCKPICK:
 				mode = GAME_MOUSE_MODE_USE_LOCKPICK;
@@ -694,7 +693,7 @@ int gameHandleKey(int eventCode, bool isInCombatMode) {
 	case KEY_UPPERCASE_Z:
 	case KEY_LOWERCASE_Z:
 		if (interfaceBarEnabled()) {
-			if (isInCombatMode) {
+/*			if (isInCombatMode) { TODO pipboy
 				soundPlayFile("iisxxxx1");
 
 				// Pipboy not available in combat!
@@ -705,7 +704,7 @@ int gameHandleKey(int eventCode, bool isInCombatMode) {
 			} else {
 				soundPlayFile("ib1p1xx1");
 				pipboyOpen(PIPBOY_OPEN_INTENT_REST);
-			}
+			}*/
 		}
 		break;
 	case KEY_HOME:
@@ -723,74 +722,74 @@ int gameHandleKey(int eventCode, bool isInCombatMode) {
 	case KEY_1:
 	case KEY_EXCLAMATION:
 		if (interfaceBarEnabled()) {
-			soundPlayFile("ib1p1xx1");
+//			soundPlayFile("ib1p1xx1"); TODO audio
 			gameMouseSetCursor(MOUSE_CURSOR_USE_CROSSHAIR);
-			_action_skill_use(SKILL_SNEAK);
+//			_action_skill_use(SKILL_SNEAK);  TODO actions
 		}
 		break;
 	case KEY_2:
 	case KEY_AT:
 		if (interfaceBarEnabled()) {
-			soundPlayFile("ib1p1xx1");
+//			soundPlayFile("ib1p1xx1");
 			gameMouseSetCursor(MOUSE_CURSOR_USE_CROSSHAIR);
-			gameMouseSetMode(GAME_MOUSE_MODE_USE_LOCKPICK);
+//			gameMouseSetMode(GAME_MOUSE_MODE_USE_LOCKPICK);
 		}
 		break;
 	case KEY_3:
 	case KEY_NUMBER_SIGN:
 		if (interfaceBarEnabled()) {
-			soundPlayFile("ib1p1xx1");
+//			soundPlayFile("ib1p1xx1");
 			gameMouseSetCursor(MOUSE_CURSOR_USE_CROSSHAIR);
-			gameMouseSetMode(GAME_MOUSE_MODE_USE_STEAL);
+//			gameMouseSetMode(GAME_MOUSE_MODE_USE_STEAL);
 		}
 		break;
 	case KEY_4:
 	case KEY_DOLLAR:
 		if (interfaceBarEnabled()) {
-			soundPlayFile("ib1p1xx1");
+//			soundPlayFile("ib1p1xx1");
 			gameMouseSetCursor(MOUSE_CURSOR_USE_CROSSHAIR);
-			gameMouseSetMode(GAME_MOUSE_MODE_USE_TRAPS);
+//			gameMouseSetMode(GAME_MOUSE_MODE_USE_TRAPS);
 		}
 		break;
 	case KEY_5:
 	case KEY_PERCENT:
 		if (interfaceBarEnabled()) {
-			soundPlayFile("ib1p1xx1");
+//			soundPlayFile("ib1p1xx1");
 			gameMouseSetCursor(MOUSE_CURSOR_USE_CROSSHAIR);
-			gameMouseSetMode(GAME_MOUSE_MODE_USE_FIRST_AID);
+//			gameMouseSetMode(GAME_MOUSE_MODE_USE_FIRST_AID);
 		}
 		break;
 	case KEY_6:
 	case KEY_CARET:
 		if (interfaceBarEnabled()) {
-			soundPlayFile("ib1p1xx1");
+//			soundPlayFile("ib1p1xx1");
 			gameMouseSetCursor(MOUSE_CURSOR_USE_CROSSHAIR);
-			gameMouseSetMode(GAME_MOUSE_MODE_USE_DOCTOR);
+//			gameMouseSetMode(GAME_MOUSE_MODE_USE_DOCTOR);
 		}
 		break;
 	case KEY_7:
 	case KEY_AMPERSAND:
 		if (interfaceBarEnabled()) {
-			soundPlayFile("ib1p1xx1");
+//			soundPlayFile("ib1p1xx1");
 			gameMouseSetCursor(MOUSE_CURSOR_USE_CROSSHAIR);
-			gameMouseSetMode(GAME_MOUSE_MODE_USE_SCIENCE);
+//			gameMouseSetMode(GAME_MOUSE_MODE_USE_SCIENCE);
 		}
 		break;
 	case KEY_8:
 	case KEY_ASTERISK:
 		if (interfaceBarEnabled()) {
-			soundPlayFile("ib1p1xx1");
+//			soundPlayFile("ib1p1xx1");
 			gameMouseSetCursor(MOUSE_CURSOR_USE_CROSSHAIR);
-			gameMouseSetMode(GAME_MOUSE_MODE_USE_REPAIR);
+//			gameMouseSetMode(GAME_MOUSE_MODE_USE_REPAIR);
 		}
 		break;
 	case KEY_MINUS:
 	case KEY_UNDERSCORE:
-		brightnessDecrease();
+//		brightnessDecrease(); TODO preferences
 		break;
 	case KEY_EQUAL:
 	case KEY_PLUS:
-		brightnessIncrease();
+//		brightnessIncrease(); TODO preferences
 		break;
 	case KEY_COMMA:
 	case KEY_LESS:
@@ -809,7 +808,7 @@ int gameHandleKey(int eventCode, bool isInCombatMode) {
 	case KEY_SLASH:
 	case KEY_QUESTION:
 		if (1) {
-			soundPlayFile("ib1p1xx1");
+//			soundPlayFile("ib1p1xx1");
 
 			int month;
 			int day;
@@ -839,32 +838,32 @@ int gameHandleKey(int eventCode, bool isInCombatMode) {
 		}
 		break;
 	case KEY_F1:
-		soundPlayFile("ib1p1xx1");
-		showHelp();
+//		soundPlayFile("ib1p1xx1"); TODO help
+//		showHelp();
 		break;
 	case KEY_F2:
-		gameSoundSetMasterVolume(gameSoundGetMasterVolume() - 2047);
+//		gameSoundSetMasterVolume(gameSoundGetMasterVolume() - 2047); TODO audio
 		break;
 	case KEY_F3:
-		gameSoundSetMasterVolume(gameSoundGetMasterVolume() + 2047);
+//		gameSoundSetMasterVolume(gameSoundGetMasterVolume() + 2047); TODO audio
 		break;
 	case KEY_CTRL_S:
 	case KEY_F4:
-		soundPlayFile("ib1p1xx1");
+/*		soundPlayFile("ib1p1xx1");  TODO loadsave
 		if (lsgSaveGame(1) == -1) {
 			debugPrint("\n ** Error calling SaveGame()! **\n");
-		}
+		}*/
 		break;
 	case KEY_CTRL_L:
 	case KEY_F5:
-		soundPlayFile("ib1p1xx1");
+/*		soundPlayFile("ib1p1xx1"); TODO loadsave
 		if (lsgLoadGame(LOAD_SAVE_MODE_NORMAL) == -1) {
 			debugPrint("\n ** Error calling LoadGame()! **\n");
-		}
+		}*/
 		break;
 	case KEY_F6:
 		if (1) {
-			soundPlayFile("ib1p1xx1");
+/*			soundPlayFile("ib1p1xx1"); TODO loadsave
 
 			int rc = lsgSaveGame(LOAD_SAVE_MODE_QUICK);
 			if (rc == -1) {
@@ -874,12 +873,12 @@ int gameHandleKey(int eventCode, bool isInCombatMode) {
 				// Quick save game successfully saved.
 				char* msg = getmsg(&gMiscMessageList, &messageListItem, 5);
 				displayMonitorAddMessage(msg);
-			}
+			}*/
 		}
 		break;
 	case KEY_F7:
 		if (1) {
-			soundPlayFile("ib1p1xx1");
+/*			soundPlayFile("ib1p1xx1"); TODO loadsave
 
 			int rc = lsgLoadGame(LOAD_SAVE_MODE_QUICK);
 			if (rc == -1) {
@@ -889,12 +888,12 @@ int gameHandleKey(int eventCode, bool isInCombatMode) {
 				// Quick load game successfully loaded.
 				char* msg = getmsg(&gMiscMessageList, &messageListItem, 4);
 				displayMonitorAddMessage(msg);
-			}
+			}*/
 		}
 		break;
 	case KEY_CTRL_V:
 		if (1) {
-			soundPlayFile("ib1p1xx1");
+//			soundPlayFile("ib1p1xx1"); TODO audio
 
 			char version[VERSION_MAX];
 			versionGetVersion(version, sizeof(version));
@@ -918,7 +917,6 @@ int gameHandleKey(int eventCode, bool isInCombatMode) {
 
 	return 0;
 }
-#endif
 
 // game_ui_disable
 // 0x443BFC
@@ -1234,7 +1232,7 @@ static void showHelp() {
 #endif
 
 // TODO quit yes/no win
-#if 0
+
 // 0x4440B8
 int showQuitConfirmationDialog() {
 	bool isoWasEnabled = isoDisable();
@@ -1288,7 +1286,7 @@ int showQuitConfirmationDialog() {
 
 	return rc;
 }
-#endif
+
 
 // 0x44418C
 /*static*/ int gameDbInit() {
