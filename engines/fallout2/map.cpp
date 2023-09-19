@@ -947,9 +947,9 @@ static int mapLoad(File *stream) {
 		object->id = scriptsNewObjectId();
 		script->field_1C = object->id;
 		script->owner = object;
-		_scr_spatials_disable();
-		scriptExecProc(gMapSid, SCRIPT_PROC_MAP_ENTER);
-		_scr_spatials_enable();
+//		_scr_spatials_disable();  TODO scripts test
+//		scriptExecProc(gMapSid, SCRIPT_PROC_MAP_ENTER);
+//		_scr_spatials_enable();
 
 		error = "Error Setting up random encounter";
 /*		if (wmSetupRandomEncounter() == -1) {  TODO world_map
@@ -980,12 +980,12 @@ err:
 	_gmouse_disable_scrolling();
 	gameMouseSetCursor(MOUSE_CURSOR_WAIT_PLANET);
 
-	if (scriptsExecStartProc() == -1) {
-		debugPrint("\n   Error: scr_load_all_scripts failed!");
-	}
+//	if (scriptsExecStartProc() == -1) {  TODO scripts test
+//		debugPrint("\n   Error: scr_load_all_scripts failed!");
+//	}
 
-	scriptsExecMapEnterProc();
-	scriptsExecMapUpdateProc();
+//	scriptsExecMapEnterProc();
+//	scriptsExecMapUpdateProc();
 	tileEnable();
 
 	if (gMapTransition.map > 0) {
