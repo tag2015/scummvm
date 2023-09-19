@@ -1,16 +1,16 @@
-#include "dialog.h"
+#include "fallout2/dialog.h"
 
-#include <string.h>
+// #include <string.h>
 
-#include "memory_manager.h"
-#include "mouse.h"
-#include "movie.h"
-#include "platform_compat.h"
-#include "svga.h"
-#include "text_font.h"
-#include "window_manager.h"
+#include "fallout2/memory_manager.h"
+#include "fallout2/mouse.h"
+// #include "fallout2/movie.h" TODO movie
+#include "fallout2/platform_compat.h"
+#include "fallout2/svga.h"
+#include "fallout2/text_font.h"
+#include "fallout2/window_manager.h"
 
-namespace fallout {
+namespace Fallout2 {
 
 // 0x501623
 const float flt_501623 = 31.0;
@@ -28,10 +28,10 @@ int _topDialogLine = 0;
 int _topDialogReply = 0;
 
 // 0x5184E4
-DialogFunc1* _replyWinDrawCallback = NULL;
+DialogFunc1 *_replyWinDrawCallback = NULL;
 
 // 0x5184E8
-DialogFunc2* _optionsWinDrawCallback = NULL;
+DialogFunc2 *_optionsWinDrawCallback = NULL;
 
 // 0x5184EC
 int gDialogBorderX = 7;
@@ -78,7 +78,7 @@ int dword_56DB6C;
 int dword_56DB70;
 
 // 0x56DB74
-char* off_56DB74;
+char *off_56DB74;
 
 // 0x56DB7C
 int dword_56DB7C;
@@ -93,7 +93,7 @@ int dword_56DB84;
 int dword_56DB88;
 
 // 0x56DB8C
-char* off_56DB8C;
+char *off_56DB8C;
 
 // 0x56DB90
 int _replyPlaying;
@@ -129,19 +129,19 @@ int dword_56DBB8;
 int dword_56DBBC;
 
 // 0x56DBC0
-char* off_56DBC0;
+char *off_56DBC0;
 
 // 0x56DBC4
-char* off_56DBC4;
+char *off_56DBC4;
 
 // 0x56DBC8
-char* off_56DBC8;
+char *off_56DBC8;
 
 // 0x56DBCC
-char* off_56DBCC;
+char *off_56DBCC;
 
 // 0x56DBD0
-char* gDialogReplyTitle;
+char *gDialogReplyTitle;
 
 // 0x56DBD4
 int _upButton;
@@ -153,29 +153,29 @@ int dword_56DBD8;
 int dword_56DBDC;
 
 // 0x56DBE0
-char* off_56DBE0;
+char *off_56DBE0;
 
 // 0x56DBE4
-char* off_56DBE4;
+char *off_56DBE4;
 
 // 0x56DBE8
-char* off_56DBE8;
+char *off_56DBE8;
 
 // 0x56DBEC
-char* off_56DBEC;
+char *off_56DBEC;
 
 // 0x42F434
-STRUCT_56DAE0_FIELD_4* _getReply() {
-	STRUCT_56DAE0_FIELD_4* v0;
-	STRUCT_56DAE0_FIELD_4_FIELD_C* v1;
+STRUCT_56DAE0_FIELD_4 *_getReply() {
+	STRUCT_56DAE0_FIELD_4 *v0;
+	STRUCT_56DAE0_FIELD_4_FIELD_C *v1;
 
 	v0 = &(_dialog[_tods].field_4[_dialog[_tods].field_C]);
 	if (v0->field_C == NULL) {
 		v0->field_14 = 1;
-		v1 = (STRUCT_56DAE0_FIELD_4_FIELD_C*)internal_malloc_safe(sizeof(STRUCT_56DAE0_FIELD_4_FIELD_C), __FILE__, __LINE__); // "..\\int\\DIALOG.C", 789
+		v1 = (STRUCT_56DAE0_FIELD_4_FIELD_C *)internal_malloc_safe(sizeof(STRUCT_56DAE0_FIELD_4_FIELD_C), __FILE__, __LINE__); // "..\\int\\DIALOG.C", 789
 	} else {
 		v0->field_14++;
-		v1 = (STRUCT_56DAE0_FIELD_4_FIELD_C*)internal_realloc_safe(v0->field_C, sizeof(STRUCT_56DAE0_FIELD_4_FIELD_C) * v0->field_14, __FILE__, __LINE__); // "..\\int\\DIALOG.C", 793
+		v1 = (STRUCT_56DAE0_FIELD_4_FIELD_C *)internal_realloc_safe(v0->field_C, sizeof(STRUCT_56DAE0_FIELD_4_FIELD_C) * v0->field_14, __FILE__, __LINE__); // "..\\int\\DIALOG.C", 793
 	}
 	v0->field_C = v1;
 
@@ -183,27 +183,27 @@ STRUCT_56DAE0_FIELD_4* _getReply() {
 }
 
 // 0x42F4C0
-void _replyAddOption(const char* a1, const char* a2, int a3) {
-	STRUCT_56DAE0_FIELD_4* v18;
+void _replyAddOption(const char *a1, const char *a2, int a3) {
+	STRUCT_56DAE0_FIELD_4 *v18;
 	int v17;
-	char* v14;
-	char* v15;
+	char *v14;
+	char *v15;
 
 	v18 = _getReply();
 	v17 = v18->field_14 - 1;
 	v18->field_C[v17].kind = 2;
 
 	if (a1 != NULL) {
-		v14 = (char*)internal_malloc_safe(strlen(a1) + 1, __FILE__, __LINE__); // "..\\int\\DIALOG.C", 805
-		strcpy(v14, a1);
+		v14 = (char *)internal_malloc_safe(strlen(a1) + 1, __FILE__, __LINE__); // "..\\int\\DIALOG.C", 805
+		strncpy(v14, a1, strlen(a1) + 1);
 		v18->field_C[v17].field_0 = v14;
 	} else {
 		v18->field_C[v17].field_0 = NULL;
 	}
 
 	if (a2 != NULL) {
-		v15 = (char*)internal_malloc_safe(strlen(a2) + 1, __FILE__, __LINE__); // "..\\int\\DIALOG.C", 810
-		strcpy(v15, a2);
+		v15 = (char *)internal_malloc_safe(strlen(a2) + 1, __FILE__, __LINE__); // "..\\int\\DIALOG.C", 810
+		strncpy(v15, a2, strlen(a2) + 1);
 		v18->field_C[v17].string = v15;
 	} else {
 		v18->field_C[v17].string = NULL;
@@ -215,10 +215,10 @@ void _replyAddOption(const char* a1, const char* a2, int a3) {
 }
 
 // 0x42F624
-void _replyAddOptionProc(const char* a1, int a2, int a3) {
-	STRUCT_56DAE0_FIELD_4* v5;
+void _replyAddOptionProc(const char *a1, int a2, int a3) {
+	STRUCT_56DAE0_FIELD_4 *v5;
 	int v13;
-	char* v11;
+	char *v11;
 
 	v5 = _getReply();
 	v13 = v5->field_14 - 1;
@@ -226,8 +226,8 @@ void _replyAddOptionProc(const char* a1, int a2, int a3) {
 	v5->field_C[v13].kind = 1;
 
 	if (a1 != NULL) {
-		v11 = (char*)internal_malloc_safe(strlen(a1) + 1, __FILE__, __LINE__); // "..\\int\\DIALOG.C", 830
-		strcpy(v11, a1);
+		v11 = (char *)internal_malloc_safe(strlen(a1) + 1, __FILE__, __LINE__); // "..\\int\\DIALOG.C", 830
+		strncpy(v11, a1, strlen(a1) + 1);
 		v5->field_C[v13].field_0 = v11;
 	} else {
 		v5->field_C[v13].field_0 = NULL;
@@ -241,7 +241,7 @@ void _replyAddOptionProc(const char* a1, int a2, int a3) {
 }
 
 // 0x42F714
-void _optionFree(STRUCT_56DAE0_FIELD_4_FIELD_C* a1) {
+void _optionFree(STRUCT_56DAE0_FIELD_4_FIELD_C *a1) {
 	if (a1->field_0 != NULL) {
 		internal_free_safe(a1->field_0, __FILE__, __LINE__); // "..\\int\\DIALOG.C", 844
 	}
@@ -257,8 +257,8 @@ void _optionFree(STRUCT_56DAE0_FIELD_4_FIELD_C* a1) {
 void _replyFree() {
 	int i;
 	int j;
-	STRUCT_56DAE0* ptr;
-	STRUCT_56DAE0_FIELD_4* v6;
+	STRUCT_56DAE0 *ptr;
+	STRUCT_56DAE0_FIELD_4 *v6;
 
 	ptr = &(_dialog[_tods]);
 	for (i = 0; i < ptr->field_8; i++) {
@@ -310,7 +310,7 @@ int _endDialog() {
 }
 
 // 0x42FC70
-void _printLine(int win, char** strings, int strings_num, int a4, int a5, int a6, int a7, int a8, int a9) {
+void _printLine(int win, char **strings, int strings_num, int a4, int a5, int a6, int a7, int a8, int a9) {
 	int i;
 	int v11;
 
@@ -321,8 +321,8 @@ void _printLine(int win, char** strings, int strings_num, int a4, int a5, int a6
 }
 
 // 0x42FCF0
-void _printStr(int win, char* a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9) {
-	char** strings;
+void _printStr(int win, char *a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9) {
+	char **strings;
 	int strings_num;
 
 	strings = _windowWordWrap(a2, a3, 0, &strings_num);
@@ -337,7 +337,7 @@ int _abortReply(int a1) {
 	int x;
 
 	if (_replyPlaying == 2) {
-		return _moviePlaying() == 0;
+		return 1; //_moviePlaying() == 0;  TODO movie
 	} else if (_replyPlaying == 3) {
 		return 1;
 	}
@@ -375,7 +375,7 @@ void _endReply() {
 }
 
 // 0x4301E8
-void _drawStr(int win, char* str, int font, int width, int height, int left, int top, int a8, int a9, int a10) {
+void _drawStr(int win, char *str, int font, int width, int height, int left, int top, int a8, int a9, int a10) {
 	int old_font;
 	Rect rect;
 
@@ -393,8 +393,8 @@ void _drawStr(int win, char* str, int font, int width, int height, int left, int
 }
 
 // 0x430D40
-int _dialogStart(Program* a1) {
-	STRUCT_56DAE0* ptr;
+int _dialogStart(Program *a1) {
+	STRUCT_56DAE0 *ptr;
 
 	if (_tods == 3) {
 		return 1;
@@ -426,9 +426,9 @@ int _dialogRestart() {
 }
 
 // 0x430DE4
-int _dialogGotoReply(const char* a1) {
-	STRUCT_56DAE0* ptr;
-	STRUCT_56DAE0_FIELD_4* v5;
+int _dialogGotoReply(const char *a1) {
+	STRUCT_56DAE0 *ptr;
+	STRUCT_56DAE0_FIELD_4 *v5;
 	int i;
 
 	if (_tods == -1) {
@@ -454,14 +454,14 @@ int _dialogGotoReply(const char* a1) {
 }
 
 // 0x430E84
-int dialogSetReplyTitle(const char* a1) {
+int dialogSetReplyTitle(const char *a1) {
 	if (gDialogReplyTitle != NULL) {
 		internal_free_safe(gDialogReplyTitle, __FILE__, __LINE__); // "..\\int\\DIALOG.C", 2561
 	}
 
 	if (a1 != NULL) {
-		gDialogReplyTitle = (char*)internal_malloc_safe(strlen(a1) + 1, __FILE__, __LINE__); // "..\\int\\DIALOG.C", 2564
-		strcpy(gDialogReplyTitle, a1);
+		gDialogReplyTitle = (char *)internal_malloc_safe(strlen(a1) + 1, __FILE__, __LINE__); // "..\\int\\DIALOG.C", 2564
+		strncpy(gDialogReplyTitle, a1, strlen(a1) + 1);
 	} else {
 		gDialogReplyTitle = NULL;
 	}
@@ -470,14 +470,14 @@ int dialogSetReplyTitle(const char* a1) {
 }
 
 // 0x430EFC
-int _dialogReply(const char* a1, const char* a2) {
+int _dialogReply(const char *a1, const char *a2) {
 	// TODO: Incomplete.
 	// _replyAddNew(a1, a2);
 	return 0;
 }
 
 // 0x430F04
-int _dialogOption(const char* a1, const char* a2) {
+int _dialogOption(const char *a1, const char *a2) {
 	if (_dialog[_tods].field_C == -1) {
 		return 0;
 	}
@@ -488,7 +488,7 @@ int _dialogOption(const char* a1, const char* a2) {
 }
 
 // 0x430F38
-int _dialogOptionProc(const char* a1, int a2) {
+int _dialogOptionProc(const char *a1, int a2) {
 	if (_dialog[_tods].field_C == -1) {
 		return 1;
 	}
@@ -499,7 +499,7 @@ int _dialogOptionProc(const char* a1, int a2) {
 }
 
 // 0x430FD4
-int sub_430FD4(const char* a1, const char* a2, int timeout) {
+int sub_430FD4(const char *a1, const char *a2, int timeout) {
 	// TODO: Incomplete.
 	return -1;
 }
@@ -527,7 +527,7 @@ int _dialogQuit() {
 }
 
 // 0x4311B8
-int dialogSetOptionWindow(int a1, int a2, int a3, int a4, char* a5) {
+int dialogSetOptionWindow(int a1, int a2, int a3, int a4, char *a5) {
 	dword_56DB6C = a1;
 	dword_56DB70 = a2;
 	dword_56DB64 = a3;
@@ -537,7 +537,7 @@ int dialogSetOptionWindow(int a1, int a2, int a3, int a4, char* a5) {
 }
 
 // 0x4311E0
-int dialogSetReplyWindow(int a1, int a2, int a3, int a4, char* a5) {
+int dialogSetReplyWindow(int a1, int a2, int a3, int a4, char *a5) {
 	dword_56DB84 = a1;
 	dword_56DB88 = a2;
 	dword_56DB7C = a3;
@@ -556,7 +556,7 @@ int dialogSetBorder(int a1, int a2) {
 }
 
 // 0x431218
-int _dialogSetScrollUp(int a1, int a2, char* a3, char* a4, char* a5, char* a6, int a7) {
+int _dialogSetScrollUp(int a1, int a2, char *a3, char *a4, char *a5, char *a6, int a7) {
 	_upButton = a1;
 	dword_56DBD8 = a2;
 
@@ -586,7 +586,7 @@ int _dialogSetScrollUp(int a1, int a2, char* a3, char* a4, char* a5, char* a6, i
 }
 
 // 0x4312C0
-int _dialogSetScrollDown(int a1, int a2, char* a3, char* a4, char* a5, char* a6, int a7) {
+int _dialogSetScrollDown(int a1, int a2, char *a3, char *a4, char *a5, char *a6, int a7) {
 	_downButton = a1;
 	dword_56DBB8 = a2;
 
@@ -696,7 +696,7 @@ int _dialogGetDialogDepth() {
 }
 
 // 0x431520
-void _dialogRegisterWinDrawCallbacks(DialogFunc1* a1, DialogFunc2* a2) {
+void _dialogRegisterWinDrawCallbacks(DialogFunc1 *a1, DialogFunc2 *a2) {
 	_replyWinDrawCallback = a1;
 	_optionsWinDrawCallback = a2;
 }
@@ -717,4 +717,4 @@ int _dialogGetMediaFlag() {
 	return _mediaFlag;
 }
 
-} // namespace fallout
+} // namespace Fallout2

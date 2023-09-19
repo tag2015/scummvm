@@ -16,6 +16,7 @@ MODULE_OBJS = \
 	datafile.o \
 	db.o \
 	dfile.o \
+	dialog.o \
 	dictionary.o \
 	dinput.o \
 	display_monitor.o \
