@@ -47,6 +47,7 @@ MODULE_OBJS = \
 	message.o \
 	mouse.o \
 	mouse_manager.o \
+	nevs.o \
 	object.o \
 	options.o \
 	palette.o \
