@@ -989,12 +989,12 @@ int scriptsHandleRequests() {
 
 	if ((gScriptsRequests & SCRIPT_REQUEST_LOOTING) != 0) {
 		gScriptsRequests &= ~SCRIPT_REQUEST_LOOTING;
-//		inventoryOpenLooting(gScriptsRequestedLootingBy, gScriptsRequestedLootingFrom); TODO inventory
+		inventoryOpenLooting(gScriptsRequestedLootingBy, gScriptsRequestedLootingFrom);
 	}
 
 	if ((gScriptsRequests & SCRIPT_REQUEST_STEALING) != 0) {
 		gScriptsRequests &= ~SCRIPT_REQUEST_STEALING;
-//		inventoryOpenStealing(gScriptsRequestedStealingBy, gScriptsRequestedStealingFrom); TODO inventory
+		inventoryOpenStealing(gScriptsRequestedStealingBy, gScriptsRequestedStealingFrom);
 	}
 
 	return 0;
