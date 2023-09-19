@@ -1,11 +1,11 @@
-#ifndef LIPS_H
-#define LIPS_H
+#ifndef FALLOUT2_LIPS_H
+#define FALLOUT2_LIPS_H
 
-#include <stddef.h>
+// #include <stddef.h>
 
-#include "sound.h"
+#include "fallout2/sound.h"
 
-namespace fallout {
+namespace Fallout2 {
 
 #define PHONEME_COUNT (42)
 
@@ -23,16 +23,16 @@ typedef struct LipsData {
 	int version;
 	int field_4;
 	int flags;
-	Sound* sound;
+	Sound *sound;
 	int field_10;
-	void* field_14;
-	unsigned char* phonemes;
+	void *field_14;
+	unsigned char *phonemes;
 	int field_1C;
 	int field_20;
 	int field_24;
 	int field_28;
 	int field_2C;
-	SpeechMarker* markers;
+	SpeechMarker *markers;
 	int field_34;
 	int field_38;
 	int field_3C;
@@ -53,9 +53,9 @@ extern LipsData gLipsData;
 
 void lipsTicker();
 int lipsStart();
-int lipsLoad(const char* audioFileName, const char* headFileName);
+int lipsLoad(const char *audioFileName, const char *headFileName);
 int lipsFree();
 
-} // namespace fallout
+} // namespace Fallout2
 
-#endif /* LIPS_H */
+#endif
