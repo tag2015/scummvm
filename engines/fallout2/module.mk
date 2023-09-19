@@ -48,6 +48,7 @@ MODULE_OBJS = \
 	mouse.o \
 	mouse_manager.o \
 	object.o \
+	options.o \
 	palette.o \
 	party_member.o \
 	pcx.o \
