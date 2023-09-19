@@ -236,7 +236,9 @@ size_t fileRead(void *ptr, size_t size, size_t count, File *stream) {
 			totalBytesRead += bytesRead;
 		}
 
-		return totalBytesRead / size;
+		if (!size)
+			warning("DB: fileRead: Requested size is zero");
+		return (size > 0) ? (totalBytesRead / size) : 0;
 	}
 
 	if (stream->type == XFILE_TYPE_DFILE && stream->dfile->entry->compressed) {
