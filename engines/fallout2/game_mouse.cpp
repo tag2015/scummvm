@@ -1190,7 +1190,7 @@ void _gmouse_handle_event(int mouseX, int mouseY, int mouseState) {
 						if (1) {
 							int skill = -1;
 
-							int rc = -1; //skilldexOpen(); TODO skilldex
+							int rc = skilldexOpen();
 							switch (rc) {
 							case SKILLDEX_RC_SNEAK:
 								//_action_skill_use(SKILL_SNEAK); TODO actions
