@@ -221,8 +221,8 @@ int characterSelectorOpen() {
 
 		case KEY_UPPERCASE_T:
 		case KEY_LOWERCASE_T:
-			// rc = 2;
-			// done = true;
+			rc = 2;
+			done = true;
 			break;
 
 		case KEY_F10:
