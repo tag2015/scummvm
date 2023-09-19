@@ -1,21 +1,21 @@
-#include "nevs.h"
+#include "fallout2/nevs.h"
 
-#include <stdlib.h>
-#include <string.h>
+/*#include <stdlib.h>
+#include <string.h>*/
 
-#include "debug.h"
-#include "interpreter_lib.h"
-#include "memory_manager.h"
-#include "platform_compat.h"
+#include "fallout2/debug.h"
+#include "fallout2/interpreter_lib.h"
+#include "fallout2/memory_manager.h"
+#include "fallout2/platform_compat.h"
 
-namespace fallout {
+namespace Fallout2 {
 
 #define NEVS_COUNT 40
 
 typedef struct Nevs {
 	bool used;
 	char name[32];
-	Program* program;
+	Program *program;
 	int proc;
 	int type;
 	int hits;
@@ -23,27 +23,26 @@ typedef struct Nevs {
 	void (*field_38)();
 } Nevs;
 
-static Nevs* _nevs_alloc();
-static void _nevs_reset(Nevs* nevs);
-static void _nevs_removeprogramreferences(Program* program);
-static Nevs* _nevs_find(const char* name);
+static Nevs *_nevs_alloc();
+static void _nevs_reset(Nevs *nevs);
+static void _nevs_removeprogramreferences(Program *program);
+static Nevs *_nevs_find(const char *name);
 
 // 0x6391C8
-static Nevs* gNevs;
+static Nevs *gNevs;
 
 // 0x6391CC
 static int gNevsHits;
 
 // nevs_alloc
 // 0x488340
-static Nevs* _nevs_alloc() {
+static Nevs *_nevs_alloc() {
 	if (gNevs == NULL) {
-		debugPrint("nevs_alloc(): nevs_initonce() not called!");
-		exit(99);
+		error("nevs_alloc(): nevs_initonce() not called");
 	}
 
 	for (int index = 0; index < NEVS_COUNT; index++) {
-		Nevs* nevs = &(gNevs[index]);
+		Nevs *nevs = &(gNevs[index]);
 		if (!nevs->used) {
 			// NOTE: Uninline.
 			_nevs_reset(nevs);
@@ -57,7 +56,7 @@ static Nevs* _nevs_alloc() {
 // NOTE: Inlined.
 //
 // 0x488394
-static void _nevs_reset(Nevs* nevs) {
+static void _nevs_reset(Nevs *nevs) {
 	nevs->used = false;
 	memset(nevs, 0, sizeof(*nevs));
 }
@@ -71,10 +70,10 @@ void _nevs_close() {
 }
 
 // 0x4883D4
-static void _nevs_removeprogramreferences(Program* program) {
+static void _nevs_removeprogramreferences(Program *program) {
 	if (gNevs != NULL) {
 		for (int i = 0; i < NEVS_COUNT; i++) {
-			Nevs* nevs = &(gNevs[i]);
+			Nevs *nevs = &(gNevs[i]);
 			if (nevs->used && nevs->program == program) {
 				// NOTE: Uninline.
 				_nevs_reset(nevs);
@@ -86,27 +85,25 @@ static void _nevs_removeprogramreferences(Program* program) {
 // nevs_initonce
 // 0x488418
 void _nevs_initonce() {
-	intLibRegisterProgramDeleteCallback(_nevs_removeprogramreferences);
+	//	intLibRegisterProgramDeleteCallback(_nevs_removeprogramreferences); TODO interpreter_lib
 
 	if (gNevs == NULL) {
-		gNevs = (Nevs*)internal_calloc_safe(sizeof(Nevs), NEVS_COUNT, __FILE__, __LINE__); // "..\\int\\NEVS.C", 131
+		gNevs = (Nevs *)internal_calloc_safe(sizeof(Nevs), NEVS_COUNT, __FILE__, __LINE__); // "..\\int\\NEVS.C", 131
 		if (gNevs == NULL) {
-			debugPrint("nevs_initonce(): out of memory");
-			exit(99);
+			error("nevs_initonce(): out of memory");
 		}
 	}
 }
 
 // nevs_find
 // 0x48846C
-static Nevs* _nevs_find(const char* name) {
+static Nevs *_nevs_find(const char *name) {
 	if (gNevs == NULL) {
-		debugPrint("nevs_find(): nevs_initonce() not called!");
-		exit(99);
+		error("nevs_find(): nevs_initonce() not called");
 	}
 
 	for (int index = 0; index < NEVS_COUNT; index++) {
-		Nevs* nevs = &(gNevs[index]);
+		Nevs *nevs = &(gNevs[index]);
 		if (nevs->used && compat_stricmp(nevs->name, name) == 0) {
 			return nevs;
 		}
@@ -116,8 +113,8 @@ static Nevs* _nevs_find(const char* name) {
 }
 
 // 0x4884C8
-int _nevs_addevent(const char* name, Program* program, int proc, int type) {
-	Nevs* nevs = _nevs_find(name);
+int _nevs_addevent(const char *name, Program *program, int proc, int type) {
+	Nevs *nevs = _nevs_find(name);
 	if (nevs == NULL) {
 		nevs = _nevs_alloc();
 	}
@@ -127,7 +124,7 @@ int _nevs_addevent(const char* name, Program* program, int proc, int type) {
 	}
 
 	nevs->used = true;
-	strcpy(nevs->name, name);
+	strncpy(nevs->name, name, 31);
 	nevs->program = program;
 	nevs->proc = proc;
 	nevs->type = type;
@@ -138,10 +135,10 @@ int _nevs_addevent(const char* name, Program* program, int proc, int type) {
 
 // nevs_clearevent
 // 0x48859C
-int _nevs_clearevent(const char* a1) {
+int _nevs_clearevent(const char *a1) {
 	debugPrint("nevs_clearevent( '%s');\n", a1);
 
-	Nevs* nevs = _nevs_find(a1);
+	Nevs *nevs = _nevs_find(a1);
 	if (nevs != NULL) {
 		// NOTE: Uninline.
 		_nevs_reset(nevs);
@@ -153,19 +150,17 @@ int _nevs_clearevent(const char* a1) {
 
 // nevs_signal
 // 0x48862C
-int _nevs_signal(const char* name) {
+int _nevs_signal(const char *name) {
 	debugPrint("nevs_signal( '%s');\n", name);
 
-	Nevs* nevs = _nevs_find(name);
+	Nevs *nevs = _nevs_find(name);
 	if (nevs == NULL) {
 		return 1;
 	}
 
 	debugPrint("nep: %p,  used = %u, prog = %p, proc = %d", nevs, nevs->used, nevs->program, nevs->proc);
 
-	if (nevs->used
-	        && ((nevs->program != NULL && nevs->proc != 0) || nevs->field_38 != NULL)
-	        && !nevs->busy) {
+	if (nevs->used && ((nevs->program != NULL && nevs->proc != 0) || nevs->field_38 != NULL) && !nevs->busy) {
 		nevs->hits++;
 		gNevsHits++;
 		return 0;
@@ -186,10 +181,8 @@ void _nevs_update() {
 	gNevsHits = 0;
 
 	for (int index = 0; index < NEVS_COUNT; index++) {
-		Nevs* nevs = &(gNevs[index]);
-		if (nevs->used
-		        && ((nevs->program != NULL && nevs->proc != 0) || nevs->field_38 != NULL)
-		        && !nevs->busy) {
+		Nevs *nevs = &(gNevs[index]);
+		if (nevs->used && ((nevs->program != NULL && nevs->proc != 0) || nevs->field_38 != NULL) && !nevs->busy) {
 			if (nevs->hits > 0) {
 				nevs->busy = true;
 
@@ -213,4 +206,4 @@ void _nevs_update() {
 	}
 }
 
-} // namespace fallout
+} // namespace Fallout2
