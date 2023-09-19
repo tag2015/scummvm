@@ -1,12 +1,12 @@
-#ifndef OPTIONS_H
-#define OPTIONS_H
+#ifndef FALLOUT2_OPTIONS_H
+#define FALLOUT2_OPTIONS_H
 
-namespace fallout {
+namespace Fallout2 {
 
 int showOptions();
 int showPause(bool a1);
 int _init_options_menu();
 
-} // namespace fallout
+} // namespace Fallout2
 
-#endif /* OPTIONS_H */
+#endif
