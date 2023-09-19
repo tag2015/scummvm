@@ -1,31 +1,31 @@
-#include "skilldex.h"
+#include "fallout2/skilldex.h"
 
-#include <stdio.h>
-#include <string.h>
+/*#include <stdio.h>
+#include <string.h>*/
 
-#include "art.h"
-#include "color.h"
-#include "cycle.h"
-#include "debug.h"
-#include "draw.h"
-#include "game.h"
-#include "game_mouse.h"
-#include "game_sound.h"
-#include "geometry.h"
-#include "input.h"
-#include "interface.h"
-#include "kb.h"
-#include "map.h"
-#include "memory.h"
-#include "message.h"
-#include "object.h"
-#include "platform_compat.h"
-#include "skill.h"
-#include "svga.h"
-#include "text_font.h"
-#include "window_manager.h"
+#include "fallout2/art.h"
+#include "fallout2/color.h"
+#include "fallout2/cycle.h"
+#include "fallout2/debug.h"
+#include "fallout2/draw.h"
+#include "fallout2/game.h"
+#include "fallout2/game_mouse.h"
+// #include "fallout2/game_sound.h"  TODO audio
+#include "fallout2/geometry.h"
+#include "fallout2/input.h"
+#include "fallout2/interface.h"
+#include "fallout2/kb.h"
+#include "fallout2/map.h"
+#include "fallout2/memory.h"
+#include "fallout2/message.h"
+#include "fallout2/object.h"
+#include "fallout2/platform_compat.h"
+#include "fallout2/skill.h"
+#include "fallout2/svga.h"
+#include "fallout2/text_font.h"
+#include "fallout2/window_manager.h"
 
-namespace fallout {
+namespace Fallout2 {
 
 #define SKILLDEX_WINDOW_RIGHT_MARGIN 4
 #define SKILLDEX_WINDOW_BOTTOM_MARGIN 6
@@ -85,7 +85,7 @@ static const int gSkilldexSkills[SKILLDEX_SKILL_COUNT] = {
 };
 
 // 0x6680B8
-static unsigned char* gSkilldexButtonsData[SKILLDEX_SKILL_BUTTON_BUFFER_COUNT];
+static unsigned char *gSkilldexButtonsData[SKILLDEX_SKILL_BUTTON_BUFFER_COUNT];
 
 // skilldex.msg
 // 0x6680F8
@@ -98,7 +98,7 @@ static MessageListItem gSkilldexMessageListItem;
 static int gSkilldexWindow;
 
 // 0x668144
-static unsigned char* gSkilldexWindowBuffer;
+static unsigned char *gSkilldexWindowBuffer;
 
 // 0x668148
 static int gSkilldexWindowOldFont;
@@ -125,7 +125,7 @@ int skilldexOpen() {
 		if (keyCode == KEY_ESCAPE || keyCode == KEY_UPPERCASE_S || keyCode == KEY_LOWERCASE_S || keyCode == 500 || _game_user_wants_to_quit != 0) {
 			rc = 0;
 		} else if (keyCode == KEY_RETURN) {
-			soundPlayFile("ib1p1xx1");
+//			soundPlayFile("ib1p1xx1"); TODO audio
 			rc = 0;
 		} else if (keyCode >= 501 && keyCode <= 509) {
 			rc = keyCode - 500;
@@ -184,7 +184,7 @@ static int skilldexWindowInit() {
 	bool cycle = false;
 	int buttonDataIndex;
 	for (buttonDataIndex = 0; buttonDataIndex < SKILLDEX_SKILL_BUTTON_BUFFER_COUNT; buttonDataIndex++) {
-		gSkilldexButtonsData[buttonDataIndex] = (unsigned char*)internal_malloc(_skilldexFrmImages[SKILLDEX_FRM_BUTTON_ON].getHeight() * _skilldexFrmImages[SKILLDEX_FRM_BUTTON_ON].getWidth() + 512);
+		gSkilldexButtonsData[buttonDataIndex] = (unsigned char *)internal_malloc(_skilldexFrmImages[SKILLDEX_FRM_BUTTON_ON].getHeight() * _skilldexFrmImages[SKILLDEX_FRM_BUTTON_ON].getWidth() + 512);
 		if (gSkilldexButtonsData[buttonDataIndex] == NULL) {
 			break;
 		}
@@ -192,7 +192,7 @@ static int skilldexWindowInit() {
 		// NOTE: Original code uses bitwise XOR.
 		cycle = !cycle;
 
-		unsigned char* data;
+		unsigned char *data;
 		int size;
 		if (cycle) {
 			size = _skilldexFrmImages[SKILLDEX_FRM_BUTTON_OFF].getWidth() * _skilldexFrmImages[SKILLDEX_FRM_BUTTON_OFF].getHeight();
@@ -223,11 +223,11 @@ static int skilldexWindowInit() {
 	int skilldexWindowX = (screenGetWidth() - gInterfaceBarWidth) / 2 + gInterfaceBarWidth - _skilldexFrmImages[SKILLDEX_FRM_BACKGROUND].getWidth() - SKILLDEX_WINDOW_RIGHT_MARGIN;
 	int skilldexWindowY = screenGetHeight() - INTERFACE_BAR_HEIGHT - 1 - _skilldexFrmImages[SKILLDEX_FRM_BACKGROUND].getHeight() - SKILLDEX_WINDOW_BOTTOM_MARGIN;
 	gSkilldexWindow = windowCreate(skilldexWindowX,
-	                               skilldexWindowY,
-	                               _skilldexFrmImages[SKILLDEX_FRM_BACKGROUND].getWidth(),
-	                               _skilldexFrmImages[SKILLDEX_FRM_BACKGROUND].getHeight(),
-	                               256,
-	                               WINDOW_MODAL | WINDOW_DONT_MOVE_TOP);
+								   skilldexWindowY,
+								   _skilldexFrmImages[SKILLDEX_FRM_BACKGROUND].getWidth(),
+								   _skilldexFrmImages[SKILLDEX_FRM_BACKGROUND].getHeight(),
+								   256,
+								   WINDOW_MODAL | WINDOW_DONT_MOVE_TOP);
 	if (gSkilldexWindow == -1) {
 		for (int index = 0; index < SKILLDEX_SKILL_BUTTON_BUFFER_COUNT; index++) {
 			internal_free(gSkilldexButtonsData[index]);
@@ -249,18 +249,18 @@ static int skilldexWindowInit() {
 
 	gSkilldexWindowBuffer = windowGetBuffer(gSkilldexWindow);
 	memcpy(gSkilldexWindowBuffer,
-	       _skilldexFrmImages[SKILLDEX_FRM_BACKGROUND].getData(),
-	       _skilldexFrmImages[SKILLDEX_FRM_BACKGROUND].getWidth() * _skilldexFrmImages[SKILLDEX_FRM_BACKGROUND].getHeight());
+		   _skilldexFrmImages[SKILLDEX_FRM_BACKGROUND].getData(),
+		   _skilldexFrmImages[SKILLDEX_FRM_BACKGROUND].getWidth() * _skilldexFrmImages[SKILLDEX_FRM_BACKGROUND].getHeight());
 
 	fontSetCurrent(103);
 
 	// Render "SKILLDEX" title.
-	char* title = getmsg(&gSkilldexMessageList, &gSkilldexMessageListItem, 100);
+	char *title = getmsg(&gSkilldexMessageList, &gSkilldexMessageListItem, 100);
 	fontDrawText(gSkilldexWindowBuffer + 14 * _skilldexFrmImages[SKILLDEX_FRM_BACKGROUND].getWidth() + 55,
-	             title,
-	             _skilldexFrmImages[SKILLDEX_FRM_BACKGROUND].getWidth(),
-	             _skilldexFrmImages[SKILLDEX_FRM_BACKGROUND].getWidth(),
-	             _colorTable[18979]);
+				 title,
+				 _skilldexFrmImages[SKILLDEX_FRM_BACKGROUND].getWidth(),
+				 _skilldexFrmImages[SKILLDEX_FRM_BACKGROUND].getWidth(),
+				 _colorTable[18979]);
 
 	// Render skill values.
 	int valueY = 48;
@@ -276,7 +276,7 @@ static int skilldexWindowInit() {
 		// because -5 is also a legitimate skill value.
 		//
 		// TODO: Provide other error code in `skillGetValue`.
-		unsigned char* numbersFrmData = _skilldexFrmImages[SKILLDEX_FRM_BIG_NUMBERS].getData();
+		unsigned char *numbersFrmData = _skilldexFrmImages[SKILLDEX_FRM_BIG_NUMBERS].getData();
 		if (value < 0) {
 			// First half of the bignum.frm is white, second half is red.
 			numbersFrmData += _skilldexFrmImages[SKILLDEX_FRM_BIG_NUMBERS].getWidth() / 2;
@@ -285,27 +285,27 @@ static int skilldexWindowInit() {
 
 		int hundreds = value / 100;
 		blitBufferToBuffer(numbersFrmData + 14 * hundreds,
-		                   14,
-		                   24,
-		                   336,
-		                   gSkilldexWindowBuffer + _skilldexFrmImages[SKILLDEX_FRM_BACKGROUND].getWidth() * valueY + 110,
-		                   _skilldexFrmImages[SKILLDEX_FRM_BACKGROUND].getWidth());
+						   14,
+						   24,
+						   336,
+						   gSkilldexWindowBuffer + _skilldexFrmImages[SKILLDEX_FRM_BACKGROUND].getWidth() * valueY + 110,
+						   _skilldexFrmImages[SKILLDEX_FRM_BACKGROUND].getWidth());
 
 		int tens = (value % 100) / 10;
 		blitBufferToBuffer(numbersFrmData + 14 * tens,
-		                   14,
-		                   24,
-		                   336,
-		                   gSkilldexWindowBuffer + _skilldexFrmImages[SKILLDEX_FRM_BACKGROUND].getWidth() * valueY + 124,
-		                   _skilldexFrmImages[SKILLDEX_FRM_BACKGROUND].getWidth());
+						   14,
+						   24,
+						   336,
+						   gSkilldexWindowBuffer + _skilldexFrmImages[SKILLDEX_FRM_BACKGROUND].getWidth() * valueY + 124,
+						   _skilldexFrmImages[SKILLDEX_FRM_BACKGROUND].getWidth());
 
 		int ones = (value % 100) % 10;
 		blitBufferToBuffer(numbersFrmData + 14 * ones,
-		                   14,
-		                   24,
-		                   336,
-		                   gSkilldexWindowBuffer + _skilldexFrmImages[SKILLDEX_FRM_BACKGROUND].getWidth() * valueY + 138,
-		                   _skilldexFrmImages[SKILLDEX_FRM_BACKGROUND].getWidth());
+						   14,
+						   24,
+						   336,
+						   gSkilldexWindowBuffer + _skilldexFrmImages[SKILLDEX_FRM_BACKGROUND].getWidth() * valueY + 138,
+						   _skilldexFrmImages[SKILLDEX_FRM_BACKGROUND].getWidth());
 
 		valueY += 36;
 	}
@@ -317,7 +317,7 @@ static int skilldexWindowInit() {
 	int nameY = ((_skilldexFrmImages[SKILLDEX_FRM_BUTTON_OFF].getHeight() - lineHeight) / 2) + 1;
 	for (int index = 0; index < SKILLDEX_SKILL_COUNT; index++) {
 		char name[MESSAGE_LIST_ITEM_FIELD_MAX_SIZE];
-		strcpy(name, getmsg(&gSkilldexMessageList, &gSkilldexMessageListItem, 102 + index));
+		strncpy(name, getmsg(&gSkilldexMessageList, &gSkilldexMessageListItem, 102 + index), MESSAGE_LIST_ITEM_FIELD_MAX_SIZE - 1);
 
 		int nameX = ((_skilldexFrmImages[SKILLDEX_FRM_BUTTON_OFF].getWidth() - fontGetStringWidth(name)) / 2) + 1;
 		if (nameX < 0) {
@@ -325,60 +325,60 @@ static int skilldexWindowInit() {
 		}
 
 		fontDrawText(gSkilldexButtonsData[index * 2] + _skilldexFrmImages[SKILLDEX_FRM_BUTTON_ON].getWidth() * nameY + nameX,
-		             name,
-		             _skilldexFrmImages[SKILLDEX_FRM_BUTTON_ON].getWidth(),
-		             _skilldexFrmImages[SKILLDEX_FRM_BUTTON_ON].getWidth(),
-		             _colorTable[18979]);
+					 name,
+					 _skilldexFrmImages[SKILLDEX_FRM_BUTTON_ON].getWidth(),
+					 _skilldexFrmImages[SKILLDEX_FRM_BUTTON_ON].getWidth(),
+					 _colorTable[18979]);
 
 		fontDrawText(gSkilldexButtonsData[index * 2 + 1] + _skilldexFrmImages[SKILLDEX_FRM_BUTTON_OFF].getWidth() * nameY + nameX,
-		             name,
-		             _skilldexFrmImages[SKILLDEX_FRM_BUTTON_OFF].getWidth(),
-		             _skilldexFrmImages[SKILLDEX_FRM_BUTTON_OFF].getWidth(),
-		             _colorTable[14723]);
+					 name,
+					 _skilldexFrmImages[SKILLDEX_FRM_BUTTON_OFF].getWidth(),
+					 _skilldexFrmImages[SKILLDEX_FRM_BUTTON_OFF].getWidth(),
+					 _colorTable[14723]);
 
 		int btn = buttonCreate(gSkilldexWindow,
-		                       15,
-		                       buttonY,
-		                       _skilldexFrmImages[SKILLDEX_FRM_BUTTON_OFF].getWidth(),
-		                       _skilldexFrmImages[SKILLDEX_FRM_BUTTON_OFF].getHeight(),
-		                       -1,
-		                       -1,
-		                       -1,
-		                       501 + index,
-		                       gSkilldexButtonsData[index * 2],
-		                       gSkilldexButtonsData[index * 2 + 1],
-		                       NULL,
-		                       BUTTON_FLAG_TRANSPARENT);
+							   15,
+							   buttonY,
+							   _skilldexFrmImages[SKILLDEX_FRM_BUTTON_OFF].getWidth(),
+							   _skilldexFrmImages[SKILLDEX_FRM_BUTTON_OFF].getHeight(),
+							   -1,
+							   -1,
+							   -1,
+							   501 + index,
+							   gSkilldexButtonsData[index * 2],
+							   gSkilldexButtonsData[index * 2 + 1],
+							   NULL,
+							   BUTTON_FLAG_TRANSPARENT);
 		if (btn != -1) {
-			buttonSetCallbacks(btn, _gsound_lrg_butt_press, _gsound_lrg_butt_release);
+//			buttonSetCallbacks(btn, _gsound_lrg_butt_press, _gsound_lrg_butt_release); TODO audio
 		}
 
 		buttonY += 36;
 	}
 
 	// Render "CANCEL" button.
-	char* cancel = getmsg(&gSkilldexMessageList, &gSkilldexMessageListItem, 101);
+	char *cancel = getmsg(&gSkilldexMessageList, &gSkilldexMessageListItem, 101);
 	fontDrawText(gSkilldexWindowBuffer + _skilldexFrmImages[SKILLDEX_FRM_BACKGROUND].getWidth() * 337 + 72,
-	             cancel,
-	             _skilldexFrmImages[SKILLDEX_FRM_BACKGROUND].getWidth(),
-	             _skilldexFrmImages[SKILLDEX_FRM_BACKGROUND].getWidth(),
-	             _colorTable[18979]);
+				 cancel,
+				 _skilldexFrmImages[SKILLDEX_FRM_BACKGROUND].getWidth(),
+				 _skilldexFrmImages[SKILLDEX_FRM_BACKGROUND].getWidth(),
+				 _colorTable[18979]);
 
 	int cancelBtn = buttonCreate(gSkilldexWindow,
-	                             48,
-	                             338,
-	                             _skilldexFrmImages[SKILLDEX_FRM_LITTLE_RED_BUTTON_UP].getWidth(),
-	                             _skilldexFrmImages[SKILLDEX_FRM_LITTLE_RED_BUTTON_UP].getHeight(),
-	                             -1,
-	                             -1,
-	                             -1,
-	                             500,
-	                             _skilldexFrmImages[SKILLDEX_FRM_LITTLE_RED_BUTTON_UP].getData(),
-	                             _skilldexFrmImages[SKILLDEX_FRM_LITTLE_RED_BUTTON_DOWN].getData(),
-	                             NULL,
-	                             BUTTON_FLAG_TRANSPARENT);
+								 48,
+								 338,
+								 _skilldexFrmImages[SKILLDEX_FRM_LITTLE_RED_BUTTON_UP].getWidth(),
+								 _skilldexFrmImages[SKILLDEX_FRM_LITTLE_RED_BUTTON_UP].getHeight(),
+								 -1,
+								 -1,
+								 -1,
+								 500,
+								 _skilldexFrmImages[SKILLDEX_FRM_LITTLE_RED_BUTTON_UP].getData(),
+								 _skilldexFrmImages[SKILLDEX_FRM_LITTLE_RED_BUTTON_DOWN].getData(),
+								 NULL,
+								 BUTTON_FLAG_TRANSPARENT);
 	if (cancelBtn != -1) {
-		buttonSetCallbacks(cancelBtn, _gsound_red_butt_press, _gsound_red_butt_release);
+//		buttonSetCallbacks(cancelBtn, _gsound_red_butt_press, _gsound_red_butt_release); TODO audio
 	}
 
 	windowRefresh(gSkilldexWindow);
@@ -411,4 +411,4 @@ static void skilldexWindowFree() {
 	gameMouseSetCursor(MOUSE_CURSOR_ARROW);
 }
 
-} // namespace fallout
+} // namespace Fallout2
