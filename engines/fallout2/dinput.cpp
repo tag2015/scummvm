@@ -123,7 +123,7 @@ bool mouseDeviceGetData(MouseData *mouseState) {
 	lastMousePosX = mousePos.x;
 	lastMousePosY = mousePos.y;
 	mouseState->buttons[0] = g_engine->getEventManager()->getButtonState() & 1;
-	mouseState->buttons[1] = g_engine->getEventManager()->getButtonState() & 2;
+	mouseState->buttons[1] = (g_engine->getEventManager()->getButtonState() & 2) >> 1;
 
 	mouseState->wheelX = gMouseWheelDeltaX;
 	mouseState->wheelY = gMouseWheelDeltaY;
