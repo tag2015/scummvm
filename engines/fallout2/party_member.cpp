@@ -1535,7 +1535,7 @@ int _partyMemberIncLevels() {
 
 // 0x495EA8
 static int _partyMemberCopyLevelInfo(Object *critter, int a2) {
-	if (critter == NULL) {  // TODO inventory item
+	if (critter == NULL) {
 		return -1;
 	}
 
@@ -1553,7 +1553,7 @@ static int _partyMemberCopyLevelInfo(Object *critter, int a2) {
 		return -1;
 	}
 
-/*	Object *item2 = critterGetItem2(critter);
+	Object *item2 = critterGetItem2(critter);
 	_invenUnwieldFunc(critter, 1, 0);
 
 	Object *armor = critterGetArmor(critter);
@@ -1587,7 +1587,7 @@ static int _partyMemberCopyLevelInfo(Object *critter, int a2) {
 		// incorrect item slot after leveling up.
 		_invenWieldFunc(critter, item2, 1, false);
 	}
-*/
+
 	return 0;
 }
 

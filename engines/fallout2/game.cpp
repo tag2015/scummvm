@@ -28,7 +28,7 @@
 // #include "game_sound.h"
 #include "fallout2/input.h"
 #include "fallout2/interface.h"
-// #include "inventory.h"
+#include "fallout2/inventory.h"
 #include "fallout2/item.h"
 // #include "kb.h"
 // #include "loadsave.h"
@@ -1012,7 +1012,7 @@ int gameSetGlobalVar(int var, int value) {
 
 // 0x443CE8
 int globalVarsRead(const char *path, const char *section, int *variablesListLengthPtr, int **variablesListPtr) {
-	//	_inven_reset_dude();  TODO inventory.cpp
+	_inven_reset_dude();
 
 	File *stream = fileOpen(path, "rt");
 	if (stream == NULL) {

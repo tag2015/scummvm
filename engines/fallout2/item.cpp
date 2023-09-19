@@ -392,7 +392,7 @@ int itemAdd(Object *owner, Object *itemToAdd, int quantity) {
 
 // 0x477490
 int itemRemove(Object *owner, Object *itemToRemove, int quantity) {
-/*	Inventory *inventory = &(owner->data.inventory);  TODO inventory.cpp
+	Inventory *inventory = &(owner->data.inventory);
 	Object *item1 = critterGetItem1(owner);
 	Object *item2 = critterGetItem2(owner);
 
@@ -449,7 +449,7 @@ int itemRemove(Object *owner, Object *itemToRemove, int quantity) {
 
 	itemToRemove->owner = NULL;
 	itemToRemove->flags &= ~OBJECT_EQUIPPED;
-*/
+
 	return 0;
 }
 
@@ -585,7 +585,7 @@ int itemDropAll(Object *critter, int tile) {
 					}
 
 					frmId = proto->fid & 0xFFF;
-//					_adjust_ac(critter, item, NULL);  TODO inventory
+					_adjust_ac(critter, item, NULL);
 				}
 			}
 
@@ -870,7 +870,7 @@ int objectGetCost(Object *obj) {
 		}
 	}
 
-/*	if (FID_TYPE(obj->fid) == OBJ_TYPE_CRITTER) { TODO inventory
+	if (FID_TYPE(obj->fid) == OBJ_TYPE_CRITTER) {
 		Object *item2 = critterGetItem2(obj);
 		if (item2 != NULL && (item2->flags & OBJECT_IN_RIGHT_HAND) == 0) {
 			cost += itemGetCost(item2);
@@ -885,7 +885,7 @@ int objectGetCost(Object *obj) {
 		if (armor != NULL && (armor->flags & OBJECT_WORN) == 0) {
 			cost += itemGetCost(armor);
 		}
-	}*/
+	}
 
 	return cost;
 }
@@ -899,7 +899,7 @@ int objectGetInventoryWeight(Object *obj) {
 	}
 
 	int weight = 0;
-/* TODO inventory
+
 	Inventory *inventory = &(obj->data.inventory);
 	for (int index = 0; index < inventory->length; index++) {
 		InventoryItem *inventoryItem = &(inventory->items[index]);
@@ -929,7 +929,7 @@ int objectGetInventoryWeight(Object *obj) {
 			}
 		}
 	}
-*/
+
 	return weight;
 }
 
@@ -977,11 +977,11 @@ Object *critterGetWeaponForHitMode(Object *critter, int hitMode) {
 	case HIT_MODE_LEFT_WEAPON_PRIMARY:
 	case HIT_MODE_LEFT_WEAPON_SECONDARY:
 	case HIT_MODE_LEFT_WEAPON_RELOAD:
-{};//		return critterGetItem1(critter); TODO inventory
+		return critterGetItem1(critter);
 	case HIT_MODE_RIGHT_WEAPON_PRIMARY:
 	case HIT_MODE_RIGHT_WEAPON_SECONDARY:
 	case HIT_MODE_RIGHT_WEAPON_RELOAD:
-{};//		return critterGetItem2(critter);
+		return critterGetItem2(critter);
 	}
 
 	return NULL;
@@ -1401,7 +1401,7 @@ int weaponAttemptReload(Object *critter, Object *weapon) {
 	if (weapon->pid != PROTO_ID_SOLAR_SCORCHER) {
 		int inventoryItemIndex = -1;
 		for (;;) {
-			Object *ammo = NULL; // _inven_find_type(critter, ITEM_TYPE_AMMO, &inventoryItemIndex);  TODO inventory
+			Object *ammo = _inven_find_type(critter, ITEM_TYPE_AMMO, &inventoryItemIndex);
 			if (ammo == NULL) {
 				break;
 			}
@@ -1424,7 +1424,7 @@ int weaponAttemptReload(Object *critter, Object *weapon) {
 
 		inventoryItemIndex = -1;
 		for (;;) {
-			Object *ammo = NULL; //_inven_find_type(critter, ITEM_TYPE_AMMO, &inventoryItemIndex); TODO inventory
+			Object *ammo = _inven_find_type(critter, ITEM_TYPE_AMMO, &inventoryItemIndex);
 			if (ammo == NULL) {
 				break;
 			}
@@ -2376,7 +2376,7 @@ static int stealthBoyTurnOn(Object *object) {
 
 // 0x479998
 static int stealthBoyTurnOff(Object *critter, Object *item) {
-/* TODO inventory
+
 	Object *item1 = critterGetItem1(critter);
 	if (item1 != NULL && item1 != item && item1->pid == PROTO_ID_STEALTH_BOY_II) {
 		return -1;
@@ -2396,7 +2396,7 @@ static int stealthBoyTurnOff(Object *critter, Object *item) {
 	Rect rect;
 	objectGetRect(critter, &rect);
 	tileWindowRefreshRect(&rect, critter->elevation);
-*/
+
 	return 0;
 }
 
