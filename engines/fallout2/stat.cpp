@@ -271,7 +271,7 @@ int critterGetStat(Object *critter, int stat) {
 						value++;
 					}
 
-/*					bool hasMirrorShades = false;  TODO inventory.cpp
+					bool hasMirrorShades = false;
 
 					Object *item2 = critterGetItem2(critter);
 					if (item2 != NULL && item2->pid == PROTO_ID_MIRRORED_SHADES) {
@@ -285,7 +285,7 @@ int critterGetStat(Object *critter, int stat) {
 
 					if (hasMirrorShades) {
 						value++;
-					}*/
+					}
 				}
 				break;
 			case STAT_INTELLIGENCE:

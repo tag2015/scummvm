@@ -127,7 +127,7 @@ int queueLoad(File *stream) {
 		} else {
 			obj = objectFindFirst();
 			while (obj != NULL) {
-				obj = NULL; // _inven_find_id(obj, objectId);  TODO inventory.cpp
+				obj = _inven_find_id(obj, objectId);
 				if (obj != NULL) {
 					break;
 				}

@@ -294,10 +294,10 @@ int _obj_examine_func(Object *critter, Object *target, void (*fn)(char *string))
 				hpMessageListItem.num = 535 + critterGetStat(target, STAT_GENDER);
 			}
 
-			Object *item2 = NULL; /* critterGetItem2(target); TODO inventory
+			Object *item2 = critterGetItem2(target);
 			if (item2 != NULL && itemGetType(item2) != ITEM_TYPE_WEAPON) {
 				item2 = NULL;
-			}*/
+			}
 
 			if (!messageListGetItem(&gProtoMessageList, &hpMessageListItem)) {
 				debugPrint("\nError: Can't find msg num!");
@@ -609,7 +609,7 @@ int _obj_pickup(Object *critter, Object *item) {
 
 // 0x49B73C
 static int _obj_remove_from_inven(Object *critter, Object *item) {
-/*	Rect updatedRect; TODO inventory
+	Rect updatedRect;
 	int fid;
 	int v11 = 0;
 	if (critterGetItem2(critter) == item) {
@@ -652,8 +652,7 @@ static int _obj_remove_from_inven(Object *critter, Object *item) {
 	if (v11 <= 2 && critter == gDude) {
 		interfaceUpdateItems(false, INTERFACE_ITEM_ACTION_DEFAULT, INTERFACE_ITEM_ACTION_DEFAULT);
 	}
-	return rc; */
-	return 0;
+	return rc;
 }
 
 // 0x49B8B0
@@ -866,7 +865,7 @@ static int _obj_use_explosive(Object *explosive) {
 			displayMonitorAddMessage(messageListItem.text);
 		}
 	} else {
-/*		int seconds = _inven_set_timer(explosive);  TODO inventory
+		int seconds = _inven_set_timer(explosive);
 		if (seconds != -1) {
 			// You set the timer.
 			messageListItem.num = 589;
@@ -902,7 +901,7 @@ static int _obj_use_explosive(Object *explosive) {
 			}
 
 			queueAddEvent(delay, explosive, NULL, eventType);
-		} */
+		}
 	}
 
 	return 2;

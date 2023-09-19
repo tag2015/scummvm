@@ -1158,7 +1158,7 @@ void _gmouse_handle_event(int mouseX, int mouseY, int mouseState) {
 
 					switch (actionMenuItems[actionIndex]) {
 					case GAME_MOUSE_ACTION_MENU_ITEM_INVENTORY:
-//						inventoryOpenUseItemOn(v16); TODO inventory
+						inventoryOpenUseItemOn(v16);
 						break;
 					case GAME_MOUSE_ACTION_MENU_ITEM_LOOK:
 						if (_obj_examine(gDude, v16) == -1) {

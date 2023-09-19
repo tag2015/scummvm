@@ -412,7 +412,7 @@ int critterAdjustRadiation(Object *obj, int amount) {
 		proto->critter.data.flags |= CRITTER_RADIATED;
 	}
 
-/*	if (amount > 0) { TODO inventory.cpp
+	if (amount > 0) {
 		Object *geigerCounter = NULL;
 
 		Object *item1 = critterGetItem1(gDude);
@@ -444,7 +444,7 @@ int critterAdjustRadiation(Object *obj, int amount) {
 				}
 			}
 		}
-	}*/
+	}
 
 	if (amount >= 10) {
 		// You have received a large dose of radiation.

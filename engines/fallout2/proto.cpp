@@ -813,7 +813,7 @@ int _proto_dude_update_gender() {
 
 	_art_vault_guy_num = frmId;
 
-/*	if (critterGetArmor(gDude) == NULL) {  // TODO inventory.cpp
+	if (critterGetArmor(gDude) == NULL) {
 		int v1 = 0;
 		if (critterGetItem2(gDude) != NULL || critterGetItem1(gDude) != NULL) {
 			v1 = (gDude->fid & 0xF000) >> 12;
@@ -821,7 +821,7 @@ int _proto_dude_update_gender() {
 
 		int fid = buildFid(OBJ_TYPE_CRITTER, _art_vault_guy_num, 0, v1, 0);
 		objectSetFid(gDude, fid, NULL);
-	}*/
+	}
 
 	proto->fid = buildFid(OBJ_TYPE_CRITTER, _art_vault_guy_num, 0, 0, 0);
 
@@ -862,7 +862,7 @@ int _proto_dude_init(const char *path) {
 	proto->critter.data.damageType = 0;
 
 	_proto_dude_update_gender();
-	// _inven_reset_dude();  TODO inventory.cpp
+	_inven_reset_dude();
 
 	if ((gDude->flags & OBJECT_FLAT) != 0) {
 		_obj_toggle_flat(gDude, NULL);
