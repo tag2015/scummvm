@@ -649,7 +649,7 @@ int gameHandleKey(int eventCode, bool isInCombatMode) {
 
 			// NOTE: There is an `inc` for this value to build jump table which
 			// is not needed.
-			int rc = 0; //skilldexOpen(); TODO skilldex
+			int rc = skilldexOpen();
 
 			// Remap Skilldex result code to action.
 			switch (rc) {

@@ -65,6 +65,7 @@ MODULE_OBJS = \
 	settings.o \
 	sfall_config.o \
 	skill.o \
+	skilldex.o \
 	stat.o \
 	string_parsers.o \
 	svga.o \
