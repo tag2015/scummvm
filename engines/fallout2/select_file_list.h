@@ -1,12 +1,12 @@
-#ifndef SELECT_FILE_LIST_H
-#define SELECT_FILE_LIST_H
+#ifndef FALLOUT2_SELECT_FILE_LIST_H
+#define FALLOUT2_SELECT_FILE_LIST_H
 
-namespace fallout {
+namespace Fallout2 {
 
-int _compare(const void* a1, const void* a2);
-char** _getFileList(const char* pattern, int* fileNameListLengthPtr);
-void _freeFileList(char** fileList);
+int _compare(const void *a1, const void *a2);
+char **_getFileList(const char *pattern, int *fileNameListLengthPtr);
+void _freeFileList(char **fileList);
 
-} // namespace fallout
+} // namespace Fallout2
 
-#endif /* SELECT_FILE_LIST_H */
+#endif
