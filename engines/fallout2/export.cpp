@@ -252,7 +252,7 @@ void _removeProgramReferences(Program *program) {
 
 // 0x44152C
 void _initExport() {
-//	intLibRegisterProgramDeleteCallback(_removeProgramReferences); TODO interpreter_lib
+	intLibRegisterProgramDeleteCallback(_removeProgramReferences);
 }
 
 // 0x441538

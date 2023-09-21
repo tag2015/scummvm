@@ -1263,7 +1263,7 @@ void _initWindow(int resolution, int a2) {
 	int rc;
 	int i, j;
 
-//	intLibRegisterProgramDeleteCallback(_removeProgramReferences_3);  TODO interpreter_lib
+	intLibRegisterProgramDeleteCallback(_removeProgramReferences_3);
 
 	_currentTextColorR = 0;
 	_currentTextColorG = 0;
