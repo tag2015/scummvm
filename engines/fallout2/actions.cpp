@@ -770,8 +770,8 @@ int _action_ranged(Attack *attack, int anim) {
 					objectSetLight(projectile, 9, projectile->lightIntensity, NULL);
 				}
 
-				int projectileOrigin = _combat_bullet_start(attack->attacker, attack->defender);
-				objectSetLocation(projectile, projectileOrigin, attack->attacker->elevation, NULL);
+				int projectileOrigin = 0; // _combat_bullet_start(attack->attacker, attack->defender); TODO combat
+//				objectSetLocation(projectile, projectileOrigin, attack->attacker->elevation, NULL);
 
 				int projectileRotation = tileGetRotationTo(attack->attacker->tile, attack->defender->tile);
 				objectSetRotation(projectile, projectileRotation, NULL);
@@ -1609,7 +1609,7 @@ int actionExplode(int tile, int elevation, int minDamage, int maxDamage, Object 
 		attack->defenderDamage = _compute_explosion_damage(minDamage, maxDamage, critter, &(attack->defenderKnockback));
 	}
 
-	_compute_explosion_on_extras(attack, 0, 0, 1);
+//	_compute_explosion_on_extras(attack, 0, 0, 1); TODO combat
 
 	for (int index = 0; index < attack->extrasLength; index++) {
 		Object *critter = attack->extras[index];
@@ -1620,7 +1620,7 @@ int actionExplode(int tile, int elevation, int minDamage, int maxDamage, Object 
 		attack->extrasDamage[index] = _compute_explosion_damage(minDamage, maxDamage, critter, &(attack->extrasKnockback[index]));
 	}
 
-	attackComputeDeathFlags(attack);
+//	attackComputeDeathFlags(attack); TODO combat
 
 	if (a6) {
 		_action_in_explode = true;
@@ -1637,8 +1637,8 @@ int actionExplode(int tile, int elevation, int minDamage, int maxDamage, Object 
 			animationRegisterAnimateAndHide(adjacentExplosions[rotation], ANIM_STAND, 0);
 		}
 
-		animationRegisterCallbackForced(explosion, 0, (AnimationCallback *)_combat_explode_scenery, -1);
-		animationRegisterHideObjectForced(explosion);
+//		animationRegisterCallbackForced(explosion, 0, (AnimationCallback *)_combat_explode_scenery, -1); TODO combat
+//		animationRegisterHideObjectForced(explosion);
 
 		for (int rotation = 0; rotation < ROTATION_COUNT; rotation++) {
 			animationRegisterHideObjectForced(adjacentExplosions[rotation]);
@@ -1677,7 +1677,7 @@ int actionExplode(int tile, int elevation, int minDamage, int maxDamage, Object 
 
 		_report_explosion(attack, a5);
 
-		_combat_explode_scenery(explosion, NULL);
+//		_combat_explode_scenery(explosion, NULL); TODO combat
 
 		objectDestroy(explosion, NULL);
 
