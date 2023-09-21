@@ -3,7 +3,7 @@
 // #include <stdio.h>
 // #include <string.h>
 
-// #include "actions.h"
+#include "fallout2/actions.h"
 #include "fallout2/animation.h"
 #include "fallout2/art.h"
 // #include "automap.h"
@@ -657,7 +657,7 @@ int gameHandleKey(int eventCode, bool isInCombatMode) {
 				debugPrint("\n ** Error calling skilldex_select()! ** \n");
 				break;
 			case SKILLDEX_RC_SNEAK:
-//				_action_skill_use(SKILL_SNEAK); TODO action
+				_action_skill_use(SKILL_SNEAK);
 				break;
 			case SKILLDEX_RC_LOCKPICK:
 				mode = GAME_MOUSE_MODE_USE_LOCKPICK;
@@ -724,7 +724,7 @@ int gameHandleKey(int eventCode, bool isInCombatMode) {
 		if (interfaceBarEnabled()) {
 //			soundPlayFile("ib1p1xx1"); TODO audio
 			gameMouseSetCursor(MOUSE_CURSOR_USE_CROSSHAIR);
-//			_action_skill_use(SKILL_SNEAK);  TODO actions
+			_action_skill_use(SKILL_SNEAK);
 		}
 		break;
 	case KEY_2:
@@ -732,7 +732,7 @@ int gameHandleKey(int eventCode, bool isInCombatMode) {
 		if (interfaceBarEnabled()) {
 //			soundPlayFile("ib1p1xx1");
 			gameMouseSetCursor(MOUSE_CURSOR_USE_CROSSHAIR);
-//			gameMouseSetMode(GAME_MOUSE_MODE_USE_LOCKPICK);
+			gameMouseSetMode(GAME_MOUSE_MODE_USE_LOCKPICK);
 		}
 		break;
 	case KEY_3:
@@ -740,7 +740,7 @@ int gameHandleKey(int eventCode, bool isInCombatMode) {
 		if (interfaceBarEnabled()) {
 //			soundPlayFile("ib1p1xx1");
 			gameMouseSetCursor(MOUSE_CURSOR_USE_CROSSHAIR);
-//			gameMouseSetMode(GAME_MOUSE_MODE_USE_STEAL);
+			gameMouseSetMode(GAME_MOUSE_MODE_USE_STEAL);
 		}
 		break;
 	case KEY_4:
@@ -748,7 +748,7 @@ int gameHandleKey(int eventCode, bool isInCombatMode) {
 		if (interfaceBarEnabled()) {
 //			soundPlayFile("ib1p1xx1");
 			gameMouseSetCursor(MOUSE_CURSOR_USE_CROSSHAIR);
-//			gameMouseSetMode(GAME_MOUSE_MODE_USE_TRAPS);
+			gameMouseSetMode(GAME_MOUSE_MODE_USE_TRAPS);
 		}
 		break;
 	case KEY_5:
@@ -756,7 +756,7 @@ int gameHandleKey(int eventCode, bool isInCombatMode) {
 		if (interfaceBarEnabled()) {
 //			soundPlayFile("ib1p1xx1");
 			gameMouseSetCursor(MOUSE_CURSOR_USE_CROSSHAIR);
-//			gameMouseSetMode(GAME_MOUSE_MODE_USE_FIRST_AID);
+			gameMouseSetMode(GAME_MOUSE_MODE_USE_FIRST_AID);
 		}
 		break;
 	case KEY_6:
@@ -764,7 +764,7 @@ int gameHandleKey(int eventCode, bool isInCombatMode) {
 		if (interfaceBarEnabled()) {
 //			soundPlayFile("ib1p1xx1");
 			gameMouseSetCursor(MOUSE_CURSOR_USE_CROSSHAIR);
-//			gameMouseSetMode(GAME_MOUSE_MODE_USE_DOCTOR);
+			gameMouseSetMode(GAME_MOUSE_MODE_USE_DOCTOR);
 		}
 		break;
 	case KEY_7:
@@ -772,7 +772,7 @@ int gameHandleKey(int eventCode, bool isInCombatMode) {
 		if (interfaceBarEnabled()) {
 //			soundPlayFile("ib1p1xx1");
 			gameMouseSetCursor(MOUSE_CURSOR_USE_CROSSHAIR);
-//			gameMouseSetMode(GAME_MOUSE_MODE_USE_SCIENCE);
+			gameMouseSetMode(GAME_MOUSE_MODE_USE_SCIENCE);
 		}
 		break;
 	case KEY_8:
@@ -780,7 +780,7 @@ int gameHandleKey(int eventCode, bool isInCombatMode) {
 		if (interfaceBarEnabled()) {
 //			soundPlayFile("ib1p1xx1");
 			gameMouseSetCursor(MOUSE_CURSOR_USE_CROSSHAIR);
-//			gameMouseSetMode(GAME_MOUSE_MODE_USE_REPAIR);
+			gameMouseSetMode(GAME_MOUSE_MODE_USE_REPAIR);
 		}
 		break;
 	case KEY_MINUS:
