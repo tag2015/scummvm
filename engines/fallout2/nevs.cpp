@@ -85,7 +85,7 @@ static void _nevs_removeprogramreferences(Program *program) {
 // nevs_initonce
 // 0x488418
 void _nevs_initonce() {
-	//	intLibRegisterProgramDeleteCallback(_nevs_removeprogramreferences); TODO interpreter_lib
+	intLibRegisterProgramDeleteCallback(_nevs_removeprogramreferences);
 
 	if (gNevs == NULL) {
 		gNevs = (Nevs *)internal_calloc_safe(sizeof(Nevs), NEVS_COUNT, __FILE__, __LINE__); // "..\\int\\NEVS.C", 131
