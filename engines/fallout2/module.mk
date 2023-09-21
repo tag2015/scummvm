@@ -4,6 +4,7 @@ MODULE_OBJS = \
 	fallout2.o \
 	console.o \
 	metaengine.o \
+	actions.o \
 	art.o \
 	animation.o \
 	cache.o \
