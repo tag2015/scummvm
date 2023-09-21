@@ -36,6 +36,8 @@ MODULE_OBJS = \
 	input.o \
 	interface.o \
 	interpreter.o \
+	interpreter_extra.o \
+	interpreter_lib.o \
 	inventory.o \
 	item.o \
 	light.o \
@@ -63,6 +65,7 @@ MODULE_OBJS = \
 	reaction.o \
 	region.o \
 	scripts.o \
+	select_file_list.o \
 	settings.o \
 	sfall_config.o \
 	skill.o \
