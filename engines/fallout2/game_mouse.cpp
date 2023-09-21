@@ -941,7 +941,7 @@ void _gmouse_handle_event(int mouseX, int mouseY, int mouseState) {
 			if (v5 != NULL) {
 				switch (FID_TYPE(v5->fid)) {
 				case OBJ_TYPE_ITEM:
-//					actionPickUp(gDude, v5); TODO actions
+					actionPickUp(gDude, v5);
 					break;
 				case OBJ_TYPE_CRITTER:
 					if (v5 == gDude) {
@@ -958,16 +958,16 @@ void _gmouse_handle_event(int mouseX, int mouseY, int mouseState) {
 									_obj_look_at(gDude, v5);
 								}
 							} else {
-//								actionTalk(gDude, v5); TODO actions
+								actionTalk(gDude, v5);
 							}
 						} else {
-//							_action_loot_container(gDude, v5); TODO actions
+							_action_loot_container(gDude, v5);
 						}
 					}
 					break;
 				case OBJ_TYPE_SCENERY:
 					if (_obj_action_can_use(v5)) {
-//						_action_use_an_object(gDude, v5); TODO actions
+						_action_use_an_object(gDude, v5);
 					} else {
 						if (_obj_examine(gDude, v5) == -1) {
 							_obj_look_at(gDude, v5);
@@ -1015,7 +1015,7 @@ void _gmouse_handle_event(int mouseX, int mouseY, int mouseState) {
 
 						int actionPointsRequired = itemGetActionPointCost(gDude, hitMode, false);
 						if (actionPointsRequired <= gDude->data.critter.combat.ap) {
-							/*if (_action_use_an_item_on_object(gDude, object, weapon) != -1) { TODO action
+							if (_action_use_an_item_on_object(gDude, object, weapon) != -1) {
 								int actionPoints = gDude->data.critter.combat.ap;
 								if (actionPointsRequired > actionPoints) {
 									gDude->data.critter.combat.ap = 0;
@@ -1023,10 +1023,10 @@ void _gmouse_handle_event(int mouseX, int mouseY, int mouseState) {
 									gDude->data.critter.combat.ap -= actionPointsRequired;
 								}
 								interfaceRenderActionPoints(gDude->data.critter.combat.ap, _combat_free_move);
-							}*/
+							}
 						}
 					} else {
-//						_action_use_an_item_on_object(gDude, object, weapon);  TODO action
+						_action_use_an_item_on_object(gDude, object, weapon);
 					}
 				}
 			}
@@ -1037,7 +1037,7 @@ void _gmouse_handle_event(int mouseX, int mouseY, int mouseState) {
 
 		if (gGameMouseMode == GAME_MOUSE_MODE_USE_FIRST_AID || gGameMouseMode == GAME_MOUSE_MODE_USE_DOCTOR || gGameMouseMode == GAME_MOUSE_MODE_USE_LOCKPICK || gGameMouseMode == GAME_MOUSE_MODE_USE_STEAL || gGameMouseMode == GAME_MOUSE_MODE_USE_TRAPS || gGameMouseMode == GAME_MOUSE_MODE_USE_SCIENCE || gGameMouseMode == GAME_MOUSE_MODE_USE_REPAIR) {
 			Object *object = gameMouseGetObjectUnderCursor(-1, 1, gElevation);
-			if (object == NULL /*|| actionUseSkill(gDude, object, gGameMouseModeSkills[gGameMouseMode - FIRST_GAME_MOUSE_MODE_SKILL]) != -1*/) {  // TODO actions
+			if (object == NULL || actionUseSkill(gDude, object, gGameMouseModeSkills[gGameMouseMode - FIRST_GAME_MOUSE_MODE_SKILL]) != -1) {
 				gameMouseSetCursor(MOUSE_CURSOR_NONE);
 				gameMouseSetMode(GAME_MOUSE_MODE_MOVE);
 			}
@@ -1074,9 +1074,9 @@ void _gmouse_handle_event(int mouseX, int mouseY, int mouseState) {
 						}
 					}
 
-//					if (actionCheckPush(gDude, v16)) { TODO actions
-//						actionMenuItems[actionMenuItemsCount++] = GAME_MOUSE_ACTION_MENU_ITEM_PUSH;
-//					}
+					if (actionCheckPush(gDude, v16)) {
+						actionMenuItems[actionMenuItemsCount++] = GAME_MOUSE_ACTION_MENU_ITEM_PUSH;
+					}
 				}
 
 				actionMenuItems[actionMenuItemsCount++] = GAME_MOUSE_ACTION_MENU_ITEM_LOOK;
@@ -1171,20 +1171,20 @@ void _gmouse_handle_event(int mouseX, int mouseY, int mouseState) {
 						}
 						break;
 					case GAME_MOUSE_ACTION_MENU_ITEM_TALK:
-//						actionTalk(gDude, v16); TODO action
+						actionTalk(gDude, v16);
 						break;
 					case GAME_MOUSE_ACTION_MENU_ITEM_USE:
-/*						switch (FID_TYPE(v16->fid)) { TODO actions
+						switch (FID_TYPE(v16->fid)) {
 						case OBJ_TYPE_SCENERY:
-							_action_use_an_object(gDude, v16); TODO action
+							_action_use_an_object(gDude, v16);
 							break;
 						case OBJ_TYPE_CRITTER:
-							_action_loot_container(gDude, v16); TODO action
+							_action_loot_container(gDude, v16);
 							break;
 						default:
 							actionPickUp(gDude, v16);
 							break;
-						}*/
+						}
 						break;
 					case GAME_MOUSE_ACTION_MENU_ITEM_USE_SKILL:
 						if (1) {
@@ -1193,7 +1193,7 @@ void _gmouse_handle_event(int mouseX, int mouseY, int mouseState) {
 							int rc = skilldexOpen();
 							switch (rc) {
 							case SKILLDEX_RC_SNEAK:
-								//_action_skill_use(SKILL_SNEAK); TODO actions
+								_action_skill_use(SKILL_SNEAK);
 								break;
 							case SKILLDEX_RC_LOCKPICK:
 								skill = SKILL_LOCKPICK;
@@ -1219,12 +1219,12 @@ void _gmouse_handle_event(int mouseX, int mouseY, int mouseState) {
 							}
 
 							if (skill != -1) {
-//								actionUseSkill(gDude, v16, skill); TODO actions
+								actionUseSkill(gDude, v16, skill);
 							}
 						}
 						break;
 					case GAME_MOUSE_ACTION_MENU_ITEM_PUSH:
-//						actionPush(gDude, v16); TODO actions
+						actionPush(gDude, v16);
 						break;
 					}
 				}
