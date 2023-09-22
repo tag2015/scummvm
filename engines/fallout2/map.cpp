@@ -233,7 +233,7 @@ int isoInit() {
 	debug("ISO - Initialized user interface!");
 
 	// SFALL
-//	elevatorsInit(); TODO elevators
+	elevatorsInit();
 
 	mapMakeMapsDirectory();
 

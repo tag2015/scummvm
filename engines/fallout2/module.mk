@@ -23,6 +23,7 @@ MODULE_OBJS = \
 	dinput.o \
 	display_monitor.o \
 	draw.o \
+	elevator.o \
 	export.o \
 	file_find.o \
 	font_manager.o \
