@@ -1197,7 +1197,7 @@ int mapSetTransition(MapTransition *transition) {
 
 // 0x4835F8
 int mapHandleTransition() {
-/*	if (gMapTransition.map == 0) { TODO combat world_map
+	if (gMapTransition.map == 0) {
 		return 0;
 	}
 
@@ -1206,19 +1206,19 @@ int mapHandleTransition() {
 	gameMouseSetCursor(MOUSE_CURSOR_NONE);
 
 	if (gMapTransition.map == -1) {
-		if (!isInCombat()) {
+		if (/*!isInCombat()*/ 1) {  // TODO combat
 			animationStop();
 			wmTownMap();
 			memset(&gMapTransition, 0, sizeof(gMapTransition));
 		}
 	} else if (gMapTransition.map == -2) {
-		if (!isInCombat()) {
+		if (/*!isInCombat()*/ 1) {  // TODO combat
 			animationStop();
 			wmWorldMap();
 			memset(&gMapTransition, 0, sizeof(gMapTransition));
 		}
 	} else {
-		if (!isInCombat()) {
+		if (/*!isInCombat()*/ 1) { // TODO combat
 			if (gMapTransition.map != gMapHeader.field_34 || gElevation == gMapTransition.elevation) {
 				mapLoadById(gMapTransition.map);
 			}
@@ -1243,7 +1243,7 @@ int mapHandleTransition() {
 		}
 	}
 
-	return 0; */
+	return 0;
 }
 
 // 0x483784
