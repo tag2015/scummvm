@@ -510,7 +510,7 @@ static void _show_skill_use_messages(Object *obj, int skill, Object *a3, int a4,
 
 			char text[60];
 			snprintf(text, sizeof(text), messageListItem.text, after - before);
-//			displayMonitorAddMessage(text);  TODO: display_monitor.cpp
+			displayMonitorAddMessage(text);
 		}
 	}
 }
@@ -518,7 +518,7 @@ static void _show_skill_use_messages(Object *obj, int skill, Object *a3, int a4,
 // skill_use
 // 0x4AAD08
 int skillUse(Object *obj, Object *a2, int skill, int criticalChanceModifier) {
-	/* TODO critter, party...
+
 	MessageListItem messageListItem;
 	char text[60];
 
@@ -631,7 +631,7 @@ int skillUse(Object *obj, Object *a2, int skill, int criticalChanceModifier) {
 				}
 
 				if (a2 == gDude) {
-					strcpy(text, messageListItem.text);
+					strncpy(text, messageListItem.text, sizeof(text) - 1);
 				} else {
 					snprintf(text, sizeof(text), messageListItem.text, objectGetName(a2));
 				}
@@ -791,7 +791,7 @@ int skillUse(Object *obj, Object *a2, int skill, int criticalChanceModifier) {
 				}
 
 				if (a2 == gDude) {
-					strcpy(text, messageListItem.text);
+					strncpy(text, messageListItem.text, sizeof(text) - 1);
 				} else {
 					snprintf(text, sizeof(text), messageListItem.text, objectGetName(a2));
 				}
@@ -998,13 +998,12 @@ int skillUse(Object *obj, Object *a2, int skill, int criticalChanceModifier) {
 		scriptsExecMapUpdateProc();
 	}
 
-	return 0;*/
-	return -1; // TODO remove
+	return 0;
 }
 
 // 0x4ABBE4
 int skillsPerformStealing(Object *a1, Object *a2, Object *item, bool isPlanting) {
-	/* TODO perk, citter...
+
 	int howMuch;
 
 	int stealModifier = _gStealCount;
@@ -1083,8 +1082,7 @@ int skillsPerformStealing(Object *a1, Object *a2, Object *item, bool isPlanting)
 		displayMonitorAddMessage(text);
 
 		return 0;
-	}*/
-	return -1; //TODO remove
+	}
 }
 
 // 0x4ABDEC
