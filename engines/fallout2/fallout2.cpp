@@ -47,6 +47,7 @@
 #include "fallout2/game_memory.h"
 #include "fallout2/interface.h"
 #include "fallout2/input.h"
+#include "fallout2/inventory.h"
 #include "fallout2/item.h"
 #include "fallout2/map.h"
 #include "fallout2/mainmenu.h"
@@ -74,6 +75,7 @@
 #include "fallout2/win32.h"
 #include "fallout2/window.h"
 #include "fallout2/window_manager.h"
+#include "fallout2/worldmap.h"
 
 #define SPLASH_COUNT (10)
 
@@ -407,6 +409,8 @@ Common::Error Fallout2Engine::run() {
 	else
 		warning("Error initializing critters");
 
+	_inven_reset_dude();
+
 	if (isoInit() != 0)
 		warning("Failed on iso_init");
 
@@ -438,8 +442,10 @@ Common::Error Fallout2Engine::run() {
 	else
 		debugPrint("Loaded game scripts!");
 
-	// SFALL
-	premadeCharactersInit();
+	if (wmWorldMap_init() != 0)
+		warning("Failed on wmWorldMap_init\n");
+	else
+		debugPrint("Initialized world map!");
 
 	char path[COMPAT_MAX_PATH];
 
@@ -464,6 +470,9 @@ Common::Error Fallout2Engine::run() {
 		warning("Failed on init_options_menu\n");
 	else
 		debug("Initialized options");
+
+	// SFALL
+	premadeCharactersInit();
 
 	messageListRepositorySetStandardMessageList(STANDARD_MESSAGE_LIST_MISC, &gMiscMessageList);
 
@@ -520,14 +529,14 @@ Common::Error Fallout2Engine::run() {
 				free(mapNameCopy);
 
 				mouseShowCursor();
-				//	scriptsEnable();
+				scriptsEnable();
 				while (_game_user_wants_to_quit == 0) {
 					sharedFpsLimiter.mark();
 
 					int keyCode = inputGetInput();
 					gameHandleKey(keyCode, false);
 
-					//  scriptsHandleRequests();
+					scriptsHandleRequests();
 
 					mapHandleTransition();
 
@@ -544,8 +553,18 @@ Common::Error Fallout2Engine::run() {
 					renderPresent();
 					sharedFpsLimiter.throttle();
 				}
+				scriptsDisable();
+//				if (cursorWasHidden) {
+//					mouseHideCursor();
+//				}
 			}
+			paletteFadeTo(gPaletteWhite);
 
+			objectHide(gDude, NULL);
+			_map_exit();
+
+			// NOTE: Uninline.
+//			main_reset_system();
 			mainMenuWindowInit();
 			break;
 
