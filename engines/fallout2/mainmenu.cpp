@@ -11,7 +11,7 @@
 #include "fallout2/kb.h" // TODO kb
 #include "fallout2/mouse.h"
 #include "fallout2/palette.h"
-// #include "preferences.h" TODO prefs
+#include "fallout2/preferences.h"
 #include "fallout2/sfall_config.h"
 #include "fallout2/svga.h"
 #include "fallout2/text_font.h"
@@ -330,9 +330,9 @@ int mainMenuWindowHandleEvents() {
 				rc = MAIN_MENU_SELFRUN;
 				continue;
 			} else if (keyCode == KEY_PLUS || keyCode == KEY_EQUAL) {
-//				brightnessIncrease();  TODO prefs
+				brightnessIncrease();
 			} else if (keyCode == KEY_MINUS || keyCode == KEY_UNDERSCORE) {
-//				brightnessDecrease();  TODO prefs
+				brightnessDecrease();
 			} else if (keyCode == KEY_UPPERCASE_D || keyCode == KEY_LOWERCASE_D) {
 				rc = MAIN_MENU_SCREENSAVER;
 				continue;

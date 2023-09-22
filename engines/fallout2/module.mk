@@ -60,6 +60,7 @@ MODULE_OBJS = \
 	perk.o \
 	platform_compat.o \
 	pointer_registry.o \
+	preferences.o \
 	proto.o \
 	proto_instance.o \
 	queue.o \

@@ -15,7 +15,7 @@
 #include "fallout2/memory.h"
 #include "fallout2/message.h"
 #include "fallout2/mouse.h"
-// #include "fallout2/preferences.h" TODO prefs
+#include "fallout2/preferences.h"
 #include "fallout2/svga.h"
 #include "fallout2/text_font.h"
 #include "fallout2/tile.h"
@@ -132,15 +132,15 @@ int showOptions() {
 			// FALLTHROUGH
 			case 502:
 				// PREFERENCES
-//				doPreferences(false); TODO prefs
+				doPreferences(false);
 				break;
 			case KEY_PLUS:
 			case KEY_EQUAL:
-//				brightnessIncrease(); TODO prefs
+				brightnessIncrease();
 				break;
 			case KEY_UNDERSCORE:
 			case KEY_MINUS:
-//				brightnessDecrease(); TODO prefs
+				brightnessDecrease();
 				break;
 			case KEY_F12:
 //				takeScreenshot(); TODO game
@@ -443,11 +443,11 @@ int showPause(bool a1) {
 		switch (keyCode) {
 		case KEY_PLUS:
 		case KEY_EQUAL:
-//			brightnessIncrease(); TODO prefs
+			brightnessIncrease();
 			break;
 		case KEY_MINUS:
 		case KEY_UNDERSCORE:
-//			brightnessDecrease(); TODO prefs
+			brightnessDecrease();
 			break;
 		default:
 			if (keyCode != -1 && keyCode != -2) {
@@ -511,7 +511,7 @@ static void _ShadeScreen(bool a1) {
 // init_options_menu
 // 0x4928B8
 int _init_options_menu() {
-//	preferencesInit(); TODO prefs
+	preferencesInit();
 
 	grayscalePaletteUpdate(0, 255);
 
