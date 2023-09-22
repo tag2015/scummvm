@@ -44,7 +44,7 @@
 #include "fallout2/perk.h"
 #include "fallout2/pipboy.h"
 #include "fallout2/platform_compat.h"
-// #include "preferences.h"
+#include "fallout2/preferences.h"
 #include "fallout2/proto.h"
 #include "fallout2/queue.h"
 #include "fallout2/random.h"
@@ -785,11 +785,11 @@ int gameHandleKey(int eventCode, bool isInCombatMode) {
 		break;
 	case KEY_MINUS:
 	case KEY_UNDERSCORE:
-//		brightnessDecrease(); TODO preferences
+		brightnessDecrease();
 		break;
 	case KEY_EQUAL:
 	case KEY_PLUS:
-//		brightnessIncrease(); TODO preferences
+		brightnessIncrease();
 		break;
 	case KEY_COMMA:
 	case KEY_LESS:
