@@ -60,6 +60,7 @@
 #include "fallout2/party_member.h"
 #include "fallout2/perk.h"
 #include "fallout2/platform_compat.h"
+#include "fallout2/preferences.h"
 #include "fallout2/proto.h"
 #include "fallout2/queue.h"
 #include "fallout2/random.h"
@@ -572,6 +573,8 @@ Common::Error Fallout2Engine::run() {
 			break;
 
 		case MAIN_MENU_OPTIONS:
+			mainMenuWindowHide(true);
+			doPreferences(true);
 			break;
 
 		case MAIN_MENU_CREDITS:
