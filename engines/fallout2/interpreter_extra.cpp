@@ -728,13 +728,13 @@ static void opMarkAreaKnown(Program *program) {
 	// TODO: Provide meaningful names.
 	if (data[2] == 0) {
 		if (data[0] == CITY_STATE_INVISIBLE) {
-//			wmAreaSetVisibleState(data[1], 0, 1);  TODO world_map
+			wmAreaSetVisibleState(data[1], 0, 1);
 		} else {
-//			wmAreaSetVisibleState(data[1], 1, 1);
-//			wmAreaMarkVisitedState(data[1], data[0]);
+			wmAreaSetVisibleState(data[1], 1, 1);
+			wmAreaMarkVisitedState(data[1], data[0]);
 		}
 	} else if (data[2] == 1) {
-//		wmMapMarkVisited(data[1]);
+		wmMapMarkVisited(data[1]);
 	}
 }
 
@@ -1915,20 +1915,20 @@ static void opMetarule3(Program *program) {
 		}
 		break;
 	case METARULE3_MARK_SUBTILE:
-		// result.integerValue = wmSubTileMarkRadiusVisited(param1.integerValue, param2.integerValue, param3.integerValue); TODO world_map
+		result.integerValue = wmSubTileMarkRadiusVisited(param1.integerValue, param2.integerValue, param3.integerValue);
 		break;
 	case METARULE3_GET_KILL_COUNT:
 		result.integerValue = killsGetByType(param1.integerValue);
 		break;
 	case METARULE3_MARK_MAP_ENTRANCE:
-		// result.integerValue = wmMapMarkMapEntranceState(param1.integerValue, param2.integerValue, param3.integerValue); TODO world_map
+		result.integerValue = wmMapMarkMapEntranceState(param1.integerValue, param2.integerValue, param3.integerValue);
 		break;
 	case METARULE3_WM_SUBTILE_STATE:
 		if (1) {
-		//	int state;
-		//	if (wmSubTileGetVisitedState(param1.integerValue, param2.integerValue, &state) == 0) { TODO world_map
-		//		result.integerValue = state;
-		//	}
+			int state;
+			if (wmSubTileGetVisitedState(param1.integerValue, param2.integerValue, &state) == 0) {
+				result.integerValue = state;
+			}
 		}
 		break;
 	case METARULE3_TILE_GET_NEXT_CRITTER:
@@ -1980,7 +1980,7 @@ static void opMetarule3(Program *program) {
 		// result.integerValue = aiGetChemUse(static_cast<Object *>(param1.pointerValue)); TODO combat_ai
 		break;
 	case METARULE3_110:
-		//result.integerValue = wmCarIsOutOfGas() ? 1 : 0; TODO world_map
+		result.integerValue = wmCarIsOutOfGas() ? 1 : 0;
 		break;
 	case METARULE3_111:
 		result.integerValue = _map_target_load_area();
@@ -1997,7 +1997,7 @@ static void opSetMapMusic(Program *program) {
 	int mapIndex = programStackPopInteger(program);
 
 	debugPrint("\nset_map_music: %d, %s", mapIndex, string);
-//	wmSetMapMusic(mapIndex, string);  TODO world_map
+	wmSetMapMusic(mapIndex, string);
 }
 
 // NOTE: Function name is a bit misleading. Last parameter is a boolean value
@@ -2071,7 +2071,7 @@ static void opLoadMap(Program *program) {
 
 	if (mapName != NULL) {
 		gGameGlobalVars[GVAR_LOAD_MAP_INDEX] = param;
-		mapIndex = -1; // wmMapMatchNameToIdx(mapName); TODO world_map
+		mapIndex = wmMapMatchNameToIdx(mapName);
 	} else {
 		if (mapIndexOrName.integerValue >= 0) {
 			gGameGlobalVars[GVAR_LOAD_MAP_INDEX] = param;
@@ -2096,10 +2096,10 @@ static void opWorldmapCitySetPos(Program *program) {
 	int x = programStackPopInteger(program);
 	int city = programStackPopInteger(program);
 
-	/*if (wmAreaSetWorldPos(city, x, y) == -1) {  TODO world_map
+	if (wmAreaSetWorldPos(city, x, y) == -1) {
 		scriptPredefinedError(program, "wm_area_set_pos", SCRIPT_ERROR_FOLLOWS);
 		debugPrint("Invalid Parameter!");
-	}*/
+	}
 }
 
 // set_exit_grids
@@ -3110,25 +3110,25 @@ static void opMetarule(Program *program) {
 		result = _getPartyMemberCount();
 		break;
 	case METARULE_AREA_KNOWN:
-//		result = wmAreaVisitedState(param.integerValue); TODO world_map
+		result = wmAreaVisitedState(param.integerValue);
 		break;
 	case METARULE_WHO_ON_DRUGS:
 		result = queueHasEvent(static_cast<Object *>(param.pointerValue), EVENT_TYPE_DRUG);
 		break;
 	case METARULE_MAP_KNOWN:
-//		result = wmMapIsKnown(param.integerValue); TODO world_map
+		result = wmMapIsKnown(param.integerValue);
 		break;
 	case METARULE_IS_LOADGAME:
 //		result = _isLoadingGame(); TODO loadsave
 		break;
 	case METARULE_CAR_CURRENT_TOWN:
-//		result = wmCarCurrentArea(); TODO world_map
+		result = wmCarCurrentArea();
 		break;
 	case METARULE_GIVE_CAR_TO_PARTY:
-//		result = wmCarGiveToParty(); TODO world_map
+		result = wmCarGiveToParty();
 		break;
 	case METARULE_GIVE_CAR_GAS:
-//		result = wmCarFillGas(param.integerValue); TODO world_map
+		result = wmCarFillGas(param.integerValue);
 		break;
 	case METARULE_SKILL_CHECK_TAG:
 		result = skillIsTagged(param.integerValue);
@@ -3168,15 +3168,15 @@ static void opMetarule(Program *program) {
 		}
 		break;
 	case METARULE_GET_WORLDMAP_XPOS:
-//		wmGetPartyWorldPos(&result, NULL); TODO world_map
+		wmGetPartyWorldPos(&result, NULL);
 		break;
 	case METARULE_GET_WORLDMAP_YPOS:
-//		wmGetPartyWorldPos(NULL, &result); TODO world_map
+		wmGetPartyWorldPos(NULL, &result);
 		break;
 	case METARULE_CURRENT_TOWN:
-//		if (wmGetPartyCurArea(&result) == -1) { TODO world_map
+		if (wmGetPartyCurArea(&result) == -1) {
 			debugPrint("\nIntextra: Error: metarule: current_town");
-//		}
+		}
 		break;
 	case METARULE_LANGUAGE_FILTER:
 		result = static_cast<int>(settings.preferences.language_filter);
