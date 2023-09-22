@@ -899,7 +899,7 @@ int scriptsHandleRequests() {
 		wmWorldMap();
 	}
 
-/*	if ((gScriptsRequests & SCRIPT_REQUEST_ELEVATOR) != 0) { TODO elevator
+	if ((gScriptsRequests & SCRIPT_REQUEST_ELEVATOR) != 0) {
 		int map = gMapHeader.field_34;
 		int elevation = gScriptsRequestedElevatorLevel;
 		int tile = -1;
@@ -907,7 +907,7 @@ int scriptsHandleRequests() {
 		gScriptsRequests &= ~SCRIPT_REQUEST_ELEVATOR;
 
 		if (elevatorSelectLevel(gScriptsRequestedElevatorType, &map, &elevation, &tile) != -1) {
-			automapSaveCurrent();
+//			automapSaveCurrent(); TODO automap
 
 			if (map == gMapHeader.field_34) {
 				if (elevation == gElevation) {
@@ -969,7 +969,7 @@ int scriptsHandleRequests() {
 				mapSetTransition(&transition);
 			}
 		}
-	} */
+	}
 
 	if ((gScriptsRequests & SCRIPT_REQUEST_EXPLOSION) != 0) {
 		gScriptsRequests &= ~SCRIPT_REQUEST_EXPLOSION;
@@ -1002,13 +1002,13 @@ int scriptsHandleRequests() {
 
 // 0x4A43A0
 int _scripts_check_state_in_combat() {
-/*	if ((gScriptsRequests & SCRIPT_REQUEST_ELEVATOR) != 0) { TODO elevator inventory
+	if ((gScriptsRequests & SCRIPT_REQUEST_ELEVATOR) != 0) {
 		int map = gMapHeader.field_34;
 		int elevation = gScriptsRequestedElevatorLevel;
 		int tile = -1;
 
 		if (elevatorSelectLevel(gScriptsRequestedElevatorType, &map, &elevation, &tile) != -1) {
-			automapSaveCurrent();
+//			automapSaveCurrent(); TODO automap
 
 			if (map == gMapHeader.field_34) {
 				if (elevation == gElevation) {
@@ -1056,7 +1056,7 @@ int _scripts_check_state_in_combat() {
 	if ((gScriptsRequests & SCRIPT_REQUEST_LOOTING) != 0) {
 		inventoryOpenLooting(gScriptsRequestedLootingBy, gScriptsRequestedLootingFrom);
 	}
-*/
+
 	// NOTE: Uninline.
 	scriptsClearPendingRequests();
 
@@ -1106,7 +1106,7 @@ void scriptsRequestWorldMap() {
 // scripts_request_elevator
 // 0x4A466C
 int scriptsRequestElevator(Object *a1, int a2) {
-/*	int elevatorType = a2; TODO elevator
+	int elevatorType = a2;
 	int elevatorLevel = gElevation;
 
 	int tile = a1->tile;
@@ -1155,7 +1155,7 @@ int scriptsRequestElevator(Object *a1, int a2) {
 
 	gScriptsRequests |= SCRIPT_REQUEST_ELEVATOR;
 	gScriptsRequestedElevatorType = elevatorType;
-	gScriptsRequestedElevatorLevel = elevatorLevel; */
+	gScriptsRequestedElevatorLevel = elevatorLevel;
 
 	return 0;
 }
