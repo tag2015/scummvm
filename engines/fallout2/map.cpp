@@ -977,12 +977,12 @@ err:
 	_gmouse_disable_scrolling();
 	gameMouseSetCursor(MOUSE_CURSOR_WAIT_PLANET);
 
-//	if (scriptsExecStartProc() == -1) {  TODO scripts test
-//		debugPrint("\n   Error: scr_load_all_scripts failed!");
-//	}
+	if (scriptsExecStartProc() == -1) {
+		debugPrint("\n   Error: scr_load_all_scripts failed!");
+	}
 
-//	scriptsExecMapEnterProc();
-//	scriptsExecMapUpdateProc();
+	scriptsExecMapEnterProc();
+	scriptsExecMapUpdateProc();
 	tileEnable();
 
 	if (gMapTransition.map > 0) {
