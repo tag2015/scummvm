@@ -1,17 +1,17 @@
-#ifndef FALLOUT_PREFERENCES_H_
-#define FALLOUT_PREFERENCES_H_
+#ifndef FALLOUT2_PREFERENCES_H
+#define FALLOUT2_PREFERENCES_H
 
-#include "db.h"
+#include "fallout2/db.h"
 
-namespace fallout {
+namespace Fallout2 {
 
 int preferencesInit();
 int doPreferences(bool animated);
-int preferencesSave(File* stream);
-int preferencesLoad(File* stream);
+int preferencesSave(File *stream);
+int preferencesLoad(File *stream);
 void brightnessIncrease();
 void brightnessDecrease();
 
-} // namespace fallout
+} // namespace Fallout2
 
-#endif /* FALLOUT_PREFERENCES_H_ */
+#endif
