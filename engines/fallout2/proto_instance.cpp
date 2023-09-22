@@ -1497,7 +1497,7 @@ static int useLadderDown(Object *a1, Object *ladder, int a3) {
 
 		mapSetTransition(&transition);
 
-//		wmMapMarkMapEntranceState(transition.map, elevation, 1); TODO world_map
+		wmMapMarkMapEntranceState(transition.map, elevation, 1);
 	} else {
 		Rect updatedRect;
 		if (objectSetLocation(a1, tile, elevation, &updatedRect) == -1) {
@@ -1530,7 +1530,7 @@ static int useLadderUp(Object *a1, Object *ladder, int a3) {
 
 		mapSetTransition(&transition);
 
-//		wmMapMarkMapEntranceState(transition.map, elevation, 1); TODO world_map
+		wmMapMarkMapEntranceState(transition.map, elevation, 1);
 	} else {
 		Rect updatedRect;
 		if (objectSetLocation(a1, tile, elevation, &updatedRect) == -1) {
@@ -1563,7 +1563,7 @@ static int useStairs(Object *a1, Object *stairs, int a3) {
 
 		mapSetTransition(&transition);
 
-//		wmMapMarkMapEntranceState(transition.map, elevation, 1); TODO world_map
+		wmMapMarkMapEntranceState(transition.map, elevation, 1);
 	} else {
 		Rect updatedRect;
 		if (objectSetLocation(a1, tile, elevation, &updatedRect) == -1) {
@@ -2194,7 +2194,7 @@ int _objPMAttemptPlacement(Object *obj, int tile, int elevation) {
 
 	int v9 = tile;
 	int v7 = 0;
-/*	if (!wmEvalTileNumForPlacement(tile)) {  // TODO world_map
+	if (!wmEvalTileNumForPlacement(tile)) {
 		v9 = gDude->tile;
 		for (int v4 = 1; v4 <= 100; v4++) {
 			// TODO: Check.
@@ -2209,7 +2209,7 @@ int _objPMAttemptPlacement(Object *obj, int tile, int elevation) {
 				break;
 			}
 		}
-	} */
+	}
 
 	objectShow(obj, NULL);
 	objectSetLocation(obj, v9, elevation, NULL);

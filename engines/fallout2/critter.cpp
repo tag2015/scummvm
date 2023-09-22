@@ -1269,9 +1269,9 @@ int _critter_set_who_hit_me(Object *a1, Object *a2) {
 // 0x42E564
 bool _critter_can_obj_dude_rest() {
 	bool v1 = false;
-//	if (!wmMapCanRestHere(gElevation)) { TODO worldmap.cpp
+	if (!wmMapCanRestHere(gElevation)) {
 		v1 = true;
-//	}
+	}
 
 	bool result = true;
 
