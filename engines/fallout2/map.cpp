@@ -366,7 +366,7 @@ int mapSetElevation(int elevation) {
 	}
 
 	if (elevation != gElevation) {
-//		wmMapMarkMapEntranceState(gMapHeader.field_34, elevation, 1); TODO world_map
+		wmMapMarkMapEntranceState(gMapHeader.field_34, elevation, 1);
 	}
 
 	gElevation = elevation;
@@ -487,9 +487,9 @@ void mapSetStart(int tile, int elevation, int rotation) {
 
 // 0x4824CC
 char *mapGetName(int map, int elevation) {
-//	if (map < 0 || map >= wmMapMaxCount()) { TODO world_map
-//		return NULL;
-//	}
+	if (map < 0 || map >= wmMapMaxCount()) {
+		return NULL;
+	}
 
 	if (!elevationIsValid(elevation)) {
 		return NULL;
@@ -503,7 +503,7 @@ char *mapGetName(int map, int elevation) {
 //
 // 0x482528
 bool _is_map_idx_same(int map1, int map2) {
-/*	if (map1 < 0 || map1 >= wmMapMaxCount()) { TODO world_map
+	if (map1 < 0 || map1 >= wmMapMaxCount()) {
 		return 0;
 	}
 
@@ -529,13 +529,12 @@ bool _is_map_idx_same(int map1, int map2) {
 		return 0;
 	}
 
-	return city1 == city2;*/
-	return false;  // TODO remove
+	return city1 == city2;
 }
 
 // 0x4825CC
 int _get_map_idx_same(int map1, int map2) {
-/*	int city1 = -1; TODO world_map
+	int city1 = -1;
 	if (wmMatchAreaContainingMapIdx(map1, &city1) == -1) {
 		return -1;
 	}
@@ -549,16 +548,15 @@ int _get_map_idx_same(int map1, int map2) {
 		return -1;
 	}
 
-	return city1;*/
-	return 0; // TODO remove
+	return city1;
 }
 
 // 0x48261C
 char *mapGetCityName(int map) {
 	int city = 0;
-//	if (wmMatchAreaContainingMapIdx(map, &city) == -1) { TODO world_map
-//		return _aErrorF2;
-//	}
+	if (wmMatchAreaContainingMapIdx(map, &city) == -1) {
+		return _aErrorF2;
+	}
 
 	MessageListItem messageListItem;
 	char *name = getmsg(&gMapMessageList, &messageListItem, 1500 + city);
@@ -567,15 +565,14 @@ char *mapGetCityName(int map) {
 
 // 0x48268C
 char *_map_get_description_idx_(int map) {
-/*	int city; TODO world_map
+	int city;
 	if (wmMatchAreaContainingMapIdx(map, &city) == 0) {
 		wmGetAreaIdxName(city, _scratchStr);
 	} else {
-		strcpy(_scratchStr, _errMapName);
+		strncpy(_scratchStr, _errMapName, sizeof(_scratchStr) - 1);
 	}
 
-	return _scratchStr; */
-	return "";
+	return _scratchStr;
 }
 
 // 0x4826B8
@@ -751,7 +748,7 @@ int mapLoadByName(char *fileName) {
 		if (stream != NULL) {
 			fileClose(stream);
 			rc = mapLoadSaved(fileName);
-//			wmMapMusicStart(); TODO world_map
+			wmMapMusicStart();
 		}
 	}
 
@@ -776,7 +773,7 @@ int mapLoadByName(char *fileName) {
 int mapLoadById(int map) {
 	scriptSetFixedParam(gMapSid, map);
 
-/*	char name[16]; TODo world_map
+	char name[16];
 	if (wmMapIdxToName(map, name, sizeof(name)) == -1) {
 		return -1;
 	}
@@ -787,7 +784,7 @@ int mapLoadById(int map) {
 
 	wmMapMusicStart();
 
-	return rc;*/
+	return rc;
 }
 
 // 0x482B74
@@ -904,7 +901,7 @@ static int mapLoad(File *stream) {
 	lightSetAmbientIntensity(LIGHT_INTENSITY_MAX, false);
 	objectSetLocation(gDude, gCenterTile, gElevation, NULL);
 	objectSetRotation(gDude, gEnteringRotation, NULL);
-//	gMapHeader.field_34 = wmMapMatchNameToIdx(gMapHeader.name); TODO world_map
+	gMapHeader.field_34 = wmMapMatchNameToIdx(gMapHeader.name);
 
 	if ((gMapHeader.flags & 1) == 0) {
 		char path[COMPAT_MAX_PATH];
@@ -947,14 +944,14 @@ static int mapLoad(File *stream) {
 		object->id = scriptsNewObjectId();
 		script->field_1C = object->id;
 		script->owner = object;
-//		_scr_spatials_disable();  TODO scripts test
-//		scriptExecProc(gMapSid, SCRIPT_PROC_MAP_ENTER);
-//		_scr_spatials_enable();
+		_scr_spatials_disable();
+		scriptExecProc(gMapSid, SCRIPT_PROC_MAP_ENTER);
+		_scr_spatials_enable();
 
 		error = "Error Setting up random encounter";
-/*		if (wmSetupRandomEncounter() == -1) {  TODO world_map
+		if (wmSetupRandomEncounter() == -1) {
 			goto err;
-		}*/
+		}
 	}
 
 	error = NULL;
@@ -1002,12 +999,12 @@ err:
 //		rc = -1;
 //	}
 
-//	wmMapMarkVisited(gMapHeader.field_34); TODO world_map
-//	wmMapMarkMapEntranceState(gMapHeader.field_34, gElevation, 1);
+	wmMapMarkVisited(gMapHeader.field_34);
+	wmMapMarkMapEntranceState(gMapHeader.field_34, gElevation, 1);
 
-//	if (wmCheckGameAreaEvents() != 0) {
-//		rc = -1;
-//	}
+	if (wmCheckGameAreaEvents() != 0) {
+		rc = -1;
+	}
 
 	fileSetReadProgressHandler(NULL, 0);
 
@@ -1065,7 +1062,7 @@ int mapLoadSaved(char *fileName) {
 
 // 0x48328C
 static int _map_age_dead_critters() {
-	/*if (!wmMapDeadBodiesAge()) { TODO world_map
+	if (!wmMapDeadBodiesAge()) {
 		return 0;
 	}
 
@@ -1167,15 +1164,15 @@ static int _map_age_dead_critters() {
 
 	internal_free(objects);
 
-	return rc;*/
+	return rc;
 }
 
 // 0x48358C
 int _map_target_load_area() {
-	int city = -1; /* TODO world_map
+	int city = -1;
 	if (wmMatchAreaContainingMapIdx(gMapHeader.field_34, &city) == -1) {
 		city = -1;
-	}*/
+	}
 	return city;
 }
 
