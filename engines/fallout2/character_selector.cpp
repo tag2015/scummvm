@@ -26,7 +26,7 @@
 #include "fallout2/object.h"
 #include "fallout2/palette.h"
 #include "fallout2/platform_compat.h"
-// #include "fallout2/preferences.h" TODO preferences
+#include "fallout2/preferences.h"
 #include "fallout2/proto.h"
 #include "fallout2/settings.h"
 #include "fallout2/sfall_config.h"
@@ -167,28 +167,22 @@ int characterSelectorOpen() {
 	while (!done) {
 		sharedFpsLimiter.mark();
 
-		//		if (_game_user_wants_to_quit != 0) {  TODO game
-		//			break;
-		//		}
+		if (_game_user_wants_to_quit != 0) {
+			break;
+		}
 
 		int keyCode = inputGetInput();
-
-		/*		Common::Event e;
-				while (g_system->getEventManager()->pollEvent(e)) {
-					if (e.type == Common::EVENT_KEYDOWN) {
-						break;
-					}*/
 
 		switch (keyCode) {
 
 		case KEY_MINUS:
 		case KEY_UNDERSCORE:
-			//	brightnessDecrease(); TODO preferences
+			brightnessDecrease();
 			break;
 
 		case KEY_EQUAL:
 		case KEY_PLUS:
-			//	brightnessIncrease();  TODO preferences
+			brightnessIncrease();
 			break;
 
 		case KEY_UPPERCASE_B:
@@ -226,7 +220,7 @@ int characterSelectorOpen() {
 			break;
 
 		case KEY_F10:
-			//	showQuitConfirmationDialog(); TODO game
+			showQuitConfirmationDialog();
 			break;
 
 		case KEY_ARROW_LEFT:
