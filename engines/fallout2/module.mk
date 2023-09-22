@@ -85,6 +85,7 @@ MODULE_OBJS = \
 	window_manager.o \
 	window_manager_private.o \
 	word_wrap.o \
+	worldmap.o \
 	xfile.o \
 	third_party/fpattern/fpattern.o
 
