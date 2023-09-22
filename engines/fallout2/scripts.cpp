@@ -891,12 +891,12 @@ int scriptsHandleRequests() {
 
 	if ((gScriptsRequests & SCRIPT_REQUEST_0x02) != 0) {
 		gScriptsRequests &= ~SCRIPT_REQUEST_0x02;
-//		wmTownMap(); TODO world_map
+		wmTownMap();
 	}
 
 	if ((gScriptsRequests & SCRIPT_REQUEST_WORLD_MAP) != 0) {
 		gScriptsRequests &= ~SCRIPT_REQUEST_WORLD_MAP;
-//		wmWorldMap(); TODO world_map
+		wmWorldMap();
 	}
 
 /*	if ((gScriptsRequests & SCRIPT_REQUEST_ELEVATOR) != 0) { TODO elevator

@@ -1443,7 +1443,7 @@ int objectSetLocation(Object *obj, int tile, int elevation, Rect *rect) {
 						transition.rotation = data->misc.rotation;
 						mapSetTransition(&transition);
 
-//						wmMapMarkMapEntranceState(transition.map, transition.elevation, 1);  TODO world_map
+						wmMapMarkMapEntranceState(transition.map, transition.elevation, 1);
 					}
 				}
 			}
