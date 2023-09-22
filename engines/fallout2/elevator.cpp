@@ -1,28 +1,30 @@
-#include "elevator.h"
+#include "fallout2/elevator.h"
 
-#include <ctype.h>
+/*#include <ctype.h>
 #include <string.h>
 
-#include <algorithm>
+#include <algorithm>*/
 
-#include "art.h"
-#include "cycle.h"
-#include "debug.h"
-#include "draw.h"
-#include "game_mouse.h"
-#include "game_sound.h"
-#include "geometry.h"
-#include "input.h"
-#include "interface.h"
-#include "kb.h"
-#include "map.h"
-#include "pipboy.h"
-#include "scripts.h"
-#include "sfall_config.h"
-#include "svga.h"
-#include "window_manager.h"
+#include "fallout2/fallout2.h"
 
-namespace fallout {
+#include "fallout2/art.h"
+#include "fallout2/cycle.h"
+#include "fallout2/debug.h"
+#include "fallout2/draw.h"
+#include "fallout2/game_mouse.h"
+// #include "fallout2/game_sound.h" TODO audio
+#include "fallout2/geometry.h"
+#include "fallout2/input.h"
+#include "fallout2/interface.h"
+#include "fallout2/kb.h"
+#include "fallout2/map.h"
+#include "fallout2/pipboy.h"
+#include "fallout2/scripts.h"
+#include "fallout2/sfall_config.h"
+#include "fallout2/svga.h"
+#include "fallout2/window_manager.h"
+
+namespace Fallout2 {
 
 // The maximum number of elevator levels.
 #define ELEVATOR_LEVEL_MAX (4)
@@ -62,30 +64,30 @@ static const int gElevatorFrmIds[ELEVATOR_FRM_COUNT] = {
 
 // 0x43E95C
 static ElevatorBackground gElevatorBackgrounds[ELEVATORS_MAX] = {
-	{ 143, -1 },
-	{ 143, 150 },
-	{ 144, -1 },
-	{ 144, 145 },
-	{ 146, -1 },
-	{ 146, 147 },
-	{ 146, -1 },
-	{ 146, 151 },
-	{ 148, -1 },
-	{ 146, -1 },
-	{ 146, -1 },
-	{ 146, 147 },
-	{ 388, -1 },
-	{ 143, 150 },
-	{ 148, -1 },
-	{ 148, -1 },
-	{ 148, -1 },
-	{ 143, 150 },
-	{ 143, 150 },
-	{ 143, 150 },
-	{ 143, 150 },
-	{ 143, 150 },
-	{ 143, 150 },
-	{ 143, 150 },
+	{143, -1},
+	{143, 150},
+	{144, -1},
+	{144, 145},
+	{146, -1},
+	{146, 147},
+	{146, -1},
+	{146, 151},
+	{148, -1},
+	{146, -1},
+	{146, -1},
+	{146, 147},
+	{388, -1},
+	{143, 150},
+	{148, -1},
+	{148, -1},
+	{148, -1},
+	{143, 150},
+	{143, 150},
+	{143, 150},
+	{143, 150},
+	{143, 150},
+	{143, 150},
+	{143, 150},
 };
 
 // Number of levels for eleveators.
@@ -121,148 +123,148 @@ static int gElevatorLevels[ELEVATORS_MAX] = {
 // 0x43EA7C
 static ElevatorDescription gElevatorDescriptions[ELEVATORS_MAX][ELEVATOR_LEVEL_MAX] = {
 	{
-		{ 14, 0, 18940 },
-		{ 14, 1, 18936 },
-		{ 15, 0, 21340 },
-		{ 15, 1, 21340 },
+		{14, 0, 18940},
+		{14, 1, 18936},
+		{15, 0, 21340},
+		{15, 1, 21340},
 	},
 	{
-		{ 13, 0, 20502 },
-		{ 14, 0, 14912 },
-		{ 0, 0, -1 },
-		{ 0, 0, -1 },
+		{13, 0, 20502},
+		{14, 0, 14912},
+		{0, 0, -1},
+		{0, 0, -1},
 	},
 	{
-		{ 33, 0, 12498 },
-		{ 33, 1, 20094 },
-		{ 34, 0, 17312 },
-		{ 0, 0, -1 },
+		{33, 0, 12498},
+		{33, 1, 20094},
+		{34, 0, 17312},
+		{0, 0, -1},
 	},
 	{
-		{ 34, 0, 16140 },
-		{ 34, 1, 16140 },
-		{ 0, 0, -1 },
-		{ 0, 0, -1 },
+		{34, 0, 16140},
+		{34, 1, 16140},
+		{0, 0, -1},
+		{0, 0, -1},
 	},
 	{
-		{ 49, 0, 14920 },
-		{ 49, 1, 15120 },
-		{ 50, 0, 12944 },
-		{ 0, 0, -1 },
+		{49, 0, 14920},
+		{49, 1, 15120},
+		{50, 0, 12944},
+		{0, 0, -1},
 	},
 	{
-		{ 50, 0, 24520 },
-		{ 50, 1, 25316 },
-		{ 0, 0, -1 },
-		{ 0, 0, -1 },
+		{50, 0, 24520},
+		{50, 1, 25316},
+		{0, 0, -1},
+		{0, 0, -1},
 	},
 	{
-		{ 42, 0, 22526 },
-		{ 42, 1, 22526 },
-		{ 42, 2, 22526 },
-		{ 0, 0, -1 },
+		{42, 0, 22526},
+		{42, 1, 22526},
+		{42, 2, 22526},
+		{0, 0, -1},
 	},
 	{
-		{ 42, 2, 14086 },
-		{ 43, 0, 14086 },
-		{ 43, 2, 14086 },
-		{ 0, 0, -1 },
+		{42, 2, 14086},
+		{43, 0, 14086},
+		{43, 2, 14086},
+		{0, 0, -1},
 	},
 	{
-		{ 40, 0, 14104 },
-		{ 40, 1, 22504 },
-		{ 40, 2, 17312 },
-		{ 0, 0, -1 },
+		{40, 0, 14104},
+		{40, 1, 22504},
+		{40, 2, 17312},
+		{0, 0, -1},
 	},
 	{
-		{ 9, 0, 13704 },
-		{ 9, 1, 23302 },
-		{ 9, 2, 17308 },
-		{ 0, 0, -1 },
+		{9, 0, 13704},
+		{9, 1, 23302},
+		{9, 2, 17308},
+		{0, 0, -1},
 	},
 	{
-		{ 28, 0, 19300 },
-		{ 28, 1, 19300 },
-		{ 28, 2, 20110 },
-		{ 0, 0, -1 },
+		{28, 0, 19300},
+		{28, 1, 19300},
+		{28, 2, 20110},
+		{0, 0, -1},
 	},
 	{
-		{ 28, 2, 20118 },
-		{ 29, 0, 21710 },
-		{ 0, 0, -1 },
-		{ 0, 0, -1 },
+		{28, 2, 20118},
+		{29, 0, 21710},
+		{0, 0, -1},
+		{0, 0, -1},
 	},
 	{
-		{ 28, 0, 20122 },
-		{ 28, 1, 20124 },
-		{ 28, 2, 20940 },
-		{ 29, 0, 22540 },
+		{28, 0, 20122},
+		{28, 1, 20124},
+		{28, 2, 20940},
+		{29, 0, 22540},
 	},
 	{
-		{ 12, 1, 16052 },
-		{ 12, 2, 14480 },
-		{ 0, 0, -1 },
-		{ 0, 0, -1 },
+		{12, 1, 16052},
+		{12, 2, 14480},
+		{0, 0, -1},
+		{0, 0, -1},
 	},
 	{
-		{ 6, 0, 14104 },
-		{ 6, 1, 22504 },
-		{ 6, 2, 17312 },
-		{ 0, 0, -1 },
+		{6, 0, 14104},
+		{6, 1, 22504},
+		{6, 2, 17312},
+		{0, 0, -1},
 	},
 	{
-		{ 30, 0, 14104 },
-		{ 30, 1, 22504 },
-		{ 30, 2, 17312 },
-		{ 0, 0, -1 },
+		{30, 0, 14104},
+		{30, 1, 22504},
+		{30, 2, 17312},
+		{0, 0, -1},
 	},
 	{
-		{ 36, 0, 13704 },
-		{ 36, 1, 23302 },
-		{ 36, 2, 17308 },
-		{ 0, 0, -1 },
+		{36, 0, 13704},
+		{36, 1, 23302},
+		{36, 2, 17308},
+		{0, 0, -1},
 	},
 	{
-		{ 39, 0, 17285 },
-		{ 36, 0, 19472 },
-		{ 0, 0, -1 },
-		{ 0, 0, -1 },
+		{39, 0, 17285},
+		{36, 0, 19472},
+		{0, 0, -1},
+		{0, 0, -1},
 	},
 	{
-		{ 109, 2, 10701 },
-		{ 109, 1, 10705 },
-		{ 0, 0, -1 },
-		{ 0, 0, -1 },
+		{109, 2, 10701},
+		{109, 1, 10705},
+		{0, 0, -1},
+		{0, 0, -1},
 	},
 	{
-		{ 109, 2, 14697 },
-		{ 109, 1, 15099 },
-		{ 0, 0, -1 },
-		{ 0, 0, -1 },
+		{109, 2, 14697},
+		{109, 1, 15099},
+		{0, 0, -1},
+		{0, 0, -1},
 	},
 	{
-		{ 109, 2, 23877 },
-		{ 109, 1, 25481 },
-		{ 0, 0, -1 },
-		{ 0, 0, -1 },
+		{109, 2, 23877},
+		{109, 1, 25481},
+		{0, 0, -1},
+		{0, 0, -1},
 	},
 	{
-		{ 109, 2, 26130 },
-		{ 109, 1, 24721 },
-		{ 0, 0, -1 },
-		{ 0, 0, -1 },
+		{109, 2, 26130},
+		{109, 1, 24721},
+		{0, 0, -1},
+		{0, 0, -1},
 	},
 	{
-		{ 137, 0, 23953 },
-		{ 148, 1, 16526 },
-		{ 0, 0, -1 },
-		{ 0, 0, -1 },
+		{137, 0, 23953},
+		{148, 1, 16526},
+		{0, 0, -1},
+		{0, 0, -1},
 	},
 	{
-		{ 62, 0, 13901 },
-		{ 63, 1, 17923 },
-		{ 0, 0, -1 },
-		{ 0, 0, -1 },
+		{62, 0, 13901},
+		{63, 1, 17923},
+		{0, 0, -1},
+		{0, 0, -1},
 	},
 };
 
@@ -270,34 +272,34 @@ static ElevatorDescription gElevatorDescriptions[ELEVATORS_MAX][ELEVATOR_LEVEL_M
 //
 // 0x43EEFC
 static char gElevatorLevelLabels[ELEVATORS_MAX][ELEVATOR_LEVEL_MAX] = {
-	{ '1', '2', '3', '4' },
-	{ 'G', '1', '\0', '\0' },
-	{ '1', '2', '3', '\0' },
-	{ '3', '4', '\0', '\0' },
-	{ '1', '2', '3', '\0' },
-	{ '3', '4', '\0', '\0' },
-	{ '1', '2', '3', '\0' },
-	{ '3', '4', '6', '\0' },
-	{ '1', '2', '3', '\0' },
-	{ '1', '2', '3', '\0' },
-	{ '1', '2', '3', '\0' },
-	{ '3', '4', '\0', '\0' },
-	{ '1', '2', '3', '4' },
-	{ '1', '2', '\0', '\0' },
-	{ '1', '2', '3', '\0' },
-	{ '1', '2', '3', '\0' },
-	{ '1', '2', '3', '\0' },
-	{ '1', '2', '\0', '\0' },
-	{ '1', '2', '\0', '\0' },
-	{ '1', '2', '\0', '\0' },
-	{ '1', '2', '\0', '\0' },
-	{ '1', '2', '\0', '\0' },
-	{ '1', '2', '\0', '\0' },
-	{ '1', '2', '\0', '\0' },
+	{'1', '2', '3', '4'},
+	{'G', '1', '\0', '\0'},
+	{'1', '2', '3', '\0'},
+	{'3', '4', '\0', '\0'},
+	{'1', '2', '3', '\0'},
+	{'3', '4', '\0', '\0'},
+	{'1', '2', '3', '\0'},
+	{'3', '4', '6', '\0'},
+	{'1', '2', '3', '\0'},
+	{'1', '2', '3', '\0'},
+	{'1', '2', '3', '\0'},
+	{'3', '4', '\0', '\0'},
+	{'1', '2', '3', '4'},
+	{'1', '2', '\0', '\0'},
+	{'1', '2', '3', '\0'},
+	{'1', '2', '3', '\0'},
+	{'1', '2', '3', '\0'},
+	{'1', '2', '\0', '\0'},
+	{'1', '2', '\0', '\0'},
+	{'1', '2', '\0', '\0'},
+	{'1', '2', '\0', '\0'},
+	{'1', '2', '\0', '\0'},
+	{'1', '2', '\0', '\0'},
+	{'1', '2', '\0', '\0'},
 };
 
 // 0x51862C
-static const char* gElevatorSoundEffects[ELEVATOR_LEVEL_MAX - 1][ELEVATOR_LEVEL_MAX] = {
+static const char *gElevatorSoundEffects[ELEVATOR_LEVEL_MAX - 1][ELEVATOR_LEVEL_MAX] = {
 	{
 		"ELV1_1",
 		"ELV1_1",
@@ -322,7 +324,7 @@ static const char* gElevatorSoundEffects[ELEVATOR_LEVEL_MAX - 1][ELEVATOR_LEVEL_
 static int gElevatorWindow;
 
 // 0x570A6C
-static unsigned char* gElevatorWindowBuffer;
+static unsigned char *gElevatorWindowBuffer;
 
 // 0x570A70
 static bool gElevatorWindowIsoWasEnabled;
@@ -334,7 +336,7 @@ static FrmImage _elevatorPanelFrmImage;
 // Presents elevator dialog for player to pick a desired level.
 //
 // 0x43EF5C
-int elevatorSelectLevel(int elevator, int* mapPtr, int* elevationPtr, int* tilePtr) {
+int elevatorSelectLevel(int elevator, int *mapPtr, int *elevationPtr, int *tilePtr) {
 	if (elevator < 0 || elevator >= ELEVATORS_MAX) {
 		return -1;
 	}
@@ -344,7 +346,7 @@ int elevatorSelectLevel(int elevator, int* mapPtr, int* elevationPtr, int* tileP
 		return -1;
 	}
 
-	const ElevatorDescription* elevatorDescription = gElevatorDescriptions[elevator];
+	const ElevatorDescription *elevatorDescription = gElevatorDescriptions[elevator];
 
 	int index;
 	for (index = 0; index < ELEVATOR_LEVEL_MAX; index++) {
@@ -382,12 +384,12 @@ int elevatorSelectLevel(int elevator, int* mapPtr, int* elevationPtr, int* tileP
 	int v18 = (_elevatorFrmImages[ELEVATOR_FRM_GAUGE].getWidth() * _elevatorFrmImages[ELEVATOR_FRM_GAUGE].getHeight()) / 13;
 	float v42 = 12.0f / (float)(gElevatorLevels[elevator] - 1);
 	blitBufferToBuffer(
-	    _elevatorFrmImages[ELEVATOR_FRM_GAUGE].getData() + v18 * (int)((float)(*elevationPtr) * v42),
-	    _elevatorFrmImages[ELEVATOR_FRM_GAUGE].getWidth(),
-	    _elevatorFrmImages[ELEVATOR_FRM_GAUGE].getHeight() / 13,
-	    _elevatorFrmImages[ELEVATOR_FRM_GAUGE].getWidth(),
-	    gElevatorWindowBuffer + _elevatorBackgroundFrmImage.getWidth() * 41 + 121,
-	    _elevatorBackgroundFrmImage.getWidth());
+		_elevatorFrmImages[ELEVATOR_FRM_GAUGE].getData() + v18 * (int)((float)(*elevationPtr) * v42),
+		_elevatorFrmImages[ELEVATOR_FRM_GAUGE].getWidth(),
+		_elevatorFrmImages[ELEVATOR_FRM_GAUGE].getHeight() / 13,
+		_elevatorFrmImages[ELEVATOR_FRM_GAUGE].getWidth(),
+		gElevatorWindowBuffer + _elevatorBackgroundFrmImage.getWidth() * 41 + 121,
+		_elevatorBackgroundFrmImage.getWidth());
 	windowRefresh(gElevatorWindow);
 
 	bool done = false;
@@ -433,7 +435,7 @@ int elevatorSelectLevel(int elevator, int* mapPtr, int* elevationPtr, int* tileP
 				numberOfLevelsTravelled = -numberOfLevelsTravelled;
 			}
 
-			soundPlayFile(gElevatorSoundEffects[gElevatorLevels[elevator] - 2][numberOfLevelsTravelled]);
+//			soundPlayFile(gElevatorSoundEffects[gElevatorLevels[elevator] - 2][numberOfLevelsTravelled]); TODO audio
 
 			float v41 = (float)keyCode * v42;
 			float v44 = (float)(*elevationPtr) * v42;
@@ -443,12 +445,12 @@ int elevatorSelectLevel(int elevator, int* mapPtr, int* elevationPtr, int* tileP
 				unsigned int tick = getTicks();
 				v44 += v43;
 				blitBufferToBuffer(
-				    _elevatorFrmImages[ELEVATOR_FRM_GAUGE].getData() + v18 * (int)v44,
-				    _elevatorFrmImages[ELEVATOR_FRM_GAUGE].getWidth(),
-				    _elevatorFrmImages[ELEVATOR_FRM_GAUGE].getHeight() / 13,
-				    _elevatorFrmImages[ELEVATOR_FRM_GAUGE].getWidth(),
-				    gElevatorWindowBuffer + _elevatorBackgroundFrmImage.getWidth() * 41 + 121,
-				    _elevatorBackgroundFrmImage.getWidth());
+					_elevatorFrmImages[ELEVATOR_FRM_GAUGE].getData() + v18 * (int)v44,
+					_elevatorFrmImages[ELEVATOR_FRM_GAUGE].getWidth(),
+					_elevatorFrmImages[ELEVATOR_FRM_GAUGE].getHeight() / 13,
+					_elevatorFrmImages[ELEVATOR_FRM_GAUGE].getWidth(),
+					gElevatorWindowBuffer + _elevatorBackgroundFrmImage.getWidth() * 41 + 121,
+					_elevatorBackgroundFrmImage.getWidth());
 
 				windowRefresh(gElevatorWindow);
 
@@ -466,7 +468,7 @@ int elevatorSelectLevel(int elevator, int* mapPtr, int* elevationPtr, int* tileP
 	elevatorWindowFree();
 
 	if (keyCode != KEY_ESCAPE) {
-		const ElevatorDescription* description = &(elevatorDescription[keyCode]);
+		const ElevatorDescription *description = &(elevatorDescription[keyCode]);
 		*mapPtr = description->map;
 		*elevationPtr = description->elevation;
 		*tilePtr = description->tile;
@@ -508,7 +510,7 @@ static int elevatorWindowInit(int elevator) {
 		return -1;
 	}
 
-	const ElevatorBackground* elevatorBackground = &(gElevatorBackgrounds[elevator]);
+	const ElevatorBackground *elevatorBackground = &(gElevatorBackgrounds[elevator]);
 	bool backgroundsLoaded = true;
 
 	int backgroundFid = buildFid(OBJ_TYPE_INTERFACE, elevatorBackground->backgroundFrmId, 0, 0, 0);
@@ -543,12 +545,12 @@ static int elevatorWindowInit(int elevator) {
 	int elevatorWindowX = (screenGetWidth() - _elevatorBackgroundFrmImage.getWidth()) / 2;
 	int elevatorWindowY = (screenGetHeight() - INTERFACE_BAR_HEIGHT - 1 - _elevatorBackgroundFrmImage.getHeight()) / 2;
 	gElevatorWindow = windowCreate(
-	                      elevatorWindowX,
-	                      elevatorWindowY,
-	                      _elevatorBackgroundFrmImage.getWidth(),
-	                      _elevatorBackgroundFrmImage.getHeight(),
-	                      256,
-	                      WINDOW_MODAL | WINDOW_DONT_MOVE_TOP);
+		elevatorWindowX,
+		elevatorWindowY,
+		_elevatorBackgroundFrmImage.getWidth(),
+		_elevatorBackgroundFrmImage.getHeight(),
+		256,
+		WINDOW_MODAL | WINDOW_DONT_MOVE_TOP);
 	if (gElevatorWindow == -1) {
 		_elevatorBackgroundFrmImage.unlock();
 		_elevatorPanelFrmImage.unlock();
@@ -571,30 +573,30 @@ static int elevatorWindowInit(int elevator) {
 
 	if (_elevatorPanelFrmImage.isLocked()) {
 		blitBufferToBuffer(_elevatorPanelFrmImage.getData(),
-		                   _elevatorPanelFrmImage.getWidth(),
-		                   _elevatorPanelFrmImage.getHeight(),
-		                   _elevatorPanelFrmImage.getWidth(),
-		                   gElevatorWindowBuffer + _elevatorBackgroundFrmImage.getWidth() * (_elevatorBackgroundFrmImage.getHeight() - _elevatorPanelFrmImage.getHeight()),
-		                   _elevatorBackgroundFrmImage.getWidth());
+						   _elevatorPanelFrmImage.getWidth(),
+						   _elevatorPanelFrmImage.getHeight(),
+						   _elevatorPanelFrmImage.getWidth(),
+						   gElevatorWindowBuffer + _elevatorBackgroundFrmImage.getWidth() * (_elevatorBackgroundFrmImage.getHeight() - _elevatorPanelFrmImage.getHeight()),
+						   _elevatorBackgroundFrmImage.getWidth());
 	}
 
 	int y = 40;
 	for (int level = 0; level < gElevatorLevels[elevator]; level++) {
 		int btn = buttonCreate(gElevatorWindow,
-		                       13,
-		                       y,
-		                       _elevatorFrmImages[ELEVATOR_FRM_BUTTON_DOWN].getWidth(),
-		                       _elevatorFrmImages[ELEVATOR_FRM_BUTTON_DOWN].getHeight(),
-		                       -1,
-		                       -1,
-		                       -1,
-		                       500 + level,
-		                       _elevatorFrmImages[ELEVATOR_FRM_BUTTON_UP].getData(),
-		                       _elevatorFrmImages[ELEVATOR_FRM_BUTTON_DOWN].getData(),
-		                       NULL,
-		                       BUTTON_FLAG_TRANSPARENT);
+							   13,
+							   y,
+							   _elevatorFrmImages[ELEVATOR_FRM_BUTTON_DOWN].getWidth(),
+							   _elevatorFrmImages[ELEVATOR_FRM_BUTTON_DOWN].getHeight(),
+							   -1,
+							   -1,
+							   -1,
+							   500 + level,
+							   _elevatorFrmImages[ELEVATOR_FRM_BUTTON_UP].getData(),
+							   _elevatorFrmImages[ELEVATOR_FRM_BUTTON_DOWN].getData(),
+							   NULL,
+							   BUTTON_FLAG_TRANSPARENT);
 		if (btn != -1) {
-			buttonSetCallbacks(btn, _gsound_red_butt_press, NULL);
+//			buttonSetCallbacks(btn, _gsound_red_butt_press, NULL); TODO audio
 		}
 		y += 60;
 	}
@@ -643,7 +645,7 @@ static int elevatorGetLevelFromKeyCode(int elevator, int keyCode) {
 }
 
 void elevatorsInit() {
-	char* elevatorsFileName;
+	char *elevatorsFileName;
 	configGetString(&gSfallConfig, SFALL_CONFIG_MISC_KEY, SFALL_CONFIG_ELEVATORS_FILE_KEY, &elevatorsFileName);
 	if (elevatorsFileName != NULL && *elevatorsFileName == '\0') {
 		elevatorsFileName = NULL;
@@ -661,7 +663,7 @@ void elevatorsInit() {
 					if (index >= ELEVATOR_COUNT) {
 						int levels = 0;
 						configGetInt(&elevatorsConfig, sectionKey, "ButtonCount", &levels);
-						gElevatorLevels[index] = std::clamp(levels, 2, ELEVATOR_LEVEL_MAX);
+						gElevatorLevels[index] = clamp(levels, 2, ELEVATOR_LEVEL_MAX);
 					}
 
 					configGetInt(&elevatorsConfig, sectionKey, "MainFrm", &(gElevatorBackgrounds[index].backgroundFrmId));
@@ -688,7 +690,7 @@ void elevatorsInit() {
 
 					int type;
 					if (configGetInt(&elevatorsConfig, sectionKey, "Image", &type)) {
-						type = std::clamp(type, 0, ELEVATORS_MAX - 1);
+						type = clamp(type, 0, ELEVATORS_MAX - 1);
 						if (index != type) {
 							memcpy(&(gElevatorBackgrounds[index]), &(gElevatorBackgrounds[type]), sizeof(*gElevatorBackgrounds));
 							memcpy(&(gElevatorLevels[index]), &(gElevatorLevels[type]), sizeof(*gElevatorLevels));
@@ -703,4 +705,4 @@ void elevatorsInit() {
 	}
 }
 
-} // namespace fallout
+} // namespace Fallout2
