@@ -1,36 +1,41 @@
-#include "options.h"
+#include "fallout2/options.h"
 
-#include <algorithm>
+// #include <algorithm>
 
-#include "art.h"
-#include "color.h"
-#include "combat.h"
-#include "combat_ai.h"
-#include "debug.h"
-#include "draw.h"
-#include "game.h"
-#include "game_mouse.h"
-#include "game_sound.h"
-#include "graph_lib.h"
-#include "input.h"
-#include "kb.h"
-#include "message.h"
-#include "mouse.h"
-#include "palette.h"
-#include "scripts.h"
-#include "settings.h"
-#include "svga.h"
-#include "text_font.h"
-#include "text_object.h"
-#include "window_manager.h"
+#include "fallout2/fallout2.h"
 
-namespace fallout {
+#include "fallout2/art.h"
+#include "fallout2/color.h"
+#include "fallout2/combat.h"
+#include "fallout2/combat_ai.h"
+#include "fallout2/debug.h"
+#include "fallout2/draw.h"
+#include "fallout2/game.h"
+#include "fallout2/game_mouse.h"
+// #include "fallout2/game_sound.h" TODO audio
+#include "fallout2/graph_lib.h"
+#include "fallout2/input.h"
+#include "fallout2/kb.h"
+#include "fallout2/message.h"
+#include "fallout2/mouse.h"
+#include "fallout2/palette.h"
+#include "fallout2/scripts.h"
+#include "fallout2/settings.h"
+#include "fallout2/svga.h"
+#include "fallout2/text_font.h"
+#include "fallout2/text_object.h"
+#include "fallout2/window_manager.h"
+
+namespace Fallout2 {
 
 #define PREFERENCES_WINDOW_WIDTH 640
 #define PREFERENCES_WINDOW_HEIGHT 480
 
 #define PRIMARY_OPTION_VALUE_COUNT 4
 #define SECONDARY_OPTION_VALUE_COUNT 2
+
+//TODO remove
+#define VOLUME_MAX (0x7FFF)
 
 typedef enum Preference {
 	PREF_GAME_DIFFICULTY,
@@ -101,7 +106,7 @@ typedef struct PreferenceDescription {
 	char name[32];
 	double minValue;
 	double maxValue;
-	int* valuePtr;
+	int *valuePtr;
 } PreferenceDescription;
 
 static void _SetSystemPrefs();
@@ -174,7 +179,7 @@ static const short word_48FC06[SECONDARY_OPTION_VALUE_COUNT] = {
 // y offsets for secondary preferences
 // 0x48FC30
 static const int dword_48FC30[SECONDARY_PREF_COUNT] = {
-	66, // combat messages
+	66,  // combat messages
 	133, // combat taunts
 	200, // language filter
 	264, // running
@@ -185,7 +190,7 @@ static const int dword_48FC30[SECONDARY_PREF_COUNT] = {
 // y offsets for primary preferences
 // 0x48FC1C
 static const int dword_48FC1C[PRIMARY_PREF_COUNT] = {
-	66, // game difficulty
+	66,  // game difficulty
 	143, // combat difficulty
 	222, // violence level
 	304, // target highlight
@@ -223,8 +228,8 @@ static const int gPreferencesWindowFrmIds[PREFERENCES_WINDOW_FRM_COUNT] = {
 	245, // prfxout.frm - options screen
 	246, // prefcvr.frm - options screen
 	247, // prfsldon.frm - options screen
-	8, // lilredup.frm - little red button up
-	9, // lilreddn.frm - little red button down
+	8,   // lilredup.frm - little red button up
+	9,   // lilreddn.frm - little red button down
 };
 
 // 0x6637E8
@@ -252,7 +257,7 @@ static double gPreferencesMouseSensitivity1;
 static double gPreferencesMouseSensitivity2;
 
 // 0x6638F8
-static unsigned char* gPreferencesWindowBuffer;
+static unsigned char *gPreferencesWindowBuffer;
 
 // 0x663904
 static int gPreferencesWindow;
@@ -367,25 +372,25 @@ static int gPreferencesCombatLooks1;
 
 // 0x5197F8
 static PreferenceDescription gPreferenceDescriptions[PREF_COUNT] = {
-	{ 3, 0, 76, 71, 0, 0, { 203, 204, 205, 0 }, 0, GAME_CONFIG_GAME_DIFFICULTY_KEY, 0, 0, &gPreferencesGameDifficulty1 },
-	{ 3, 0, 76, 149, 0, 0, { 206, 204, 208, 0 }, 0, GAME_CONFIG_COMBAT_DIFFICULTY_KEY, 0, 0, &gPreferencesCombatDifficulty1 },
-	{ 4, 0, 76, 226, 0, 0, { 214, 215, 204, 216 }, 0, GAME_CONFIG_VIOLENCE_LEVEL_KEY, 0, 0, &gPreferencesViolenceLevel1 },
-	{ 3, 0, 76, 309, 0, 0, { 202, 201, 213, 0 }, 0, GAME_CONFIG_TARGET_HIGHLIGHT_KEY, 0, 0, &gPreferencesTargetHighlight1 },
-	{ 2, 0, 76, 387, 0, 0, { 202, 201, 0, 0 }, 0, GAME_CONFIG_COMBAT_LOOKS_KEY, 0, 0, &gPreferencesCombatLooks1 },
-	{ 2, 0, 299, 74, 0, 0, { 211, 212, 0, 0 }, 0, GAME_CONFIG_COMBAT_MESSAGES_KEY, 0, 0, &gPreferencesCombatMessages1 },
-	{ 2, 0, 299, 141, 0, 0, { 202, 201, 0, 0 }, 0, GAME_CONFIG_COMBAT_TAUNTS_KEY, 0, 0, &gPreferencesCombatTaunts1 },
-	{ 2, 0, 299, 207, 0, 0, { 202, 201, 0, 0 }, 0, GAME_CONFIG_LANGUAGE_FILTER_KEY, 0, 0, &gPreferencesLanguageFilter1 },
-	{ 2, 0, 299, 271, 0, 0, { 209, 219, 0, 0 }, 0, GAME_CONFIG_RUNNING_KEY, 0, 0, &gPreferencesRunning1 },
-	{ 2, 0, 299, 338, 0, 0, { 202, 201, 0, 0 }, 0, GAME_CONFIG_SUBTITLES_KEY, 0, 0, &gPreferencesSubtitles1 },
-	{ 2, 0, 299, 404, 0, 0, { 202, 201, 0, 0 }, 0, GAME_CONFIG_ITEM_HIGHLIGHT_KEY, 0, 0, &gPreferencesItemHighlight1 },
-	{ 2, 0, 374, 50, 0, 0, { 207, 210, 0, 0 }, 0, GAME_CONFIG_COMBAT_SPEED_KEY, 0.0, 50.0, &gPreferencesCombatSpeed1 },
-	{ 3, 0, 374, 125, 0, 0, { 217, 209, 218, 0 }, 0, GAME_CONFIG_TEXT_BASE_DELAY_KEY, 1.0, 6.0, NULL },
-	{ 4, 0, 374, 196, 0, 0, { 202, 221, 209, 222 }, 0, GAME_CONFIG_MASTER_VOLUME_KEY, 0, 32767.0, &gPreferencesMasterVolume1 },
-	{ 4, 0, 374, 247, 0, 0, { 202, 221, 209, 222 }, 0, GAME_CONFIG_MUSIC_VOLUME_KEY, 0, 32767.0, &gPreferencesMusicVolume1 },
-	{ 4, 0, 374, 298, 0, 0, { 202, 221, 209, 222 }, 0, GAME_CONFIG_SNDFX_VOLUME_KEY, 0, 32767.0, &gPreferencesSoundEffectsVolume1 },
-	{ 4, 0, 374, 349, 0, 0, { 202, 221, 209, 222 }, 0, GAME_CONFIG_SPEECH_VOLUME_KEY, 0, 32767.0, &gPreferencesSpeechVolume1 },
-	{ 2, 0, 374, 400, 0, 0, { 207, 223, 0, 0 }, 0, GAME_CONFIG_BRIGHTNESS_KEY, 1.0, 1.17999267578125, NULL },
-	{ 2, 0, 374, 451, 0, 0, { 207, 218, 0, 0 }, 0, GAME_CONFIG_MOUSE_SENSITIVITY_KEY, 1.0, 2.5, NULL },
+	{3, 0, 76, 71, 0, 0, {203, 204, 205, 0}, 0, GAME_CONFIG_GAME_DIFFICULTY_KEY, 0, 0, &gPreferencesGameDifficulty1},
+	{3, 0, 76, 149, 0, 0, {206, 204, 208, 0}, 0, GAME_CONFIG_COMBAT_DIFFICULTY_KEY, 0, 0, &gPreferencesCombatDifficulty1},
+	{4, 0, 76, 226, 0, 0, {214, 215, 204, 216}, 0, GAME_CONFIG_VIOLENCE_LEVEL_KEY, 0, 0, &gPreferencesViolenceLevel1},
+	{3, 0, 76, 309, 0, 0, {202, 201, 213, 0}, 0, GAME_CONFIG_TARGET_HIGHLIGHT_KEY, 0, 0, &gPreferencesTargetHighlight1},
+	{2, 0, 76, 387, 0, 0, {202, 201, 0, 0}, 0, GAME_CONFIG_COMBAT_LOOKS_KEY, 0, 0, &gPreferencesCombatLooks1},
+	{2, 0, 299, 74, 0, 0, {211, 212, 0, 0}, 0, GAME_CONFIG_COMBAT_MESSAGES_KEY, 0, 0, &gPreferencesCombatMessages1},
+	{2, 0, 299, 141, 0, 0, {202, 201, 0, 0}, 0, GAME_CONFIG_COMBAT_TAUNTS_KEY, 0, 0, &gPreferencesCombatTaunts1},
+	{2, 0, 299, 207, 0, 0, {202, 201, 0, 0}, 0, GAME_CONFIG_LANGUAGE_FILTER_KEY, 0, 0, &gPreferencesLanguageFilter1},
+	{2, 0, 299, 271, 0, 0, {209, 219, 0, 0}, 0, GAME_CONFIG_RUNNING_KEY, 0, 0, &gPreferencesRunning1},
+	{2, 0, 299, 338, 0, 0, {202, 201, 0, 0}, 0, GAME_CONFIG_SUBTITLES_KEY, 0, 0, &gPreferencesSubtitles1},
+	{2, 0, 299, 404, 0, 0, {202, 201, 0, 0}, 0, GAME_CONFIG_ITEM_HIGHLIGHT_KEY, 0, 0, &gPreferencesItemHighlight1},
+	{2, 0, 374, 50, 0, 0, {207, 210, 0, 0}, 0, GAME_CONFIG_COMBAT_SPEED_KEY, 0.0, 50.0, &gPreferencesCombatSpeed1},
+	{3, 0, 374, 125, 0, 0, {217, 209, 218, 0}, 0, GAME_CONFIG_TEXT_BASE_DELAY_KEY, 1.0, 6.0, NULL},
+	{4, 0, 374, 196, 0, 0, {202, 221, 209, 222}, 0, GAME_CONFIG_MASTER_VOLUME_KEY, 0, 32767.0, &gPreferencesMasterVolume1},
+	{4, 0, 374, 247, 0, 0, {202, 221, 209, 222}, 0, GAME_CONFIG_MUSIC_VOLUME_KEY, 0, 32767.0, &gPreferencesMusicVolume1},
+	{4, 0, 374, 298, 0, 0, {202, 221, 209, 222}, 0, GAME_CONFIG_SNDFX_VOLUME_KEY, 0, 32767.0, &gPreferencesSoundEffectsVolume1},
+	{4, 0, 374, 349, 0, 0, {202, 221, 209, 222}, 0, GAME_CONFIG_SPEECH_VOLUME_KEY, 0, 32767.0, &gPreferencesSpeechVolume1},
+	{2, 0, 374, 400, 0, 0, {207, 223, 0, 0}, 0, GAME_CONFIG_BRIGHTNESS_KEY, 1.0, 1.17999267578125, NULL},
+	{2, 0, 374, 451, 0, 0, {207, 218, 0, 0}, 0, GAME_CONFIG_MOUSE_SENSITIVITY_KEY, 1.0, 2.5, NULL},
 };
 
 static FrmImage _preferencesFrmImages[PREFERENCES_WINDOW_FRM_COUNT];
@@ -514,40 +519,40 @@ static void preferencesSetDefaults(bool a1) {
 
 // 0x4931F8
 static void _JustUpdate_() {
-	gPreferencesGameDifficulty1 = std::clamp(gPreferencesGameDifficulty1, 0, 2);
-	gPreferencesCombatDifficulty1 = std::clamp(gPreferencesCombatDifficulty1, 0, 2);
-	gPreferencesViolenceLevel1 = std::clamp(gPreferencesViolenceLevel1, 0, 3);
-	gPreferencesTargetHighlight1 = std::clamp(gPreferencesTargetHighlight1, 0, 2);
-	gPreferencesCombatMessages1 = std::clamp(gPreferencesCombatMessages1, 0, 1);
-	gPreferencesCombatLooks1 = std::clamp(gPreferencesCombatLooks1, 0, 1);
-	gPreferencesCombatTaunts1 = std::clamp(gPreferencesCombatTaunts1, 0, 1);
-	gPreferencesLanguageFilter1 = std::clamp(gPreferencesLanguageFilter1, 0, 1);
-	gPreferencesRunning1 = std::clamp(gPreferencesRunning1, 0, 1);
-	gPreferencesSubtitles1 = std::clamp(gPreferencesSubtitles1, 0, 1);
-	gPreferencesItemHighlight1 = std::clamp(gPreferencesItemHighlight1, 0, 1);
-	gPreferencesCombatSpeed1 = std::clamp(gPreferencesCombatSpeed1, 0, 50);
-	gPreferencesPlayerSpeedup1 = std::clamp(gPreferencesPlayerSpeedup1, 0, 1);
-	gPreferencesTextBaseDelay1 = std::clamp(gPreferencesTextBaseDelay1, 6.0, 10.0);
-	gPreferencesMasterVolume1 = std::clamp(gPreferencesMasterVolume1, 0, VOLUME_MAX);
-	gPreferencesMusicVolume1 = std::clamp(gPreferencesMusicVolume1, 0, VOLUME_MAX);
-	gPreferencesSoundEffectsVolume1 = std::clamp(gPreferencesSoundEffectsVolume1, 0, VOLUME_MAX);
-	gPreferencesSpeechVolume1 = std::clamp(gPreferencesSpeechVolume1, 0, VOLUME_MAX);
-	gPreferencesBrightness1 = std::clamp(gPreferencesBrightness1, 1.0, 1.17999267578125);
-	gPreferencesMouseSensitivity1 = std::clamp(gPreferencesMouseSensitivity1, 1.0, 2.5);
+	gPreferencesGameDifficulty1 = clamp(gPreferencesGameDifficulty1, 0, 2);
+	gPreferencesCombatDifficulty1 = clamp(gPreferencesCombatDifficulty1, 0, 2);
+	gPreferencesViolenceLevel1 = clamp(gPreferencesViolenceLevel1, 0, 3);
+	gPreferencesTargetHighlight1 = clamp(gPreferencesTargetHighlight1, 0, 2);
+	gPreferencesCombatMessages1 = clamp(gPreferencesCombatMessages1, 0, 1);
+	gPreferencesCombatLooks1 = clamp(gPreferencesCombatLooks1, 0, 1);
+	gPreferencesCombatTaunts1 = clamp(gPreferencesCombatTaunts1, 0, 1);
+	gPreferencesLanguageFilter1 = clamp(gPreferencesLanguageFilter1, 0, 1);
+	gPreferencesRunning1 = clamp(gPreferencesRunning1, 0, 1);
+	gPreferencesSubtitles1 = clamp(gPreferencesSubtitles1, 0, 1);
+	gPreferencesItemHighlight1 = clamp(gPreferencesItemHighlight1, 0, 1);
+	gPreferencesCombatSpeed1 = clamp(gPreferencesCombatSpeed1, 0, 50);
+	gPreferencesPlayerSpeedup1 = clamp(gPreferencesPlayerSpeedup1, 0, 1);
+	gPreferencesTextBaseDelay1 = clamp(gPreferencesTextBaseDelay1, 6.0, 10.0);
+	gPreferencesMasterVolume1 = clamp(gPreferencesMasterVolume1, 0, VOLUME_MAX);
+	gPreferencesMusicVolume1 = clamp(gPreferencesMusicVolume1, 0, VOLUME_MAX);
+	gPreferencesSoundEffectsVolume1 = clamp(gPreferencesSoundEffectsVolume1, 0, VOLUME_MAX);
+	gPreferencesSpeechVolume1 = clamp(gPreferencesSpeechVolume1, 0, VOLUME_MAX);
+	gPreferencesBrightness1 = clamp(gPreferencesBrightness1, 1.0, 1.17999267578125);
+	gPreferencesMouseSensitivity1 = clamp(gPreferencesMouseSensitivity1, 1.0, 2.5);
 
 	textObjectsSetBaseDelay(gPreferencesTextBaseDelay1);
 	gameMouseLoadItemHighlight();
 
 	double textLineDelay = (gPreferencesTextBaseDelay1 + (-1.0)) * 0.2 * 2.0;
-	textLineDelay = std::clamp(textLineDelay, 0.0, 2.0);
+	textLineDelay = clamp(textLineDelay, 0.0, 2.0);
 
 	textObjectsSetLineDelay(textLineDelay);
-	aiMessageListReloadIfNeeded();
+//	aiMessageListReloadIfNeeded(); TODO combat_ai
 	_scr_message_free();
-	gameSoundSetMasterVolume(gPreferencesMasterVolume1);
+/*	gameSoundSetMasterVolume(gPreferencesMasterVolume1);  TODO audio
 	backgroundSoundSetVolume(gPreferencesMusicVolume1);
 	soundEffectsSetVolume(gPreferencesSoundEffectsVolume1);
-	speechSetVolume(gPreferencesSpeechVolume1);
+	speechSetVolume(gPreferencesSpeechVolume1); */
 	mouseSetSensitivity(gPreferencesMouseSensitivity1);
 	colorSetBrightness(gPreferencesBrightness1);
 }
@@ -556,7 +561,7 @@ static void _JustUpdate_() {
 static void _UpdateThing(int index) {
 	fontSetCurrent(101);
 
-	PreferenceDescription* meta = &(gPreferenceDescriptions[index]);
+	PreferenceDescription *meta = &(gPreferenceDescriptions[index]);
 
 	if (index >= FIRST_PRIMARY_PREF && index <= LAST_PRIMARY_PREF) {
 		int primaryOptionIndex = index - FIRST_PRIMARY_PREF;
@@ -567,10 +572,10 @@ static void _UpdateThing(int index) {
 		blitBufferToBuffer(_preferencesFrmImages[PREFERENCES_WINDOW_FRM_BACKGROUND].getData() + 640 * offsets[primaryOptionIndex] + 23, 160, 54, 640, gPreferencesWindowBuffer + 640 * offsets[primaryOptionIndex] + 23, 640);
 
 		for (int valueIndex = 0; valueIndex < meta->valuesCount; valueIndex++) {
-			const char* text = getmsg(&gPreferencesMessageList, &gPreferencesMessageListItem, meta->labelIds[valueIndex]);
+			const char *text = getmsg(&gPreferencesMessageList, &gPreferencesMessageListItem, meta->labelIds[valueIndex]);
 
 			char copy[100]; // TODO: Size is probably wrong.
-			strcpy(copy, text);
+			strncpy(copy, text, sizeof(copy) - 1);
 
 			int x = meta->knobX + word_48FBF6[valueIndex];
 			int len = fontGetStringWidth(copy);
@@ -589,13 +594,13 @@ static void _UpdateThing(int index) {
 				break;
 			}
 
-			char* p = copy;
+			char *p = copy;
 			while (*p != '\0' && *p != ' ') {
 				p++;
 			}
 
 			int y = meta->knobY + word_48FBFE[valueIndex];
-			const char* s;
+			const char *s;
 			if (*p != '\0') {
 				*p = '\0';
 				fontDrawText(gPreferencesWindowBuffer + 640 * y + x, copy, 640, 640, _colorTable[18979]);
@@ -620,7 +625,7 @@ static void _UpdateThing(int index) {
 
 		// Secondary options are booleans, so it's index is also it's value.
 		for (int value = 0; value < 2; value++) {
-			const char* text = getmsg(&gPreferencesMessageList, &gPreferencesMessageListItem, meta->labelIds[value]);
+			const char *text = getmsg(&gPreferencesMessageList, &gPreferencesMessageListItem, meta->labelIds[value]);
 
 			int x;
 			if (value) {
@@ -644,7 +649,7 @@ static void _UpdateThing(int index) {
 		case PREF_COMBAT_SPEED:
 			if (1) {
 				double value = *meta->valuePtr;
-				value = std::clamp(value, 0.0, 50.0);
+				value = clamp(value, 0.0, 50.0);
 
 				int x = (int)((value - meta->minValue) * 219.0 / (meta->maxValue - meta->minValue) + 384.0);
 				blitBufferToBufferTrans(_preferencesFrmImages[PREFERENCES_WINDOW_FRM_KNOB_OFF].getData(), 21, 12, 21, gPreferencesWindowBuffer + 640 * meta->knobY + x, 640);
@@ -652,13 +657,13 @@ static void _UpdateThing(int index) {
 			break;
 		case PREF_TEXT_BASE_DELAY:
 			if (1) {
-				gPreferencesTextBaseDelay1 = std::clamp(gPreferencesTextBaseDelay1, 1.0, 6.0);
+				gPreferencesTextBaseDelay1 = clamp(gPreferencesTextBaseDelay1, 1.0, 6.0);
 
 				int x = (int)((6.0 - gPreferencesTextBaseDelay1) * 43.8 + 384.0);
 				blitBufferToBufferTrans(_preferencesFrmImages[PREFERENCES_WINDOW_FRM_KNOB_OFF].getData(), 21, 12, 21, gPreferencesWindowBuffer + 640 * meta->knobY + x, 640);
 
 				double value = (gPreferencesTextBaseDelay1 - 1.0) * 0.2 * 2.0;
-				value = std::clamp(value, 0.0, 2.0);
+				value = clamp(value, 0.0, 2.0);
 
 				textObjectsSetBaseDelay(gPreferencesTextBaseDelay1);
 				textObjectsSetLineDelay(value);
@@ -670,30 +675,30 @@ static void _UpdateThing(int index) {
 		case PREF_SPEECH_VOLUME:
 			if (1) {
 				double value = *meta->valuePtr;
-				value = std::clamp(value, meta->minValue, meta->maxValue);
+				value = clamp(value, meta->minValue, meta->maxValue);
 
 				int x = (int)((value - meta->minValue) * 219.0 / (meta->maxValue - meta->minValue) + 384.0);
 				blitBufferToBufferTrans(_preferencesFrmImages[PREFERENCES_WINDOW_FRM_KNOB_OFF].getData(), 21, 12, 21, gPreferencesWindowBuffer + 640 * meta->knobY + x, 640);
 
 				switch (index) {
 				case PREF_MASTER_VOLUME:
-					gameSoundSetMasterVolume(gPreferencesMasterVolume1);
+//					gameSoundSetMasterVolume(gPreferencesMasterVolume1); TODO audio
 					break;
 				case PREF_MUSIC_VOLUME:
-					backgroundSoundSetVolume(gPreferencesMusicVolume1);
+//					backgroundSoundSetVolume(gPreferencesMusicVolume1); TODO audio
 					break;
 				case PREF_SFX_VOLUME:
-					soundEffectsSetVolume(gPreferencesSoundEffectsVolume1);
+//					soundEffectsSetVolume(gPreferencesSoundEffectsVolume1); TODO audio
 					break;
 				case PREF_SPEECH_VOLUME:
-					speechSetVolume(gPreferencesSpeechVolume1);
+//					speechSetVolume(gPreferencesSpeechVolume1); TODO audio
 					break;
 				}
 			}
 			break;
 		case PREF_BRIGHTNESS:
 			if (1) {
-				gPreferencesBrightness1 = std::clamp(gPreferencesBrightness1, 1.0, 1.17999267578125);
+				gPreferencesBrightness1 = clamp(gPreferencesBrightness1, 1.0, 1.17999267578125);
 
 				int x = (int)((gPreferencesBrightness1 - meta->minValue) * (219.0 / (meta->maxValue - meta->minValue)) + 384.0);
 				blitBufferToBufferTrans(_preferencesFrmImages[PREFERENCES_WINDOW_FRM_KNOB_OFF].getData(), 21, 12, 21, gPreferencesWindowBuffer + 640 * meta->knobY + x, 640);
@@ -703,7 +708,7 @@ static void _UpdateThing(int index) {
 			break;
 		case PREF_MOUSE_SENSITIVIY:
 			if (1) {
-				gPreferencesMouseSensitivity1 = std::clamp(gPreferencesMouseSensitivity1, 1.0, 2.5);
+				gPreferencesMouseSensitivity1 = clamp(gPreferencesMouseSensitivity1, 1.0, 2.5);
 
 				int x = (int)((gPreferencesMouseSensitivity1 - meta->minValue) * (219.0 / (meta->maxValue - meta->minValue)) + 384.0);
 				blitBufferToBufferTrans(_preferencesFrmImages[PREFERENCES_WINDOW_FRM_KNOB_OFF].getData(), 21, 12, 21, gPreferencesWindowBuffer + 640 * meta->knobY + x, 640);
@@ -714,7 +719,7 @@ static void _UpdateThing(int index) {
 		}
 
 		for (int optionIndex = 0; optionIndex < meta->valuesCount; optionIndex++) {
-			const char* str = getmsg(&gPreferencesMessageList, &gPreferencesMessageListItem, meta->labelIds[optionIndex]);
+			const char *str = getmsg(&gPreferencesMessageList, &gPreferencesMessageListItem, meta->labelIds[optionIndex]);
 
 			int x;
 			switch (optionIndex) {
@@ -811,31 +816,51 @@ int _SavePrefs(bool save) {
 }
 
 // 0x493224
-int preferencesSave(File* stream) {
+int preferencesSave(File *stream) {
 	float textBaseDelay = (float)gPreferencesTextBaseDelay1;
 	float brightness = (float)gPreferencesBrightness1;
 	float mouseSensitivity = (float)gPreferencesMouseSensitivity1;
 
-	if (fileWriteInt32(stream, gPreferencesGameDifficulty1) == -1) goto err;
-	if (fileWriteInt32(stream, gPreferencesCombatDifficulty1) == -1) goto err;
-	if (fileWriteInt32(stream, gPreferencesViolenceLevel1) == -1) goto err;
-	if (fileWriteInt32(stream, gPreferencesTargetHighlight1) == -1) goto err;
-	if (fileWriteInt32(stream, gPreferencesCombatLooks1) == -1) goto err;
-	if (fileWriteInt32(stream, gPreferencesCombatMessages1) == -1) goto err;
-	if (fileWriteInt32(stream, gPreferencesCombatTaunts1) == -1) goto err;
-	if (fileWriteInt32(stream, gPreferencesLanguageFilter1) == -1) goto err;
-	if (fileWriteInt32(stream, gPreferencesRunning1) == -1) goto err;
-	if (fileWriteInt32(stream, gPreferencesSubtitles1) == -1) goto err;
-	if (fileWriteInt32(stream, gPreferencesItemHighlight1) == -1) goto err;
-	if (fileWriteInt32(stream, gPreferencesCombatSpeed1) == -1) goto err;
-	if (fileWriteInt32(stream, gPreferencesPlayerSpeedup1) == -1) goto err;
-	if (fileWriteFloat(stream, textBaseDelay) == -1) goto err;
-	if (fileWriteInt32(stream, gPreferencesMasterVolume1) == -1) goto err;
-	if (fileWriteInt32(stream, gPreferencesMusicVolume1) == -1) goto err;
-	if (fileWriteInt32(stream, gPreferencesSoundEffectsVolume1) == -1) goto err;
-	if (fileWriteInt32(stream, gPreferencesSpeechVolume1) == -1) goto err;
-	if (fileWriteFloat(stream, brightness) == -1) goto err;
-	if (fileWriteFloat(stream, mouseSensitivity) == -1) goto err;
+	if (fileWriteInt32(stream, gPreferencesGameDifficulty1) == -1)
+		goto err;
+	if (fileWriteInt32(stream, gPreferencesCombatDifficulty1) == -1)
+		goto err;
+	if (fileWriteInt32(stream, gPreferencesViolenceLevel1) == -1)
+		goto err;
+	if (fileWriteInt32(stream, gPreferencesTargetHighlight1) == -1)
+		goto err;
+	if (fileWriteInt32(stream, gPreferencesCombatLooks1) == -1)
+		goto err;
+	if (fileWriteInt32(stream, gPreferencesCombatMessages1) == -1)
+		goto err;
+	if (fileWriteInt32(stream, gPreferencesCombatTaunts1) == -1)
+		goto err;
+	if (fileWriteInt32(stream, gPreferencesLanguageFilter1) == -1)
+		goto err;
+	if (fileWriteInt32(stream, gPreferencesRunning1) == -1)
+		goto err;
+	if (fileWriteInt32(stream, gPreferencesSubtitles1) == -1)
+		goto err;
+	if (fileWriteInt32(stream, gPreferencesItemHighlight1) == -1)
+		goto err;
+	if (fileWriteInt32(stream, gPreferencesCombatSpeed1) == -1)
+		goto err;
+	if (fileWriteInt32(stream, gPreferencesPlayerSpeedup1) == -1)
+		goto err;
+	if (fileWriteFloat(stream, textBaseDelay) == -1)
+		goto err;
+	if (fileWriteInt32(stream, gPreferencesMasterVolume1) == -1)
+		goto err;
+	if (fileWriteInt32(stream, gPreferencesMusicVolume1) == -1)
+		goto err;
+	if (fileWriteInt32(stream, gPreferencesSoundEffectsVolume1) == -1)
+		goto err;
+	if (fileWriteInt32(stream, gPreferencesSpeechVolume1) == -1)
+		goto err;
+	if (fileWriteFloat(stream, brightness) == -1)
+		goto err;
+	if (fileWriteFloat(stream, mouseSensitivity) == -1)
+		goto err;
 
 	return 0;
 
@@ -847,33 +872,53 @@ err:
 }
 
 // 0x49340C
-int preferencesLoad(File* stream) {
+int preferencesLoad(File *stream) {
 	float textBaseDelay;
 	float brightness;
 	float mouseSensitivity;
 
 	preferencesSetDefaults(false);
 
-	if (fileReadInt32(stream, &gPreferencesGameDifficulty1) == -1) goto err;
-	if (fileReadInt32(stream, &gPreferencesCombatDifficulty1) == -1) goto err;
-	if (fileReadInt32(stream, &gPreferencesViolenceLevel1) == -1) goto err;
-	if (fileReadInt32(stream, &gPreferencesTargetHighlight1) == -1) goto err;
-	if (fileReadInt32(stream, &gPreferencesCombatLooks1) == -1) goto err;
-	if (fileReadInt32(stream, &gPreferencesCombatMessages1) == -1) goto err;
-	if (fileReadInt32(stream, &gPreferencesCombatTaunts1) == -1) goto err;
-	if (fileReadInt32(stream, &gPreferencesLanguageFilter1) == -1) goto err;
-	if (fileReadInt32(stream, &gPreferencesRunning1) == -1) goto err;
-	if (fileReadInt32(stream, &gPreferencesSubtitles1) == -1) goto err;
-	if (fileReadInt32(stream, &gPreferencesItemHighlight1) == -1) goto err;
-	if (fileReadInt32(stream, &gPreferencesCombatSpeed1) == -1) goto err;
-	if (fileReadInt32(stream, &gPreferencesPlayerSpeedup1) == -1) goto err;
-	if (fileReadFloat(stream, &textBaseDelay) == -1) goto err;
-	if (fileReadInt32(stream, &gPreferencesMasterVolume1) == -1) goto err;
-	if (fileReadInt32(stream, &gPreferencesMusicVolume1) == -1) goto err;
-	if (fileReadInt32(stream, &gPreferencesSoundEffectsVolume1) == -1) goto err;
-	if (fileReadInt32(stream, &gPreferencesSpeechVolume1) == -1) goto err;
-	if (fileReadFloat(stream, &brightness) == -1) goto err;
-	if (fileReadFloat(stream, &mouseSensitivity) == -1) goto err;
+	if (fileReadInt32(stream, &gPreferencesGameDifficulty1) == -1)
+		goto err;
+	if (fileReadInt32(stream, &gPreferencesCombatDifficulty1) == -1)
+		goto err;
+	if (fileReadInt32(stream, &gPreferencesViolenceLevel1) == -1)
+		goto err;
+	if (fileReadInt32(stream, &gPreferencesTargetHighlight1) == -1)
+		goto err;
+	if (fileReadInt32(stream, &gPreferencesCombatLooks1) == -1)
+		goto err;
+	if (fileReadInt32(stream, &gPreferencesCombatMessages1) == -1)
+		goto err;
+	if (fileReadInt32(stream, &gPreferencesCombatTaunts1) == -1)
+		goto err;
+	if (fileReadInt32(stream, &gPreferencesLanguageFilter1) == -1)
+		goto err;
+	if (fileReadInt32(stream, &gPreferencesRunning1) == -1)
+		goto err;
+	if (fileReadInt32(stream, &gPreferencesSubtitles1) == -1)
+		goto err;
+	if (fileReadInt32(stream, &gPreferencesItemHighlight1) == -1)
+		goto err;
+	if (fileReadInt32(stream, &gPreferencesCombatSpeed1) == -1)
+		goto err;
+	if (fileReadInt32(stream, &gPreferencesPlayerSpeedup1) == -1)
+		goto err;
+	if (fileReadFloat(stream, &textBaseDelay) == -1)
+		goto err;
+	if (fileReadInt32(stream, &gPreferencesMasterVolume1) == -1)
+		goto err;
+	if (fileReadInt32(stream, &gPreferencesMusicVolume1) == -1)
+		goto err;
+	if (fileReadInt32(stream, &gPreferencesSoundEffectsVolume1) == -1)
+		goto err;
+	if (fileReadInt32(stream, &gPreferencesSpeechVolume1) == -1)
+		goto err;
+	if (fileReadFloat(stream, &brightness) == -1)
+		goto err;
+	if (fileReadFloat(stream, &mouseSensitivity) == -1)
+		goto err;
 
 	gPreferencesBrightness1 = brightness;
 	gPreferencesMouseSensitivity1 = mouseSensitivity;
@@ -945,7 +990,7 @@ void brightnessDecrease() {
 static int preferencesWindowInit() {
 	int i;
 	int fid;
-	char* messageItemText;
+	char *messageItemText;
 	int x;
 	int y;
 	int width;
@@ -982,11 +1027,11 @@ static int preferencesWindowInit() {
 	int preferencesWindowX = (screenGetWidth() - PREFERENCES_WINDOW_WIDTH) / 2;
 	int preferencesWindowY = (screenGetHeight() - PREFERENCES_WINDOW_HEIGHT) / 2;
 	gPreferencesWindow = windowCreate(preferencesWindowX,
-	                                  preferencesWindowY,
-	                                  PREFERENCES_WINDOW_WIDTH,
-	                                  PREFERENCES_WINDOW_HEIGHT,
-	                                  256,
-	                                  WINDOW_MODAL | WINDOW_DONT_MOVE_TOP);
+									  preferencesWindowY,
+									  PREFERENCES_WINDOW_WIDTH,
+									  PREFERENCES_WINDOW_HEIGHT,
+									  256,
+									  WINDOW_MODAL | WINDOW_DONT_MOVE_TOP);
 	if (gPreferencesWindow == -1) {
 		for (i = 0; i < PREFERENCES_WINDOW_FRM_COUNT; i++) {
 			_preferencesFrmImages[i].unlock();
@@ -996,8 +1041,8 @@ static int preferencesWindowInit() {
 
 	gPreferencesWindowBuffer = windowGetBuffer(gPreferencesWindow);
 	memcpy(gPreferencesWindowBuffer,
-	       _preferencesFrmImages[PREFERENCES_WINDOW_FRM_BACKGROUND].getData(),
-	       _preferencesFrmImages[PREFERENCES_WINDOW_FRM_BACKGROUND].getWidth() * _preferencesFrmImages[PREFERENCES_WINDOW_FRM_BACKGROUND].getHeight());
+		   _preferencesFrmImages[PREFERENCES_WINDOW_FRM_BACKGROUND].getData(),
+		   _preferencesFrmImages[PREFERENCES_WINDOW_FRM_BACKGROUND].getWidth() * _preferencesFrmImages[PREFERENCES_WINDOW_FRM_BACKGROUND].getHeight());
 
 	fontSetCurrent(104);
 
@@ -1084,76 +1129,76 @@ static int preferencesWindowInit() {
 	}
 
 	_plyrspdbid = buttonCreate(gPreferencesWindow,
-	                           383,
-	                           68,
-	                           _preferencesFrmImages[PREFERENCES_WINDOW_FRM_CHECKBOX_OFF].getWidth(),
-	                           _preferencesFrmImages[PREFERENCES_WINDOW_FRM_CHECKBOX_ON].getHeight(),
-	                           -1,
-	                           -1,
-	                           524,
-	                           524,
-	                           _preferencesFrmImages[PREFERENCES_WINDOW_FRM_CHECKBOX_OFF].getData(),
-	                           _preferencesFrmImages[PREFERENCES_WINDOW_FRM_CHECKBOX_ON].getData(),
-	                           NULL,
-	                           BUTTON_FLAG_TRANSPARENT | BUTTON_FLAG_0x01 | BUTTON_FLAG_0x02);
+							   383,
+							   68,
+							   _preferencesFrmImages[PREFERENCES_WINDOW_FRM_CHECKBOX_OFF].getWidth(),
+							   _preferencesFrmImages[PREFERENCES_WINDOW_FRM_CHECKBOX_ON].getHeight(),
+							   -1,
+							   -1,
+							   524,
+							   524,
+							   _preferencesFrmImages[PREFERENCES_WINDOW_FRM_CHECKBOX_OFF].getData(),
+							   _preferencesFrmImages[PREFERENCES_WINDOW_FRM_CHECKBOX_ON].getData(),
+							   NULL,
+							   BUTTON_FLAG_TRANSPARENT | BUTTON_FLAG_0x01 | BUTTON_FLAG_0x02);
 	if (_plyrspdbid != -1) {
 		_win_set_button_rest_state(_plyrspdbid, gPreferencesPlayerSpeedup1, 0);
 	}
 
-	buttonSetCallbacks(_plyrspdbid, _gsound_med_butt_press, _gsound_med_butt_press);
+//	buttonSetCallbacks(_plyrspdbid, _gsound_med_butt_press, _gsound_med_butt_press); TODO audio
 
 	// DEFAULT
 	btn = buttonCreate(gPreferencesWindow,
-	                   23,
-	                   450,
-	                   _preferencesFrmImages[PREFERENCES_WINDOW_FRM_LITTLE_RED_BUTTON_UP].getWidth(),
-	                   _preferencesFrmImages[PREFERENCES_WINDOW_FRM_LITTLE_RED_BUTTON_DOWN].getHeight(),
-	                   -1,
-	                   -1,
-	                   -1,
-	                   527,
-	                   _preferencesFrmImages[PREFERENCES_WINDOW_FRM_LITTLE_RED_BUTTON_UP].getData(),
-	                   _preferencesFrmImages[PREFERENCES_WINDOW_FRM_LITTLE_RED_BUTTON_DOWN].getData(),
-	                   NULL,
-	                   BUTTON_FLAG_TRANSPARENT);
+					   23,
+					   450,
+					   _preferencesFrmImages[PREFERENCES_WINDOW_FRM_LITTLE_RED_BUTTON_UP].getWidth(),
+					   _preferencesFrmImages[PREFERENCES_WINDOW_FRM_LITTLE_RED_BUTTON_DOWN].getHeight(),
+					   -1,
+					   -1,
+					   -1,
+					   527,
+					   _preferencesFrmImages[PREFERENCES_WINDOW_FRM_LITTLE_RED_BUTTON_UP].getData(),
+					   _preferencesFrmImages[PREFERENCES_WINDOW_FRM_LITTLE_RED_BUTTON_DOWN].getData(),
+					   NULL,
+					   BUTTON_FLAG_TRANSPARENT);
 	if (btn != -1) {
-		buttonSetCallbacks(btn, _gsound_red_butt_press, _gsound_red_butt_release);
+//		buttonSetCallbacks(btn, _gsound_red_butt_press, _gsound_red_butt_release); TODO audio
 	}
 
 	// DONE
 	btn = buttonCreate(gPreferencesWindow,
-	                   148,
-	                   450,
-	                   _preferencesFrmImages[PREFERENCES_WINDOW_FRM_LITTLE_RED_BUTTON_UP].getWidth(),
-	                   _preferencesFrmImages[PREFERENCES_WINDOW_FRM_LITTLE_RED_BUTTON_DOWN].getHeight(),
-	                   -1,
-	                   -1,
-	                   -1,
-	                   504,
-	                   _preferencesFrmImages[PREFERENCES_WINDOW_FRM_LITTLE_RED_BUTTON_UP].getData(),
-	                   _preferencesFrmImages[PREFERENCES_WINDOW_FRM_LITTLE_RED_BUTTON_DOWN].getData(),
-	                   NULL,
-	                   BUTTON_FLAG_TRANSPARENT);
+					   148,
+					   450,
+					   _preferencesFrmImages[PREFERENCES_WINDOW_FRM_LITTLE_RED_BUTTON_UP].getWidth(),
+					   _preferencesFrmImages[PREFERENCES_WINDOW_FRM_LITTLE_RED_BUTTON_DOWN].getHeight(),
+					   -1,
+					   -1,
+					   -1,
+					   504,
+					   _preferencesFrmImages[PREFERENCES_WINDOW_FRM_LITTLE_RED_BUTTON_UP].getData(),
+					   _preferencesFrmImages[PREFERENCES_WINDOW_FRM_LITTLE_RED_BUTTON_DOWN].getData(),
+					   NULL,
+					   BUTTON_FLAG_TRANSPARENT);
 	if (btn != -1) {
-		buttonSetCallbacks(btn, _gsound_red_butt_press, _gsound_red_butt_release);
+//		buttonSetCallbacks(btn, _gsound_red_butt_press, _gsound_red_butt_release); TODO audio
 	}
 
 	// CANCEL
 	btn = buttonCreate(gPreferencesWindow,
-	                   263,
-	                   450,
-	                   _preferencesFrmImages[PREFERENCES_WINDOW_FRM_LITTLE_RED_BUTTON_UP].getWidth(),
-	                   _preferencesFrmImages[PREFERENCES_WINDOW_FRM_LITTLE_RED_BUTTON_DOWN].getHeight(),
-	                   -1,
-	                   -1,
-	                   -1,
-	                   528,
-	                   _preferencesFrmImages[PREFERENCES_WINDOW_FRM_LITTLE_RED_BUTTON_UP].getData(),
-	                   _preferencesFrmImages[PREFERENCES_WINDOW_FRM_LITTLE_RED_BUTTON_DOWN].getData(),
-	                   NULL,
-	                   BUTTON_FLAG_TRANSPARENT);
+					   263,
+					   450,
+					   _preferencesFrmImages[PREFERENCES_WINDOW_FRM_LITTLE_RED_BUTTON_UP].getWidth(),
+					   _preferencesFrmImages[PREFERENCES_WINDOW_FRM_LITTLE_RED_BUTTON_DOWN].getHeight(),
+					   -1,
+					   -1,
+					   -1,
+					   528,
+					   _preferencesFrmImages[PREFERENCES_WINDOW_FRM_LITTLE_RED_BUTTON_UP].getData(),
+					   _preferencesFrmImages[PREFERENCES_WINDOW_FRM_LITTLE_RED_BUTTON_DOWN].getData(),
+					   NULL,
+					   BUTTON_FLAG_TRANSPARENT);
 	if (btn != -1) {
-		buttonSetCallbacks(btn, _gsound_red_butt_press, _gsound_red_butt_release);
+//		buttonSetCallbacks(btn, _gsound_red_butt_press, _gsound_red_butt_release); TODO audio
 	}
 
 	fontSetCurrent(101);
@@ -1168,7 +1213,7 @@ static int preferencesWindowFree() {
 	if (_changed) {
 		_SavePrefs(1);
 		_JustUpdate_();
-		_combat_highlight_change();
+//		_combat_highlight_change(); TODO combat
 	}
 
 	windowDestroy(gPreferencesWindow);
@@ -1213,7 +1258,7 @@ int doPreferences(bool animated) {
 		case KEY_RETURN:
 		case KEY_UPPERCASE_P:
 		case KEY_LOWERCASE_P:
-			soundPlayFile("ib1p1xx1");
+//			soundPlayFile("ib1p1xx1"); TODO audio
 		// FALLTHROUGH
 		case 504:
 			rc = 1;
@@ -1275,8 +1320,8 @@ static void _DoThing(int eventCode) {
 	int preferenceIndex = eventCode - 505;
 
 	if (preferenceIndex >= FIRST_PRIMARY_PREF && preferenceIndex <= LAST_PRIMARY_PREF) {
-		PreferenceDescription* meta = &(gPreferenceDescriptions[preferenceIndex]);
-		int* valuePtr = meta->valuePtr;
+		PreferenceDescription *meta = &(gPreferenceDescriptions[preferenceIndex]);
+		int *valuePtr = meta->valuePtr;
 		int value = *valuePtr;
 		bool valueChanged = false;
 
@@ -1340,17 +1385,17 @@ static void _DoThing(int eventCode) {
 		}
 
 		if (valueChanged) {
-			soundPlayFile("ib3p1xx1");
+//			soundPlayFile("ib3p1xx1"); TODO audio
 			inputBlockForTocks(70);
-			soundPlayFile("ib3lu1x1");
+//			soundPlayFile("ib3lu1x1"); TODO audio
 			_UpdateThing(preferenceIndex);
 			windowRefresh(gPreferencesWindow);
 			_changed = true;
 			return;
 		}
 	} else if (preferenceIndex >= FIRST_SECONDARY_PREF && preferenceIndex <= LAST_SECONDARY_PREF) {
-		PreferenceDescription* meta = &(gPreferenceDescriptions[preferenceIndex]);
-		int* valuePtr = meta->valuePtr;
+		PreferenceDescription *meta = &(gPreferenceDescriptions[preferenceIndex]);
+		int *valuePtr = meta->valuePtr;
 		int value = *valuePtr;
 		bool valueChanged = false;
 
@@ -1374,19 +1419,19 @@ static void _DoThing(int eventCode) {
 		}
 
 		if (valueChanged) {
-			soundPlayFile("ib2p1xx1");
+//			soundPlayFile("ib2p1xx1"); TODO audio
 			inputBlockForTocks(70);
-			soundPlayFile("ib2lu1x1");
+//			soundPlayFile("ib2lu1x1"); TODO audio
 			_UpdateThing(preferenceIndex);
 			windowRefresh(gPreferencesWindow);
 			_changed = true;
 			return;
 		}
 	} else if (preferenceIndex >= FIRST_RANGE_PREF && preferenceIndex <= LAST_RANGE_PREF) {
-		PreferenceDescription* meta = &(gPreferenceDescriptions[preferenceIndex]);
-		int* valuePtr = meta->valuePtr;
+		PreferenceDescription *meta = &(gPreferenceDescriptions[preferenceIndex]);
+		int *valuePtr = meta->valuePtr;
 
-		soundPlayFile("ib1p1xx1");
+//		soundPlayFile("ib1p1xx1"); TODO audio
 
 		double value;
 		switch (preferenceIndex) {
@@ -1423,7 +1468,7 @@ static void _DoThing(int eventCode) {
 			mouseGetPositionInWindow(gPreferencesWindow, &x, &y);
 
 			if (mouseGetEvent() & 0x10) {
-				soundPlayFile("ib1lu1x1");
+//				soundPlayFile("ib1lu1x1"); TODO audio
 				_UpdateThing(preferenceIndex);
 				windowRefresh(gPreferencesWindow);
 				renderPresent();
@@ -1458,20 +1503,20 @@ static void _DoThing(int eventCode) {
 				break;
 			case PREF_MASTER_VOLUME:
 				*meta->valuePtr = (int)newValue;
-				gameSoundSetMasterVolume(gPreferencesMasterVolume1);
+//				gameSoundSetMasterVolume(gPreferencesMasterVolume1); TODO audio
 				v52 = 1;
 				break;
 			case PREF_MUSIC_VOLUME:
 				*meta->valuePtr = (int)newValue;
-				backgroundSoundSetVolume(gPreferencesMusicVolume1);
+//				backgroundSoundSetVolume(gPreferencesMusicVolume1); TODO audio
 				v52 = 1;
 				break;
 			case PREF_SFX_VOLUME:
 				*meta->valuePtr = (int)newValue;
-				soundEffectsSetVolume(gPreferencesSoundEffectsVolume1);
+//				soundEffectsSetVolume(gPreferencesSoundEffectsVolume1); TODO audio
 				v52 = 1;
 				if (sfxVolumeExample == 0) {
-					soundPlayFile("butin1");
+//					soundPlayFile("butin1"); TODO audio
 					sfxVolumeExample = 7;
 				} else {
 					sfxVolumeExample--;
@@ -1479,10 +1524,10 @@ static void _DoThing(int eventCode) {
 				break;
 			case PREF_SPEECH_VOLUME:
 				*meta->valuePtr = (int)newValue;
-				speechSetVolume(gPreferencesSpeechVolume1);
+//				speechSetVolume(gPreferencesSpeechVolume1); TODO audio
 				v52 = 1;
 				if (speechVolumeExample == 0) {
-					speechLoad("narrator\\options", 12, 13, 15);
+//					speechLoad("narrator\\options", 12, 13, 15); TODO audio
 					speechVolumeExample = 40;
 				} else {
 					speechVolumeExample--;
@@ -1502,7 +1547,7 @@ static void _DoThing(int eventCode) {
 				blitBufferToBuffer(_preferencesFrmImages[PREFERENCES_WINDOW_FRM_BACKGROUND].getData() + off, 240, 24, PREFERENCES_WINDOW_WIDTH, gPreferencesWindowBuffer + off, PREFERENCES_WINDOW_WIDTH);
 
 				for (int optionIndex = 0; optionIndex < meta->valuesCount; optionIndex++) {
-					const char* str = getmsg(&gPreferencesMessageList, &gPreferencesMessageListItem, meta->labelIds[optionIndex]);
+					const char *str = getmsg(&gPreferencesMessageList, &gPreferencesMessageListItem, meta->labelIds[optionIndex]);
 
 					int x;
 					switch (optionIndex) {
@@ -1567,4 +1612,4 @@ static void _DoThing(int eventCode) {
 	_changed = true;
 }
 
-} // namespace fallout
+} // namespace Fallout2
