@@ -8,6 +8,7 @@ MODULE_OBJS = \
 	art.o \
 	animation.o \
 	cache.o \
+	character_editor.o \
 	character_selector.o \
 	color.o \
 	config.o \
