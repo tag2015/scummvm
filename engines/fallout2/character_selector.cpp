@@ -10,7 +10,7 @@
 #include "common/events.h"
 
 #include "fallout2/art.h"
-// #include "fallout2/character_editor.h" TODO character_editor
+#include "fallout2/character_editor.h"
 #include "fallout2/color.h"
 #include "fallout2/critter.h"
 #include "fallout2/db.h"
@@ -194,23 +194,23 @@ int characterSelectorOpen() {
 
 		case KEY_UPPERCASE_C:
 		case KEY_LOWERCASE_C:
-			//  _ResetPlayer();  TODO character_editor
-			// 	if (characterEditorShow(1) == 0) {
-			// 		rc = 2;
-			// 		done = true;
-			// 	} else {
-			// 		characterSelectorWindowRefresh();
-			// 	}
+			_ResetPlayer();
+			if (characterEditorShow(1) == 0) {
+				rc = 2;
+				done = true;
+			} else {
+				characterSelectorWindowRefresh();
+			}
 			break;
 
 		case KEY_UPPERCASE_M:
 		case KEY_LOWERCASE_M:
-			// if (!characterEditorShow(1)) { TODO character_editor
-			// 			rc = 2;
-			// 			done = true;
-			// 		} else {
-			// 			characterSelectorWindowRefresh();
-			// 		}
+			if (!characterEditorShow(1)) {
+				rc = 2;
+				done = true;
+			} else {
+				characterSelectorWindowRefresh();
+			}
 			break;
 
 		case KEY_UPPERCASE_T:
