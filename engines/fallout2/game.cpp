@@ -7,7 +7,7 @@
 #include "fallout2/animation.h"
 #include "fallout2/art.h"
 // #include "automap.h"
-// #include "character_editor.h"
+#include "fallout2/character_editor.h"
 // #include "character_selector.h"
 #include "fallout2/color.h"
 // #include "combat.h"
@@ -596,12 +596,12 @@ int gameHandleKey(int eventCode, bool isInCombatMode) {
 	case KEY_UPPERCASE_C:
 	case KEY_LOWERCASE_C:
 		if (interfaceBarEnabled()) {
-/*			soundPlayFile("ib1p1xx1"); TODO audio
-			bool isoWasEnabled = isoDisable(); TODO character_editor
+//			soundPlayFile("ib1p1xx1"); TODO audio
+			bool isoWasEnabled = isoDisable();
 			characterEditorShow(false);
 			if (isoWasEnabled) {
 				isoEnable();
-			}*/
+			}
 		}
 		break;
 	case KEY_UPPERCASE_I:

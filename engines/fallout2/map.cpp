@@ -10,7 +10,7 @@
 #include "fallout2/animation.h"
 #include "fallout2/art.h"
 // #include "fallout2/automap.h"  TODO automap
-// #include "fallout2/character_editor.h"  TODO character_editor
+#include "fallout2/character_editor.h"
 #include "fallout2/color.h"
 #include "fallout2/combat.h"
 #include "fallout2/critter.h"
@@ -1029,7 +1029,7 @@ int mapLoadSaved(char *fileName) {
 	debugPrint("\nMAP: Loading SAVED map.");
 
 	char mapName[16]; // TODO: Size is probably wrong.
-//	_strmfe(mapName, fileName, "SAV");  TODO character_editor
+	_strmfe(mapName, fileName, "SAV");
 
 	int rc = mapLoadByName(mapName);
 

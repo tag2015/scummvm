@@ -1006,10 +1006,10 @@ int gcdLoad(const char *path) {
 		return -1;
 	}
 
-/*	if (fileReadInt32(stream, &gCharacterEditorRemainingCharacterPoints) == -1) {  TODO character_editor.cpp
+	if (fileReadInt32(stream, &gCharacterEditorRemainingCharacterPoints) == -1) {
 		fileClose(stream);
 		return -1;
-	}*/
+	}
 
 	proto->critter.data.baseStats[STAT_DAMAGE_RESISTANCE_EMP] = 100;
 	proto->critter.data.bodyType = 0;
@@ -1083,10 +1083,10 @@ int gcdSave(const char *path) {
 		return -1;
 	}
 
-/*	if (fileWriteInt32(stream, gCharacterEditorRemainingCharacterPoints) == -1) {  TODO character_editor.cpp
+	if (fileWriteInt32(stream, gCharacterEditorRemainingCharacterPoints) == -1) {
 		fileClose(stream);
 		return -1;
-	}*/
+	}
 
 	fileClose(stream);
 	return 0;
