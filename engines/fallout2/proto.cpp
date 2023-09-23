@@ -2114,7 +2114,7 @@ int _ResetPlayer() {
 	proto->critter.data.baseStats[STAT_DAMAGE_RESISTANCE_EMP] = 100;
 
 	critterReset();
-	// characterEditorReset();  TODO character_editor.cpp
+	characterEditorReset();
 	protoCritterDataResetSkills(&(proto->critter.data));
 	skillsReset();
 	perksReset();

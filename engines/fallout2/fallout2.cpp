@@ -33,6 +33,7 @@
 
 #include "fallout2/animation.h"
 #include "fallout2/art.h"
+#include "fallout2/character_editor.h"
 #include "fallout2/character_selector.h"
 #include "fallout2/color.h"
 #include "fallout2/credits.h"
@@ -447,6 +448,9 @@ Common::Error Fallout2Engine::run() {
 		warning("Failed on wmWorldMap_init\n");
 	else
 		debugPrint("Initialized world map!");
+
+	characterEditorInit();
+	debugPrint(">CharEditInit\t");
 
 	char path[COMPAT_MAX_PATH];
 

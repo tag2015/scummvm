@@ -6,7 +6,7 @@
 #include <algorithm>*/
 
 #include "fallout2/art.h"
-// #include "fallout2/character_editor.h" TODO character_editor
+#include "fallout2/character_editor.h"
 #include "fallout2/color.h"
 #include "fallout2/debug.h"
 #include "fallout2/draw.h"
@@ -1255,7 +1255,7 @@ int showSaveFileDialog(char *title, char **fileList, char *dest, int fileListLen
 					break;
 				}
 			}
-		} else if (/*_isdoschar(keyCode)*/ 1) { // TODO character_editor
+		} else if (_isdoschar(keyCode)) {
 			bufferFill(fileNameBufferPtr, fontGetStringWidth(fileNameCopy), cursorHeight, backgroundWidth, 100);
 
 			fileNameCopy[fileNameCopyLength] = keyCode & 0xFF;
