@@ -476,7 +476,7 @@ bool _windowActivateRegion(const char *regionName, int a2) {
 int _getInput() {
 	int keyCode = inputGetInput();
 	if (keyCode == KEY_CTRL_Q || keyCode == KEY_CTRL_X || keyCode == KEY_F10) {
-//		showQuitConfirmationDialog();  TODO game.cpp
+		showQuitConfirmationDialog();
 	}
 
 	if (_game_user_wants_to_quit != 0) {
