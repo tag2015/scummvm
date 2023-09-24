@@ -1,7 +1,6 @@
 #include "fallout2/memory.h"
 
-// #include "debug.h" TODO
-#include "common/debug.h"
+#include "fallout2/debug.h"
 
 namespace Fallout2 {
 
