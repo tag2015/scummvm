@@ -501,7 +501,7 @@ static int explosionFailureEventProcess(Object *obj, void *data) {
 	// Due to your inept handling, the explosive detonates prematurely.
 	msg.num = 4000;
 	if (messageListGetItem(&gMiscMessageList, &msg)) {
-//		displayMonitorAddMessage(msg.text);  TODO display_monitor
+		displayMonitorAddMessage(msg.text);
 	}
 
 	return _queue_do_explosion_(obj, true);
