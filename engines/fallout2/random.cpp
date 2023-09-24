@@ -1,16 +1,18 @@
 #include "fallout2/random.h"
 
-#include "common/debug.h"
 #include "fallout2/fallout2.h"
+
+#include "fallout2/debug.h"
 #include "fallout2/platform_compat.h"
+#include "fallout2/scripts.h"
+// #include "sfall_config.h" TODO: sfall criticals time override
+
 
 /*#include <limits.h>
 #include <stdlib.h>
 #include <random>
 */
 
-// #include "scripts.h" TODO: for getGameTime
-// #include "sfall_config.h" TODO: sfall criticals time override
 
 namespace Fallout2 {
 
@@ -94,7 +96,7 @@ int randomRoll(int difficulty, int criticalSuccessModifier, int *howMuchPtr) {
 //
 // 0x4A3030
 static int randomTranslateRoll(int delta, int criticalSuccessModifier) {
-	// int gameTime = gameTimeGetTime();  TODO
+	int gameTime = gameTimeGetTime();
 
 	// SFALL: Remove criticals time limits.
 	// TODO: Time limits are already disabled
@@ -107,7 +109,7 @@ static int randomTranslateRoll(int delta, int criticalSuccessModifier) {
 	if (delta < 0) {
 		roll = ROLL_FAILURE;
 
-		if (criticalsTimeLimitsRemoved /*|| (gameTime / GAME_TIME_TICKS_PER_DAY) >= 1*/) {
+		if (criticalsTimeLimitsRemoved || (gameTime / GAME_TIME_TICKS_PER_DAY) >= 1) {
 			// 10% to become critical failure.
 			if (randomBetween(1, 100) <= -delta / 10) {
 				roll = ROLL_CRITICAL_FAILURE;
@@ -116,7 +118,7 @@ static int randomTranslateRoll(int delta, int criticalSuccessModifier) {
 	} else {
 		roll = ROLL_SUCCESS;
 
-		if (criticalsTimeLimitsRemoved /*|| (gameTime / GAME_TIME_TICKS_PER_DAY) >= 1*/) {
+		if (criticalsTimeLimitsRemoved || (gameTime / GAME_TIME_TICKS_PER_DAY) >= 1) {
 			// 10% + modifier to become critical success.
 			if (randomBetween(1, 100) <= delta / 10 + criticalSuccessModifier) {
 				roll = ROLL_CRITICAL_SUCCESS;
