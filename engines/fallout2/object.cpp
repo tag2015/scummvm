@@ -411,6 +411,7 @@ int objectRead(Object *obj, File *stream) {
 
 	if (fileReadInt32(stream, &(obj->id)) == -1)
 		return -1;
+	debug(6, "Reading Object - id %d", obj->id);
 	if (fileReadInt32(stream, &(obj->tile)) == -1)
 		return -1;
 	if (fileReadInt32(stream, &(obj->x)) == -1)
@@ -445,7 +446,7 @@ int objectRead(Object *obj, File *stream) {
 		return -1;
 	if (fileReadInt32(stream, &(obj->field_80)) == -1)
 		return -1;
-
+	debug(6, "Object header read successfully");
 	obj->outline = 0;
 	obj->owner = NULL;
 
@@ -479,6 +480,7 @@ int objectLoadAll(File *stream) {
 
 // 0x488CF8
 static int objectLoadAllInternal(File *stream) {
+	debug(6, "Loading all map objects (objectLoadAllInternal)");
 	if (stream == NULL) {
 		return -1;
 	}
@@ -598,6 +600,7 @@ static int objectLoadAllInternal(File *stream) {
 
 	_obj_rebuild_all_light();
 
+	debug(6, "Loaded all map objects");
 	return 0;
 }
 
