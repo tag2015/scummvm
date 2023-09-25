@@ -231,58 +231,6 @@ void Fallout2Engine::showSplash() {
 	settings.system.splash = splash + 1;
 }
 
-
-/*
-int isoInit() {
-	tileScrollLimitingDisable();
-	tileScrollBlockingDisable();
-
-	// NOTE: Uninline.
-	//square_init();
-
-	if (artInit() != 0) {
-		debugPrint("art_init failed in iso_init\n");
-		return -1;
-	}
-
-	debugPrint(">art_init\t\t");
-
-//	if (tileInit(_square, SQUARE_GRID_WIDTH, SQUARE_GRID_HEIGHT, HEX_GRID_WIDTH, HEX_GRID_HEIGHT, gIsoWindowBuffer, screenGetWidth(), screenGetVisibleHeight(), screenGetWidth(), isoWindowRefreshRect) != 0) {
-//		debugPrint("tile_init failed in iso_init\n");
-//		return -1;
-//	}
-
-//	debugPrint(">tile_init\t\t");
-
-	// if (objectsInit(gIsoWindowBuffer, screenGetWidth(), screenGetVisibleHeight(), screenGetWidth()) != 0) {
-	// 	debugPrint("obj_init failed in iso_init\n");
-	// 	return -1;
-	// }
-
-	// debugPrint(">obj_init\t\t");
-
-	// colorCycleInit();
-	// debugPrint(">cycle_init\t\t");
-
-	// tileScrollBlockingEnable();
-	// tileScrollLimitingEnable();
-
-	if (interfaceInit() != 0) {
-		debugPrint("intface_init failed in iso_init\n");
-		return -1;
-	}
-
-	debugPrint(">intface_init\t\t");
-
-	// SFALL
-//	mapMakeMapsDirectory();
-
-	// NOTE: Uninline.
-//	mapSetEnteringLocation(-1, -1, -1);
-
-	return 0;
-}*/
-
 Common::Error Fallout2Engine::run() {
 	// Initialize 640x480 paletted graphics mode
 	initGraphics(640, 480);
@@ -295,11 +243,6 @@ Common::Error Fallout2Engine::run() {
 	int saveSlot = ConfMan.getInt("save_slot");
 	if (saveSlot != -1)
 		(void)loadGameState(saveSlot);
-
-	// Draw a series of boxes on screen as a sample
-	//	for (int i = 0; i < 100; ++i)
-	//		_screen->frameRect(Common::Rect(i, i, 320 - i, 200 - i), i);
-	//	_screen->update();
 
 	// Set empty palette
 	byte pal[256 * 3] = { 0 };
@@ -384,112 +327,126 @@ Common::Error Fallout2Engine::run() {
 	else
 		warning("Error initializing stats");
 
+	// init party members (including main char)
 	if (partyMembersInit() != 0)
 		warning("Failed on partyMember_init");
 	else
 		debug("Initialized party members!");
 
+	// init perks messagelist
 	if (perksInit() == 0)
 		debug("Initialized perks!");
 	else
 		warning("Error initializing perks");
 
+	// init traits messagelist
 	if (traitsInit() == true)
 		debug("Initialized traits!");
 	else
 		warning("Error initializing traits");
 
+	// init items messagelist
 	if (itemsInit() == 0)
 		debug("Initialized items!");
 	else
 		warning("Error initializing items!");
 
+	// init queue subsystem
 	queueInit();
 
+	// init critters messagelist
 	if (critterInit() == 0)
 		debug("Initialized critters!");
 	else
 		warning("Error initializing critters");
 
+	// init player inventory
 	_inven_reset_dude();
 
+	// init main isometric view (tiles, objects, interface)
 	if (isoInit() != 0)
 		warning("Failed on iso_init");
 
+	// init mouse pointers
 	if (gameMouseInit() != 0)
 		warning("Failed on gmouse_init");
 	else
 		debug("Initialized mouse!");
 
+	// init protos
 	if (protoInit() != 0)
 		warning("Failed on proto_init");
 	else
 		debug("Initialized protos!");
 
+	// init sprite animations
 	animationInit();
 	debug("Initialized animations!");
 
+	// init scripts/interpreter
 	if (scriptsInit() != 0)
 		warning("Failed on scripts init");
 	else
 		debug("Initialized scripts!");
 
+	// load global vars
 	if (gameLoadGlobalVars() != 0)
 		warning("Failed loading global vars!");
 	else
 		debug("Loaded global vars!");
 
+	// load game sripts
 	if (_scr_game_init() != 0)
 		warning("Failed on scr_game_init");
 	else
-		debugPrint("Loaded game scripts!");
+		debug("Loaded game scripts!");
 
+	// init world map
 	if (wmWorldMap_init() != 0)
-		warning("Failed on wmWorldMap_init\n");
+		warning("Failed on wmWorldMap_init");
 	else
-		debugPrint("Initialized world map!");
+		debug("Initialized world map!");
 
+	// init character editor
 	characterEditorInit();
-	debugPrint(">CharEditInit\t");
+	debug("Initialized character editor!");
 
 	char path[COMPAT_MAX_PATH];
 
+	// init message list
 	if (!messageListInit(&gMiscMessageList))
-		warning("Failed on message_init\n");
+		warning("Failed on message_init");
 	else
 		debug("Initialized messages list!");
 
 	snprintf(path, sizeof(path), "%s%s", asc_5186C8, "misc.msg");
 
+	// load message lists
 	if (!messageListLoad(&gMiscMessageList, path))
-		warning("Failed on message_load\n");
+		warning("Failed on message_load");
 	else
 		debug("Loaded messages list: %s!", path);
 
+	// disable scripts before start
 	if (scriptsDisable() != 0)
-		warning("Failed on scr_disable\n");
-	else
-		debug("Disabled scripts!");
+		warning("Failed on scr_disable");
 
+	// init options window
 	if (_init_options_menu() != 0)
-		warning("Failed on init_options_menu\n");
+		warning("Failed on init_options_menu");
 	else
-		debug("Initialized options");
+		debug("Initialized options!");
 
 	// SFALL
 	premadeCharactersInit();
 
 	messageListRepositorySetStandardMessageList(STANDARD_MESSAGE_LIST_MISC, &gMiscMessageList);
 
+	// load main menu
 	if (mainMenuWindowInit() == 0)
 		debug("Initialized main menu!");
 	else
 		warning("Couldn't load main menu");
-
-	// throw a dice (yay!)
-	debugPrint("RandomRoll (diff= 70) result: %d", randomRoll(70, 5, NULL));
-	debugPrint("RandomRoll (diff= 10) result: %d", randomRoll(10, 5, NULL));
-	debugPrint("RandomRoll (diff= 150) result: %d", randomRoll(150, 5, NULL));
 
 	g_system->delayMillis(1000);
 	paletteFadeTo(gPaletteBlack);
