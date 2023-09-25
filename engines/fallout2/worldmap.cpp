@@ -3653,7 +3653,7 @@ int wmSetupRandomEncounter() {
 				if (prevCritter != NULL) {
 					if (prevCritter != critter) {
 						if (encounterTableEntry->subEntiesLength != 1) {
-							if (encounterTableEntry->subEntiesLength == 2 /*&& !isInCombat()*/) {  // TODO combat
+							if (encounterTableEntry->subEntiesLength == 2 && !isInCombat()) {
 								prevCritter->data.critter.combat.whoHitMe = critter;
 								critter->data.critter.combat.whoHitMe = prevCritter;
 
@@ -3671,7 +3671,7 @@ int wmSetupRandomEncounter() {
 								_scripts_request_combat_locked(&combat);
 							}
 						} else {
-							if (/*!isInCombat()*/ 1) { // TODO combat
+							if (!isInCombat()) {
 								prevCritter->data.critter.combat.whoHitMe = gDude;
 
 								STRUCT_664980 combat;

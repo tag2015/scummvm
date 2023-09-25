@@ -246,13 +246,13 @@ void displayMonitorAddMessage(char *str) {
 	knobString[1] = '\0';
 	int knobWidth = fontGetStringWidth(knobString);
 
-/*	if (!isInCombat()) { TODO combat
+	if (!isInCombat()) {
 		unsigned int now = _get_bk_time();
 		if (getTicksBetween(now, gDisplayMonitorLastBeepTimestamp) >= DISPLAY_MONITOR_BEEP_DELAY) {
 			gDisplayMonitorLastBeepTimestamp = now;
-			soundPlayFile("monitor"); TODO audio
+//			soundPlayFile("monitor"); TODO audio
 		}
-	}*/
+	}
 
 	// TODO: Refactor these two loops.
 	char *v1 = NULL;

@@ -197,7 +197,7 @@ int critterGetStat(Object *critter, int stat) {
 			}
 			break;
 		case STAT_ARMOR_CLASS:
-/*			if (isInCombat()) {  TODO combat.cpp
+			if (isInCombat()) {
 				if (_combat_whose_turn() != critter) {
 					int actionPointsMultiplier = 1;
 					int hthEvadeBonus = 0;
@@ -235,7 +235,7 @@ int critterGetStat(Object *critter, int stat) {
 					value += hthEvadeBonus;
 					value += critter->data.critter.combat.ap * actionPointsMultiplier;
 				}
-			}*/
+			}
 			break;
 		case STAT_AGE:
 			value += gameTimeGetTime() / GAME_TIME_TICKS_PER_YEAR;
