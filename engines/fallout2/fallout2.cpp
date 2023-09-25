@@ -36,6 +36,8 @@
 #include "fallout2/character_editor.h"
 #include "fallout2/character_selector.h"
 #include "fallout2/color.h"
+#include "fallout2/combat.h"
+#include "fallout2/combat_ai.h"
 #include "fallout2/credits.h"
 #include "fallout2/critter.h"
 #include "fallout2/cycle.h"
@@ -361,6 +363,10 @@ Common::Error Fallout2Engine::run() {
 	else
 		warning("Error initializing critters");
 
+	// init AI
+	aiInit();
+	debug("Initialized AI!");
+
 	// init player inventory
 	_inven_reset_dude();
 
@@ -417,6 +423,12 @@ Common::Error Fallout2Engine::run() {
 		warning("Failed on gdialog_init");
 	else
 		debug("Initialized game dialogs!");
+
+	// init combat system
+	if (combatInit() != 0)
+		debugPrint("Failed on combat_init\n");
+	else
+		debug("Initialized combat system!");
 
 	char path[COMPAT_MAX_PATH];
 
