@@ -406,11 +406,11 @@ int partyMemberAdd(Object *object) {
 //	critterSetTeam(object, 0); TODO combat_ai.cpp
 	queueRemoveEventsByType(object, EVENT_TYPE_SCRIPT);
 
-/*	if (_gdialogActive()) {  TODO game_dialog.cpp
+	if (_gdialogActive()) {
 		if (object == gGameDialogSpeaker) {
 			_gdialogUpdatePartyStatus();
 		}
-	}*/
+	}
 
 	return 0;
 }
@@ -459,11 +459,11 @@ int partyMemberRemove(Object *object) {
 
 	queueRemoveEventsByType(object, EVENT_TYPE_SCRIPT);
 
-/*	if (_gdialogActive()) {  TODO game_dialog.cpp
+	if (_gdialogActive()) {
 		if (object == gGameDialogSpeaker) {
 			_gdialogUpdatePartyStatus();
 		}
-	}*/
+	}
 
 	return 0;
 }
