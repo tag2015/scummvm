@@ -21,7 +21,7 @@
 #include "fallout2/draw.h"
 // #include "endgame.h"
 #include "fallout2/font_manager.h"
-// #include "game_dialog.h"
+#include "fallout2/game_dialog.h"
 // #include "game_memory.h"
 #include "fallout2/game_mouse.h"
 // #include "game_movie.h"
@@ -460,7 +460,7 @@ void gameExit() {
 int gameHandleKey(int eventCode, bool isInCombatMode) {
 	// NOTE: Uninline.
 	if (gameGetState() == GAME_STATE_5) {
-//		_gdialogSystemEnter(); TODO game_dialog
+		_gdialogSystemEnter();
 	}
 
 	if (eventCode == -1) {
