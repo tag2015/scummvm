@@ -547,7 +547,7 @@ static void _JustUpdate_() {
 	textLineDelay = clamp(textLineDelay, 0.0, 2.0);
 
 	textObjectsSetLineDelay(textLineDelay);
-//	aiMessageListReloadIfNeeded(); TODO combat_ai
+	aiMessageListReloadIfNeeded();
 	_scr_message_free();
 /*	gameSoundSetMasterVolume(gPreferencesMasterVolume1);  TODO audio
 	backgroundSoundSetVolume(gPreferencesMusicVolume1);
