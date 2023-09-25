@@ -512,7 +512,7 @@ int _obj_examine_func(Object *critter, Object *target, void (*fn)(char *string))
 			snprintf(formattedText, sizeof(formattedText),
 					 ammoMessageListItem.text,
 					 ammoGetArmorClassModifier(target));
-			if (/*fn == gameDialogRenderSupplementaryMessage*/ 0) {  // TODO game_dialog
+			if (fn == gameDialogRenderSupplementaryMessage) {
 				strcat_s(ammoFormattedText, sizeof(ammoFormattedText), formattedText);
 			} else {
 				fn(formattedText);
@@ -527,7 +527,7 @@ int _obj_examine_func(Object *critter, Object *target, void (*fn)(char *string))
 			snprintf(formattedText, sizeof(formattedText),
 					 ammoMessageListItem.text,
 					 ammoGetDamageResistanceModifier(target));
-			if (/*fn == gameDialogRenderSupplementaryMessage*/ 0) { // TODO game_dialog
+			if (fn == gameDialogRenderSupplementaryMessage) {
 				strcat_s(ammoFormattedText, sizeof(ammoFormattedText), ", ");
 				strcat_s(ammoFormattedText, sizeof(ammoFormattedText), formattedText);
 			} else {
@@ -544,7 +544,7 @@ int _obj_examine_func(Object *critter, Object *target, void (*fn)(char *string))
 					 ammoMessageListItem.text,
 					 ammoGetDamageMultiplier(target),
 					 ammoGetDamageDivisor(target));
-			if (/* fn == gameDialogRenderSupplementaryMessage*/ 0) {  // TODO game_dialog
+			if (fn == gameDialogRenderSupplementaryMessage) {
 				strcat_s(ammoFormattedText, sizeof(ammoFormattedText), ", ");
 				strcat_s(ammoFormattedText, sizeof(ammoFormattedText), formattedText);
 				strcat_s(ammoFormattedText, sizeof(ammoFormattedText), ".");
