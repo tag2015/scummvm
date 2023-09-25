@@ -684,7 +684,7 @@ static void _doBkProcesses() {
 
 // 0x4A3CA0
 static void _script_chk_critters() {
-	if (/* !_gdialogActive() && !isInCombat() */1 ) {  // TODO combat game_dialog
+	if (!_gdialogActive() && !isInCombat()) {
 		ScriptList *scriptList;
 		ScriptListExtent *scriptListExtent;
 
@@ -703,7 +703,7 @@ static void _script_chk_critters() {
 		}
 
 		if (_count_ < scriptsCount) {
-			int proc = /*isInCombat()*/ 0 ? SCRIPT_PROC_COMBAT : SCRIPT_PROC_CRITTER;  // TODO combat
+			int proc = isInCombat() ? SCRIPT_PROC_COMBAT : SCRIPT_PROC_CRITTER;
 			int extentIndex = _count_ / SCRIPT_LIST_EXTENT_SIZE;
 			int scriptIndex = _count_ % SCRIPT_LIST_EXTENT_SIZE;
 
@@ -729,9 +729,9 @@ static void _script_chk_timed_events() {
 	int v0 = _get_bk_time();
 
 	int v1 = false;
-//	if (!isInCombat()) {  TODO combat
+	if (!isInCombat()) {
 		v1 = true;
-//	}
+	}
 
 	if (gameGetState() != GAME_STATE_4) {
 		if (getTicksBetween(v0, _last_light_time) >= 30000) {
@@ -744,9 +744,9 @@ static void _script_chk_timed_events() {
 
 	if (getTicksBetween(v0, _last_time__) >= 100) {
 		_last_time__ = v0;
-//		if (!isInCombat()) { TODO combat
+		if (!isInCombat()) {
 			gGameTime += 1;
-//		}
+		}
 		v1 = true;
 	}
 
@@ -881,10 +881,10 @@ int scriptsHandleRequests() {
 
 			if ((gScriptsRequests & SCRIPT_REQUEST_0x40) != 0) {
 				gScriptsRequests &= ~SCRIPT_REQUEST_0x40;
-//				_combat(NULL); TODO combat
+				_combat(NULL);
 			} else {
-//				_combat(&stru_664980); TODO combat
-//				memset(&stru_664980, 0, sizeof(stru_664980));
+				_combat(&stru_664980);
+				memset(&stru_664980, 0, sizeof(stru_664980));
 			}
 		}
 	}
@@ -1096,9 +1096,9 @@ void _scripts_request_combat_locked(STRUCT_664980 *a1) {
 // request_world_map()
 // 0x4A4644
 void scriptsRequestWorldMap() {
-//	if (isInCombat()) { TODO combat
-//		_game_user_wants_to_quit = 1;
-//	}
+	if (isInCombat()) {
+		_game_user_wants_to_quit = 1;
+	}
 
 	gScriptsRequests |= SCRIPT_REQUEST_WORLD_MAP;
 }
@@ -2776,14 +2776,14 @@ bool _scr_end_combat() {
 		return false;
 	}
 
-//	int team = _combat_player_knocked_out_by(); TODO combat
-//	if (team == -1) {
-//		return false;
-//	}
+	int team = _combat_player_knocked_out_by();
+	if (team == -1) {
+		return false;
+	}
 
 	Script *before;
 	if (scriptGetScript(gMapSid, &before) != -1) {
-//		before->fixedParam = team;  TODO combat
+		before->fixedParam = team;
 	}
 
 	scriptExecProc(gMapSid, SCRIPT_PROC_COMBAT);

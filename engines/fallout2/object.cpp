@@ -1412,12 +1412,12 @@ int objectSetLocation(Object *obj, int tile, int elevation, Rect *rect) {
 		return -1;
 	}
 
-/*	if (isInCombat()) {
+	if (isInCombat()) {
 		if (FID_TYPE(obj->fid) == OBJ_TYPE_CRITTER) {
 			bool v8 = obj->outline != 0 && (obj->outline & OUTLINE_DISABLED) == 0;
-			_combat_update_critter_outline_for_los(obj, v8);  TODO combat.cpp
+			_combat_update_critter_outline_for_los(obj, v8);
 		}
-	}*/
+	}
 
 	if (rect != NULL) {
 		rectUnion(rect, &v23, rect);
@@ -1500,13 +1500,13 @@ int objectSetLocation(Object *obj, int tile, int elevation, Rect *rect) {
 		if (elevation != oldElevation) {
 			mapSetElevation(elevation);
 			tileSetCenter(tile, TILE_SET_CENTER_REFRESH_WINDOW | TILE_SET_CENTER_FLAG_IGNORE_SCROLL_RESTRICTIONS);
-			if (/*isInCombat()*/ 0) {  // TODO combat.cpp
+			if (isInCombat()) {
 				_game_user_wants_to_quit = 1;
 			}
 		}
 	} else {
 		if (elevation != _obj_last_elev && PID_TYPE(obj->pid) == OBJ_TYPE_CRITTER) {
-		//	_combat_delete_critter(obj); TODO combat.cpp
+			_combat_delete_critter(obj);
 		}
 	}
 

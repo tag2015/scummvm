@@ -748,7 +748,7 @@ static int _obj_use_book(Object *book) {
 		return -1;
 	}
 
-	if (/*isInCombat()*/ 0) {  // TODO combat
+	if (isInCombat()) {
 		// You cannot do that in combat.
 		messageListItem.num = 902;
 		if (messageListGetItem(&gProtoMessageList, &messageListItem)) {
@@ -1056,7 +1056,7 @@ int _protinst_use_item(Object *critter, Object *item) {
 // 0x49BFE8
 static int _protinstTestDroppedExplosive(Object *a1) {
 	// SFALL
-/*	if (explosiveIsActiveExplosive(a1->pid)) {  TODO combat
+	if (explosiveIsActiveExplosive(a1->pid)) {
 		Attack attack;
 		attackInit(&attack, gDude, 0, HIT_MODE_PUNCH, HIT_LOCATION_TORSO);
 		attack.attackerFlags = DAM_HIT;
@@ -1086,7 +1086,7 @@ static int _protinstTestDroppedExplosive(Object *a1) {
 			attack.field_1C = 0;
 			scriptsRequestCombat(&attack);
 		}
-	}*/
+	}
 	return 0;
 }
 
@@ -1297,7 +1297,7 @@ int _protinst_use_item_on(Object *a1, Object *a2, Object *item) {
 		return script->field_28;
 	}
 
-	if (/*isInCombat()*/ 0) {  // TODO combat
+	if (isInCombat()) {
 		MessageListItem messageListItem;
 		// You cannot do that in combat.
 		messageListItem.num = 902;
@@ -1374,7 +1374,7 @@ int _obj_use_item_on(Object *a1, Object *a2, Object *a3) {
 
 // 0x49C6BC
 int _check_scenery_ap_cost(Object *obj, Object *a2) {
-	if (/*!isInCombat()*/ 1) { // TODO combat
+	if (!isInCombat()) {
 		return 0;
 	}
 

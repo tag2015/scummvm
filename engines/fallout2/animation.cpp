@@ -475,10 +475,10 @@ int reg_anim_end() {
 	animationSequence->animationIndex = -1;
 	animationSequence->flags &= ~ANIM_SEQ_ACCUMULATING;
 	animationSequence->animations[0].delay = 0;
-//	if (isInCombat()) { TODO combat
-//		_combat_anim_begin();
-//		animationSequence->flags |= ANIM_SEQ_COMBAT_ANIM_STARTED;
-//	}
+	if (isInCombat()) {
+		_combat_anim_begin();
+		animationSequence->flags |= ANIM_SEQ_COMBAT_ANIM_STARTED;
+	}
 
 	int index = gAnimationSequenceCurrentIndex;
 	gAnimationSequenceCurrentIndex = -1;
@@ -1605,9 +1605,9 @@ static int _anim_set_end(int animationSequenceIndex) {
 
 	animationSequence->animationIndex = -1;
 	animationSequence->field_0 = -1000;
-/*	if ((animationSequence->flags & ANIM_SEQ_COMBAT_ANIM_STARTED) != 0) { TODO combat
+	if ((animationSequence->flags & ANIM_SEQ_COMBAT_ANIM_STARTED) != 0) {
 		_combat_anim_finished();
-	}*/
+	}
 
 	if (_anim_in_bk) {
 		animationSequence->flags = ANIM_SEQ_0x20;
@@ -1679,7 +1679,7 @@ int pathfinderFindPath(Object *object, int from, int to, unsigned char *rotation
 		critterType = critterGetKillType(object);
 	}
 
-	bool isNotInCombat = true; // !isInCombat(); TODO combat
+	bool isNotInCombat = !isInCombat();
 
 	memset(gPathfinderProcessedTiles, 0, sizeof(gPathfinderProcessedTiles));
 
@@ -2544,7 +2544,7 @@ static void _object_move(int index) {
 			rectUnion(&dirtyRect, &tempRect, &dirtyRect);
 
 			bool cannotMove = false;
-			if (/*isInCombat()*/ 0 && FID_TYPE(object->fid) == OBJ_TYPE_CRITTER) {  // TODO combat
+			if (isInCombat() && FID_TYPE(object->fid) == OBJ_TYPE_CRITTER) {
 				int actionPointsRequired = critterGetMovementPointCostAdjustedForCrippledLegs(object, 1);
 				if (actionPointsRequired > _combat_free_move) {
 					actionPointsRequired -= _combat_free_move;
@@ -2884,9 +2884,9 @@ int _check_move(int *actionPointsPtr) {
 		return -1;
 	}
 
-	if (/*isInCombat()*/ 0) {  // TODO combat
-		/*if (*actionPointsPtr != -1) {
-			if (gPressedPhysicalKeys[SDL_SCANCODE_RCTRL] || gPressedPhysicalKeys[SDL_SCANCODE_LCTRL]) {
+	if (isInCombat()) {
+		if (*actionPointsPtr != -1) {
+			if (/*gPressedPhysicalKeys[SDL_SCANCODE_RCTRL] || gPressedPhysicalKeys[SDL_SCANCODE_LCTRL]*/ 0) {  // TODO kb
 				int hitMode;
 				bool aiming;
 				interfaceGetCurrentHitMode(&hitMode, &aiming);
@@ -2896,7 +2896,7 @@ int _check_move(int *actionPointsPtr) {
 					return -1;
 				}
 			}
-		}*/
+		}
 	} else {
 		if (settings.system.interrupt_walk) {
 			reg_anim_clear(gDude);
@@ -2962,11 +2962,11 @@ void _dude_fidget() {
 		return;
 	}
 
-/*	if (isInCombat()) {  TODO combat
+	if (isInCombat()) {
 		return;
 	}
 
-	if (vcrGetState() != VCR_STATE_TURNED_OFF) {  TODO vcr
+	/*if (vcrGetState() != VCR_STATE_TURNED_OFF) {  TODO vcr
 		return;
 	}*/
 
@@ -3224,13 +3224,13 @@ static unsigned int animationComputeTicksPerFrame(Object *object, int fid) {
 		fps = 10;
 	}
 
-/*	if (isInCombat()) {  TODO combat
+	if (isInCombat()) {
 		if (FID_ANIM_TYPE(fid) == ANIM_WALK) {
 			if (object != gDude || settings.preferences.player_speedup) {
 				fps += settings.preferences.combat_speed;
 			}
 		}
-	}*/
+	}
 
 	return 1000 / fps;
 }

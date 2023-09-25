@@ -824,7 +824,7 @@ static void opMoveTo(Program *program) {
 			objectGetRect(object, &before);
 
 			if (object->elevation != elevation && PID_TYPE(object->pid) == OBJ_TYPE_CRITTER) {
-//				_combat_delete_critter(object); TODO combat
+				_combat_delete_critter(object);
 			}
 
 			Rect after;
@@ -953,7 +953,7 @@ static void opDestroyObject(Program *program) {
 	bool isSelf = object == scriptGetSelf(program);
 
 	if (PID_TYPE(object->pid) == OBJ_TYPE_CRITTER) {
-//		_combat_delete_critter(object); TODO combat
+		_combat_delete_critter(object);
 	}
 
 	Object *owner = objectGetOwner(object);
@@ -1312,7 +1312,7 @@ static void opAnimateStand(Program *program) {
 		object = scriptGetSelf(program);
 	}
 
-	if (/*!isInCombat()*/ 1) {  // TODO combat
+	if (!isInCombat()) {
 		reg_anim_begin(ANIMATION_REQUEST_UNRESERVED);
 		animationRegisterAnimate(object, ANIM_STAND, 0);
 		reg_anim_end();
@@ -1335,7 +1335,7 @@ static void opAnimateStandReverse(Program *program) {
 		object = scriptGetSelf(program);
 	}
 
-	if (/*!isInCombat()*/ 1) { // TODO combat
+	if (!isInCombat()) {
 		reg_anim_begin(ANIMATION_REQUEST_UNRESERVED);
 		animationRegisterAnimateReversed(object, ANIM_STAND, 0);
 		reg_anim_end();
@@ -1370,7 +1370,7 @@ static void opAnimateMoveObjectToTile(Program *program) {
 		return;
 	}
 
-	if (/*isInCombat()*/ 0) {  // TODO combat
+	if (isInCombat()) {
 		return;
 	}
 
@@ -1790,7 +1790,7 @@ static void opAttackComplex(Program *program) {
 		return;
 	}
 
-	if (/*isInCombat()*/ 0) {  // TODO combat
+	if (isInCombat()) {
 		CritterCombatData *combatData = &(self->data.critter.combat);
 		if ((combatData->maneuver & CRITTER_MANEUVER_ENGAGING) == 0) {
 			combatData->maneuver |= CRITTER_MANEUVER_ENGAGING;
@@ -1832,7 +1832,7 @@ static void opStartGameDialog(Program *program) {
 	Object *obj = static_cast<Object *>(programStackPopPointer(program));
 	programStackPopInteger(program);
 
-	if (/*isInCombat()*/ 0) { // TODO combat
+	if (isInCombat()) {
 		return;
 	}
 
@@ -2023,7 +2023,7 @@ static void opSetObjectVisibility(Program *program) {
 
 	if (invisible != 0) {
 		if ((obj->flags & OBJECT_HIDDEN) == 0) {
-			if (/*isInCombat()*/ 0) {  // TODO combat
+			if (isInCombat()) {
 				objectDisableOutline(obj, NULL);
 				objectClearOutline(obj, NULL);
 			}
@@ -2237,7 +2237,7 @@ static void opKillCritter(Program *program) {
 	bool isSelf = self == object;
 
 	reg_anim_clear(object);
-//	_combat_delete_critter(object);  TODO combat
+	_combat_delete_critter(object);
 	critterKill(object, deathFrame, 1);
 
 	program->flags &= ~PROGRAM_FLAG_0x20;
@@ -2323,7 +2323,7 @@ static void opKillCritterType(Program *program) {
 				reg_anim_clear(obj);
 
 				if (deathFrame != 0) {
-//					_combat_delete_critter(obj); TODO combat
+					_combat_delete_critter(obj);
 					if (deathFrame == 1) {
 						// Pick next animation from the |ftList|.
 						int anim = _correctDeath(obj, ftList[ftIndex], true);
@@ -2605,9 +2605,9 @@ static void opGameDialogSystemEnter(Program *program) {
 		}
 	}
 
-//	if (isInCombat()) {  TODO combat
-//		return;
-//	}
+	if (isInCombat()) {
+		return;
+	}
 
 	if (gameRequestState(GAME_STATE_4) == -1) {
 		return;
@@ -2722,7 +2722,7 @@ static void opCritterAttemptPlacement(Program *program) {
 	}
 
 	if (elevation != critter->elevation && PID_TYPE(critter->pid) == OBJ_TYPE_CRITTER) {
-//		_combat_delete_critter(critter); TODO combat
+		_combat_delete_critter(critter);
 	}
 
 	objectSetLocation(critter, 0, elevation, NULL);
@@ -3344,7 +3344,7 @@ static void opRegAnimFunc(Program *program) {
 	ProgramValue param = programStackPopValue(program);
 	int cmd = programStackPopInteger(program);
 
-	if (/*!isInCombat()*/ 1) { // TODO combat
+	if (!isInCombat()) {
 		switch (cmd) {
 		case OP_REG_ANIM_FUNC_BEGIN:
 			reg_anim_begin(param.integerValue);
@@ -3366,7 +3366,7 @@ static void opRegAnimAnimate(Program *program) {
 	int anim = programStackPopInteger(program);
 	Object *object = static_cast<Object *>(programStackPopPointer(program));
 
-	if (/*!isInCombat()*/ 1) { // TODO combat
+	if (!isInCombat()) {
 		if (anim != 20 || object == NULL || object->pid != 0x100002F || (settings.preferences.violence_level >= 2)) {
 			if (object != NULL) {
 				animationRegisterAnimate(object, anim, delay);
@@ -3384,7 +3384,7 @@ static void opRegAnimAnimateReverse(Program *program) {
 	int anim = programStackPopInteger(program);
 	Object *object = static_cast<Object *>(programStackPopPointer(program));
 
-	if (/* !isInCombat()*/ 1) { // TODO combat
+	if (!isInCombat()) {
 		if (object != NULL) {
 			animationRegisterAnimateReversed(object, anim, delay);
 		} else {
@@ -3400,7 +3400,7 @@ static void opRegAnimObjectMoveToObject(Program *program) {
 	Object *dest = static_cast<Object *>(programStackPopPointer(program));
 	Object *object = static_cast<Object *>(programStackPopPointer(program));
 
-	if (/*!isInCombat()*/ 1) { // TODO combat
+	if (!isInCombat()) {
 		if (object != NULL) {
 			animationRegisterMoveToObject(object, dest, -1, delay);
 		} else {
@@ -3416,7 +3416,7 @@ static void opRegAnimObjectRunToObject(Program *program) {
 	Object *dest = static_cast<Object *>(programStackPopPointer(program));
 	Object *object = static_cast<Object *>(programStackPopPointer(program));
 
-	if (/*!isInCombat()*/ 1) { // TODO combat
+	if (!isInCombat()) {
 		if (object != NULL) {
 			animationRegisterRunToObject(object, dest, -1, delay);
 		} else {
@@ -3432,7 +3432,7 @@ static void opRegAnimObjectMoveToTile(Program *program) {
 	int tile = programStackPopInteger(program);
 	Object *object = static_cast<Object *>(programStackPopPointer(program));
 
-	if (/*!isInCombat()*/ 1) {  // TODO combat
+	if (!isInCombat()) {
 		if (object != NULL) {
 			animationRegisterMoveToTile(object, tile, object->elevation, -1, delay);
 		} else {
@@ -3448,7 +3448,7 @@ static void opRegAnimObjectRunToTile(Program *program) {
 	int tile = programStackPopInteger(program);
 	Object *object = static_cast<Object *>(programStackPopPointer(program));
 
-	if (/*!isInCombat()*/ 1) { // TODO combat
+	if (!isInCombat()) {
 		if (object != NULL) {
 			animationRegisterRunToTile(object, tile, object->elevation, -1, delay);
 		} else {
@@ -3835,7 +3835,7 @@ static void opRegAnimAnimateForever(Program *program) {
 	int anim = programStackPopInteger(program);
 	Object *obj = static_cast<Object *>(programStackPopPointer(program));
 
-	if (/*!isInCombat()*/ 1) { // TODO combat
+	if (!isInCombat()) {
 		if (obj != NULL) {
 			animationRegisterAnimateForever(obj, anim, -1);
 		} else {
@@ -3878,7 +3878,7 @@ static void opCritterInjure(Program *program) {
 // combat_is_initialized
 // 0x45AF7C
 static void opCombatIsInitialized(Program *program) {
-	programStackPushInteger(program, /*isInCombat() ? 1 :*/ 0);  // TODO combat
+	programStackPushInteger(program, isInCombat() ? 1 : 0);
 }
 
 // gdialog_barter
@@ -4275,7 +4275,7 @@ static void opAttackSetup(Program *program) {
 			return;
 		}
 
-		if (/*isInCombat()*/ 0) {  // TODO combat
+		if (isInCombat()) {
 			if ((attacker->data.critter.combat.maneuver & CRITTER_MANEUVER_ENGAGING) == 0) {
 				attacker->data.critter.combat.maneuver |= CRITTER_MANEUVER_ENGAGING;
 				attacker->data.critter.combat.whoHitMe = defender;
@@ -4312,7 +4312,7 @@ static void opDestroyMultipleObjects(Program *program) {
 	int result = 0;
 
 	if (PID_TYPE(object->pid) == OBJ_TYPE_CRITTER) {
-//		_combat_delete_critter(object); TODO combat
+		_combat_delete_critter(object);
 	}
 
 	Object *owner = objectGetOwner(object);
@@ -4580,7 +4580,7 @@ static void opCritterSetFleeState(Program *program) {
 // terminate_combat
 // 0x45CA84
 static void opTerminateCombat(Program *program) {
-	if (/*isInCombat()*/ 0) { // TODO combat
+	if (isInCombat()) {
 		_game_user_wants_to_quit = 1;
 		Object *self = scriptGetSelf(program);
 		if (self != NULL) {

@@ -538,10 +538,10 @@ static int inventoryMessageListFree() {
 
 // 0x46E7B0
 void inventoryOpen() {
-	if (/*isInCombat()*/ 0) { // TODO combat
-							  //		if (_combat_whose_turn() != _inven_dude) {
-							  //			return;
-							  //		}
+	if (isInCombat()) {
+		if (_combat_whose_turn() != _inven_dude) {
+			return;
+		}
 	}
 
 	ScopedGameMode gm(GameMode::kInventory);
@@ -550,7 +550,7 @@ void inventoryOpen() {
 		return;
 	}
 
-	/* if (isInCombat()) { TODO combat
+	if (isInCombat()) {
 		if (_inven_dude == gDude) {
 			int actionPointsRequired = 4 - 2 * perkGetRank(_inven_dude, PERK_QUICK_POCKETS);
 			if (actionPointsRequired > 0 && actionPointsRequired > gDude->data.critter.combat.ap) {
@@ -576,7 +576,7 @@ void inventoryOpen() {
 				interfaceRenderActionPoints(gDude->data.critter.combat.ap, _combat_free_move);
 			}
 		}
-	}*/
+	}
 
 	Object *oldArmor = critterGetArmor(_inven_dude);
 	bool isoWasEnabled = _setup_inventory(INVENTORY_WINDOW_TYPE_NORMAL);
@@ -1542,42 +1542,42 @@ static void _exit_inventory(bool shouldEnableIso) {
 
 	_gmouse_enable();
 
-	/*	if (_dropped_explosive) { TODO combat
-			Attack v1;
-			attackInit(&v1, gDude, NULL, HIT_MODE_PUNCH, HIT_LOCATION_TORSO);
-			v1.attackerFlags = DAM_HIT;
-			v1.tile = gDude->tile;
-			_compute_explosion_on_extras(&v1, 0, 0, 1);
+	if (_dropped_explosive) {
+		Attack v1;
+		attackInit(&v1, gDude, NULL, HIT_MODE_PUNCH, HIT_LOCATION_TORSO);
+		v1.attackerFlags = DAM_HIT;
+		v1.tile = gDude->tile;
+		_compute_explosion_on_extras(&v1, 0, 0, 1);
 
-			Object *v2 = NULL;
-			for (int index = 0; index < v1.extrasLength; index++) {
-				Object *critter = v1.extras[index];
-				if (critter != gDude && critter->data.critter.combat.team != gDude->data.critter.combat.team && statRoll(critter, STAT_PERCEPTION, 0, NULL) >= ROLL_SUCCESS) {
-					_critter_set_who_hit_me(critter, gDude);
+		Object *v2 = NULL;
+		for (int index = 0; index < v1.extrasLength; index++) {
+			Object *critter = v1.extras[index];
+			if (critter != gDude && critter->data.critter.combat.team != gDude->data.critter.combat.team && statRoll(critter, STAT_PERCEPTION, 0, NULL) >= ROLL_SUCCESS) {
+				_critter_set_who_hit_me(critter, gDude);
 
-					if (v2 == NULL) {
-						v2 = critter;
-					}
+				if (v2 == NULL) {
+					v2 = critter;
 				}
 			}
+		}
 
-			if (v2 != NULL) {
-				if (!isInCombat()) {
-					STRUCT_664980 v3;
-					v3.attacker = v2;
-					v3.defender = gDude;
-					v3.actionPointsBonus = 0;
-					v3.accuracyBonus = 0;
-					v3.damageBonus = 0;
-					v3.minDamage = 0;
-					v3.maxDamage = INT_MAX;
-					v3.field_1C = 0;
-					scriptsRequestCombat(&v3);
-				}
+		if (v2 != NULL) {
+			if (!isInCombat()) {
+				STRUCT_664980 v3;
+				v3.attacker = v2;
+				v3.defender = gDude;
+				v3.actionPointsBonus = 0;
+				v3.accuracyBonus = 0;
+				v3.damageBonus = 0;
+				v3.minDamage = 0;
+				v3.maxDamage = INT_MAX;
+				v3.field_1C = 0;
+				scriptsRequestCombat(&v3);
 			}
+		}
 
-			_dropped_explosive = false;
-		}*/
+		_dropped_explosive = false;
+	}
 }
 
 // 0x46FDF4
@@ -2673,7 +2673,7 @@ void inventoryOpenUseItemOn(Object *a1) {
 						// opened by "Use Inventory Item On" (backpack) action icon
 						if (inventoryItemIndex < _pud->length && inventoryItemIndex >= 0) {
 							InventoryItem *inventoryItem = &(_pud->items[inventoryItemIndex]);
-							/*if (isInCombat()) {  TODO combat
+							if (isInCombat()) {
 								if (gDude->data.critter.combat.ap >= 2) {
 									if (_action_use_an_item_on_object(gDude, a1, inventoryItem->item) != -1) {
 										int actionPoints = gDude->data.critter.combat.ap;
@@ -2687,7 +2687,7 @@ void inventoryOpenUseItemOn(Object *a1) {
 								}
 							} else {
 								_action_use_an_item_on_object(gDude, a1, inventoryItem->item);
-							} */
+							}
 							keyCode = KEY_ESCAPE;
 						} else {
 							keyCode = -1;
@@ -2958,16 +2958,16 @@ static void inventoryRenderSummary() {
 					bool isSecondary = actions[index] == INTERFACE_ITEM_ACTION_SECONDARY || actions[index] == INTERFACE_ITEM_ACTION_SECONDARY_AIMING;
 
 					if (index == HAND_LEFT) {
-						hitMode = HIT_MODE_PUNCH; /* unarmedGetPunchHitMode(isSecondary); TODO combat */
+						hitMode = unarmedGetPunchHitMode(isSecondary);
 					} else {
-						hitMode = HIT_MODE_KICK; /* unarmedGetKickHitMode(isSecondary); TODO combat */
+						hitMode = unarmedGetKickHitMode(isSecondary);
 					}
 				}
 
 				// Formula is the same as in `weaponGetDamage`.
 				int minDamage;
 				int maxDamage;
-				int bonusDamage = 0; //unarmedGetDamage(hitMode, &minDamage, &maxDamage); TODO combat
+				int bonusDamage = unarmedGetDamage(hitMode, &minDamage, &maxDamage);
 				int meleeDamage = critterGetStat(_stack[0], STAT_MELEE_DAMAGE);
 				// TODO: Localize unarmed attack names.
 				snprintf(formattedText, sizeof(formattedText), "%s %d-%d",
@@ -3031,9 +3031,9 @@ static void inventoryRenderSummary() {
 			meleeDamage = critterGetStat(_stack[0], STAT_MELEE_DAMAGE);
 
 			// SFALL: Display melee damage without "Bonus HtH Damage" bonus.
-//			if (damageModGetBonusHthDamageFix() && !damageModGetDisplayBonusDamage()) { TODO combat
-//				meleeDamage -= 2 * perkGetRank(gDude, PERK_BONUS_HTH_DAMAGE);
-//			}
+			if (damageModGetBonusHthDamageFix() && !damageModGetDisplayBonusDamage()) {
+				meleeDamage -= 2 * perkGetRank(gDude, PERK_BONUS_HTH_DAMAGE);
+			}
 		} else {
 			meleeDamage = 0;
 		}
@@ -3042,7 +3042,7 @@ static void inventoryRenderSummary() {
 		if (messageListGetItem(&gInventoryMessageList, &messageListItem)) {
 			if (attackType != 4 && range <= 1) {
 				// SFALL: Display bonus damage.
-/*				if (damageModGetBonusHthDamageFix() && damageModGetDisplayBonusDamage()) { TODO combat
+				if (damageModGetBonusHthDamageFix() && damageModGetDisplayBonusDamage()) {
 					// CE: Just in case check for attack type, however it looks
 					// like we cannot be here with anything besides melee or
 					// unarmed.
@@ -3050,14 +3050,14 @@ static void inventoryRenderSummary() {
 						// See explanation in `weaponGetDamage`.
 						damageMin += 2 * perkGetRank(gDude, PERK_BONUS_HTH_DAMAGE);
 					}
-				}*/
+				}
 				snprintf(formattedText, sizeof(formattedText), "%s %d-%d", messageListItem.text, damageMin, damageMax + meleeDamage);
 			} else {
 				MessageListItem rangeMessageListItem;
 				rangeMessageListItem.num = 16; // Rng:
 				if (messageListGetItem(&gInventoryMessageList, &rangeMessageListItem)) {
 					// SFALL: Display bonus damage.
-/*					if (damageModGetDisplayBonusDamage()) { TODO combat
+					if (damageModGetDisplayBonusDamage()) {
 						// CE: There is a bug in Sfall diplaying wrong damage
 						// bonus for melee weapons with range > 1 (spears,
 						// sledgehammers) and throwables (secondary mode).
@@ -3066,7 +3066,7 @@ static void inventoryRenderSummary() {
 							damageMin += damageBonus;
 							damageMax += damageBonus;
 						}
-					}*/
+					}
 
 					snprintf(formattedText, sizeof(formattedText), "%s %d-%d   %s %d", messageListItem.text, damageMin, damageMax + meleeDamage, rangeMessageListItem.text, range);
 				}

@@ -1213,7 +1213,7 @@ static int preferencesWindowFree() {
 	if (_changed) {
 		_SavePrefs(1);
 		_JustUpdate_();
-//		_combat_highlight_change(); TODO combat
+		_combat_highlight_change();
 	}
 
 	windowDestroy(gPreferencesWindow);

@@ -2798,7 +2798,7 @@ static void characterEditorDrawDerivedStats() {
 
 	// SFALL: Display melee damage without "Bonus HtH Damage" bonus.
 	int meleeDamage = critterGetStat(gDude, STAT_MELEE_DAMAGE);
-	if (/*!damageModGetDisplayBonusDamage()*/ 1) {  // TODO combat
+	if (!damageModGetDisplayBonusDamage()) {
 		meleeDamage -= 2 * perkGetRank(gDude, PERK_BONUS_HTH_DAMAGE);
 	}
 
@@ -4418,7 +4418,7 @@ static int characterPrintToFile(const char *fileName) {
 
 	// SFALL: Display melee damage without "Bonus HtH Damage" bonus.
 	int meleeDamage = critterGetStat(gDude, STAT_MELEE_DAMAGE);
-	if (/*!damageModGetDisplayBonusDamage()*/ 1) {  // TODO combat
+	if (!damageModGetDisplayBonusDamage()) {
 		meleeDamage -= 2 * perkGetRank(gDude, PERK_BONUS_HTH_DAMAGE);
 	}
 
