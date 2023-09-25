@@ -446,6 +446,7 @@ int objectDataRead(Object *obj, File *stream) {
 	Proto *proto;
 	int temp;
 
+	debug(6, "Attempt to load object proto PID: %d (aka %d)", PID_TYPE(obj->pid), obj->pid);
 	Inventory *inventory = &(obj->data.inventory);
 	if (fileReadInt32(stream, &(inventory->length)) == -1)
 		return -1;
@@ -565,6 +566,7 @@ int objectDataRead(Object *obj, File *stream) {
 		}
 	}
 
+	debug(6, "Object proto loaded properly");
 	return 0;
 }
 
@@ -1503,6 +1505,7 @@ static int protoRead(Proto *proto, File *stream) {
 	if (fileReadInt32(stream, &(proto->fid)) == -1)
 		return -1;
 
+	debug(6, "Loaded proto header - PID %d aka %d", proto->pid, PID_TYPE(proto->pid));
 	switch (PID_TYPE(proto->pid)) {
 	case OBJ_TYPE_ITEM:
 		if (fileReadInt32(stream, &(proto->item.lightDistance)) == -1)
