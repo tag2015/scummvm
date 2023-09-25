@@ -609,7 +609,7 @@ int _action_melee(Attack *attack, int anim) {
 
 //	strcpy(sfx_name_temp, sfx_name);
 
-//	_combatai_msg(attack->attacker, attack, AI_MESSAGE_TYPE_ATTACK, 0); TODO combat_ai
+	_combatai_msg(attack->attacker, attack, AI_MESSAGE_TYPE_ATTACK, 0);
 
 	if (attack->attackerFlags & 0x0300) {
 //		animationRegisterPlaySoundEffect(attack->attacker, sfx_name_temp, 0); TODO audio
@@ -655,10 +655,10 @@ int _action_melee(Attack *attack, int anim) {
 
 	if ((attack->attackerFlags & DAM_HIT) != 0) {
 		if ((attack->defenderFlags & DAM_DEAD) == 0) {
-//			_combatai_msg(attack->attacker, attack, AI_MESSAGE_TYPE_HIT, -1); TODO combat_ai
+			_combatai_msg(attack->attacker, attack, AI_MESSAGE_TYPE_HIT, -1);
 		}
 	} else {
-//		_combatai_msg(attack->attacker, attack, AI_MESSAGE_TYPE_MISS, -1);
+		_combatai_msg(attack->attacker, attack, AI_MESSAGE_TYPE_MISS, -1);
 	}
 
 	if (reg_anim_end() == -1) {
@@ -712,7 +712,7 @@ int _action_ranged(Attack *attack, int anim) {
 		animationRegisterAnimate(attack->attacker, ANIM_POINT, -1);
 	}
 
-//	_combatai_msg(attack->attacker, attack, AI_MESSAGE_TYPE_ATTACK, 0); TODO combat_ai
+	_combatai_msg(attack->attacker, attack, AI_MESSAGE_TYPE_ATTACK, 0);
 
 	const char *sfx;
 	if (((attack->attacker->fid & 0xF000) >> 12) != 0) {
@@ -743,7 +743,7 @@ int _action_ranged(Attack *attack, int anim) {
 					itemRemove(attack->attacker, weapon, 1);
 					replacedWeapon = itemReplace(attack->attacker, weapon, weaponFlags & OBJECT_IN_ANY_HAND);
 					objectSetFid(projectile, projectileProto->fid, NULL);
-//					_cAIPrepWeaponItem(attack->attacker, weapon); TODO combat_ai
+					_cAIPrepWeaponItem(attack->attacker, weapon);
 
 					if (attack->attacker == gDude) {
 						if (replacedWeapon == NULL) {
@@ -896,10 +896,10 @@ int _action_ranged(Attack *attack, int anim) {
 	_show_damage(attack, anim, delay);
 
 	if ((attack->attackerFlags & DAM_HIT) == 0) {
-//		_combatai_msg(attack->defender, attack, AI_MESSAGE_TYPE_MISS, -1); TODO combat_ai
+		_combatai_msg(attack->defender, attack, AI_MESSAGE_TYPE_MISS, -1);
 	} else {
 		if ((attack->defenderFlags & DAM_DEAD) == 0) {
-//			_combatai_msg(attack->defender, attack, AI_MESSAGE_TYPE_HIT, -1);
+			_combatai_msg(attack->defender, attack, AI_MESSAGE_TYPE_HIT, -1);
 		}
 	}
 
