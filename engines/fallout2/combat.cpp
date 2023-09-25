@@ -1,51 +1,51 @@
-#include "combat.h"
+#include "fallout2/combat.h"
 
-#include <limits.h>
+/*#include <limits.h>
 #include <stdio.h>
-#include <string.h>
+#include <string.h>*/
 
-#include "actions.h"
-#include "animation.h"
-#include "art.h"
-#include "color.h"
-#include "combat_ai.h"
-#include "critter.h"
-#include "db.h"
-#include "debug.h"
-#include "display_monitor.h"
-#include "draw.h"
-#include "elevator.h"
-#include "game.h"
-#include "game_mouse.h"
-#include "game_sound.h"
-#include "input.h"
-#include "interface.h"
-#include "item.h"
-#include "kb.h"
-#include "loadsave.h"
-#include "map.h"
-#include "memory.h"
-#include "message.h"
-#include "object.h"
-#include "party_member.h"
-#include "perk.h"
-#include "pipboy.h"
-#include "platform_compat.h"
-#include "proto.h"
-#include "queue.h"
-#include "random.h"
-#include "scripts.h"
-#include "settings.h"
-#include "sfall_config.h"
-#include "skill.h"
-#include "stat.h"
-#include "svga.h"
-#include "text_font.h"
-#include "tile.h"
-#include "trait.h"
-#include "window_manager.h"
+#include "fallout2/actions.h"
+#include "fallout2/animation.h"
+#include "fallout2/art.h"
+#include "fallout2/color.h"
+#include "fallout2/combat_ai.h"
+#include "fallout2/critter.h"
+#include "fallout2/db.h"
+#include "fallout2/debug.h"
+#include "fallout2/display_monitor.h"
+#include "fallout2/draw.h"
+#include "fallout2/elevator.h"
+#include "fallout2/game.h"
+#include "fallout2/game_mouse.h"
+// #include "fallout2/game_sound.h" TODO audio
+#include "fallout2/input.h"
+#include "fallout2/interface.h"
+#include "fallout2/item.h"
+#include "fallout2/kb.h"
+// #include "fallout2/loadsave.h" TODO loadsave
+#include "fallout2/map.h"
+#include "fallout2/memory.h"
+#include "fallout2/message.h"
+#include "fallout2/object.h"
+#include "fallout2/party_member.h"
+#include "fallout2/perk.h"
+#include "fallout2/pipboy.h"
+#include "fallout2/platform_compat.h"
+#include "fallout2/proto.h"
+#include "fallout2/queue.h"
+#include "fallout2/random.h"
+#include "fallout2/scripts.h"
+#include "fallout2/settings.h"
+#include "fallout2/sfall_config.h"
+#include "fallout2/skill.h"
+#include "fallout2/stat.h"
+#include "fallout2/svga.h"
+#include "fallout2/text_font.h"
+#include "fallout2/tile.h"
+#include "fallout2/trait.h"
+#include "fallout2/window_manager.h"
 
-namespace fallout {
+namespace Fallout2 {
 
 #define CALLED_SHOT_WINDOW_Y (20)
 #define CALLED_SHOT_WINDOW_WIDTH (504)
@@ -59,9 +59,9 @@ typedef enum DamageCalculationType {
 } DamageCalculationType;
 
 typedef struct CombatAiInfo {
-	Object* friendlyDead;
-	Object* lastTarget;
-	Object* lastItem;
+	Object *friendlyDead;
+	Object *lastTarget;
+	Object *lastItem;
 	int lastMove;
 } CombatAiInfo;
 
@@ -79,8 +79,8 @@ typedef struct UnarmedHitDescription {
 } UnarmedHitDescription;
 
 typedef struct DamageCalculationContext {
-	Attack* attack;
-	int* damagePtr;
+	Attack *attack;
+	int *damagePtr;
 	int ammoQuantity;
 	int damageResistance;
 	int damageThreshold;
@@ -89,60 +89,60 @@ typedef struct DamageCalculationContext {
 	int combatDifficultyDamageModifier;
 } DamageCalculationContext;
 
-static bool _combat_safety_invalidate_weapon_func(Object* attacker, Object* weapon, int hitMode, Object* defender, int* safeDistancePtr, Object* attackerFriend);
+static bool _combat_safety_invalidate_weapon_func(Object *attacker, Object *weapon, int hitMode, Object *defender, int *safeDistancePtr, Object *attackerFriend);
 static void _combatInitAIInfoList();
 static int aiInfoCopy(int srcIndex, int destIndex);
-static int _combatAIInfoSetLastMove(Object* object, int move);
-static void _combat_begin(Object* a1);
-static void _combat_begin_extra(Object* a1);
+static int _combatAIInfoSetLastMove(Object *object, int move);
+static void _combat_begin(Object *a1);
+static void _combat_begin_extra(Object *a1);
 static void _combat_update_critters_in_los(bool a1);
 static void _combat_over();
 static void _combat_add_noncoms();
-static int _compare_faster(const void* a1, const void* a2);
-static void _combat_sequence_init(Object* a1, Object* a2);
+static int _compare_faster(const void *a1, const void *a2);
+static void _combat_sequence_init(Object *a1, Object *a2);
 static void _combat_sequence();
 static void combatAttemptEnd();
 static int _combat_input();
 static void _combat_set_move_all();
-static int _combat_turn(Object* a1, bool a2);
+static int _combat_turn(Object *a1, bool a2);
 static bool _combat_should_end();
-static bool _check_ranged_miss(Attack* attack);
-static int _shoot_along_path(Attack* attack, int endTile, int rounds, int anim);
-static int _compute_spray(Attack* attack, int accuracy, int* roundsHitMainTargetPtr, int* roundsSpentPtr, int anim);
-static int attackComputeEnhancedKnockout(Attack* attack);
-static int attackCompute(Attack* attack);
-static int attackComputeCriticalHit(Attack* a1);
-static int _attackFindInvalidFlags(Object* a1, Object* a2);
-static int attackComputeCriticalFailure(Attack* attack);
-static void _do_random_cripple(int* flagsPtr);
-static int attackDetermineToHit(Object* attacker, int tile, Object* defender, int hitLocation, int hitMode, bool a6);
-static void attackComputeDamage(Attack* attack, int ammoQuantity, int a3);
-static void _check_for_death(Object* a1, int a2, int* a3);
-static void _set_new_results(Object* a1, int a2);
-static void _damage_object(Object* a1, int damage, bool animated, int a4, Object* a5);
-static void combatCopyDamageAmountDescription(char* dest, size_t size, Object* critter_obj, int damage);
-static void combatAddDamageFlagsDescription(char* a1, int flags, Object* a3);
-static void _combat_standup(Object* a1);
-static void _print_tohit(unsigned char* dest, int dest_pitch, int a3);
-static char* hitLocationGetName(Object* critter, int hitLocation);
+static bool _check_ranged_miss(Attack *attack);
+static int _shoot_along_path(Attack *attack, int endTile, int rounds, int anim);
+static int _compute_spray(Attack *attack, int accuracy, int *roundsHitMainTargetPtr, int *roundsSpentPtr, int anim);
+static int attackComputeEnhancedKnockout(Attack *attack);
+static int attackCompute(Attack *attack);
+static int attackComputeCriticalHit(Attack *a1);
+static int _attackFindInvalidFlags(Object *a1, Object *a2);
+static int attackComputeCriticalFailure(Attack *attack);
+static void _do_random_cripple(int *flagsPtr);
+static int attackDetermineToHit(Object *attacker, int tile, Object *defender, int hitLocation, int hitMode, bool a6);
+static void attackComputeDamage(Attack *attack, int ammoQuantity, int a3);
+static void _check_for_death(Object *a1, int a2, int *a3);
+static void _set_new_results(Object *a1, int a2);
+static void _damage_object(Object *a1, int damage, bool animated, int a4, Object *a5);
+static void combatCopyDamageAmountDescription(char *dest, size_t size, Object *critter_obj, int damage);
+static void combatAddDamageFlagsDescription(char *a1, int flags, Object *a3);
+static void _combat_standup(Object *a1);
+static void _print_tohit(unsigned char *dest, int dest_pitch, int a3);
+static char *hitLocationGetName(Object *critter, int hitLocation);
 static void _draw_loc_off(int a1, int a2);
 static void _draw_loc_on_(int a1, int a2);
 static void _draw_loc_(int eventCode, int color);
-static int calledShotSelectHitLocation(Object* critter, int* hitLocation, int hitMode);
+static int calledShotSelectHitLocation(Object *critter, int *hitLocation, int hitMode);
 
 static void criticalsInit();
 static void criticalsReset();
 static void criticalsExit();
 static void burstModInit();
-static int burstModComputeRounds(int totalRounds, int* centerRoundsPtr, int* leftRoundsPtr, int* rightRoundsPtr);
+static int burstModComputeRounds(int totalRounds, int *centerRoundsPtr, int *leftRoundsPtr, int *rightRoundsPtr);
 static void unarmedInit();
 static void unarmedInitVanilla();
 static void unarmedInitCustom();
 static int unarmedGetHitModeInRange(int firstHitMode, int lastHitMode, bool isSecondary);
 static void damageModInit();
-static void damageModCalculateGlovz(DamageCalculationContext* context);
+static void damageModCalculateGlovz(DamageCalculationContext *context);
 static int damageModGlovzDivRound(int dividend, int divisor);
-static void damageModCalculateYaam(DamageCalculationContext* context);
+static void damageModCalculateYaam(DamageCalculationContext *context);
 
 // 0x500B50
 static char _a_1[] = ".";
@@ -157,10 +157,10 @@ int _combatNumTurns = 0;
 unsigned int gCombatState = COMBAT_STATE_0x02;
 
 // 0x510948
-static CombatAiInfo* _aiInfoList = NULL;
+static CombatAiInfo *_aiInfoList = NULL;
 
 // 0x51094C
-static STRUCT_664980* _gcsd = NULL;
+static STRUCT_664980 *_gcsd = NULL;
 
 // 0x510950
 static bool _combat_call_display = false;
@@ -190,1596 +190,1596 @@ static CriticalHitDescription gCriticalHitTables[SFALL_KILL_TYPE_COUNT][HIT_LOCA
 	{
 		// HIT_LOCATION_HEAD
 		{
-			{ 4, 0, -1, 0, 0, 5001, 5000 },
-			{ 4, DAM_BYPASS, STAT_ENDURANCE, 0, DAM_KNOCKED_OUT, 5002, 5003 },
-			{ 5, DAM_BYPASS, STAT_ENDURANCE, -3, DAM_KNOCKED_OUT, 5002, 5003 },
-			{ 5, DAM_KNOCKED_DOWN | DAM_BYPASS, STAT_ENDURANCE, -3, DAM_KNOCKED_OUT, 5004, 5003 },
-			{ 6, DAM_KNOCKED_OUT | DAM_BYPASS, STAT_LUCK, 0, DAM_BLIND, 5005, 5006 },
-			{ 6, DAM_DEAD, -1, 0, 0, 5007, 5000 },
+			{4, 0, -1, 0, 0, 5001, 5000},
+			{4, DAM_BYPASS, STAT_ENDURANCE, 0, DAM_KNOCKED_OUT, 5002, 5003},
+			{5, DAM_BYPASS, STAT_ENDURANCE, -3, DAM_KNOCKED_OUT, 5002, 5003},
+			{5, DAM_KNOCKED_DOWN | DAM_BYPASS, STAT_ENDURANCE, -3, DAM_KNOCKED_OUT, 5004, 5003},
+			{6, DAM_KNOCKED_OUT | DAM_BYPASS, STAT_LUCK, 0, DAM_BLIND, 5005, 5006},
+			{6, DAM_DEAD, -1, 0, 0, 5007, 5000},
 		},
 		// HIT_LOCATION_LEFT_ARM
 		{
-			{ 3, 0, -1, 0, 0, 5008, 5000 },
-			{ 3, DAM_LOSE_TURN, -1, 0, 0, 5009, 5000 },
-			{ 4, 0, STAT_ENDURANCE, -3, DAM_CRIP_ARM_LEFT, 5010, 5011 },
-			{ 4, DAM_CRIP_ARM_LEFT | DAM_BYPASS, -1, 0, 0, 5012, 5000 },
-			{ 4, DAM_CRIP_ARM_LEFT | DAM_BYPASS, -1, 0, 0, 5012, 5000 },
-			{ 4, DAM_CRIP_ARM_LEFT | DAM_BYPASS, -1, 0, 0, 5013, 5000 },
+			{3, 0, -1, 0, 0, 5008, 5000},
+			{3, DAM_LOSE_TURN, -1, 0, 0, 5009, 5000},
+			{4, 0, STAT_ENDURANCE, -3, DAM_CRIP_ARM_LEFT, 5010, 5011},
+			{4, DAM_CRIP_ARM_LEFT | DAM_BYPASS, -1, 0, 0, 5012, 5000},
+			{4, DAM_CRIP_ARM_LEFT | DAM_BYPASS, -1, 0, 0, 5012, 5000},
+			{4, DAM_CRIP_ARM_LEFT | DAM_BYPASS, -1, 0, 0, 5013, 5000},
 		},
 		// HIT_LOCATION_RIGHT_ARM
 		{
-			{ 3, 0, -1, 0, 0, 5008, 5000 },
-			{ 3, DAM_LOSE_TURN, -1, 0, 0, 5009, 5000 },
-			{ 4, 0, STAT_ENDURANCE, -3, DAM_CRIP_ARM_RIGHT, 5014, 5000 },
-			{ 4, DAM_CRIP_ARM_RIGHT | DAM_BYPASS, -1, 0, 0, 5015, 5000 },
-			{ 4, DAM_CRIP_ARM_RIGHT | DAM_BYPASS, -1, 0, 0, 5015, 5000 },
-			{ 4, DAM_CRIP_ARM_RIGHT | DAM_BYPASS, -1, 0, 0, 5013, 5000 },
+			{3, 0, -1, 0, 0, 5008, 5000},
+			{3, DAM_LOSE_TURN, -1, 0, 0, 5009, 5000},
+			{4, 0, STAT_ENDURANCE, -3, DAM_CRIP_ARM_RIGHT, 5014, 5000},
+			{4, DAM_CRIP_ARM_RIGHT | DAM_BYPASS, -1, 0, 0, 5015, 5000},
+			{4, DAM_CRIP_ARM_RIGHT | DAM_BYPASS, -1, 0, 0, 5015, 5000},
+			{4, DAM_CRIP_ARM_RIGHT | DAM_BYPASS, -1, 0, 0, 5013, 5000},
 		},
 		// HIT_LOCATION_TORSO
 		{
-			{ 3, 0, -1, 0, 0, 5016, 5000 },
-			{ 3, DAM_BYPASS, -1, 0, 0, 5017, 5000 },
-			{ 4, DAM_KNOCKED_DOWN | DAM_BYPASS, -1, 0, 0, 5019, 5000 },
-			{ 4, DAM_KNOCKED_DOWN | DAM_BYPASS, -1, 0, 0, 5019, 5000 },
-			{ 6, DAM_KNOCKED_OUT | DAM_BYPASS, -1, 0, 0, 5020, 5000 },
-			{ 6, DAM_DEAD, -1, 0, 0, 5021, 5000 },
+			{3, 0, -1, 0, 0, 5016, 5000},
+			{3, DAM_BYPASS, -1, 0, 0, 5017, 5000},
+			{4, DAM_KNOCKED_DOWN | DAM_BYPASS, -1, 0, 0, 5019, 5000},
+			{4, DAM_KNOCKED_DOWN | DAM_BYPASS, -1, 0, 0, 5019, 5000},
+			{6, DAM_KNOCKED_OUT | DAM_BYPASS, -1, 0, 0, 5020, 5000},
+			{6, DAM_DEAD, -1, 0, 0, 5021, 5000},
 		},
 		// HIT_LOCATION_RIGHT_LEG
 		{
-			{ 3, DAM_KNOCKED_DOWN, -1, 0, 0, 5023, 5000 },
-			{ 3, DAM_KNOCKED_DOWN, STAT_ENDURANCE, 0, DAM_CRIP_LEG_RIGHT, 5023, 5024 },
-			{ 4, DAM_KNOCKED_DOWN, STAT_ENDURANCE, -3, DAM_CRIP_LEG_RIGHT, 5023, 5024 },
-			{ 4, DAM_KNOCKED_DOWN | DAM_CRIP_LEG_RIGHT | DAM_BYPASS, -1, 0, 0, 5025, 5000 },
-			{ 4, DAM_KNOCKED_DOWN | DAM_CRIP_LEG_RIGHT | DAM_BYPASS, STAT_ENDURANCE, 0, DAM_KNOCKED_OUT, 5025, 5026 },
-			{ 4, DAM_KNOCKED_OUT | DAM_CRIP_LEG_RIGHT | DAM_BYPASS, -1, 0, 0, 5026, 5000 },
+			{3, DAM_KNOCKED_DOWN, -1, 0, 0, 5023, 5000},
+			{3, DAM_KNOCKED_DOWN, STAT_ENDURANCE, 0, DAM_CRIP_LEG_RIGHT, 5023, 5024},
+			{4, DAM_KNOCKED_DOWN, STAT_ENDURANCE, -3, DAM_CRIP_LEG_RIGHT, 5023, 5024},
+			{4, DAM_KNOCKED_DOWN | DAM_CRIP_LEG_RIGHT | DAM_BYPASS, -1, 0, 0, 5025, 5000},
+			{4, DAM_KNOCKED_DOWN | DAM_CRIP_LEG_RIGHT | DAM_BYPASS, STAT_ENDURANCE, 0, DAM_KNOCKED_OUT, 5025, 5026},
+			{4, DAM_KNOCKED_OUT | DAM_CRIP_LEG_RIGHT | DAM_BYPASS, -1, 0, 0, 5026, 5000},
 		},
 		// HIT_LOCATION_LEFT_LEG
 		{
-			{ 3, DAM_KNOCKED_DOWN, -1, 0, 0, 5023, 5000 },
-			{ 3, DAM_KNOCKED_DOWN, STAT_ENDURANCE, 0, DAM_CRIP_LEG_LEFT, 5023, 5024 },
-			{ 4, DAM_KNOCKED_DOWN, STAT_ENDURANCE, -3, DAM_CRIP_LEG_LEFT, 5023, 5024 },
-			{ 4, DAM_KNOCKED_DOWN | DAM_CRIP_LEG_LEFT | DAM_BYPASS, -1, 0, 0, 5025, 5000 },
-			{ 4, DAM_KNOCKED_DOWN | DAM_CRIP_LEG_LEFT | DAM_BYPASS, STAT_ENDURANCE, 0, DAM_KNOCKED_OUT, 5025, 5026 },
-			{ 4, DAM_KNOCKED_OUT | DAM_CRIP_LEG_LEFT | DAM_BYPASS, -1, 0, 0, 5026, 5000 },
+			{3, DAM_KNOCKED_DOWN, -1, 0, 0, 5023, 5000},
+			{3, DAM_KNOCKED_DOWN, STAT_ENDURANCE, 0, DAM_CRIP_LEG_LEFT, 5023, 5024},
+			{4, DAM_KNOCKED_DOWN, STAT_ENDURANCE, -3, DAM_CRIP_LEG_LEFT, 5023, 5024},
+			{4, DAM_KNOCKED_DOWN | DAM_CRIP_LEG_LEFT | DAM_BYPASS, -1, 0, 0, 5025, 5000},
+			{4, DAM_KNOCKED_DOWN | DAM_CRIP_LEG_LEFT | DAM_BYPASS, STAT_ENDURANCE, 0, DAM_KNOCKED_OUT, 5025, 5026},
+			{4, DAM_KNOCKED_OUT | DAM_CRIP_LEG_LEFT | DAM_BYPASS, -1, 0, 0, 5026, 5000},
 		},
 		// HIT_LOCATION_EYES
 		{
-			{ 4, 0, STAT_LUCK, 4, DAM_BLIND, 5027, 5028 },
-			{ 4, DAM_BYPASS, STAT_LUCK, 3, DAM_BLIND, 5029, 5028 },
-			{ 6, DAM_BYPASS, STAT_LUCK, 2, DAM_BLIND, 5029, 5028 },
-			{ 6, DAM_BLIND | DAM_BYPASS | DAM_LOSE_TURN, -1, 0, 0, 5030, 5000 },
-			{ 8, DAM_KNOCKED_OUT | DAM_BLIND | DAM_BYPASS, -1, 0, 0, 5031, 5000 },
-			{ 8, DAM_DEAD, -1, 0, 0, 5032, 5000 },
+			{4, 0, STAT_LUCK, 4, DAM_BLIND, 5027, 5028},
+			{4, DAM_BYPASS, STAT_LUCK, 3, DAM_BLIND, 5029, 5028},
+			{6, DAM_BYPASS, STAT_LUCK, 2, DAM_BLIND, 5029, 5028},
+			{6, DAM_BLIND | DAM_BYPASS | DAM_LOSE_TURN, -1, 0, 0, 5030, 5000},
+			{8, DAM_KNOCKED_OUT | DAM_BLIND | DAM_BYPASS, -1, 0, 0, 5031, 5000},
+			{8, DAM_DEAD, -1, 0, 0, 5032, 5000},
 		},
 		// HIT_LOCATION_GROIN
 		{
-			{ 3, 0, -1, 0, 0, 5033, 5000 },
-			{ 3, DAM_BYPASS, STAT_ENDURANCE, -3, DAM_KNOCKED_DOWN, 5034, 5035 },
-			{ 3, DAM_KNOCKED_DOWN, STAT_ENDURANCE, -3, DAM_KNOCKED_OUT, 5035, 5036 },
-			{ 3, DAM_KNOCKED_OUT, -1, 0, 0, 5036, 5000 },
-			{ 4, DAM_KNOCKED_DOWN | DAM_BYPASS, STAT_ENDURANCE, 0, DAM_KNOCKED_OUT, 5035, 5036 },
-			{ 4, DAM_KNOCKED_OUT | DAM_BYPASS, -1, 0, 0, 5037, 5000 },
+			{3, 0, -1, 0, 0, 5033, 5000},
+			{3, DAM_BYPASS, STAT_ENDURANCE, -3, DAM_KNOCKED_DOWN, 5034, 5035},
+			{3, DAM_KNOCKED_DOWN, STAT_ENDURANCE, -3, DAM_KNOCKED_OUT, 5035, 5036},
+			{3, DAM_KNOCKED_OUT, -1, 0, 0, 5036, 5000},
+			{4, DAM_KNOCKED_DOWN | DAM_BYPASS, STAT_ENDURANCE, 0, DAM_KNOCKED_OUT, 5035, 5036},
+			{4, DAM_KNOCKED_OUT | DAM_BYPASS, -1, 0, 0, 5037, 5000},
 		},
 		// HIT_LOCATION_UNCALLED
 		{
-			{ 3, 0, -1, 0, 0, 5016, 5000 },
-			{ 3, DAM_BYPASS, -1, 0, 0, 5017, 5000 },
-			{ 4, 0, -1, 0, 0, 5018, 5000 },
-			{ 4, DAM_KNOCKED_DOWN | DAM_BYPASS, -1, 0, 0, 5019, 5000 },
-			{ 6, DAM_KNOCKED_OUT | DAM_BYPASS, -1, 0, 0, 5020, 5000 },
-			{ 6, DAM_DEAD, -1, 0, 0, 5021, 5000 },
+			{3, 0, -1, 0, 0, 5016, 5000},
+			{3, DAM_BYPASS, -1, 0, 0, 5017, 5000},
+			{4, 0, -1, 0, 0, 5018, 5000},
+			{4, DAM_KNOCKED_DOWN | DAM_BYPASS, -1, 0, 0, 5019, 5000},
+			{6, DAM_KNOCKED_OUT | DAM_BYPASS, -1, 0, 0, 5020, 5000},
+			{6, DAM_DEAD, -1, 0, 0, 5021, 5000},
 		},
 	},
 	// KILL_TYPE_WOMAN
 	{
 		// HIT_LOCATION_HEAD
 		{
-			{ 4, 0, -1, 0, 0, 5101, 5100 },
-			{ 4, DAM_BYPASS, STAT_ENDURANCE, 0, DAM_KNOCKED_OUT, 5102, 5103 },
-			{ 6, DAM_BYPASS, STAT_ENDURANCE, -3, DAM_KNOCKED_OUT, 5102, 5103 },
-			{ 6, DAM_KNOCKED_DOWN | DAM_BYPASS, STAT_ENDURANCE, -3, DAM_KNOCKED_OUT, 5104, 5103 },
-			{ 6, DAM_KNOCKED_OUT | DAM_BYPASS, STAT_LUCK, 0, DAM_BLIND, 5105, 5106 },
-			{ 6, DAM_DEAD, -1, 0, 0, 5107, 5000 },
+			{4, 0, -1, 0, 0, 5101, 5100},
+			{4, DAM_BYPASS, STAT_ENDURANCE, 0, DAM_KNOCKED_OUT, 5102, 5103},
+			{6, DAM_BYPASS, STAT_ENDURANCE, -3, DAM_KNOCKED_OUT, 5102, 5103},
+			{6, DAM_KNOCKED_DOWN | DAM_BYPASS, STAT_ENDURANCE, -3, DAM_KNOCKED_OUT, 5104, 5103},
+			{6, DAM_KNOCKED_OUT | DAM_BYPASS, STAT_LUCK, 0, DAM_BLIND, 5105, 5106},
+			{6, DAM_DEAD, -1, 0, 0, 5107, 5000},
 		},
 		// HIT_LOCATION_LEFT_ARM
 		{
-			{ 3, 0, -1, 0, 0, 5108, 5100 },
-			{ 3, DAM_LOSE_TURN, -1, 0, 0, 5109, 5100 },
-			{ 4, 0, STAT_ENDURANCE, -2, DAM_CRIP_ARM_LEFT, 5110, 5111 },
-			{ 4, 0, STAT_ENDURANCE, -4, DAM_CRIP_ARM_LEFT, 5110, 5111 },
-			{ 4, DAM_CRIP_ARM_LEFT | DAM_BYPASS, -1, 0, 0, 5112, 5100 },
-			{ 4, DAM_CRIP_ARM_LEFT | DAM_BYPASS, -1, 0, 0, 5113, 5100 },
+			{3, 0, -1, 0, 0, 5108, 5100},
+			{3, DAM_LOSE_TURN, -1, 0, 0, 5109, 5100},
+			{4, 0, STAT_ENDURANCE, -2, DAM_CRIP_ARM_LEFT, 5110, 5111},
+			{4, 0, STAT_ENDURANCE, -4, DAM_CRIP_ARM_LEFT, 5110, 5111},
+			{4, DAM_CRIP_ARM_LEFT | DAM_BYPASS, -1, 0, 0, 5112, 5100},
+			{4, DAM_CRIP_ARM_LEFT | DAM_BYPASS, -1, 0, 0, 5113, 5100},
 		},
 		// HIT_LOCATION_RIGHT_ARM
 		{
-			{ 3, 0, -1, 0, 0, 5108, 5100 },
-			{ 3, DAM_LOSE_TURN, -1, 0, 0, 5109, 5100 },
-			{ 4, 0, STAT_ENDURANCE, -2, DAM_CRIP_ARM_RIGHT, 5114, 5100 },
-			{ 4, 0, STAT_ENDURANCE, -4, DAM_CRIP_ARM_RIGHT, 5114, 5100 },
-			{ 4, DAM_CRIP_ARM_RIGHT | DAM_BYPASS, -1, 0, 0, 5115, 5100 },
-			{ 4, DAM_CRIP_ARM_RIGHT | DAM_BYPASS, -1, 0, 0, 5113, 5100 },
+			{3, 0, -1, 0, 0, 5108, 5100},
+			{3, DAM_LOSE_TURN, -1, 0, 0, 5109, 5100},
+			{4, 0, STAT_ENDURANCE, -2, DAM_CRIP_ARM_RIGHT, 5114, 5100},
+			{4, 0, STAT_ENDURANCE, -4, DAM_CRIP_ARM_RIGHT, 5114, 5100},
+			{4, DAM_CRIP_ARM_RIGHT | DAM_BYPASS, -1, 0, 0, 5115, 5100},
+			{4, DAM_CRIP_ARM_RIGHT | DAM_BYPASS, -1, 0, 0, 5113, 5100},
 		},
 		// HIT_LOCATION_TORSO
 		{
-			{ 3, 0, -1, 0, 0, 5116, 5100 },
-			{ 3, DAM_BYPASS, -1, 0, 0, 5117, 5100 },
-			{ 4, DAM_KNOCKED_DOWN | DAM_BYPASS, -1, 0, 0, 5119, 5100 },
-			{ 4, DAM_KNOCKED_DOWN | DAM_BYPASS, -1, 0, 0, 5119, 5100 },
-			{ 6, DAM_KNOCKED_OUT | DAM_BYPASS, -1, 0, 0, 5120, 5100 },
-			{ 6, DAM_DEAD, -1, 0, 0, 5121, 5100 },
+			{3, 0, -1, 0, 0, 5116, 5100},
+			{3, DAM_BYPASS, -1, 0, 0, 5117, 5100},
+			{4, DAM_KNOCKED_DOWN | DAM_BYPASS, -1, 0, 0, 5119, 5100},
+			{4, DAM_KNOCKED_DOWN | DAM_BYPASS, -1, 0, 0, 5119, 5100},
+			{6, DAM_KNOCKED_OUT | DAM_BYPASS, -1, 0, 0, 5120, 5100},
+			{6, DAM_DEAD, -1, 0, 0, 5121, 5100},
 		},
 		// HIT_LOCATION_RIGHT_LEG
 		{
-			{ 3, DAM_KNOCKED_DOWN, -1, 0, 0, 5123, 5100 },
-			{ 4, DAM_KNOCKED_DOWN, STAT_ENDURANCE, 0, DAM_CRIP_LEG_RIGHT, 5123, 5124 },
-			{ 4, DAM_KNOCKED_DOWN, STAT_ENDURANCE, -3, DAM_CRIP_LEG_RIGHT, 5123, 5124 },
-			{ 4, DAM_KNOCKED_DOWN | DAM_CRIP_LEG_RIGHT | DAM_BYPASS, -1, 0, 0, 5125, 5100 },
-			{ 4, DAM_KNOCKED_DOWN | DAM_CRIP_LEG_RIGHT | DAM_BYPASS, STAT_ENDURANCE, 0, DAM_KNOCKED_OUT, 5125, 5126 },
-			{ 4, DAM_KNOCKED_OUT | DAM_CRIP_LEG_RIGHT | DAM_BYPASS, -1, 0, 0, 5126, 5100 },
+			{3, DAM_KNOCKED_DOWN, -1, 0, 0, 5123, 5100},
+			{4, DAM_KNOCKED_DOWN, STAT_ENDURANCE, 0, DAM_CRIP_LEG_RIGHT, 5123, 5124},
+			{4, DAM_KNOCKED_DOWN, STAT_ENDURANCE, -3, DAM_CRIP_LEG_RIGHT, 5123, 5124},
+			{4, DAM_KNOCKED_DOWN | DAM_CRIP_LEG_RIGHT | DAM_BYPASS, -1, 0, 0, 5125, 5100},
+			{4, DAM_KNOCKED_DOWN | DAM_CRIP_LEG_RIGHT | DAM_BYPASS, STAT_ENDURANCE, 0, DAM_KNOCKED_OUT, 5125, 5126},
+			{4, DAM_KNOCKED_OUT | DAM_CRIP_LEG_RIGHT | DAM_BYPASS, -1, 0, 0, 5126, 5100},
 		},
 		// HIT_LOCATION_LEFT_LEG
 		{
-			{ 3, DAM_KNOCKED_DOWN, -1, 0, 0, 5123, 5100 },
-			{ 4, DAM_KNOCKED_DOWN, STAT_ENDURANCE, 0, DAM_CRIP_LEG_LEFT, 5123, 5124 },
-			{ 4, DAM_KNOCKED_DOWN, STAT_ENDURANCE, -3, DAM_CRIP_LEG_LEFT, 5123, 5124 },
-			{ 4, DAM_KNOCKED_DOWN | DAM_CRIP_LEG_LEFT | DAM_BYPASS, -1, 0, 0, 5125, 5100 },
-			{ 4, DAM_KNOCKED_DOWN | DAM_CRIP_LEG_LEFT | DAM_BYPASS, STAT_ENDURANCE, 0, DAM_KNOCKED_OUT, 5125, 5126 },
-			{ 4, DAM_KNOCKED_OUT | DAM_CRIP_LEG_LEFT | DAM_BYPASS, -1, 0, 0, 5126, 5100 },
+			{3, DAM_KNOCKED_DOWN, -1, 0, 0, 5123, 5100},
+			{4, DAM_KNOCKED_DOWN, STAT_ENDURANCE, 0, DAM_CRIP_LEG_LEFT, 5123, 5124},
+			{4, DAM_KNOCKED_DOWN, STAT_ENDURANCE, -3, DAM_CRIP_LEG_LEFT, 5123, 5124},
+			{4, DAM_KNOCKED_DOWN | DAM_CRIP_LEG_LEFT | DAM_BYPASS, -1, 0, 0, 5125, 5100},
+			{4, DAM_KNOCKED_DOWN | DAM_CRIP_LEG_LEFT | DAM_BYPASS, STAT_ENDURANCE, 0, DAM_KNOCKED_OUT, 5125, 5126},
+			{4, DAM_KNOCKED_OUT | DAM_CRIP_LEG_LEFT | DAM_BYPASS, -1, 0, 0, 5126, 5100},
 		},
 		// HIT_LOCATION_EYES
 		{
-			{ 4, 0, STAT_LUCK, 4, DAM_BLIND, 5127, 5128 },
-			{ 4, DAM_BYPASS, STAT_LUCK, 3, DAM_BLIND, 5129, 5128 },
-			{ 6, DAM_BYPASS, STAT_LUCK, 2, DAM_BLIND, 5129, 5128 },
-			{ 6, DAM_BLIND | DAM_BYPASS | DAM_LOSE_TURN, -1, 0, 0, 5130, 5100 },
-			{ 8, DAM_KNOCKED_OUT | DAM_BLIND | DAM_BYPASS, -1, 0, 0, 5131, 5100 },
-			{ 8, DAM_DEAD, -1, 0, 0, 5132, 5100 },
+			{4, 0, STAT_LUCK, 4, DAM_BLIND, 5127, 5128},
+			{4, DAM_BYPASS, STAT_LUCK, 3, DAM_BLIND, 5129, 5128},
+			{6, DAM_BYPASS, STAT_LUCK, 2, DAM_BLIND, 5129, 5128},
+			{6, DAM_BLIND | DAM_BYPASS | DAM_LOSE_TURN, -1, 0, 0, 5130, 5100},
+			{8, DAM_KNOCKED_OUT | DAM_BLIND | DAM_BYPASS, -1, 0, 0, 5131, 5100},
+			{8, DAM_DEAD, -1, 0, 0, 5132, 5100},
 		},
 		// HIT_LOCATION_GROIN
 		{
-			{ 3, 0, -1, 0, 0, 5133, 5100 },
-			{ 3, 0, STAT_ENDURANCE, 0, DAM_KNOCKED_DOWN, 5133, 5134 },
-			{ 3, DAM_KNOCKED_DOWN, STAT_ENDURANCE, 0, DAM_KNOCKED_OUT, 5134, 5135 },
-			{ 3, DAM_KNOCKED_OUT, -1, 0, 0, 5135, 5100 },
-			{ 4, DAM_KNOCKED_DOWN | DAM_BYPASS, STAT_ENDURANCE, 0, DAM_KNOCKED_OUT, 5134, 5135 },
-			{ 4, DAM_KNOCKED_OUT | DAM_BYPASS, -1, 0, 0, 5135, 5100 },
+			{3, 0, -1, 0, 0, 5133, 5100},
+			{3, 0, STAT_ENDURANCE, 0, DAM_KNOCKED_DOWN, 5133, 5134},
+			{3, DAM_KNOCKED_DOWN, STAT_ENDURANCE, 0, DAM_KNOCKED_OUT, 5134, 5135},
+			{3, DAM_KNOCKED_OUT, -1, 0, 0, 5135, 5100},
+			{4, DAM_KNOCKED_DOWN | DAM_BYPASS, STAT_ENDURANCE, 0, DAM_KNOCKED_OUT, 5134, 5135},
+			{4, DAM_KNOCKED_OUT | DAM_BYPASS, -1, 0, 0, 5135, 5100},
 		},
 		// HIT_LOCATION_UNCALLED
 		{
-			{ 3, 0, -1, 0, 0, 5116, 5100 },
-			{ 3, DAM_BYPASS, -1, 0, 0, 5117, 5100 },
-			{ 4, DAM_KNOCKED_DOWN | DAM_BYPASS, -1, 0, 0, 5119, 5100 },
-			{ 4, DAM_KNOCKED_DOWN | DAM_BYPASS, -1, 0, 0, 5119, 5100 },
-			{ 6, DAM_KNOCKED_OUT | DAM_BYPASS, -1, 0, 0, 5120, 5100 },
-			{ 6, DAM_DEAD, -1, 0, 0, 5121, 5100 },
+			{3, 0, -1, 0, 0, 5116, 5100},
+			{3, DAM_BYPASS, -1, 0, 0, 5117, 5100},
+			{4, DAM_KNOCKED_DOWN | DAM_BYPASS, -1, 0, 0, 5119, 5100},
+			{4, DAM_KNOCKED_DOWN | DAM_BYPASS, -1, 0, 0, 5119, 5100},
+			{6, DAM_KNOCKED_OUT | DAM_BYPASS, -1, 0, 0, 5120, 5100},
+			{6, DAM_DEAD, -1, 0, 0, 5121, 5100},
 		},
 	},
 	// KILL_TYPE_CHILD
 	{
 		// HIT_LOCATION_HEAD
 		{
-			{ 4, 0, STAT_ENDURANCE, 0, DAM_KNOCKED_OUT, 5200, 5201 },
-			{ 4, DAM_BYPASS, STAT_ENDURANCE, -2, DAM_KNOCKED_OUT, 5202, 5203 },
-			{ 4, DAM_BYPASS, STAT_ENDURANCE, -2, DAM_KNOCKED_OUT, 5202, 5203 },
-			{ 6, DAM_KNOCKED_OUT | DAM_BYPASS, -1, 0, 0, 5203, 5000 },
-			{ 6, DAM_KNOCKED_OUT | DAM_BYPASS, -1, 0, 0, 5203, 5000 },
-			{ 6, DAM_DEAD, -1, 0, 0, 5204, 5000 },
+			{4, 0, STAT_ENDURANCE, 0, DAM_KNOCKED_OUT, 5200, 5201},
+			{4, DAM_BYPASS, STAT_ENDURANCE, -2, DAM_KNOCKED_OUT, 5202, 5203},
+			{4, DAM_BYPASS, STAT_ENDURANCE, -2, DAM_KNOCKED_OUT, 5202, 5203},
+			{6, DAM_KNOCKED_OUT | DAM_BYPASS, -1, 0, 0, 5203, 5000},
+			{6, DAM_KNOCKED_OUT | DAM_BYPASS, -1, 0, 0, 5203, 5000},
+			{6, DAM_DEAD, -1, 0, 0, 5204, 5000},
 		},
 		// HIT_LOCATION_LEFT_ARM
 		{
-			{ 3, 0, -1, 0, 0, 5205, 5000 },
-			{ 4, DAM_LOSE_TURN, STAT_ENDURANCE, 0, DAM_CRIP_ARM_LEFT, 5206, 5207 },
-			{ 4, DAM_LOSE_TURN, STAT_ENDURANCE, -2, DAM_CRIP_ARM_LEFT, 5206, 5207 },
-			{ 4, DAM_CRIP_ARM_LEFT | DAM_BYPASS, -1, 0, 0, 5208, 5000 },
-			{ 4, DAM_CRIP_ARM_LEFT | DAM_BYPASS, -1, 0, 0, 5208, 5000 },
-			{ 4, DAM_CRIP_ARM_LEFT | DAM_BYPASS, -1, 0, 0, 5208, 5000 },
+			{3, 0, -1, 0, 0, 5205, 5000},
+			{4, DAM_LOSE_TURN, STAT_ENDURANCE, 0, DAM_CRIP_ARM_LEFT, 5206, 5207},
+			{4, DAM_LOSE_TURN, STAT_ENDURANCE, -2, DAM_CRIP_ARM_LEFT, 5206, 5207},
+			{4, DAM_CRIP_ARM_LEFT | DAM_BYPASS, -1, 0, 0, 5208, 5000},
+			{4, DAM_CRIP_ARM_LEFT | DAM_BYPASS, -1, 0, 0, 5208, 5000},
+			{4, DAM_CRIP_ARM_LEFT | DAM_BYPASS, -1, 0, 0, 5208, 5000},
 		},
 		// HIT_LOCATION_RIGHT_ARM
 		{
-			{ 3, 0, -1, 0, 0, 5209, 5000 },
-			{ 4, DAM_LOSE_TURN, STAT_ENDURANCE, 0, DAM_CRIP_ARM_RIGHT, 5206, 5207 },
-			{ 4, DAM_LOSE_TURN, STAT_ENDURANCE, -2, DAM_CRIP_ARM_RIGHT, 5206, 5207 },
-			{ 4, DAM_CRIP_ARM_RIGHT | DAM_BYPASS, -1, 0, 0, 5208, 5000 },
-			{ 4, DAM_CRIP_ARM_RIGHT | DAM_BYPASS, -1, 0, 0, 5208, 5000 },
-			{ 4, DAM_CRIP_ARM_RIGHT | DAM_BYPASS, -1, 0, 0, 5208, 5000 },
+			{3, 0, -1, 0, 0, 5209, 5000},
+			{4, DAM_LOSE_TURN, STAT_ENDURANCE, 0, DAM_CRIP_ARM_RIGHT, 5206, 5207},
+			{4, DAM_LOSE_TURN, STAT_ENDURANCE, -2, DAM_CRIP_ARM_RIGHT, 5206, 5207},
+			{4, DAM_CRIP_ARM_RIGHT | DAM_BYPASS, -1, 0, 0, 5208, 5000},
+			{4, DAM_CRIP_ARM_RIGHT | DAM_BYPASS, -1, 0, 0, 5208, 5000},
+			{4, DAM_CRIP_ARM_RIGHT | DAM_BYPASS, -1, 0, 0, 5208, 5000},
 		},
 		// HIT_LOCATION_TORSO
 		{
-			{ 3, 0, -1, 0, 0, 5210, 5000 },
-			{ 4, DAM_BYPASS, -1, 0, 0, 5211, 5000 },
-			{ 4, DAM_KNOCKED_DOWN | DAM_BYPASS, -1, 0, 0, 5212, 5000 },
-			{ 4, DAM_KNOCKED_DOWN | DAM_BYPASS, -1, 0, 0, 5212, 5000 },
-			{ 4, DAM_KNOCKED_OUT | DAM_BYPASS, -1, 0, 0, 5213, 5000 },
-			{ 6, DAM_DEAD, -1, 0, 0, 5214, 5000 },
+			{3, 0, -1, 0, 0, 5210, 5000},
+			{4, DAM_BYPASS, -1, 0, 0, 5211, 5000},
+			{4, DAM_KNOCKED_DOWN | DAM_BYPASS, -1, 0, 0, 5212, 5000},
+			{4, DAM_KNOCKED_DOWN | DAM_BYPASS, -1, 0, 0, 5212, 5000},
+			{4, DAM_KNOCKED_OUT | DAM_BYPASS, -1, 0, 0, 5213, 5000},
+			{6, DAM_DEAD, -1, 0, 0, 5214, 5000},
 		},
 		// HIT_LOCATION_RIGHT_LEG
 		{
-			{ 3, 0, -1, 0, 0, 5215, 5000 },
-			{ 3, DAM_KNOCKED_DOWN | DAM_CRIP_LEG_RIGHT, -1, 0, DAM_CRIP_ARM_RIGHT | DAM_BLIND | DAM_ON_FIRE | DAM_EXPLODE, 5000, 0 },
-			{ 3, DAM_KNOCKED_DOWN | DAM_CRIP_LEG_RIGHT, -1, 0, DAM_CRIP_ARM_RIGHT | DAM_BLIND | DAM_ON_FIRE | DAM_EXPLODE, 5000, 0 },
-			{ 4, DAM_KNOCKED_DOWN | DAM_CRIP_LEG_RIGHT | DAM_BYPASS, -1, 0, 0, 5217, 5000 },
-			{ 4, DAM_KNOCKED_DOWN | DAM_CRIP_LEG_RIGHT | DAM_BYPASS, -1, 0, 0, 5217, 5000 },
-			{ 4, DAM_KNOCKED_DOWN | DAM_CRIP_LEG_RIGHT | DAM_BYPASS, -1, 0, 0, 5217, 5000 },
+			{3, 0, -1, 0, 0, 5215, 5000},
+			{3, DAM_KNOCKED_DOWN | DAM_CRIP_LEG_RIGHT, -1, 0, DAM_CRIP_ARM_RIGHT | DAM_BLIND | DAM_ON_FIRE | DAM_EXPLODE, 5000, 0},
+			{3, DAM_KNOCKED_DOWN | DAM_CRIP_LEG_RIGHT, -1, 0, DAM_CRIP_ARM_RIGHT | DAM_BLIND | DAM_ON_FIRE | DAM_EXPLODE, 5000, 0},
+			{4, DAM_KNOCKED_DOWN | DAM_CRIP_LEG_RIGHT | DAM_BYPASS, -1, 0, 0, 5217, 5000},
+			{4, DAM_KNOCKED_DOWN | DAM_CRIP_LEG_RIGHT | DAM_BYPASS, -1, 0, 0, 5217, 5000},
+			{4, DAM_KNOCKED_DOWN | DAM_CRIP_LEG_RIGHT | DAM_BYPASS, -1, 0, 0, 5217, 5000},
 		},
 		// HIT_LOCATION_LEFT_LEG
 		{
-			{ 3, 0, -1, 0, 0, 5215, 5000 },
-			{ 3, DAM_KNOCKED_DOWN | DAM_CRIP_LEG_LEFT, -1, 0, DAM_CRIP_ARM_RIGHT | DAM_BLIND | DAM_ON_FIRE | DAM_EXPLODE, 5000, 0 },
-			{ 3, DAM_KNOCKED_DOWN | DAM_CRIP_LEG_LEFT, -1, 0, DAM_CRIP_ARM_RIGHT | DAM_BLIND | DAM_ON_FIRE | DAM_EXPLODE, 5000, 0 },
-			{ 4, DAM_KNOCKED_DOWN | DAM_CRIP_LEG_LEFT | DAM_BYPASS, -1, 0, 0, 5217, 5000 },
-			{ 4, DAM_KNOCKED_DOWN | DAM_CRIP_LEG_LEFT | DAM_BYPASS, -1, 0, 0, 5217, 5000 },
-			{ 4, DAM_KNOCKED_DOWN | DAM_CRIP_LEG_LEFT | DAM_BYPASS, -1, 0, 0, 5217, 5000 },
+			{3, 0, -1, 0, 0, 5215, 5000},
+			{3, DAM_KNOCKED_DOWN | DAM_CRIP_LEG_LEFT, -1, 0, DAM_CRIP_ARM_RIGHT | DAM_BLIND | DAM_ON_FIRE | DAM_EXPLODE, 5000, 0},
+			{3, DAM_KNOCKED_DOWN | DAM_CRIP_LEG_LEFT, -1, 0, DAM_CRIP_ARM_RIGHT | DAM_BLIND | DAM_ON_FIRE | DAM_EXPLODE, 5000, 0},
+			{4, DAM_KNOCKED_DOWN | DAM_CRIP_LEG_LEFT | DAM_BYPASS, -1, 0, 0, 5217, 5000},
+			{4, DAM_KNOCKED_DOWN | DAM_CRIP_LEG_LEFT | DAM_BYPASS, -1, 0, 0, 5217, 5000},
+			{4, DAM_KNOCKED_DOWN | DAM_CRIP_LEG_LEFT | DAM_BYPASS, -1, 0, 0, 5217, 5000},
 		},
 		// HIT_LOCATION_EYES
 		{
-			{ 4, 0, STAT_LUCK, 5, DAM_BLIND, 5218, 5219 },
-			{ 4, DAM_BYPASS, STAT_LUCK, 2, DAM_BLIND, 5220, 5221 },
-			{ 6, DAM_BYPASS, STAT_LUCK, -1, DAM_BLIND, 5220, 5221 },
-			{ 6, DAM_BLIND | DAM_BYPASS | DAM_LOSE_TURN, -1, 0, 0, 5222, 5000 },
-			{ 8, DAM_KNOCKED_OUT | DAM_BLIND | DAM_BYPASS, -1, 0, 0, 5223, 5000 },
-			{ 8, DAM_DEAD, -1, 0, 0, 5224, 5000 },
+			{4, 0, STAT_LUCK, 5, DAM_BLIND, 5218, 5219},
+			{4, DAM_BYPASS, STAT_LUCK, 2, DAM_BLIND, 5220, 5221},
+			{6, DAM_BYPASS, STAT_LUCK, -1, DAM_BLIND, 5220, 5221},
+			{6, DAM_BLIND | DAM_BYPASS | DAM_LOSE_TURN, -1, 0, 0, 5222, 5000},
+			{8, DAM_KNOCKED_OUT | DAM_BLIND | DAM_BYPASS, -1, 0, 0, 5223, 5000},
+			{8, DAM_DEAD, -1, 0, 0, 5224, 5000},
 		},
 		// HIT_LOCATION_GROIN
 		{
-			{ 3, 0, -1, 0, 0, 5225, 5000 },
-			{ 3, 0, -1, 0, 0, 5225, 5000 },
-			{ 3, DAM_KNOCKED_DOWN, -1, 0, 0, 5226, 5000 },
-			{ 3, DAM_KNOCKED_DOWN, -1, 0, 0, 5226, 5000 },
-			{ 3, DAM_KNOCKED_DOWN, -1, 0, 0, 5226, 5000 },
-			{ 4, DAM_KNOCKED_DOWN, -1, 0, 0, 5226, 5000 },
+			{3, 0, -1, 0, 0, 5225, 5000},
+			{3, 0, -1, 0, 0, 5225, 5000},
+			{3, DAM_KNOCKED_DOWN, -1, 0, 0, 5226, 5000},
+			{3, DAM_KNOCKED_DOWN, -1, 0, 0, 5226, 5000},
+			{3, DAM_KNOCKED_DOWN, -1, 0, 0, 5226, 5000},
+			{4, DAM_KNOCKED_DOWN, -1, 0, 0, 5226, 5000},
 		},
 		// HIT_LOCATION_UNCALLED
 		{
-			{ 3, 0, -1, 0, 0, 5210, 5000 },
-			{ 3, DAM_BYPASS, -1, 0, 0, 5211, 5000 },
-			{ 4, DAM_BYPASS, -1, 0, 0, 5211, 5000 },
-			{ 4, DAM_KNOCKED_DOWN | DAM_BYPASS, -1, 0, 0, 5212, 5000 },
-			{ 4, DAM_KNOCKED_OUT | DAM_BYPASS, -1, 0, 0, 5213, 5000 },
-			{ 6, DAM_DEAD, -1, 0, 0, 5214, 5000 },
+			{3, 0, -1, 0, 0, 5210, 5000},
+			{3, DAM_BYPASS, -1, 0, 0, 5211, 5000},
+			{4, DAM_BYPASS, -1, 0, 0, 5211, 5000},
+			{4, DAM_KNOCKED_DOWN | DAM_BYPASS, -1, 0, 0, 5212, 5000},
+			{4, DAM_KNOCKED_OUT | DAM_BYPASS, -1, 0, 0, 5213, 5000},
+			{6, DAM_DEAD, -1, 0, 0, 5214, 5000},
 		},
 	},
 	// KILL_TYPE_SUPER_MUTANT
 	{
 		// HIT_LOCATION_HEAD
 		{
-			{ 4, 0, -1, 0, 0, 5300, 5000 },
-			{ 4, DAM_BYPASS, STAT_ENDURANCE, -1, DAM_KNOCKED_DOWN, 5301, 5302 },
-			{ 5, DAM_BYPASS, STAT_ENDURANCE, -4, DAM_KNOCKED_DOWN, 5301, 5302 },
-			{ 5, DAM_KNOCKED_DOWN | DAM_BYPASS, STAT_ENDURANCE, -3, DAM_KNOCKED_OUT, 5302, 5303 },
-			{ 6, DAM_KNOCKED_DOWN | DAM_BYPASS, STAT_ENDURANCE, 0, DAM_KNOCKED_OUT, 5302, 5303 },
-			{ 6, DAM_DEAD, -1, 0, 0, 5304, 5000 },
+			{4, 0, -1, 0, 0, 5300, 5000},
+			{4, DAM_BYPASS, STAT_ENDURANCE, -1, DAM_KNOCKED_DOWN, 5301, 5302},
+			{5, DAM_BYPASS, STAT_ENDURANCE, -4, DAM_KNOCKED_DOWN, 5301, 5302},
+			{5, DAM_KNOCKED_DOWN | DAM_BYPASS, STAT_ENDURANCE, -3, DAM_KNOCKED_OUT, 5302, 5303},
+			{6, DAM_KNOCKED_DOWN | DAM_BYPASS, STAT_ENDURANCE, 0, DAM_KNOCKED_OUT, 5302, 5303},
+			{6, DAM_DEAD, -1, 0, 0, 5304, 5000},
 		},
 		// HIT_LOCATION_LEFT_ARM
 		{
-			{ 3, 0, -1, 0, 0, 5300, 5000 },
-			{ 3, 0, STAT_AGILITY, 0, DAM_LOSE_TURN, 5300, 5306 },
-			{ 4, DAM_BYPASS | DAM_LOSE_TURN, STAT_ENDURANCE, -1, DAM_CRIP_ARM_LEFT, 5307, 5308 },
-			{ 4, DAM_BYPASS | DAM_LOSE_TURN, STAT_ENDURANCE, -3, DAM_CRIP_ARM_LEFT, 5307, 5308 },
-			{ 4, DAM_CRIP_ARM_LEFT | DAM_BYPASS, -1, 0, 0, 5308, 5000 },
-			{ 4, DAM_CRIP_ARM_LEFT | DAM_BYPASS, -1, 0, 0, 5308, 5000 },
+			{3, 0, -1, 0, 0, 5300, 5000},
+			{3, 0, STAT_AGILITY, 0, DAM_LOSE_TURN, 5300, 5306},
+			{4, DAM_BYPASS | DAM_LOSE_TURN, STAT_ENDURANCE, -1, DAM_CRIP_ARM_LEFT, 5307, 5308},
+			{4, DAM_BYPASS | DAM_LOSE_TURN, STAT_ENDURANCE, -3, DAM_CRIP_ARM_LEFT, 5307, 5308},
+			{4, DAM_CRIP_ARM_LEFT | DAM_BYPASS, -1, 0, 0, 5308, 5000},
+			{4, DAM_CRIP_ARM_LEFT | DAM_BYPASS, -1, 0, 0, 5308, 5000},
 		},
 		// HIT_LOCATION_RIGHT_ARM
 		{
-			{ 3, 0, -1, 0, 0, 5300, 5000 },
-			{ 3, 0, STAT_AGILITY, 0, DAM_LOSE_TURN, 5300, 5006 },
-			{ 4, DAM_BYPASS | DAM_LOSE_TURN, STAT_ENDURANCE, -1, DAM_CRIP_ARM_RIGHT, 5307, 5309 },
-			{ 4, DAM_BYPASS | DAM_LOSE_TURN, STAT_ENDURANCE, -3, DAM_CRIP_ARM_RIGHT, 5307, 5309 },
-			{ 4, DAM_CRIP_ARM_RIGHT | DAM_BYPASS, -1, 0, 0, 5309, 5000 },
-			{ 4, DAM_CRIP_ARM_RIGHT | DAM_BYPASS, -1, 0, 0, 5309, 5000 },
+			{3, 0, -1, 0, 0, 5300, 5000},
+			{3, 0, STAT_AGILITY, 0, DAM_LOSE_TURN, 5300, 5006},
+			{4, DAM_BYPASS | DAM_LOSE_TURN, STAT_ENDURANCE, -1, DAM_CRIP_ARM_RIGHT, 5307, 5309},
+			{4, DAM_BYPASS | DAM_LOSE_TURN, STAT_ENDURANCE, -3, DAM_CRIP_ARM_RIGHT, 5307, 5309},
+			{4, DAM_CRIP_ARM_RIGHT | DAM_BYPASS, -1, 0, 0, 5309, 5000},
+			{4, DAM_CRIP_ARM_RIGHT | DAM_BYPASS, -1, 0, 0, 5309, 5000},
 		},
 		// HIT_LOCATION_TORSO
 		{
-			{ 3, 0, -1, 0, 0, 5300, 5000 },
-			{ 3, DAM_BYPASS, -1, 0, 0, 5301, 5000 },
-			{ 4, DAM_KNOCKED_DOWN | DAM_BYPASS, -1, 0, 0, 5302, 5000 },
-			{ 4, DAM_KNOCKED_DOWN | DAM_BYPASS, -1, 0, 0, 5302, 5000 },
-			{ 4, DAM_KNOCKED_OUT | DAM_BYPASS, -1, 0, 0, 5310, 5000 },
-			{ 6, DAM_DEAD, -1, 0, 0, 5311, 5000 },
+			{3, 0, -1, 0, 0, 5300, 5000},
+			{3, DAM_BYPASS, -1, 0, 0, 5301, 5000},
+			{4, DAM_KNOCKED_DOWN | DAM_BYPASS, -1, 0, 0, 5302, 5000},
+			{4, DAM_KNOCKED_DOWN | DAM_BYPASS, -1, 0, 0, 5302, 5000},
+			{4, DAM_KNOCKED_OUT | DAM_BYPASS, -1, 0, 0, 5310, 5000},
+			{6, DAM_DEAD, -1, 0, 0, 5311, 5000},
 		},
 		// HIT_LOCATION_RIGHT_LEG
 		{
-			{ 3, 0, -1, 0, 0, 5300, 5000 },
-			{ 3, 0, STAT_AGILITY, 0, DAM_KNOCKED_DOWN, 5300, 5312 },
-			{ 4, DAM_KNOCKED_DOWN, STAT_ENDURANCE, -3, DAM_CRIP_LEG_RIGHT, 5312, 5313 },
-			{ 4, DAM_KNOCKED_DOWN | DAM_CRIP_LEG_RIGHT, -1, 0, 0, 5313, 5000 },
-			{ 4, DAM_KNOCKED_DOWN | DAM_CRIP_LEG_RIGHT | DAM_BYPASS, -1, 0, 0, 5314, 5000 },
-			{ 4, DAM_KNOCKED_OUT | DAM_CRIP_LEG_RIGHT | DAM_BYPASS, -1, 0, 0, 5315, 5000 },
+			{3, 0, -1, 0, 0, 5300, 5000},
+			{3, 0, STAT_AGILITY, 0, DAM_KNOCKED_DOWN, 5300, 5312},
+			{4, DAM_KNOCKED_DOWN, STAT_ENDURANCE, -3, DAM_CRIP_LEG_RIGHT, 5312, 5313},
+			{4, DAM_KNOCKED_DOWN | DAM_CRIP_LEG_RIGHT, -1, 0, 0, 5313, 5000},
+			{4, DAM_KNOCKED_DOWN | DAM_CRIP_LEG_RIGHT | DAM_BYPASS, -1, 0, 0, 5314, 5000},
+			{4, DAM_KNOCKED_OUT | DAM_CRIP_LEG_RIGHT | DAM_BYPASS, -1, 0, 0, 5315, 5000},
 		},
 		// HIT_LOCATION_LEFT_LEG
 		{
-			{ 3, 0, -1, 0, 0, 5300, 5000 },
-			{ 3, 0, STAT_AGILITY, 0, DAM_KNOCKED_DOWN, 5300, 5312 },
-			{ 4, DAM_KNOCKED_DOWN, STAT_ENDURANCE, -3, DAM_CRIP_LEG_LEFT, 5312, 5313 },
-			{ 4, DAM_KNOCKED_DOWN | DAM_CRIP_LEG_LEFT, -1, 0, 0, 5313, 5000 },
-			{ 4, DAM_KNOCKED_DOWN | DAM_CRIP_LEG_LEFT | DAM_BYPASS, -1, 0, 0, 5314, 5000 },
-			{ 4, DAM_KNOCKED_OUT | DAM_CRIP_LEG_LEFT | DAM_BYPASS, -1, 0, 0, 5315, 5000 },
+			{3, 0, -1, 0, 0, 5300, 5000},
+			{3, 0, STAT_AGILITY, 0, DAM_KNOCKED_DOWN, 5300, 5312},
+			{4, DAM_KNOCKED_DOWN, STAT_ENDURANCE, -3, DAM_CRIP_LEG_LEFT, 5312, 5313},
+			{4, DAM_KNOCKED_DOWN | DAM_CRIP_LEG_LEFT, -1, 0, 0, 5313, 5000},
+			{4, DAM_KNOCKED_DOWN | DAM_CRIP_LEG_LEFT | DAM_BYPASS, -1, 0, 0, 5314, 5000},
+			{4, DAM_KNOCKED_OUT | DAM_CRIP_LEG_LEFT | DAM_BYPASS, -1, 0, 0, 5315, 5000},
 		},
 		// HIT_LOCATION_EYES
 		{
-			{ 4, 0, -1, 0, 0, 5300, 5000 },
-			{ 4, DAM_BYPASS, STAT_LUCK, 5, DAM_BLIND, 5316, 5317 },
-			{ 6, DAM_BYPASS, STAT_LUCK, 3, DAM_BLIND, 5316, 5317 },
-			{ 6, DAM_BYPASS | DAM_LOSE_TURN, STAT_LUCK, 0, DAM_BLIND, 5318, 5319 },
-			{ 8, DAM_KNOCKED_OUT | DAM_BLIND | DAM_BYPASS, -1, 0, 0, 5320, 5000 },
-			{ 8, DAM_DEAD, -1, 0, 0, 5321, 5000 },
+			{4, 0, -1, 0, 0, 5300, 5000},
+			{4, DAM_BYPASS, STAT_LUCK, 5, DAM_BLIND, 5316, 5317},
+			{6, DAM_BYPASS, STAT_LUCK, 3, DAM_BLIND, 5316, 5317},
+			{6, DAM_BYPASS | DAM_LOSE_TURN, STAT_LUCK, 0, DAM_BLIND, 5318, 5319},
+			{8, DAM_KNOCKED_OUT | DAM_BLIND | DAM_BYPASS, -1, 0, 0, 5320, 5000},
+			{8, DAM_DEAD, -1, 0, 0, 5321, 5000},
 		},
 		// HIT_LOCATION_GROIN
 		{
-			{ 3, 0, -1, 0, 0, 5300, 5000 },
-			{ 3, 0, STAT_LUCK, 0, DAM_BYPASS, 5300, 5017 },
-			{ 3, DAM_BYPASS, STAT_ENDURANCE, -2, DAM_KNOCKED_DOWN, 5301, 5302 },
-			{ 3, DAM_KNOCKED_DOWN, -1, 0, 0, 5312, 5000 },
-			{ 4, DAM_KNOCKED_DOWN | DAM_BYPASS, STAT_ENDURANCE, 0, DAM_KNOCKED_OUT, 5302, 5303 },
-			{ 4, DAM_KNOCKED_OUT | DAM_BYPASS, -1, 0, 0, 5303, 5000 },
+			{3, 0, -1, 0, 0, 5300, 5000},
+			{3, 0, STAT_LUCK, 0, DAM_BYPASS, 5300, 5017},
+			{3, DAM_BYPASS, STAT_ENDURANCE, -2, DAM_KNOCKED_DOWN, 5301, 5302},
+			{3, DAM_KNOCKED_DOWN, -1, 0, 0, 5312, 5000},
+			{4, DAM_KNOCKED_DOWN | DAM_BYPASS, STAT_ENDURANCE, 0, DAM_KNOCKED_OUT, 5302, 5303},
+			{4, DAM_KNOCKED_OUT | DAM_BYPASS, -1, 0, 0, 5303, 5000},
 		},
 		// HIT_LOCATION_UNCALLED
 		{
-			{ 3, 0, -1, 0, 0, 5300, 5000 },
-			{ 3, DAM_BYPASS, -1, 0, 0, 5301, 5000 },
-			{ 4, DAM_KNOCKED_DOWN | DAM_BYPASS, -1, 0, 0, 5302, 5000 },
-			{ 4, DAM_KNOCKED_DOWN | DAM_BYPASS, -1, 0, 0, 5302, 5000 },
-			{ 4, DAM_KNOCKED_OUT | DAM_BYPASS, -1, 0, 0, 5310, 5000 },
-			{ 6, DAM_DEAD, -1, 0, 0, 5311, 5000 },
+			{3, 0, -1, 0, 0, 5300, 5000},
+			{3, DAM_BYPASS, -1, 0, 0, 5301, 5000},
+			{4, DAM_KNOCKED_DOWN | DAM_BYPASS, -1, 0, 0, 5302, 5000},
+			{4, DAM_KNOCKED_DOWN | DAM_BYPASS, -1, 0, 0, 5302, 5000},
+			{4, DAM_KNOCKED_OUT | DAM_BYPASS, -1, 0, 0, 5310, 5000},
+			{6, DAM_DEAD, -1, 0, 0, 5311, 5000},
 		},
 	},
 	// KILL_TYPE_GHOUL
 	{
 		// HIT_LOCATION_HEAD
 		{
-			{ 4, 0, -1, 0, 0, 5001, 5000 },
-			{ 4, DAM_BYPASS, STAT_ENDURANCE, 0, DAM_KNOCKED_OUT, 5400, 5003 },
-			{ 5, DAM_BYPASS, STAT_ENDURANCE, -1, DAM_KNOCKED_OUT, 5400, 5003 },
-			{ 5, DAM_KNOCKED_DOWN | DAM_BYPASS, STAT_ENDURANCE, -2, DAM_KNOCKED_OUT, 5004, 5005 },
-			{ 6, DAM_KNOCKED_OUT | DAM_BYPASS, STAT_STRENGTH, 0, 0, 5005, 5000 },
-			{ 6, DAM_DEAD, -1, 0, 0, 5401, 5000 },
+			{4, 0, -1, 0, 0, 5001, 5000},
+			{4, DAM_BYPASS, STAT_ENDURANCE, 0, DAM_KNOCKED_OUT, 5400, 5003},
+			{5, DAM_BYPASS, STAT_ENDURANCE, -1, DAM_KNOCKED_OUT, 5400, 5003},
+			{5, DAM_KNOCKED_DOWN | DAM_BYPASS, STAT_ENDURANCE, -2, DAM_KNOCKED_OUT, 5004, 5005},
+			{6, DAM_KNOCKED_OUT | DAM_BYPASS, STAT_STRENGTH, 0, 0, 5005, 5000},
+			{6, DAM_DEAD, -1, 0, 0, 5401, 5000},
 		},
 		// HIT_LOCATION_LEFT_ARM
 		{
-			{ 3, 0, -1, 0, 0, 5016, 5000 },
-			{ 3, 0, STAT_AGILITY, 0, DAM_DROP | DAM_LOSE_TURN, 5001, 5402 },
-			{ 4, DAM_DROP | DAM_LOSE_TURN, STAT_ENDURANCE, 0, DAM_CRIP_ARM_LEFT, 5402, 5012 },
-			{ 4, DAM_BYPASS | DAM_DROP | DAM_LOSE_TURN, STAT_ENDURANCE, 0, DAM_CRIP_ARM_LEFT, 5403, 5404 },
-			{ 4, DAM_CRIP_ARM_LEFT | DAM_BYPASS | DAM_DROP, -1, 0, 0, 5404, 5000 },
-			{ 4, DAM_CRIP_ARM_LEFT | DAM_BYPASS | DAM_DROP, -1, 0, 0, 5404, 5000 },
+			{3, 0, -1, 0, 0, 5016, 5000},
+			{3, 0, STAT_AGILITY, 0, DAM_DROP | DAM_LOSE_TURN, 5001, 5402},
+			{4, DAM_DROP | DAM_LOSE_TURN, STAT_ENDURANCE, 0, DAM_CRIP_ARM_LEFT, 5402, 5012},
+			{4, DAM_BYPASS | DAM_DROP | DAM_LOSE_TURN, STAT_ENDURANCE, 0, DAM_CRIP_ARM_LEFT, 5403, 5404},
+			{4, DAM_CRIP_ARM_LEFT | DAM_BYPASS | DAM_DROP, -1, 0, 0, 5404, 5000},
+			{4, DAM_CRIP_ARM_LEFT | DAM_BYPASS | DAM_DROP, -1, 0, 0, 5404, 5000},
 		},
 		// HIT_LOCATION_RIGHT_ARM
 		{
-			{ 3, 0, -1, 0, 0, 5016, 5000 },
-			{ 3, 0, STAT_AGILITY, 0, DAM_DROP | DAM_LOSE_TURN, 5001, 5402 },
-			{ 4, DAM_DROP | DAM_LOSE_TURN, STAT_ENDURANCE, 0, DAM_CRIP_ARM_RIGHT, 5402, 5015 },
-			{ 4, DAM_BYPASS | DAM_DROP | DAM_LOSE_TURN, STAT_ENDURANCE, 0, DAM_CRIP_ARM_RIGHT, 5403, 5404 },
-			{ 4, DAM_CRIP_ARM_RIGHT | DAM_BYPASS | DAM_DROP, -1, 0, 0, 5404, 5000 },
-			{ 4, DAM_CRIP_ARM_RIGHT | DAM_BYPASS | DAM_DROP, -1, 0, 0, 5404, 5000 },
+			{3, 0, -1, 0, 0, 5016, 5000},
+			{3, 0, STAT_AGILITY, 0, DAM_DROP | DAM_LOSE_TURN, 5001, 5402},
+			{4, DAM_DROP | DAM_LOSE_TURN, STAT_ENDURANCE, 0, DAM_CRIP_ARM_RIGHT, 5402, 5015},
+			{4, DAM_BYPASS | DAM_DROP | DAM_LOSE_TURN, STAT_ENDURANCE, 0, DAM_CRIP_ARM_RIGHT, 5403, 5404},
+			{4, DAM_CRIP_ARM_RIGHT | DAM_BYPASS | DAM_DROP, -1, 0, 0, 5404, 5000},
+			{4, DAM_CRIP_ARM_RIGHT | DAM_BYPASS | DAM_DROP, -1, 0, 0, 5404, 5000},
 		},
 		// HIT_LOCATION_TORSO
 		{
-			{ 3, 0, -1, 0, 0, 5001, 5000 },
-			{ 3, DAM_BYPASS, -1, 0, 0, 5017, 5000 },
-			{ 3, 0, -1, 0, 0, 5018, 5000 },
-			{ 4, DAM_KNOCKED_DOWN | DAM_BYPASS, -1, 0, 0, 5004, 5000 },
-			{ 4, DAM_KNOCKED_OUT | DAM_BYPASS, -1, 0, 0, 5003, 5000 },
-			{ 6, DAM_DEAD, -1, 0, 0, 5007, 5000 },
+			{3, 0, -1, 0, 0, 5001, 5000},
+			{3, DAM_BYPASS, -1, 0, 0, 5017, 5000},
+			{3, 0, -1, 0, 0, 5018, 5000},
+			{4, DAM_KNOCKED_DOWN | DAM_BYPASS, -1, 0, 0, 5004, 5000},
+			{4, DAM_KNOCKED_OUT | DAM_BYPASS, -1, 0, 0, 5003, 5000},
+			{6, DAM_DEAD, -1, 0, 0, 5007, 5000},
 		},
 		// HIT_LOCATION_RIGHT_LEG
 		{
-			{ 3, 0, -1, 0, 0, 5001, 5000 },
-			{ 3, 0, STAT_AGILITY, 0, DAM_KNOCKED_DOWN, 5001, 5023 },
-			{ 4, DAM_KNOCKED_DOWN, STAT_ENDURANCE, 0, DAM_CRIP_LEG_RIGHT, 5023, 5024 },
-			{ 4, DAM_KNOCKED_DOWN | DAM_CRIP_LEG_RIGHT, -1, 0, 0, 5024, 5000 },
-			{ 4, DAM_KNOCKED_DOWN | DAM_CRIP_LEG_RIGHT | DAM_BYPASS, STAT_ENDURANCE, 0, DAM_KNOCKED_OUT, 5024, 5026 },
-			{ 4, DAM_KNOCKED_OUT | DAM_CRIP_LEG_RIGHT | DAM_BYPASS, -1, 0, 0, 5026, 5000 },
+			{3, 0, -1, 0, 0, 5001, 5000},
+			{3, 0, STAT_AGILITY, 0, DAM_KNOCKED_DOWN, 5001, 5023},
+			{4, DAM_KNOCKED_DOWN, STAT_ENDURANCE, 0, DAM_CRIP_LEG_RIGHT, 5023, 5024},
+			{4, DAM_KNOCKED_DOWN | DAM_CRIP_LEG_RIGHT, -1, 0, 0, 5024, 5000},
+			{4, DAM_KNOCKED_DOWN | DAM_CRIP_LEG_RIGHT | DAM_BYPASS, STAT_ENDURANCE, 0, DAM_KNOCKED_OUT, 5024, 5026},
+			{4, DAM_KNOCKED_OUT | DAM_CRIP_LEG_RIGHT | DAM_BYPASS, -1, 0, 0, 5026, 5000},
 		},
 		// HIT_LOCATION_LEFT_LEG
 		{
-			{ 3, 0, -1, 0, 0, 5001, 5000 },
-			{ 3, 0, STAT_AGILITY, 0, DAM_KNOCKED_DOWN, 5001, 5023 },
-			{ 4, DAM_KNOCKED_DOWN, STAT_ENDURANCE, 0, DAM_CRIP_LEG_LEFT, 5023, 5024 },
-			{ 4, DAM_KNOCKED_DOWN | DAM_CRIP_LEG_LEFT, -1, 0, 0, 5024, 5000 },
-			{ 4, DAM_KNOCKED_DOWN | DAM_CRIP_LEG_LEFT | DAM_BYPASS, STAT_ENDURANCE, 0, DAM_KNOCKED_OUT, 5024, 5026 },
-			{ 4, DAM_KNOCKED_OUT | DAM_CRIP_LEG_LEFT | DAM_BYPASS, -1, 0, 0, 5026, 5000 },
+			{3, 0, -1, 0, 0, 5001, 5000},
+			{3, 0, STAT_AGILITY, 0, DAM_KNOCKED_DOWN, 5001, 5023},
+			{4, DAM_KNOCKED_DOWN, STAT_ENDURANCE, 0, DAM_CRIP_LEG_LEFT, 5023, 5024},
+			{4, DAM_KNOCKED_DOWN | DAM_CRIP_LEG_LEFT, -1, 0, 0, 5024, 5000},
+			{4, DAM_KNOCKED_DOWN | DAM_CRIP_LEG_LEFT | DAM_BYPASS, STAT_ENDURANCE, 0, DAM_KNOCKED_OUT, 5024, 5026},
+			{4, DAM_KNOCKED_OUT | DAM_CRIP_LEG_LEFT | DAM_BYPASS, -1, 0, 0, 5026, 5000},
 		},
 		// HIT_LOCATION_EYES
 		{
-			{ 4, 0, STAT_LUCK, 3, DAM_BLIND, 5001, 5405 },
-			{ 4, DAM_BYPASS, STAT_LUCK, 0, DAM_BLIND, 5406, 5407 },
-			{ 6, DAM_BYPASS, STAT_LUCK, -3, DAM_BLIND, 5406, 5407 },
-			{ 6, DAM_BLIND | DAM_BYPASS | DAM_LOSE_TURN, -1, 0, 0, 5030, 5000 },
-			{ 8, DAM_KNOCKED_OUT | DAM_BLIND | DAM_BYPASS, -1, 0, 0, 5031, 5000 },
-			{ 8, DAM_DEAD, -1, 0, 0, 5408, 5000 },
+			{4, 0, STAT_LUCK, 3, DAM_BLIND, 5001, 5405},
+			{4, DAM_BYPASS, STAT_LUCK, 0, DAM_BLIND, 5406, 5407},
+			{6, DAM_BYPASS, STAT_LUCK, -3, DAM_BLIND, 5406, 5407},
+			{6, DAM_BLIND | DAM_BYPASS | DAM_LOSE_TURN, -1, 0, 0, 5030, 5000},
+			{8, DAM_KNOCKED_OUT | DAM_BLIND | DAM_BYPASS, -1, 0, 0, 5031, 5000},
+			{8, DAM_DEAD, -1, 0, 0, 5408, 5000},
 		},
 		// HIT_LOCATION_GROIN
 		{
-			{ 3, 0, -1, 0, 0, 5001, 5000 },
-			{ 3, 0, STAT_LUCK, 0, DAM_BYPASS, 5001, 5033 },
-			{ 3, DAM_BYPASS, STAT_ENDURANCE, 0, DAM_KNOCKED_DOWN, 5033, 5035 },
-			{ 3, DAM_KNOCKED_DOWN, -1, 0, 0, 5004, 5000 },
-			{ 4, DAM_KNOCKED_DOWN | DAM_BYPASS, STAT_ENDURANCE, 0, DAM_KNOCKED_OUT, 5035, 5036 },
-			{ 4, DAM_KNOCKED_OUT | DAM_BYPASS, -1, 0, 0, 5036, 5000 },
+			{3, 0, -1, 0, 0, 5001, 5000},
+			{3, 0, STAT_LUCK, 0, DAM_BYPASS, 5001, 5033},
+			{3, DAM_BYPASS, STAT_ENDURANCE, 0, DAM_KNOCKED_DOWN, 5033, 5035},
+			{3, DAM_KNOCKED_DOWN, -1, 0, 0, 5004, 5000},
+			{4, DAM_KNOCKED_DOWN | DAM_BYPASS, STAT_ENDURANCE, 0, DAM_KNOCKED_OUT, 5035, 5036},
+			{4, DAM_KNOCKED_OUT | DAM_BYPASS, -1, 0, 0, 5036, 5000},
 		},
 		// HIT_LOCATION_UNCALLED
 		{
-			{ 3, 0, -1, 0, 0, 5001, 5000 },
-			{ 3, DAM_BYPASS, -1, 0, 0, 5017, 5000 },
-			{ 3, 0, -1, 0, 0, 5018, 5000 },
-			{ 4, DAM_KNOCKED_DOWN | DAM_BYPASS, -1, 0, 0, 5004, 5000 },
-			{ 4, DAM_KNOCKED_OUT | DAM_BYPASS, -1, 0, 0, 5003, 5000 },
-			{ 6, DAM_DEAD, -1, 0, 0, 5007, 5000 },
+			{3, 0, -1, 0, 0, 5001, 5000},
+			{3, DAM_BYPASS, -1, 0, 0, 5017, 5000},
+			{3, 0, -1, 0, 0, 5018, 5000},
+			{4, DAM_KNOCKED_DOWN | DAM_BYPASS, -1, 0, 0, 5004, 5000},
+			{4, DAM_KNOCKED_OUT | DAM_BYPASS, -1, 0, 0, 5003, 5000},
+			{6, DAM_DEAD, -1, 0, 0, 5007, 5000},
 		},
 	},
 	// KILL_TYPE_BRAHMIN
 	{
 		// HIT_LOCATION_HEAD
 		{
-			{ 4, 0, -1, 0, 0, 5016, 5000 },
-			{ 4, 0, -1, 0, 0, 5016, 5000 },
-			{ 5, 0, STAT_ENDURANCE, 2, DAM_KNOCKED_DOWN, 5016, 5500 },
-			{ 5, 0, STAT_ENDURANCE, -1, DAM_KNOCKED_DOWN, 5016, 5500 },
-			{ 6, DAM_KNOCKED_OUT, STAT_STRENGTH, 0, 0, 5501, 5000 },
-			{ 6, DAM_DEAD, -1, 0, 0, 5502, 5000 },
+			{4, 0, -1, 0, 0, 5016, 5000},
+			{4, 0, -1, 0, 0, 5016, 5000},
+			{5, 0, STAT_ENDURANCE, 2, DAM_KNOCKED_DOWN, 5016, 5500},
+			{5, 0, STAT_ENDURANCE, -1, DAM_KNOCKED_DOWN, 5016, 5500},
+			{6, DAM_KNOCKED_OUT, STAT_STRENGTH, 0, 0, 5501, 5000},
+			{6, DAM_DEAD, -1, 0, 0, 5502, 5000},
 		},
 		// HIT_LOCATION_LEFT_ARM
 		{
-			{ 3, 0, -1, 0, 0, 5001, 5000 },
-			{ 3, 0, -1, 0, 0, 5001, 5000 },
-			{ 4, 0, STAT_ENDURANCE, 0, DAM_CRIP_LEG_LEFT, 5016, 5503 },
-			{ 4, 0, STAT_ENDURANCE, 0, DAM_CRIP_LEG_LEFT, 5016, 5503 },
-			{ 4, DAM_CRIP_LEG_LEFT, -1, 0, 0, 5503, 5000 },
-			{ 4, DAM_CRIP_LEG_LEFT, -1, 0, 0, 5503, 5000 },
+			{3, 0, -1, 0, 0, 5001, 5000},
+			{3, 0, -1, 0, 0, 5001, 5000},
+			{4, 0, STAT_ENDURANCE, 0, DAM_CRIP_LEG_LEFT, 5016, 5503},
+			{4, 0, STAT_ENDURANCE, 0, DAM_CRIP_LEG_LEFT, 5016, 5503},
+			{4, DAM_CRIP_LEG_LEFT, -1, 0, 0, 5503, 5000},
+			{4, DAM_CRIP_LEG_LEFT, -1, 0, 0, 5503, 5000},
 		},
 		// HIT_LOCATION_RIGHT_ARM
 		{
-			{ 3, 0, -1, 0, 0, 5001, 5000 },
-			{ 3, 0, -1, 0, 0, 5001, 5000 },
-			{ 4, 0, STAT_ENDURANCE, 0, DAM_CRIP_LEG_RIGHT, 5016, 5503 },
-			{ 4, 0, STAT_ENDURANCE, 0, DAM_CRIP_LEG_RIGHT, 5016, 5503 },
-			{ 4, DAM_CRIP_LEG_RIGHT, -1, 0, 0, 5503, 5000 },
-			{ 4, DAM_CRIP_LEG_RIGHT, -1, 0, 0, 5503, 5000 },
+			{3, 0, -1, 0, 0, 5001, 5000},
+			{3, 0, -1, 0, 0, 5001, 5000},
+			{4, 0, STAT_ENDURANCE, 0, DAM_CRIP_LEG_RIGHT, 5016, 5503},
+			{4, 0, STAT_ENDURANCE, 0, DAM_CRIP_LEG_RIGHT, 5016, 5503},
+			{4, DAM_CRIP_LEG_RIGHT, -1, 0, 0, 5503, 5000},
+			{4, DAM_CRIP_LEG_RIGHT, -1, 0, 0, 5503, 5000},
 		},
 		// HIT_LOCATION_TORSO
 		{
-			{ 3, 0, -1, 0, 0, 5504, 5000 },
-			{ 3, 0, -1, 0, 0, 5504, 5000 },
-			{ 4, 0, -1, 0, 0, 5504, 5000 },
-			{ 4, DAM_BYPASS, -1, 0, 0, 5505, 5000 },
-			{ 4, DAM_BYPASS, -1, 0, 0, 5505, 5000 },
-			{ 6, DAM_DEAD, -1, 0, 0, 5506, 5000 },
+			{3, 0, -1, 0, 0, 5504, 5000},
+			{3, 0, -1, 0, 0, 5504, 5000},
+			{4, 0, -1, 0, 0, 5504, 5000},
+			{4, DAM_BYPASS, -1, 0, 0, 5505, 5000},
+			{4, DAM_BYPASS, -1, 0, 0, 5505, 5000},
+			{6, DAM_DEAD, -1, 0, 0, 5506, 5000},
 		},
 		// HIT_LOCATION_RIGHT_LEG
 		{
-			{ 3, 0, -1, 0, 0, 5001, 5000 },
-			{ 3, 0, -1, 0, 0, 5001, 5000 },
-			{ 4, 0, STAT_ENDURANCE, 0, DAM_CRIP_LEG_RIGHT, 5016, 5503 },
-			{ 4, 0, STAT_ENDURANCE, 0, DAM_CRIP_LEG_RIGHT, 5016, 5503 },
-			{ 4, DAM_CRIP_LEG_RIGHT, -1, 0, 0, 5503, 5000 },
-			{ 4, DAM_CRIP_LEG_RIGHT, -1, 0, 0, 5503, 5000 },
+			{3, 0, -1, 0, 0, 5001, 5000},
+			{3, 0, -1, 0, 0, 5001, 5000},
+			{4, 0, STAT_ENDURANCE, 0, DAM_CRIP_LEG_RIGHT, 5016, 5503},
+			{4, 0, STAT_ENDURANCE, 0, DAM_CRIP_LEG_RIGHT, 5016, 5503},
+			{4, DAM_CRIP_LEG_RIGHT, -1, 0, 0, 5503, 5000},
+			{4, DAM_CRIP_LEG_RIGHT, -1, 0, 0, 5503, 5000},
 		},
 		// HIT_LOCATION_LEFT_LEG
 		{
-			{ 3, 0, -1, 0, 0, 5001, 5000 },
-			{ 3, 0, -1, 0, 0, 5001, 5000 },
-			{ 4, 0, STAT_ENDURANCE, 0, DAM_CRIP_LEG_LEFT, 5016, 5503 },
-			{ 4, 0, STAT_ENDURANCE, 0, DAM_CRIP_LEG_LEFT, 5016, 5503 },
-			{ 4, DAM_CRIP_LEG_LEFT, -1, 0, 0, 5503, 5000 },
-			{ 4, DAM_CRIP_LEG_LEFT, -1, 0, 0, 5503, 5000 },
+			{3, 0, -1, 0, 0, 5001, 5000},
+			{3, 0, -1, 0, 0, 5001, 5000},
+			{4, 0, STAT_ENDURANCE, 0, DAM_CRIP_LEG_LEFT, 5016, 5503},
+			{4, 0, STAT_ENDURANCE, 0, DAM_CRIP_LEG_LEFT, 5016, 5503},
+			{4, DAM_CRIP_LEG_LEFT, -1, 0, 0, 5503, 5000},
+			{4, DAM_CRIP_LEG_LEFT, -1, 0, 0, 5503, 5000},
 		},
 		// HIT_LOCATION_EYES
 		{
-			{ 4, 0, -1, 0, 0, 5001, 5000 },
-			{ 4, DAM_BYPASS, STAT_LUCK, 0, DAM_BLIND, 5029, 5507 },
-			{ 6, DAM_BYPASS, STAT_LUCK, -3, DAM_BLIND, 5029, 5507 },
-			{ 6, DAM_BLIND | DAM_BYPASS | DAM_LOSE_TURN, -1, 0, 0, 5508, 5000 },
-			{ 8, DAM_KNOCKED_OUT | DAM_BLIND | DAM_BYPASS, -1, 0, 0, 5509, 5000 },
-			{ 8, DAM_DEAD, -1, 0, 0, 5510, 5000 },
+			{4, 0, -1, 0, 0, 5001, 5000},
+			{4, DAM_BYPASS, STAT_LUCK, 0, DAM_BLIND, 5029, 5507},
+			{6, DAM_BYPASS, STAT_LUCK, -3, DAM_BLIND, 5029, 5507},
+			{6, DAM_BLIND | DAM_BYPASS | DAM_LOSE_TURN, -1, 0, 0, 5508, 5000},
+			{8, DAM_KNOCKED_OUT | DAM_BLIND | DAM_BYPASS, -1, 0, 0, 5509, 5000},
+			{8, DAM_DEAD, -1, 0, 0, 5510, 5000},
 		},
 		// HIT_LOCATION_GROIN
 		{
-			{ 3, 0, -1, 0, 0, 5001, 5000 },
-			{ 3, DAM_BYPASS, -1, 0, 0, 5511, 5000 },
-			{ 3, DAM_BYPASS, -1, 0, 0, 5511, 5000 },
-			{ 4, DAM_BYPASS, -1, 0, 0, 5512, 5000 },
-			{ 4, DAM_BYPASS, -1, 0, 0, 5512, 5000 },
-			{ 6, DAM_BYPASS, -1, 0, 0, 5513, 5000 },
+			{3, 0, -1, 0, 0, 5001, 5000},
+			{3, DAM_BYPASS, -1, 0, 0, 5511, 5000},
+			{3, DAM_BYPASS, -1, 0, 0, 5511, 5000},
+			{4, DAM_BYPASS, -1, 0, 0, 5512, 5000},
+			{4, DAM_BYPASS, -1, 0, 0, 5512, 5000},
+			{6, DAM_BYPASS, -1, 0, 0, 5513, 5000},
 		},
 		// HIT_LOCATION_UNCALLED
 		{
-			{ 3, 0, -1, 0, 0, 5504, 5000 },
-			{ 3, 0, -1, 0, 0, 5504, 5000 },
-			{ 4, 0, -1, 0, 0, 5504, 5000 },
-			{ 4, DAM_BYPASS, -1, 0, 0, 5505, 5000 },
-			{ 4, DAM_BYPASS, -1, 0, 0, 5505, 5000 },
-			{ 6, DAM_DEAD, -1, 0, 0, 5506, 5000 },
+			{3, 0, -1, 0, 0, 5504, 5000},
+			{3, 0, -1, 0, 0, 5504, 5000},
+			{4, 0, -1, 0, 0, 5504, 5000},
+			{4, DAM_BYPASS, -1, 0, 0, 5505, 5000},
+			{4, DAM_BYPASS, -1, 0, 0, 5505, 5000},
+			{6, DAM_DEAD, -1, 0, 0, 5506, 5000},
 		},
 	},
 	// KILL_TYPE_RADSCORPION
 	{
 		// HIT_LOCATION_HEAD
 		{
-			{ 4, 0, -1, 0, 0, 5001, 5000 },
-			{ 4, 0, STAT_ENDURANCE, 3, DAM_KNOCKED_DOWN, 5001, 5600 },
-			{ 5, 0, STAT_ENDURANCE, 0, DAM_KNOCKED_DOWN, 5001, 5600 },
-			{ 5, 0, STAT_ENDURANCE, -3, DAM_KNOCKED_DOWN, 5001, 5600 },
-			{ 6, DAM_KNOCKED_DOWN, -1, 0, 0, 5600, 5000 },
-			{ 6, DAM_DEAD, -1, 0, 0, 5601, 5000 },
+			{4, 0, -1, 0, 0, 5001, 5000},
+			{4, 0, STAT_ENDURANCE, 3, DAM_KNOCKED_DOWN, 5001, 5600},
+			{5, 0, STAT_ENDURANCE, 0, DAM_KNOCKED_DOWN, 5001, 5600},
+			{5, 0, STAT_ENDURANCE, -3, DAM_KNOCKED_DOWN, 5001, 5600},
+			{6, DAM_KNOCKED_DOWN, -1, 0, 0, 5600, 5000},
+			{6, DAM_DEAD, -1, 0, 0, 5601, 5000},
 		},
 		// HIT_LOCATION_LEFT_ARM
 		{
-			{ 3, 0, -1, 0, 0, 5001, 5000 },
-			{ 3, 0, -1, 0, 0, 5001, 5000 },
-			{ 4, 0, -1, 0, 0, 5016, 5000 },
-			{ 4, 0, STAT_ENDURANCE, 0, DAM_CRIP_ARM_LEFT, 5016, 5602 },
-			{ 4, DAM_CRIP_ARM_LEFT, -1, 0, 0, 5602, 5000 },
-			{ 4, DAM_CRIP_ARM_LEFT, -1, 0, 0, 5602, 5000 },
+			{3, 0, -1, 0, 0, 5001, 5000},
+			{3, 0, -1, 0, 0, 5001, 5000},
+			{4, 0, -1, 0, 0, 5016, 5000},
+			{4, 0, STAT_ENDURANCE, 0, DAM_CRIP_ARM_LEFT, 5016, 5602},
+			{4, DAM_CRIP_ARM_LEFT, -1, 0, 0, 5602, 5000},
+			{4, DAM_CRIP_ARM_LEFT, -1, 0, 0, 5602, 5000},
 		},
 		// HIT_LOCATION_RIGHT_ARM
 		{
-			{ 3, 0, -1, 0, 0, 5001, 5000 },
-			{ 3, 0, -1, 0, 0, 5001, 5000 },
-			{ 4, 0, -1, 0, 0, 5016, 5000 },
-			{ 4, 0, STAT_ENDURANCE, 2, DAM_CRIP_ARM_RIGHT, 5016, 5603 },
-			{ 4, 0, STAT_ENDURANCE, 0, DAM_CRIP_ARM_RIGHT, 5016, 5603 },
-			{ 4, DAM_CRIP_ARM_RIGHT, -1, 0, 0, 5603, 5000 },
+			{3, 0, -1, 0, 0, 5001, 5000},
+			{3, 0, -1, 0, 0, 5001, 5000},
+			{4, 0, -1, 0, 0, 5016, 5000},
+			{4, 0, STAT_ENDURANCE, 2, DAM_CRIP_ARM_RIGHT, 5016, 5603},
+			{4, 0, STAT_ENDURANCE, 0, DAM_CRIP_ARM_RIGHT, 5016, 5603},
+			{4, DAM_CRIP_ARM_RIGHT, -1, 0, 0, 5603, 5000},
 		},
 		// HIT_LOCATION_TORSO
 		{
-			{ 3, 0, -1, 0, 0, 5001, 5000 },
-			{ 3, DAM_BYPASS, -1, 0, 0, 5604, 5000 },
-			{ 4, 0, -1, 0, 0, 5016, 5000 },
-			{ 4, DAM_BYPASS, -1, 0, 0, 5605, 5000 },
-			{ 4, DAM_BYPASS, STAT_AGILITY, 0, DAM_KNOCKED_DOWN, 5605, 5606 },
-			{ 4, DAM_DEAD, -1, 0, 0, 5607, 5000 },
+			{3, 0, -1, 0, 0, 5001, 5000},
+			{3, DAM_BYPASS, -1, 0, 0, 5604, 5000},
+			{4, 0, -1, 0, 0, 5016, 5000},
+			{4, DAM_BYPASS, -1, 0, 0, 5605, 5000},
+			{4, DAM_BYPASS, STAT_AGILITY, 0, DAM_KNOCKED_DOWN, 5605, 5606},
+			{4, DAM_DEAD, -1, 0, 0, 5607, 5000},
 		},
 		// HIT_LOCATION_RIGHT_LEG
 		{
-			{ 3, 0, -1, 0, 0, 5001, 5000 },
-			{ 3, 0, STAT_AGILITY, 2, 0, 5001, 5600 },
-			{ 4, DAM_KNOCKED_DOWN, STAT_ENDURANCE, 0, DAM_CRIP_LEG_RIGHT, 5600, 5608 },
-			{ 4, DAM_CRIP_LEG_RIGHT | DAM_BYPASS, -1, 0, 0, 5609, 5000 },
-			{ 4, DAM_KNOCKED_DOWN | DAM_CRIP_LEG_RIGHT | DAM_BYPASS, -1, 0, 0, 5608, 5000 },
-			{ 4, DAM_KNOCKED_DOWN | DAM_CRIP_LEG_RIGHT | DAM_BYPASS, -1, 0, 0, 5608, 5000 },
+			{3, 0, -1, 0, 0, 5001, 5000},
+			{3, 0, STAT_AGILITY, 2, 0, 5001, 5600},
+			{4, DAM_KNOCKED_DOWN, STAT_ENDURANCE, 0, DAM_CRIP_LEG_RIGHT, 5600, 5608},
+			{4, DAM_CRIP_LEG_RIGHT | DAM_BYPASS, -1, 0, 0, 5609, 5000},
+			{4, DAM_KNOCKED_DOWN | DAM_CRIP_LEG_RIGHT | DAM_BYPASS, -1, 0, 0, 5608, 5000},
+			{4, DAM_KNOCKED_DOWN | DAM_CRIP_LEG_RIGHT | DAM_BYPASS, -1, 0, 0, 5608, 5000},
 		},
 		// HIT_LOCATION_LEFT_LEG
 		{
-			{ 3, 0, -1, 0, 0, 5001, 5000 },
-			{ 3, 0, STAT_AGILITY, 2, 0, 5001, 5600 },
-			{ 4, DAM_KNOCKED_DOWN, STAT_ENDURANCE, 0, DAM_CRIP_LEG_LEFT, 5600, 5008 },
-			{ 4, DAM_CRIP_LEG_LEFT | DAM_BYPASS, -1, 0, 0, 5609, 5000 },
-			{ 4, DAM_KNOCKED_DOWN | DAM_CRIP_LEG_LEFT | DAM_BYPASS, -1, 0, 0, 5608, 5000 },
-			{ 4, DAM_KNOCKED_DOWN | DAM_CRIP_LEG_LEFT | DAM_BYPASS, -1, 0, 0, 5608, 5000 },
+			{3, 0, -1, 0, 0, 5001, 5000},
+			{3, 0, STAT_AGILITY, 2, 0, 5001, 5600},
+			{4, DAM_KNOCKED_DOWN, STAT_ENDURANCE, 0, DAM_CRIP_LEG_LEFT, 5600, 5008},
+			{4, DAM_CRIP_LEG_LEFT | DAM_BYPASS, -1, 0, 0, 5609, 5000},
+			{4, DAM_KNOCKED_DOWN | DAM_CRIP_LEG_LEFT | DAM_BYPASS, -1, 0, 0, 5608, 5000},
+			{4, DAM_KNOCKED_DOWN | DAM_CRIP_LEG_LEFT | DAM_BYPASS, -1, 0, 0, 5608, 5000},
 		},
 		// HIT_LOCATION_EYES
 		{
-			{ 4, 0, -1, 0, 0, 5001, 5000 },
-			{ 4, 0, STAT_AGILITY, 3, DAM_BLIND, 5001, 5610 },
-			{ 6, 0, STAT_AGILITY, 0, DAM_BLIND, 5016, 5610 },
-			{ 6, 0, STAT_AGILITY, -3, DAM_BLIND, 5016, 5610 },
-			{ 8, 0, STAT_AGILITY, -3, DAM_BLIND, 5611, 5612 },
-			{ 8, DAM_DEAD, -1, 0, 0, 5613, 5000 },
+			{4, 0, -1, 0, 0, 5001, 5000},
+			{4, 0, STAT_AGILITY, 3, DAM_BLIND, 5001, 5610},
+			{6, 0, STAT_AGILITY, 0, DAM_BLIND, 5016, 5610},
+			{6, 0, STAT_AGILITY, -3, DAM_BLIND, 5016, 5610},
+			{8, 0, STAT_AGILITY, -3, DAM_BLIND, 5611, 5612},
+			{8, DAM_DEAD, -1, 0, 0, 5613, 5000},
 		},
 		// HIT_LOCATION_GROIN
 		{
-			{ 3, 0, -1, 0, 0, 5614, 5000 },
-			{ 3, 0, -1, 0, 0, 5614, 5000 },
-			{ 4, 0, -1, 0, 0, 5614, 5000 },
-			{ 4, DAM_KNOCKED_OUT, -1, 0, 0, 5615, 5000 },
-			{ 4, DAM_KNOCKED_OUT, -1, 0, 0, 5615, 5000 },
-			{ 4, DAM_DEAD, -1, 0, 0, 5616, 5000 },
+			{3, 0, -1, 0, 0, 5614, 5000},
+			{3, 0, -1, 0, 0, 5614, 5000},
+			{4, 0, -1, 0, 0, 5614, 5000},
+			{4, DAM_KNOCKED_OUT, -1, 0, 0, 5615, 5000},
+			{4, DAM_KNOCKED_OUT, -1, 0, 0, 5615, 5000},
+			{4, DAM_DEAD, -1, 0, 0, 5616, 5000},
 		},
 		// HIT_LOCATION_UNCALLED
 		{
-			{ 3, 0, -1, 0, 0, 5001, 5000 },
-			{ 3, DAM_BYPASS, -1, 0, 0, 5604, 5000 },
-			{ 4, 0, -1, 0, 0, 5016, 5000 },
-			{ 4, DAM_BYPASS, -1, 0, 0, 5605, 5000 },
-			{ 4, DAM_BYPASS, STAT_AGILITY, 0, DAM_KNOCKED_DOWN, 5605, 5606 },
-			{ 4, DAM_DEAD, -1, 0, 0, 5607, 5000 },
+			{3, 0, -1, 0, 0, 5001, 5000},
+			{3, DAM_BYPASS, -1, 0, 0, 5604, 5000},
+			{4, 0, -1, 0, 0, 5016, 5000},
+			{4, DAM_BYPASS, -1, 0, 0, 5605, 5000},
+			{4, DAM_BYPASS, STAT_AGILITY, 0, DAM_KNOCKED_DOWN, 5605, 5606},
+			{4, DAM_DEAD, -1, 0, 0, 5607, 5000},
 		},
 	},
 	// KILL_TYPE_RAT
 	{
 		// HIT_LOCATION_HEAD
 		{
-			{ 4, DAM_BYPASS, -1, 0, 0, 5700, 5000 },
-			{ 4, DAM_BYPASS, -1, 0, 0, 5700, 5000 },
-			{ 4, DAM_DEAD, -1, 0, 0, 5701, 5000 },
-			{ 4, DAM_DEAD, -1, 0, 0, 5701, 5000 },
-			{ 6, DAM_DEAD, -1, 0, 0, 5701, 5000 },
-			{ 6, DAM_DEAD, -1, 0, 0, 5701, 5000 },
+			{4, DAM_BYPASS, -1, 0, 0, 5700, 5000},
+			{4, DAM_BYPASS, -1, 0, 0, 5700, 5000},
+			{4, DAM_DEAD, -1, 0, 0, 5701, 5000},
+			{4, DAM_DEAD, -1, 0, 0, 5701, 5000},
+			{6, DAM_DEAD, -1, 0, 0, 5701, 5000},
+			{6, DAM_DEAD, -1, 0, 0, 5701, 5000},
 		},
 		// HIT_LOCATION_LEFT_ARM
 		{
-			{ 3, DAM_CRIP_ARM_LEFT, -1, 0, 0, 5703, 5000 },
-			{ 3, DAM_CRIP_ARM_LEFT, -1, 0, 0, 5703, 5000 },
-			{ 3, DAM_CRIP_ARM_LEFT, -1, 0, 0, 5703, 5000 },
-			{ 4, DAM_CRIP_ARM_LEFT, -1, 0, 0, 5703, 5000 },
-			{ 4, DAM_CRIP_ARM_LEFT, -1, 0, 0, 5703, 5000 },
-			{ 4, DAM_CRIP_ARM_LEFT, -1, 0, 0, 5703, 5000 },
+			{3, DAM_CRIP_ARM_LEFT, -1, 0, 0, 5703, 5000},
+			{3, DAM_CRIP_ARM_LEFT, -1, 0, 0, 5703, 5000},
+			{3, DAM_CRIP_ARM_LEFT, -1, 0, 0, 5703, 5000},
+			{4, DAM_CRIP_ARM_LEFT, -1, 0, 0, 5703, 5000},
+			{4, DAM_CRIP_ARM_LEFT, -1, 0, 0, 5703, 5000},
+			{4, DAM_CRIP_ARM_LEFT, -1, 0, 0, 5703, 5000},
 		},
 		// HIT_LOCATION_RIGHT_ARM
 		{
-			{ 3, DAM_CRIP_ARM_RIGHT, -1, 0, 0, 5705, 5000 },
-			{ 3, DAM_CRIP_ARM_RIGHT, -1, 0, 0, 5705, 5000 },
-			{ 3, DAM_CRIP_ARM_RIGHT, -1, 0, 0, 5705, 5000 },
-			{ 4, DAM_CRIP_ARM_RIGHT, -1, 0, 0, 5705, 5000 },
-			{ 4, DAM_CRIP_ARM_RIGHT, -1, 0, 0, 5705, 5000 },
-			{ 4, DAM_CRIP_ARM_RIGHT, -1, 0, 0, 5705, 5000 },
+			{3, DAM_CRIP_ARM_RIGHT, -1, 0, 0, 5705, 5000},
+			{3, DAM_CRIP_ARM_RIGHT, -1, 0, 0, 5705, 5000},
+			{3, DAM_CRIP_ARM_RIGHT, -1, 0, 0, 5705, 5000},
+			{4, DAM_CRIP_ARM_RIGHT, -1, 0, 0, 5705, 5000},
+			{4, DAM_CRIP_ARM_RIGHT, -1, 0, 0, 5705, 5000},
+			{4, DAM_CRIP_ARM_RIGHT, -1, 0, 0, 5705, 5000},
 		},
 		// HIT_LOCATION_TORSO
 		{
-			{ 3, 0, -1, 0, 0, 5706, 5000 },
-			{ 3, DAM_KNOCKED_DOWN, -1, 0, 0, 5707, 5000 },
-			{ 3, DAM_KNOCKED_DOWN, -1, 0, 0, 5707, 5000 },
-			{ 4, DAM_KNOCKED_DOWN, -1, 0, 0, 5707, 5000 },
-			{ 4, DAM_KNOCKED_DOWN, -1, 0, 0, 5707, 5000 },
-			{ 4, DAM_DEAD, -1, 0, 0, 5708, 5000 },
+			{3, 0, -1, 0, 0, 5706, 5000},
+			{3, DAM_KNOCKED_DOWN, -1, 0, 0, 5707, 5000},
+			{3, DAM_KNOCKED_DOWN, -1, 0, 0, 5707, 5000},
+			{4, DAM_KNOCKED_DOWN, -1, 0, 0, 5707, 5000},
+			{4, DAM_KNOCKED_DOWN, -1, 0, 0, 5707, 5000},
+			{4, DAM_DEAD, -1, 0, 0, 5708, 5000},
 		},
 		// HIT_LOCATION_RIGHT_LEG
 		{
-			{ 3, DAM_CRIP_LEG_RIGHT, -1, 0, 0, 5709, 5000 },
-			{ 3, DAM_CRIP_LEG_RIGHT, -1, 0, 0, 5709, 5000 },
-			{ 3, DAM_CRIP_LEG_RIGHT, -1, 0, 0, 5709, 5000 },
-			{ 4, DAM_CRIP_LEG_RIGHT, -1, 0, 0, 5709, 5000 },
-			{ 4, DAM_CRIP_LEG_RIGHT, -1, 0, 0, 5709, 5000 },
-			{ 4, DAM_CRIP_LEG_RIGHT, -1, 0, 0, 5709, 5000 },
+			{3, DAM_CRIP_LEG_RIGHT, -1, 0, 0, 5709, 5000},
+			{3, DAM_CRIP_LEG_RIGHT, -1, 0, 0, 5709, 5000},
+			{3, DAM_CRIP_LEG_RIGHT, -1, 0, 0, 5709, 5000},
+			{4, DAM_CRIP_LEG_RIGHT, -1, 0, 0, 5709, 5000},
+			{4, DAM_CRIP_LEG_RIGHT, -1, 0, 0, 5709, 5000},
+			{4, DAM_CRIP_LEG_RIGHT, -1, 0, 0, 5709, 5000},
 		},
 		// HIT_LOCATION_LEFT_LEG
 		{
-			{ 3, DAM_CRIP_LEG_LEFT, -1, 0, 0, 5710, 5000 },
-			{ 3, DAM_CRIP_LEG_LEFT, -1, 0, 0, 5710, 5000 },
-			{ 3, DAM_CRIP_LEG_LEFT, -1, 0, 0, 5710, 5000 },
-			{ 4, DAM_CRIP_LEG_LEFT, -1, 0, 0, 5710, 5000 },
-			{ 4, DAM_CRIP_LEG_LEFT, -1, 0, 0, 5710, 5000 },
-			{ 4, DAM_CRIP_LEG_LEFT, -1, 0, 0, 5710, 5000 },
+			{3, DAM_CRIP_LEG_LEFT, -1, 0, 0, 5710, 5000},
+			{3, DAM_CRIP_LEG_LEFT, -1, 0, 0, 5710, 5000},
+			{3, DAM_CRIP_LEG_LEFT, -1, 0, 0, 5710, 5000},
+			{4, DAM_CRIP_LEG_LEFT, -1, 0, 0, 5710, 5000},
+			{4, DAM_CRIP_LEG_LEFT, -1, 0, 0, 5710, 5000},
+			{4, DAM_CRIP_LEG_LEFT, -1, 0, 0, 5710, 5000},
 		},
 		// HIT_LOCATION_EYES
 		{
-			{ 4, DAM_BYPASS, -1, 0, 0, 5711, 5000 },
-			{ 4, DAM_DEAD, -1, 0, 0, 5712, 5000 },
-			{ 4, DAM_DEAD, -1, 0, 0, 5712, 5000 },
-			{ 6, DAM_DEAD, -1, 0, 0, 5712, 5000 },
-			{ 6, DAM_DEAD, -1, 0, 0, 5712, 5000 },
-			{ 6, DAM_DEAD, -1, 0, 0, 5712, 5000 },
+			{4, DAM_BYPASS, -1, 0, 0, 5711, 5000},
+			{4, DAM_DEAD, -1, 0, 0, 5712, 5000},
+			{4, DAM_DEAD, -1, 0, 0, 5712, 5000},
+			{6, DAM_DEAD, -1, 0, 0, 5712, 5000},
+			{6, DAM_DEAD, -1, 0, 0, 5712, 5000},
+			{6, DAM_DEAD, -1, 0, 0, 5712, 5000},
 		},
 		// HIT_LOCATION_GROIN
 		{
-			{ 3, 0, -1, 0, 0, 5001, 5000 },
-			{ 3, 0, -1, 0, 0, 5001, 5000 },
-			{ 4, DAM_BYPASS, -1, 0, 0, 5711, 5000 },
-			{ 4, DAM_BYPASS, -1, 0, 0, 5711, 5000 },
-			{ 6, DAM_DEAD, -1, 0, 0, 5712, 5000 },
-			{ 6, DAM_DEAD, -1, 0, 0, 5712, 5000 },
+			{3, 0, -1, 0, 0, 5001, 5000},
+			{3, 0, -1, 0, 0, 5001, 5000},
+			{4, DAM_BYPASS, -1, 0, 0, 5711, 5000},
+			{4, DAM_BYPASS, -1, 0, 0, 5711, 5000},
+			{6, DAM_DEAD, -1, 0, 0, 5712, 5000},
+			{6, DAM_DEAD, -1, 0, 0, 5712, 5000},
 		},
 		// HIT_LOCATION_UNCALLED
 		{
-			{ 3, 0, -1, 0, 0, 5706, 5000 },
-			{ 3, DAM_KNOCKED_DOWN, -1, 0, 0, 5707, 5000 },
-			{ 3, DAM_KNOCKED_DOWN, -1, 0, 0, 5707, 5000 },
-			{ 4, DAM_KNOCKED_DOWN, -1, 0, 0, 5707, 5000 },
-			{ 4, DAM_KNOCKED_DOWN, -1, 0, 0, 5707, 5000 },
-			{ 4, DAM_DEAD, -1, 0, 0, 5708, 5000 },
+			{3, 0, -1, 0, 0, 5706, 5000},
+			{3, DAM_KNOCKED_DOWN, -1, 0, 0, 5707, 5000},
+			{3, DAM_KNOCKED_DOWN, -1, 0, 0, 5707, 5000},
+			{4, DAM_KNOCKED_DOWN, -1, 0, 0, 5707, 5000},
+			{4, DAM_KNOCKED_DOWN, -1, 0, 0, 5707, 5000},
+			{4, DAM_DEAD, -1, 0, 0, 5708, 5000},
 		},
 	},
 	// KILL_TYPE_FLOATER
 	{
 		// HIT_LOCATION_HEAD
 		{
-			{ 4, 0, -1, 0, 0, 5001, 5000 },
-			{ 4, 0, STAT_AGILITY, 0, DAM_KNOCKED_DOWN, 5001, 5800 },
-			{ 5, 0, STAT_AGILITY, -3, DAM_KNOCKED_DOWN, 5016, 5800 },
-			{ 5, DAM_KNOCKED_DOWN, STAT_ENDURANCE, 0, DAM_KNOCKED_OUT, 5800, 5801 },
-			{ 6, DAM_KNOCKED_DOWN, STAT_ENDURANCE, -3, DAM_KNOCKED_OUT, 5800, 5801 },
-			{ 6, DAM_DEAD, -1, 0, 0, 5802, 5000 },
+			{4, 0, -1, 0, 0, 5001, 5000},
+			{4, 0, STAT_AGILITY, 0, DAM_KNOCKED_DOWN, 5001, 5800},
+			{5, 0, STAT_AGILITY, -3, DAM_KNOCKED_DOWN, 5016, 5800},
+			{5, DAM_KNOCKED_DOWN, STAT_ENDURANCE, 0, DAM_KNOCKED_OUT, 5800, 5801},
+			{6, DAM_KNOCKED_DOWN, STAT_ENDURANCE, -3, DAM_KNOCKED_OUT, 5800, 5801},
+			{6, DAM_DEAD, -1, 0, 0, 5802, 5000},
 		},
 		// HIT_LOCATION_LEFT_ARM
 		{
-			{ 3, 0, -1, 0, 0, 5001, 5000 },
-			{ 3, 0, STAT_ENDURANCE, 0, DAM_LOSE_TURN, 5001, 5803 },
-			{ 4, 0, STAT_ENDURANCE, -2, DAM_LOSE_TURN, 5001, 5803 },
-			{ 3, DAM_BYPASS | DAM_LOSE_TURN, -1, 0, 0, 5804, 5000 },
-			{ 4, DAM_BYPASS | DAM_LOSE_TURN, -1, 0, 0, 5804, 5000 },
-			{ 4, DAM_DEAD, -1, 0, 0, 5805, 5000 },
+			{3, 0, -1, 0, 0, 5001, 5000},
+			{3, 0, STAT_ENDURANCE, 0, DAM_LOSE_TURN, 5001, 5803},
+			{4, 0, STAT_ENDURANCE, -2, DAM_LOSE_TURN, 5001, 5803},
+			{3, DAM_BYPASS | DAM_LOSE_TURN, -1, 0, 0, 5804, 5000},
+			{4, DAM_BYPASS | DAM_LOSE_TURN, -1, 0, 0, 5804, 5000},
+			{4, DAM_DEAD, -1, 0, 0, 5805, 5000},
 		},
 		// HIT_LOCATION_RIGHT_ARM
 		{
-			{ 3, 0, -1, 0, 0, 5001, 5000 },
-			{ 3, 0, STAT_ENDURANCE, 0, DAM_LOSE_TURN, 5001, 5803 },
-			{ 4, 0, STAT_ENDURANCE, -2, DAM_LOSE_TURN, 5001, 5803 },
-			{ 3, DAM_BYPASS | DAM_LOSE_TURN, -1, 0, 0, 5804, 5000 },
-			{ 4, DAM_BYPASS | DAM_LOSE_TURN, -1, 0, 0, 5804, 5000 },
-			{ 4, DAM_DEAD, -1, 0, 0, 5805, 5000 },
+			{3, 0, -1, 0, 0, 5001, 5000},
+			{3, 0, STAT_ENDURANCE, 0, DAM_LOSE_TURN, 5001, 5803},
+			{4, 0, STAT_ENDURANCE, -2, DAM_LOSE_TURN, 5001, 5803},
+			{3, DAM_BYPASS | DAM_LOSE_TURN, -1, 0, 0, 5804, 5000},
+			{4, DAM_BYPASS | DAM_LOSE_TURN, -1, 0, 0, 5804, 5000},
+			{4, DAM_DEAD, -1, 0, 0, 5805, 5000},
 		},
 		// HIT_LOCATION_TORSO
 		{
-			{ 3, 0, -1, 0, 0, 5001, 5000 },
-			{ 3, 0, STAT_AGILITY, 0, DAM_KNOCKED_DOWN, 5001, 5800 },
-			{ 3, 0, STAT_AGILITY, -2, DAM_KNOCKED_DOWN, 5001, 5800 },
-			{ 4, DAM_KNOCKED_DOWN, -1, 0, 0, 5800, 5000 },
-			{ 4, DAM_KNOCKED_DOWN | DAM_BYPASS, -1, 0, 0, 5804, 5000 },
-			{ 4, DAM_DEAD, -1, 0, 0, 5805, 5000 },
+			{3, 0, -1, 0, 0, 5001, 5000},
+			{3, 0, STAT_AGILITY, 0, DAM_KNOCKED_DOWN, 5001, 5800},
+			{3, 0, STAT_AGILITY, -2, DAM_KNOCKED_DOWN, 5001, 5800},
+			{4, DAM_KNOCKED_DOWN, -1, 0, 0, 5800, 5000},
+			{4, DAM_KNOCKED_DOWN | DAM_BYPASS, -1, 0, 0, 5804, 5000},
+			{4, DAM_DEAD, -1, 0, 0, 5805, 5000},
 		},
 		// HIT_LOCATION_RIGHT_LEG
 		{
-			{ 3, 0, -1, 0, 0, 5001, 5000 },
-			{ 3, 0, STAT_AGILITY, 1, DAM_KNOCKED_DOWN, 5001, 5800 },
-			{ 4, 0, STAT_AGILITY, -1, DAM_KNOCKED_DOWN, 5001, 5800 },
-			{ 4, DAM_KNOCKED_DOWN, STAT_ENDURANCE, -1, DAM_CRIP_LEG_LEFT | DAM_CRIP_LEG_RIGHT, 5800, 5806 },
-			{ 4, DAM_KNOCKED_DOWN | DAM_BYPASS, STAT_ENDURANCE, -3, DAM_CRIP_LEG_LEFT | DAM_CRIP_LEG_RIGHT, 5804, 5806 },
-			{ 6, DAM_DEAD | DAM_ON_FIRE, -1, 0, 0, 5807, 5000 },
+			{3, 0, -1, 0, 0, 5001, 5000},
+			{3, 0, STAT_AGILITY, 1, DAM_KNOCKED_DOWN, 5001, 5800},
+			{4, 0, STAT_AGILITY, -1, DAM_KNOCKED_DOWN, 5001, 5800},
+			{4, DAM_KNOCKED_DOWN, STAT_ENDURANCE, -1, DAM_CRIP_LEG_LEFT | DAM_CRIP_LEG_RIGHT, 5800, 5806},
+			{4, DAM_KNOCKED_DOWN | DAM_BYPASS, STAT_ENDURANCE, -3, DAM_CRIP_LEG_LEFT | DAM_CRIP_LEG_RIGHT, 5804, 5806},
+			{6, DAM_DEAD | DAM_ON_FIRE, -1, 0, 0, 5807, 5000},
 		},
 		// HIT_LOCATION_LEFT_LEG
 		{
-			{ 3, 0, -1, 0, 0, 5001, 5000 },
-			{ 3, 0, -1, 0, 0, 5001, 5000 },
-			{ 4, DAM_LOSE_TURN, -1, 0, 0, 5803, 5000 },
-			{ 4, DAM_LOSE_TURN, -1, 0, 0, 5803, 5000 },
-			{ 4, DAM_CRIP_ARM_LEFT | DAM_CRIP_ARM_RIGHT | DAM_LOSE_TURN, -1, 0, 0, 5808, 5000 },
-			{ 4, DAM_CRIP_ARM_LEFT | DAM_CRIP_ARM_RIGHT | DAM_LOSE_TURN, -1, 0, 0, 5808, 5000 },
+			{3, 0, -1, 0, 0, 5001, 5000},
+			{3, 0, -1, 0, 0, 5001, 5000},
+			{4, DAM_LOSE_TURN, -1, 0, 0, 5803, 5000},
+			{4, DAM_LOSE_TURN, -1, 0, 0, 5803, 5000},
+			{4, DAM_CRIP_ARM_LEFT | DAM_CRIP_ARM_RIGHT | DAM_LOSE_TURN, -1, 0, 0, 5808, 5000},
+			{4, DAM_CRIP_ARM_LEFT | DAM_CRIP_ARM_RIGHT | DAM_LOSE_TURN, -1, 0, 0, 5808, 5000},
 		},
 		// HIT_LOCATION_EYES
 		{
-			{ 4, 0, -1, 0, 0, 5001, 5000 },
-			{ 4, DAM_BYPASS, -1, 0, 0, 5809, 5000 },
-			{ 5, 0, STAT_ENDURANCE, 0, DAM_BLIND, 5016, 5810 },
-			{ 5, DAM_BYPASS, STAT_ENDURANCE, -3, DAM_BLIND, 5809, 5810 },
-			{ 6, DAM_BLIND | DAM_BYPASS, -1, 0, 0, 5810, 5000 },
-			{ 6, DAM_KNOCKED_DOWN | DAM_BLIND | DAM_BYPASS, -1, 0, 0, 5801, 5000 },
+			{4, 0, -1, 0, 0, 5001, 5000},
+			{4, DAM_BYPASS, -1, 0, 0, 5809, 5000},
+			{5, 0, STAT_ENDURANCE, 0, DAM_BLIND, 5016, 5810},
+			{5, DAM_BYPASS, STAT_ENDURANCE, -3, DAM_BLIND, 5809, 5810},
+			{6, DAM_BLIND | DAM_BYPASS, -1, 0, 0, 5810, 5000},
+			{6, DAM_KNOCKED_DOWN | DAM_BLIND | DAM_BYPASS, -1, 0, 0, 5801, 5000},
 		},
 		// HIT_LOCATION_GROIN
 		{
-			{ 3, 0, -1, 0, 0, 5001, 5000 },
-			{ 3, 0, -1, 0, 0, 5001, 5000 },
-			{ 3, 0, STAT_ENDURANCE, 0, DAM_KNOCKED_DOWN, 5001, 5800 },
-			{ 3, 0, STAT_ENDURANCE, -3, DAM_KNOCKED_DOWN, 5001, 5800 },
-			{ 3, DAM_KNOCKED_DOWN | DAM_BYPASS, -1, 0, 0, 5800, 5000 },
-			{ 3, DAM_KNOCKED_DOWN | DAM_BYPASS, -1, 0, 0, 5800, 5000 },
+			{3, 0, -1, 0, 0, 5001, 5000},
+			{3, 0, -1, 0, 0, 5001, 5000},
+			{3, 0, STAT_ENDURANCE, 0, DAM_KNOCKED_DOWN, 5001, 5800},
+			{3, 0, STAT_ENDURANCE, -3, DAM_KNOCKED_DOWN, 5001, 5800},
+			{3, DAM_KNOCKED_DOWN | DAM_BYPASS, -1, 0, 0, 5800, 5000},
+			{3, DAM_KNOCKED_DOWN | DAM_BYPASS, -1, 0, 0, 5800, 5000},
 		},
 		// HIT_LOCATION_UNCALLED
 		{
-			{ 3, 0, -1, 0, 0, 5001, 5000 },
-			{ 3, 0, STAT_AGILITY, 0, DAM_KNOCKED_DOWN, 5001, 5800 },
-			{ 3, 0, STAT_AGILITY, -2, DAM_KNOCKED_DOWN, 5001, 5800 },
-			{ 4, DAM_KNOCKED_DOWN, -1, 0, 0, 5800, 5000 },
-			{ 4, DAM_KNOCKED_DOWN | DAM_BYPASS, -1, 0, 0, 5804, 5000 },
-			{ 4, DAM_DEAD, -1, 0, 0, 5805, 5000 },
+			{3, 0, -1, 0, 0, 5001, 5000},
+			{3, 0, STAT_AGILITY, 0, DAM_KNOCKED_DOWN, 5001, 5800},
+			{3, 0, STAT_AGILITY, -2, DAM_KNOCKED_DOWN, 5001, 5800},
+			{4, DAM_KNOCKED_DOWN, -1, 0, 0, 5800, 5000},
+			{4, DAM_KNOCKED_DOWN | DAM_BYPASS, -1, 0, 0, 5804, 5000},
+			{4, DAM_DEAD, -1, 0, 0, 5805, 5000},
 		},
 	},
 	// KILL_TYPE_CENTAUR
 	{
 		// HIT_LOCATION_HEAD
 		{
-			{ 4, 0, -1, 0, 0, 5016, 5000 },
-			{ 4, 0, STAT_ENDURANCE, 0, DAM_KNOCKED_DOWN | DAM_LOSE_TURN, 5016, 5900 },
-			{ 5, 0, STAT_ENDURANCE, -3, DAM_KNOCKED_DOWN | DAM_LOSE_TURN, 5016, 5900 },
-			{ 5, DAM_BYPASS, STAT_ENDURANCE, -3, DAM_KNOCKED_DOWN | DAM_LOSE_TURN, 5901, 5900 },
-			{ 6, DAM_BYPASS, STAT_ENDURANCE, -3, DAM_KNOCKED_DOWN | DAM_LOSE_TURN, 5901, 5900 },
-			{ 6, DAM_DEAD, -1, 0, 0, 5902, 5000 },
+			{4, 0, -1, 0, 0, 5016, 5000},
+			{4, 0, STAT_ENDURANCE, 0, DAM_KNOCKED_DOWN | DAM_LOSE_TURN, 5016, 5900},
+			{5, 0, STAT_ENDURANCE, -3, DAM_KNOCKED_DOWN | DAM_LOSE_TURN, 5016, 5900},
+			{5, DAM_BYPASS, STAT_ENDURANCE, -3, DAM_KNOCKED_DOWN | DAM_LOSE_TURN, 5901, 5900},
+			{6, DAM_BYPASS, STAT_ENDURANCE, -3, DAM_KNOCKED_DOWN | DAM_LOSE_TURN, 5901, 5900},
+			{6, DAM_DEAD, -1, 0, 0, 5902, 5000},
 		},
 		// HIT_LOCATION_LEFT_ARM
 		{
-			{ 3, 0, -1, 0, 0, 5001, 5000 },
-			{ 3, 0, -1, 0, 0, 5001, 5000 },
-			{ 4, 0, STAT_ENDURANCE, 0, DAM_LOSE_TURN, 5016, 5903 },
-			{ 4, 0, STAT_ENDURANCE, 0, DAM_CRIP_ARM_LEFT, 5016, 5904 },
-			{ 4, DAM_CRIP_ARM_LEFT, -1, 0, 0, 5904, 5000 },
-			{ 4, DAM_CRIP_ARM_LEFT | DAM_BYPASS, -1, 0, 0, 5905, 5000 },
+			{3, 0, -1, 0, 0, 5001, 5000},
+			{3, 0, -1, 0, 0, 5001, 5000},
+			{4, 0, STAT_ENDURANCE, 0, DAM_LOSE_TURN, 5016, 5903},
+			{4, 0, STAT_ENDURANCE, 0, DAM_CRIP_ARM_LEFT, 5016, 5904},
+			{4, DAM_CRIP_ARM_LEFT, -1, 0, 0, 5904, 5000},
+			{4, DAM_CRIP_ARM_LEFT | DAM_BYPASS, -1, 0, 0, 5905, 5000},
 		},
 		// HIT_LOCATION_RIGHT_ARM
 		{
-			{ 3, 0, -1, 0, 0, 5001, 5000 },
-			{ 3, 0, -1, 0, 0, 5001, 5000 },
-			{ 4, 0, STAT_ENDURANCE, 0, DAM_LOSE_TURN, 5016, 5903 },
-			{ 4, 0, STAT_ENDURANCE, 0, DAM_CRIP_ARM_RIGHT, 5016, 5904 },
-			{ 4, DAM_CRIP_ARM_RIGHT, -1, 0, 0, 5904, 5000 },
-			{ 4, DAM_CRIP_ARM_RIGHT | DAM_BYPASS, -1, 0, 0, 5905, 5000 },
+			{3, 0, -1, 0, 0, 5001, 5000},
+			{3, 0, -1, 0, 0, 5001, 5000},
+			{4, 0, STAT_ENDURANCE, 0, DAM_LOSE_TURN, 5016, 5903},
+			{4, 0, STAT_ENDURANCE, 0, DAM_CRIP_ARM_RIGHT, 5016, 5904},
+			{4, DAM_CRIP_ARM_RIGHT, -1, 0, 0, 5904, 5000},
+			{4, DAM_CRIP_ARM_RIGHT | DAM_BYPASS, -1, 0, 0, 5905, 5000},
 		},
 		// HIT_LOCATION_TORSO
 		{
-			{ 3, 0, -1, 0, 0, 5001, 5000 },
-			{ 4, 0, -1, 0, 0, 5001, 5000 },
-			{ 4, DAM_BYPASS, -1, 0, 0, 5901, 5000 },
-			{ 4, DAM_BYPASS, STAT_ENDURANCE, 2, 0, 5901, 5900 },
-			{ 5, DAM_KNOCKED_DOWN | DAM_BYPASS, -1, 0, 0, 5900, 5000 },
-			{ 5, DAM_DEAD, -1, 0, 0, 5902, 5000 },
+			{3, 0, -1, 0, 0, 5001, 5000},
+			{4, 0, -1, 0, 0, 5001, 5000},
+			{4, DAM_BYPASS, -1, 0, 0, 5901, 5000},
+			{4, DAM_BYPASS, STAT_ENDURANCE, 2, 0, 5901, 5900},
+			{5, DAM_KNOCKED_DOWN | DAM_BYPASS, -1, 0, 0, 5900, 5000},
+			{5, DAM_DEAD, -1, 0, 0, 5902, 5000},
 		},
 		// HIT_LOCATION_RIGHT_LEG
 		{
-			{ 3, 0, -1, 0, 0, 5001, 5000 },
-			{ 3, DAM_KNOCKED_DOWN, -1, 0, 0, 5900, 5000 },
-			{ 4, DAM_KNOCKED_DOWN, STAT_ENDURANCE, 0, DAM_CRIP_LEG_RIGHT, 5900, 5906 },
-			{ 4, DAM_KNOCKED_DOWN | DAM_CRIP_LEG_RIGHT, -1, 0, 0, 5906, 5000 },
-			{ 4, DAM_KNOCKED_DOWN | DAM_CRIP_LEG_RIGHT, -1, 0, 0, 5906, 5000 },
-			{ 4, DAM_KNOCKED_DOWN | DAM_CRIP_LEG_RIGHT | DAM_LOSE_TURN, -1, 0, 0, 5907, 5000 },
+			{3, 0, -1, 0, 0, 5001, 5000},
+			{3, DAM_KNOCKED_DOWN, -1, 0, 0, 5900, 5000},
+			{4, DAM_KNOCKED_DOWN, STAT_ENDURANCE, 0, DAM_CRIP_LEG_RIGHT, 5900, 5906},
+			{4, DAM_KNOCKED_DOWN | DAM_CRIP_LEG_RIGHT, -1, 0, 0, 5906, 5000},
+			{4, DAM_KNOCKED_DOWN | DAM_CRIP_LEG_RIGHT, -1, 0, 0, 5906, 5000},
+			{4, DAM_KNOCKED_DOWN | DAM_CRIP_LEG_RIGHT | DAM_LOSE_TURN, -1, 0, 0, 5907, 5000},
 		},
 		// HIT_LOCATION_LEFT_LEG
 		{
-			{ 3, 0, -1, 0, 0, 5001, 5000 },
-			{ 3, DAM_KNOCKED_DOWN, -1, 0, 0, 5900, 5000 },
-			{ 4, DAM_KNOCKED_DOWN, STAT_ENDURANCE, 0, DAM_CRIP_LEG_LEFT, 5900, 5906 },
-			{ 4, DAM_KNOCKED_DOWN | DAM_CRIP_LEG_LEFT, -1, 0, 0, 5906, 5000 },
-			{ 4, DAM_KNOCKED_DOWN | DAM_CRIP_LEG_LEFT, -1, 0, 0, 5906, 5000 },
-			{ 4, DAM_KNOCKED_DOWN | DAM_CRIP_LEG_LEFT | DAM_LOSE_TURN, -1, 0, 0, 5907, 5000 },
+			{3, 0, -1, 0, 0, 5001, 5000},
+			{3, DAM_KNOCKED_DOWN, -1, 0, 0, 5900, 5000},
+			{4, DAM_KNOCKED_DOWN, STAT_ENDURANCE, 0, DAM_CRIP_LEG_LEFT, 5900, 5906},
+			{4, DAM_KNOCKED_DOWN | DAM_CRIP_LEG_LEFT, -1, 0, 0, 5906, 5000},
+			{4, DAM_KNOCKED_DOWN | DAM_CRIP_LEG_LEFT, -1, 0, 0, 5906, 5000},
+			{4, DAM_KNOCKED_DOWN | DAM_CRIP_LEG_LEFT | DAM_LOSE_TURN, -1, 0, 0, 5907, 5000},
 		},
 		// HIT_LOCATION_EYES
 		{
-			{ 4, 0, -1, 0, 0, 5001, 5000 },
-			{ 4, 0, STAT_ENDURANCE, 1, DAM_BLIND, 5001, 5908 },
-			{ 6, DAM_BYPASS, STAT_ENDURANCE, -1, DAM_BLIND, 5901, 5908 },
-			{ 6, DAM_BLIND | DAM_BYPASS | DAM_LOSE_TURN, -1, 0, 0, 5909, 5000 },
-			{ 8, DAM_KNOCKED_OUT | DAM_BLIND | DAM_BYPASS, -1, 0, 0, 5910, 5000 },
-			{ 8, DAM_DEAD, -1, 0, 0, 5911, 5000 },
+			{4, 0, -1, 0, 0, 5001, 5000},
+			{4, 0, STAT_ENDURANCE, 1, DAM_BLIND, 5001, 5908},
+			{6, DAM_BYPASS, STAT_ENDURANCE, -1, DAM_BLIND, 5901, 5908},
+			{6, DAM_BLIND | DAM_BYPASS | DAM_LOSE_TURN, -1, 0, 0, 5909, 5000},
+			{8, DAM_KNOCKED_OUT | DAM_BLIND | DAM_BYPASS, -1, 0, 0, 5910, 5000},
+			{8, DAM_DEAD, -1, 0, 0, 5911, 5000},
 		},
 		// HIT_LOCATION_GROIN
 		{
-			{ 2, 0, -1, 0, 0, 5912, 5000 },
-			{ 2, 0, -1, 0, 0, 5912, 5000 },
-			{ 2, 0, -1, 0, 0, 5912, 5000 },
-			{ 2, 0, -1, 0, 0, 5912, 5000 },
-			{ 2, 0, -1, 0, 0, 5912, 5000 },
-			{ 2, 0, -1, 0, 0, 5912, 5000 },
+			{2, 0, -1, 0, 0, 5912, 5000},
+			{2, 0, -1, 0, 0, 5912, 5000},
+			{2, 0, -1, 0, 0, 5912, 5000},
+			{2, 0, -1, 0, 0, 5912, 5000},
+			{2, 0, -1, 0, 0, 5912, 5000},
+			{2, 0, -1, 0, 0, 5912, 5000},
 		},
 		// HIT_LOCATION_UNCALLED
 		{
-			{ 3, 0, -1, 0, 0, 5001, 5000 },
-			{ 4, 0, -1, 0, 0, 5001, 5000 },
-			{ 4, DAM_BYPASS, -1, 0, 0, 5901, 5000 },
-			{ 4, DAM_BYPASS, STAT_ENDURANCE, 2, 0, 5901, 5900 },
-			{ 5, DAM_KNOCKED_DOWN | DAM_BYPASS, -1, 0, 0, 5900, 5000 },
-			{ 5, DAM_DEAD, -1, 0, 0, 5902, 5000 },
+			{3, 0, -1, 0, 0, 5001, 5000},
+			{4, 0, -1, 0, 0, 5001, 5000},
+			{4, DAM_BYPASS, -1, 0, 0, 5901, 5000},
+			{4, DAM_BYPASS, STAT_ENDURANCE, 2, 0, 5901, 5900},
+			{5, DAM_KNOCKED_DOWN | DAM_BYPASS, -1, 0, 0, 5900, 5000},
+			{5, DAM_DEAD, -1, 0, 0, 5902, 5000},
 		},
 	},
 	// KILL_TYPE_ROBOT
 	{
 		// HIT_LOCATION_HEAD
 		{
-			{ 4, 0, -1, 0, 0, 6000, 5000 },
-			{ 4, 0, -1, 0, 0, 6000, 5000 },
-			{ 5, 0, -1, 0, 0, 6000, 5000 },
-			{ 5, DAM_KNOCKED_DOWN, -1, 0, 0, 6001, 5000 },
-			{ 6, DAM_KNOCKED_DOWN | DAM_BYPASS, -1, 0, 0, 6002, 5000 },
-			{ 6, DAM_DEAD, -1, 0, 0, 6003, 5000 },
+			{4, 0, -1, 0, 0, 6000, 5000},
+			{4, 0, -1, 0, 0, 6000, 5000},
+			{5, 0, -1, 0, 0, 6000, 5000},
+			{5, DAM_KNOCKED_DOWN, -1, 0, 0, 6001, 5000},
+			{6, DAM_KNOCKED_DOWN | DAM_BYPASS, -1, 0, 0, 6002, 5000},
+			{6, DAM_DEAD, -1, 0, 0, 6003, 5000},
 		},
 		// HIT_LOCATION_LEFT_ARM
 		{
-			{ 3, 0, -1, 0, 0, 6000, 5000 },
-			{ 3, 0, -1, 0, 0, 6000, 5000 },
-			{ 3, 0, STAT_ENDURANCE, 0, DAM_CRIP_ARM_LEFT, 6000, 6004 },
-			{ 3, 0, STAT_ENDURANCE, -3, DAM_CRIP_ARM_LEFT, 6000, 6004 },
-			{ 4, DAM_CRIP_ARM_LEFT, -1, 0, 0, 6004, 5000 },
-			{ 4, DAM_CRIP_ARM_LEFT, STAT_ENDURANCE, 0, DAM_CRIP_ARM_RIGHT, 6004, 6005 },
+			{3, 0, -1, 0, 0, 6000, 5000},
+			{3, 0, -1, 0, 0, 6000, 5000},
+			{3, 0, STAT_ENDURANCE, 0, DAM_CRIP_ARM_LEFT, 6000, 6004},
+			{3, 0, STAT_ENDURANCE, -3, DAM_CRIP_ARM_LEFT, 6000, 6004},
+			{4, DAM_CRIP_ARM_LEFT, -1, 0, 0, 6004, 5000},
+			{4, DAM_CRIP_ARM_LEFT, STAT_ENDURANCE, 0, DAM_CRIP_ARM_RIGHT, 6004, 6005},
 		},
 		// HIT_LOCATION_RIGHT_ARM
 		{
-			{ 3, 0, -1, 0, 0, 6000, 5000 },
-			{ 3, 0, -1, 0, 0, 6000, 5000 },
-			{ 3, 0, STAT_ENDURANCE, 0, DAM_CRIP_ARM_RIGHT, 6000, 6004 },
-			{ 3, 0, STAT_ENDURANCE, -3, DAM_CRIP_ARM_RIGHT, 6000, 6004 },
-			{ 4, DAM_CRIP_ARM_RIGHT, -1, 0, 0, 6004, 5000 },
-			{ 4, DAM_CRIP_ARM_RIGHT, STAT_ENDURANCE, 0, DAM_CRIP_ARM_LEFT, 6004, 6005 },
+			{3, 0, -1, 0, 0, 6000, 5000},
+			{3, 0, -1, 0, 0, 6000, 5000},
+			{3, 0, STAT_ENDURANCE, 0, DAM_CRIP_ARM_RIGHT, 6000, 6004},
+			{3, 0, STAT_ENDURANCE, -3, DAM_CRIP_ARM_RIGHT, 6000, 6004},
+			{4, DAM_CRIP_ARM_RIGHT, -1, 0, 0, 6004, 5000},
+			{4, DAM_CRIP_ARM_RIGHT, STAT_ENDURANCE, 0, DAM_CRIP_ARM_LEFT, 6004, 6005},
 		},
 		// HIT_LOCATION_TORSO
 		{
-			{ 3, 0, -1, 0, 0, 6000, 5000 },
-			{ 3, DAM_BYPASS, -1, 0, 0, 6006, 5000 },
-			{ 4, 0, -1, 0, 0, 6007, 5000 },
-			{ 4, DAM_BYPASS, -1, 0, 0, 6008, 5000 },
-			{ 6, DAM_BYPASS, -1, 0, 0, 6009, 5000 },
-			{ 6, DAM_DEAD, -1, 0, 0, 6010, 5000 },
+			{3, 0, -1, 0, 0, 6000, 5000},
+			{3, DAM_BYPASS, -1, 0, 0, 6006, 5000},
+			{4, 0, -1, 0, 0, 6007, 5000},
+			{4, DAM_BYPASS, -1, 0, 0, 6008, 5000},
+			{6, DAM_BYPASS, -1, 0, 0, 6009, 5000},
+			{6, DAM_DEAD, -1, 0, 0, 6010, 5000},
 		},
 		// HIT_LOCATION_RIGHT_LEG
 		{
-			{ 3, 0, -1, 0, 0, 6000, 5000 },
-			{ 4, 0, -1, 0, 0, 6007, 5000 },
-			{ 3, 0, STAT_ENDURANCE, 0, DAM_CRIP_LEG_RIGHT, 6000, 6004 },
-			{ 4, 0, STAT_ENDURANCE, -4, DAM_CRIP_LEG_RIGHT, 6007, 6004 },
-			{ 4, DAM_CRIP_LEG_RIGHT, STAT_ENDURANCE, 0, DAM_KNOCKED_DOWN, 6004, 6011 },
-			{ 4, DAM_CRIP_LEG_RIGHT, STAT_ENDURANCE, -3, DAM_KNOCKED_DOWN | DAM_CRIP_LEG_LEFT, 6004, 6012 },
+			{3, 0, -1, 0, 0, 6000, 5000},
+			{4, 0, -1, 0, 0, 6007, 5000},
+			{3, 0, STAT_ENDURANCE, 0, DAM_CRIP_LEG_RIGHT, 6000, 6004},
+			{4, 0, STAT_ENDURANCE, -4, DAM_CRIP_LEG_RIGHT, 6007, 6004},
+			{4, DAM_CRIP_LEG_RIGHT, STAT_ENDURANCE, 0, DAM_KNOCKED_DOWN, 6004, 6011},
+			{4, DAM_CRIP_LEG_RIGHT, STAT_ENDURANCE, -3, DAM_KNOCKED_DOWN | DAM_CRIP_LEG_LEFT, 6004, 6012},
 		},
 		// HIT_LOCATION_LEFT_LEG
 		{
-			{ 3, 0, -1, 0, 0, 6000, 5000 },
-			{ 4, 0, -1, 0, 0, 6007, 5000 },
-			{ 3, 0, STAT_ENDURANCE, 0, DAM_CRIP_LEG_LEFT, 6000, 6004 },
-			{ 4, 0, STAT_ENDURANCE, -4, DAM_CRIP_LEG_LEFT, 6007, 6004 },
-			{ 4, DAM_CRIP_LEG_LEFT, STAT_ENDURANCE, 0, DAM_KNOCKED_DOWN, 6004, 6011 },
-			{ 4, DAM_CRIP_LEG_LEFT, STAT_ENDURANCE, -3, DAM_KNOCKED_DOWN | DAM_CRIP_LEG_RIGHT, 6004, 6012 },
+			{3, 0, -1, 0, 0, 6000, 5000},
+			{4, 0, -1, 0, 0, 6007, 5000},
+			{3, 0, STAT_ENDURANCE, 0, DAM_CRIP_LEG_LEFT, 6000, 6004},
+			{4, 0, STAT_ENDURANCE, -4, DAM_CRIP_LEG_LEFT, 6007, 6004},
+			{4, DAM_CRIP_LEG_LEFT, STAT_ENDURANCE, 0, DAM_KNOCKED_DOWN, 6004, 6011},
+			{4, DAM_CRIP_LEG_LEFT, STAT_ENDURANCE, -3, DAM_KNOCKED_DOWN | DAM_CRIP_LEG_RIGHT, 6004, 6012},
 		},
 		// HIT_LOCATION_EYES
 		{
-			{ 3, 0, -1, 0, 0, 6000, 5000 },
-			{ 3, 0, STAT_ENDURANCE, 0, DAM_BLIND, 6000, 6013 },
-			{ 3, 0, STAT_ENDURANCE, -2, DAM_BLIND, 6000, 6013 },
-			{ 3, 0, STAT_ENDURANCE, -4, DAM_BLIND, 6000, 6013 },
-			{ 3, 0, STAT_ENDURANCE, -6, DAM_BLIND, 6000, 6013 },
-			{ 3, DAM_BLIND, -1, 0, 0, 6013, 5000 },
+			{3, 0, -1, 0, 0, 6000, 5000},
+			{3, 0, STAT_ENDURANCE, 0, DAM_BLIND, 6000, 6013},
+			{3, 0, STAT_ENDURANCE, -2, DAM_BLIND, 6000, 6013},
+			{3, 0, STAT_ENDURANCE, -4, DAM_BLIND, 6000, 6013},
+			{3, 0, STAT_ENDURANCE, -6, DAM_BLIND, 6000, 6013},
+			{3, DAM_BLIND, -1, 0, 0, 6013, 5000},
 		},
 		// HIT_LOCATION_GROIN
 		{
-			{ 3, 0, -1, 0, 0, 6000, 5000 },
-			{ 3, 0, -1, 0, 0, 6000, 5000 },
-			{ 3, 0, STAT_ENDURANCE, -1, DAM_KNOCKED_DOWN | DAM_LOSE_TURN, 6000, 6002 },
-			{ 3, 0, STAT_ENDURANCE, -4, DAM_KNOCKED_DOWN | DAM_LOSE_TURN, 6000, 6002 },
-			{ 3, DAM_KNOCKED_DOWN | DAM_LOSE_TURN, STAT_ENDURANCE, 0, 0, 6002, 6003 },
-			{ 3, DAM_KNOCKED_DOWN | DAM_LOSE_TURN, STAT_ENDURANCE, -4, 0, 6002, 6003 },
+			{3, 0, -1, 0, 0, 6000, 5000},
+			{3, 0, -1, 0, 0, 6000, 5000},
+			{3, 0, STAT_ENDURANCE, -1, DAM_KNOCKED_DOWN | DAM_LOSE_TURN, 6000, 6002},
+			{3, 0, STAT_ENDURANCE, -4, DAM_KNOCKED_DOWN | DAM_LOSE_TURN, 6000, 6002},
+			{3, DAM_KNOCKED_DOWN | DAM_LOSE_TURN, STAT_ENDURANCE, 0, 0, 6002, 6003},
+			{3, DAM_KNOCKED_DOWN | DAM_LOSE_TURN, STAT_ENDURANCE, -4, 0, 6002, 6003},
 		},
 		// HIT_LOCATION_UNCALLED
 		{
-			{ 3, 0, -1, 0, 0, 6000, 5000 },
-			{ 3, DAM_BYPASS, -1, 0, 0, 6006, 5000 },
-			{ 4, 0, -1, 0, 0, 6007, 5000 },
-			{ 4, DAM_BYPASS, -1, 0, 0, 6008, 5000 },
-			{ 6, DAM_BYPASS, -1, 0, 0, 6009, 5000 },
-			{ 6, DAM_DEAD, -1, 0, 0, 6010, 5000 },
+			{3, 0, -1, 0, 0, 6000, 5000},
+			{3, DAM_BYPASS, -1, 0, 0, 6006, 5000},
+			{4, 0, -1, 0, 0, 6007, 5000},
+			{4, DAM_BYPASS, -1, 0, 0, 6008, 5000},
+			{6, DAM_BYPASS, -1, 0, 0, 6009, 5000},
+			{6, DAM_DEAD, -1, 0, 0, 6010, 5000},
 		},
 	},
 	// KILL_TYPE_DOG
 	{
 		// HIT_LOCATION_HEAD
 		{
-			{ 4, 0, -1, 0, 0, 5016, 5000 },
-			{ 4, 0, STAT_ENDURANCE, 0, DAM_KNOCKED_DOWN, 5016, 6100 },
-			{ 4, 0, STAT_ENDURANCE, -3, DAM_KNOCKED_DOWN, 5016, 6100 },
-			{ 4, 0, STAT_ENDURANCE, -6, DAM_CRIP_ARM_LEFT | DAM_CRIP_ARM_RIGHT, 5016, 6101 },
-			{ 4, DAM_KNOCKED_DOWN, STAT_ENDURANCE, -3, DAM_KNOCKED_OUT, 6100, 6102 },
-			{ 4, DAM_DEAD, -1, 0, 0, 6103, 5000 },
+			{4, 0, -1, 0, 0, 5016, 5000},
+			{4, 0, STAT_ENDURANCE, 0, DAM_KNOCKED_DOWN, 5016, 6100},
+			{4, 0, STAT_ENDURANCE, -3, DAM_KNOCKED_DOWN, 5016, 6100},
+			{4, 0, STAT_ENDURANCE, -6, DAM_CRIP_ARM_LEFT | DAM_CRIP_ARM_RIGHT, 5016, 6101},
+			{4, DAM_KNOCKED_DOWN, STAT_ENDURANCE, -3, DAM_KNOCKED_OUT, 6100, 6102},
+			{4, DAM_DEAD, -1, 0, 0, 6103, 5000},
 		},
 		// HIT_LOCATION_LEFT_ARM
 		{
-			{ 3, 0, -1, 0, 0, 5001, 5000 },
-			{ 3, 0, STAT_ENDURANCE, -1, DAM_CRIP_LEG_LEFT, 5001, 6104 },
-			{ 3, 0, STAT_ENDURANCE, -3, DAM_CRIP_LEG_LEFT, 5001, 6104 },
-			{ 3, 0, STAT_ENDURANCE, -5, DAM_KNOCKED_DOWN | DAM_CRIP_LEG_LEFT, 5001, 6105 },
-			{ 3, DAM_CRIP_LEG_LEFT, STAT_AGILITY, -1, DAM_KNOCKED_DOWN, 6104, 6105 },
-			{ 3, DAM_KNOCKED_DOWN | DAM_CRIP_LEG_LEFT, -1, 0, 0, 6105, 5000 },
+			{3, 0, -1, 0, 0, 5001, 5000},
+			{3, 0, STAT_ENDURANCE, -1, DAM_CRIP_LEG_LEFT, 5001, 6104},
+			{3, 0, STAT_ENDURANCE, -3, DAM_CRIP_LEG_LEFT, 5001, 6104},
+			{3, 0, STAT_ENDURANCE, -5, DAM_KNOCKED_DOWN | DAM_CRIP_LEG_LEFT, 5001, 6105},
+			{3, DAM_CRIP_LEG_LEFT, STAT_AGILITY, -1, DAM_KNOCKED_DOWN, 6104, 6105},
+			{3, DAM_KNOCKED_DOWN | DAM_CRIP_LEG_LEFT, -1, 0, 0, 6105, 5000},
 		},
 		// HIT_LOCATION_RIGHT_ARM
 		{
-			{ 3, 0, -1, 0, 0, 5001, 5000 },
-			{ 3, 0, STAT_ENDURANCE, -1, DAM_CRIP_LEG_RIGHT, 5001, 6104 },
-			{ 3, 0, STAT_ENDURANCE, -3, DAM_CRIP_LEG_RIGHT, 5001, 6104 },
-			{ 3, 0, STAT_ENDURANCE, -5, DAM_KNOCKED_DOWN | DAM_CRIP_LEG_RIGHT, 5001, 6105 },
-			{ 3, DAM_CRIP_LEG_RIGHT, STAT_AGILITY, -1, DAM_KNOCKED_DOWN, 6104, 6105 },
-			{ 3, DAM_KNOCKED_DOWN | DAM_CRIP_LEG_RIGHT, -1, 0, 0, 6105, 5000 },
+			{3, 0, -1, 0, 0, 5001, 5000},
+			{3, 0, STAT_ENDURANCE, -1, DAM_CRIP_LEG_RIGHT, 5001, 6104},
+			{3, 0, STAT_ENDURANCE, -3, DAM_CRIP_LEG_RIGHT, 5001, 6104},
+			{3, 0, STAT_ENDURANCE, -5, DAM_KNOCKED_DOWN | DAM_CRIP_LEG_RIGHT, 5001, 6105},
+			{3, DAM_CRIP_LEG_RIGHT, STAT_AGILITY, -1, DAM_KNOCKED_DOWN, 6104, 6105},
+			{3, DAM_KNOCKED_DOWN | DAM_CRIP_LEG_RIGHT, -1, 0, 0, 6105, 5000},
 		},
 		// HIT_LOCATION_TORSO
 		{
-			{ 3, 0, -1, 0, 0, 5001, 5000 },
-			{ 3, 0, STAT_AGILITY, -1, DAM_KNOCKED_DOWN, 5001, 6100 },
-			{ 4, 0, -1, 0, 0, 5016, 5000 },
-			{ 4, 0, STAT_AGILITY, -3, DAM_KNOCKED_DOWN, 5016, 6100 },
-			{ 4, DAM_KNOCKED_DOWN, -1, 0, 0, 6100, 5000 },
-			{ 6, DAM_DEAD, -1, 0, 0, 6103, 5000 },
+			{3, 0, -1, 0, 0, 5001, 5000},
+			{3, 0, STAT_AGILITY, -1, DAM_KNOCKED_DOWN, 5001, 6100},
+			{4, 0, -1, 0, 0, 5016, 5000},
+			{4, 0, STAT_AGILITY, -3, DAM_KNOCKED_DOWN, 5016, 6100},
+			{4, DAM_KNOCKED_DOWN, -1, 0, 0, 6100, 5000},
+			{6, DAM_DEAD, -1, 0, 0, 6103, 5000},
 		},
 		// HIT_LOCATION_RIGHT_LEG
 		{
-			{ 3, 0, STAT_ENDURANCE, 1, DAM_CRIP_LEG_RIGHT, 5001, 6104 },
-			{ 3, 0, STAT_ENDURANCE, 0, DAM_CRIP_LEG_RIGHT, 5001, 6104 },
-			{ 3, 0, STAT_ENDURANCE, -2, DAM_CRIP_LEG_RIGHT, 5001, 6104 },
-			{ 3, 0, STAT_ENDURANCE, -4, DAM_KNOCKED_DOWN | DAM_CRIP_LEG_RIGHT, 5001, 6105 },
-			{ 3, DAM_CRIP_LEG_RIGHT, STAT_AGILITY, -1, DAM_KNOCKED_DOWN, 6104, 6105 },
-			{ 3, DAM_KNOCKED_DOWN | DAM_CRIP_LEG_RIGHT, -1, 0, 0, 6105, 5000 },
+			{3, 0, STAT_ENDURANCE, 1, DAM_CRIP_LEG_RIGHT, 5001, 6104},
+			{3, 0, STAT_ENDURANCE, 0, DAM_CRIP_LEG_RIGHT, 5001, 6104},
+			{3, 0, STAT_ENDURANCE, -2, DAM_CRIP_LEG_RIGHT, 5001, 6104},
+			{3, 0, STAT_ENDURANCE, -4, DAM_KNOCKED_DOWN | DAM_CRIP_LEG_RIGHT, 5001, 6105},
+			{3, DAM_CRIP_LEG_RIGHT, STAT_AGILITY, -1, DAM_KNOCKED_DOWN, 6104, 6105},
+			{3, DAM_KNOCKED_DOWN | DAM_CRIP_LEG_RIGHT, -1, 0, 0, 6105, 5000},
 		},
 		// HIT_LOCATION_LEFT_LEG
 		{
-			{ 3, 0, STAT_ENDURANCE, 1, DAM_CRIP_LEG_LEFT, 5001, 6104 },
-			{ 3, 0, STAT_ENDURANCE, 0, DAM_CRIP_LEG_LEFT, 5001, 6104 },
-			{ 3, 0, STAT_ENDURANCE, -2, DAM_CRIP_LEG_LEFT, 5001, 6104 },
-			{ 3, 0, STAT_ENDURANCE, -4, DAM_KNOCKED_DOWN | DAM_CRIP_LEG_LEFT, 5001, 6105 },
-			{ 3, DAM_CRIP_LEG_LEFT, STAT_AGILITY, -1, DAM_KNOCKED_DOWN, 6104, 6105 },
-			{ 3, DAM_KNOCKED_DOWN | DAM_CRIP_LEG_LEFT, -1, 0, 0, 6105, 5000 },
+			{3, 0, STAT_ENDURANCE, 1, DAM_CRIP_LEG_LEFT, 5001, 6104},
+			{3, 0, STAT_ENDURANCE, 0, DAM_CRIP_LEG_LEFT, 5001, 6104},
+			{3, 0, STAT_ENDURANCE, -2, DAM_CRIP_LEG_LEFT, 5001, 6104},
+			{3, 0, STAT_ENDURANCE, -4, DAM_KNOCKED_DOWN | DAM_CRIP_LEG_LEFT, 5001, 6105},
+			{3, DAM_CRIP_LEG_LEFT, STAT_AGILITY, -1, DAM_KNOCKED_DOWN, 6104, 6105},
+			{3, DAM_KNOCKED_DOWN | DAM_CRIP_LEG_LEFT, -1, 0, 0, 6105, 5000},
 		},
 		// HIT_LOCATION_EYES
 		{
-			{ 4, 0, -1, 0, 0, 5001, 5000 },
-			{ 4, DAM_BYPASS, -1, 0, 0, 5018, 5000 },
-			{ 6, DAM_BYPASS, -1, 0, 0, 5018, 5000 },
-			{ 6, DAM_BYPASS, STAT_ENDURANCE, 3, DAM_BLIND, 5018, 6106 },
-			{ 8, DAM_BYPASS, STAT_ENDURANCE, 0, DAM_BLIND, 5018, 6106 },
-			{ 8, DAM_DEAD, -1, 0, 0, 6107, 5000 },
+			{4, 0, -1, 0, 0, 5001, 5000},
+			{4, DAM_BYPASS, -1, 0, 0, 5018, 5000},
+			{6, DAM_BYPASS, -1, 0, 0, 5018, 5000},
+			{6, DAM_BYPASS, STAT_ENDURANCE, 3, DAM_BLIND, 5018, 6106},
+			{8, DAM_BYPASS, STAT_ENDURANCE, 0, DAM_BLIND, 5018, 6106},
+			{8, DAM_DEAD, -1, 0, 0, 6107, 5000},
 		},
 		// HIT_LOCATION_GROIN
 		{
-			{ 3, 0, -1, 0, 0, 5001, 5000 },
-			{ 3, 0, STAT_AGILITY, -2, DAM_KNOCKED_DOWN, 5001, 6100 },
-			{ 4, 0, -1, 0, 0, 5016, 5000 },
-			{ 4, 0, STAT_AGILITY, -5, DAM_KNOCKED_DOWN, 5016, 6100 },
-			{ 4, DAM_KNOCKED_DOWN, -1, 0, 0, 6100, 5000 },
-			{ 6, DAM_DEAD, -1, 0, 0, 6103, 5000 },
+			{3, 0, -1, 0, 0, 5001, 5000},
+			{3, 0, STAT_AGILITY, -2, DAM_KNOCKED_DOWN, 5001, 6100},
+			{4, 0, -1, 0, 0, 5016, 5000},
+			{4, 0, STAT_AGILITY, -5, DAM_KNOCKED_DOWN, 5016, 6100},
+			{4, DAM_KNOCKED_DOWN, -1, 0, 0, 6100, 5000},
+			{6, DAM_DEAD, -1, 0, 0, 6103, 5000},
 		},
 		// HIT_LOCATION_UNCALLED
 		{
-			{ 3, 0, -1, 0, 0, 5001, 5000 },
-			{ 3, 0, STAT_AGILITY, -1, DAM_KNOCKED_DOWN, 5001, 6100 },
-			{ 4, 0, -1, 0, 0, 5016, 5000 },
-			{ 4, 0, STAT_AGILITY, -3, DAM_KNOCKED_DOWN, 5016, 6100 },
-			{ 4, DAM_KNOCKED_DOWN, -1, 0, 0, 6100, 5000 },
-			{ 6, DAM_DEAD, -1, 0, 0, 6103, 5000 },
+			{3, 0, -1, 0, 0, 5001, 5000},
+			{3, 0, STAT_AGILITY, -1, DAM_KNOCKED_DOWN, 5001, 6100},
+			{4, 0, -1, 0, 0, 5016, 5000},
+			{4, 0, STAT_AGILITY, -3, DAM_KNOCKED_DOWN, 5016, 6100},
+			{4, DAM_KNOCKED_DOWN, -1, 0, 0, 6100, 5000},
+			{6, DAM_DEAD, -1, 0, 0, 6103, 5000},
 		},
 	},
 	// KILL_TYPE_MANTIS
 	{
 		// HIT_LOCATION_HEAD
 		{
-			{ 4, 0, -1, 0, 0, 5001, 5000 },
-			{ 4, 0, STAT_ENDURANCE, 0, DAM_KNOCKED_DOWN, 5001, 6200 },
-			{ 5, 0, STAT_ENDURANCE, -3, DAM_KNOCKED_DOWN, 5016, 6200 },
-			{ 5, DAM_KNOCKED_DOWN, STAT_ENDURANCE, -1, DAM_KNOCKED_OUT, 6200, 6201 },
-			{ 6, DAM_KNOCKED_DOWN, STAT_ENDURANCE, -3, DAM_KNOCKED_OUT, 6200, 6201 },
-			{ 6, DAM_DEAD, -1, 0, 0, 6202, 5000 },
+			{4, 0, -1, 0, 0, 5001, 5000},
+			{4, 0, STAT_ENDURANCE, 0, DAM_KNOCKED_DOWN, 5001, 6200},
+			{5, 0, STAT_ENDURANCE, -3, DAM_KNOCKED_DOWN, 5016, 6200},
+			{5, DAM_KNOCKED_DOWN, STAT_ENDURANCE, -1, DAM_KNOCKED_OUT, 6200, 6201},
+			{6, DAM_KNOCKED_DOWN, STAT_ENDURANCE, -3, DAM_KNOCKED_OUT, 6200, 6201},
+			{6, DAM_DEAD, -1, 0, 0, 6202, 5000},
 		},
 		// HIT_LOCATION_LEFT_ARM
 		{
-			{ 3, 0, STAT_ENDURANCE, 0, DAM_CRIP_ARM_LEFT, 5001, 6203 },
-			{ 3, 0, STAT_ENDURANCE, 0, DAM_CRIP_ARM_LEFT, 5001, 6203 },
-			{ 3, 0, STAT_ENDURANCE, -2, DAM_CRIP_ARM_LEFT, 5001, 6203 },
-			{ 4, 0, STAT_ENDURANCE, -4, DAM_CRIP_ARM_LEFT, 5016, 6203 },
-			{ 4, 0, STAT_ENDURANCE, -4, DAM_CRIP_ARM_LEFT, 5016, 6203 },
-			{ 4, DAM_CRIP_ARM_LEFT | DAM_LOSE_TURN, -1, 0, 0, 6204, 5000 },
+			{3, 0, STAT_ENDURANCE, 0, DAM_CRIP_ARM_LEFT, 5001, 6203},
+			{3, 0, STAT_ENDURANCE, 0, DAM_CRIP_ARM_LEFT, 5001, 6203},
+			{3, 0, STAT_ENDURANCE, -2, DAM_CRIP_ARM_LEFT, 5001, 6203},
+			{4, 0, STAT_ENDURANCE, -4, DAM_CRIP_ARM_LEFT, 5016, 6203},
+			{4, 0, STAT_ENDURANCE, -4, DAM_CRIP_ARM_LEFT, 5016, 6203},
+			{4, DAM_CRIP_ARM_LEFT | DAM_LOSE_TURN, -1, 0, 0, 6204, 5000},
 		},
 		// HIT_LOCATION_RIGHT_ARM
 		{
-			{ 3, 0, STAT_ENDURANCE, 0, DAM_CRIP_ARM_RIGHT, 5001, 6203 },
-			{ 3, 0, STAT_ENDURANCE, 0, DAM_CRIP_ARM_RIGHT, 5001, 6203 },
-			{ 3, 0, STAT_ENDURANCE, -2, DAM_CRIP_ARM_RIGHT, 5001, 6203 },
-			{ 4, 0, STAT_ENDURANCE, -4, DAM_CRIP_ARM_RIGHT, 5016, 6203 },
-			{ 4, 0, STAT_ENDURANCE, -4, DAM_CRIP_ARM_RIGHT, 5016, 6203 },
-			{ 4, DAM_CRIP_ARM_RIGHT | DAM_LOSE_TURN, -1, 0, 0, 6204, 5000 },
+			{3, 0, STAT_ENDURANCE, 0, DAM_CRIP_ARM_RIGHT, 5001, 6203},
+			{3, 0, STAT_ENDURANCE, 0, DAM_CRIP_ARM_RIGHT, 5001, 6203},
+			{3, 0, STAT_ENDURANCE, -2, DAM_CRIP_ARM_RIGHT, 5001, 6203},
+			{4, 0, STAT_ENDURANCE, -4, DAM_CRIP_ARM_RIGHT, 5016, 6203},
+			{4, 0, STAT_ENDURANCE, -4, DAM_CRIP_ARM_RIGHT, 5016, 6203},
+			{4, DAM_CRIP_ARM_RIGHT | DAM_LOSE_TURN, -1, 0, 0, 6204, 5000},
 		},
 		// HIT_LOCATION_TORSO
 		{
-			{ 3, 0, -1, 0, 0, 1000, 5000 },
-			{ 3, 0, STAT_ENDURANCE, 0, DAM_BYPASS, 5001, 6205 },
-			{ 3, 0, STAT_ENDURANCE, -2, DAM_BYPASS, 5001, 6205 },
-			{ 4, 0, STAT_ENDURANCE, -2, DAM_BYPASS, 5016, 6205 },
-			{ 4, 0, STAT_ENDURANCE, -4, DAM_BYPASS, 5016, 6205 },
-			{ 6, DAM_DEAD, -1, 0, 0, 6206, 5000 },
+			{3, 0, -1, 0, 0, 1000, 5000},
+			{3, 0, STAT_ENDURANCE, 0, DAM_BYPASS, 5001, 6205},
+			{3, 0, STAT_ENDURANCE, -2, DAM_BYPASS, 5001, 6205},
+			{4, 0, STAT_ENDURANCE, -2, DAM_BYPASS, 5016, 6205},
+			{4, 0, STAT_ENDURANCE, -4, DAM_BYPASS, 5016, 6205},
+			{6, DAM_DEAD, -1, 0, 0, 6206, 5000},
 		},
 		// HIT_LOCATION_RIGHT_LEG
 		{
-			{ 3, 0, STAT_AGILITY, 0, DAM_KNOCKED_DOWN, 5001, 6201 },
-			{ 3, 0, STAT_AGILITY, -2, DAM_KNOCKED_DOWN, 5001, 6201 },
-			{ 4, 0, STAT_AGILITY, -4, DAM_KNOCKED_DOWN, 5001, 6201 },
-			{ 3, DAM_KNOCKED_DOWN, STAT_ENDURANCE, 0, DAM_CRIP_LEG_RIGHT, 6201, 6203 },
-			{ 4, DAM_KNOCKED_DOWN, STAT_ENDURANCE, -3, DAM_CRIP_LEG_RIGHT, 6201, 6203 },
-			{ 4, DAM_KNOCKED_DOWN | DAM_CRIP_LEG_RIGHT, -1, 0, 0, 6207, 5000 },
+			{3, 0, STAT_AGILITY, 0, DAM_KNOCKED_DOWN, 5001, 6201},
+			{3, 0, STAT_AGILITY, -2, DAM_KNOCKED_DOWN, 5001, 6201},
+			{4, 0, STAT_AGILITY, -4, DAM_KNOCKED_DOWN, 5001, 6201},
+			{3, DAM_KNOCKED_DOWN, STAT_ENDURANCE, 0, DAM_CRIP_LEG_RIGHT, 6201, 6203},
+			{4, DAM_KNOCKED_DOWN, STAT_ENDURANCE, -3, DAM_CRIP_LEG_RIGHT, 6201, 6203},
+			{4, DAM_KNOCKED_DOWN | DAM_CRIP_LEG_RIGHT, -1, 0, 0, 6207, 5000},
 		},
 		// HIT_LOCATION_LEFT_LEG
 		{
-			{ 3, 0, STAT_AGILITY, 0, DAM_KNOCKED_DOWN, 5001, 6201 },
-			{ 3, 0, STAT_AGILITY, -3, DAM_KNOCKED_DOWN, 5001, 6201 },
-			{ 3, DAM_KNOCKED_DOWN, STAT_ENDURANCE, -2, DAM_CRIP_LEG_LEFT, 6201, 6208 },
-			{ 3, DAM_KNOCKED_DOWN, STAT_ENDURANCE, -2, DAM_CRIP_LEG_LEFT, 6201, 6208 },
-			{ 3, DAM_KNOCKED_DOWN, STAT_ENDURANCE, -5, DAM_CRIP_LEG_LEFT, 6201, 6208 },
-			{ 3, DAM_KNOCKED_DOWN | DAM_CRIP_LEG_LEFT, -1, 0, 0, 6208, 5000 },
+			{3, 0, STAT_AGILITY, 0, DAM_KNOCKED_DOWN, 5001, 6201},
+			{3, 0, STAT_AGILITY, -3, DAM_KNOCKED_DOWN, 5001, 6201},
+			{3, DAM_KNOCKED_DOWN, STAT_ENDURANCE, -2, DAM_CRIP_LEG_LEFT, 6201, 6208},
+			{3, DAM_KNOCKED_DOWN, STAT_ENDURANCE, -2, DAM_CRIP_LEG_LEFT, 6201, 6208},
+			{3, DAM_KNOCKED_DOWN, STAT_ENDURANCE, -5, DAM_CRIP_LEG_LEFT, 6201, 6208},
+			{3, DAM_KNOCKED_DOWN | DAM_CRIP_LEG_LEFT, -1, 0, 0, 6208, 5000},
 		},
 		// HIT_LOCATION_EYES
 		{
-			{ 4, 0, -1, 0, 0, 5001, 5000 },
-			{ 4, DAM_BYPASS, STAT_ENDURANCE, 0, DAM_LOSE_TURN, 6205, 6209 },
-			{ 6, DAM_BYPASS, STAT_ENDURANCE, -3, DAM_LOSE_TURN, 6205, 6209 },
-			{ 6, DAM_BYPASS | DAM_LOSE_TURN, STAT_ENDURANCE, -3, DAM_BLIND, 6209, 6210 },
-			{ 8, DAM_KNOCKED_DOWN | DAM_BYPASS | DAM_LOSE_TURN, STAT_ENDURANCE, -3, DAM_BLIND, 6209, 6210 },
-			{ 8, DAM_DEAD, -1, 0, 0, 6202, 5000 },
+			{4, 0, -1, 0, 0, 5001, 5000},
+			{4, DAM_BYPASS, STAT_ENDURANCE, 0, DAM_LOSE_TURN, 6205, 6209},
+			{6, DAM_BYPASS, STAT_ENDURANCE, -3, DAM_LOSE_TURN, 6205, 6209},
+			{6, DAM_BYPASS | DAM_LOSE_TURN, STAT_ENDURANCE, -3, DAM_BLIND, 6209, 6210},
+			{8, DAM_KNOCKED_DOWN | DAM_BYPASS | DAM_LOSE_TURN, STAT_ENDURANCE, -3, DAM_BLIND, 6209, 6210},
+			{8, DAM_DEAD, -1, 0, 0, 6202, 5000},
 		},
 		// HIT_LOCATION_GROIN
 		{
-			{ 3, 0, -1, 0, 0, 5001, 5000 },
-			{ 3, 0, -1, 0, 0, 5001, 5000 },
-			{ 3, DAM_BYPASS, -1, 0, 0, 6205, 5000 },
-			{ 4, 0, -1, 0, 0, 5016, 5000 },
-			{ 4, 0, -1, 0, 0, 5016, 5000 },
-			{ 4, DAM_KNOCKED_DOWN | DAM_BYPASS, -1, 0, 0, 6209, 5000 },
+			{3, 0, -1, 0, 0, 5001, 5000},
+			{3, 0, -1, 0, 0, 5001, 5000},
+			{3, DAM_BYPASS, -1, 0, 0, 6205, 5000},
+			{4, 0, -1, 0, 0, 5016, 5000},
+			{4, 0, -1, 0, 0, 5016, 5000},
+			{4, DAM_KNOCKED_DOWN | DAM_BYPASS, -1, 0, 0, 6209, 5000},
 		},
 		// HIT_LOCATION_UNCALLED
 		{
-			{ 3, 0, -1, 0, 0, 1000, 5000 },
-			{ 3, 0, STAT_ENDURANCE, 0, DAM_BYPASS, 5001, 6205 },
-			{ 3, 0, STAT_ENDURANCE, -2, DAM_BYPASS, 5001, 6205 },
-			{ 4, 0, STAT_ENDURANCE, -2, DAM_BYPASS, 5016, 6205 },
-			{ 4, 0, STAT_ENDURANCE, -4, DAM_BYPASS, 5016, 6205 },
-			{ 6, DAM_DEAD, -1, 0, 0, 6206, 5000 },
+			{3, 0, -1, 0, 0, 1000, 5000},
+			{3, 0, STAT_ENDURANCE, 0, DAM_BYPASS, 5001, 6205},
+			{3, 0, STAT_ENDURANCE, -2, DAM_BYPASS, 5001, 6205},
+			{4, 0, STAT_ENDURANCE, -2, DAM_BYPASS, 5016, 6205},
+			{4, 0, STAT_ENDURANCE, -4, DAM_BYPASS, 5016, 6205},
+			{6, DAM_DEAD, -1, 0, 0, 6206, 5000},
 		},
 	},
 	// KILL_TYPE_DEATH_CLAW
 	{
 		// HIT_LOCATION_HEAD
 		{
-			{ 4, 0, -1, 0, 0, 5016, 5000 },
-			{ 4, 0, STAT_ENDURANCE, 0, DAM_KNOCKED_DOWN, 5016, 5023 },
-			{ 5, 0, STAT_ENDURANCE, -3, DAM_KNOCKED_DOWN, 5016, 5023 },
-			{ 5, 0, STAT_ENDURANCE, -5, DAM_KNOCKED_DOWN, 5016, 5023 },
-			{ 6, 0, STAT_ENDURANCE, -4, DAM_KNOCKED_DOWN | DAM_LOSE_TURN, 5016, 5004 },
-			{ 6, 0, STAT_ENDURANCE, -5, DAM_KNOCKED_DOWN | DAM_LOSE_TURN, 5016, 5004 },
+			{4, 0, -1, 0, 0, 5016, 5000},
+			{4, 0, STAT_ENDURANCE, 0, DAM_KNOCKED_DOWN, 5016, 5023},
+			{5, 0, STAT_ENDURANCE, -3, DAM_KNOCKED_DOWN, 5016, 5023},
+			{5, 0, STAT_ENDURANCE, -5, DAM_KNOCKED_DOWN, 5016, 5023},
+			{6, 0, STAT_ENDURANCE, -4, DAM_KNOCKED_DOWN | DAM_LOSE_TURN, 5016, 5004},
+			{6, 0, STAT_ENDURANCE, -5, DAM_KNOCKED_DOWN | DAM_LOSE_TURN, 5016, 5004},
 		},
 		// HIT_LOCATION_LEFT_ARM
 		{
-			{ 3, 0, -1, 0, 0, 5001, 5000 },
-			{ 3, 0, STAT_ENDURANCE, 0, DAM_CRIP_ARM_LEFT, 5001, 5011 },
-			{ 3, 0, STAT_ENDURANCE, -2, DAM_CRIP_ARM_LEFT, 5001, 5011 },
-			{ 3, 0, STAT_ENDURANCE, -4, DAM_CRIP_ARM_LEFT, 5001, 5011 },
-			{ 3, 0, STAT_ENDURANCE, -6, DAM_CRIP_ARM_LEFT, 5001, 5011 },
-			{ 3, 0, STAT_ENDURANCE, -8, DAM_CRIP_ARM_LEFT, 5001, 5011 },
+			{3, 0, -1, 0, 0, 5001, 5000},
+			{3, 0, STAT_ENDURANCE, 0, DAM_CRIP_ARM_LEFT, 5001, 5011},
+			{3, 0, STAT_ENDURANCE, -2, DAM_CRIP_ARM_LEFT, 5001, 5011},
+			{3, 0, STAT_ENDURANCE, -4, DAM_CRIP_ARM_LEFT, 5001, 5011},
+			{3, 0, STAT_ENDURANCE, -6, DAM_CRIP_ARM_LEFT, 5001, 5011},
+			{3, 0, STAT_ENDURANCE, -8, DAM_CRIP_ARM_LEFT, 5001, 5011},
 		},
 		// HIT_LOCATION_RIGHT_ARM
 		{
-			{ 3, 0, -1, 0, 0, 5001, 5000 },
-			{ 3, 0, STAT_ENDURANCE, 0, DAM_CRIP_ARM_RIGHT, 5001, 5014 },
-			{ 3, 0, STAT_ENDURANCE, -2, DAM_CRIP_ARM_RIGHT, 5001, 5014 },
-			{ 3, 0, STAT_ENDURANCE, -4, DAM_CRIP_ARM_RIGHT, 5001, 5014 },
-			{ 3, 0, STAT_ENDURANCE, -6, DAM_CRIP_ARM_RIGHT, 5001, 5014 },
-			{ 3, 0, STAT_ENDURANCE, -8, DAM_CRIP_ARM_RIGHT, 5001, 5014 },
+			{3, 0, -1, 0, 0, 5001, 5000},
+			{3, 0, STAT_ENDURANCE, 0, DAM_CRIP_ARM_RIGHT, 5001, 5014},
+			{3, 0, STAT_ENDURANCE, -2, DAM_CRIP_ARM_RIGHT, 5001, 5014},
+			{3, 0, STAT_ENDURANCE, -4, DAM_CRIP_ARM_RIGHT, 5001, 5014},
+			{3, 0, STAT_ENDURANCE, -6, DAM_CRIP_ARM_RIGHT, 5001, 5014},
+			{3, 0, STAT_ENDURANCE, -8, DAM_CRIP_ARM_RIGHT, 5001, 5014},
 		},
 		// HIT_LOCATION_TORSO
 		{
-			{ 3, 0, -1, 0, 0, 5001, 5000 },
-			{ 3, 0, STAT_ENDURANCE, -1, DAM_BYPASS, 5001, 6300 },
-			{ 4, 0, -1, 0, 0, 5016, 5000 },
-			{ 4, 0, STAT_ENDURANCE, -1, DAM_BYPASS, 5016, 6300 },
-			{ 5, DAM_KNOCKED_DOWN | DAM_BYPASS, -1, 0, 0, 5004, 5000 },
-			{ 5, DAM_KNOCKED_DOWN | DAM_BYPASS | DAM_LOSE_TURN, -1, 0, 0, 5005, 5000 },
+			{3, 0, -1, 0, 0, 5001, 5000},
+			{3, 0, STAT_ENDURANCE, -1, DAM_BYPASS, 5001, 6300},
+			{4, 0, -1, 0, 0, 5016, 5000},
+			{4, 0, STAT_ENDURANCE, -1, DAM_BYPASS, 5016, 6300},
+			{5, DAM_KNOCKED_DOWN | DAM_BYPASS, -1, 0, 0, 5004, 5000},
+			{5, DAM_KNOCKED_DOWN | DAM_BYPASS | DAM_LOSE_TURN, -1, 0, 0, 5005, 5000},
 		},
 		// HIT_LOCATION_RIGHT_LEG
 		{
-			{ 3, 0, STAT_AGILITY, 0, DAM_KNOCKED_DOWN, 5001, 5004 },
-			{ 3, 0, STAT_ENDURANCE, 0, DAM_CRIP_LEG_RIGHT, 5001, 5004 },
-			{ 3, DAM_KNOCKED_DOWN, STAT_ENDURANCE, -2, DAM_CRIP_LEG_RIGHT, 5001, 5004 },
-			{ 4, DAM_KNOCKED_DOWN, STAT_ENDURANCE, -4, DAM_CRIP_LEG_RIGHT, 5016, 5022 },
-			{ 4, DAM_KNOCKED_DOWN, STAT_ENDURANCE, -5, DAM_CRIP_LEG_RIGHT, 5023, 5024 },
-			{ 4, DAM_KNOCKED_DOWN, STAT_ENDURANCE, -6, DAM_CRIP_LEG_RIGHT, 5023, 5024 },
+			{3, 0, STAT_AGILITY, 0, DAM_KNOCKED_DOWN, 5001, 5004},
+			{3, 0, STAT_ENDURANCE, 0, DAM_CRIP_LEG_RIGHT, 5001, 5004},
+			{3, DAM_KNOCKED_DOWN, STAT_ENDURANCE, -2, DAM_CRIP_LEG_RIGHT, 5001, 5004},
+			{4, DAM_KNOCKED_DOWN, STAT_ENDURANCE, -4, DAM_CRIP_LEG_RIGHT, 5016, 5022},
+			{4, DAM_KNOCKED_DOWN, STAT_ENDURANCE, -5, DAM_CRIP_LEG_RIGHT, 5023, 5024},
+			{4, DAM_KNOCKED_DOWN, STAT_ENDURANCE, -6, DAM_CRIP_LEG_RIGHT, 5023, 5024},
 		},
 		// HIT_LOCATION_LEFT_LEG
 		{
-			{ 3, 0, STAT_AGILITY, 0, DAM_KNOCKED_DOWN, 5001, 5004 },
-			{ 3, 0, STAT_ENDURANCE, 0, DAM_CRIP_LEG_RIGHT, 5001, 5004 },
-			{ 3, DAM_KNOCKED_DOWN, STAT_ENDURANCE, -2, DAM_CRIP_LEG_RIGHT, 5001, 5004 },
-			{ 4, DAM_KNOCKED_DOWN, STAT_ENDURANCE, -4, DAM_CRIP_LEG_RIGHT, 5016, 5022 },
-			{ 4, DAM_KNOCKED_DOWN, STAT_ENDURANCE, -5, DAM_CRIP_LEG_RIGHT, 5023, 5024 },
-			{ 4, DAM_KNOCKED_DOWN, STAT_ENDURANCE, -6, DAM_CRIP_LEG_RIGHT, 5023, 5024 },
+			{3, 0, STAT_AGILITY, 0, DAM_KNOCKED_DOWN, 5001, 5004},
+			{3, 0, STAT_ENDURANCE, 0, DAM_CRIP_LEG_RIGHT, 5001, 5004},
+			{3, DAM_KNOCKED_DOWN, STAT_ENDURANCE, -2, DAM_CRIP_LEG_RIGHT, 5001, 5004},
+			{4, DAM_KNOCKED_DOWN, STAT_ENDURANCE, -4, DAM_CRIP_LEG_RIGHT, 5016, 5022},
+			{4, DAM_KNOCKED_DOWN, STAT_ENDURANCE, -5, DAM_CRIP_LEG_RIGHT, 5023, 5024},
+			{4, DAM_KNOCKED_DOWN, STAT_ENDURANCE, -6, DAM_CRIP_LEG_RIGHT, 5023, 5024},
 		},
 		// HIT_LOCATION_EYES
 		{
-			{ 4, 0, -1, 0, 0, 5001, 5000 },
-			{ 4, 0, STAT_ENDURANCE, -3, DAM_LOSE_TURN, 5001, 6301 },
-			{ 6, DAM_BYPASS, STAT_ENDURANCE, -6, DAM_LOSE_TURN, 6300, 6301 },
-			{ 6, DAM_BYPASS, STAT_ENDURANCE, -2, DAM_BLIND, 6301, 6302 },
-			{ 8, DAM_BLIND | DAM_BYPASS, -1, 0, 0, 6302, 5000 },
-			{ 8, DAM_BLIND | DAM_BYPASS, -1, 0, 0, 6302, 5000 },
+			{4, 0, -1, 0, 0, 5001, 5000},
+			{4, 0, STAT_ENDURANCE, -3, DAM_LOSE_TURN, 5001, 6301},
+			{6, DAM_BYPASS, STAT_ENDURANCE, -6, DAM_LOSE_TURN, 6300, 6301},
+			{6, DAM_BYPASS, STAT_ENDURANCE, -2, DAM_BLIND, 6301, 6302},
+			{8, DAM_BLIND | DAM_BYPASS, -1, 0, 0, 6302, 5000},
+			{8, DAM_BLIND | DAM_BYPASS, -1, 0, 0, 6302, 5000},
 		},
 		// HIT_LOCATION_GROIN
 		{
-			{ 3, 0, -1, 0, 0, 5001, 5000 },
-			{ 3, 0, -1, 0, 0, 5001, 5000 },
-			{ 4, 0, -1, 0, 0, 5001, 5000 },
-			{ 4, 0, -1, 0, 0, 5016, 5000 },
-			{ 5, 0, STAT_AGILITY, 0, DAM_KNOCKED_DOWN, 5016, 5004 },
-			{ 5, 0, STAT_AGILITY, -3, DAM_KNOCKED_DOWN, 5016, 5004 },
+			{3, 0, -1, 0, 0, 5001, 5000},
+			{3, 0, -1, 0, 0, 5001, 5000},
+			{4, 0, -1, 0, 0, 5001, 5000},
+			{4, 0, -1, 0, 0, 5016, 5000},
+			{5, 0, STAT_AGILITY, 0, DAM_KNOCKED_DOWN, 5016, 5004},
+			{5, 0, STAT_AGILITY, -3, DAM_KNOCKED_DOWN, 5016, 5004},
 		},
 		// HIT_LOCATION_UNCALLED
 		{
-			{ 3, 0, -1, 0, 0, 5001, 5000 },
-			{ 3, 0, STAT_ENDURANCE, -1, DAM_BYPASS, 5001, 6300 },
-			{ 4, 0, -1, 0, 0, 5016, 5000 },
-			{ 4, 0, STAT_ENDURANCE, -1, DAM_BYPASS, 5016, 6300 },
-			{ 5, DAM_KNOCKED_DOWN | DAM_BYPASS, -1, 0, 0, 5004, 5000 },
-			{ 5, DAM_KNOCKED_DOWN | DAM_BYPASS | DAM_LOSE_TURN, -1, 0, 0, 5005, 5000 },
+			{3, 0, -1, 0, 0, 5001, 5000},
+			{3, 0, STAT_ENDURANCE, -1, DAM_BYPASS, 5001, 6300},
+			{4, 0, -1, 0, 0, 5016, 5000},
+			{4, 0, STAT_ENDURANCE, -1, DAM_BYPASS, 5016, 6300},
+			{5, DAM_KNOCKED_DOWN | DAM_BYPASS, -1, 0, 0, 5004, 5000},
+			{5, DAM_KNOCKED_DOWN | DAM_BYPASS | DAM_LOSE_TURN, -1, 0, 0, 5005, 5000},
 		},
 	},
 	// KILL_TYPE_PLANT
 	{
 		// HIT_LOCATION_HEAD
 		{
-			{ 4, 0, -1, 0, 0, 6405, 5000 },
-			{ 4, DAM_BYPASS, -1, 0, 0, 6400, 5000 },
-			{ 5, 0, -1, 0, 0, 6401, 5000 },
-			{ 5, DAM_BYPASS, -1, 0, 0, 6402, 5000 },
-			{ 6, DAM_BYPASS, STAT_ENDURANCE, -3, DAM_LOSE_TURN, 6402, 6403 },
-			{ 6, DAM_BYPASS, STAT_ENDURANCE, -6, DAM_LOSE_TURN, 6402, 6403 },
+			{4, 0, -1, 0, 0, 6405, 5000},
+			{4, DAM_BYPASS, -1, 0, 0, 6400, 5000},
+			{5, 0, -1, 0, 0, 6401, 5000},
+			{5, DAM_BYPASS, -1, 0, 0, 6402, 5000},
+			{6, DAM_BYPASS, STAT_ENDURANCE, -3, DAM_LOSE_TURN, 6402, 6403},
+			{6, DAM_BYPASS, STAT_ENDURANCE, -6, DAM_LOSE_TURN, 6402, 6403},
 		},
 		// HIT_LOCATION_LEFT_ARM
 		{
-			{ 3, 0, -1, 0, 0, 6405, 5000 },
-			{ 3, 0, -1, 0, 0, 6405, 5000 },
-			{ 3, 0, -1, 0, 0, 6405, 5000 },
-			{ 3, 0, -1, 0, 0, 6405, 5000 },
-			{ 3, 0, -1, 0, 0, 6405, 5000 },
-			{ 3, 0, -1, 0, 0, 6405, 5000 },
+			{3, 0, -1, 0, 0, 6405, 5000},
+			{3, 0, -1, 0, 0, 6405, 5000},
+			{3, 0, -1, 0, 0, 6405, 5000},
+			{3, 0, -1, 0, 0, 6405, 5000},
+			{3, 0, -1, 0, 0, 6405, 5000},
+			{3, 0, -1, 0, 0, 6405, 5000},
 		},
 		// HIT_LOCATION_RIGHT_ARM
 		{
-			{ 3, 0, -1, 0, 0, 6405, 5000 },
-			{ 3, 0, -1, 0, 0, 6405, 5000 },
-			{ 3, 0, -1, 0, 0, 6405, 5000 },
-			{ 3, 0, -1, 0, 0, 6405, 5000 },
-			{ 3, 0, -1, 0, 0, 6405, 5000 },
-			{ 3, 0, -1, 0, 0, 6405, 5000 },
+			{3, 0, -1, 0, 0, 6405, 5000},
+			{3, 0, -1, 0, 0, 6405, 5000},
+			{3, 0, -1, 0, 0, 6405, 5000},
+			{3, 0, -1, 0, 0, 6405, 5000},
+			{3, 0, -1, 0, 0, 6405, 5000},
+			{3, 0, -1, 0, 0, 6405, 5000},
 		},
 		// HIT_LOCATION_TORSO
 		{
-			{ 3, 0, -1, 0, 0, 6405, 5000 },
-			{ 3, 0, -1, 0, 0, 6405, 5000 },
-			{ 3, DAM_BYPASS, -1, 0, 0, 6400, 5000 },
-			{ 4, 0, -1, 0, 0, 6401, 5000 },
-			{ 4, 0, -1, 0, 0, 6401, 5000 },
-			{ 4, DAM_BYPASS, -1, 0, 0, 6402, 5000 },
+			{3, 0, -1, 0, 0, 6405, 5000},
+			{3, 0, -1, 0, 0, 6405, 5000},
+			{3, DAM_BYPASS, -1, 0, 0, 6400, 5000},
+			{4, 0, -1, 0, 0, 6401, 5000},
+			{4, 0, -1, 0, 0, 6401, 5000},
+			{4, DAM_BYPASS, -1, 0, 0, 6402, 5000},
 		},
 		// HIT_LOCATION_RIGHT_LEG
 		{
-			{ 3, 0, -1, 0, 0, 6405, 5000 },
-			{ 3, 0, -1, 0, 0, 6405, 5000 },
-			{ 3, 0, -1, 0, 0, 6405, 5000 },
-			{ 3, 0, -1, 0, 0, 6405, 5000 },
-			{ 3, 0, -1, 0, 0, 6405, 5000 },
-			{ 3, 0, -1, 0, 0, 6405, 5000 },
+			{3, 0, -1, 0, 0, 6405, 5000},
+			{3, 0, -1, 0, 0, 6405, 5000},
+			{3, 0, -1, 0, 0, 6405, 5000},
+			{3, 0, -1, 0, 0, 6405, 5000},
+			{3, 0, -1, 0, 0, 6405, 5000},
+			{3, 0, -1, 0, 0, 6405, 5000},
 		},
 		// HIT_LOCATION_LEFT_LEG
 		{
-			{ 3, 0, -1, 0, 0, 6405, 5000 },
-			{ 3, 0, -1, 0, 0, 6405, 5000 },
-			{ 3, 0, -1, 0, 0, 6405, 5000 },
-			{ 3, 0, -1, 0, 0, 6405, 5000 },
-			{ 3, 0, -1, 0, 0, 6405, 5000 },
-			{ 3, 0, -1, 0, 0, 6405, 5000 },
+			{3, 0, -1, 0, 0, 6405, 5000},
+			{3, 0, -1, 0, 0, 6405, 5000},
+			{3, 0, -1, 0, 0, 6405, 5000},
+			{3, 0, -1, 0, 0, 6405, 5000},
+			{3, 0, -1, 0, 0, 6405, 5000},
+			{3, 0, -1, 0, 0, 6405, 5000},
 		},
 		// HIT_LOCATION_EYES
 		{
-			{ 4, 0, -1, 0, 0, 6405, 5000 },
-			{ 4, DAM_BYPASS, -1, 0, 0, 6400, 5000 },
-			{ 5, 0, -1, 0, 0, 6401, 5000 },
-			{ 5, DAM_BYPASS, -1, 0, 0, 6402, 5000 },
-			{ 6, DAM_BYPASS, STAT_ENDURANCE, -4, DAM_BLIND, 6402, 6406 },
-			{ 6, DAM_BLIND | DAM_BYPASS, -1, 0, 0, 6406, 6404 },
+			{4, 0, -1, 0, 0, 6405, 5000},
+			{4, DAM_BYPASS, -1, 0, 0, 6400, 5000},
+			{5, 0, -1, 0, 0, 6401, 5000},
+			{5, DAM_BYPASS, -1, 0, 0, 6402, 5000},
+			{6, DAM_BYPASS, STAT_ENDURANCE, -4, DAM_BLIND, 6402, 6406},
+			{6, DAM_BLIND | DAM_BYPASS, -1, 0, 0, 6406, 6404},
 		},
 		// HIT_LOCATION_GROIN
 		{
-			{ 3, 0, -1, 0, 0, 6405, 5000 },
-			{ 3, 0, -1, 0, 0, 6405, 5000 },
-			{ 4, DAM_BYPASS, -1, 0, 0, 6402, 5000 },
-			{ 4, DAM_BYPASS, -1, 0, 0, 6402, 5000 },
-			{ 5, DAM_BYPASS, STAT_ENDURANCE, -3, DAM_LOSE_TURN, 6402, 6403 },
-			{ 5, DAM_BYPASS, STAT_ENDURANCE, -6, DAM_LOSE_TURN, 6402, 6403 },
+			{3, 0, -1, 0, 0, 6405, 5000},
+			{3, 0, -1, 0, 0, 6405, 5000},
+			{4, DAM_BYPASS, -1, 0, 0, 6402, 5000},
+			{4, DAM_BYPASS, -1, 0, 0, 6402, 5000},
+			{5, DAM_BYPASS, STAT_ENDURANCE, -3, DAM_LOSE_TURN, 6402, 6403},
+			{5, DAM_BYPASS, STAT_ENDURANCE, -6, DAM_LOSE_TURN, 6402, 6403},
 		},
 		// HIT_LOCATION_UNCALLED
 		{
-			{ 3, 0, -1, 0, 0, 6405, 5000 },
-			{ 3, 0, -1, 0, 0, 6405, 5000 },
-			{ 3, DAM_BYPASS, -1, 0, 0, 6400, 5000 },
-			{ 4, 0, -1, 0, 0, 6401, 5000 },
-			{ 4, 0, -1, 0, 0, 6401, 5000 },
-			{ 4, DAM_BYPASS, -1, 0, 0, 6402, 5000 },
+			{3, 0, -1, 0, 0, 6405, 5000},
+			{3, 0, -1, 0, 0, 6405, 5000},
+			{3, DAM_BYPASS, -1, 0, 0, 6400, 5000},
+			{4, 0, -1, 0, 0, 6401, 5000},
+			{4, 0, -1, 0, 0, 6401, 5000},
+			{4, DAM_BYPASS, -1, 0, 0, 6402, 5000},
 		},
 	},
 	// KILL_TYPE_GECKO
 	{
 		// HIT_LOCATION_HEAD
 		{
-			{ 4, 0, -1, 0, 0, 6701, 5000 },
-			{ 4, DAM_BYPASS, STAT_ENDURANCE, 0, DAM_KNOCKED_OUT, 6700, 5003 },
-			{ 5, DAM_BYPASS, STAT_ENDURANCE, -3, DAM_KNOCKED_OUT, 6700, 5003 },
-			{ 5, DAM_KNOCKED_DOWN | DAM_BYPASS, STAT_ENDURANCE, -3, DAM_KNOCKED_OUT, 6700, 5003 },
-			{ 6, DAM_KNOCKED_OUT | DAM_BYPASS, STAT_LUCK, 0, DAM_BLIND, 6700, 5006 },
-			{ 6, DAM_DEAD, -1, 0, 0, 6700, 5000 },
+			{4, 0, -1, 0, 0, 6701, 5000},
+			{4, DAM_BYPASS, STAT_ENDURANCE, 0, DAM_KNOCKED_OUT, 6700, 5003},
+			{5, DAM_BYPASS, STAT_ENDURANCE, -3, DAM_KNOCKED_OUT, 6700, 5003},
+			{5, DAM_KNOCKED_DOWN | DAM_BYPASS, STAT_ENDURANCE, -3, DAM_KNOCKED_OUT, 6700, 5003},
+			{6, DAM_KNOCKED_OUT | DAM_BYPASS, STAT_LUCK, 0, DAM_BLIND, 6700, 5006},
+			{6, DAM_DEAD, -1, 0, 0, 6700, 5000},
 		},
 		// HIT_LOCATION_LEFT_ARM
 		{
-			{ 3, 0, -1, 0, 0, 6702, 5000 },
-			{ 3, DAM_LOSE_TURN, -1, 0, 0, 6702, 5000 },
-			{ 4, 0, STAT_ENDURANCE, -3, DAM_CRIP_ARM_LEFT, 6702, 5011 },
-			{ 4, DAM_CRIP_ARM_LEFT | DAM_BYPASS, -1, 0, 0, 6702, 5000 },
-			{ 4, DAM_CRIP_ARM_LEFT | DAM_BYPASS, -1, 0, 0, 6702, 5000 },
-			{ 4, DAM_CRIP_ARM_LEFT | DAM_BYPASS, -1, 0, 0, 6702, 5000 },
+			{3, 0, -1, 0, 0, 6702, 5000},
+			{3, DAM_LOSE_TURN, -1, 0, 0, 6702, 5000},
+			{4, 0, STAT_ENDURANCE, -3, DAM_CRIP_ARM_LEFT, 6702, 5011},
+			{4, DAM_CRIP_ARM_LEFT | DAM_BYPASS, -1, 0, 0, 6702, 5000},
+			{4, DAM_CRIP_ARM_LEFT | DAM_BYPASS, -1, 0, 0, 6702, 5000},
+			{4, DAM_CRIP_ARM_LEFT | DAM_BYPASS, -1, 0, 0, 6702, 5000},
 		},
 		// HIT_LOCATION_RIGHT_ARM
 		{
-			{ 3, 0, -1, 0, 0, 6702, 5000 },
-			{ 3, DAM_LOSE_TURN, -1, 0, 0, 6702, 5000 },
-			{ 4, 0, STAT_ENDURANCE, -3, DAM_CRIP_ARM_RIGHT, 6702, 5000 },
-			{ 4, DAM_CRIP_ARM_RIGHT | DAM_BYPASS, -1, 0, 0, 6702, 5000 },
-			{ 4, DAM_CRIP_ARM_RIGHT | DAM_BYPASS, -1, 0, 0, 6702, 5000 },
-			{ 4, DAM_CRIP_ARM_RIGHT | DAM_BYPASS, -1, 0, 0, 6702, 5000 },
+			{3, 0, -1, 0, 0, 6702, 5000},
+			{3, DAM_LOSE_TURN, -1, 0, 0, 6702, 5000},
+			{4, 0, STAT_ENDURANCE, -3, DAM_CRIP_ARM_RIGHT, 6702, 5000},
+			{4, DAM_CRIP_ARM_RIGHT | DAM_BYPASS, -1, 0, 0, 6702, 5000},
+			{4, DAM_CRIP_ARM_RIGHT | DAM_BYPASS, -1, 0, 0, 6702, 5000},
+			{4, DAM_CRIP_ARM_RIGHT | DAM_BYPASS, -1, 0, 0, 6702, 5000},
 		},
 		// HIT_LOCATION_TORSO
 		{
-			{ 3, 0, -1, 0, 0, 6701, 5000 },
-			{ 3, DAM_BYPASS, -1, 0, 0, 6701, 5000 },
-			{ 4, DAM_KNOCKED_DOWN | DAM_BYPASS, -1, 0, 0, 6704, 5000 },
-			{ 4, DAM_KNOCKED_DOWN | DAM_BYPASS, -1, 0, 0, 6704, 5000 },
-			{ 6, DAM_KNOCKED_OUT | DAM_BYPASS, -1, 0, 0, 6704, 5000 },
-			{ 6, DAM_DEAD, -1, 0, 0, 6704, 5000 },
+			{3, 0, -1, 0, 0, 6701, 5000},
+			{3, DAM_BYPASS, -1, 0, 0, 6701, 5000},
+			{4, DAM_KNOCKED_DOWN | DAM_BYPASS, -1, 0, 0, 6704, 5000},
+			{4, DAM_KNOCKED_DOWN | DAM_BYPASS, -1, 0, 0, 6704, 5000},
+			{6, DAM_KNOCKED_OUT | DAM_BYPASS, -1, 0, 0, 6704, 5000},
+			{6, DAM_DEAD, -1, 0, 0, 6704, 5000},
 		},
 		// HIT_LOCATION_RIGHT_LEG
 		{
-			{ 3, DAM_KNOCKED_DOWN, -1, 0, 0, 6705, 5000 },
-			{ 3, DAM_KNOCKED_DOWN, STAT_ENDURANCE, 0, DAM_CRIP_LEG_RIGHT, 6705, 5024 },
-			{ 4, DAM_KNOCKED_DOWN, STAT_ENDURANCE, -3, DAM_CRIP_LEG_RIGHT, 6705, 5024 },
-			{ 4, DAM_KNOCKED_DOWN | DAM_CRIP_LEG_RIGHT | DAM_BYPASS, -1, 0, 0, 6705, 5000 },
-			{ 4, DAM_KNOCKED_DOWN | DAM_CRIP_LEG_RIGHT | DAM_BYPASS, STAT_ENDURANCE, 0, DAM_KNOCKED_OUT, 6705, 5026 },
-			{ 4, DAM_KNOCKED_OUT | DAM_CRIP_LEG_RIGHT | DAM_BYPASS, -1, 0, 0, 6705, 5000 },
+			{3, DAM_KNOCKED_DOWN, -1, 0, 0, 6705, 5000},
+			{3, DAM_KNOCKED_DOWN, STAT_ENDURANCE, 0, DAM_CRIP_LEG_RIGHT, 6705, 5024},
+			{4, DAM_KNOCKED_DOWN, STAT_ENDURANCE, -3, DAM_CRIP_LEG_RIGHT, 6705, 5024},
+			{4, DAM_KNOCKED_DOWN | DAM_CRIP_LEG_RIGHT | DAM_BYPASS, -1, 0, 0, 6705, 5000},
+			{4, DAM_KNOCKED_DOWN | DAM_CRIP_LEG_RIGHT | DAM_BYPASS, STAT_ENDURANCE, 0, DAM_KNOCKED_OUT, 6705, 5026},
+			{4, DAM_KNOCKED_OUT | DAM_CRIP_LEG_RIGHT | DAM_BYPASS, -1, 0, 0, 6705, 5000},
 		},
 		// HIT_LOCATION_LEFT_LEG
 		{
-			{ 3, DAM_KNOCKED_DOWN, -1, 0, 0, 6705, 5000 },
-			{ 3, DAM_KNOCKED_DOWN, STAT_ENDURANCE, 0, DAM_CRIP_LEG_LEFT, 6705, 5024 },
-			{ 4, DAM_KNOCKED_DOWN, STAT_ENDURANCE, -3, DAM_CRIP_LEG_LEFT, 6705, 5024 },
-			{ 4, DAM_KNOCKED_DOWN | DAM_CRIP_LEG_LEFT | DAM_BYPASS, -1, 0, 0, 6705, 5000 },
-			{ 4, DAM_KNOCKED_DOWN | DAM_CRIP_LEG_LEFT | DAM_BYPASS, STAT_ENDURANCE, 0, DAM_KNOCKED_OUT, 6705, 5026 },
-			{ 4, DAM_KNOCKED_OUT | DAM_CRIP_LEG_LEFT | DAM_BYPASS, -1, 0, 0, 6705, 5000 },
+			{3, DAM_KNOCKED_DOWN, -1, 0, 0, 6705, 5000},
+			{3, DAM_KNOCKED_DOWN, STAT_ENDURANCE, 0, DAM_CRIP_LEG_LEFT, 6705, 5024},
+			{4, DAM_KNOCKED_DOWN, STAT_ENDURANCE, -3, DAM_CRIP_LEG_LEFT, 6705, 5024},
+			{4, DAM_KNOCKED_DOWN | DAM_CRIP_LEG_LEFT | DAM_BYPASS, -1, 0, 0, 6705, 5000},
+			{4, DAM_KNOCKED_DOWN | DAM_CRIP_LEG_LEFT | DAM_BYPASS, STAT_ENDURANCE, 0, DAM_KNOCKED_OUT, 6705, 5026},
+			{4, DAM_KNOCKED_OUT | DAM_CRIP_LEG_LEFT | DAM_BYPASS, -1, 0, 0, 6705, 5000},
 		},
 		// HIT_LOCATION_EYES
 		{
-			{ 4, 0, STAT_LUCK, 4, DAM_BLIND, 6700, 5028 },
-			{ 4, DAM_BYPASS, STAT_LUCK, 3, DAM_BLIND, 6700, 5028 },
-			{ 6, DAM_BYPASS, STAT_LUCK, 2, DAM_BLIND, 6700, 5028 },
-			{ 6, DAM_BLIND | DAM_BYPASS | DAM_LOSE_TURN, -1, 0, 0, 6700, 5000 },
-			{ 8, DAM_KNOCKED_OUT | DAM_BLIND | DAM_BYPASS, -1, 0, 0, 6700, 5000 },
-			{ 8, DAM_DEAD, -1, 0, 0, 6700, 5000 },
+			{4, 0, STAT_LUCK, 4, DAM_BLIND, 6700, 5028},
+			{4, DAM_BYPASS, STAT_LUCK, 3, DAM_BLIND, 6700, 5028},
+			{6, DAM_BYPASS, STAT_LUCK, 2, DAM_BLIND, 6700, 5028},
+			{6, DAM_BLIND | DAM_BYPASS | DAM_LOSE_TURN, -1, 0, 0, 6700, 5000},
+			{8, DAM_KNOCKED_OUT | DAM_BLIND | DAM_BYPASS, -1, 0, 0, 6700, 5000},
+			{8, DAM_DEAD, -1, 0, 0, 6700, 5000},
 		},
 		// HIT_LOCATION_GROIN
 		{
-			{ 3, 0, -1, 0, 0, 6703, 5000 },
-			{ 3, DAM_BYPASS, STAT_ENDURANCE, -3, DAM_KNOCKED_DOWN, 6703, 5035 },
-			{ 3, DAM_KNOCKED_DOWN, STAT_ENDURANCE, -3, DAM_KNOCKED_OUT, 6703, 5036 },
-			{ 3, DAM_KNOCKED_OUT, -1, 0, 0, 6703, 5000 },
-			{ 4, DAM_KNOCKED_DOWN | DAM_BYPASS, STAT_ENDURANCE, 0, DAM_KNOCKED_OUT, 6703, 5036 },
-			{ 4, DAM_KNOCKED_OUT | DAM_BYPASS, -1, 0, 0, 6703, 5000 },
+			{3, 0, -1, 0, 0, 6703, 5000},
+			{3, DAM_BYPASS, STAT_ENDURANCE, -3, DAM_KNOCKED_DOWN, 6703, 5035},
+			{3, DAM_KNOCKED_DOWN, STAT_ENDURANCE, -3, DAM_KNOCKED_OUT, 6703, 5036},
+			{3, DAM_KNOCKED_OUT, -1, 0, 0, 6703, 5000},
+			{4, DAM_KNOCKED_DOWN | DAM_BYPASS, STAT_ENDURANCE, 0, DAM_KNOCKED_OUT, 6703, 5036},
+			{4, DAM_KNOCKED_OUT | DAM_BYPASS, -1, 0, 0, 6703, 5000},
 		},
 		// HIT_LOCATION_UNCALLED
 		{
-			{ 3, 0, -1, 0, 0, 6700, 5000 },
-			{ 3, DAM_BYPASS, -1, 0, 0, 6700, 5000 },
-			{ 4, 0, -1, 0, 0, 6700, 5000 },
-			{ 4, DAM_KNOCKED_DOWN | DAM_BYPASS, -1, 0, 0, 6700, 5000 },
-			{ 6, DAM_KNOCKED_OUT | DAM_BYPASS, -1, 0, 0, 6700, 5000 },
-			{ 6, DAM_DEAD, -1, 0, 0, 6700, 5000 },
+			{3, 0, -1, 0, 0, 6700, 5000},
+			{3, DAM_BYPASS, -1, 0, 0, 6700, 5000},
+			{4, 0, -1, 0, 0, 6700, 5000},
+			{4, DAM_KNOCKED_DOWN | DAM_BYPASS, -1, 0, 0, 6700, 5000},
+			{6, DAM_KNOCKED_OUT | DAM_BYPASS, -1, 0, 0, 6700, 5000},
+			{6, DAM_DEAD, -1, 0, 0, 6700, 5000},
 		},
 	},
 	// KILL_TYPE_ALIEN
 	{
 		// HIT_LOCATION_HEAD
 		{
-			{ 4, 0, -1, 0, 0, 6801, 5000 },
-			{ 4, DAM_BYPASS, STAT_ENDURANCE, 0, DAM_KNOCKED_OUT, 6800, 5003 },
-			{ 5, DAM_BYPASS, STAT_ENDURANCE, -3, DAM_KNOCKED_OUT, 6800, 5003 },
-			{ 5, DAM_KNOCKED_DOWN | DAM_BYPASS, STAT_ENDURANCE, -3, DAM_KNOCKED_OUT, 6803, 5003 },
-			{ 6, DAM_KNOCKED_OUT | DAM_BYPASS, STAT_LUCK, 0, DAM_BLIND, 6804, 5006 },
-			{ 6, DAM_DEAD, -1, 0, 0, 6804, 5000 },
+			{4, 0, -1, 0, 0, 6801, 5000},
+			{4, DAM_BYPASS, STAT_ENDURANCE, 0, DAM_KNOCKED_OUT, 6800, 5003},
+			{5, DAM_BYPASS, STAT_ENDURANCE, -3, DAM_KNOCKED_OUT, 6800, 5003},
+			{5, DAM_KNOCKED_DOWN | DAM_BYPASS, STAT_ENDURANCE, -3, DAM_KNOCKED_OUT, 6803, 5003},
+			{6, DAM_KNOCKED_OUT | DAM_BYPASS, STAT_LUCK, 0, DAM_BLIND, 6804, 5006},
+			{6, DAM_DEAD, -1, 0, 0, 6804, 5000},
 		},
 		// HIT_LOCATION_LEFT_ARM
 		{
-			{ 3, 0, -1, 0, 0, 6806, 5000 },
-			{ 3, DAM_LOSE_TURN, -1, 0, 0, 6806, 5000 },
-			{ 4, 0, STAT_ENDURANCE, -3, DAM_CRIP_ARM_LEFT, 6806, 5011 },
-			{ 4, DAM_CRIP_ARM_LEFT | DAM_BYPASS, -1, 0, 0, 6806, 5000 },
-			{ 4, DAM_CRIP_ARM_LEFT | DAM_BYPASS, -1, 0, 0, 6806, 5000 },
-			{ 4, DAM_CRIP_ARM_LEFT | DAM_BYPASS, -1, 0, 0, 6806, 5000 },
+			{3, 0, -1, 0, 0, 6806, 5000},
+			{3, DAM_LOSE_TURN, -1, 0, 0, 6806, 5000},
+			{4, 0, STAT_ENDURANCE, -3, DAM_CRIP_ARM_LEFT, 6806, 5011},
+			{4, DAM_CRIP_ARM_LEFT | DAM_BYPASS, -1, 0, 0, 6806, 5000},
+			{4, DAM_CRIP_ARM_LEFT | DAM_BYPASS, -1, 0, 0, 6806, 5000},
+			{4, DAM_CRIP_ARM_LEFT | DAM_BYPASS, -1, 0, 0, 6806, 5000},
 		},
 		// HIT_LOCATION_RIGHT_ARM
 		{
-			{ 3, 0, -1, 0, 0, 6806, 5000 },
-			{ 3, DAM_LOSE_TURN, -1, 0, 0, 6806, 5000 },
-			{ 4, 0, STAT_ENDURANCE, -3, DAM_CRIP_ARM_RIGHT, 6806, 5000 },
-			{ 4, DAM_CRIP_ARM_RIGHT | DAM_BYPASS, -1, 0, 0, 6806, 5000 },
-			{ 4, DAM_CRIP_ARM_RIGHT | DAM_BYPASS, -1, 0, 0, 6806, 5000 },
-			{ 4, DAM_CRIP_ARM_RIGHT | DAM_BYPASS, -1, 0, 0, 6806, 5000 },
+			{3, 0, -1, 0, 0, 6806, 5000},
+			{3, DAM_LOSE_TURN, -1, 0, 0, 6806, 5000},
+			{4, 0, STAT_ENDURANCE, -3, DAM_CRIP_ARM_RIGHT, 6806, 5000},
+			{4, DAM_CRIP_ARM_RIGHT | DAM_BYPASS, -1, 0, 0, 6806, 5000},
+			{4, DAM_CRIP_ARM_RIGHT | DAM_BYPASS, -1, 0, 0, 6806, 5000},
+			{4, DAM_CRIP_ARM_RIGHT | DAM_BYPASS, -1, 0, 0, 6806, 5000},
 		},
 		// HIT_LOCATION_TORSO
 		{
-			{ 3, 0, -1, 0, 0, 6800, 5000 },
-			{ 3, DAM_BYPASS, -1, 0, 0, 6800, 5000 },
-			{ 4, DAM_KNOCKED_DOWN | DAM_BYPASS, -1, 0, 0, 6800, 5000 },
-			{ 4, DAM_KNOCKED_DOWN | DAM_BYPASS, -1, 0, 0, 6800, 5000 },
-			{ 6, DAM_KNOCKED_OUT | DAM_BYPASS, -1, 0, 0, 6800, 5000 },
-			{ 6, DAM_DEAD, -1, 0, 0, 6800, 5000 },
+			{3, 0, -1, 0, 0, 6800, 5000},
+			{3, DAM_BYPASS, -1, 0, 0, 6800, 5000},
+			{4, DAM_KNOCKED_DOWN | DAM_BYPASS, -1, 0, 0, 6800, 5000},
+			{4, DAM_KNOCKED_DOWN | DAM_BYPASS, -1, 0, 0, 6800, 5000},
+			{6, DAM_KNOCKED_OUT | DAM_BYPASS, -1, 0, 0, 6800, 5000},
+			{6, DAM_DEAD, -1, 0, 0, 6800, 5000},
 		},
 		// HIT_LOCATION_RIGHT_LEG
 		{
-			{ 3, DAM_KNOCKED_DOWN, -1, 0, 0, 6805, 5000 },
-			{ 3, DAM_KNOCKED_DOWN, STAT_ENDURANCE, 0, DAM_CRIP_LEG_RIGHT, 6805, 5024 },
-			{ 4, DAM_KNOCKED_DOWN, STAT_ENDURANCE, -3, DAM_CRIP_LEG_RIGHT, 6805, 5024 },
-			{ 4, DAM_KNOCKED_DOWN | DAM_CRIP_LEG_RIGHT | DAM_BYPASS, -1, 0, 0, 6805, 5000 },
-			{ 4, DAM_KNOCKED_DOWN | DAM_CRIP_LEG_RIGHT | DAM_BYPASS, STAT_ENDURANCE, 0, DAM_KNOCKED_OUT, 6805, 5026 },
-			{ 4, DAM_KNOCKED_OUT | DAM_CRIP_LEG_RIGHT | DAM_BYPASS, -1, 0, 0, 6805, 5000 },
+			{3, DAM_KNOCKED_DOWN, -1, 0, 0, 6805, 5000},
+			{3, DAM_KNOCKED_DOWN, STAT_ENDURANCE, 0, DAM_CRIP_LEG_RIGHT, 6805, 5024},
+			{4, DAM_KNOCKED_DOWN, STAT_ENDURANCE, -3, DAM_CRIP_LEG_RIGHT, 6805, 5024},
+			{4, DAM_KNOCKED_DOWN | DAM_CRIP_LEG_RIGHT | DAM_BYPASS, -1, 0, 0, 6805, 5000},
+			{4, DAM_KNOCKED_DOWN | DAM_CRIP_LEG_RIGHT | DAM_BYPASS, STAT_ENDURANCE, 0, DAM_KNOCKED_OUT, 6805, 5026},
+			{4, DAM_KNOCKED_OUT | DAM_CRIP_LEG_RIGHT | DAM_BYPASS, -1, 0, 0, 6805, 5000},
 		},
 		// HIT_LOCATION_LEFT_LEG
 		{
-			{ 3, DAM_KNOCKED_DOWN, -1, 0, 0, 6805, 5000 },
-			{ 3, DAM_KNOCKED_DOWN, STAT_ENDURANCE, 0, DAM_CRIP_LEG_LEFT, 6805, 5024 },
-			{ 4, DAM_KNOCKED_DOWN, STAT_ENDURANCE, -3, DAM_CRIP_LEG_LEFT, 6805, 5024 },
-			{ 4, DAM_KNOCKED_DOWN | DAM_CRIP_LEG_LEFT | DAM_BYPASS, -1, 0, 0, 6805, 5000 },
-			{ 4, DAM_KNOCKED_DOWN | DAM_CRIP_LEG_LEFT | DAM_BYPASS, STAT_ENDURANCE, 0, DAM_KNOCKED_OUT, 6805, 5026 },
-			{ 4, DAM_KNOCKED_OUT | DAM_CRIP_LEG_LEFT | DAM_BYPASS, -1, 0, 0, 6805, 5000 },
+			{3, DAM_KNOCKED_DOWN, -1, 0, 0, 6805, 5000},
+			{3, DAM_KNOCKED_DOWN, STAT_ENDURANCE, 0, DAM_CRIP_LEG_LEFT, 6805, 5024},
+			{4, DAM_KNOCKED_DOWN, STAT_ENDURANCE, -3, DAM_CRIP_LEG_LEFT, 6805, 5024},
+			{4, DAM_KNOCKED_DOWN | DAM_CRIP_LEG_LEFT | DAM_BYPASS, -1, 0, 0, 6805, 5000},
+			{4, DAM_KNOCKED_DOWN | DAM_CRIP_LEG_LEFT | DAM_BYPASS, STAT_ENDURANCE, 0, DAM_KNOCKED_OUT, 6805, 5026},
+			{4, DAM_KNOCKED_OUT | DAM_CRIP_LEG_LEFT | DAM_BYPASS, -1, 0, 0, 6805, 5000},
 		},
 		// HIT_LOCATION_EYES
 		{
-			{ 4, 0, STAT_LUCK, 4, DAM_BLIND, 6803, 5028 },
-			{ 4, DAM_BYPASS, STAT_LUCK, 3, DAM_BLIND, 6803, 5028 },
-			{ 6, DAM_BYPASS, STAT_LUCK, 2, DAM_BLIND, 6803, 5028 },
-			{ 6, DAM_BLIND | DAM_BYPASS | DAM_LOSE_TURN, -1, 0, 0, 6803, 5000 },
-			{ 8, DAM_KNOCKED_OUT | DAM_BLIND | DAM_BYPASS, -1, 0, 0, 6803, 5000 },
-			{ 8, DAM_DEAD, -1, 0, 0, 6804, 5000 },
+			{4, 0, STAT_LUCK, 4, DAM_BLIND, 6803, 5028},
+			{4, DAM_BYPASS, STAT_LUCK, 3, DAM_BLIND, 6803, 5028},
+			{6, DAM_BYPASS, STAT_LUCK, 2, DAM_BLIND, 6803, 5028},
+			{6, DAM_BLIND | DAM_BYPASS | DAM_LOSE_TURN, -1, 0, 0, 6803, 5000},
+			{8, DAM_KNOCKED_OUT | DAM_BLIND | DAM_BYPASS, -1, 0, 0, 6803, 5000},
+			{8, DAM_DEAD, -1, 0, 0, 6804, 5000},
 		},
 		// HIT_LOCATION_GROIN
 		{
-			{ 3, 0, -1, 0, 0, 6801, 5000 },
-			{ 3, DAM_BYPASS, STAT_ENDURANCE, -3, DAM_KNOCKED_DOWN, 6801, 5035 },
-			{ 3, DAM_KNOCKED_DOWN, STAT_ENDURANCE, -3, DAM_KNOCKED_OUT, 6801, 5036 },
-			{ 3, DAM_KNOCKED_OUT, -1, 0, 0, 6801, 5000 },
-			{ 4, DAM_KNOCKED_DOWN | DAM_BYPASS, STAT_ENDURANCE, 0, DAM_KNOCKED_OUT, 6804, 5036 },
-			{ 4, DAM_KNOCKED_OUT | DAM_BYPASS, -1, 0, 0, 6804, 5000 },
+			{3, 0, -1, 0, 0, 6801, 5000},
+			{3, DAM_BYPASS, STAT_ENDURANCE, -3, DAM_KNOCKED_DOWN, 6801, 5035},
+			{3, DAM_KNOCKED_DOWN, STAT_ENDURANCE, -3, DAM_KNOCKED_OUT, 6801, 5036},
+			{3, DAM_KNOCKED_OUT, -1, 0, 0, 6801, 5000},
+			{4, DAM_KNOCKED_DOWN | DAM_BYPASS, STAT_ENDURANCE, 0, DAM_KNOCKED_OUT, 6804, 5036},
+			{4, DAM_KNOCKED_OUT | DAM_BYPASS, -1, 0, 0, 6804, 5000},
 		},
 		// HIT_LOCATION_UNCALLED
 		{
-			{ 3, 0, -1, 0, 0, 6800, 5000 },
-			{ 3, DAM_BYPASS, -1, 0, 0, 6800, 5000 },
-			{ 4, 0, -1, 0, 0, 6800, 5000 },
-			{ 4, DAM_KNOCKED_DOWN | DAM_BYPASS, -1, 0, 0, 6800, 5000 },
-			{ 6, DAM_KNOCKED_OUT | DAM_BYPASS, -1, 0, 0, 6800, 5000 },
-			{ 6, DAM_DEAD, -1, 0, 0, 6800, 5000 },
+			{3, 0, -1, 0, 0, 6800, 5000},
+			{3, DAM_BYPASS, -1, 0, 0, 6800, 5000},
+			{4, 0, -1, 0, 0, 6800, 5000},
+			{4, DAM_KNOCKED_DOWN | DAM_BYPASS, -1, 0, 0, 6800, 5000},
+			{6, DAM_KNOCKED_OUT | DAM_BYPASS, -1, 0, 0, 6800, 5000},
+			{6, DAM_DEAD, -1, 0, 0, 6800, 5000},
 		},
 	},
 	// KILL_TYPE_GIANT_ANT
 	{
 		// HIT_LOCATION_HEAD
 		{
-			{ 4, 0, -1, 0, 0, 6901, 5000 },
-			{ 4, DAM_BYPASS, STAT_ENDURANCE, 0, DAM_KNOCKED_OUT, 6901, 5003 },
-			{ 5, DAM_BYPASS, STAT_ENDURANCE, -3, DAM_KNOCKED_OUT, 6902, 5003 },
-			{ 5, DAM_KNOCKED_DOWN | DAM_BYPASS, STAT_ENDURANCE, -3, DAM_KNOCKED_OUT, 6902, 5003 },
-			{ 6, DAM_KNOCKED_OUT | DAM_BYPASS, STAT_LUCK, 0, DAM_BLIND, 6902, 5006 },
-			{ 6, DAM_DEAD, -1, 0, 0, 6902, 5000 },
+			{4, 0, -1, 0, 0, 6901, 5000},
+			{4, DAM_BYPASS, STAT_ENDURANCE, 0, DAM_KNOCKED_OUT, 6901, 5003},
+			{5, DAM_BYPASS, STAT_ENDURANCE, -3, DAM_KNOCKED_OUT, 6902, 5003},
+			{5, DAM_KNOCKED_DOWN | DAM_BYPASS, STAT_ENDURANCE, -3, DAM_KNOCKED_OUT, 6902, 5003},
+			{6, DAM_KNOCKED_OUT | DAM_BYPASS, STAT_LUCK, 0, DAM_BLIND, 6902, 5006},
+			{6, DAM_DEAD, -1, 0, 0, 6902, 5000},
 		},
 		// HIT_LOCATION_LEFT_ARM
 		{
-			{ 3, 0, -1, 0, 0, 6906, 5000 },
-			{ 3, DAM_LOSE_TURN, -1, 0, 0, 6906, 5000 },
-			{ 4, 0, STAT_ENDURANCE, -3, DAM_CRIP_ARM_LEFT, 6906, 5011 },
-			{ 4, DAM_CRIP_ARM_LEFT | DAM_BYPASS, -1, 0, 0, 6906, 5000 },
-			{ 4, DAM_CRIP_ARM_LEFT | DAM_BYPASS, -1, 0, 0, 6906, 5000 },
-			{ 4, DAM_CRIP_ARM_LEFT | DAM_BYPASS, -1, 0, 0, 6906, 5000 },
+			{3, 0, -1, 0, 0, 6906, 5000},
+			{3, DAM_LOSE_TURN, -1, 0, 0, 6906, 5000},
+			{4, 0, STAT_ENDURANCE, -3, DAM_CRIP_ARM_LEFT, 6906, 5011},
+			{4, DAM_CRIP_ARM_LEFT | DAM_BYPASS, -1, 0, 0, 6906, 5000},
+			{4, DAM_CRIP_ARM_LEFT | DAM_BYPASS, -1, 0, 0, 6906, 5000},
+			{4, DAM_CRIP_ARM_LEFT | DAM_BYPASS, -1, 0, 0, 6906, 5000},
 		},
 		// HIT_LOCATION_RIGHT_ARM
 		{
-			{ 3, 0, -1, 0, 0, 6906, 5000 },
-			{ 3, DAM_LOSE_TURN, -1, 0, 0, 6906, 5000 },
-			{ 4, 0, STAT_ENDURANCE, -3, DAM_CRIP_ARM_RIGHT, 6906, 5000 },
-			{ 4, DAM_CRIP_ARM_RIGHT | DAM_BYPASS, -1, 0, 0, 6906, 5000 },
-			{ 4, DAM_CRIP_ARM_RIGHT | DAM_BYPASS, -1, 0, 0, 6906, 5000 },
-			{ 4, DAM_CRIP_ARM_RIGHT | DAM_BYPASS, -1, 0, 0, 6906, 5000 },
+			{3, 0, -1, 0, 0, 6906, 5000},
+			{3, DAM_LOSE_TURN, -1, 0, 0, 6906, 5000},
+			{4, 0, STAT_ENDURANCE, -3, DAM_CRIP_ARM_RIGHT, 6906, 5000},
+			{4, DAM_CRIP_ARM_RIGHT | DAM_BYPASS, -1, 0, 0, 6906, 5000},
+			{4, DAM_CRIP_ARM_RIGHT | DAM_BYPASS, -1, 0, 0, 6906, 5000},
+			{4, DAM_CRIP_ARM_RIGHT | DAM_BYPASS, -1, 0, 0, 6906, 5000},
 		},
 		// HIT_LOCATION_TORSO
 		{
-			{ 3, 0, -1, 0, 0, 6900, 5000 },
-			{ 3, DAM_BYPASS, -1, 0, 0, 6900, 5000 },
-			{ 4, DAM_KNOCKED_DOWN | DAM_BYPASS, -1, 0, 0, 6904, 5000 },
-			{ 4, DAM_KNOCKED_DOWN | DAM_BYPASS, -1, 0, 0, 6904, 5000 },
-			{ 6, DAM_KNOCKED_OUT | DAM_BYPASS, -1, 0, 0, 6904, 5000 },
-			{ 6, DAM_DEAD, -1, 0, 0, 6904, 5000 },
+			{3, 0, -1, 0, 0, 6900, 5000},
+			{3, DAM_BYPASS, -1, 0, 0, 6900, 5000},
+			{4, DAM_KNOCKED_DOWN | DAM_BYPASS, -1, 0, 0, 6904, 5000},
+			{4, DAM_KNOCKED_DOWN | DAM_BYPASS, -1, 0, 0, 6904, 5000},
+			{6, DAM_KNOCKED_OUT | DAM_BYPASS, -1, 0, 0, 6904, 5000},
+			{6, DAM_DEAD, -1, 0, 0, 6904, 5000},
 		},
 		// HIT_LOCATION_RIGHT_LEG
 		{
-			{ 3, DAM_KNOCKED_DOWN, -1, 0, 0, 6905, 5000 },
-			{ 3, DAM_KNOCKED_DOWN, STAT_ENDURANCE, 0, DAM_CRIP_LEG_RIGHT, 6905, 5024 },
-			{ 4, DAM_KNOCKED_DOWN, STAT_ENDURANCE, -3, DAM_CRIP_LEG_RIGHT, 6905, 5024 },
-			{ 4, DAM_KNOCKED_DOWN | DAM_CRIP_LEG_RIGHT | DAM_BYPASS, -1, 0, 0, 6905, 5000 },
-			{ 4, DAM_KNOCKED_DOWN | DAM_CRIP_LEG_RIGHT | DAM_BYPASS, STAT_ENDURANCE, 0, DAM_KNOCKED_OUT, 6905, 5026 },
-			{ 4, DAM_KNOCKED_OUT | DAM_CRIP_LEG_RIGHT | DAM_BYPASS, -1, 0, 0, 6905, 5000 },
+			{3, DAM_KNOCKED_DOWN, -1, 0, 0, 6905, 5000},
+			{3, DAM_KNOCKED_DOWN, STAT_ENDURANCE, 0, DAM_CRIP_LEG_RIGHT, 6905, 5024},
+			{4, DAM_KNOCKED_DOWN, STAT_ENDURANCE, -3, DAM_CRIP_LEG_RIGHT, 6905, 5024},
+			{4, DAM_KNOCKED_DOWN | DAM_CRIP_LEG_RIGHT | DAM_BYPASS, -1, 0, 0, 6905, 5000},
+			{4, DAM_KNOCKED_DOWN | DAM_CRIP_LEG_RIGHT | DAM_BYPASS, STAT_ENDURANCE, 0, DAM_KNOCKED_OUT, 6905, 5026},
+			{4, DAM_KNOCKED_OUT | DAM_CRIP_LEG_RIGHT | DAM_BYPASS, -1, 0, 0, 6905, 5000},
 		},
 		// HIT_LOCATION_LEFT_LEG
 		{
-			{ 3, DAM_KNOCKED_DOWN, -1, 0, 0, 6905, 5000 },
-			{ 3, DAM_KNOCKED_DOWN, STAT_ENDURANCE, 0, DAM_CRIP_LEG_LEFT, 6905, 5024 },
-			{ 4, DAM_KNOCKED_DOWN, STAT_ENDURANCE, -3, DAM_CRIP_LEG_LEFT, 6905, 5024 },
-			{ 4, DAM_KNOCKED_DOWN | DAM_CRIP_LEG_LEFT | DAM_BYPASS, -1, 0, 0, 6905, 5000 },
-			{ 4, DAM_KNOCKED_DOWN | DAM_CRIP_LEG_LEFT | DAM_BYPASS, STAT_ENDURANCE, 0, DAM_KNOCKED_OUT, 6905, 5026 },
-			{ 4, DAM_KNOCKED_OUT | DAM_CRIP_LEG_LEFT | DAM_BYPASS, -1, 0, 0, 6905, 5000 },
+			{3, DAM_KNOCKED_DOWN, -1, 0, 0, 6905, 5000},
+			{3, DAM_KNOCKED_DOWN, STAT_ENDURANCE, 0, DAM_CRIP_LEG_LEFT, 6905, 5024},
+			{4, DAM_KNOCKED_DOWN, STAT_ENDURANCE, -3, DAM_CRIP_LEG_LEFT, 6905, 5024},
+			{4, DAM_KNOCKED_DOWN | DAM_CRIP_LEG_LEFT | DAM_BYPASS, -1, 0, 0, 6905, 5000},
+			{4, DAM_KNOCKED_DOWN | DAM_CRIP_LEG_LEFT | DAM_BYPASS, STAT_ENDURANCE, 0, DAM_KNOCKED_OUT, 6905, 5026},
+			{4, DAM_KNOCKED_OUT | DAM_CRIP_LEG_LEFT | DAM_BYPASS, -1, 0, 0, 6905, 5000},
 		},
 		// HIT_LOCATION_EYES
 		{
-			{ 4, 0, STAT_LUCK, 4, DAM_BLIND, 6900, 5028 },
-			{ 4, DAM_BYPASS, STAT_LUCK, 3, DAM_BLIND, 6906, 5028 },
-			{ 6, DAM_BYPASS, STAT_LUCK, 2, DAM_BLIND, 6901, 5028 },
-			{ 6, DAM_BLIND | DAM_BYPASS | DAM_LOSE_TURN, -1, 0, 0, 6901, 5000 },
-			{ 8, DAM_KNOCKED_OUT | DAM_BLIND | DAM_BYPASS, -1, 0, 0, 6901, 5000 },
-			{ 8, DAM_DEAD, -1, 0, 0, 6901, 5000 },
+			{4, 0, STAT_LUCK, 4, DAM_BLIND, 6900, 5028},
+			{4, DAM_BYPASS, STAT_LUCK, 3, DAM_BLIND, 6906, 5028},
+			{6, DAM_BYPASS, STAT_LUCK, 2, DAM_BLIND, 6901, 5028},
+			{6, DAM_BLIND | DAM_BYPASS | DAM_LOSE_TURN, -1, 0, 0, 6901, 5000},
+			{8, DAM_KNOCKED_OUT | DAM_BLIND | DAM_BYPASS, -1, 0, 0, 6901, 5000},
+			{8, DAM_DEAD, -1, 0, 0, 6901, 5000},
 		},
 		// HIT_LOCATION_GROIN
 		{
-			{ 3, 0, -1, 0, 0, 6900, 5000 },
-			{ 3, DAM_BYPASS, STAT_ENDURANCE, -3, DAM_KNOCKED_DOWN, 6900, 5035 },
-			{ 3, DAM_KNOCKED_DOWN, STAT_ENDURANCE, -3, DAM_KNOCKED_OUT, 6900, 5036 },
-			{ 3, DAM_KNOCKED_OUT, -1, 0, 0, 6903, 5000 },
-			{ 4, DAM_KNOCKED_DOWN | DAM_BYPASS, STAT_ENDURANCE, 0, DAM_KNOCKED_OUT, 6903, 5036 },
-			{ 4, DAM_KNOCKED_OUT | DAM_BYPASS, -1, 0, 0, 6903, 5000 },
+			{3, 0, -1, 0, 0, 6900, 5000},
+			{3, DAM_BYPASS, STAT_ENDURANCE, -3, DAM_KNOCKED_DOWN, 6900, 5035},
+			{3, DAM_KNOCKED_DOWN, STAT_ENDURANCE, -3, DAM_KNOCKED_OUT, 6900, 5036},
+			{3, DAM_KNOCKED_OUT, -1, 0, 0, 6903, 5000},
+			{4, DAM_KNOCKED_DOWN | DAM_BYPASS, STAT_ENDURANCE, 0, DAM_KNOCKED_OUT, 6903, 5036},
+			{4, DAM_KNOCKED_OUT | DAM_BYPASS, -1, 0, 0, 6903, 5000},
 		},
 		// HIT_LOCATION_UNCALLED
 		{
-			{ 3, 0, -1, 0, 0, 6900, 5000 },
-			{ 3, DAM_BYPASS, -1, 0, 0, 6900, 5000 },
-			{ 4, 0, -1, 0, 0, 6904, 5000 },
-			{ 4, DAM_KNOCKED_DOWN | DAM_BYPASS, -1, 0, 0, 6904, 5000 },
-			{ 6, DAM_KNOCKED_OUT | DAM_BYPASS, -1, 0, 0, 6904, 5000 },
-			{ 6, DAM_DEAD, -1, 0, 0, 6904, 5000 },
+			{3, 0, -1, 0, 0, 6900, 5000},
+			{3, DAM_BYPASS, -1, 0, 0, 6900, 5000},
+			{4, 0, -1, 0, 0, 6904, 5000},
+			{4, DAM_KNOCKED_DOWN | DAM_BYPASS, -1, 0, 0, 6904, 5000},
+			{6, DAM_KNOCKED_OUT | DAM_BYPASS, -1, 0, 0, 6904, 5000},
+			{6, DAM_DEAD, -1, 0, 0, 6904, 5000},
 		},
 	},
 	// KILL_TYPE_BIG_BAD_BOSS
 	{
 		// HIT_LOCATION_HEAD
 		{
-			{ 3, 0, -1, 0, 0, 7101, 7100 },
-			{ 3, 0, -1, 0, 0, 7102, 7103 },
-			{ 4, 0, -1, 0, 0, 7102, 7103 },
-			{ 4, DAM_LOSE_TURN, -1, 0, 0, 7104, 7103 },
-			{ 5, DAM_KNOCKED_DOWN, STAT_LUCK, 0, DAM_BLIND, 7105, 7106 },
-			{ 6, DAM_KNOCKED_DOWN, -1, 0, 0, 7105, 7100 },
+			{3, 0, -1, 0, 0, 7101, 7100},
+			{3, 0, -1, 0, 0, 7102, 7103},
+			{4, 0, -1, 0, 0, 7102, 7103},
+			{4, DAM_LOSE_TURN, -1, 0, 0, 7104, 7103},
+			{5, DAM_KNOCKED_DOWN, STAT_LUCK, 0, DAM_BLIND, 7105, 7106},
+			{6, DAM_KNOCKED_DOWN, -1, 0, 0, 7105, 7100},
 		},
 		// HIT_LOCATION_LEFT_ARM
 		{
-			{ 3, 0, -1, 0, 0, 7106, 7100 },
-			{ 3, 0, -1, 0, 0, 7106, 7100 },
-			{ 3, DAM_LOSE_TURN, -1, 0, 0, 7106, 7011 },
-			{ 4, DAM_LOSE_TURN, -1, 0, 0, 7106, 7100 },
-			{ 4, DAM_CRIP_ARM_LEFT, -1, 0, 0, 7106, 7100 },
-			{ 4, DAM_CRIP_ARM_LEFT, -1, 0, 0, 7106, 7100 },
+			{3, 0, -1, 0, 0, 7106, 7100},
+			{3, 0, -1, 0, 0, 7106, 7100},
+			{3, DAM_LOSE_TURN, -1, 0, 0, 7106, 7011},
+			{4, DAM_LOSE_TURN, -1, 0, 0, 7106, 7100},
+			{4, DAM_CRIP_ARM_LEFT, -1, 0, 0, 7106, 7100},
+			{4, DAM_CRIP_ARM_LEFT, -1, 0, 0, 7106, 7100},
 		},
 		// HIT_LOCATION_RIGHT_ARM
 		{
-			{ 3, 0, -1, 0, 0, 7106, 7100 },
-			{ 3, 0, -1, 0, 0, 7106, 7100 },
-			{ 3, DAM_LOSE_TURN, -1, 0, 0, 7106, 7100 },
-			{ 4, DAM_LOSE_TURN, -1, 0, 0, 7106, 7100 },
-			{ 4, DAM_CRIP_ARM_RIGHT, -1, 0, 0, 7106, 7100 },
-			{ 4, DAM_CRIP_ARM_RIGHT, -1, 0, 0, 7106, 7100 },
+			{3, 0, -1, 0, 0, 7106, 7100},
+			{3, 0, -1, 0, 0, 7106, 7100},
+			{3, DAM_LOSE_TURN, -1, 0, 0, 7106, 7100},
+			{4, DAM_LOSE_TURN, -1, 0, 0, 7106, 7100},
+			{4, DAM_CRIP_ARM_RIGHT, -1, 0, 0, 7106, 7100},
+			{4, DAM_CRIP_ARM_RIGHT, -1, 0, 0, 7106, 7100},
 		},
 		// HIT_LOCATION_TORSO
 		{
-			{ 3, 0, -1, 0, 0, 7106, 7100 },
-			{ 3, 0, -1, 0, 0, 7106, 7100 },
-			{ 3, 0, -1, 0, 0, 7106, 7100 },
-			{ 4, 0, -1, 0, 0, 7106, 7100 },
-			{ 4, DAM_KNOCKED_DOWN, -1, 0, 0, 7106, 7100 },
-			{ 5, DAM_KNOCKED_DOWN, -1, 0, 0, 7106, 7100 },
+			{3, 0, -1, 0, 0, 7106, 7100},
+			{3, 0, -1, 0, 0, 7106, 7100},
+			{3, 0, -1, 0, 0, 7106, 7100},
+			{4, 0, -1, 0, 0, 7106, 7100},
+			{4, DAM_KNOCKED_DOWN, -1, 0, 0, 7106, 7100},
+			{5, DAM_KNOCKED_DOWN, -1, 0, 0, 7106, 7100},
 		},
 		// HIT_LOCATION_RIGHT_LEG
 		{
-			{ 3, DAM_KNOCKED_DOWN, -1, 0, 0, 7106, 7100 },
-			{ 3, DAM_KNOCKED_DOWN, STAT_ENDURANCE, 0, DAM_CRIP_LEG_RIGHT, 7106, 7106 },
-			{ 3, DAM_KNOCKED_DOWN, STAT_ENDURANCE, -3, DAM_CRIP_LEG_RIGHT, 7060, 7106 },
-			{ 4, DAM_KNOCKED_DOWN | DAM_CRIP_LEG_RIGHT, -1, 0, 0, 7106, 7100 },
-			{ 4, DAM_KNOCKED_DOWN | DAM_CRIP_LEG_RIGHT, -1, 0, 0, 7106, 7106 },
-			{ 4, DAM_CRIP_LEG_RIGHT, -1, 0, 0, 7106, 7100 },
+			{3, DAM_KNOCKED_DOWN, -1, 0, 0, 7106, 7100},
+			{3, DAM_KNOCKED_DOWN, STAT_ENDURANCE, 0, DAM_CRIP_LEG_RIGHT, 7106, 7106},
+			{3, DAM_KNOCKED_DOWN, STAT_ENDURANCE, -3, DAM_CRIP_LEG_RIGHT, 7060, 7106},
+			{4, DAM_KNOCKED_DOWN | DAM_CRIP_LEG_RIGHT, -1, 0, 0, 7106, 7100},
+			{4, DAM_KNOCKED_DOWN | DAM_CRIP_LEG_RIGHT, -1, 0, 0, 7106, 7106},
+			{4, DAM_CRIP_LEG_RIGHT, -1, 0, 0, 7106, 7100},
 		},
 		// HIT_LOCATION_LEFT_LEG
 		{
-			{ 3, DAM_KNOCKED_DOWN, -1, 0, 0, 7106, 7100 },
-			{ 3, DAM_KNOCKED_DOWN, STAT_ENDURANCE, 0, DAM_CRIP_LEG_LEFT, 7106, 7024 },
-			{ 3, DAM_KNOCKED_DOWN, STAT_ENDURANCE, -3, DAM_CRIP_LEG_LEFT, 7106, 7024 },
-			{ 4, DAM_KNOCKED_DOWN | DAM_CRIP_LEG_LEFT, -1, 0, 0, 7106, 7100 },
-			{ 4, DAM_KNOCKED_DOWN | DAM_CRIP_LEG_LEFT, -1, 0, 0, 7106, 7106 },
-			{ 4, DAM_CRIP_LEG_LEFT, -1, 0, 0, 7106, 7100 },
+			{3, DAM_KNOCKED_DOWN, -1, 0, 0, 7106, 7100},
+			{3, DAM_KNOCKED_DOWN, STAT_ENDURANCE, 0, DAM_CRIP_LEG_LEFT, 7106, 7024},
+			{3, DAM_KNOCKED_DOWN, STAT_ENDURANCE, -3, DAM_CRIP_LEG_LEFT, 7106, 7024},
+			{4, DAM_KNOCKED_DOWN | DAM_CRIP_LEG_LEFT, -1, 0, 0, 7106, 7100},
+			{4, DAM_KNOCKED_DOWN | DAM_CRIP_LEG_LEFT, -1, 0, 0, 7106, 7106},
+			{4, DAM_CRIP_LEG_LEFT, -1, 0, 0, 7106, 7100},
 		},
 		// HIT_LOCATION_EYES
 		{
-			{ 3, 0, -1, 0, 0, 7106, 7106 },
-			{ 3, 0, -1, 0, 0, 7106, 7106 },
-			{ 4, 0, STAT_LUCK, 2, DAM_BLIND, 7106, 7106 },
-			{ 4, DAM_LOSE_TURN, -1, 0, 0, 7106, 7100 },
-			{ 5, DAM_BLIND | DAM_LOSE_TURN, -1, 0, 0, 7106, 7100 },
-			{ 5, DAM_BLIND | DAM_LOSE_TURN, -1, 0, 0, 7106, 7100 },
+			{3, 0, -1, 0, 0, 7106, 7106},
+			{3, 0, -1, 0, 0, 7106, 7106},
+			{4, 0, STAT_LUCK, 2, DAM_BLIND, 7106, 7106},
+			{4, DAM_LOSE_TURN, -1, 0, 0, 7106, 7100},
+			{5, DAM_BLIND | DAM_LOSE_TURN, -1, 0, 0, 7106, 7100},
+			{5, DAM_BLIND | DAM_LOSE_TURN, -1, 0, 0, 7106, 7100},
 		},
 		// HIT_LOCATION_GROIN
 		{
-			{ 3, 0, -1, 0, 0, 7106, 7100 },
-			{ 3, 0, STAT_ENDURANCE, -3, DAM_KNOCKED_DOWN, 7106, 7106 },
-			{ 3, DAM_KNOCKED_DOWN, -1, 0, 0, 7106, 7106 },
-			{ 3, DAM_KNOCKED_DOWN, -1, 0, 0, 7106, 7100 },
-			{ 4, 0, -1, 0, 0, 7106, 7106 },
-			{ 4, DAM_KNOCKED_DOWN, -1, 0, 0, 7106, 7100 },
+			{3, 0, -1, 0, 0, 7106, 7100},
+			{3, 0, STAT_ENDURANCE, -3, DAM_KNOCKED_DOWN, 7106, 7106},
+			{3, DAM_KNOCKED_DOWN, -1, 0, 0, 7106, 7106},
+			{3, DAM_KNOCKED_DOWN, -1, 0, 0, 7106, 7100},
+			{4, 0, -1, 0, 0, 7106, 7106},
+			{4, DAM_KNOCKED_DOWN, -1, 0, 0, 7106, 7100},
 		},
 		// HIT_LOCATION_UNCALLED
 		{
-			{ 3, 0, -1, 0, 0, 7106, 7100 },
-			{ 3, 0, -1, 0, 0, 7106, 7100 },
-			{ 4, 0, -1, 0, 0, 7106, 7100 },
-			{ 4, 0, -1, 0, 0, 7106, 7100 },
-			{ 5, DAM_KNOCKED_DOWN, -1, 0, 0, 7106, 7100 },
-			{ 5, DAM_KNOCKED_DOWN, -1, 0, 0, 7106, 7100 },
+			{3, 0, -1, 0, 0, 7106, 7100},
+			{3, 0, -1, 0, 0, 7106, 7100},
+			{4, 0, -1, 0, 0, 7106, 7100},
+			{4, 0, -1, 0, 0, 7106, 7100},
+			{5, DAM_KNOCKED_DOWN, -1, 0, 0, 7106, 7100},
+			{5, DAM_KNOCKED_DOWN, -1, 0, 0, 7106, 7100},
 		},
 	},
 };
@@ -1789,76 +1789,76 @@ static CriticalHitDescription gCriticalHitTables[SFALL_KILL_TYPE_COUNT][HIT_LOCA
 // 0x5179B0
 static CriticalHitDescription gPlayerCriticalHitTable[HIT_LOCATION_COUNT][CRTICIAL_EFFECT_COUNT] = {
 	{
-		{ 3, 0, -1, 0, 0, 6500, 5000 },
-		{ 3, DAM_BYPASS, STAT_ENDURANCE, 3, DAM_KNOCKED_DOWN, 6501, 6503 },
-		{ 3, DAM_BYPASS, STAT_ENDURANCE, 0, DAM_KNOCKED_DOWN, 6501, 6503 },
-		{ 3, DAM_KNOCKED_DOWN | DAM_BYPASS, STAT_ENDURANCE, 2, DAM_KNOCKED_OUT, 6503, 6502 },
-		{ 3, DAM_KNOCKED_OUT | DAM_BYPASS, STAT_LUCK, 2, DAM_BLIND, 6502, 6504 },
-		{ 6, DAM_BYPASS, STAT_ENDURANCE, -2, DAM_DEAD, 6501, 6505 },
+		{3, 0, -1, 0, 0, 6500, 5000},
+		{3, DAM_BYPASS, STAT_ENDURANCE, 3, DAM_KNOCKED_DOWN, 6501, 6503},
+		{3, DAM_BYPASS, STAT_ENDURANCE, 0, DAM_KNOCKED_DOWN, 6501, 6503},
+		{3, DAM_KNOCKED_DOWN | DAM_BYPASS, STAT_ENDURANCE, 2, DAM_KNOCKED_OUT, 6503, 6502},
+		{3, DAM_KNOCKED_OUT | DAM_BYPASS, STAT_LUCK, 2, DAM_BLIND, 6502, 6504},
+		{6, DAM_BYPASS, STAT_ENDURANCE, -2, DAM_DEAD, 6501, 6505},
 	},
 	{
-		{ 2, 0, -1, 0, 0, 6506, 5000 },
-		{ 2, DAM_LOSE_TURN, -1, 0, 0, 6507, 5000 },
-		{ 3, 0, STAT_ENDURANCE, 0, DAM_CRIP_ARM_LEFT, 6508, 6509 },
-		{ 3, DAM_BYPASS, -1, 0, 0, 6501, 5000 },
-		{ 3, DAM_CRIP_ARM_LEFT | DAM_BYPASS, -1, 0, 0, 6510, 5000 },
-		{ 3, DAM_CRIP_ARM_LEFT | DAM_BYPASS, -1, 0, 0, 6510, 5000 },
+		{2, 0, -1, 0, 0, 6506, 5000},
+		{2, DAM_LOSE_TURN, -1, 0, 0, 6507, 5000},
+		{3, 0, STAT_ENDURANCE, 0, DAM_CRIP_ARM_LEFT, 6508, 6509},
+		{3, DAM_BYPASS, -1, 0, 0, 6501, 5000},
+		{3, DAM_CRIP_ARM_LEFT | DAM_BYPASS, -1, 0, 0, 6510, 5000},
+		{3, DAM_CRIP_ARM_LEFT | DAM_BYPASS, -1, 0, 0, 6510, 5000},
 	},
 	{
-		{ 2, 0, -1, 0, 0, 6506, 5000 },
-		{ 2, DAM_LOSE_TURN, -1, 0, 0, 6507, 5000 },
-		{ 3, 0, STAT_ENDURANCE, 0, DAM_CRIP_ARM_RIGHT, 6508, 6509 },
-		{ 3, DAM_BYPASS, -1, 0, 0, 6501, 5000 },
-		{ 3, DAM_CRIP_ARM_RIGHT | DAM_BYPASS, -1, 0, 0, 6511, 5000 },
-		{ 3, DAM_CRIP_ARM_RIGHT | DAM_BYPASS, -1, 0, 0, 6511, 5000 },
+		{2, 0, -1, 0, 0, 6506, 5000},
+		{2, DAM_LOSE_TURN, -1, 0, 0, 6507, 5000},
+		{3, 0, STAT_ENDURANCE, 0, DAM_CRIP_ARM_RIGHT, 6508, 6509},
+		{3, DAM_BYPASS, -1, 0, 0, 6501, 5000},
+		{3, DAM_CRIP_ARM_RIGHT | DAM_BYPASS, -1, 0, 0, 6511, 5000},
+		{3, DAM_CRIP_ARM_RIGHT | DAM_BYPASS, -1, 0, 0, 6511, 5000},
 	},
 	{
-		{ 3, 0, -1, 0, 0, 6512, 5000 },
-		{ 3, 0, -1, 0, 0, 6512, 5000 },
-		{ 3, DAM_BYPASS, -1, 0, 0, 6508, 5000 },
-		{ 3, DAM_KNOCKED_DOWN | DAM_BYPASS, -1, 0, 0, 6503, 5000 },
-		{ 4, DAM_KNOCKED_DOWN | DAM_BYPASS, -1, 0, 0, 6503, 5000 },
-		{ 4, DAM_KNOCKED_DOWN | DAM_BYPASS, STAT_LUCK, 2, DAM_DEAD, 6503, 6513 },
+		{3, 0, -1, 0, 0, 6512, 5000},
+		{3, 0, -1, 0, 0, 6512, 5000},
+		{3, DAM_BYPASS, -1, 0, 0, 6508, 5000},
+		{3, DAM_KNOCKED_DOWN | DAM_BYPASS, -1, 0, 0, 6503, 5000},
+		{4, DAM_KNOCKED_DOWN | DAM_BYPASS, -1, 0, 0, 6503, 5000},
+		{4, DAM_KNOCKED_DOWN | DAM_BYPASS, STAT_LUCK, 2, DAM_DEAD, 6503, 6513},
 	},
 	{
-		{ 3, 0, -1, 0, 0, 6512, 5000 },
-		{ 3, DAM_KNOCKED_DOWN, -1, 0, 0, 6514, 5000 },
-		{ 3, DAM_KNOCKED_DOWN, STAT_ENDURANCE, 0, DAM_CRIP_LEG_RIGHT, 6514, 6515 },
-		{ 4, DAM_KNOCKED_DOWN | DAM_CRIP_LEG_RIGHT | DAM_BYPASS, -1, 0, 0, 6516, 5000 },
-		{ 4, DAM_KNOCKED_DOWN | DAM_CRIP_LEG_RIGHT | DAM_BYPASS, -1, 0, 0, 6516, 5000 },
-		{ 4, DAM_KNOCKED_OUT | DAM_CRIP_LEG_RIGHT | DAM_BYPASS, -1, 0, 0, 6517, 5000 },
+		{3, 0, -1, 0, 0, 6512, 5000},
+		{3, DAM_KNOCKED_DOWN, -1, 0, 0, 6514, 5000},
+		{3, DAM_KNOCKED_DOWN, STAT_ENDURANCE, 0, DAM_CRIP_LEG_RIGHT, 6514, 6515},
+		{4, DAM_KNOCKED_DOWN | DAM_CRIP_LEG_RIGHT | DAM_BYPASS, -1, 0, 0, 6516, 5000},
+		{4, DAM_KNOCKED_DOWN | DAM_CRIP_LEG_RIGHT | DAM_BYPASS, -1, 0, 0, 6516, 5000},
+		{4, DAM_KNOCKED_OUT | DAM_CRIP_LEG_RIGHT | DAM_BYPASS, -1, 0, 0, 6517, 5000},
 	},
 	{
-		{ 3, 0, -1, 0, 0, 6512, 5000 },
-		{ 3, DAM_KNOCKED_DOWN, -1, 0, 0, 6514, 5000 },
-		{ 3, DAM_KNOCKED_DOWN, STAT_ENDURANCE, 0, DAM_CRIP_LEG_LEFT, 6514, 6515 },
-		{ 4, DAM_KNOCKED_DOWN | DAM_CRIP_LEG_LEFT | DAM_BYPASS, -1, 0, 0, 6516, 5000 },
-		{ 4, DAM_KNOCKED_DOWN | DAM_CRIP_LEG_LEFT | DAM_BYPASS, -1, 0, 0, 6516, 5000 },
-		{ 4, DAM_KNOCKED_OUT | DAM_CRIP_LEG_LEFT | DAM_BYPASS, -1, 0, 0, 6517, 5000 },
+		{3, 0, -1, 0, 0, 6512, 5000},
+		{3, DAM_KNOCKED_DOWN, -1, 0, 0, 6514, 5000},
+		{3, DAM_KNOCKED_DOWN, STAT_ENDURANCE, 0, DAM_CRIP_LEG_LEFT, 6514, 6515},
+		{4, DAM_KNOCKED_DOWN | DAM_CRIP_LEG_LEFT | DAM_BYPASS, -1, 0, 0, 6516, 5000},
+		{4, DAM_KNOCKED_DOWN | DAM_CRIP_LEG_LEFT | DAM_BYPASS, -1, 0, 0, 6516, 5000},
+		{4, DAM_KNOCKED_OUT | DAM_CRIP_LEG_LEFT | DAM_BYPASS, -1, 0, 0, 6517, 5000},
 	},
 	{
-		{ 3, 0, -1, 0, 0, 6518, 5000 },
-		{ 3, 0, STAT_LUCK, 3, DAM_BLIND, 6518, 6519 },
-		{ 3, DAM_BYPASS, STAT_LUCK, 3, DAM_BLIND, 6501, 6519 },
-		{ 4, DAM_BYPASS | DAM_LOSE_TURN, -1, 0, 0, 6520, 5000 },
-		{ 4, DAM_BLIND | DAM_BYPASS | DAM_LOSE_TURN, -1, 0, 0, 6521, 5000 },
-		{ 6, DAM_DEAD, -1, 0, 0, 6522, 5000 },
+		{3, 0, -1, 0, 0, 6518, 5000},
+		{3, 0, STAT_LUCK, 3, DAM_BLIND, 6518, 6519},
+		{3, DAM_BYPASS, STAT_LUCK, 3, DAM_BLIND, 6501, 6519},
+		{4, DAM_BYPASS | DAM_LOSE_TURN, -1, 0, 0, 6520, 5000},
+		{4, DAM_BLIND | DAM_BYPASS | DAM_LOSE_TURN, -1, 0, 0, 6521, 5000},
+		{6, DAM_DEAD, -1, 0, 0, 6522, 5000},
 	},
 	{
-		{ 3, 0, -1, 0, 0, 6523, 5000 },
-		{ 3, 0, STAT_ENDURANCE, 0, DAM_KNOCKED_DOWN, 6523, 6524 },
-		{ 3, DAM_KNOCKED_DOWN, -1, 0, 0, 6524, 5000 },
-		{ 3, DAM_KNOCKED_DOWN, STAT_ENDURANCE, 4, DAM_KNOCKED_OUT, 6524, 6525 },
-		{ 4, DAM_KNOCKED_DOWN, STAT_ENDURANCE, 2, DAM_KNOCKED_OUT, 6524, 6525 },
-		{ 4, DAM_KNOCKED_OUT, -1, 0, 0, 6526, 5000 },
+		{3, 0, -1, 0, 0, 6523, 5000},
+		{3, 0, STAT_ENDURANCE, 0, DAM_KNOCKED_DOWN, 6523, 6524},
+		{3, DAM_KNOCKED_DOWN, -1, 0, 0, 6524, 5000},
+		{3, DAM_KNOCKED_DOWN, STAT_ENDURANCE, 4, DAM_KNOCKED_OUT, 6524, 6525},
+		{4, DAM_KNOCKED_DOWN, STAT_ENDURANCE, 2, DAM_KNOCKED_OUT, 6524, 6525},
+		{4, DAM_KNOCKED_OUT, -1, 0, 0, 6526, 5000},
 	},
 	{
-		{ 3, 0, -1, 0, 0, 6512, 5000 },
-		{ 3, 0, -1, 0, 0, 6512, 5000 },
-		{ 3, DAM_BYPASS, -1, 0, 0, 6508, 5000 },
-		{ 3, DAM_KNOCKED_DOWN | DAM_BYPASS, -1, 0, 0, 6503, 5000 },
-		{ 4, DAM_KNOCKED_DOWN | DAM_BYPASS, -1, 0, 0, 6503, 5000 },
-		{ 4, DAM_KNOCKED_DOWN | DAM_BYPASS, STAT_LUCK, 2, DAM_DEAD, 6503, 6513 },
+		{3, 0, -1, 0, 0, 6512, 5000},
+		{3, 0, -1, 0, 0, 6512, 5000},
+		{3, DAM_BYPASS, -1, 0, 0, 6508, 5000},
+		{3, DAM_KNOCKED_DOWN | DAM_BYPASS, -1, 0, 0, 6503, 5000},
+		{4, DAM_KNOCKED_DOWN | DAM_BYPASS, -1, 0, 0, 6503, 5000},
+		{4, DAM_KNOCKED_DOWN | DAM_BYPASS, STAT_LUCK, 2, DAM_DEAD, 6503, 6513},
 	},
 };
 
@@ -1872,13 +1872,13 @@ static bool _combat_cleanup_enabled = false;
 //
 // 0x517FA0
 static const int _cf_table[WEAPON_CRITICAL_FAILURE_TYPE_COUNT][WEAPON_CRITICAL_FAILURE_EFFECT_COUNT] = {
-	{ 0, DAM_LOSE_TURN, DAM_LOSE_TURN, DAM_HURT_SELF | DAM_KNOCKED_DOWN, DAM_CRIP_RANDOM },
-	{ 0, DAM_LOSE_TURN, DAM_DROP, DAM_RANDOM_HIT, DAM_HIT_SELF },
-	{ 0, DAM_LOSE_AMMO, DAM_DROP, DAM_RANDOM_HIT, DAM_DESTROY },
-	{ DAM_LOSE_TURN, DAM_LOSE_TURN | DAM_LOSE_AMMO, DAM_DROP | DAM_LOSE_TURN, DAM_RANDOM_HIT, DAM_EXPLODE | DAM_LOSE_TURN },
-	{ DAM_DUD, DAM_DROP, DAM_DROP | DAM_HURT_SELF, DAM_RANDOM_HIT, DAM_EXPLODE },
-	{ DAM_LOSE_TURN, DAM_DUD, DAM_DESTROY, DAM_RANDOM_HIT, DAM_EXPLODE | DAM_LOSE_TURN | DAM_KNOCKED_DOWN },
-	{ 0, DAM_LOSE_TURN, DAM_RANDOM_HIT, DAM_DESTROY, DAM_EXPLODE | DAM_LOSE_TURN | DAM_ON_FIRE },
+	{0, DAM_LOSE_TURN, DAM_LOSE_TURN, DAM_HURT_SELF | DAM_KNOCKED_DOWN, DAM_CRIP_RANDOM},
+	{0, DAM_LOSE_TURN, DAM_DROP, DAM_RANDOM_HIT, DAM_HIT_SELF},
+	{0, DAM_LOSE_AMMO, DAM_DROP, DAM_RANDOM_HIT, DAM_DESTROY},
+	{DAM_LOSE_TURN, DAM_LOSE_TURN | DAM_LOSE_AMMO, DAM_DROP | DAM_LOSE_TURN, DAM_RANDOM_HIT, DAM_EXPLODE | DAM_LOSE_TURN},
+	{DAM_DUD, DAM_DROP, DAM_DROP | DAM_HURT_SELF, DAM_RANDOM_HIT, DAM_EXPLODE},
+	{DAM_LOSE_TURN, DAM_DUD, DAM_DESTROY, DAM_RANDOM_HIT, DAM_EXPLODE | DAM_LOSE_TURN | DAM_KNOCKED_DOWN},
+	{0, DAM_LOSE_TURN, DAM_RANDOM_HIT, DAM_DESTROY, DAM_EXPLODE | DAM_LOSE_TURN | DAM_ON_FIRE},
 };
 
 // 0x51802C
@@ -1914,7 +1914,7 @@ static Attack _main_ctd;
 static MessageList gCombatMessageList;
 
 // 0x56D370
-static Object* gCalledShotCritter;
+static Object *gCalledShotCritter;
 
 // 0x56D374
 static int gCalledShotWindow;
@@ -1928,13 +1928,13 @@ static int _list_total;
 // Probably last who_hit_me of obj_dude
 //
 // 0x56D380
-static Object* _combat_ending_guy;
+static Object *_combat_ending_guy;
 
 // 0x56D384
 static int _list_noncom;
 
 // 0x56D388
-static Object* _combat_turn_obj;
+static Object *_combat_turn_obj;
 
 // target_highlight
 //
@@ -1942,7 +1942,7 @@ static Object* _combat_turn_obj;
 static int _combat_highlight;
 
 // 0x56D390
-static Object** _combat_list;
+static Object **_combat_list;
 
 // 0x56D394
 static int _list_com;
@@ -1966,7 +1966,7 @@ static Attack _explosion_ctd;
 static CriticalHitDescription gBaseCriticalHitTables[SFALL_KILL_TYPE_COUNT][HIT_LOCATION_COUNT][CRTICIAL_EFFECT_COUNT];
 static CriticalHitDescription gBasePlayerCriticalHitTable[HIT_LOCATION_COUNT][CRTICIAL_EFFECT_COUNT];
 
-static const char* gCritDataMemberKeys[CRIT_DATA_MEMBER_COUNT] = {
+static const char *gCritDataMemberKeys[CRIT_DATA_MEMBER_COUNT] = {
 	"DamageMultiplier",
 	"EffectFlags",
 	"StatCheck",
@@ -2072,7 +2072,7 @@ void combatExit() {
 }
 
 // 0x420E24
-int _find_cid(int a1, int cid, Object** critterList, int critterListLength) {
+int _find_cid(int a1, int cid, Object **critterList, int critterListLength) {
 	int index;
 
 	for (index = a1; index < critterListLength; index++) {
@@ -2085,11 +2085,12 @@ int _find_cid(int a1, int cid, Object** critterList, int critterListLength) {
 }
 
 // 0x420E4C
-int combatLoad(File* stream) {
-	if (fileReadUInt32(stream, &gCombatState) == -1) return -1;
+int combatLoad(File *stream) {
+	if (fileReadUInt32(stream, &gCombatState) == -1)
+		return -1;
 
 	if (!isInCombat()) {
-		Object* obj = objectFindFirst();
+		Object *obj = objectFindFirst();
 		while (obj != NULL) {
 			if (PID_TYPE(obj->pid) == OBJ_TYPE_CRITTER) {
 				if (obj->data.critter.combat.whoHitMeCid == -1) {
@@ -2101,19 +2102,26 @@ int combatLoad(File* stream) {
 		return 0;
 	}
 
-	if (fileReadInt32(stream, &_combat_turn_running) == -1) return -1;
-	if (fileReadInt32(stream, &_combat_free_move) == -1) return -1;
-	if (fileReadInt32(stream, &_combat_exps) == -1) return -1;
-	if (fileReadInt32(stream, &_list_com) == -1) return -1;
-	if (fileReadInt32(stream, &_list_noncom) == -1) return -1;
-	if (fileReadInt32(stream, &_list_total) == -1) return -1;
+	if (fileReadInt32(stream, &_combat_turn_running) == -1)
+		return -1;
+	if (fileReadInt32(stream, &_combat_free_move) == -1)
+		return -1;
+	if (fileReadInt32(stream, &_combat_exps) == -1)
+		return -1;
+	if (fileReadInt32(stream, &_list_com) == -1)
+		return -1;
+	if (fileReadInt32(stream, &_list_noncom) == -1)
+		return -1;
+	if (fileReadInt32(stream, &_list_total) == -1)
+		return -1;
 
 	if (objectListCreate(-1, gElevation, OBJ_TYPE_CRITTER, &_combat_list) != _list_total) {
 		objectListFree(_combat_list);
 		return -1;
 	}
 
-	if (fileReadInt32(stream, &(gDude->cid)) == -1) return -1;
+	if (fileReadInt32(stream, &(gDude->cid)) == -1)
+		return -1;
 
 	for (int index = 0; index < _list_total; index++) {
 		if (_combat_list[index]->data.critter.combat.whoHitMeCid == -1) {
@@ -2131,7 +2139,8 @@ int combatLoad(File* stream) {
 
 	for (int index = 0; index < _list_total; index++) {
 		int cid;
-		if (fileReadInt32(stream, &cid) == -1) return -1;
+		if (fileReadInt32(stream, &cid) == -1)
+			return -1;
 
 		// NOTE: Uninline.
 		int found = _find_cid(index, cid, _combat_list, _list_total);
@@ -2139,7 +2148,7 @@ int combatLoad(File* stream) {
 			return -1;
 		}
 
-		Object* obj = _combat_list[index];
+		Object *obj = _combat_list[index];
 		_combat_list[index] = _combat_list[found];
 		_combat_list[found] = obj;
 	}
@@ -2152,16 +2161,17 @@ int combatLoad(File* stream) {
 		internal_free(_aiInfoList);
 	}
 
-	_aiInfoList = (CombatAiInfo*)internal_malloc(sizeof(*_aiInfoList) * _list_total);
+	_aiInfoList = (CombatAiInfo *)internal_malloc(sizeof(*_aiInfoList) * _list_total);
 	if (_aiInfoList == NULL) {
 		return -1;
 	}
 
 	for (int index = 0; index < _list_total; index++) {
-		CombatAiInfo* aiInfo = &(_aiInfoList[index]);
+		CombatAiInfo *aiInfo = &(_aiInfoList[index]);
 
 		int friendlyId;
-		if (fileReadInt32(stream, &friendlyId) == -1) return -1;
+		if (fileReadInt32(stream, &friendlyId) == -1)
+			return -1;
 
 		if (friendlyId == -1) {
 			aiInfo->friendlyDead = NULL;
@@ -2169,11 +2179,13 @@ int combatLoad(File* stream) {
 			// SFALL: Fix incorrect object type search when loading a game in
 			// combat mode.
 			aiInfo->friendlyDead = objectTypedFindById(friendlyId, OBJ_TYPE_CRITTER);
-			if (aiInfo->friendlyDead == NULL) return -1;
+			if (aiInfo->friendlyDead == NULL)
+				return -1;
 		}
 
 		int targetId;
-		if (fileReadInt32(stream, &targetId) == -1) return -1;
+		if (fileReadInt32(stream, &targetId) == -1)
+			return -1;
 
 		if (targetId == -1) {
 			aiInfo->lastTarget = NULL;
@@ -2181,11 +2193,13 @@ int combatLoad(File* stream) {
 			// SFALL: Fix incorrect object type search when loading a game in
 			// combat mode.
 			aiInfo->lastTarget = objectTypedFindById(targetId, OBJ_TYPE_CRITTER);
-			if (aiInfo->lastTarget == NULL) return -1;
+			if (aiInfo->lastTarget == NULL)
+				return -1;
 		}
 
 		int itemId;
-		if (fileReadInt32(stream, &itemId) == -1) return -1;
+		if (fileReadInt32(stream, &itemId) == -1)
+			return -1;
 
 		if (itemId == -1) {
 			aiInfo->lastItem = NULL;
@@ -2193,10 +2207,12 @@ int combatLoad(File* stream) {
 			// SFALL: Fix incorrect object type search when loading a game in
 			// combat mode.
 			aiInfo->lastItem = objectTypedFindById(itemId, OBJ_TYPE_ITEM);
-			if (aiInfo->lastItem == NULL) return -1;
+			if (aiInfo->lastItem == NULL)
+				return -1;
 		}
 
-		if (fileReadInt32(stream, &(aiInfo->lastMove)) == -1) return -1;
+		if (fileReadInt32(stream, &(aiInfo->lastMove)) == -1)
+			return -1;
 	}
 
 	_combat_begin_extra(gDude);
@@ -2205,21 +2221,31 @@ int combatLoad(File* stream) {
 }
 
 // 0x421244
-int combatSave(File* stream) {
-	if (fileWriteInt32(stream, gCombatState) == -1) return -1;
+int combatSave(File *stream) {
+	if (fileWriteInt32(stream, gCombatState) == -1)
+		return -1;
 
-	if (!isInCombat()) return 0;
+	if (!isInCombat())
+		return 0;
 
-	if (fileWriteInt32(stream, _combat_turn_running) == -1) return -1;
-	if (fileWriteInt32(stream, _combat_free_move) == -1) return -1;
-	if (fileWriteInt32(stream, _combat_exps) == -1) return -1;
-	if (fileWriteInt32(stream, _list_com) == -1) return -1;
-	if (fileWriteInt32(stream, _list_noncom) == -1) return -1;
-	if (fileWriteInt32(stream, _list_total) == -1) return -1;
-	if (fileWriteInt32(stream, gDude->cid) == -1) return -1;
+	if (fileWriteInt32(stream, _combat_turn_running) == -1)
+		return -1;
+	if (fileWriteInt32(stream, _combat_free_move) == -1)
+		return -1;
+	if (fileWriteInt32(stream, _combat_exps) == -1)
+		return -1;
+	if (fileWriteInt32(stream, _list_com) == -1)
+		return -1;
+	if (fileWriteInt32(stream, _list_noncom) == -1)
+		return -1;
+	if (fileWriteInt32(stream, _list_total) == -1)
+		return -1;
+	if (fileWriteInt32(stream, gDude->cid) == -1)
+		return -1;
 
 	for (int index = 0; index < _list_total; index++) {
-		if (fileWriteInt32(stream, _combat_list[index]->cid) == -1) return -1;
+		if (fileWriteInt32(stream, _combat_list[index]->cid) == -1)
+			return -1;
 	}
 
 	if (_aiInfoList == NULL) {
@@ -2227,24 +2253,28 @@ int combatSave(File* stream) {
 	}
 
 	for (int index = 0; index < _list_total; index++) {
-		CombatAiInfo* aiInfo = &(_aiInfoList[index]);
+		CombatAiInfo *aiInfo = &(_aiInfoList[index]);
 
-		if (fileWriteInt32(stream, aiInfo->friendlyDead != NULL ? aiInfo->friendlyDead->id : -1) == -1) return -1;
-		if (fileWriteInt32(stream, aiInfo->lastTarget != NULL ? aiInfo->lastTarget->id : -1) == -1) return -1;
-		if (fileWriteInt32(stream, aiInfo->lastItem != NULL ? aiInfo->lastItem->id : -1) == -1) return -1;
-		if (fileWriteInt32(stream, aiInfo->lastMove) == -1) return -1;
+		if (fileWriteInt32(stream, aiInfo->friendlyDead != NULL ? aiInfo->friendlyDead->id : -1) == -1)
+			return -1;
+		if (fileWriteInt32(stream, aiInfo->lastTarget != NULL ? aiInfo->lastTarget->id : -1) == -1)
+			return -1;
+		if (fileWriteInt32(stream, aiInfo->lastItem != NULL ? aiInfo->lastItem->id : -1) == -1)
+			return -1;
+		if (fileWriteInt32(stream, aiInfo->lastMove) == -1)
+			return -1;
 	}
 
 	return 0;
 }
 
 // 0x4213E8
-bool _combat_safety_invalidate_weapon(Object* attacker, Object* weapon, int hitMode, Object* defender, int* safeDistancePtr) {
+bool _combat_safety_invalidate_weapon(Object *attacker, Object *weapon, int hitMode, Object *defender, int *safeDistancePtr) {
 	return _combat_safety_invalidate_weapon_func(attacker, weapon, hitMode, defender, safeDistancePtr, NULL);
 }
 
 // 0x4213FC
-static bool _combat_safety_invalidate_weapon_func(Object* attacker, Object* weapon, int hitMode, Object* defender, int* safeDistancePtr, Object* attackerFriend) {
+static bool _combat_safety_invalidate_weapon_func(Object *attacker, Object *weapon, int hitMode, Object *defender, int *safeDistancePtr, Object *attackerFriend) {
 	if (safeDistancePtr != NULL) {
 		*safeDistancePtr = 0;
 	}
@@ -2276,11 +2306,8 @@ static bool _combat_safety_invalidate_weapon_func(Object* attacker, Object* weap
 		}
 
 		for (int index = 0; index < _list_total; index++) {
-			Object* candidate = _combat_list[index];
-			if (candidate->data.critter.combat.team == team
-			        && candidate != attacker
-			        && candidate != defender
-			        && !critterIsDead(candidate)) {
+			Object *candidate = _combat_list[index];
+			if (candidate->data.critter.combat.team == team && candidate != attacker && candidate != defender && !critterIsDead(candidate)) {
 				int v14 = objectGetDistanceBetween(defender, candidate);
 				if (v14 < damageRadius && candidate != candidate->data.critter.combat.whoHitMe) {
 					int damageThreshold = critterGetStat(candidate, STAT_DAMAGE_THRESHOLD + damageType);
@@ -2327,12 +2354,8 @@ static bool _combat_safety_invalidate_weapon_func(Object* attacker, Object* weap
 	}
 
 	for (int index = 0; index < attack.extrasLength; index++) {
-		Object* candidate = attack.extras[index];
-		if (candidate->data.critter.combat.team == team
-		        && candidate != attacker
-		        && candidate != defender
-		        && !critterIsDead(candidate)
-		        && candidate != candidate->data.critter.combat.whoHitMe) {
+		Object *candidate = attack.extras[index];
+		if (candidate->data.critter.combat.team == team && candidate != attacker && candidate != defender && !critterIsDead(candidate) && candidate != candidate->data.critter.combat.whoHitMe) {
 			int damageThreshold = critterGetStat(candidate, STAT_DAMAGE_THRESHOLD + damageType);
 			int damageResistance = critterGetStat(candidate, STAT_DAMAGE_RESISTANCE + damageType);
 			if (damageResistance * (maxDamage - damageThreshold) / 100 > 0) {
@@ -2345,12 +2368,12 @@ static bool _combat_safety_invalidate_weapon_func(Object* attacker, Object* weap
 }
 
 // 0x4217BC
-bool _combatTestIncidentalHit(Object* attacker, Object* defender, Object* attackerFriend, Object* weapon) {
+bool _combatTestIncidentalHit(Object *attacker, Object *defender, Object *attackerFriend, Object *weapon) {
 	return _combat_safety_invalidate_weapon_func(attacker, weapon, HIT_MODE_RIGHT_WEAPON_PRIMARY, defender, NULL, attackerFriend);
 }
 
 // 0x4217D4
-Object* _combat_whose_turn() {
+Object *_combat_whose_turn() {
 	if (isInCombat()) {
 		return _combat_turn_obj;
 	} else {
@@ -2359,7 +2382,7 @@ Object* _combat_whose_turn() {
 }
 
 // 0x4217E8
-void _combat_data_init(Object* obj) {
+void _combat_data_init(Object *obj) {
 	obj->data.critter.combat.damageLastTurn = 0;
 	obj->data.critter.combat.results = 0;
 }
@@ -2380,8 +2403,8 @@ static void _combatInitAIInfoList() {
 
 // 0x421850
 static int aiInfoCopy(int srcIndex, int destIndex) {
-	CombatAiInfo* src = &_aiInfoList[srcIndex];
-	CombatAiInfo* dest = &_aiInfoList[destIndex];
+	CombatAiInfo *src = &_aiInfoList[srcIndex];
+	CombatAiInfo *dest = &_aiInfoList[destIndex];
 
 	dest->friendlyDead = src->friendlyDead;
 	dest->lastTarget = src->lastTarget;
@@ -2392,7 +2415,7 @@ static int aiInfoCopy(int srcIndex, int destIndex) {
 }
 
 // 0x421880
-Object* aiInfoGetFriendlyDead(Object* obj) {
+Object *aiInfoGetFriendlyDead(Object *obj) {
 	if (!isInCombat()) {
 		return NULL;
 	}
@@ -2409,7 +2432,7 @@ Object* aiInfoGetFriendlyDead(Object* obj) {
 }
 
 // 0x4218AC
-int aiInfoSetFriendlyDead(Object* a1, Object* a2) {
+int aiInfoSetFriendlyDead(Object *a1, Object *a2) {
 	if (!isInCombat()) {
 		return 0;
 	}
@@ -2432,7 +2455,7 @@ int aiInfoSetFriendlyDead(Object* a1, Object* a2) {
 }
 
 // 0x4218EC
-Object* aiInfoGetLastTarget(Object* obj) {
+Object *aiInfoGetLastTarget(Object *obj) {
 	if (!isInCombat()) {
 		return NULL;
 	}
@@ -2449,7 +2472,7 @@ Object* aiInfoGetLastTarget(Object* obj) {
 }
 
 // 0x421918
-int aiInfoSetLastTarget(Object* a1, Object* a2) {
+int aiInfoSetLastTarget(Object *a1, Object *a2) {
 	if (!isInCombat()) {
 		return 0;
 	}
@@ -2476,7 +2499,7 @@ int aiInfoSetLastTarget(Object* a1, Object* a2) {
 }
 
 // 0x42196C
-Object* aiInfoGetLastItem(Object* obj) {
+Object *aiInfoGetLastItem(Object *obj) {
 	int v1;
 
 	if (!isInCombat()) {
@@ -2496,7 +2519,7 @@ Object* aiInfoGetLastItem(Object* obj) {
 }
 
 // 0x421998
-int aiInfoSetLastItem(Object* obj, Object* a2) {
+int aiInfoSetLastItem(Object *obj, Object *a2) {
 	int v2;
 
 	if (!isInCombat()) {
@@ -2520,7 +2543,7 @@ int aiInfoSetLastItem(Object* obj, Object* a2) {
 // NOTE: Inlined.
 //
 // 0x421A00
-static int _combatAIInfoSetLastMove(Object* object, int move) {
+static int _combatAIInfoSetLastMove(Object *object, int move) {
 	if (!isInCombat()) {
 		return 0;
 	}
@@ -2539,7 +2562,7 @@ static int _combatAIInfoSetLastMove(Object* object, int move) {
 }
 
 // 0x421A34
-static void _combat_begin(Object* a1) {
+static void _combat_begin(Object *a1) {
 	_combat_turn_running = 0;
 	animationStop();
 	tickersRemove(_dude_fidget);
@@ -2552,7 +2575,7 @@ static void _combat_begin(Object* a1) {
 		_list_total = objectListCreate(-1, _combat_elev, OBJ_TYPE_CRITTER, &_combat_list);
 		_list_noncom = _list_total;
 		_list_com = 0;
-		_aiInfoList = (CombatAiInfo*)internal_malloc(sizeof(*_aiInfoList) * _list_total);
+		_aiInfoList = (CombatAiInfo *)internal_malloc(sizeof(*_aiInfoList) * _list_total);
 		if (_aiInfoList == NULL) {
 			return;
 		}
@@ -2560,10 +2583,10 @@ static void _combat_begin(Object* a1) {
 		// NOTE: Uninline.
 		_combatInitAIInfoList();
 
-		Object* v1 = NULL;
+		Object *v1 = NULL;
 		for (int index = 0; index < _list_total; index++) {
-			Object* critter = _combat_list[index];
-			CritterCombatData* combatData = &(critter->data.critter.combat);
+			Object *critter = _combat_list[index];
+			CritterCombatData *combatData = &(critter->data.critter.combat);
 			combatData->maneuver &= CRITTER_MANEUVER_ENGAGING;
 			combatData->damageLastTurn = 0;
 			combatData->whoHitMe = NULL;
@@ -2593,12 +2616,12 @@ static void _combat_begin(Object* a1) {
 		interfaceBarEndButtonsShow(true);
 		_gmouse_enable_scrolling();
 
-		if (v1 != NULL && !_isLoadingGame()) {
+		if (v1 != NULL /*&& !_isLoadingGame()*/) {  // TODO loadsave
 			int fid = buildFid(FID_TYPE(v1->fid),
-			                   100,
-			                   FID_ANIM_TYPE(v1->fid),
-			                   (v1->fid & 0xF000) >> 12,
-			                   (v1->fid & 0x70000000) >> 28);
+							   100,
+							   FID_ANIM_TYPE(v1->fid),
+							   (v1->fid & 0xF000) >> 12,
+							   (v1->fid & 0x70000000) >> 28);
 
 			reg_anim_clear(v1);
 			reg_anim_begin(ANIMATION_REQUEST_RESERVED);
@@ -2614,7 +2637,7 @@ static void _combat_begin(Object* a1) {
 }
 
 // 0x421C8C
-static void _combat_begin_extra(Object* a1) {
+static void _combat_begin_extra(Object *a1) {
 	for (int index = 0; index < _list_total; index++) {
 		_combat_update_critter_outline_for_los(_combat_list[index], 0);
 	}
@@ -2642,7 +2665,7 @@ static void _combat_update_critters_in_los(bool a1) {
 // Something with outlining.
 //
 // 0x421D50
-void _combat_update_critter_outline_for_los(Object* critter, bool a2) {
+void _combat_update_critter_outline_for_los(Object *critter, bool a2) {
 	if (PID_TYPE(critter->pid) != OBJ_TYPE_CRITTER) {
 		return;
 	}
@@ -2664,8 +2687,8 @@ void _combat_update_critter_outline_for_los(Object* critter, bool a2) {
 		int outlineType = critter->outline & OUTLINE_TYPE_MASK;
 		if (outlineType != OUTLINE_TYPE_HOSTILE && outlineType != OUTLINE_TYPE_FRIENDLY) {
 			int newOutlineType = gDude->data.critter.combat.team == critter->data.critter.combat.team
-			                     ? OUTLINE_TYPE_FRIENDLY
-			                     : OUTLINE_TYPE_HOSTILE;
+									 ? OUTLINE_TYPE_FRIENDLY
+									 : OUTLINE_TYPE_HOSTILE;
 			objectDisableOutline(critter, NULL);
 			objectClearOutline(critter, NULL);
 			objectSetOutline(critter, newOutlineType, NULL);
@@ -2730,7 +2753,7 @@ void _combat_update_critter_outline_for_los(Object* critter, bool a2) {
 static void _combat_over() {
 	if (_game_user_wants_to_quit == 0) {
 		for (int index = 0; index < _list_com; index++) {
-			Object* critter = _combat_list[index];
+			Object *critter = _combat_list[index];
 			if (critter != gDude) {
 				// SFALL: Fix to prevent dead NPCs from reloading their weapons.
 				if ((critter->data.critter.combat.results & DAM_DEAD) == 0) {
@@ -2743,13 +2766,13 @@ static void _combat_over() {
 	tickersAdd(_dude_fidget);
 
 	for (int index = 0; index < _list_noncom + _list_com; index++) {
-		Object* critter = _combat_list[index];
+		Object *critter = _combat_list[index];
 		critter->data.critter.combat.damageLastTurn = 0;
 		critter->data.critter.combat.maneuver = CRITTER_MANEUVER_NONE;
 	}
 
 	for (int index = 0; index < _list_total; index++) {
-		Object* critter = _combat_list[index];
+		Object *critter = _combat_list[index];
 		critter->data.critter.combat.ap = 0;
 		objectClearOutline(critter, NULL);
 		critter->data.critter.combat.whoHitMe = NULL;
@@ -2757,12 +2780,12 @@ static void _combat_over() {
 		scriptSetObjects(critter->sid, NULL, NULL);
 		scriptSetFixedParam(critter->sid, 0);
 
-		if (critter->pid == 0x1000098 && !critterIsDead(critter) && !_isLoadingGame()) {
+		if (critter->pid == 0x1000098 && !critterIsDead(critter)/* && !_isLoadingGame()*/) {  // TODO loadsave
 			int fid = buildFid(FID_TYPE(critter->fid),
-			                   99,
-			                   FID_ANIM_TYPE(critter->fid),
-			                   (critter->fid & 0xF000) >> 12,
-			                   (critter->fid & 0x70000000) >> 28);
+							   99,
+							   FID_ANIM_TYPE(critter->fid),
+							   (critter->fid & 0xF000) >> 12,
+							   (critter->fid & 0x70000000) >> 28);
 			reg_anim_clear(critter);
 			reg_anim_begin(ANIMATION_REQUEST_RESERVED);
 			animationRegisterAnimate(critter, ANIM_UP_STAIRS_RIGHT, -1);
@@ -2872,13 +2895,13 @@ static void _combat_add_noncoms() {
 	_combatai_notify_friends(gDude);
 
 	for (int index = _list_com; index < _list_com + _list_noncom; index++) {
-		Object* obj = _combat_list[index];
+		Object *obj = _combat_list[index];
 		if (_combatai_want_to_join(obj)) {
 			obj->data.critter.combat.maneuver = CRITTER_MANEUVER_NONE;
 
-			Object** objectPtr1 = &(_combat_list[index]);
-			Object** objectPtr2 = &(_combat_list[_list_com]);
-			Object* t = *objectPtr1;
+			Object **objectPtr1 = &(_combat_list[index]);
+			Object **objectPtr2 = &(_combat_list[_list_com]);
+			Object *t = *objectPtr1;
 			*objectPtr1 = *objectPtr2;
 			*objectPtr2 = t;
 
@@ -2904,9 +2927,9 @@ static void _combat_add_noncoms() {
 // Compares critters by sequence.
 //
 // 0x4223C8
-static int _compare_faster(const void* a1, const void* a2) {
-	Object* v1 = *(Object**)a1;
-	Object* v2 = *(Object**)a2;
+static int _compare_faster(const void *a1, const void *a2) {
+	Object *v1 = *(Object **)a1;
+	Object *v2 = *(Object **)a2;
 
 	int sequence1 = critterGetStat(v1, STAT_SEQUENCE);
 	int sequence2 = critterGetStat(v2, STAT_SEQUENCE);
@@ -2928,13 +2951,13 @@ static int _compare_faster(const void* a1, const void* a2) {
 }
 
 // 0x42243C
-static void _combat_sequence_init(Object* a1, Object* a2) {
+static void _combat_sequence_init(Object *a1, Object *a2) {
 	int next = 0;
 	if (a1 != NULL) {
 		for (int index = 0; index < _list_total; index++) {
-			Object* obj = _combat_list[index];
+			Object *obj = _combat_list[index];
 			if (obj == a1) {
-				Object* temp = _combat_list[next];
+				Object *temp = _combat_list[next];
 				_combat_list[index] = temp;
 				_combat_list[next] = obj;
 				next += 1;
@@ -2945,9 +2968,9 @@ static void _combat_sequence_init(Object* a1, Object* a2) {
 
 	if (a2 != NULL) {
 		for (int index = 0; index < _list_total; index++) {
-			Object* obj = _combat_list[index];
+			Object *obj = _combat_list[index];
 			if (obj == a2) {
-				Object* temp = _combat_list[next];
+				Object *temp = _combat_list[next];
 				_combat_list[index] = temp;
 				_combat_list[next] = obj;
 				next += 1;
@@ -2958,9 +2981,9 @@ static void _combat_sequence_init(Object* a1, Object* a2) {
 
 	if (a1 != gDude && a2 != gDude) {
 		for (int index = 0; index < _list_total; index++) {
-			Object* obj = _combat_list[index];
+			Object *obj = _combat_list[index];
 			if (obj == gDude) {
-				Object* temp = _combat_list[next];
+				Object *temp = _combat_list[next];
 				_combat_list[index] = temp;
 				_combat_list[next] = obj;
 				next += 1;
@@ -2988,7 +3011,7 @@ static void _combat_sequence() {
 	int count = _list_com;
 
 	for (int index = 0; index < count; index++) {
-		Object* critter = _combat_list[index];
+		Object *critter = _combat_list[index];
 		if ((critter->data.critter.combat.results & DAM_DEAD) != 0) {
 			_combat_list[index] = _combat_list[count - 1];
 			_combat_list[count - 1] = critter;
@@ -3002,10 +3025,9 @@ static void _combat_sequence() {
 	}
 
 	for (int index = 0; index < count; index++) {
-		Object* critter = _combat_list[index];
+		Object *critter = _combat_list[index];
 		if (critter != gDude) {
-			if ((critter->data.critter.combat.results & DAM_KNOCKED_OUT) != 0
-			        || critter->data.critter.combat.maneuver == CRITTER_MANEUVER_DISENGAGING) {
+			if ((critter->data.critter.combat.results & DAM_KNOCKED_OUT) != 0 || critter->data.critter.combat.maneuver == CRITTER_MANEUVER_DISENGAGING) {
 				critter->data.critter.combat.maneuver &= ~CRITTER_MANEUVER_ENGAGING;
 				_list_noncom += 1;
 
@@ -3036,10 +3058,10 @@ static void combatAttemptEnd() {
 		int dudeTeam = gDude->data.critter.combat.team;
 
 		for (int index = 0; index < _list_com; index++) {
-			Object* critter = _combat_list[index];
+			Object *critter = _combat_list[index];
 			if (critter != gDude) {
 				int critterTeam = critter->data.critter.combat.team;
-				Object* critterWhoHitMe = critter->data.critter.combat.whoHitMe;
+				Object *critterWhoHitMe = critter->data.critter.combat.whoHitMe;
 				if (critterTeam != dudeTeam || (critterWhoHitMe != NULL && critterWhoHitMe->data.critter.combat.team == critterTeam)) {
 					if (!_combatai_want_to_stop(critter)) {
 						messageListItem.num = 103;
@@ -3053,10 +3075,10 @@ static void combatAttemptEnd() {
 		}
 
 		for (int index = _list_com; index < _list_com + _list_noncom; index++) {
-			Object* critter = _combat_list[index];
+			Object *critter = _combat_list[index];
 			if (critter != gDude) {
 				int critterTeam = critter->data.critter.combat.team;
-				Object* critterWhoHitMe = critter->data.critter.combat.whoHitMe;
+				Object *critterWhoHitMe = critter->data.critter.combat.whoHitMe;
 				if (critterTeam != dudeTeam || (critterWhoHitMe != NULL && critterWhoHitMe->data.critter.combat.team == critterTeam)) {
 					if (_combatai_want_to_join(critter)) {
 						messageListItem.num = 103;
@@ -3156,7 +3178,7 @@ static int _combat_input() {
 // 0x422914
 static void _combat_set_move_all() {
 	for (int index = 0; index < _list_com; index++) {
-		Object* object = _combat_list[index];
+		Object *object = _combat_list[index];
 
 		int actionPoints = critterGetStat(object, STAT_MAXIMUM_ACTION_POINTS);
 
@@ -3172,7 +3194,7 @@ static void _combat_set_move_all() {
 }
 
 // 0x42299C
-static int _combat_turn(Object* a1, bool a2) {
+static int _combat_turn(Object *a1, bool a2) {
 	_combat_turn_obj = a1;
 
 	attackInit(&_main_ctd, a1, NULL, HIT_MODE_PUNCH, HIT_LOCATION_TORSO);
@@ -3181,12 +3203,12 @@ static int _combat_turn(Object* a1, bool a2) {
 		a1->data.critter.combat.results &= ~DAM_LOSE_TURN;
 	} else {
 		if (a1 == gDude) {
-			keyboardReset();
+//			keyboardReset(); TODO kb
 			interfaceRenderArmorClass(true);
 			_combat_free_move = 2 * perkGetRank(gDude, PERK_BONUS_MOVE);
 			interfaceRenderActionPoints(gDude->data.critter.combat.ap, _combat_free_move);
 		} else {
-			soundContinueAll();
+//			soundContinueAll();  TODO audio
 		}
 
 		bool scriptOverrides = false;
@@ -3195,7 +3217,7 @@ static int _combat_turn(Object* a1, bool a2) {
 			scriptSetFixedParam(a1->sid, 4);
 			scriptExecProc(a1->sid, SCRIPT_PROC_COMBAT);
 
-			Script* scr;
+			Script *scr;
 			if (scriptGetScript(a1->sid, &scr) != -1) {
 				scriptOverrides = scr->scriptOverrides;
 			}
@@ -3304,12 +3326,12 @@ static bool _combat_should_end() {
 	int team = gDude->data.critter.combat.team;
 
 	for (index = 0; index < _list_com; index++) {
-		Object* critter = _combat_list[index];
+		Object *critter = _combat_list[index];
 		if (critter->data.critter.combat.team != team) {
 			break;
 		}
 
-		Object* critterWhoHitMe = critter->data.critter.combat.whoHitMe;
+		Object *critterWhoHitMe = critter->data.critter.combat.whoHitMe;
 		if (critterWhoHitMe != NULL && critterWhoHitMe->data.critter.combat.team == team) {
 			break;
 		}
@@ -3323,12 +3345,10 @@ static bool _combat_should_end() {
 }
 
 // 0x422D2C
-void _combat(STRUCT_664980* attack) {
+void _combat(STRUCT_664980 *attack) {
 	ScopedGameMode gm(GameMode::kCombat);
 
-	if (attack == NULL
-	        || (attack->attacker == NULL || attack->attacker->elevation == gElevation)
-	        || (attack->defender == NULL || attack->defender->elevation == gElevation)) {
+	if (attack == NULL || (attack->attacker == NULL || attack->attacker->elevation == gElevation) || (attack->defender == NULL || attack->defender->elevation == gElevation)) {
 		int v3 = gCombatState & 0x01;
 
 		_combat_begin(NULL);
@@ -3350,8 +3370,8 @@ void _combat(STRUCT_664980* attack) {
 			}
 			_gcsd = NULL;
 		} else {
-			Object* v3;
-			Object* v9;
+			Object *v3;
+			Object *v9;
 			if (attack != NULL) {
 				v3 = attack->defender;
 				v9 = attack->attacker;
@@ -3412,7 +3432,7 @@ void _combat(STRUCT_664980* attack) {
 }
 
 // 0x422EC4
-void attackInit(Attack* attack, Object* attacker, Object* defender, int hitMode, int hitLocation) {
+void attackInit(Attack *attack, Object *attacker, Object *defender, int hitMode, int hitLocation) {
 	attack->attacker = attacker;
 	attack->hitMode = hitMode;
 	attack->weapon = critterGetWeaponForHitMode(attacker, hitMode);
@@ -3432,7 +3452,7 @@ void attackInit(Attack* attack, Object* attacker, Object* defender, int hitMode,
 }
 
 // 0x422F3C
-int _combat_attack(Object* a1, Object* a2, int hitMode, int hitLocation) {
+int _combat_attack(Object *a1, Object *a2, int hitMode, int hitLocation) {
 	if (a1 != gDude && hitMode == HIT_MODE_PUNCH && randomBetween(1, 4) == 1) {
 		int fid = buildFid(OBJ_TYPE_CRITTER, a1->fid & 0xFFF, ANIM_KICK_LEG, (a1->fid & 0xF000) >> 12, (a1->fid & 0x70000000) >> 28);
 		if (artExists(fid)) {
@@ -3509,18 +3529,18 @@ int _combat_attack(Object* a1, Object* a2, int hitMode, int hitLocation) {
 // Returns tile one step closer from [a1] to [a2]
 //
 // 0x423104
-int _combat_bullet_start(const Object* a1, const Object* a2) {
+int _combat_bullet_start(const Object *a1, const Object *a2) {
 	int rotation = tileGetRotationTo(a1->tile, a2->tile);
 	return tileGetTileInDirection(a1->tile, rotation, 1);
 }
 
 // 0x423128
-static bool _check_ranged_miss(Attack* attack) {
+static bool _check_ranged_miss(Attack *attack) {
 	int range = weaponGetRange(attack->attacker, attack->hitMode);
 	int to = _tile_num_beyond(attack->attacker->tile, attack->defender->tile, range);
 
 	int roll = ROLL_FAILURE;
-	Object* critter = attack->attacker;
+	Object *critter = attack->attacker;
 	if (critter != NULL) {
 		int curr = attack->attacker->tile;
 		while (curr != to) {
@@ -3569,12 +3589,12 @@ static bool _check_ranged_miss(Attack* attack) {
 }
 
 // 0x423284
-static int _shoot_along_path(Attack* attack, int endTile, int rounds, int anim) {
+static int _shoot_along_path(Attack *attack, int endTile, int rounds, int anim) {
 	int remainingRounds = rounds;
 	int roundsHitMainTarget = 0;
 	int currentTile = attack->attacker->tile;
 
-	Object* critter = attack->attacker;
+	Object *critter = attack->attacker;
 	while (critter != NULL) {
 		if ((remainingRounds <= 0 && anim != ANIM_FIRE_CONTINUOUS) || currentTile == endTile || attack->extrasLength >= 6) {
 			break;
@@ -3642,7 +3662,7 @@ static int _shoot_along_path(Attack* attack, int endTile, int rounds, int anim) 
 }
 
 // 0x423488
-static int _compute_spray(Attack* attack, int accuracy, int* roundsHitMainTargetPtr, int* roundsSpentPtr, int anim) {
+static int _compute_spray(Attack *attack, int accuracy, int *roundsHitMainTargetPtr, int *roundsSpentPtr, int anim) {
 	*roundsHitMainTargetPtr = 0;
 
 	int ammoQuantity = ammoGetQuantity(attack->weapon);
@@ -3736,12 +3756,12 @@ static int _compute_spray(Attack* attack, int accuracy, int* roundsHitMainTarget
 }
 
 // 0x423714
-static int attackComputeEnhancedKnockout(Attack* attack) {
+static int attackComputeEnhancedKnockout(Attack *attack) {
 	if (weaponGetPerk(attack->weapon) == PERK_WEAPON_ENHANCED_KNOCKOUT) {
 		int difficulty = critterGetStat(attack->attacker, STAT_STRENGTH) - 8;
 		int chance = randomBetween(1, 100);
 		if (chance <= difficulty) {
-			Object* weapon = NULL;
+			Object *weapon = NULL;
 			if (attack->defender != gDude) {
 				weapon = critterGetWeaponForHitMode(attack->defender, HIT_MODE_RIGHT_WEAPON_PRIMARY);
 			}
@@ -3756,7 +3776,7 @@ static int attackComputeEnhancedKnockout(Attack* attack) {
 }
 
 // 0x42378C
-static int attackCompute(Attack* attack) {
+static int attackCompute(Attack *attack) {
 	int range = weaponGetRange(attack->attacker, attack->hitMode);
 	int distance = objectGetDistanceBetween(attack->attacker, attack->defender);
 
@@ -3806,10 +3826,7 @@ static int attackCompute(Attack* attack) {
 				roll = ROLL_CRITICAL_SUCCESS;
 			}
 
-			if (perkHasRank(gDude, PERK_SILENT_DEATH)
-			        && !_is_hit_from_front(gDude, attack->defender)
-			        && dudeHasState(DUDE_STATE_SNEAKING)
-			        && gDude != attack->defender->data.critter.combat.whoHitMe) {
+			if (perkHasRank(gDude, PERK_SILENT_DEATH) && !_is_hit_from_front(gDude, attack->defender) && dudeHasState(DUDE_STATE_SNEAKING) && gDude != attack->defender->data.critter.combat.whoHitMe) {
 				damageMultiplier = 4;
 			}
 
@@ -3851,10 +3868,7 @@ static int attackCompute(Attack* attack) {
 
 		// SFALL: Fix Silent Death bonus not being applied to critical hits.
 		if ((attackType == ATTACK_TYPE_MELEE || attackType == ATTACK_TYPE_UNARMED) && attack->attacker == gDude) {
-			if (perkHasRank(gDude, PERK_SILENT_DEATH)
-			        && !_is_hit_from_front(gDude, attack->defender)
-			        && dudeHasState(DUDE_STATE_SNEAKING)
-			        && gDude != attack->defender->data.critter.combat.whoHitMe) {
+			if (perkHasRank(gDude, PERK_SILENT_DEATH) && !_is_hit_from_front(gDude, attack->defender) && dudeHasState(DUDE_STATE_SNEAKING) && gDude != attack->defender->data.critter.combat.whoHitMe) {
 				damageMultiplier *= 2;
 			}
 		}
@@ -3891,7 +3905,7 @@ static int attackCompute(Attack* attack) {
 
 			attack->tile = tile;
 
-			Object* v25 = attack->defender;
+			Object *v25 = attack->defender;
 			_make_straight_path_func(v25, attack->defender->tile, attack->tile, NULL, &v25, 32, _obj_shoot_blocking_at);
 			if (v25 != NULL && v25 != attack->defender) {
 				attack->tile = v25->tile;
@@ -3923,8 +3937,8 @@ static int attackCompute(Attack* attack) {
 
 // compute_explosion_on_extras
 // 0x423C10
-void _compute_explosion_on_extras(Attack* attack, int a2, bool isGrenade, int a4) {
-	Object* attacker;
+void _compute_explosion_on_extras(Attack *attack, int a2, bool isGrenade, int a4) {
+	Object *attacker;
 
 	if (a2) {
 		attacker = attack->attacker;
@@ -3985,12 +3999,8 @@ void _compute_explosion_on_extras(Attack* attack, int a2, bool isGrenade, int a4
 			break;
 		}
 
-		Object* obstacle = _obj_blocking_at(attacker, v5, attack->attacker->elevation);
-		if (obstacle != NULL
-		        && FID_TYPE(obstacle->fid) == OBJ_TYPE_CRITTER
-		        && (obstacle->data.critter.combat.results & DAM_DEAD) == 0
-		        && (obstacle->flags & OBJECT_SHOOT_THRU) == 0
-		        && !_combat_is_shot_blocked(obstacle, obstacle->tile, tile, NULL, NULL)) {
+		Object *obstacle = _obj_blocking_at(attacker, v5, attack->attacker->elevation);
+		if (obstacle != NULL && FID_TYPE(obstacle->fid) == OBJ_TYPE_CRITTER && (obstacle->data.critter.combat.results & DAM_DEAD) == 0 && (obstacle->flags & OBJECT_SHOOT_THRU) == 0 && !_combat_is_shot_blocked(obstacle, obstacle->tile, tile, NULL, NULL)) {
 			if (obstacle == attack->attacker) {
 				attack->attackerFlags &= ~DAM_HIT;
 				attackComputeDamage(attack, 1, 2);
@@ -4024,8 +4034,8 @@ void _compute_explosion_on_extras(Attack* attack, int a2, bool isGrenade, int a4
 }
 
 // 0x423EB4
-static int attackComputeCriticalHit(Attack* attack) {
-	Object* defender = attack->defender;
+static int attackComputeCriticalHit(Attack *attack) {
+	Object *defender = attack->defender;
 	if (defender != NULL && _critter_flag_check(defender->pid, CRITTER_INVULNERABLE)) {
 		return 2;
 	}
@@ -4054,7 +4064,7 @@ static int attackComputeCriticalHit(Attack* attack) {
 	else
 		effect = 5;
 
-	CriticalHitDescription* criticalHitDescription;
+	CriticalHitDescription *criticalHitDescription;
 	if (defender == gDude) {
 		criticalHitDescription = &(gPlayerCriticalHitTable[attack->defenderHitLocation][effect]);
 	} else {
@@ -4084,7 +4094,7 @@ static int attackComputeCriticalHit(Attack* attack) {
 		attack->defenderFlags |= DAM_KNOCKED_OUT;
 	}
 
-	Object* weapon = NULL;
+	Object *weapon = NULL;
 	if (defender != gDude) {
 		weapon = critterGetWeaponForHitMode(defender, HIT_MODE_RIGHT_WEAPON_PRIMARY);
 	}
@@ -4096,7 +4106,7 @@ static int attackComputeCriticalHit(Attack* attack) {
 }
 
 // 0x424088
-static int _attackFindInvalidFlags(Object* critter, Object* item) {
+static int _attackFindInvalidFlags(Object *critter, Object *item) {
 	int flags = 0;
 
 	if (critter != NULL && PID_TYPE(critter->pid) == OBJ_TYPE_CRITTER && _critter_flag_check(critter->pid, CRITTER_NO_DROP)) {
@@ -4111,7 +4121,7 @@ static int _attackFindInvalidFlags(Object* critter, Object* item) {
 }
 
 // 0x4240DC
-static int attackComputeCriticalFailure(Attack* attack) {
+static int attackComputeCriticalFailure(Attack *attack) {
 	attack->attackerFlags &= ~DAM_HIT;
 
 	if (attack->attacker != NULL && _critter_flag_check(attack->attacker->pid, CRITTER_INVULNERABLE)) {
@@ -4206,7 +4216,7 @@ static int attackComputeCriticalFailure(Attack* attack) {
 }
 
 // 0x42432C
-static void _do_random_cripple(int* flagsPtr) {
+static void _do_random_cripple(int *flagsPtr) {
 	*flagsPtr &= ~DAM_CRIP_RANDOM;
 
 	switch (randomBetween(0, 3)) {
@@ -4226,28 +4236,28 @@ static void _do_random_cripple(int* flagsPtr) {
 }
 
 // 0x42436C
-int _determine_to_hit(Object* a1, Object* a2, int hitLocation, int hitMode) {
+int _determine_to_hit(Object *a1, Object *a2, int hitLocation, int hitMode) {
 	return attackDetermineToHit(a1, a1->tile, a2, hitLocation, hitMode, true);
 }
 
 // 0x424380
-int _determine_to_hit_no_range(Object* a1, Object* a2, int hitLocation, int hitMode, unsigned char* a5) {
+int _determine_to_hit_no_range(Object *a1, Object *a2, int hitLocation, int hitMode, unsigned char *a5) {
 	return attackDetermineToHit(a1, a1->tile, a2, hitLocation, hitMode, false);
 }
 
 // 0x424394
-int _determine_to_hit_from_tile(Object* a1, int tile, Object* a3, int hitLocation, int hitMode) {
+int _determine_to_hit_from_tile(Object *a1, int tile, Object *a3, int hitLocation, int hitMode) {
 	return attackDetermineToHit(a1, tile, a3, hitLocation, hitMode, true);
 }
 
 // determine_to_hit
 // 0x4243A8
-static int attackDetermineToHit(Object* attacker, int tile, Object* defender, int hitLocation, int hitMode, bool a6) {
-	Object* weapon = critterGetWeaponForHitMode(attacker, hitMode);
+static int attackDetermineToHit(Object *attacker, int tile, Object *defender, int hitLocation, int hitMode, bool a6) {
+	Object *weapon = critterGetWeaponForHitMode(attacker, hitMode);
 
 	bool targetIsCritter = defender != NULL
-	                       ? FID_TYPE(defender->fid) == OBJ_TYPE_CRITTER
-	                       : false;
+							   ? FID_TYPE(defender->fid) == OBJ_TYPE_CRITTER
+							   : false;
 
 	bool isRangedWeapon = false;
 
@@ -4297,8 +4307,8 @@ static int attackDetermineToHit(Object* attacker, int tile, Object* defender, in
 
 			if (modifier >= v25) {
 				int penalty = attacker == gDude
-				              ? v29 * (perception - 2)
-				              : v29 * perception;
+								  ? v29 * (perception - 2)
+								  : v29 * perception;
 
 				modifier -= penalty;
 			} else {
@@ -4429,11 +4439,11 @@ static int attackDetermineToHit(Object* attacker, int tile, Object* defender, in
 }
 
 // 0x4247B8
-static void attackComputeDamage(Attack* attack, int ammoQuantity, int bonusDamageMultiplier) {
-	int* damagePtr;
-	Object* critter;
-	int* flagsPtr;
-	int* knockbackDistancePtr;
+static void attackComputeDamage(Attack *attack, int ammoQuantity, int bonusDamageMultiplier) {
+	int *damagePtr;
+	Object *critter;
+	int *flagsPtr;
+	int *knockbackDistancePtr;
 
 	if ((attack->attackerFlags & DAM_HIT) != 0) {
 		damagePtr = &(attack->defenderDamage);
@@ -4462,8 +4472,7 @@ static void attackComputeDamage(Attack* attack, int ammoQuantity, int bonusDamag
 		damageResistance = 20 * damageResistance / 100;
 	} else {
 		// SFALL
-		if (weaponGetPerk(attack->weapon) == PERK_WEAPON_PENETRATE
-		        || unarmedIsPenetrating(attack->hitMode)) {
+		if (weaponGetPerk(attack->weapon) == PERK_WEAPON_PENETRATE || unarmedIsPenetrating(attack->hitMode)) {
 			damageThreshold = 20 * damageThreshold / 100;
 		}
 
@@ -4560,11 +4569,7 @@ static void attackComputeDamage(Attack* attack, int ammoQuantity, int bonusDamag
 		}
 	}
 
-	if (knockbackDistancePtr != NULL
-	        && (critter->flags & OBJECT_MULTIHEX) == 0
-	        && (damageType == DAMAGE_TYPE_EXPLOSION || attack->weapon == NULL || weaponGetAttackTypeForHitMode(attack->weapon, attack->hitMode) == ATTACK_TYPE_MELEE)
-	        && PID_TYPE(critter->pid) == OBJ_TYPE_CRITTER
-	        && !_critter_flag_check(critter->pid, CRITTER_NO_KNOCKBACK)) {
+	if (knockbackDistancePtr != NULL && (critter->flags & OBJECT_MULTIHEX) == 0 && (damageType == DAMAGE_TYPE_EXPLOSION || attack->weapon == NULL || weaponGetAttackTypeForHitMode(attack->weapon, attack->hitMode) == ATTACK_TYPE_MELEE) && PID_TYPE(critter->pid) == OBJ_TYPE_CRITTER && !_critter_flag_check(critter->pid, CRITTER_NO_KNOCKBACK)) {
 		bool shouldKnockback = true;
 		bool hasStonewall = false;
 		if (critter == gDude) {
@@ -4590,7 +4595,7 @@ static void attackComputeDamage(Attack* attack, int ammoQuantity, int bonusDamag
 }
 
 // 0x424BAC
-void attackComputeDeathFlags(Attack* attack) {
+void attackComputeDeathFlags(Attack *attack) {
 	_check_for_death(attack->attacker, attack->attackerDamage, &(attack->attackerFlags));
 	_check_for_death(attack->defender, attack->defenderDamage, &(attack->defenderFlags));
 
@@ -4600,8 +4605,8 @@ void attackComputeDeathFlags(Attack* attack) {
 }
 
 // 0x424C04
-void _apply_damage(Attack* attack, bool animated) {
-	Object* attacker = attack->attacker;
+void _apply_damage(Attack *attack, bool animated) {
+	Object *attacker = attack->attacker;
 	bool attackerIsCritter = attacker != NULL && FID_TYPE(attacker->fid) == OBJ_TYPE_CRITTER;
 	bool v5 = attack->defender != attack->oops;
 
@@ -4611,12 +4616,12 @@ void _apply_damage(Attack* attack, bool animated) {
 		_damage_object(attacker, attack->attackerDamage, animated, attack->defender == attack->oops, attacker);
 	}
 
-	Object* v7 = attack->oops;
+	Object *v7 = attack->oops;
 	if (v7 != NULL && v7 != attack->defender) {
 		_combatai_notify_onlookers(v7);
 	}
 
-	Object* defender = attack->defender;
+	Object *defender = attack->defender;
 	bool defenderIsCritter = defender != NULL && FID_TYPE(defender->fid) == OBJ_TYPE_CRITTER;
 
 	if (!defenderIsCritter && !v5) {
@@ -4662,7 +4667,7 @@ void _apply_damage(Attack* attack, bool animated) {
 	}
 
 	for (int index = 0; index < attack->extrasLength; index++) {
-		Object* obj = attack->extras[index];
+		Object *obj = attack->extras[index];
 		if (FID_TYPE(obj->fid) == OBJ_TYPE_CRITTER && (obj->data.critter.combat.results & DAM_DEAD) == 0) {
 			_set_new_results(obj, attack->extrasFlags[index]);
 
@@ -4691,7 +4696,7 @@ void _apply_damage(Attack* attack, bool animated) {
 }
 
 // 0x424EE8
-static void _check_for_death(Object* object, int damage, int* flags) {
+static void _check_for_death(Object *object, int damage, int *flags) {
 	if (object == NULL || !_critter_flag_check(object->pid, CRITTER_INVULNERABLE)) {
 		if (object == NULL || PID_TYPE(object->pid) == OBJ_TYPE_CRITTER) {
 			if (damage > 0) {
@@ -4704,7 +4709,7 @@ static void _check_for_death(Object* object, int damage, int* flags) {
 }
 
 // 0x424F2C
-static void _set_new_results(Object* critter, int flags) {
+static void _set_new_results(Object *critter, int flags) {
 	if (critter == NULL) {
 		return;
 	}
@@ -4744,7 +4749,7 @@ static void _set_new_results(Object* critter, int flags) {
 }
 
 // 0x425020
-static void _damage_object(Object* a1, int damage, bool animated, int a4, Object* a5) {
+static void _damage_object(Object *a1, int damage, bool animated, int a4, Object *a5) {
 	if (a1 == NULL) {
 		return;
 	}
@@ -4783,10 +4788,10 @@ static void _damage_object(Object* a1, int damage, bool animated, int a4, Object
 		itemDestroyAllHidden(a1);
 
 		if (a1 != gDude) {
-			Object* whoHitMe = a1->data.critter.combat.whoHitMe;
+			Object *whoHitMe = a1->data.critter.combat.whoHitMe;
 			if (whoHitMe == gDude || (whoHitMe != NULL && whoHitMe->data.critter.combat.team == gDude->data.critter.combat.team)) {
 				bool scriptOverrides = false;
-				Script* scr;
+				Script *scr;
 				if (scriptGetScript(a1->sid, &scr) != -1) {
 					scriptOverrides = scr->scriptOverrides;
 				}
@@ -4810,11 +4815,11 @@ static void _damage_object(Object* a1, int damage, bool animated, int a4, Object
 // Print attack description to monitor.
 //
 // 0x425170
-void _combat_display(Attack* attack) {
+void _combat_display(Attack *attack) {
 	MessageListItem messageListItem;
 
 	if (attack->attacker == gDude) {
-		Object* weapon = critterGetWeaponForHitMode(attack->attacker, attack->hitMode);
+		Object *weapon = critterGetWeaponForHitMode(attack->attacker, attack->hitMode);
 		int strengthRequired = weaponGetMinStrengthRequired(weapon);
 
 		if (perkGetRank(attack->attacker, PERK_WEAPON_HANDLING) != 0) {
@@ -4832,14 +4837,14 @@ void _combat_display(Attack* attack) {
 		}
 	}
 
-	Object* mainCritter;
+	Object *mainCritter;
 	if ((attack->attackerFlags & DAM_HIT) != 0) {
 		mainCritter = attack->defender;
 	} else {
 		mainCritter = attack->attacker;
 	}
 
-	char* mainCritterName = _a_1;
+	char *mainCritterName = _a_1;
 
 	char you[20];
 	you[0] = '\0';
@@ -4852,7 +4857,7 @@ void _combat_display(Attack* attack) {
 	}
 
 	if (messageListGetItem(&gCombatMessageList, &messageListItem)) {
-		strcpy(you, messageListItem.text);
+		strncpy(you, messageListItem.text, sizeof(you) - 1);
 	}
 
 	int baseMessageId;
@@ -4873,10 +4878,7 @@ void _combat_display(Attack* attack) {
 	}
 
 	char text[280];
-	if (attack->defender != NULL
-	        && attack->oops != NULL
-	        && attack->defender != attack->oops
-	        && (attack->attackerFlags & DAM_HIT) != 0) {
+	if (attack->defender != NULL && attack->oops != NULL && attack->defender != attack->oops && (attack->attackerFlags & DAM_HIT) != 0) {
 		if (FID_TYPE(attack->defender->fid) == OBJ_TYPE_CRITTER) {
 			if (attack->oops == gDude) {
 				// 608 (male) - Oops! %s was hit instead of you!
@@ -4888,7 +4890,7 @@ void _combat_display(Attack* attack) {
 			} else {
 				// 509 (male) - Oops! %s were hit instead of %s!
 				// 559 (female) - Oops! %s were hit instead of %s!
-				const char* name = objectGetName(attack->oops);
+				const char *name = objectGetName(attack->oops);
 				messageListItem.num = baseMessageId + 9;
 				if (messageListGetItem(&gCombatMessageList, &messageListItem)) {
 					snprintf(text, sizeof(text), messageListItem.text, mainCritterName, name);
@@ -4908,7 +4910,7 @@ void _combat_display(Attack* attack) {
 					snprintf(text, sizeof(text), messageListItem.text, you);
 				}
 			} else {
-				const char* name = objectGetName(attack->attacker);
+				const char *name = objectGetName(attack->attacker);
 				if (critterGetStat(attack->attacker, STAT_GENDER) == GENDER_MALE) {
 					// (male) %s missed
 					messageListItem.num = 615;
@@ -4923,13 +4925,13 @@ void _combat_display(Attack* attack) {
 			}
 		}
 
-		strcat(text, ".");
+		strcat_s(text, sizeof(text), ".");
 
 		displayMonitorAddMessage(text);
 	}
 
 	if ((attack->attackerFlags & DAM_HIT) != 0) {
-		Object* v21 = attack->defender;
+		Object *v21 = attack->defender;
 		if (v21 != NULL && (v21->data.critter.combat.results & DAM_DEAD) == 0) {
 			text[0] = '\0';
 
@@ -4962,7 +4964,7 @@ void _combat_display(Attack* attack) {
 						combatCopyDamageAmountDescription(text, sizeof(text), v21, attack->defenderDamage);
 					}
 				} else {
-					const char* hitLocationName = hitLocationGetName(v21, attack->defenderHitLocation);
+					const char *hitLocationName = hitLocationGetName(v21, attack->defenderHitLocation);
 					if (hitLocationName != NULL) {
 						if ((attack->attackerFlags & DAM_CRITICAL) != 0) {
 							switch (attack->defenderDamage) {
@@ -5009,11 +5011,11 @@ void _combat_display(Attack* attack) {
 				if (settings.preferences.combat_messages && (attack->attackerFlags & DAM_CRITICAL) != 0 && attack->criticalMessageId != -1) {
 					messageListItem.num = attack->criticalMessageId;
 					if (messageListGetItem(&gCombatMessageList, &messageListItem)) {
-						strcat(text, messageListItem.text);
+						strcat_s(text, sizeof(text), messageListItem.text);
 					}
 
 					if ((attack->defenderFlags & DAM_DEAD) != 0) {
-						strcat(text, ".");
+						strcat_s(text, sizeof(text), ".");
 						displayMonitorAddMessage(text);
 
 						if (attack->defender == gDude) {
@@ -5042,7 +5044,7 @@ void _combat_display(Attack* attack) {
 					combatAddDamageFlagsDescription(text, attack->defenderFlags, attack->defender);
 				}
 
-				strcat(text, ".");
+				strcat_s(text, sizeof(text), ".");
 
 				displayMonitorAddMessage(text);
 			}
@@ -5081,7 +5083,7 @@ void _combat_display(Attack* attack) {
 
 			combatAddDamageFlagsDescription(text, attack->attackerFlags, attack->attacker);
 
-			strcat(text, ".");
+			strcat_s(text, sizeof(text), ".");
 
 			displayMonitorAddMessage(text);
 		}
@@ -5090,18 +5092,18 @@ void _combat_display(Attack* attack) {
 			if (attack->attackerDamage > 0) {
 				combatCopyDamageAmountDescription(text, sizeof(text), attack->attacker, attack->attackerDamage);
 				combatAddDamageFlagsDescription(text, attack->attackerFlags, attack->attacker);
-				strcat(text, ".");
+				strcat_s(text, sizeof(text), ".");
 				displayMonitorAddMessage(text);
 			}
 		}
 	}
 
 	for (int index = 0; index < attack->extrasLength; index++) {
-		Object* critter = attack->extras[index];
+		Object *critter = attack->extras[index];
 		if ((critter->data.critter.combat.results & DAM_DEAD) == 0) {
 			combatCopyDamageAmountDescription(text, sizeof(text), critter, attack->extrasDamage[index]);
 			combatAddDamageFlagsDescription(text, attack->extrasFlags[index], critter);
-			strcat(text, ".");
+			strcat_s(text, sizeof(text), ".");
 
 			displayMonitorAddMessage(text);
 		}
@@ -5109,10 +5111,10 @@ void _combat_display(Attack* attack) {
 }
 
 // 0x425A9C
-static void combatCopyDamageAmountDescription(char* dest, size_t size, Object* critter, int damage) {
+static void combatCopyDamageAmountDescription(char *dest, size_t size, Object *critter, int damage) {
 	MessageListItem messageListItem;
 	char text[40];
-	char* name;
+	char *name;
 
 	int messageId;
 	if (critter == gDude) {
@@ -5127,7 +5129,7 @@ static void combatCopyDamageAmountDescription(char* dest, size_t size, Object* c
 		// 506 - You
 		messageListItem.num = messageId + 6;
 		if (messageListGetItem(&gCombatMessageList, &messageListItem)) {
-			strcpy(text, messageListItem.text);
+			strncpy(text, messageListItem.text, sizeof(text) - 1);
 		}
 
 		name = text;
@@ -5167,7 +5169,7 @@ static void combatCopyDamageAmountDescription(char* dest, size_t size, Object* c
 }
 
 // 0x425BA4
-static void combatAddDamageFlagsDescription(char* dest, int flags, Object* critter) {
+static void combatAddDamageFlagsDescription(char *dest, int flags, Object *critter) {
 	MessageListItem messageListItem;
 
 	int num;
@@ -5193,13 +5195,13 @@ static void combatAddDamageFlagsDescription(char* dest, int flags, Object* critt
 		// " and "
 		messageListItem.num = 108;
 		if (messageListGetItem(&gCombatMessageList, &messageListItem)) {
-			strcat(dest, messageListItem.text);
+			strcat_s(dest, 280, messageListItem.text);
 		}
 
 		// were killed
 		messageListItem.num = num + 7;
 		if (messageListGetItem(&gCombatMessageList, &messageListItem)) {
-			strcat(dest, messageListItem.text);
+			strcat_s(dest, 280, messageListItem.text);
 		}
 
 		return;
@@ -5217,23 +5219,23 @@ static void combatAddDamageFlagsDescription(char* dest, int flags, Object* critt
 
 	if (flagsListLength != 0) {
 		for (int index = 0; index < flagsListLength - 1; index++) {
-			strcat(dest, ", ");
+			strcat_s(dest, 280, ", ");
 
 			messageListItem.num = num + flagsList[index];
 			if (messageListGetItem(&gCombatMessageList, &messageListItem)) {
-				strcat(dest, messageListItem.text);
+				strcat_s(dest, 280, messageListItem.text);
 			}
 		}
 
 		// " and "
 		messageListItem.num = 108;
 		if (messageListGetItem(&gCombatMessageList, &messageListItem)) {
-			strcat(dest, messageListItem.text);
+			strcat_s(dest, 280, messageListItem.text);
 		}
 
 		messageListItem.num = num + flagsList[flagsListLength - 1];
 		if (messageListGetItem(&gCombatMessageList, &messageListItem)) {
-			strcat(dest, messageListItem.text);
+			strcat_s(dest, 280, messageListItem.text);
 		}
 	}
 }
@@ -5263,7 +5265,7 @@ void _combat_anim_finished() {
 	if (_combat_cleanup_enabled) {
 		_combat_cleanup_enabled = false;
 
-		Object* weapon = critterGetWeaponForHitMode(_main_ctd.attacker, _main_ctd.hitMode);
+		Object *weapon = critterGetWeaponForHitMode(_main_ctd.attacker, _main_ctd.hitMode);
 		if (weapon != NULL) {
 			if (ammoGetCapacity(weapon) > 0) {
 				int ammoQuantity = ammoGetQuantity(weapon);
@@ -5282,7 +5284,7 @@ void _combat_anim_finished() {
 
 		_apply_damage(&_main_ctd, true);
 
-		Object* attacker = _main_ctd.attacker;
+		Object *attacker = _main_ctd.attacker;
 		if (attacker == gDude && _combat_highlight == 2) {
 			_combat_outline_on();
 		}
@@ -5308,7 +5310,7 @@ void _combat_anim_finished() {
 }
 
 // 0x425FBC
-static void _combat_standup(Object* a1) {
+static void _combat_standup(Object *a1) {
 	int v2;
 
 	v2 = 3;
@@ -5335,7 +5337,7 @@ static void _combat_standup(Object* a1) {
 // Render two digits.
 //
 // 0x42603C
-static void _print_tohit(unsigned char* dest, int destPitch, int accuracy) {
+static void _print_tohit(unsigned char *dest, int destPitch, int accuracy) {
 	FrmImage numbersFrmImage;
 	int numbersFid = buildFid(OBJ_TYPE_INTERFACE, 82, 0, 0, 0);
 	if (!numbersFrmImage.lock(numbersFid)) {
@@ -5352,7 +5354,7 @@ static void _print_tohit(unsigned char* dest, int destPitch, int accuracy) {
 }
 
 // 0x42612C
-static char* hitLocationGetName(Object* critter, int hitLocation) {
+static char *hitLocationGetName(Object *critter, int hitLocation) {
 	MessageListItem messageListItem;
 	messageListItem.num = 1000 + 10 * _art_alias_num(critter->fid & 0xFFF) + hitLocation;
 	if (messageListGetItem(&gCombatMessageList, &messageListItem)) {
@@ -5377,17 +5379,17 @@ static void _draw_loc_(int eventCode, int color) {
 	color |= 0x3000000;
 
 	if (eventCode >= 4) {
-		char* name = hitLocationGetName(gCalledShotCritter, _hit_loc_right[eventCode - 4]);
+		char *name = hitLocationGetName(gCalledShotCritter, _hit_loc_right[eventCode - 4]);
 		int width = fontGetStringWidth(name);
 		windowDrawText(gCalledShotWindow, name, 0, 431 - width, _call_ty[eventCode - 4] - 86, color);
 	} else {
-		char* name = hitLocationGetName(gCalledShotCritter, _hit_loc_left[eventCode]);
+		char *name = hitLocationGetName(gCalledShotCritter, _hit_loc_left[eventCode]);
 		windowDrawText(gCalledShotWindow, name, 0, 74, _call_ty[eventCode] - 86, color);
 	}
 }
 
 // 0x426218
-static int calledShotSelectHitLocation(Object* critter, int* hitLocation, int hitMode) {
+static int calledShotSelectHitLocation(Object *critter, int *hitLocation, int hitMode) {
 	if (critter == NULL) {
 		return 0;
 	}
@@ -5403,19 +5405,19 @@ static int calledShotSelectHitLocation(Object* critter, int* hitLocation, int hi
 	int calledShotWindowX = (screenGetWidth() - CALLED_SHOT_WINDOW_WIDTH) / 2;
 	// Center vertically for HRP, otherwise maintain original location (20).
 	int calledShotWindowY = screenGetHeight() != 480
-	                        ? (screenGetHeight() - INTERFACE_BAR_HEIGHT - 1 - CALLED_SHOT_WINDOW_HEIGHT) / 2
-	                        : CALLED_SHOT_WINDOW_Y;
+								? (screenGetHeight() - INTERFACE_BAR_HEIGHT - 1 - CALLED_SHOT_WINDOW_HEIGHT) / 2
+								: CALLED_SHOT_WINDOW_Y;
 	gCalledShotWindow = windowCreate(calledShotWindowX,
-	                                 calledShotWindowY,
-	                                 CALLED_SHOT_WINDOW_WIDTH,
-	                                 CALLED_SHOT_WINDOW_HEIGHT,
-	                                 _colorTable[0],
-	                                 WINDOW_MODAL);
+									 calledShotWindowY,
+									 CALLED_SHOT_WINDOW_WIDTH,
+									 CALLED_SHOT_WINDOW_HEIGHT,
+									 _colorTable[0],
+									 WINDOW_MODAL);
 	if (gCalledShotWindow == -1) {
 		return -1;
 	}
 
-	unsigned char* windowBuffer = windowGetBuffer(gCalledShotWindow);
+	unsigned char *windowBuffer = windowGetBuffer(gCalledShotWindow);
 
 	FrmImage backgroundFrm;
 	int backgroundFid = buildFid(OBJ_TYPE_INTERFACE, 118, 0, 0, 0);
@@ -5425,21 +5427,21 @@ static int calledShotSelectHitLocation(Object* critter, int* hitLocation, int hi
 	}
 
 	blitBufferToBuffer(backgroundFrm.getData(),
-	                   CALLED_SHOT_WINDOW_WIDTH,
-	                   CALLED_SHOT_WINDOW_HEIGHT,
-	                   CALLED_SHOT_WINDOW_WIDTH,
-	                   windowBuffer,
-	                   CALLED_SHOT_WINDOW_WIDTH);
+					   CALLED_SHOT_WINDOW_WIDTH,
+					   CALLED_SHOT_WINDOW_HEIGHT,
+					   CALLED_SHOT_WINDOW_WIDTH,
+					   windowBuffer,
+					   CALLED_SHOT_WINDOW_WIDTH);
 
 	FrmImage critterFrm;
 	int critterFid = buildFid(OBJ_TYPE_CRITTER, critter->fid & 0xFFF, ANIM_CALLED_SHOT_PIC, 0, 0);
 	if (critterFrm.lock(critterFid)) {
 		blitBufferToBuffer(critterFrm.getData(),
-		                   170,
-		                   225,
-		                   170,
-		                   windowBuffer + CALLED_SHOT_WINDOW_WIDTH * 31 + 168,
-		                   CALLED_SHOT_WINDOW_WIDTH);
+						   170,
+						   225,
+						   170,
+						   windowBuffer + CALLED_SHOT_WINDOW_WIDTH * 31 + 168,
+						   CALLED_SHOT_WINDOW_WIDTH);
 	}
 
 	FrmImage cancelButtonNormalFrmImage;
@@ -5458,20 +5460,20 @@ static int calledShotSelectHitLocation(Object* critter, int* hitLocation, int hi
 
 	// Cancel button
 	int cancelBtn = buttonCreate(gCalledShotWindow,
-	                             210,
-	                             268,
-	                             15,
-	                             16,
-	                             -1,
-	                             -1,
-	                             -1,
-	                             KEY_ESCAPE,
-	                             cancelButtonNormalFrmImage.getData(),
-	                             cancelButtonPressedFrmImage.getData(),
-	                             NULL,
-	                             BUTTON_FLAG_TRANSPARENT);
+								 210,
+								 268,
+								 15,
+								 16,
+								 -1,
+								 -1,
+								 -1,
+								 KEY_ESCAPE,
+								 cancelButtonNormalFrmImage.getData(),
+								 cancelButtonPressedFrmImage.getData(),
+								 NULL,
+								 BUTTON_FLAG_TRANSPARENT);
 	if (cancelBtn != -1) {
-		buttonSetCallbacks(cancelBtn, _gsound_red_butt_press, _gsound_red_butt_release);
+//		buttonSetCallbacks(cancelBtn, _gsound_red_butt_press, _gsound_red_butt_release); TODO audio
 	}
 
 	int oldFont = fontGetCurrent();
@@ -5544,14 +5546,14 @@ static int calledShotSelectHitLocation(Object* critter, int* hitLocation, int hi
 
 	*hitLocation = eventCode < 4 ? _hit_loc_left[eventCode] : _hit_loc_right[eventCode - 4];
 
-	soundPlayFile("icsxxxx1");
+//	soundPlayFile("icsxxxx1"); TODO audio
 
 	return 0;
 }
 
 // check for possibility of performing attacking
 // 0x426614
-int _combat_check_bad_shot(Object* attacker, Object* defender, int hitMode, bool aiming) {
+int _combat_check_bad_shot(Object *attacker, Object *defender, int hitMode, bool aiming) {
 	int range = 1;
 	int tile = -1;
 	if (defender != NULL) {
@@ -5562,10 +5564,9 @@ int _combat_check_bad_shot(Object* attacker, Object* defender, int hitMode, bool
 		}
 	}
 
-	Object* weapon = critterGetWeaponForHitMode(attacker, hitMode);
+	Object *weapon = critterGetWeaponForHitMode(attacker, hitMode);
 	if (weapon != NULL) {
-		if ((attacker->data.critter.combat.results & DAM_CRIP_ARM_LEFT) != 0
-		        && (attacker->data.critter.combat.results & DAM_CRIP_ARM_RIGHT) != 0) {
+		if ((attacker->data.critter.combat.results & DAM_CRIP_ARM_LEFT) != 0 && (attacker->data.critter.combat.results & DAM_CRIP_ARM_RIGHT) != 0) {
 			return COMBAT_BAD_SHOT_BOTH_ARMS_CRIPPLED;
 		}
 
@@ -5592,9 +5593,7 @@ int _combat_check_bad_shot(Object* attacker, Object* defender, int hitMode, bool
 		}
 	}
 
-	if (attackType == ATTACK_TYPE_RANGED
-	        || attackType == ATTACK_TYPE_THROW
-	        || weaponGetRange(attacker, hitMode) > 1) {
+	if (attackType == ATTACK_TYPE_RANGED || attackType == ATTACK_TYPE_THROW || weaponGetRange(attacker, hitMode) > 1) {
 		if (_combat_is_shot_blocked(attacker, attacker->tile, tile, defender, NULL)) {
 			return COMBAT_BAD_SHOT_AIM_BLOCKED;
 		}
@@ -5604,7 +5603,7 @@ int _combat_check_bad_shot(Object* attacker, Object* defender, int hitMode, bool
 }
 
 // 0x426744
-bool _combat_to_hit(Object* target, int* accuracy) {
+bool _combat_to_hit(Object *target, int *accuracy) {
 	int hitMode;
 	bool aiming;
 	if (interfaceGetCurrentHitMode(&hitMode, &aiming) == -1) {
@@ -5621,7 +5620,7 @@ bool _combat_to_hit(Object* target, int* accuracy) {
 }
 
 // 0x4267CC
-void _combat_attack_this(Object* a1) {
+void _combat_attack_this(Object *a1) {
 	if (a1 == NULL) {
 		return;
 	}
@@ -5637,9 +5636,9 @@ void _combat_attack_this(Object* a1) {
 	}
 
 	MessageListItem messageListItem;
-	Object* item;
+	Object *item;
 	char formattedText[80];
-	const char* sfx;
+	const char *sfx;
 
 	int rc = _combat_check_bad_shot(gDude, a1, hitMode, aiming);
 	switch (rc) {
@@ -5650,8 +5649,8 @@ void _combat_attack_this(Object* a1) {
 			displayMonitorAddMessage(messageListItem.text);
 		}
 
-		sfx = sfxBuildWeaponName(WEAPON_SOUND_EFFECT_OUT_OF_AMMO, item, hitMode, NULL);
-		soundPlayFile(sfx);
+//		sfx = sfxBuildWeaponName(WEAPON_SOUND_EFFECT_OUT_OF_AMMO, item, hitMode, NULL); TODO audio
+//		soundPlayFile(sfx);
 		return;
 	case COMBAT_BAD_SHOT_OUT_OF_RANGE:
 		messageListItem.num = 102; // Target out of range.
@@ -5736,10 +5735,10 @@ void _combat_outline_on() {
 			_combat_update_critter_outline_for_los(_combat_list[index], 1);
 		}
 	} else {
-		Object** critterList;
+		Object **critterList;
 		int critterListLength = objectListCreate(-1, gElevation, OBJ_TYPE_CRITTER, &critterList);
 		for (int index = 0; index < critterListLength; index++) {
-			Object* critter = critterList[index];
+			Object *critter = critterList[index];
 			if (critter != gDude && (critter->data.critter.combat.results & DAM_DEAD) == 0) {
 				_combat_update_critter_outline_for_los(critter, 1);
 			}
@@ -5760,7 +5759,7 @@ void _combat_outline_on() {
 void _combat_outline_off() {
 	int i;
 	int v5;
-	Object** v9;
+	Object **v9;
 
 	if (gCombatState & 1) {
 		for (i = 0; i < _list_total; i++) {
@@ -5799,12 +5798,12 @@ void _combat_highlight_change() {
 // Probably calculates line of sight or determines if object can see other object.
 //
 // 0x426CC4
-bool _combat_is_shot_blocked(Object* a1, int from, int to, Object* a4, int* a5) {
+bool _combat_is_shot_blocked(Object *a1, int from, int to, Object *a4, int *a5) {
 	if (a5 != NULL) {
 		*a5 = 0;
 	}
 
-	Object* obstacle = a1;
+	Object *obstacle = a1;
 	int current = from;
 	while (obstacle != NULL && current != to) {
 		_make_straight_path_func(a1, current, to, 0, &obstacle, 32, _obj_shoot_blocking_at);
@@ -5863,13 +5862,13 @@ int _combat_player_knocked_out_by() {
 }
 
 // 0x426DB8
-int _combat_explode_scenery(Object* a1, Object* a2) {
+int _combat_explode_scenery(Object *a1, Object *a2) {
 	_scr_explode_scenery(a1, a1->tile, weaponGetRocketExplosionRadius(NULL), a1->elevation);
 	return 0;
 }
 
 // 0x426DDC
-void _combat_delete_critter(Object* obj) {
+void _combat_delete_critter(Object *obj) {
 	// TODO: Check entire function.
 	if (!isInCombat()) {
 		return;
@@ -5916,7 +5915,7 @@ void _combat_delete_critter(Object* obj) {
 }
 
 // 0x426EC4
-void _combatKillCritterOutsideCombat(Object* critter_obj, char* msg) {
+void _combatKillCritterOutsideCombat(Object *critter_obj, char *msg) {
 	if (critter_obj != gDude) {
 		displayMonitorAddMessage(msg);
 		scriptExecProc(critter_obj->sid, SCRIPT_PROC_DESTROY);
@@ -6071,7 +6070,7 @@ static void criticalsInit() {
 	if (mode == 1 || mode == 3) {
 		Config criticalsConfig;
 		if (configInit(&criticalsConfig)) {
-			char* criticalsConfigFilePath;
+			char *criticalsConfigFilePath;
 			configGetString(&gSfallConfig, SFALL_CONFIG_MISC_KEY, SFALL_CONFIG_OVERRIDE_CRITICALS_FILE_KEY, &criticalsConfigFilePath);
 			if (criticalsConfigFilePath != NULL && *criticalsConfigFilePath == '\0') {
 				criticalsConfigFilePath = NULL;
@@ -6204,7 +6203,7 @@ static void burstModInit() {
 	}
 }
 
-static int burstModComputeRounds(int totalRounds, int* centerRoundsPtr, int* leftRoundsPtr, int* rightRoundsPtr) {
+static int burstModComputeRounds(int totalRounds, int *centerRoundsPtr, int *leftRoundsPtr, int *rightRoundsPtr) {
 	int totalRoundsMultiplied = totalRounds * gBurstModCenterMultiplier;
 	int centerRounds = totalRoundsMultiplied / gBurstModCenterDivisor;
 	if ((totalRoundsMultiplied % gBurstModCenterDivisor) != 0) {
@@ -6235,7 +6234,7 @@ static void unarmedInit() {
 }
 
 static void unarmedInitVanilla() {
-	UnarmedHitDescription* hitDescription;
+	UnarmedHitDescription *hitDescription;
 
 	// Punch
 	hitDescription = &(gUnarmedHitDescriptions[HIT_MODE_PUNCH]);
@@ -6398,7 +6397,7 @@ static void unarmedInitVanilla() {
 }
 
 static void unarmedInitCustom() {
-	char* unarmedFileName = NULL;
+	char *unarmedFileName = NULL;
 	configGetString(&gSfallConfig, SFALL_CONFIG_MISC_KEY, SFALL_CONFIG_UNARMED_FILE_KEY, &unarmedFileName);
 	if (unarmedFileName != NULL && *unarmedFileName == '\0') {
 		unarmedFileName = NULL;
@@ -6419,7 +6418,7 @@ static void unarmedInitCustom() {
 					continue;
 				}
 
-				UnarmedHitDescription* hitDescription = &(gUnarmedHitDescriptions[hitMode]);
+				UnarmedHitDescription *hitDescription = &(gUnarmedHitDescriptions[hitMode]);
 				snprintf(section, sizeof(section), "%d", hitMode);
 
 				configGetInt(&unarmedConfig, section, "ReqLevel", &(hitDescription->requiredLevel));
@@ -6443,25 +6442,25 @@ static void unarmedInitCustom() {
 	}
 }
 
-int unarmedGetDamage(int hitMode, int* minDamagePtr, int* maxDamagePtr) {
-	UnarmedHitDescription* hitDescription = &(gUnarmedHitDescriptions[hitMode]);
+int unarmedGetDamage(int hitMode, int *minDamagePtr, int *maxDamagePtr) {
+	UnarmedHitDescription *hitDescription = &(gUnarmedHitDescriptions[hitMode]);
 	*minDamagePtr = hitDescription->minDamage;
 	*maxDamagePtr = hitDescription->maxDamage;
 	return hitDescription->bonusDamage;
 }
 
 int unarmedGetBonusCriticalChance(int hitMode) {
-	UnarmedHitDescription* hitDescription = &(gUnarmedHitDescriptions[hitMode]);
+	UnarmedHitDescription *hitDescription = &(gUnarmedHitDescriptions[hitMode]);
 	return hitDescription->bonusCriticalChance;
 }
 
 int unarmedGetActionPointCost(int hitMode) {
-	UnarmedHitDescription* hitDescription = &(gUnarmedHitDescriptions[hitMode]);
+	UnarmedHitDescription *hitDescription = &(gUnarmedHitDescriptions[hitMode]);
 	return hitDescription->actionPointCost;
 }
 
 bool unarmedIsPenetrating(int hitMode) {
-	UnarmedHitDescription* hitDescription = &(gUnarmedHitDescriptions[hitMode]);
+	UnarmedHitDescription *hitDescription = &(gUnarmedHitDescriptions[hitMode]);
 	return hitDescription->isPenetrate;
 }
 
@@ -6492,7 +6491,7 @@ static int unarmedGetHitModeInRange(int firstHitMode, int lastHitMode, bool isSe
 	}
 
 	for (int candidateHitMode = firstHitMode; candidateHitMode <= lastHitMode; candidateHitMode++) {
-		UnarmedHitDescription* hitDescription = &(gUnarmedHitDescriptions[candidateHitMode]);
+		UnarmedHitDescription *hitDescription = &(gUnarmedHitDescriptions[candidateHitMode]);
 		if (isSecondary != hitDescription->isSecondary) {
 			continue;
 		}
@@ -6541,7 +6540,7 @@ bool damageModGetDisplayBonusDamage() {
 	return gDisplayBonusDamage;
 }
 
-static void damageModCalculateGlovz(DamageCalculationContext* context) {
+static void damageModCalculateGlovz(DamageCalculationContext *context) {
 	int ammoX = weaponGetAmmoDamageMultiplier(context->attack->weapon);
 	if (ammoX <= 0) {
 		ammoX = 1;
@@ -6644,7 +6643,7 @@ static int damageModGlovzDivRound(int dividend, int divisor) {
 	return quotient;
 }
 
-static void damageModCalculateYaam(DamageCalculationContext* context) {
+static void damageModCalculateYaam(DamageCalculationContext *context) {
 	int damageMultiplier = context->bonusDamageMultiplier * weaponGetAmmoDamageMultiplier(context->attack->weapon);
 	int damageDivisor = weaponGetAmmoDamageDivisor(context->attack->weapon);
 
@@ -6713,4 +6712,4 @@ void combat_reset_hit_location_penalty() {
 	}
 }
 
-} // namespace fallout
+} // namespace Fallout2

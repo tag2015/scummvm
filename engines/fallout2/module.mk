@@ -11,6 +11,8 @@ MODULE_OBJS = \
 	character_editor.o \
 	character_selector.o \
 	color.o \
+	combat.o \
+	combat_ai.o \
 	config.o \
 	credits.o \
 	critter.o \
