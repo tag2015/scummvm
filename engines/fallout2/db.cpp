@@ -199,7 +199,7 @@ int fileWriteString(const char *string, File *stream) {
 
 // 0x4C5FFC
 size_t fileRead(void *ptr, size_t size, size_t count, File *stream) {
-	if (gFileReadProgressHandler != NULL) {
+/*	if (gFileReadProgressHandler != NULL) { TODO check
 		unsigned char *byteBuffer = (unsigned char *)ptr;
 
 		size_t totalBytesRead = 0;
@@ -239,7 +239,7 @@ size_t fileRead(void *ptr, size_t size, size_t count, File *stream) {
 		if (!size)
 			warning("DB: fileRead: Requested size is zero");
 		return (size > 0) ? (totalBytesRead / size) : 0;
-	}
+	}*/
 
 	if (stream->type == XFILE_TYPE_DFILE && stream->dfile->entry->compressed) {
 		if (stream->dfile->decompressedData == NULL)
@@ -341,13 +341,17 @@ int fileReadInt32(File *stream, int *valuePtr) {
 						  *(stream->dfile->decompressedData + stream->dfile->decompressed_position + 2) << 8 |
 						  *(stream->dfile->decompressedData + stream->dfile->decompressed_position + 3));
 			//			value = (int*) ptr;
-			debug(6, "DB: Read Int32: %d", value);
 			stream->dfile->decompressed_position += 4;
 		}
 	}
-	*valuePtr = value;
-	//	*valuePtr = ((value & 0xFF000000) >> 24) | ((value & 0xFF0000) >> 8) | ((value & 0xFF00) << 8) | ((value & 0xFF) << 24);
-
+	if(stream->dfile->entry->compressed){
+		debug(6, "DB: Read Int32 (uncompressed & shifted): %d", value);
+		*valuePtr = value;
+	}
+	else{
+		*valuePtr = ((value & 0xFF000000) >> 24) | ((value & 0xFF0000) >> 8) | ((value & 0xFF00) << 8) | ((value & 0xFF) << 24);
+		debug(6, "DB: Read Int32 (shifted): %d", *valuePtr);
+	}
 	return 0;
 }
 
