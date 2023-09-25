@@ -1653,6 +1653,7 @@ static int _square_load(File *stream, int flags) {
 	_square_reset();
 
 	for (int elevation = 0; elevation < ELEVATION_COUNT; elevation++) {
+		debug(6, "Map level (elevation): %d", elevation);
 		if ((flags & _map_data_elev_flags[elevation]) == 0) {
 			int *arr = _square[elevation]->field_0;
 			if (_db_freadIntCount(stream, arr, SQUARE_GRID_SIZE) != 0) {
@@ -1670,6 +1671,7 @@ static int _square_load(File *stream, int flags) {
 				v8 = v6 & 0xFFF;
 				v9 = arr[tile] & 0xFFFF;
 				arr[tile] = ((v8 | (v7 << 12)) << 16) | v9;
+				debug(6, "Map tile %d: %d", tile, arr[tile]);
 			}
 		}
 	}
@@ -1713,28 +1715,40 @@ static int mapHeaderWrite(MapHeader *ptr, File *stream) {
 static int mapHeaderRead(MapHeader *ptr, File *stream) {
 	if (fileReadInt32(stream, &(ptr->version)) == -1)
 		return -1;
+	debug(5, "Map Header - version %d", ptr->version);
 	if (fileReadFixedLengthString(stream, ptr->name, 16) == -1)
 		return -1;
+	debug(5, "Map Header - name: %s", ptr->name);
 	if (fileReadInt32(stream, &(ptr->enteringTile)) == -1)
 		return -1;
+	debug(5, "Map Header - enteringTile: %d", ptr->enteringTile);
 	if (fileReadInt32(stream, &(ptr->enteringElevation)) == -1)
 		return -1;
+	debug(5, "Map Header - enteringElevation: %d", ptr->enteringElevation);
 	if (fileReadInt32(stream, &(ptr->enteringRotation)) == -1)
 		return -1;
+	debug(5, "Map Header - enteringRotation: %d", ptr->enteringRotation);
 	if (fileReadInt32(stream, &(ptr->localVariablesCount)) == -1)
 		return -1;
+	debug(5, "Map Header - localVariablesCount: %d", ptr->localVariablesCount);
 	if (fileReadInt32(stream, &(ptr->scriptIndex)) == -1)
 		return -1;
+	debug(5, "Map Header - scriptIndex: %d", ptr->scriptIndex);
 	if (fileReadInt32(stream, &(ptr->flags)) == -1)
 		return -1;
+	debug(5, "Map Header - flags: %d", ptr->flags);
 	if (fileReadInt32(stream, &(ptr->darkness)) == -1)
 		return -1;
+	debug(5, "Map Header - darkness: %d", ptr->darkness);
 	if (fileReadInt32(stream, &(ptr->globalVariablesCount)) == -1)
 		return -1;
+	debug(5, "Map Header - globalVariablesCount: %d", ptr->globalVariablesCount);
 	if (fileReadInt32(stream, &(ptr->field_34)) == -1)
 		return -1;
+	debug(5, "Map Header - field_34: %d", ptr->field_34);
 	if (fileReadInt32(stream, &(ptr->lastVisitTime)) == -1)
 		return -1;
+	debug(5, "Map Header - lastVisitTime: %d", ptr->lastVisitTime);
 	if (fileReadInt32List(stream, ptr->field_3C, 44) == -1)
 		return -1;
 
