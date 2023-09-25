@@ -1728,7 +1728,7 @@ static void opObjectCanSeeObject(Program *program) {
 		// CE: These checks are on par with |opObjectCanHearObject|.
 		if (object2->elevation == object1->elevation) {
 			if (object2->tile != -1 && object1->tile != -1) {
-				if (/*isWithinPerception(object1, object2)*/ 1) {  // TODO combat_ai
+				if (isWithinPerception(object1, object2)) {
 					Object *obstacle;
 					_make_straight_path(object1, object1->tile, object2->tile, nullptr, &obstacle, 16);
 					if (obstacle == object2) {
@@ -1977,7 +1977,7 @@ static void opMetarule3(Program *program) {
 		result.integerValue = tileSetCenter(param1.integerValue, TILE_SET_CENTER_REFRESH_WINDOW);
 		break;
 	case METARULE3_109:
-		// result.integerValue = aiGetChemUse(static_cast<Object *>(param1.pointerValue)); TODO combat_ai
+		result.integerValue = aiGetChemUse(static_cast<Object *>(param1.pointerValue));
 		break;
 	case METARULE3_110:
 		result.integerValue = wmCarIsOutOfGas() ? 1 : 0;
@@ -2541,7 +2541,7 @@ static void opObjectCanHearObject(Program *program) {
 	if (object2 != nullptr && object1 != nullptr) {
 		if (object2->elevation == object1->elevation) {
 			if (object2->tile != -1 && object1->tile != -1) {
-				if (/*isWithinPerception(object1, object2)*/ 1) {  // TODO combat_ai
+				if (isWithinPerception(object1, object2)) {
 					canHear = true;
 				}
 			}
@@ -2791,7 +2791,7 @@ static void opCritterAddTrait(Program *program) {
 			case CRITTER_TRAIT_OBJECT:
 				switch (param) {
 				case CRITTER_TRAIT_OBJECT_AI_PACKET:
-//					critterSetAiPacket(object, value); TODO combat_ai
+					critterSetAiPacket(object, value);
 					break;
 				case CRITTER_TRAIT_OBJECT_TEAM:
 					if (objectIsPartyMember(object)) {
@@ -2806,7 +2806,7 @@ static void opCritterAddTrait(Program *program) {
 //						break;
 //					}
 
-//					critterSetTeam(object, value); TODO combat_ai
+					critterSetTeam(object, value);
 					break;
 				}
 				break;
@@ -4614,7 +4614,7 @@ static void opCritterStopAttacking(Program *program) {
 	if (obj != NULL) {
 		obj->data.critter.combat.maneuver |= CRITTER_MANEUVER_DISENGAGING;
 		obj->data.critter.combat.whoHitMe = NULL;
-//		aiInfoSetLastTarget(obj, NULL); TODO combat_ai
+		aiInfoSetLastTarget(obj, NULL);
 	} else {
 		scriptPredefinedError(program, "critter_stop_attacking", SCRIPT_ERROR_OBJECT_IS_NULL);
 	}
