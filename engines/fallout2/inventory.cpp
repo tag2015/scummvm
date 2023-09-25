@@ -769,7 +769,7 @@ static bool _setup_inventory(int inventoryWindowType) {
 		unsigned char *src = windowGetBuffer(_barter_back_win);
 		blitBufferToBuffer(src + INVENTORY_TRADE_WINDOW_X, INVENTORY_TRADE_WINDOW_WIDTH, INVENTORY_TRADE_WINDOW_HEIGHT, INVENTORY_TRADE_BACKGROUND_WINDOW_WIDTH, dest, INVENTORY_TRADE_WINDOW_WIDTH);
 
-		gInventoryPrintItemDescriptionHandler = NULL; // gameDialogRenderSupplementaryMessage; TODO game_dialog
+		gInventoryPrintItemDescriptionHandler = gameDialogRenderSupplementaryMessage;
 	}
 
 	if (inventoryWindowType == INVENTORY_WINDOW_TYPE_LOOT) {
@@ -2025,7 +2025,7 @@ static void _display_body(int fid, int inventoryWindowType) {
 			rect.bottom = rect.top + INVENTORY_BODY_VIEW_HEIGHT - 1;
 
 			FrmImage backgroundFrmImage;
-			int backgroundFid = buildFid(OBJ_TYPE_INTERFACE, /*gGameDialogSpeakerIsPartyMember ? 420 :*/ 111, 0, 0, 0); // TODO game_dialog
+			int backgroundFid = buildFid(OBJ_TYPE_INTERFACE, gGameDialogSpeakerIsPartyMember ? 420 : 111, 0, 0, 0);
 			if (backgroundFrmImage.lock(backgroundFid)) {
 				blitBufferToBuffer(backgroundFrmImage.getData() + rect.top * 640 + rect.left,
 								   INVENTORY_BODY_VIEW_WIDTH,
@@ -4617,9 +4617,9 @@ static int _move_inventory(Object *a1, int a2, Object *a3, bool a4) {
 
 // 0x474B2C
 static int _barter_compute_value(Object *a1, Object *a2) {
-/*	if (gGameDialogSpeakerIsPartyMember) { TODO game_dialog
+	if (gGameDialogSpeakerIsPartyMember) {
 		return objectGetInventoryWeight(_btable);
-	}*/
+	}
 
 	int cost = objectGetCost(_btable);
 	int caps = itemGetTotalCaps(_btable);
@@ -4656,18 +4656,18 @@ static int _barter_attempt_transaction(Object *a1, Object *a2, Object *a3, Objec
 		// Sorry, you cannot carry that much.
 		messageListItem.num = 31;
 		if (messageListGetItem(&gInventoryMessageList, &messageListItem)) {
-//			gameDialogRenderSupplementaryMessage(messageListItem.text); TODO game_dialog
+			gameDialogRenderSupplementaryMessage(messageListItem.text);
 		}
 		return -1;
 	}
 
-	if (/*gGameDialogSpeakerIsPartyMember*/ 0) { // TODO game_dialog
+	if (gGameDialogSpeakerIsPartyMember) {
 		int v10 = critterGetStat(a3, STAT_CARRY_WEIGHT) - objectGetInventoryWeight(a3);
 		if (objectGetInventoryWeight(a2) > v10) {
 			// Sorry, that's too much to carry.
 			messageListItem.num = 32;
 			if (messageListGetItem(&gInventoryMessageList, &messageListItem)) {
-//				gameDialogRenderSupplementaryMessage(messageListItem.text); TODO game_dialog
+				gameDialogRenderSupplementaryMessage(messageListItem.text);
 			}
 			return -1;
 		}
@@ -4694,7 +4694,7 @@ static int _barter_attempt_transaction(Object *a1, Object *a2, Object *a3, Objec
 			// No, your offer is not good enough.
 			messageListItem.num = 28;
 			if (messageListGetItem(&gInventoryMessageList, &messageListItem)) {
-//				gameDialogRenderSupplementaryMessage(messageListItem.text); TODO game_dialog
+				gameDialogRenderSupplementaryMessage(messageListItem.text);
 			}
 			return -1;
 		}
@@ -4902,7 +4902,7 @@ static void inventoryWindowRenderInnerInventories(int win, Object *a2, Object *a
 			dest += INVENTORY_TRADE_WINDOW_WIDTH * INVENTORY_SLOT_HEIGHT;
 		}
 
-		if (/*gGameDialogSpeakerIsPartyMember*/ 0) { // TODO game_dialog
+		if (gGameDialogSpeakerIsPartyMember) {
 			MessageListItem messageListItem;
 			messageListItem.num = 30;
 
@@ -4941,7 +4941,7 @@ static void inventoryWindowRenderInnerInventories(int win, Object *a2, Object *a
 			dest += INVENTORY_TRADE_WINDOW_WIDTH * INVENTORY_SLOT_HEIGHT;
 		}
 
-		if (/*gGameDialogSpeakerIsPartyMember*/ 0) {  // TODO game_dialog
+		if (gGameDialogSpeakerIsPartyMember) {
 			MessageListItem messageListItem;
 			messageListItem.num = 30;
 
@@ -4988,7 +4988,7 @@ void inventoryOpenTrade(int win, Object *a2, Object *a3, Object *a4, int a5) {
 	if (item2 != NULL) {
 		itemRemove(a2, item2, 1);
 	} else {
-		if (/*!gGameDialogSpeakerIsPartyMember*/ 1) {  // TODO game_dialog
+		if (!gGameDialogSpeakerIsPartyMember) {
 			item1 = _inven_find_type(a2, ITEM_TYPE_WEAPON, NULL);
 			if (item1 != NULL) {
 				itemRemove(a2, item1, 1);
@@ -5066,7 +5066,7 @@ void inventoryOpenTrade(int win, Object *a2, Object *a3, Object *a4, int a5) {
 		if (keyCode == KEY_LOWERCASE_T || modifier <= -30) {
 			itemMoveAll(a4, a2);
 			itemMoveAll(a3, gDude);
-//			_barter_end_to_talk_to(); TODO game_dialog
+			_barter_end_to_talk_to();
 			break;
 		} else if (keyCode == KEY_LOWERCASE_M) {
 			if (a3->data.inventory.length != 0 || _btable->data.inventory.length != 0) {
@@ -5078,9 +5078,9 @@ void inventoryOpenTrade(int win, Object *a2, Object *a3, Object *a4, int a5) {
 					// Ok, that's a good trade.
 					MessageListItem messageListItem;
 					messageListItem.num = 27;
-					if (/*!gGameDialogSpeakerIsPartyMember*/ 1) { // TODO game_dialog
+					if (!gGameDialogSpeakerIsPartyMember) {
 						if (messageListGetItem(&gInventoryMessageList, &messageListItem)) {
-//							gameDialogRenderSupplementaryMessage(messageListItem.text); TODO game_dialog
+							gameDialogRenderSupplementaryMessage(messageListItem.text);
 						}
 					}
 				}
