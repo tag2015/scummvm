@@ -3667,7 +3667,7 @@ int wmSetupRandomEncounter() {
 								combat.maxDamage = 500;
 								combat.field_1C = 0;
 
-//								_caiSetupTeamCombat(critter, prevCritter);  TODO combat_ai
+								_caiSetupTeamCombat(critter, prevCritter);
 								_scripts_request_combat_locked(&combat);
 							}
 						} else {
@@ -3684,7 +3684,7 @@ int wmSetupRandomEncounter() {
 								combat.maxDamage = 500;
 								combat.field_1C = 0;
 
-//								_caiSetupTeamCombat(gDude, prevCritter); // combat_ai
+								_caiSetupTeamCombat(gDude, prevCritter);
 								_scripts_request_combat_locked(&combat);
 							}
 						}
