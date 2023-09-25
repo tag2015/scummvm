@@ -408,9 +408,9 @@ int gameTimeEventProcess(Object *obj, void *data) {
 
 	objectUnjamAll();
 
-//	if (!_gdialogActive()) { TODO game_dialog
-//		_scriptsCheckGameEvents(&movie_index, -1);
-//	}
+	if (!_gdialogActive()) {
+		_scriptsCheckGameEvents(&movie_index, -1);
+	}
 
 	v4 = _critter_check_rads(gDude);
 
@@ -978,7 +978,7 @@ int scriptsHandleRequests() {
 
 	if ((gScriptsRequests & SCRIPT_REQUEST_DIALOG) != 0) {
 		gScriptsRequests &= ~SCRIPT_REQUEST_DIALOG;
-//		gameDialogEnter(gScriptsRequestedDialogWith, 0); TODO game_dialog
+		gameDialogEnter(gScriptsRequestedDialogWith, 0);
 	}
 
 	if ((gScriptsRequests & SCRIPT_REQUEST_ENDGAME) != 0) {
@@ -2672,9 +2672,9 @@ char *_scr_get_msg_str_speech(int messageListId, int messageId, int a3) {
 		return NULL;
 	}
 
-/*	if (FID_TYPE(gGameDialogHeadFid) != OBJ_TYPE_HEAD) {  TODO game_dialog
+	if (FID_TYPE(gGameDialogHeadFid) != OBJ_TYPE_HEAD) {
 		a3 = 0;
-	}*/
+	}
 
 	MessageListItem messageListItem;
 	messageListItem.num = messageId;
@@ -2684,7 +2684,7 @@ char *_scr_get_msg_str_speech(int messageListId, int messageId, int a3) {
 	}
 
 	if (a3) {
-	/*	if (_gdialogActive()) {  TODO game_dialog
+		if (_gdialogActive()) {
 			if (messageListItem.audio != NULL && messageListItem.audio[0] != '\0') {
 				if (messageListItem.flags & 0x01) {
 					gameDialogStartLips(NULL);
@@ -2694,7 +2694,7 @@ char *_scr_get_msg_str_speech(int messageListId, int messageId, int a3) {
 			} else {
 				debugPrint("Missing speech name: %d\n", messageListItem.num);
 			}
-		}*/
+		}
 	}
 
 	return messageListItem.text;

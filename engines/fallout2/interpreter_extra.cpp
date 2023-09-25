@@ -1785,10 +1785,10 @@ static void opAttackComplex(Program *program) {
 		return;
 	}
 
-/*	if (_gdialogActive()) { // TODO game_dialog
+	if (_gdialogActive()) {
 		// TODO: Might be an error, program flag is not removed.
 		return;
-	} */
+	}
 
 	if (/*isInCombat()*/ 0) {  // TODO combat
 		CritterCombatData *combatData = &(self->data.critter.combat);
@@ -1841,7 +1841,7 @@ static void opStartGameDialog(Program *program) {
 		return;
 	}
 
-/*	gGameDialogHeadFid = -1; TODO game_dialog
+	gGameDialogHeadFid = -1;
 	if (PID_TYPE(obj->pid) == OBJ_TYPE_CRITTER) {
 		Proto *proto;
 		if (protoGetProto(obj->pid, &proto) == -1) {
@@ -1874,25 +1874,25 @@ static void opStartGameDialog(Program *program) {
 
 	gGameDialogSid = scriptGetSid(program);
 	gGameDialogSpeaker = scriptGetSelf(program);
-	_gdialogInitFromScript(gGameDialogHeadFid, gGameDialogReactionOrFidget);*/
+	_gdialogInitFromScript(gGameDialogHeadFid, gGameDialogReactionOrFidget);
 }
 
 // end_dialogue
 // 0x456F80
 static void opEndGameDialog(Program *program) {
-/*	if (_gdialogExitFromScript() != -1) { TODO game_dialog
+	if (_gdialogExitFromScript() != -1) {
 		gGameDialogSpeaker = NULL;
 		gGameDialogSid = -1;
-	}*/
+	}
 }
 
 // dialogue_reaction
 // 0x456FA4
 static void opGameDialogReaction(Program *program) {
-/*	int value = programStackPopInteger(program); TODO game_dialog
+	int value = programStackPopInteger(program);
 
 	gGameDialogReactionOrFidget = value;
-	_talk_to_critter_reacts(value);*/
+	_talk_to_critter_reacts(value);
 }
 
 // metarule3
@@ -2613,7 +2613,7 @@ static void opGameDialogSystemEnter(Program *program) {
 		return;
 	}
 
-//	gGameDialogSpeaker = scriptGetSelf(program); TODO game_dialog
+	gGameDialogSpeaker = scriptGetSelf(program);
 }
 
 // action_being_used
@@ -3490,17 +3490,17 @@ static void opPlayGameMovie(Program *program) {
 	// artifacts when playing endgame oilrig explosion).
 	bool isoWasDisabled = isoDisable();
 
-/*	gameDialogDisable(); TODO game_dialog movie
+	gameDialogDisable();
 
-	if (gameMoviePlay(movie, flags[movie]) == -1) {
+/*	if (gameMoviePlay(movie, flags[movie]) == -1) { TODO game_movie
 		debugPrint("\nError playing movie %d!", movie);
-	}
+	}*/
 
 	gameDialogEnable();
 
 	if (isoWasDisabled) {
 		isoEnable();
-	}*/
+	}
 
 	program->flags &= ~PROGRAM_FLAG_0x20;
 }
@@ -3622,10 +3622,10 @@ static void opGetDaysSinceLastVisit(Program *program) {
 static void _op_gsay_start(Program *program) {
 	program->flags |= PROGRAM_FLAG_0x20;
 
-/*	if (_gdialogStart() != 0) { TODO game_dialog
+	if (_gdialogStart() != 0) {
 		program->flags &= ~PROGRAM_FLAG_0x20;
 		programFatalError("Error starting dialog.");
-	}*/
+	}
 
 	program->flags &= ~PROGRAM_FLAG_0x20;
 }
@@ -3634,7 +3634,7 @@ static void _op_gsay_start(Program *program) {
 // 0x45A5B0
 static void _op_gsay_end(Program *program) {
 	program->flags |= PROGRAM_FLAG_0x20;
-//	_gdialogGo(); TODO game_dialog
+	_gdialogGo();
 	program->flags &= ~PROGRAM_FLAG_0x20;
 }
 
@@ -3643,7 +3643,7 @@ static void _op_gsay_end(Program *program) {
 static void _op_gsay_reply(Program *program) {
 	program->flags |= PROGRAM_FLAG_0x20;
 
-/*	ProgramValue msg = programStackPopValue(program); TODO game_dialog
+	ProgramValue msg = programStackPopValue(program);
 	int messageListId = programStackPopInteger(program);
 
 	if ((msg.opcode & VALUE_TYPE_MASK) == VALUE_TYPE_STRING) {
@@ -3653,7 +3653,7 @@ static void _op_gsay_reply(Program *program) {
 		gameDialogSetMessageReply(program, messageListId, msg.integerValue);
 	} else {
 		programFatalError("script error: %s: invalid arg %d to gsay_reply", program->name, 0);
-	}*/
+	}
 
 	program->flags &= ~PROGRAM_FLAG_0x20;
 }
@@ -3668,7 +3668,7 @@ static void _op_gsay_option(Program *program) {
 	ProgramValue msg = programStackPopValue(program);
 	int messageListId = programStackPopInteger(program);
 
-/*	if ((proc.opcode & VALUE_TYPE_MASK) == VALUE_TYPE_STRING) { TODO game_dialog
+	if ((proc.opcode & VALUE_TYPE_MASK) == VALUE_TYPE_STRING) {
 		char *procName = programGetString(program, proc.opcode, proc.integerValue);
 		if ((msg.opcode & VALUE_TYPE_MASK) == VALUE_TYPE_STRING) {
 			const char *string = programGetString(program, msg.opcode, msg.integerValue);
@@ -3689,7 +3689,7 @@ static void _op_gsay_option(Program *program) {
 		}
 	} else {
 		programFatalError("Invalid arg 3 to sayOption");
-	}*/
+	}
 
 	program->flags &= ~PROGRAM_FLAG_0x20;
 }
@@ -3703,7 +3703,7 @@ static void _op_gsay_message(Program *program) {
 	ProgramValue msg = programStackPopValue(program);
 	int messageListId = programStackPopInteger(program);
 
-/*	if ((msg.opcode & VALUE_TYPE_MASK) == VALUE_TYPE_STRING) { TODO game_dialog
+	if ((msg.opcode & VALUE_TYPE_MASK) == VALUE_TYPE_STRING) {
 		char *string = programGetString(program, msg.opcode, msg.integerValue);
 		gameDialogSetTextReply(program, messageListId, string);
 	} else if (msg.opcode == VALUE_TYPE_INT) {
@@ -3713,7 +3713,7 @@ static void _op_gsay_message(Program *program) {
 	}
 
 	gameDialogAddMessageOptionWithProcIdentifier(-2, -2, NULL, 50);
-	_gdialogSayMessage();*/
+	_gdialogSayMessage();
 
 	program->flags &= ~PROGRAM_FLAG_0x20;
 }
@@ -3744,7 +3744,7 @@ static void _op_giq_option(Program *program) {
 		}
 	}
 
-/*	if ((proc.opcode & VALUE_TYPE_MASK) == VALUE_TYPE_STRING) { TODO game_dialog
+	if ((proc.opcode & VALUE_TYPE_MASK) == VALUE_TYPE_STRING) {
 		char *procName = programGetString(program, proc.opcode, proc.integerValue);
 		if ((msg.opcode & VALUE_TYPE_MASK) == VALUE_TYPE_STRING) {
 			char *string = programGetString(program, msg.opcode, msg.integerValue);
@@ -3763,9 +3763,9 @@ static void _op_giq_option(Program *program) {
 		} else {
 			programFatalError("script error: %s: invalid arg %d to giq_option", program->name, 1);
 		}
-	} else {*/
+	} else {
 		programFatalError("script error: %s: invalid arg %d to giq_option", program->name, 3);
-//	}
+	}
 
 	program->flags &= ~PROGRAM_FLAG_0x20;
 }
@@ -3886,9 +3886,9 @@ static void opCombatIsInitialized(Program *program) {
 static void _op_gdialog_barter(Program *program) {
 	int data = programStackPopInteger(program);
 
-/*	if (gameDialogBarter(data) == -1) { TODO game_dialog
+	if (gameDialogBarter(data) == -1) {
 		debugPrint("\nScript Error: gdialog_barter: failed");
-	}*/
+	}
 }
 
 // difficulty_level
@@ -4510,7 +4510,7 @@ static void opJamLock(Program *program) {
 static void opGameDialogSetBarterMod(Program *program) {
 	int data = programStackPopInteger(program);
 
-//	gameDialogSetBarterModifier(data); TODO game_dialog
+	gameDialogSetBarterModifier(data);
 }
 
 // combat_difficulty
