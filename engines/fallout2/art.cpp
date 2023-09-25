@@ -488,7 +488,7 @@ unsigned char *artLockFrameDataReturningSize(int fid, CacheEntry **handlePtr, in
 	if (*heightPtr == -1) {
 		return NULL;
 	}
-
+	debug(5, "Art frame - w: %d h: %d", *widthPtr, *heightPtr);
 	// NOTE: Uninline.
 	return artGetFrameData(art, 0, 0);
 }
@@ -1034,12 +1034,19 @@ static int artReadFrameData(unsigned char *data, File *stream, int count, int *p
 static int artReadHeader(Art *art, File *stream) {
 	if (fileReadInt32(stream, &(art->field_0)) == -1)
 		return -1;
+	debug(6, "Art Header - field0 %d", art->field_0);
 	if (fileReadInt16(stream, &(art->framesPerSecond)) == -1)
 		return -1;
+	debug(6, "Art Header - fps %u", art->framesPerSecond);
+
 	if (fileReadInt16(stream, &(art->actionFrame)) == -1)
 		return -1;
+	debug(6, "Art Header - actionFrame %u", art->actionFrame);
+
 	if (fileReadInt16(stream, &(art->frameCount)) == -1)
 		return -1;
+	debug(6, "Art Header - frameCount %u", art->frameCount);
+
 	if (fileReadInt16List(stream, art->xOffsets, ROTATION_COUNT) == -1)
 		return -1;
 	if (fileReadInt16List(stream, art->yOffsets, ROTATION_COUNT) == -1)
@@ -1048,6 +1055,7 @@ static int artReadHeader(Art *art, File *stream) {
 		return -1;
 	if (fileReadInt32(stream, &(art->dataSize)) == -1)
 		return -1;
+	debug(5, "Art Header - dataSize: %d", art->dataSize);
 
 	// CE: Fix malformed `frm` files with `dataSize` set to 0 in Nevada.
 	if (art->dataSize == 0) {
