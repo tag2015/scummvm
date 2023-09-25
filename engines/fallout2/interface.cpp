@@ -1090,8 +1090,8 @@ int interfaceUpdateItems(bool animated, int leftItemAction, int rightItemAction)
 			leftItemState->itemFid = -1;
 
 			// SFALL
-			leftItemState->primaryHitMode = HIT_MODE_PUNCH; /*unarmedGetPunchHitMode(false);*/ // TODO combat
-			leftItemState->secondaryHitMode = HIT_MODE_KICK; /*unarmedGetPunchHitMode(true);*/
+			leftItemState->primaryHitMode = unarmedGetPunchHitMode(false);
+			leftItemState->secondaryHitMode = unarmedGetPunchHitMode(true);
 
 			// SFALL: Keep selected attack mode.
 			// CE: Implementation is different.
@@ -1138,8 +1138,8 @@ int interfaceUpdateItems(bool animated, int leftItemAction, int rightItemAction)
 			rightItemState->itemFid = -1;
 
 			// SFALL
-//			rightItemState->primaryHitMode = unarmedGetKickHitMode(false); TODO combat
-//			rightItemState->secondaryHitMode = unarmedGetKickHitMode(true);
+			rightItemState->primaryHitMode = unarmedGetKickHitMode(false);
+			rightItemState->secondaryHitMode = unarmedGetKickHitMode(true);
 
 			// SFALL: Keep selected attack mode.
 			// CE: Implementation is different.
@@ -1268,7 +1268,7 @@ void _intface_use_item() {
 
 	if (ptr->isWeapon != 0) {
 		if (ptr->action == INTERFACE_ITEM_ACTION_RELOAD) {
-			if (/*isInCombat()*/ 0) { // TODO combat
+			if (isInCombat()) {
 				int hitMode = gInterfaceCurrentHand == HAND_LEFT
 								  ? HIT_MODE_LEFT_WEAPON_RELOAD
 								  : HIT_MODE_RIGHT_WEAPON_RELOAD;
@@ -1281,7 +1281,7 @@ void _intface_use_item() {
 						} else {
 							gDude->data.critter.combat.ap -= actionPointsRequired;
 						}
-//						interfaceRenderActionPoints(gDude->data.critter.combat.ap, _combat_free_move); TODO combat
+						interfaceRenderActionPoints(gDude->data.critter.combat.ap, _combat_free_move);
 					}
 				}
 			} else {
@@ -1290,15 +1290,15 @@ void _intface_use_item() {
 		} else {
 			gameMouseSetCursor(MOUSE_CURSOR_CROSSHAIR);
 			gameMouseSetMode(GAME_MOUSE_MODE_CROSSHAIR);
-//			if (!isInCombat()) { TODO combat
-//				_combat(NULL);
-//			}
+			if (!isInCombat()) {
+				_combat(NULL);
+			}
 		}
 	} else if (_proto_action_can_use_on(ptr->item->pid)) {
 		gameMouseSetCursor(MOUSE_CURSOR_USE_CROSSHAIR);
 		gameMouseSetMode(GAME_MOUSE_MODE_USE_CROSSHAIR);
 	} else if (_obj_action_can_use(ptr->item)) {
-		if (/*isInCombat()*/ 0) { // TODO combat
+		if (isInCombat()) {
 			int actionPointsRequired = itemGetActionPointCost(gDude, ptr->secondaryHitMode, false);
 			if (actionPointsRequired <= gDude->data.critter.combat.ap) {
 				_obj_use_item(gDude, ptr->item);
@@ -1309,7 +1309,7 @@ void _intface_use_item() {
 					gDude->data.critter.combat.ap -= actionPointsRequired;
 				}
 
-//				interfaceRenderActionPoints(gDude->data.critter.combat.ap, _combat_free_move); TODO combat
+				interfaceRenderActionPoints(gDude->data.critter.combat.ap, _combat_free_move);
 			}
 		} else {
 			_obj_use_item(gDude, ptr->item);
