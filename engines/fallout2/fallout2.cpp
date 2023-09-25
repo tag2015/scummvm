@@ -44,6 +44,7 @@
 #include "fallout2/draw.h"
 #include "fallout2/font_manager.h"
 #include "fallout2/game.h"
+#include "fallout2/game_dialog.h"
 #include "fallout2/game_mouse.h"
 #include "fallout2/game_memory.h"
 #include "fallout2/interface.h"
@@ -410,6 +411,12 @@ Common::Error Fallout2Engine::run() {
 	// init character editor
 	characterEditorInit();
 	debug("Initialized character editor!");
+
+	// init dialog/barter subsystem
+	if (gameDialogInit() != 0)
+		warning("Failed on gdialog_init");
+	else
+		debug("Initialized game dialogs!");
 
 	char path[COMPAT_MAX_PATH];
 

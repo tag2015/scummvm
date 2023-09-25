@@ -30,6 +30,7 @@ MODULE_OBJS = \
 	font_manager.o \
 	fps_limiter.o \
 	game.o \
+	game_dialog.o \
 	game_config.o \
 	game_memory.o \
 	game_mouse.o \
