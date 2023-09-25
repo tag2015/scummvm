@@ -10,7 +10,7 @@
 #include "fallout2/character_editor.h"
 // #include "character_selector.h"
 #include "fallout2/color.h"
-// #include "combat.h"
+#include "fallout2/combat.h"
 // #include "combat_ai.h"
 #include "fallout2/critter.h"
 #include "fallout2/cycle.h"
@@ -569,9 +569,9 @@ int gameHandleKey(int eventCode, bool isInCombatMode) {
 	case KEY_UPPERCASE_A:
 	case KEY_LOWERCASE_A:
 		if (interfaceBarEnabled()) {
-//			if (!isInCombatMode) { TODO combat
-//				_combat(NULL);
-//			}
+			if (!isInCombatMode) {
+				_combat(NULL);
+			}
 		}
 		break;
 	case KEY_UPPERCASE_N:
@@ -625,18 +625,18 @@ int gameHandleKey(int eventCode, bool isInCombatMode) {
 	case KEY_LOWERCASE_P:
 		// pipboy
 		if (interfaceBarEnabled()) {
-/*			if (isInCombatMode) {  TODO combat pipboy
-				soundPlayFile("iisxxxx1");
+			if (isInCombatMode) {
+//				soundPlayFile("iisxxxx1"); TODO audio
 
 				// Pipboy not available in combat!
 				MessageListItem messageListItem;
 				char title[128];
-				strcpy(title, getmsg(&gMiscMessageList, &messageListItem, 7));
+				strncpy(title, getmsg(&gMiscMessageList, &messageListItem, 7), sizeof(title) - 1);
 				showDialogBox(title, NULL, 0, 192, 116, _colorTable[32328], NULL, _colorTable[32328], 0);
 			} else {
-				soundPlayFile("ib1p1xx1");
-				pipboyOpen(PIPBOY_OPEN_INTENT_UNSPECIFIED);
-			}*/
+//				soundPlayFile("ib1p1xx1"); TODO audio
+//				pipboyOpen(PIPBOY_OPEN_INTENT_UNSPECIFIED); TODO pipboy
+			}
 		}
 		break;
 	case KEY_UPPERCASE_S:
@@ -693,18 +693,18 @@ int gameHandleKey(int eventCode, bool isInCombatMode) {
 	case KEY_UPPERCASE_Z:
 	case KEY_LOWERCASE_Z:
 		if (interfaceBarEnabled()) {
-/*			if (isInCombatMode) { TODO pipboy
-				soundPlayFile("iisxxxx1");
+			if (isInCombatMode) {
+//				soundPlayFile("iisxxxx1"); TODO audio
 
 				// Pipboy not available in combat!
 				MessageListItem messageListItem;
 				char title[128];
-				strcpy(title, getmsg(&gMiscMessageList, &messageListItem, 7));
+				strncpy(title, getmsg(&gMiscMessageList, &messageListItem, 7), sizeof(title) - 1);
 				showDialogBox(title, NULL, 0, 192, 116, _colorTable[32328], NULL, _colorTable[32328], 0);
 			} else {
-				soundPlayFile("ib1p1xx1");
-				pipboyOpen(PIPBOY_OPEN_INTENT_REST);
-			}*/
+//				soundPlayFile("ib1p1xx1"); TODO audio
+//				pipboyOpen(PIPBOY_OPEN_INTENT_REST); TODO pipboy
+			}
 		}
 		break;
 	case KEY_HOME:

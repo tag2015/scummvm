@@ -669,7 +669,7 @@ void gameDialogEnter(Object *speaker, int a2) {
 
 	_gdDialogWentOff = false;
 
-	if (/*isInCombat()*/0) {  // TODO combat
+	if (isInCombat()) {
 		return;
 	}
 
@@ -3547,7 +3547,7 @@ void partyMemberControlWindowUpdate() {
 	fontDrawText(windowBuffer + windowWidth * 148 + 240, formattedText, 115, windowWidth, _colorTable[992]);
 
 	int actionPoints;
-	if (/*isInCombat()*/ 0) { // TODO combat
+	if (isInCombat()) {
 		actionPoints = gGameDialogSpeaker->data.critter.combat.ap;
 	} else {
 		actionPoints = critterGetStat(gGameDialogSpeaker, STAT_MAXIMUM_ACTION_POINTS);

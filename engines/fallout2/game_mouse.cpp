@@ -611,7 +611,7 @@ void gameMouseRefresh() {
 			gameMouseObjectsHide();
 			gameMouseSetCursor(MOUSE_CURSOR_ARROW);
 
-			if (gGameMouseMode >= 2/* && !isInCombat()*/) {  // TODO combat
+			if (gGameMouseMode >= 2 && !isInCombat()) {
 				gameMouseSetMode(GAME_MOUSE_MODE_MOVE);
 			}
 		}
@@ -677,7 +677,7 @@ void gameMouseRefresh() {
 							primaryAction = GAME_MOUSE_ACTION_MENU_ITEM_ROTATE;
 						} else {
 							if (_obj_action_can_talk_to(pointedObject)) {
-								if (/*isInCombat()*/ 0) {  // TODO combat
+								if (isInCombat()) {
 									primaryAction = GAME_MOUSE_ACTION_MENU_ITEM_LOOK;
 								} else {
 									primaryAction = GAME_MOUSE_ACTION_MENU_ITEM_TALK;
@@ -740,7 +740,7 @@ void gameMouseRefresh() {
 					int color;
 					int accuracy;
 					char formattedAccuracy[8];
-					if (/* _combat_to_hit(pointedObject, &accuracy)*/ 0) {  // TODO combat
+					if (_combat_to_hit(pointedObject, &accuracy)) {
 						snprintf(formattedAccuracy, sizeof(formattedAccuracy), "%d%%", accuracy);
 
 						if (pointedObjectIsCritter) {
@@ -795,7 +795,7 @@ void gameMouseRefresh() {
 		int color;
 		int distance = _make_path(gDude, gDude->tile, gGameMouseHexCursor->tile, NULL, 1);
 		if (distance != 0) {
-			if (/*!isInCombat()*/ 1) {  // TODO combat
+			if (!isInCombat()) {
 				formattedActionPoints[0] = '\0';
 				color = _colorTable[31744];
 			} else {
@@ -914,7 +914,7 @@ void _gmouse_handle_event(int mouseX, int mouseY, int mouseState) {
 	if ((mouseState & MOUSE_EVENT_LEFT_BUTTON_UP) != 0) {
 		if (gGameMouseMode == GAME_MOUSE_MODE_MOVE) {
 			int actionPoints;
-			if (/*isInCombat()*/ 0 ) {  // TODO combat
+			if (isInCombat()) {
 				actionPoints = _combat_free_move + gDude->data.critter.combat.ap;
 			} else {
 				actionPoints = -1;
@@ -953,7 +953,7 @@ void _gmouse_handle_event(int mouseX, int mouseY, int mouseState) {
 						}
 					} else {
 						if (_obj_action_can_talk_to(v5)) {
-							if (/*isInCombat()*/ 0) { // TODO combat
+							if (isInCombat()) {
 								if (_obj_examine(gDude, v5) == -1) {
 									_obj_look_at(gDude, v5);
 								}
@@ -994,7 +994,7 @@ void _gmouse_handle_event(int mouseX, int mouseY, int mouseState) {
 			}
 
 			if (v7 != NULL) {
-//				_combat_attack_this(v7); TODO combat
+				_combat_attack_this(v7);
 				_gmouse_3d_hover_test = true;
 				gGameMouseLastY = mouseY;
 				gGameMouseLastX = mouseX;
@@ -1008,7 +1008,7 @@ void _gmouse_handle_event(int mouseX, int mouseY, int mouseState) {
 			if (object != NULL) {
 				Object *weapon;
 				if (interfaceGetActiveItem(&weapon) != -1) {
-					if (/*isInCombat()*/ 0) { // TODO combat
+					if (isInCombat()) {
 						int hitMode = interfaceGetCurrentHand()
 										  ? HIT_MODE_RIGHT_WEAPON_PRIMARY
 										  : HIT_MODE_LEFT_WEAPON_PRIMARY;
@@ -1065,7 +1065,7 @@ void _gmouse_handle_event(int mouseX, int mouseY, int mouseState) {
 					actionMenuItems[actionMenuItemsCount++] = GAME_MOUSE_ACTION_MENU_ITEM_ROTATE;
 				} else {
 					if (_obj_action_can_talk_to(v16)) {
-						if (/*!isInCombat()*/ 1) {  // TODO combat
+						if (!isInCombat()) {
 							actionMenuItems[actionMenuItemsCount++] = GAME_MOUSE_ACTION_MENU_ITEM_TALK;
 						}
 					} else {
@@ -1375,10 +1375,10 @@ void gameMouseSetMode(int mode) {
 
 	switch (v5) {
 	case 1:
-//		_combat_outline_on(); TODO combat
+		_combat_outline_on();
 		break;
 	case -1:
-//		_combat_outline_off(); TODO combat
+		_combat_outline_off();
 		break;
 	}
 }
@@ -1392,7 +1392,7 @@ int gameMouseGetMode() {
 void gameMouseCycleMode() {
 	int mode = (gGameMouseMode + 1) % 3;
 
-	if (/*isInCombat()*/ 0) { // TODO combat
+	if (isInCombat()) {
 		Object *item;
 		if (interfaceGetActiveItem(&item) == 0) {
 			if (item != NULL && itemGetType(item) != ITEM_TYPE_WEAPON && mode == GAME_MOUSE_MODE_CROSSHAIR) {

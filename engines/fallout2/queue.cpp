@@ -51,11 +51,9 @@ static QueueListNode *gLastFoundQueueListNode = NULL;
 static QueueListNode *gQueueListHead;
 
 // 0x51C540
-// TODO combat game_sound
 static EventTypeDescription gEventTypeDescriptions[EVENT_TYPE_COUNT] = {
 	{drugEffectEventProcess, internal_free, drugEffectEventRead, drugEffectEventWrite, true, _item_d_clear},
-	// {knockoutEventProcess, NULL, NULL, NULL, true, _critter_wake_clear}, TODO combat
-	{NULL, NULL, NULL, NULL, true, NULL},  // TODO remove
+	{knockoutEventProcess, NULL, NULL, NULL, true, _critter_wake_clear},
 	{withdrawalEventProcess, internal_free, withdrawalEventRead, withdrawalEventWrite, true, _item_wd_clear},
 	{scriptEventProcess, internal_free, scriptEventRead, scriptEventWrite, true, NULL},
 	{gameTimeEventProcess, NULL, NULL, NULL, true, NULL},

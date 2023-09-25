@@ -770,8 +770,8 @@ int _action_ranged(Attack *attack, int anim) {
 					objectSetLight(projectile, 9, projectile->lightIntensity, NULL);
 				}
 
-				int projectileOrigin = 0; // _combat_bullet_start(attack->attacker, attack->defender); TODO combat
-//				objectSetLocation(projectile, projectileOrigin, attack->attacker->elevation, NULL);
+				int projectileOrigin = _combat_bullet_start(attack->attacker, attack->defender);
+				objectSetLocation(projectile, projectileOrigin, attack->attacker->elevation, NULL);
 
 				int projectileRotation = tileGetRotationTo(attack->attacker->tile, attack->defender->tile);
 				objectSetRotation(projectile, projectileRotation, NULL);
@@ -993,7 +993,7 @@ int _action_climb_ladder(Object *a1, Object *a2) {
 
 	int animationRequestOptions;
 	int actionPoints;
-	if (/*isInCombat()*/ 0) {  // TODO combat
+	if (isInCombat()) {
 		animationRequestOptions = ANIMATION_REQUEST_RESERVED;
 		actionPoints = a1->data.critter.combat.ap;
 	} else {
@@ -1061,7 +1061,7 @@ int _action_use_an_item_on_object(Object *a1, Object *a2, Object *a3) {
 
 		int animationRequestOptions;
 		int actionPoints;
-		if (/*isInCombat()*/ 0) { // TODO combat
+		if (isInCombat()) {
 			animationRequestOptions = ANIMATION_REQUEST_RESERVED;
 			actionPoints = a1->data.critter.combat.ap;
 		} else {
@@ -1143,7 +1143,7 @@ int actionPickUp(Object *critter, Object *item) {
 		}
 	}
 
-	if (/*isInCombat()*/ 0) {  // TODO combat
+	if (isInCombat()) {
 		reg_anim_begin(ANIMATION_REQUEST_RESERVED);
 		animationRegisterMoveToObject(critter, item, critter->data.critter.combat.ap, 0);
 	} else {
@@ -1247,7 +1247,7 @@ int _action_loot_container(Object *critter, Object *container) {
 		}
 	}
 
-	if (/*isInCombat()*/ 0) {  // TODO combat
+	if (isInCombat()) {
 		reg_anim_begin(ANIMATION_REQUEST_RESERVED);
 		animationRegisterMoveToObject(critter, container, critter->data.critter.combat.ap, 0);
 	} else {
@@ -1299,7 +1299,7 @@ int actionUseSkill(Object *a1, Object *a2, int skill) {
 	switch (skill) {
 	case SKILL_FIRST_AID:
 	case SKILL_DOCTOR:
-		if (/*isInCombat()*/ 0) { // TODO combat
+		if (isInCombat()) {
 			// NOTE: Uninline.
 			return _action_use_skill_in_combat_error(a1);
 		}
@@ -1309,7 +1309,7 @@ int actionUseSkill(Object *a1, Object *a2, int skill) {
 		}
 		break;
 	case SKILL_LOCKPICK:
-		if (/*isInCombat()*/ 0) { // TODO combat
+		if (isInCombat()) {
 			// NOTE: Uninline.
 			return _action_use_skill_in_combat_error(a1);
 		}
@@ -1320,7 +1320,7 @@ int actionUseSkill(Object *a1, Object *a2, int skill) {
 
 		break;
 	case SKILL_STEAL:
-		if (/*isInCombat()*/ 0) { // TODO combat
+		if (isInCombat()) {
 			// NOTE: Uninline.
 			return _action_use_skill_in_combat_error(a1);
 		}
@@ -1335,7 +1335,7 @@ int actionUseSkill(Object *a1, Object *a2, int skill) {
 
 		break;
 	case SKILL_TRAPS:
-		if (/*isInCombat()*/ 0) {  // TODO combat
+		if (isInCombat()) {
 			// NOTE: Uninline.
 			return _action_use_skill_in_combat_error(a1);
 		}
@@ -1347,7 +1347,7 @@ int actionUseSkill(Object *a1, Object *a2, int skill) {
 		break;
 	case SKILL_SCIENCE:
 	case SKILL_REPAIR:
-		if (/*isInCombat()*/ 0) { // TODO combat
+		if (isInCombat()) {
 			// NOTE: Uninline.
 			return _action_use_skill_in_combat_error(a1);
 		}
@@ -1447,7 +1447,7 @@ int actionUseSkill(Object *a1, Object *a2, int skill) {
 		}
 	}
 
-	if (/*isInCombat()*/ 0) { // TODO combat
+	if (isInCombat()) {
 		reg_anim_begin(ANIMATION_REQUEST_RESERVED);
 		animationRegisterMoveToObject(performer, a2, performer->data.critter.combat.ap, 0);
 	} else {
@@ -1595,10 +1595,10 @@ int actionExplode(int tile, int elevation, int minDamage, int maxDamage, Object 
 		}
 	}
 
-/*	attackInit(attack, explosion, critter, HIT_MODE_PUNCH, HIT_LOCATION_TORSO); TODO combat
+	attackInit(attack, explosion, critter, HIT_MODE_PUNCH, HIT_LOCATION_TORSO);
 
 	attack->tile = tile;
-	attack->attackerFlags = DAM_HIT;*/
+	attack->attackerFlags = DAM_HIT;
 
 	gameUiDisable(1);
 
@@ -1609,7 +1609,7 @@ int actionExplode(int tile, int elevation, int minDamage, int maxDamage, Object 
 		attack->defenderDamage = _compute_explosion_damage(minDamage, maxDamage, critter, &(attack->defenderKnockback));
 	}
 
-//	_compute_explosion_on_extras(attack, 0, 0, 1); TODO combat
+	_compute_explosion_on_extras(attack, 0, 0, 1);
 
 	for (int index = 0; index < attack->extrasLength; index++) {
 		Object *critter = attack->extras[index];
@@ -1620,7 +1620,7 @@ int actionExplode(int tile, int elevation, int minDamage, int maxDamage, Object 
 		attack->extrasDamage[index] = _compute_explosion_damage(minDamage, maxDamage, critter, &(attack->extrasKnockback[index]));
 	}
 
-//	attackComputeDeathFlags(attack); TODO combat
+	attackComputeDeathFlags(attack);
 
 	if (a6) {
 		_action_in_explode = true;
@@ -1637,8 +1637,8 @@ int actionExplode(int tile, int elevation, int minDamage, int maxDamage, Object 
 			animationRegisterAnimateAndHide(adjacentExplosions[rotation], ANIM_STAND, 0);
 		}
 
-//		animationRegisterCallbackForced(explosion, 0, (AnimationCallback *)_combat_explode_scenery, -1); TODO combat
-//		animationRegisterHideObjectForced(explosion);
+		animationRegisterCallbackForced(explosion, 0, (AnimationCallback *)_combat_explode_scenery, -1);
+		animationRegisterHideObjectForced(explosion);
 
 		for (int rotation = 0; rotation < ROTATION_COUNT; rotation++) {
 			animationRegisterHideObjectForced(adjacentExplosions[rotation]);
@@ -1677,7 +1677,7 @@ int actionExplode(int tile, int elevation, int minDamage, int maxDamage, Object 
 
 		_report_explosion(attack, a5);
 
-//		_combat_explode_scenery(explosion, NULL); TODO combat
+		_combat_explode_scenery(explosion, NULL);
 
 		objectDestroy(explosion, NULL);
 
@@ -1703,9 +1703,9 @@ int _report_explosion(Attack *attack, Object *a2) {
 		extrasWasDead[index] = (attack->extras[index]->data.critter.combat.results & DAM_DEAD) != 0;
 	}
 
-//	attackComputeDeathFlags(attack); TODO combat
-//	_combat_display(attack);
-//	_apply_damage(attack, false);
+	attackComputeDeathFlags(attack);
+	_combat_display(attack);
+	_apply_damage(attack, false);
 
 	Object *anyDefender = NULL;
 	int xp = 0;
@@ -1739,7 +1739,7 @@ int _report_explosion(Attack *attack, Object *a2) {
 		}
 
 		if (anyDefender != NULL) {
-			if (/*!isInCombat()*/ 1) { // TODO combat
+			if (!isInCombat()) {
 				STRUCT_664980 combat;
 				combat.attacker = anyDefender;
 				combat.defender = a2;
@@ -1758,7 +1758,7 @@ int _report_explosion(Attack *attack, Object *a2) {
 	gameUiEnable();
 
 	if (a2 == gDude) {
-//		_combat_give_exps(xp); TODO combat
+		_combat_give_exps(xp);
 	}
 
 	return 0;
@@ -1806,13 +1806,13 @@ int actionTalk(Object *a1, Object *a2) {
 		reg_anim_clear(gDude);
 	}
 
-	if (/* isInCombat()*/ 0) { // TODO combat
+	if (isInCombat()) {
 		reg_anim_begin(ANIMATION_REQUEST_RESERVED);
 		animationRegisterMoveToObject(a1, a2, a1->data.critter.combat.ap, 0);
 	} else {
 		reg_anim_begin(a1 == gDude ? ANIMATION_REQUEST_RESERVED : ANIMATION_REQUEST_UNRESERVED);
 
-		if (objectGetDistanceBetween(a1, a2) >= 9 /*|| _combat_is_shot_blocked(a1, a1->tile, a2->tile, a2, NULL)*/) {  // TODO combat
+		if (objectGetDistanceBetween(a1, a2) >= 9 || _combat_is_shot_blocked(a1, a1->tile, a2->tile, a2, NULL)) {
 			animationRegisterRunToObject(a1, a2, -1, 0);
 		}
 	}
@@ -1824,7 +1824,7 @@ int actionTalk(Object *a1, Object *a2) {
 
 // 0x413420
 int _can_talk_to(Object *a1, Object *a2) {
-	if (/*_combat_is_shot_blocked(a1, a1->tile, a2->tile, a2, NULL) || */objectGetDistanceBetween(a1, a2) >= 9) { // TODO combat
+	if (_combat_is_shot_blocked(a1, a1->tile, a2->tile, a2, NULL) || objectGetDistanceBetween(a1, a2) >= 9) {
 		if (a1 == gDude) {
 			// You cannot get there. (used in actions.c)
 			MessageListItem messageListItem;
@@ -1866,9 +1866,9 @@ void actionDamage(int tile, int elevation, int minDamage, int maxDamage, int dam
 	objectSetLocation(attacker, tile, elevation, NULL);
 
 	Object *defender = _obj_blocking_at(NULL, tile, elevation);
-/*	attackInit(attack, attacker, defender, HIT_MODE_PUNCH, HIT_LOCATION_TORSO); TODO combat
+	attackInit(attack, attacker, defender, HIT_MODE_PUNCH, HIT_LOCATION_TORSO);
 	attack->tile = tile;
-	attack->attackerFlags = DAM_HIT;*/
+	attack->attackerFlags = DAM_HIT;
 	gameUiDisable(1);
 
 	if (defender != NULL) {
@@ -1884,7 +1884,7 @@ void actionDamage(int tile, int elevation, int minDamage, int maxDamage, int dam
 		attack->defenderDamage = damage;
 	}
 
-// 	attackComputeDeathFlags(attack); TODO combat
+	attackComputeDeathFlags(attack);
 
 	if (animated) {
 		reg_anim_begin(ANIMATION_REQUEST_RESERVED);
@@ -1916,8 +1916,8 @@ void actionDamage(int tile, int elevation, int minDamage, int maxDamage, int dam
 
 // 0x41363C
 int _report_dmg(Attack *attack, Object *a2) {
-//	_combat_display(attack); TODO combat
-//	_apply_damage(attack, false);
+	_combat_display(attack);
+	_apply_damage(attack, false);
 	internal_free(attack);
 	gameUiEnable();
 	return 0;
@@ -1975,7 +1975,7 @@ bool actionCheckPush(Object *a1, Object *a2) {
 		return false;
 	}
 
-	if (/*isInCombat()*/ 0) {  // TODO combat
+	if (isInCombat()) {
 		if (a2->data.critter.combat.team == a1->data.critter.combat.team && a2 == a1->data.critter.combat.whoHitMe) {
 			return false;
 		}
@@ -2050,7 +2050,7 @@ int actionPush(Object *a1, Object *a2) {
 	} while (0);
 
 	int actionPoints;
-	if (/*isInCombat()*/ 0) { // TODO combat
+	if (isInCombat()) {
 		actionPoints = a2->data.critter.combat.ap;
 	} else {
 		actionPoints = -1;

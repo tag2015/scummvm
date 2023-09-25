@@ -1227,27 +1227,27 @@ int weaponGetDamage(Object *critter, int hitMode) {
 			meleeDamage = critterGetStat(critter, STAT_MELEE_DAMAGE);
 
 			// SFALL: Bonus HtH Damage fix.
-/*			if (damageModGetBonusHthDamageFix()) { TODO combat
+			if (damageModGetBonusHthDamageFix()) {
 				if (critter == gDude) {
 					// See explanation below.
 					minDamage += 2 * perkGetRank(gDude, PERK_BONUS_HTH_DAMAGE);
 				}
-			}*/
+			}
 		}
 	} else {
 		// SFALL
-//		bonusDamage = unarmedGetDamage(hitMode, &minDamage, &maxDamage); TODO combat
+		bonusDamage = unarmedGetDamage(hitMode, &minDamage, &maxDamage);
 		meleeDamage = critterGetStat(critter, STAT_MELEE_DAMAGE);
 
 		// SFALL: Bonus HtH Damage fix.
-/*		if (damageModGetBonusHthDamageFix()) { TODO combat
+		if (damageModGetBonusHthDamageFix()) {
 			if (critter == gDude) {
 				// Increase only min damage. Max damage should not be changed.
 				// It is calculated later by adding `meleeDamage` which already
 				// includes damage bonus (via `perkAddEffect`).
 				minDamage += 2 * perkGetRank(gDude, PERK_BONUS_HTH_DAMAGE);
 			}
-		}*/
+		}
 	}
 
 	return randomBetween(bonusDamage + minDamage, bonusDamage + meleeDamage + maxDamage);
@@ -1614,7 +1614,7 @@ int weaponGetActionPointCost(Object *critter, int hitMode, bool aiming) {
 
 	// CE: The entire function is different in Sfall.
 	if (isUnarmedHitMode(hitMode)) {
-//		actionPoints = unarmedGetActionPointCost(hitMode); TODO combat
+		actionPoints = unarmedGetActionPointCost(hitMode);
 	} else {
 		if (weapon != NULL) {
 			if (hitMode == HIT_MODE_LEFT_WEAPON_PRIMARY || hitMode == HIT_MODE_RIGHT_WEAPON_PRIMARY) {
@@ -2578,7 +2578,7 @@ static void _perform_drug_effect(Object *critter, int *stats, int *mods, bool is
 				// %s succumbs to the adverse effects of chems.
 				text = getmsg(&gItemsMessageList, &messageListItem, 600);
 				snprintf(v24, sizeof(v24), text, name);
-//				_combatKillCritterOutsideCombat(critter, v24); TODO combat
+				_combatKillCritterOutsideCombat(critter, v24);
 			}
 		}
 
