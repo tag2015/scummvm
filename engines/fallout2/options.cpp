@@ -11,7 +11,7 @@
 #include "fallout2/graph_lib.h"
 #include "fallout2/input.h"
 #include "fallout2/kb.h"
-// #include "fallout2/loadsave.h" TODO loadsave
+#include "fallout2/loadsave.h"
 #include "fallout2/memory.h"
 #include "fallout2/message.h"
 #include "fallout2/mouse.h"
@@ -115,14 +115,14 @@ int showOptions() {
 			case KEY_UPPERCASE_S:
 			case KEY_LOWERCASE_S:
 			case 500:
-				if (/*lsgSaveGame(LOAD_SAVE_MODE_NORMAL) == 1*/ 0) { // TODO loadsave
+				if (lsgSaveGame(LOAD_SAVE_MODE_NORMAL) == 1) {
 					rc = 1;
 				}
 				break;
 			case KEY_UPPERCASE_L:
 			case KEY_LOWERCASE_L:
 			case 501:
-				if (/*lsgLoadGame(LOAD_SAVE_MODE_NORMAL) == 1*/ 0) { // TODO loadsave
+				if (lsgLoadGame(LOAD_SAVE_MODE_NORMAL) == 1) {
 					rc = 1;
 				}
 				break;
