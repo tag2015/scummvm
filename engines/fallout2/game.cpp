@@ -8,10 +8,10 @@
 #include "fallout2/art.h"
 #include "fallout2/automap.h"
 #include "fallout2/character_editor.h"
-// #include "character_selector.h"
+#include "fallout2/character_selector.h"
 #include "fallout2/color.h"
 #include "fallout2/combat.h"
-// #include "combat_ai.h"
+#include "fallout2/combat_ai.h"
 #include "fallout2/critter.h"
 #include "fallout2/cycle.h"
 #include "fallout2/db.h"
@@ -62,7 +62,7 @@
 #include "fallout2/trait.h"
 #include "fallout2/version.h"
 #include "fallout2/window_manager.h"
-// #include "worldmap.h"
+#include "fallout2/worldmap.h"
 
 #include "graphics/palette.h"
 #include "graphics/surface.h"
@@ -358,9 +358,8 @@ int gameInitWithOptions(const char* windowTitle, bool isMapper, int font, int a4
 }
 #endif
 
-// TODO reset and quit
-#if 0
 // 0x442B84
+// TODO complete
 void gameReset() {
 	tileDisable();
 	paletteReset();
@@ -372,14 +371,14 @@ void gameReset() {
 	itemsReset();
 	queueExit();
 	animationReset();
-	lsgInit();
+//	lsgInit();
 	critterReset();
 	aiReset();
 	_inven_reset_dude();
-	gameSoundReset();
-	_movieStop();
-	movieEffectsReset();
-	gameMoviesReset();
+//	gameSoundReset();
+//	_movieStop();
+//	movieEffectsReset();
+//	gameMoviesReset();
 	isoReset();
 	gameMouseReset();
 	protoReset();
@@ -390,7 +389,7 @@ void gameReset() {
 	partyMembersReset();
 	characterEditorInit();
 	pipboyReset();
-	_ResetLoadSave();
+//	_ResetLoadSave();
 	gameDialogReset();
 	combatReset();
 	_game_user_wants_to_quit = 0;
@@ -398,14 +397,14 @@ void gameReset() {
 	_init_options_menu();
 
 	// SFALL
-	sfallGlobalVarsReset();
-	sfallListsReset();
+//	sfallGlobalVarsReset();
+//	sfallListsReset();
 	messageListRepositoryReset();
 }
 
-#endif
 
 // 0x442C34
+// TODO complete
 void gameExit() {
 	debugPrint("\nGame Exit\n");
 
@@ -417,23 +416,23 @@ void gameExit() {
 	tileDisable();
 	messageListRepositorySetStandardMessageList(STANDARD_MESSAGE_LIST_MISC, nullptr);
 	messageListFree(&gMiscMessageList);
-//	combatExit();
-//	gameDialogExit();
-//	_scr_game_exit();
+	combatExit();
+	gameDialogExit();
+	_scr_game_exit();
 
 	// NOTE: Uninline.
-//	gameFreeGlobalVars();
+	gameFreeGlobalVars();
 
-//	scriptsExit();
-//	animationExit();
-//	protoExit();
-//	gameMouseExit();
-//	isoExit();
+	scriptsExit();
+	animationExit();
+	protoExit();
+	gameMouseExit();
+	isoExit();
 //	movieEffectsExit();
 //	movieExit();
 //	gameSoundExit();
-//	aiExit();
-//	critterExit();
+	aiExit();
+	critterExit();
 	itemsExit();
 	queueExit();
 	perksExit();
@@ -442,9 +441,9 @@ void gameExit() {
 	traitsExit();
 	randomExit();
 	badwordsExit();
-//	automapExit();
+	automapExit();
 	paletteExit();
-//	wmWorldMap_exit();
+	wmWorldMap_exit();
 	partyMembersExit();
 //	endgameDeathEndingExit();
 	interfaceFontsExit();
