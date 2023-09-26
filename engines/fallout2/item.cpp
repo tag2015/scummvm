@@ -8,7 +8,7 @@
 #include "fallout2/fallout2.h"
 #include "fallout2/animation.h"
 #include "fallout2/art.h"
-// #include "fallout2/automap.h" TODO automap.cpp
+#include "fallout2/automap.h"
 #include "fallout2/combat.h"
 #include "fallout2/critter.h"
 #include "fallout2/debug.h"
@@ -2171,7 +2171,7 @@ int _item_m_use_charged_item(Object *critter, Object *miscItem) {
 	} else if (pid == PROTO_ID_MOTION_SENSOR) {
 		// NOTE: Uninline.
 		if (miscItemConsumeCharge(miscItem) == 0) {
-//			automapShow(true, true); TODO automap
+			automapShow(true, true);
 		} else {
 			MessageListItem messageListItem;
 			// %s has no charges left.

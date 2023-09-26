@@ -6,7 +6,7 @@
 #include "fallout2/actions.h"
 #include "fallout2/animation.h"
 #include "fallout2/art.h"
-// #include "automap.h"
+#include "fallout2/automap.h"
 #include "fallout2/character_editor.h"
 // #include "character_selector.h"
 #include "fallout2/color.h"
@@ -555,11 +555,9 @@ int gameHandleKey(int eventCode, bool isInCombatMode) {
 		showQuitConfirmationDialog();
 		break;
 	case KEY_TAB:
-		if (interfaceBarEnabled()) {
-/*		        && gPressedPhysicalKeys[SDL_SCANCODE_LALT] == 0  TODO automap
-		        && gPressedPhysicalKeys[SDL_SCANCODE_RALT] == 0) {
-			soundPlayFile("ib1p1xx1");
-			automapShow(true, false);*/
+		if (interfaceBarEnabled() /*&& gPressedPhysicalKeys[SDL_SCANCODE_LALT] == 0 && gPressedPhysicalKeys[SDL_SCANCODE_RALT] == 0*/) {  // TODO kb
+//			soundPlayFile("ib1p1xx1"); TODO audio
+			automapShow(true, false);
 		}
 		break;
 	case KEY_CTRL_P:
