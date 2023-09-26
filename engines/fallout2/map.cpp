@@ -9,7 +9,7 @@
 
 #include "fallout2/animation.h"
 #include "fallout2/art.h"
-// #include "fallout2/automap.h"  TODO automap
+#include "fallout2/automap.h"
 #include "fallout2/character_editor.h"
 #include "fallout2/color.h"
 #include "fallout2/combat.h"

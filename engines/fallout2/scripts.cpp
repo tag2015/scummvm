@@ -8,7 +8,7 @@
 #include "fallout2/actions.h"
 #include "fallout2/animation.h"
 #include "fallout2/art.h"
-// #include "fallout2/automap.h" TODO automap
+#include "fallout2/automap.h"
 #include "fallout2/combat.h"
 #include "fallout2/critter.h"
 #include "fallout2/debug.h"
@@ -907,7 +907,7 @@ int scriptsHandleRequests() {
 		gScriptsRequests &= ~SCRIPT_REQUEST_ELEVATOR;
 
 		if (elevatorSelectLevel(gScriptsRequestedElevatorType, &map, &elevation, &tile) != -1) {
-//			automapSaveCurrent(); TODO automap
+			automapSaveCurrent();
 
 			if (map == gMapHeader.field_34) {
 				if (elevation == gElevation) {
@@ -1008,7 +1008,7 @@ int _scripts_check_state_in_combat() {
 		int tile = -1;
 
 		if (elevatorSelectLevel(gScriptsRequestedElevatorType, &map, &elevation, &tile) != -1) {
-//			automapSaveCurrent(); TODO automap
+			automapSaveCurrent();
 
 			if (map == gMapHeader.field_34) {
 				if (elevation == gElevation) {
