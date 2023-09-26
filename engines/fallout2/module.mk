@@ -63,6 +63,7 @@ MODULE_OBJS = \
 	party_member.o \
 	pcx.o \
 	perk.o \
+	pipboy.o \
 	platform_compat.o \
 	pointer_registry.o \
 	preferences.o \
