@@ -521,6 +521,11 @@ Common::Error Fallout2Engine::run() {
 				paletteFadeTo(_cmap);
 				free(mapNameCopy);
 
+				bool cursorWasHidden = cursorIsHidden();
+				if (cursorWasHidden) {
+					mouseShowCursor();
+				}
+
 				mouseShowCursor();
 				scriptsEnable();
 				while (_game_user_wants_to_quit == 0) {
@@ -547,17 +552,17 @@ Common::Error Fallout2Engine::run() {
 					sharedFpsLimiter.throttle();
 				}
 				scriptsDisable();
-//				if (cursorWasHidden) {
-//					mouseHideCursor();
-//				}
+				if (cursorWasHidden) {
+					mouseHideCursor();
+				}
 			}
 			paletteFadeTo(gPaletteWhite);
 
 			objectHide(gDude, NULL);
 			_map_exit();
 
-			// NOTE: Uninline.
-//			main_reset_system();
+			gameReset();
+
 			mainMenuWindowInit();
 			break;
 
