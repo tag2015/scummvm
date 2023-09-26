@@ -54,6 +54,7 @@
 #include "fallout2/input.h"
 #include "fallout2/inventory.h"
 #include "fallout2/item.h"
+#include "fallout2/loadsave.h"
 #include "fallout2/map.h"
 #include "fallout2/mainmenu.h"
 #include "fallout2/memory.h"
@@ -424,6 +425,10 @@ Common::Error Fallout2Engine::run() {
 	pipboyInit();
 	debug("Initialized pipboy!");
 
+	_InitLoadSave();
+	lsgInit();
+	debugPrint("Initialized save/load");
+
 	// init dialog/barter subsystem
 	if (gameDialogInit() != 0)
 		warning("Failed on gdialog_init");
@@ -566,9 +571,52 @@ Common::Error Fallout2Engine::run() {
 			mainMenuWindowInit();
 			break;
 
-		case MAIN_MENU_LOAD_GAME:
-			break;
+		case MAIN_MENU_LOAD_GAME: {
+			int win = windowCreate(0, 0, screenGetWidth(), screenGetHeight(), _colorTable[0], WINDOW_MODAL | WINDOW_MOVE_ON_TOP);
+			mainMenuWindowHide(true);
+			mainMenuWindowFree();
+			_game_user_wants_to_quit = 0;
+			//_main_show_death_scene = 0;
 
+			gDude->flags &= ~OBJECT_FLAT;
+
+			objectShow(gDude, NULL);
+			mouseHideCursor();
+
+			_map_init();
+
+			gameMouseSetCursor(MOUSE_CURSOR_NONE);
+			mouseShowCursor();
+
+			colorPaletteLoad("color.pal");
+			paletteFadeTo(_cmap);
+			int loadGameRc = lsgLoadGame(LOAD_SAVE_MODE_FROM_MAIN_MENU);
+			if (loadGameRc == -1) {
+				debugPrint("\n ** Error running LoadGame()! **\n");
+			} else if (loadGameRc != 0) {
+				windowDestroy(win);
+				win = -1;
+//				mainLoop();
+			}
+			paletteFadeTo(gPaletteWhite);
+			if (win != -1) {
+				windowDestroy(win);
+			}
+
+			// NOTE: Uninline.
+			objectHide(gDude, NULL);
+			_map_exit();
+
+			// NOTE: Uninline.
+			gameReset();
+
+//			if (_main_show_death_scene != 0) {
+//				showDeath();
+//				_main_show_death_scene = 0;
+//			}
+			mainMenuWindowInit();
+			break;
+		}
 		case MAIN_MENU_OPTIONS:
 			mainMenuWindowHide(true);
 			doPreferences(true);
