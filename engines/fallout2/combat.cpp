@@ -22,7 +22,7 @@
 #include "fallout2/interface.h"
 #include "fallout2/item.h"
 #include "fallout2/kb.h"
-// #include "fallout2/loadsave.h" TODO loadsave
+#include "fallout2/loadsave.h"
 #include "fallout2/map.h"
 #include "fallout2/memory.h"
 #include "fallout2/message.h"
@@ -2616,7 +2616,7 @@ static void _combat_begin(Object *a1) {
 		interfaceBarEndButtonsShow(true);
 		_gmouse_enable_scrolling();
 
-		if (v1 != NULL /*&& !_isLoadingGame()*/) {  // TODO loadsave
+		if (v1 != NULL && !_isLoadingGame()) {
 			int fid = buildFid(FID_TYPE(v1->fid),
 							   100,
 							   FID_ANIM_TYPE(v1->fid),
@@ -2780,7 +2780,7 @@ static void _combat_over() {
 		scriptSetObjects(critter->sid, NULL, NULL);
 		scriptSetFixedParam(critter->sid, 0);
 
-		if (critter->pid == 0x1000098 && !critterIsDead(critter)/* && !_isLoadingGame()*/) {  // TODO loadsave
+		if (critter->pid == 0x1000098 && !critterIsDead(critter) && !_isLoadingGame()) {
 			int fid = buildFid(FID_TYPE(critter->fid),
 							   99,
 							   FID_ANIM_TYPE(critter->fid),
