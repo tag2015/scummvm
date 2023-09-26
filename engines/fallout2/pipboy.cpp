@@ -1,46 +1,46 @@
-#include "pipboy.h"
+#include "fallout2/pipboy.h"
 
-#include <ctype.h>
+/*#include <ctype.h>
 #include <stdio.h>
-#include <string.h>
+#include <string.h>*/
 
-#include "art.h"
-#include "automap.h"
-#include "color.h"
-#include "combat.h"
-#include "config.h"
-#include "critter.h"
-#include "cycle.h"
-#include "dbox.h"
-#include "debug.h"
-#include "draw.h"
-#include "game.h"
-#include "game_mouse.h"
-#include "game_movie.h"
-#include "game_sound.h"
-#include "geometry.h"
-#include "input.h"
-#include "interface.h"
-#include "kb.h"
-#include "map.h"
-#include "memory.h"
-#include "message.h"
-#include "mouse.h"
-#include "object.h"
-#include "party_member.h"
-#include "platform_compat.h"
-#include "queue.h"
-#include "random.h"
-#include "scripts.h"
-#include "settings.h"
-#include "stat.h"
-#include "svga.h"
-#include "text_font.h"
-#include "window_manager.h"
-#include "word_wrap.h"
-#include "worldmap.h"
+#include "fallout2/art.h"
+#include "fallout2/automap.h"
+#include "fallout2/color.h"
+#include "fallout2/combat.h"
+#include "fallout2/config.h"
+#include "fallout2/critter.h"
+#include "fallout2/cycle.h"
+#include "fallout2/dbox.h"
+#include "fallout2/debug.h"
+#include "fallout2/draw.h"
+#include "fallout2/game.h"
+#include "fallout2/game_mouse.h"
+// #include "fallout2/game_movie.h" TODO movie
+// #include "fallout2/game_sound.h" TODO audio
+#include "fallout2/geometry.h"
+#include "fallout2/input.h"
+#include "fallout2/interface.h"
+#include "fallout2/kb.h"
+#include "fallout2/map.h"
+#include "fallout2/memory.h"
+#include "fallout2/message.h"
+#include "fallout2/mouse.h"
+#include "fallout2/object.h"
+#include "fallout2/party_member.h"
+#include "fallout2/platform_compat.h"
+#include "fallout2/queue.h"
+#include "fallout2/random.h"
+#include "fallout2/scripts.h"
+#include "fallout2/settings.h"
+#include "fallout2/stat.h"
+#include "fallout2/svga.h"
+#include "fallout2/text_font.h"
+#include "fallout2/window_manager.h"
+#include "fallout2/word_wrap.h"
+#include "fallout2/worldmap.h"
 
-namespace fallout {
+namespace Fallout2 {
 
 #define PIPBOY_WINDOW_WIDTH (640)
 #define PIPBOY_WINDOW_HEIGHT (480)
@@ -177,7 +177,7 @@ typedef struct HolidayDescription {
 } HolidayDescription;
 
 typedef struct STRUCT_664350 {
-	char* name;
+	char *name;
 	short field_4;
 	short field_6;
 } STRUCT_664350;
@@ -197,14 +197,14 @@ static void pipboyWindowFree();
 static void _pip_init_();
 static void pipboyDrawNumber(int value, int digits, int x, int y);
 static void pipboyDrawDate();
-static void pipboyDrawText(const char* text, int a2, int a3);
+static void pipboyDrawText(const char *text, int a2, int a3);
 static void pipboyDrawBackButton(int a1);
-static int _save_pipboy(File* stream);
+static int _save_pipboy(File *stream);
 static void pipboyWindowHandleStatus(int a1);
 static void pipboyWindowRenderQuestLocationList(int a1);
 static void pipboyRenderHolodiskText();
 static int pipboyWindowRenderHolodiskList(int a1);
-static int _qscmp(const void* a1, const void* a2);
+static int _qscmp(const void *a1, const void *a2);
 static void pipboyWindowHandleAutomaps(int a1);
 static int _PrintAMelevList(int a1);
 static int _PrintAMList(int a1);
@@ -218,11 +218,11 @@ static void pipboyWindowDestroyButtons();
 static bool pipboyRest(int hours, int minutes, int kind);
 static bool _Check4Health(int a1);
 static bool _AddHealth();
-static void _ClacTime(int* hours, int* minutes, int wakeUpHour);
+static void _ClacTime(int *hours, int *minutes, int wakeUpHour);
 static int pipboyRenderScreensaver();
 static int questInit();
 static void questFree();
-static int questDescriptionCompare(const void* a1, const void* a2);
+static int questDescriptionCompare(const void *a1, const void *a2);
 static int holodiskInit();
 static void holodiskFree();
 
@@ -250,13 +250,13 @@ const int gPipboyFrmIds[PIPBOY_FRM_COUNT] = {
 };
 
 // 0x51C128
-QuestDescription* gQuestDescriptions = NULL;
+QuestDescription *gQuestDescriptions = NULL;
 
 // 0x51C12C
 int gQuestsCount = 0;
 
 // 0x51C130
-HolodiskDescription* gHolodiskDescriptions = NULL;
+HolodiskDescription *gHolodiskDescriptions = NULL;
 
 // 0x51C134
 int gHolodisksCount = 0;
@@ -271,18 +271,18 @@ bool gPipboyWindowIsoWasEnabled = false;
 
 // 0x51C140
 const HolidayDescription gHolidayDescriptions[HOLIDAY_COUNT] = {
-	{ 1, 1, 100 },
-	{ 2, 14, 101 },
-	{ 4, 1, 102 },
-	{ 7, 4, 104 },
-	{ 10, 6, 103 },
-	{ 10, 31, 105 },
-	{ 11, 28, 106 },
-	{ 12, 25, 107 },
+	{1, 1, 100},
+	{2, 14, 101},
+	{4, 1, 102},
+	{7, 4, 104},
+	{10, 6, 103},
+	{10, 31, 105},
+	{11, 28, 106},
+	{12, 25, 107},
 };
 
 // 0x51C170
-PipboyRenderProc* _PipFnctn[5] = {
+PipboyRenderProc *_PipFnctn[5] = {
 	pipboyWindowHandleStatus,
 	pipboyWindowHandleAutomaps,
 	pipboyHandleVideoArchive,
@@ -310,7 +310,7 @@ MessageList gQuestsMessageList;
 int gPipboyQuestLocationsCount;
 
 // 0x66441C
-unsigned char* gPipboyWindowBuffer;
+unsigned char *gPipboyWindowBuffer;
 
 // 0x66444C
 int gPipboyWindowHolodisksCount;
@@ -400,7 +400,7 @@ static FrmImage _pipboyFrmImages[PIPBOY_FRM_COUNT];
 int pipboyOpen(int intent) {
 	if (!wmMapPipboyActive()) {
 		// You aren't wearing the pipboy!
-		const char* text = getmsg(&gMiscMessageList, &gPipboyMessageListItem, 7000);
+		const char *text = getmsg(&gMiscMessageList, &gPipboyMessageListItem, 7000);
 		showDialogBox(text, NULL, 0, 192, 135, _colorTable[32328], NULL, _colorTable[32328], 1);
 		return 0;
 	}
@@ -559,20 +559,20 @@ static int pipboyWindowInit(int intent) {
 	pipboyDrawDate();
 
 	int alarmButton = buttonCreate(gPipboyWindow,
-	                               124,
-	                               13,
-	                               _pipboyFrmImages[PIPBOY_FRM_ALARM_UP].getWidth(),
-	                               _pipboyFrmImages[PIPBOY_FRM_ALARM_UP].getHeight(),
-	                               -1,
-	                               -1,
-	                               -1,
-	                               504,
-	                               _pipboyFrmImages[PIPBOY_FRM_ALARM_UP].getData(),
-	                               _pipboyFrmImages[PIPBOY_FRM_ALARM_DOWN].getData(),
-	                               NULL,
-	                               BUTTON_FLAG_TRANSPARENT);
+								   124,
+								   13,
+								   _pipboyFrmImages[PIPBOY_FRM_ALARM_UP].getWidth(),
+								   _pipboyFrmImages[PIPBOY_FRM_ALARM_UP].getHeight(),
+								   -1,
+								   -1,
+								   -1,
+								   504,
+								   _pipboyFrmImages[PIPBOY_FRM_ALARM_UP].getData(),
+								   _pipboyFrmImages[PIPBOY_FRM_ALARM_DOWN].getData(),
+								   NULL,
+								   BUTTON_FLAG_TRANSPARENT);
 	if (alarmButton != -1) {
-		buttonSetCallbacks(alarmButton, _gsound_med_butt_press, _gsound_med_butt_release);
+//		buttonSetCallbacks(alarmButton, _gsound_med_butt_press, _gsound_med_butt_release); TODO audio
 	}
 
 	int y = 341;
@@ -580,20 +580,20 @@ static int pipboyWindowInit(int intent) {
 	for (int index = 0; index < 5; index += 1) {
 		if (index != 1) {
 			int btn = buttonCreate(gPipboyWindow,
-			                       53,
-			                       y,
-			                       _pipboyFrmImages[PIPBOY_FRM_LITTLE_RED_BUTTON_UP].getWidth(),
-			                       _pipboyFrmImages[PIPBOY_FRM_LITTLE_RED_BUTTON_UP].getHeight(),
-			                       -1,
-			                       -1,
-			                       -1,
-			                       eventCode,
-			                       _pipboyFrmImages[PIPBOY_FRM_LITTLE_RED_BUTTON_UP].getData(),
-			                       _pipboyFrmImages[PIPBOY_FRM_LITTLE_RED_BUTTON_DOWN].getData(),
-			                       NULL,
-			                       BUTTON_FLAG_TRANSPARENT);
+								   53,
+								   y,
+								   _pipboyFrmImages[PIPBOY_FRM_LITTLE_RED_BUTTON_UP].getWidth(),
+								   _pipboyFrmImages[PIPBOY_FRM_LITTLE_RED_BUTTON_UP].getHeight(),
+								   -1,
+								   -1,
+								   -1,
+								   eventCode,
+								   _pipboyFrmImages[PIPBOY_FRM_LITTLE_RED_BUTTON_UP].getData(),
+								   _pipboyFrmImages[PIPBOY_FRM_LITTLE_RED_BUTTON_DOWN].getData(),
+								   NULL,
+								   BUTTON_FLAG_TRANSPARENT);
 			if (btn != -1) {
-				buttonSetCallbacks(btn, _gsound_red_butt_press, _gsound_red_butt_release);
+//				buttonSetCallbacks(btn, _gsound_red_butt_press, _gsound_red_butt_release); TODO audio
 			}
 
 			eventCode += 1;
@@ -605,12 +605,12 @@ static int pipboyWindowInit(int intent) {
 	if (intent == PIPBOY_OPEN_INTENT_REST) {
 		if (!_critter_can_obj_dude_rest()) {
 			blitBufferToBufferTrans(
-			    _pipboyFrmImages[PIPBOY_FRM_LOGO].getData(),
-			    _pipboyFrmImages[PIPBOY_FRM_LOGO].getWidth(),
-			    _pipboyFrmImages[PIPBOY_FRM_LOGO].getHeight(),
-			    _pipboyFrmImages[PIPBOY_FRM_LOGO].getWidth(),
-			    gPipboyWindowBuffer + PIPBOY_WINDOW_WIDTH * 156 + 323,
-			    PIPBOY_WINDOW_WIDTH);
+				_pipboyFrmImages[PIPBOY_FRM_LOGO].getData(),
+				_pipboyFrmImages[PIPBOY_FRM_LOGO].getWidth(),
+				_pipboyFrmImages[PIPBOY_FRM_LOGO].getHeight(),
+				_pipboyFrmImages[PIPBOY_FRM_LOGO].getWidth(),
+				gPipboyWindowBuffer + PIPBOY_WINDOW_WIDTH * 156 + 323,
+				PIPBOY_WINDOW_WIDTH);
 
 			int month;
 			int day;
@@ -619,43 +619,43 @@ static int pipboyWindowInit(int intent) {
 
 			int holiday = 0;
 			for (; holiday < HOLIDAY_COUNT; holiday += 1) {
-				const HolidayDescription* holidayDescription = &(gHolidayDescriptions[holiday]);
+				const HolidayDescription *holidayDescription = &(gHolidayDescriptions[holiday]);
 				if (holidayDescription->month == month && holidayDescription->day == day) {
 					break;
 				}
 			}
 
 			if (holiday != HOLIDAY_COUNT) {
-				const HolidayDescription* holidayDescription = &(gHolidayDescriptions[holiday]);
-				const char* holidayName = getmsg(&gPipboyMessageList, &gPipboyMessageListItem, holidayDescription->textId);
+				const HolidayDescription *holidayDescription = &(gHolidayDescriptions[holiday]);
+				const char *holidayName = getmsg(&gPipboyMessageList, &gPipboyMessageListItem, holidayDescription->textId);
 				char holidayNameCopy[256];
-				strcpy(holidayNameCopy, holidayName);
+				strncpy(holidayNameCopy, holidayName, sizeof(holidayNameCopy) - 1);
 
 				int len = fontGetStringWidth(holidayNameCopy);
 				fontDrawText(gPipboyWindowBuffer + PIPBOY_WINDOW_WIDTH * (_pipboyFrmImages[PIPBOY_FRM_LOGO].getHeight() + 174) + 6 + _pipboyFrmImages[PIPBOY_FRM_LOGO].getWidth() / 2 + 323 - len / 2,
-				             holidayNameCopy,
-				             350,
-				             PIPBOY_WINDOW_WIDTH,
-				             _colorTable[992]);
+							 holidayNameCopy,
+							 350,
+							 PIPBOY_WINDOW_WIDTH,
+							 _colorTable[992]);
 			}
 
 			windowRefresh(gPipboyWindow);
 
-			soundPlayFile("iisxxxx1");
+//			soundPlayFile("iisxxxx1"); TODO audio
 
-			const char* text = getmsg(&gPipboyMessageList, &gPipboyMessageListItem, 215);
+			const char *text = getmsg(&gPipboyMessageList, &gPipboyMessageListItem, 215);
 			showDialogBox(text, NULL, 0, 192, 135, _colorTable[32328], 0, _colorTable[32328], DIALOG_BOX_LARGE);
 
 			intent = PIPBOY_OPEN_INTENT_UNSPECIFIED;
 		}
 	} else {
 		blitBufferToBufferTrans(
-		    _pipboyFrmImages[PIPBOY_FRM_LOGO].getData(),
-		    _pipboyFrmImages[PIPBOY_FRM_LOGO].getWidth(),
-		    _pipboyFrmImages[PIPBOY_FRM_LOGO].getHeight(),
-		    _pipboyFrmImages[PIPBOY_FRM_LOGO].getWidth(),
-		    gPipboyWindowBuffer + PIPBOY_WINDOW_WIDTH * 156 + 323,
-		    PIPBOY_WINDOW_WIDTH);
+			_pipboyFrmImages[PIPBOY_FRM_LOGO].getData(),
+			_pipboyFrmImages[PIPBOY_FRM_LOGO].getWidth(),
+			_pipboyFrmImages[PIPBOY_FRM_LOGO].getHeight(),
+			_pipboyFrmImages[PIPBOY_FRM_LOGO].getWidth(),
+			gPipboyWindowBuffer + PIPBOY_WINDOW_WIDTH * 156 + 323,
+			PIPBOY_WINDOW_WIDTH);
 
 		int month;
 		int day;
@@ -664,24 +664,24 @@ static int pipboyWindowInit(int intent) {
 
 		int holiday;
 		for (holiday = 0; holiday < HOLIDAY_COUNT; holiday += 1) {
-			const HolidayDescription* holidayDescription = &(gHolidayDescriptions[holiday]);
+			const HolidayDescription *holidayDescription = &(gHolidayDescriptions[holiday]);
 			if (holidayDescription->month == month && holidayDescription->day == day) {
 				break;
 			}
 		}
 
 		if (holiday != HOLIDAY_COUNT) {
-			const HolidayDescription* holidayDescription = &(gHolidayDescriptions[holiday]);
-			const char* holidayName = getmsg(&gPipboyMessageList, &gPipboyMessageListItem, holidayDescription->textId);
+			const HolidayDescription *holidayDescription = &(gHolidayDescriptions[holiday]);
+			const char *holidayName = getmsg(&gPipboyMessageList, &gPipboyMessageListItem, holidayDescription->textId);
 			char holidayNameCopy[256];
-			strcpy(holidayNameCopy, holidayName);
+			strncpy(holidayNameCopy, holidayName, sizeof(holidayNameCopy) - 1);
 
 			int length = fontGetStringWidth(holidayNameCopy);
 			fontDrawText(gPipboyWindowBuffer + PIPBOY_WINDOW_WIDTH * (_pipboyFrmImages[PIPBOY_FRM_LOGO].getHeight() + 174) + 6 + _pipboyFrmImages[PIPBOY_FRM_LOGO].getWidth() / 2 + 323 - length / 2,
-			             holidayNameCopy,
-			             350,
-			             PIPBOY_WINDOW_WIDTH,
-			             _colorTable[992]);
+						 holidayNameCopy,
+						 350,
+						 PIPBOY_WINDOW_WIDTH,
+						 _colorTable[992]);
 		}
 
 		windowRefresh(gPipboyWindow);
@@ -691,7 +691,7 @@ static int pipboyWindowInit(int intent) {
 		return -1;
 	}
 
-	soundPlayFile("pipon");
+//	soundPlayFile("pipon"); TODO audio
 	windowRefresh(gPipboyWindow);
 
 	return intent;
@@ -777,7 +777,7 @@ static void pipboyDrawDate() {
 }
 
 // 0x497A40
-static void pipboyDrawText(const char* text, int flags, int color) {
+static void pipboyDrawText(const char *text, int flags, int color) {
 	if ((flags & PIPBOY_TEXT_STYLE_UNDERLINE) != 0) {
 		color |= FONT_UNDERLINE;
 	}
@@ -820,24 +820,24 @@ static void pipboyDrawBackButton(int color) {
 	blitBufferToBuffer(_pipboyFrmImages[PIPBOY_FRM_BACKGROUND].getData() + PIPBOY_WINDOW_WIDTH * 436 + 254, 350, 20, PIPBOY_WINDOW_WIDTH, gPipboyWindowBuffer + PIPBOY_WINDOW_WIDTH * 436 + 254, PIPBOY_WINDOW_WIDTH);
 
 	// BACK
-	const char* text = getmsg(&gPipboyMessageList, &gPipboyMessageListItem, 201);
+	const char *text = getmsg(&gPipboyMessageList, &gPipboyMessageListItem, 201);
 	pipboyDrawText(text, PIPBOY_TEXT_ALIGNMENT_CENTER, color);
 }
 
 // NOTE: Collapsed.
 //
 // 0x497BD4
-static int _save_pipboy(File* stream) {
+static int _save_pipboy(File *stream) {
 	return 0;
 }
 
 // NOTE: Uncollapsed 0x497BD4.
-int pipboySave(File* stream) {
+int pipboySave(File *stream) {
 	return _save_pipboy(stream);
 }
 
 // NOTE: Uncollapsed 0x497BD4.
-int pipboyLoad(File* stream) {
+int pipboyLoad(File *stream) {
 	return _save_pipboy(stream);
 }
 
@@ -846,11 +846,11 @@ static void pipboyWindowHandleStatus(int a1) {
 	if (a1 == 1024) {
 		pipboyWindowDestroyButtons();
 		blitBufferToBuffer(_pipboyFrmImages[PIPBOY_FRM_BACKGROUND].getData() + PIPBOY_WINDOW_WIDTH * PIPBOY_WINDOW_CONTENT_VIEW_Y + PIPBOY_WINDOW_CONTENT_VIEW_X,
-		                   PIPBOY_WINDOW_CONTENT_VIEW_WIDTH,
-		                   PIPBOY_WINDOW_CONTENT_VIEW_HEIGHT,
-		                   PIPBOY_WINDOW_WIDTH,
-		                   gPipboyWindowBuffer + PIPBOY_WINDOW_WIDTH * PIPBOY_WINDOW_CONTENT_VIEW_Y + PIPBOY_WINDOW_CONTENT_VIEW_X,
-		                   PIPBOY_WINDOW_WIDTH);
+						   PIPBOY_WINDOW_CONTENT_VIEW_WIDTH,
+						   PIPBOY_WINDOW_CONTENT_VIEW_HEIGHT,
+						   PIPBOY_WINDOW_WIDTH,
+						   gPipboyWindowBuffer + PIPBOY_WINDOW_WIDTH * PIPBOY_WINDOW_CONTENT_VIEW_Y + PIPBOY_WINDOW_CONTENT_VIEW_X,
+						   PIPBOY_WINDOW_WIDTH);
 		if (gPipboyLinesCount >= 0) {
 			gPipboyCurrentLine = 0;
 		}
@@ -862,7 +862,7 @@ static void pipboyWindowHandleStatus(int a1) {
 		_stat_flag = 0;
 
 		for (int index = 0; index < gHolodisksCount; index += 1) {
-			HolodiskDescription* holodiskDescription = &(gHolodiskDescriptions[index]);
+			HolodiskDescription *holodiskDescription = &(gHolodiskDescriptions[index]);
 			if (gGameGlobalVars[holodiskDescription->gvar] != 0) {
 				gPipboyWindowHolodisksCount += 1;
 				break;
@@ -872,7 +872,7 @@ static void pipboyWindowHandleStatus(int a1) {
 		pipboyWindowRenderQuestLocationList(-1);
 
 		if (gPipboyQuestLocationsCount == 0) {
-			const char* text = getmsg(&gPipboyMessageList, &gPipboyMessageListItem, 203);
+			const char *text = getmsg(&gPipboyMessageList, &gPipboyMessageListItem, 203);
 			pipboyDrawText(text, 0, _colorTable[992]);
 		}
 
@@ -886,13 +886,13 @@ static void pipboyWindowHandleStatus(int a1) {
 
 	if (_stat_flag == 0 && _holo_flag == 0) {
 		if (gPipboyQuestLocationsCount != 0 && gPipboyMouseX < 429) {
-			soundPlayFile("ib1p1xx1");
+//			soundPlayFile("ib1p1xx1"); TODO audio
 			blitBufferToBuffer(_pipboyFrmImages[PIPBOY_FRM_BACKGROUND].getData() + PIPBOY_WINDOW_WIDTH * PIPBOY_WINDOW_CONTENT_VIEW_Y + PIPBOY_WINDOW_CONTENT_VIEW_X,
-			                   PIPBOY_WINDOW_CONTENT_VIEW_WIDTH,
-			                   PIPBOY_WINDOW_CONTENT_VIEW_HEIGHT,
-			                   PIPBOY_WINDOW_WIDTH,
-			                   gPipboyWindowBuffer + PIPBOY_WINDOW_WIDTH * PIPBOY_WINDOW_CONTENT_VIEW_Y + PIPBOY_WINDOW_CONTENT_VIEW_X,
-			                   PIPBOY_WINDOW_WIDTH);
+							   PIPBOY_WINDOW_CONTENT_VIEW_WIDTH,
+							   PIPBOY_WINDOW_CONTENT_VIEW_HEIGHT,
+							   PIPBOY_WINDOW_WIDTH,
+							   gPipboyWindowBuffer + PIPBOY_WINDOW_WIDTH * PIPBOY_WINDOW_CONTENT_VIEW_Y + PIPBOY_WINDOW_CONTENT_VIEW_X,
+							   PIPBOY_WINDOW_WIDTH);
 			pipboyWindowRenderQuestLocationList(a1);
 			pipboyWindowRenderHolodiskList(-1);
 			windowRefreshRect(gPipboyWindow, &gPipboyWindowContentRect);
@@ -900,12 +900,12 @@ static void pipboyWindowHandleStatus(int a1) {
 			_stat_flag = 1;
 		} else {
 			if (gPipboyWindowHolodisksCount != 0 && gPipboyWindowHolodisksCount >= a1 && gPipboyMouseX > 429) {
-				soundPlayFile("ib1p1xx1");
+//				soundPlayFile("ib1p1xx1"); TODO audio
 				_holodisk = 0;
 
 				int index = 0;
 				for (; index < gHolodisksCount; index += 1) {
-					HolodiskDescription* holodiskDescription = &(gHolodiskDescriptions[index]);
+					HolodiskDescription *holodiskDescription = &(gHolodiskDescriptions[index]);
 					if (gGameGlobalVars[holodiskDescription->gvar] > 0) {
 						if (a1 - 1 == _holodisk) {
 							break;
@@ -916,11 +916,11 @@ static void pipboyWindowHandleStatus(int a1) {
 				_holodisk = index;
 
 				blitBufferToBuffer(_pipboyFrmImages[PIPBOY_FRM_BACKGROUND].getData() + PIPBOY_WINDOW_WIDTH * PIPBOY_WINDOW_CONTENT_VIEW_Y + PIPBOY_WINDOW_CONTENT_VIEW_X,
-				                   PIPBOY_WINDOW_CONTENT_VIEW_WIDTH,
-				                   PIPBOY_WINDOW_CONTENT_VIEW_HEIGHT,
-				                   PIPBOY_WINDOW_WIDTH,
-				                   gPipboyWindowBuffer + PIPBOY_WINDOW_WIDTH * PIPBOY_WINDOW_CONTENT_VIEW_Y + PIPBOY_WINDOW_CONTENT_VIEW_X,
-				                   PIPBOY_WINDOW_WIDTH);
+								   PIPBOY_WINDOW_CONTENT_VIEW_WIDTH,
+								   PIPBOY_WINDOW_CONTENT_VIEW_HEIGHT,
+								   PIPBOY_WINDOW_WIDTH,
+								   gPipboyWindowBuffer + PIPBOY_WINDOW_WIDTH * PIPBOY_WINDOW_CONTENT_VIEW_Y + PIPBOY_WINDOW_CONTENT_VIEW_X,
+								   PIPBOY_WINDOW_WIDTH);
 				// CE: Fix highlighting holodisk (on par with quest highlighting
 				// approach).
 				pipboyWindowRenderHolodiskList(a1);
@@ -943,7 +943,7 @@ static void pipboyWindowHandleStatus(int a1) {
 		if ((gPipboyMouseX > 459 && a1 != 1027) || a1 == 1026) {
 			if (gPipboyHolodiskLastPage <= _view_page) {
 				if (a1 != 1026) {
-					soundPlayFile("ib1p1xx1");
+//					soundPlayFile("ib1p1xx1"); TODO audio
 					blitBufferToBuffer(_pipboyFrmImages[PIPBOY_FRM_BACKGROUND].getData() + PIPBOY_WINDOW_WIDTH * 436 + 254, 350, 20, PIPBOY_WINDOW_WIDTH, gPipboyWindowBuffer + PIPBOY_WINDOW_WIDTH * 436 + 254, PIPBOY_WINDOW_WIDTH);
 
 					if (gPipboyLinesCount >= 0) {
@@ -951,7 +951,7 @@ static void pipboyWindowHandleStatus(int a1) {
 					}
 
 					// Back
-					const char* text1 = getmsg(&gPipboyMessageList, &gPipboyMessageListItem, 201);
+					const char *text1 = getmsg(&gPipboyMessageList, &gPipboyMessageListItem, 201);
 					pipboyDrawText(text1, PIPBOY_TEXT_ALIGNMENT_LEFT_COLUMN_CENTER, _colorTable[992]);
 
 					if (gPipboyLinesCount >= 0) {
@@ -959,7 +959,7 @@ static void pipboyWindowHandleStatus(int a1) {
 					}
 
 					// Done
-					const char* text2 = getmsg(&gPipboyMessageList, &gPipboyMessageListItem, 214);
+					const char *text2 = getmsg(&gPipboyMessageList, &gPipboyMessageListItem, 214);
 					pipboyDrawText(text2, PIPBOY_TEXT_ALIGNMENT_RIGHT_COLUMN_CENTER, _colorTable[992]);
 
 					windowRefreshRect(gPipboyWindow, &gPipboyWindowContentRect);
@@ -967,7 +967,7 @@ static void pipboyWindowHandleStatus(int a1) {
 					pipboyWindowHandleStatus(1024);
 				}
 			} else {
-				soundPlayFile("ib1p1xx1");
+//				soundPlayFile("ib1p1xx1"); TODO audio
 				blitBufferToBuffer(_pipboyFrmImages[PIPBOY_FRM_BACKGROUND].getData() + PIPBOY_WINDOW_WIDTH * 436 + 254, 350, 20, PIPBOY_WINDOW_WIDTH, gPipboyWindowBuffer + PIPBOY_WINDOW_WIDTH * 436 + 254, PIPBOY_WINDOW_WIDTH);
 
 				if (gPipboyLinesCount >= 0) {
@@ -975,7 +975,7 @@ static void pipboyWindowHandleStatus(int a1) {
 				}
 
 				// Back
-				const char* text1 = getmsg(&gPipboyMessageList, &gPipboyMessageListItem, 201);
+				const char *text1 = getmsg(&gPipboyMessageList, &gPipboyMessageListItem, 201);
 				pipboyDrawText(text1, PIPBOY_TEXT_ALIGNMENT_LEFT_COLUMN_CENTER, _colorTable[992]);
 
 				if (gPipboyLinesCount >= 0) {
@@ -983,7 +983,7 @@ static void pipboyWindowHandleStatus(int a1) {
 				}
 
 				// More
-				const char* text2 = getmsg(&gPipboyMessageList, &gPipboyMessageListItem, 200);
+				const char *text2 = getmsg(&gPipboyMessageList, &gPipboyMessageListItem, 200);
 				pipboyDrawText(text2, PIPBOY_TEXT_ALIGNMENT_RIGHT_COLUMN_CENTER, _colorTable[992]);
 
 				windowRefreshRect(gPipboyWindow, &gPipboyWindowContentRect);
@@ -997,7 +997,7 @@ static void pipboyWindowHandleStatus(int a1) {
 		}
 
 		if (a1 == 1027) {
-			soundPlayFile("ib1p1xx1");
+//			soundPlayFile("ib1p1xx1"); TODO audio
 			blitBufferToBuffer(_pipboyFrmImages[PIPBOY_FRM_BACKGROUND].getData() + PIPBOY_WINDOW_WIDTH * 436 + 254, 350, 20, PIPBOY_WINDOW_WIDTH, gPipboyWindowBuffer + PIPBOY_WINDOW_WIDTH * 436 + 254, PIPBOY_WINDOW_WIDTH);
 
 			if (gPipboyLinesCount >= 0) {
@@ -1005,7 +1005,7 @@ static void pipboyWindowHandleStatus(int a1) {
 			}
 
 			// Back
-			const char* text1 = getmsg(&gPipboyMessageList, &gPipboyMessageListItem, 201);
+			const char *text1 = getmsg(&gPipboyMessageList, &gPipboyMessageListItem, 201);
 			pipboyDrawText(text1, PIPBOY_TEXT_ALIGNMENT_LEFT_COLUMN_CENTER, _colorTable[992]);
 
 			if (gPipboyLinesCount >= 0) {
@@ -1013,7 +1013,7 @@ static void pipboyWindowHandleStatus(int a1) {
 			}
 
 			// More
-			const char* text2 = getmsg(&gPipboyMessageList, &gPipboyMessageListItem, 200);
+			const char *text2 = getmsg(&gPipboyMessageList, &gPipboyMessageListItem, 200);
 			pipboyDrawText(text2, PIPBOY_TEXT_ALIGNMENT_RIGHT_COLUMN_CENTER, _colorTable[992]);
 
 			windowRefreshRect(gPipboyWindow, &gPipboyWindowContentRect);
@@ -1030,7 +1030,7 @@ static void pipboyWindowHandleStatus(int a1) {
 				return;
 			}
 
-			soundPlayFile("ib1p1xx1");
+//			soundPlayFile("ib1p1xx1"); TODO audio
 			blitBufferToBuffer(_pipboyFrmImages[PIPBOY_FRM_BACKGROUND].getData() + PIPBOY_WINDOW_WIDTH * 436 + 254, 350, 20, PIPBOY_WINDOW_WIDTH, gPipboyWindowBuffer + PIPBOY_WINDOW_WIDTH * 436 + 254, PIPBOY_WINDOW_WIDTH);
 
 			if (gPipboyLinesCount >= 0) {
@@ -1038,7 +1038,7 @@ static void pipboyWindowHandleStatus(int a1) {
 			}
 
 			// Back
-			const char* text1 = getmsg(&gPipboyMessageList, &gPipboyMessageListItem, 201);
+			const char *text1 = getmsg(&gPipboyMessageList, &gPipboyMessageListItem, 201);
 			pipboyDrawText(text1, PIPBOY_TEXT_ALIGNMENT_LEFT_COLUMN_CENTER, _colorTable[992]);
 
 			if (gPipboyLinesCount >= 0) {
@@ -1046,7 +1046,7 @@ static void pipboyWindowHandleStatus(int a1) {
 			}
 
 			// More
-			const char* text2 = getmsg(&gPipboyMessageList, &gPipboyMessageListItem, 200);
+			const char *text2 = getmsg(&gPipboyMessageList, &gPipboyMessageListItem, 200);
 			pipboyDrawText(text2, PIPBOY_TEXT_ALIGNMENT_RIGHT_COLUMN_CENTER, _colorTable[992]);
 
 			windowRefreshRect(gPipboyWindow, &gPipboyWindowContentRect);
@@ -1065,7 +1065,7 @@ static void pipboyWindowHandleStatus(int a1) {
 	}
 
 	if (a1 == 1025) {
-		soundPlayFile("ib1p1xx1");
+//		soundPlayFile("ib1p1xx1"); TODO audio
 		pipboyDrawBackButton(_colorTable[32747]);
 		windowRefreshRect(gPipboyWindow, &gPipboyWindowContentRect);
 		inputPauseForTocks(200);
@@ -1073,12 +1073,12 @@ static void pipboyWindowHandleStatus(int a1) {
 	}
 
 	if (a1 <= gPipboyQuestLocationsCount) {
-		soundPlayFile("ib1p1xx1");
+//		soundPlayFile("ib1p1xx1"); TODO audio
 
 		int v13 = 0;
 		int index = 0;
 		for (; index < gQuestsCount; index++) {
-			QuestDescription* questDescription = &(gQuestDescriptions[index]);
+			QuestDescription *questDescription = &(gQuestDescriptions[index]);
 			if (questDescription->displayThreshold <= gGameGlobalVars[questDescription->gvar]) {
 				if (v13 == a1 - 1) {
 					break;
@@ -1101,11 +1101,11 @@ static void pipboyWindowHandleStatus(int a1) {
 
 		pipboyWindowDestroyButtons();
 		blitBufferToBuffer(_pipboyFrmImages[PIPBOY_FRM_BACKGROUND].getData() + PIPBOY_WINDOW_WIDTH * PIPBOY_WINDOW_CONTENT_VIEW_Y + PIPBOY_WINDOW_CONTENT_VIEW_X,
-		                   PIPBOY_WINDOW_CONTENT_VIEW_WIDTH,
-		                   PIPBOY_WINDOW_CONTENT_VIEW_HEIGHT,
-		                   PIPBOY_WINDOW_WIDTH,
-		                   gPipboyWindowBuffer + PIPBOY_WINDOW_WIDTH * PIPBOY_WINDOW_CONTENT_VIEW_Y + PIPBOY_WINDOW_CONTENT_VIEW_X,
-		                   PIPBOY_WINDOW_WIDTH);
+						   PIPBOY_WINDOW_CONTENT_VIEW_WIDTH,
+						   PIPBOY_WINDOW_CONTENT_VIEW_HEIGHT,
+						   PIPBOY_WINDOW_WIDTH,
+						   gPipboyWindowBuffer + PIPBOY_WINDOW_WIDTH * PIPBOY_WINDOW_CONTENT_VIEW_Y + PIPBOY_WINDOW_CONTENT_VIEW_X,
+						   PIPBOY_WINDOW_WIDTH);
 		if (gPipboyLinesCount >= 0) {
 			gPipboyCurrentLine = 0;
 		}
@@ -1116,10 +1116,10 @@ static void pipboyWindowHandleStatus(int a1) {
 
 		pipboyWindowCreateButtons(0, 0, true);
 
-		QuestDescription* questDescription = &(gQuestDescriptions[index]);
+		QuestDescription *questDescription = &(gQuestDescriptions[index]);
 
-		const char* text1 = getmsg(&gPipboyMessageList, &gPipboyMessageListItem, 210);
-		const char* text2 = getmsg(&gMapMessageList, &gPipboyMessageListItem, questDescription->location);
+		const char *text1 = getmsg(&gPipboyMessageList, &gPipboyMessageListItem, 210);
+		const char *text2 = getmsg(&gMapMessageList, &gPipboyMessageListItem, questDescription->location);
 		char formattedText[1024];
 		snprintf(formattedText, sizeof(formattedText), "%s %s", text2, text1);
 		pipboyDrawText(formattedText, PIPBOY_TEXT_STYLE_UNDERLINE, _colorTable[992]);
@@ -1130,9 +1130,9 @@ static void pipboyWindowHandleStatus(int a1) {
 
 		int number = 1;
 		for (; index < gQuestsCount; index++) {
-			QuestDescription* questDescription = &(gQuestDescriptions[index]);
+			QuestDescription *questDescription = &(gQuestDescriptions[index]);
 			if (gGameGlobalVars[questDescription->gvar] >= questDescription->displayThreshold) {
-				const char* text = getmsg(&gQuestsMessageList, &gPipboyMessageListItem, questDescription->description);
+				const char *text = getmsg(&gQuestsMessageList, &gPipboyMessageListItem, questDescription->description);
 				char formattedText[1024];
 				snprintf(formattedText, sizeof(formattedText), "%d. %s", number, text);
 				number += 1;
@@ -1141,8 +1141,8 @@ static void pipboyWindowHandleStatus(int a1) {
 				short count;
 				if (wordWrap(formattedText, 350, beginnings, &count) == 0) {
 					for (int line = 0; line < count - 1; line += 1) {
-						char* beginning = formattedText + beginnings[line];
-						char* ending = formattedText + beginnings[line + 1];
+						char *beginning = formattedText + beginnings[line];
+						char *ending = formattedText + beginnings[line + 1];
 						char c = *ending;
 						*ending = '\0';
 
@@ -1167,7 +1167,7 @@ static void pipboyWindowHandleStatus(int a1) {
 			}
 
 			if (index != gQuestsCount - 1) {
-				QuestDescription* nextQuestDescription = &(gQuestDescriptions[index + 1]);
+				QuestDescription *nextQuestDescription = &(gQuestDescriptions[index + 1]);
 				if (questDescription->location != nextQuestDescription->location) {
 					break;
 				}
@@ -1192,7 +1192,7 @@ static void pipboyWindowRenderQuestLocationList(int a1) {
 	flags |= PIPBOY_TEXT_STYLE_UNDERLINE;
 
 	// STATUS
-	const char* statusText = getmsg(&gPipboyMessageList, &gPipboyMessageListItem, 202);
+	const char *statusText = getmsg(&gPipboyMessageList, &gPipboyMessageListItem, 202);
 	pipboyDrawText(statusText, flags, _colorTable[992]);
 
 	if (gPipboyLinesCount >= 2) {
@@ -1202,7 +1202,7 @@ static void pipboyWindowRenderQuestLocationList(int a1) {
 	gPipboyQuestLocationsCount = 0;
 
 	for (int index = 0; index < gQuestsCount; index += 1) {
-		QuestDescription* quest = &(gQuestDescriptions[index]);
+		QuestDescription *quest = &(gQuestDescriptions[index]);
 		if (quest->displayThreshold > gGameGlobalVars[quest->gvar]) {
 			continue;
 		}
@@ -1210,7 +1210,7 @@ static void pipboyWindowRenderQuestLocationList(int a1) {
 		int color = (gPipboyCurrentLine - 1) / 2 == (a1 - 1) ? _colorTable[32747] : _colorTable[992];
 
 		// Render location.
-		const char* questLocation = getmsg(&gMapMessageList, &gPipboyMessageListItem, quest->location);
+		const char *questLocation = getmsg(&gMapMessageList, &gPipboyMessageListItem, quest->location);
 		pipboyDrawText(questLocation, 0, color);
 
 		gPipboyCurrentLine += 1;
@@ -1234,17 +1234,17 @@ static void pipboyWindowRenderQuestLocationList(int a1) {
 // 0x4988A0
 static void pipboyRenderHolodiskText() {
 	blitBufferToBuffer(_pipboyFrmImages[PIPBOY_FRM_BACKGROUND].getData() + PIPBOY_WINDOW_WIDTH * PIPBOY_WINDOW_CONTENT_VIEW_Y + PIPBOY_WINDOW_CONTENT_VIEW_X,
-	                   PIPBOY_WINDOW_CONTENT_VIEW_WIDTH,
-	                   PIPBOY_WINDOW_CONTENT_VIEW_HEIGHT,
-	                   PIPBOY_WINDOW_WIDTH,
-	                   gPipboyWindowBuffer + PIPBOY_WINDOW_WIDTH * PIPBOY_WINDOW_CONTENT_VIEW_Y + PIPBOY_WINDOW_CONTENT_VIEW_X,
-	                   PIPBOY_WINDOW_WIDTH);
+					   PIPBOY_WINDOW_CONTENT_VIEW_WIDTH,
+					   PIPBOY_WINDOW_CONTENT_VIEW_HEIGHT,
+					   PIPBOY_WINDOW_WIDTH,
+					   gPipboyWindowBuffer + PIPBOY_WINDOW_WIDTH * PIPBOY_WINDOW_CONTENT_VIEW_Y + PIPBOY_WINDOW_CONTENT_VIEW_X,
+					   PIPBOY_WINDOW_WIDTH);
 
 	if (gPipboyLinesCount >= 0) {
 		gPipboyCurrentLine = 0;
 	}
 
-	HolodiskDescription* holodisk = &(gHolodiskDescriptions[_holodisk]);
+	HolodiskDescription *holodisk = &(gHolodiskDescriptions[_holodisk]);
 
 	int holodiskTextId;
 	int linesCount = 0;
@@ -1252,7 +1252,7 @@ static void pipboyRenderHolodiskText() {
 	gPipboyHolodiskLastPage = 0;
 
 	for (holodiskTextId = holodisk->description; holodiskTextId < holodisk->description + 500; holodiskTextId += 1) {
-		const char* text = getmsg(&gPipboyMessageList, &gPipboyMessageListItem, holodiskTextId);
+		const char *text = getmsg(&gPipboyMessageList, &gPipboyMessageListItem, holodiskTextId);
 		if (strcmp(text, "**END-DISK**") == 0) {
 			break;
 		}
@@ -1274,7 +1274,7 @@ static void pipboyRenderHolodiskText() {
 		int page = 0;
 		int numberOfLines = 0;
 		for (; holodiskTextId < holodiskTextId + 500; holodiskTextId += 1) {
-			const char* line = getmsg(&gPipboyMessageList, &gPipboyMessageListItem, holodiskTextId);
+			const char *line = getmsg(&gPipboyMessageList, &gPipboyMessageListItem, holodiskTextId);
 			if (strcmp(line, "**END-DISK**") == 0) {
 				debugPrint("\nPIPBOY: Premature page end in holodisk page search!\n");
 				break;
@@ -1297,13 +1297,13 @@ static void pipboyRenderHolodiskText() {
 			debugPrint("\nPIPBOY: #2 Holodisk text end not found!\n");
 		}
 	} else {
-		const char* name = getmsg(&gPipboyMessageList, &gPipboyMessageListItem, holodisk->name);
+		const char *name = getmsg(&gPipboyMessageList, &gPipboyMessageListItem, holodisk->name);
 		pipboyDrawText(name, PIPBOY_TEXT_ALIGNMENT_CENTER | PIPBOY_TEXT_STYLE_UNDERLINE, _colorTable[992]);
 	}
 
 	if (gPipboyHolodiskLastPage != 0) {
 		// of
-		const char* of = getmsg(&gPipboyMessageList, &gPipboyMessageListItem, 212);
+		const char *of = getmsg(&gPipboyMessageList, &gPipboyMessageListItem, 212);
 		char formattedText[60]; // TODO: Size is probably wrong.
 		snprintf(formattedText, sizeof(formattedText), "%d %s %d", _view_page + 1, of, gPipboyHolodiskLastPage + 1);
 
@@ -1316,7 +1316,7 @@ static void pipboyRenderHolodiskText() {
 	}
 
 	for (int line = 0; line < PIPBOY_HOLODISK_LINES_MAX; line += 1) {
-		const char* text = getmsg(&gPipboyMessageList, &gPipboyMessageListItem, holodiskTextId);
+		const char *text = getmsg(&gPipboyMessageList, &gPipboyMessageListItem, holodiskTextId);
 		if (strcmp(text, "**END-DISK**") == 0) {
 			break;
 		}
@@ -1336,7 +1336,7 @@ static void pipboyRenderHolodiskText() {
 			gPipboyCurrentLine = gPipboyLinesCount;
 		}
 
-		const char* back = getmsg(&gPipboyMessageList, &gPipboyMessageListItem, 201);
+		const char *back = getmsg(&gPipboyMessageList, &gPipboyMessageListItem, 201);
 		pipboyDrawText(back, PIPBOY_TEXT_ALIGNMENT_LEFT_COLUMN_CENTER, _colorTable[992]);
 
 		if (gPipboyLinesCount >= 0) {
@@ -1349,7 +1349,7 @@ static void pipboyRenderHolodiskText() {
 			gPipboyCurrentLine = gPipboyLinesCount;
 		}
 
-		const char* back = getmsg(&gPipboyMessageList, &gPipboyMessageListItem, 201);
+		const char *back = getmsg(&gPipboyMessageList, &gPipboyMessageListItem, 201);
 		pipboyDrawText(back, PIPBOY_TEXT_ALIGNMENT_LEFT_COLUMN_CENTER, _colorTable[992]);
 
 		if (gPipboyLinesCount >= 0) {
@@ -1359,7 +1359,7 @@ static void pipboyRenderHolodiskText() {
 		moreOrDoneTextId = 200;
 	}
 
-	const char* moreOrDoneText = getmsg(&gPipboyMessageList, &gPipboyMessageListItem, moreOrDoneTextId);
+	const char *moreOrDoneText = getmsg(&gPipboyMessageList, &gPipboyMessageListItem, moreOrDoneTextId);
 	pipboyDrawText(moreOrDoneText, PIPBOY_TEXT_ALIGNMENT_RIGHT_COLUMN_CENTER, _colorTable[992]);
 	windowRefresh(gPipboyWindow);
 }
@@ -1372,7 +1372,7 @@ static int pipboyWindowRenderHolodiskList(int a1) {
 
 	int knownHolodisksCount = 0;
 	for (int index = 0; index < gHolodisksCount; index++) {
-		HolodiskDescription* holodisk = &(gHolodiskDescriptions[index]);
+		HolodiskDescription *holodisk = &(gHolodiskDescriptions[index]);
 		if (gGameGlobalVars[holodisk->gvar] != 0) {
 			int color;
 			// CE: Fix highlighting holodisk (on par with quest highlighting
@@ -1383,7 +1383,7 @@ static int pipboyWindowRenderHolodiskList(int a1) {
 				color = _colorTable[992];
 			}
 
-			const char* text = getmsg(&gPipboyMessageList, &gPipboyMessageListItem, holodisk->name);
+			const char *text = getmsg(&gPipboyMessageList, &gPipboyMessageListItem, holodisk->name);
 			pipboyDrawText(text, PIPBOY_TEXT_ALIGNMENT_RIGHT_COLUMN, color);
 
 			gPipboyCurrentLine++;
@@ -1396,7 +1396,7 @@ static int pipboyWindowRenderHolodiskList(int a1) {
 			gPipboyCurrentLine = 0;
 		}
 
-		const char* text = getmsg(&gPipboyMessageList, &gPipboyMessageListItem, 211); // DATA
+		const char *text = getmsg(&gPipboyMessageList, &gPipboyMessageListItem, 211); // DATA
 		pipboyDrawText(text, PIPBOY_TEXT_ALIGNMENT_RIGHT_COLUMN_CENTER | PIPBOY_TEXT_STYLE_UNDERLINE, _colorTable[992]);
 	}
 
@@ -1404,9 +1404,9 @@ static int pipboyWindowRenderHolodiskList(int a1) {
 }
 
 // 0x498D34
-static int _qscmp(const void* a1, const void* a2) {
-	STRUCT_664350* v1 = (STRUCT_664350*)a1;
-	STRUCT_664350* v2 = (STRUCT_664350*)a2;
+static int _qscmp(const void *a1, const void *a2) {
+	STRUCT_664350 *v1 = (STRUCT_664350 *)a1;
+	STRUCT_664350 *v2 = (STRUCT_664350 *)a2;
 
 	return strcmp(v1->name, v2->name);
 }
@@ -1416,17 +1416,17 @@ static void pipboyWindowHandleAutomaps(int a1) {
 	if (a1 == 1024) {
 		pipboyWindowDestroyButtons();
 		blitBufferToBuffer(_pipboyFrmImages[PIPBOY_FRM_BACKGROUND].getData() + PIPBOY_WINDOW_WIDTH * PIPBOY_WINDOW_CONTENT_VIEW_Y + PIPBOY_WINDOW_CONTENT_VIEW_X,
-		                   PIPBOY_WINDOW_CONTENT_VIEW_WIDTH,
-		                   PIPBOY_WINDOW_CONTENT_VIEW_HEIGHT,
-		                   PIPBOY_WINDOW_WIDTH,
-		                   gPipboyWindowBuffer + PIPBOY_WINDOW_WIDTH * PIPBOY_WINDOW_CONTENT_VIEW_Y + PIPBOY_WINDOW_CONTENT_VIEW_X,
-		                   PIPBOY_WINDOW_WIDTH);
+						   PIPBOY_WINDOW_CONTENT_VIEW_WIDTH,
+						   PIPBOY_WINDOW_CONTENT_VIEW_HEIGHT,
+						   PIPBOY_WINDOW_WIDTH,
+						   gPipboyWindowBuffer + PIPBOY_WINDOW_WIDTH * PIPBOY_WINDOW_CONTENT_VIEW_Y + PIPBOY_WINDOW_CONTENT_VIEW_X,
+						   PIPBOY_WINDOW_WIDTH);
 
 		if (gPipboyLinesCount >= 0) {
 			gPipboyCurrentLine = 0;
 		}
 
-		const char* title = getmsg(&gPipboyMessageList, &gPipboyMessageListItem, 205);
+		const char *title = getmsg(&gPipboyMessageList, &gPipboyMessageListItem, 205);
 		pipboyDrawText(title, PIPBOY_TEXT_ALIGNMENT_CENTER | PIPBOY_TEXT_STYLE_UNDERLINE, _colorTable[992]);
 
 		_actcnt = _PrintAMList(-1);
@@ -1441,11 +1441,11 @@ static void pipboyWindowHandleAutomaps(int a1) {
 	if (_amlst_mode != 0) {
 		if (a1 == 1025 || a1 <= -1) {
 			pipboyWindowHandleAutomaps(1024);
-			soundPlayFile("ib1p1xx1");
+//			soundPlayFile("ib1p1xx1"); TODO audio
 		}
 
 		if (a1 >= 1 && a1 <= _actcnt + 3) {
-			soundPlayFile("ib1p1xx1");
+//			soundPlayFile("ib1p1xx1"); TODO audio
 			_PrintAMelevList(a1);
 			automapRenderInPipboyWindow(gPipboyWindow, _sortlist[a1 - 1].field_6, _sortlist[a1 - 1].field_4);
 			windowRefreshRect(gPipboyWindow, &gPipboyWindowContentRect);
@@ -1455,7 +1455,7 @@ static void pipboyWindowHandleAutomaps(int a1) {
 	}
 
 	if (a1 > 0 && a1 <= _actcnt) {
-		soundPlayFile("ib1p1xx1");
+//		soundPlayFile("ib1p1xx1"); TODO audio
 		pipboyWindowDestroyButtons();
 		_PrintAMList(a1);
 		windowRefreshRect(gPipboyWindow, &gPipboyWindowContentRect);
@@ -1470,7 +1470,7 @@ static void pipboyWindowHandleAutomaps(int a1) {
 
 // 0x498F30
 static int _PrintAMelevList(int a1) {
-	AutomapHeader* automapHeader;
+	AutomapHeader *automapHeader;
 	if (automapGetHeader(&automapHeader) == -1) {
 		return -1;
 	}
@@ -1506,24 +1506,24 @@ static int _PrintAMelevList(int a1) {
 	}
 
 	blitBufferToBuffer(_pipboyFrmImages[PIPBOY_FRM_BACKGROUND].getData() + PIPBOY_WINDOW_WIDTH * PIPBOY_WINDOW_CONTENT_VIEW_Y + PIPBOY_WINDOW_CONTENT_VIEW_X,
-	                   PIPBOY_WINDOW_CONTENT_VIEW_WIDTH,
-	                   PIPBOY_WINDOW_CONTENT_VIEW_HEIGHT,
-	                   PIPBOY_WINDOW_WIDTH,
-	                   gPipboyWindowBuffer + PIPBOY_WINDOW_WIDTH * PIPBOY_WINDOW_CONTENT_VIEW_Y + PIPBOY_WINDOW_CONTENT_VIEW_X,
-	                   PIPBOY_WINDOW_WIDTH);
+					   PIPBOY_WINDOW_CONTENT_VIEW_WIDTH,
+					   PIPBOY_WINDOW_CONTENT_VIEW_HEIGHT,
+					   PIPBOY_WINDOW_WIDTH,
+					   gPipboyWindowBuffer + PIPBOY_WINDOW_WIDTH * PIPBOY_WINDOW_CONTENT_VIEW_Y + PIPBOY_WINDOW_CONTENT_VIEW_X,
+					   PIPBOY_WINDOW_WIDTH);
 
 	if (gPipboyLinesCount >= 0) {
 		gPipboyCurrentLine = 0;
 	}
 
-	const char* msg = getmsg(&gPipboyMessageList, &gPipboyMessageListItem, 205);
+	const char *msg = getmsg(&gPipboyMessageList, &gPipboyMessageListItem, 205);
 	pipboyDrawText(msg, PIPBOY_TEXT_ALIGNMENT_CENTER | PIPBOY_TEXT_STYLE_UNDERLINE, _colorTable[992]);
 
 	if (gPipboyLinesCount >= 2) {
 		gPipboyCurrentLine = 2;
 	}
 
-	const char* name = _map_get_description_idx_(_amcty_indx);
+	const char *name = _map_get_description_idx_(_amcty_indx);
 	pipboyDrawText(name, PIPBOY_TEXT_ALIGNMENT_CENTER, _colorTable[992]);
 
 	if (gPipboyLinesCount >= 4) {
@@ -1551,7 +1551,7 @@ static int _PrintAMelevList(int a1) {
 
 // 0x499150
 static int _PrintAMList(int a1) {
-	AutomapHeader* automapHeader;
+	AutomapHeader *automapHeader;
 	if (automapGetHeader(&automapHeader) == -1) {
 		return -1;
 	}
@@ -1599,17 +1599,17 @@ static int _PrintAMList(int a1) {
 		}
 
 		blitBufferToBuffer(_pipboyFrmImages[PIPBOY_FRM_BACKGROUND].getData() + PIPBOY_WINDOW_WIDTH * PIPBOY_WINDOW_CONTENT_VIEW_Y + PIPBOY_WINDOW_CONTENT_VIEW_X,
-		                   PIPBOY_WINDOW_CONTENT_VIEW_WIDTH,
-		                   PIPBOY_WINDOW_CONTENT_VIEW_HEIGHT,
-		                   PIPBOY_WINDOW_WIDTH,
-		                   gPipboyWindowBuffer + PIPBOY_WINDOW_WIDTH * PIPBOY_WINDOW_CONTENT_VIEW_Y + PIPBOY_WINDOW_CONTENT_VIEW_X,
-		                   PIPBOY_WINDOW_WIDTH);
+						   PIPBOY_WINDOW_CONTENT_VIEW_WIDTH,
+						   PIPBOY_WINDOW_CONTENT_VIEW_HEIGHT,
+						   PIPBOY_WINDOW_WIDTH,
+						   gPipboyWindowBuffer + PIPBOY_WINDOW_WIDTH * PIPBOY_WINDOW_CONTENT_VIEW_Y + PIPBOY_WINDOW_CONTENT_VIEW_X,
+						   PIPBOY_WINDOW_WIDTH);
 
 		if (gPipboyLinesCount >= 0) {
 			gPipboyCurrentLine = 0;
 		}
 
-		const char* msg = getmsg(&gPipboyMessageList, &gPipboyMessageListItem, 205);
+		const char *msg = getmsg(&gPipboyMessageList, &gPipboyMessageListItem, 205);
 		pipboyDrawText(msg, PIPBOY_TEXT_ALIGNMENT_CENTER | PIPBOY_TEXT_STYLE_UNDERLINE, _colorTable[992]);
 
 		if (gPipboyLinesCount >= 2) {
@@ -1639,11 +1639,11 @@ static void pipboyHandleVideoArchive(int a1) {
 		_view_page = pipboyRenderVideoArchive(-1);
 		pipboyWindowCreateButtons(2, _view_page, false);
 	} else if (a1 >= 0 && a1 <= _view_page) {
-		soundPlayFile("ib1p1xx1");
+//		soundPlayFile("ib1p1xx1"); TODO audio
 
 		pipboyRenderVideoArchive(a1);
 
-		int movie;
+/*		int movie; TODO movie
 		for (movie = 2; movie < 16; movie++) {
 			if (gameMovieIsSeen(movie)) {
 				a1--;
@@ -1657,7 +1657,7 @@ static void pipboyHandleVideoArchive(int a1) {
 			gameMoviePlay(movie, GAME_MOVIE_FADE_IN | GAME_MOVIE_FADE_OUT | GAME_MOVIE_PAUSE_MUSIC);
 		} else {
 			debugPrint("\n ** Selected movie not found in list! **\n");
-		}
+		}*/
 
 		fontSetCurrent(101);
 
@@ -1668,7 +1668,7 @@ static void pipboyHandleVideoArchive(int a1) {
 
 // 0x4993DC
 static int pipboyRenderVideoArchive(int a1) {
-	const char* text;
+	const char *text;
 	int i;
 	int v12;
 	int msg_num;
@@ -1677,11 +1677,11 @@ static int pipboyRenderVideoArchive(int a1) {
 	int v9;
 
 	blitBufferToBuffer(_pipboyFrmImages[PIPBOY_FRM_BACKGROUND].getData() + PIPBOY_WINDOW_WIDTH * PIPBOY_WINDOW_CONTENT_VIEW_Y + PIPBOY_WINDOW_CONTENT_VIEW_X,
-	                   PIPBOY_WINDOW_CONTENT_VIEW_WIDTH,
-	                   PIPBOY_WINDOW_CONTENT_VIEW_HEIGHT,
-	                   PIPBOY_WINDOW_WIDTH,
-	                   gPipboyWindowBuffer + PIPBOY_WINDOW_WIDTH * PIPBOY_WINDOW_CONTENT_VIEW_Y + PIPBOY_WINDOW_CONTENT_VIEW_X,
-	                   PIPBOY_WINDOW_WIDTH);
+					   PIPBOY_WINDOW_CONTENT_VIEW_WIDTH,
+					   PIPBOY_WINDOW_CONTENT_VIEW_HEIGHT,
+					   PIPBOY_WINDOW_WIDTH,
+					   gPipboyWindowBuffer + PIPBOY_WINDOW_WIDTH * PIPBOY_WINDOW_CONTENT_VIEW_Y + PIPBOY_WINDOW_CONTENT_VIEW_X,
+					   PIPBOY_WINDOW_WIDTH);
 
 	if (gPipboyLinesCount >= 0) {
 		gPipboyCurrentLine = 0;
@@ -1704,7 +1704,7 @@ static int pipboyRenderVideoArchive(int a1) {
 	msg_num = 502;
 
 	for (i = 2; i < 16; i++) {
-		if (gameMovieIsSeen(i)) {
+/*		if (gameMovieIsSeen(i)) {  // TODO movie
 			v8 = v5++;
 			if (v8 == v12) {
 				v9 = _colorTable[32747];
@@ -1716,7 +1716,7 @@ static int pipboyRenderVideoArchive(int a1) {
 			pipboyDrawText(text, 0, v9);
 
 			gPipboyCurrentLine++;
-		}
+		}*/
 
 		msg_num++;
 	}
@@ -1734,10 +1734,10 @@ static void pipboyHandleAlarmClock(int a1) {
 			pipboyWindowRenderRestOptions(0);
 			pipboyWindowCreateButtons(5, gPipboyRestOptionsCount, false);
 		} else {
-			soundPlayFile("iisxxxx1");
+//			soundPlayFile("iisxxxx1"); TODO audio
 
 			// You cannot rest at this location!
-			const char* text = getmsg(&gPipboyMessageList, &gPipboyMessageListItem, 215);
+			const char *text = getmsg(&gPipboyMessageList, &gPipboyMessageListItem, 215);
 			showDialogBox(text, NULL, 0, 192, 135, _colorTable[32328], 0, _colorTable[32328], DIALOG_BOX_LARGE);
 
 			// CE: Restore previous tab to make sure clicks are processed by
@@ -1745,7 +1745,7 @@ static void pipboyHandleAlarmClock(int a1) {
 			gPipboyTab = gPipboyPrevTab;
 		}
 	} else if (a1 >= 4 && a1 <= 17) {
-		soundPlayFile("ib1p1xx1");
+//		soundPlayFile("ib1p1xx1"); TODO audio
 
 		pipboyWindowRenderRestOptions(a1 - 3);
 
@@ -1794,7 +1794,7 @@ static void pipboyHandleAlarmClock(int a1) {
 			break;
 		}
 
-		soundPlayFile("ib2lu1x1");
+//		soundPlayFile("ib2lu1x1"); TODO audio
 
 		pipboyWindowRenderRestOptions(0);
 	}
@@ -1802,14 +1802,14 @@ static void pipboyHandleAlarmClock(int a1) {
 
 // 0x4996B4
 static void pipboyWindowRenderRestOptions(int a1) {
-	const char* text;
+	const char *text;
 
 	blitBufferToBuffer(_pipboyFrmImages[PIPBOY_FRM_BACKGROUND].getData() + PIPBOY_WINDOW_WIDTH * PIPBOY_WINDOW_CONTENT_VIEW_Y + PIPBOY_WINDOW_CONTENT_VIEW_X,
-	                   PIPBOY_WINDOW_CONTENT_VIEW_WIDTH,
-	                   PIPBOY_WINDOW_CONTENT_VIEW_HEIGHT,
-	                   PIPBOY_WINDOW_WIDTH,
-	                   gPipboyWindowBuffer + PIPBOY_WINDOW_WIDTH * PIPBOY_WINDOW_CONTENT_VIEW_Y + PIPBOY_WINDOW_CONTENT_VIEW_X,
-	                   PIPBOY_WINDOW_WIDTH);
+					   PIPBOY_WINDOW_CONTENT_VIEW_WIDTH,
+					   PIPBOY_WINDOW_CONTENT_VIEW_HEIGHT,
+					   PIPBOY_WINDOW_WIDTH,
+					   gPipboyWindowBuffer + PIPBOY_WINDOW_WIDTH * PIPBOY_WINDOW_CONTENT_VIEW_Y + PIPBOY_WINDOW_CONTENT_VIEW_X,
+					   PIPBOY_WINDOW_WIDTH);
 
 	if (gPipboyLinesCount >= 0) {
 		gPipboyCurrentLine = 0;
@@ -1846,16 +1846,16 @@ static void pipboyWindowRenderRestOptions(int a1) {
 static void pipboyDrawHitPoints() {
 	int max_hp;
 	int cur_hp;
-	char* text;
+	char *text;
 	char msg[64];
 	int len;
 
 	blitBufferToBuffer(_pipboyFrmImages[PIPBOY_FRM_BACKGROUND].getData() + 66 * PIPBOY_WINDOW_WIDTH + 254,
-	                   350,
-	                   10,
-	                   PIPBOY_WINDOW_WIDTH,
-	                   gPipboyWindowBuffer + 66 * PIPBOY_WINDOW_WIDTH + 254,
-	                   PIPBOY_WINDOW_WIDTH);
+					   350,
+					   10,
+					   PIPBOY_WINDOW_WIDTH,
+					   gPipboyWindowBuffer + 66 * PIPBOY_WINDOW_WIDTH + 254,
+					   PIPBOY_WINDOW_WIDTH);
 
 	max_hp = critterGetStat(gDude, STAT_MAXIMUM_HIT_POINTS);
 	cur_hp = critterGetHitPoints(gDude);
@@ -2063,8 +2063,7 @@ static bool pipboyRest(int hours, int minutes, int duration) {
 	} else if (duration == PIPBOY_REST_DURATION_UNTIL_HEALED || duration == PIPBOY_REST_DURATION_UNTIL_PARTY_HEALED) {
 		int currentHp = critterGetHitPoints(gDude);
 		int maxHp = critterGetStat(gDude, STAT_MAXIMUM_HIT_POINTS);
-		if (currentHp != maxHp
-		        || (duration == PIPBOY_REST_DURATION_UNTIL_PARTY_HEALED && partyIsAnyoneCanBeHealedByRest())) {
+		if (currentHp != maxHp || (duration == PIPBOY_REST_DURATION_UNTIL_PARTY_HEALED && partyIsAnyoneCanBeHealedByRest())) {
 			// First pass - healing dude is the top priority.
 			int hpToHeal = maxHp - currentHp;
 			int healingRate = critterGetStat(gDude, STAT_HEALING_RATE);
@@ -2157,7 +2156,7 @@ static bool _AddHealth() {
 }
 
 // Returns [hours] and [minutes] needed to rest until [wakeUpHour].
-static void _ClacTime(int* hours, int* minutes, int wakeUpHour) {
+static void _ClacTime(int *hours, int *minutes, int wakeUpHour) {
 	int gameTimeHour = gameTimeGetHour();
 
 	*hours = gameTimeHour / 100;
@@ -2197,24 +2196,24 @@ static int pipboyRenderScreensaver() {
 
 	_gmouse_disable(0);
 
-	unsigned char* buf = (unsigned char*)internal_malloc(412 * 374);
+	unsigned char *buf = (unsigned char *)internal_malloc(412 * 374);
 	if (buf == NULL) {
 		return -1;
 	}
 
 	blitBufferToBuffer(gPipboyWindowBuffer + PIPBOY_WINDOW_WIDTH * PIPBOY_WINDOW_CONTENT_VIEW_Y + PIPBOY_WINDOW_CONTENT_VIEW_X,
-	                   PIPBOY_WINDOW_CONTENT_VIEW_WIDTH,
-	                   PIPBOY_WINDOW_CONTENT_VIEW_HEIGHT,
-	                   PIPBOY_WINDOW_WIDTH,
-	                   buf,
-	                   PIPBOY_WINDOW_CONTENT_VIEW_WIDTH);
+					   PIPBOY_WINDOW_CONTENT_VIEW_WIDTH,
+					   PIPBOY_WINDOW_CONTENT_VIEW_HEIGHT,
+					   PIPBOY_WINDOW_WIDTH,
+					   buf,
+					   PIPBOY_WINDOW_CONTENT_VIEW_WIDTH);
 
 	blitBufferToBuffer(_pipboyFrmImages[PIPBOY_FRM_BACKGROUND].getData() + PIPBOY_WINDOW_WIDTH * PIPBOY_WINDOW_CONTENT_VIEW_Y + PIPBOY_WINDOW_CONTENT_VIEW_X,
-	                   PIPBOY_WINDOW_CONTENT_VIEW_WIDTH,
-	                   PIPBOY_WINDOW_CONTENT_VIEW_HEIGHT,
-	                   PIPBOY_WINDOW_WIDTH,
-	                   gPipboyWindowBuffer + PIPBOY_WINDOW_WIDTH * PIPBOY_WINDOW_CONTENT_VIEW_Y + PIPBOY_WINDOW_CONTENT_VIEW_X,
-	                   PIPBOY_WINDOW_WIDTH);
+					   PIPBOY_WINDOW_CONTENT_VIEW_WIDTH,
+					   PIPBOY_WINDOW_CONTENT_VIEW_HEIGHT,
+					   PIPBOY_WINDOW_WIDTH,
+					   gPipboyWindowBuffer + PIPBOY_WINDOW_WIDTH * PIPBOY_WINDOW_CONTENT_VIEW_Y + PIPBOY_WINDOW_CONTENT_VIEW_X,
+					   PIPBOY_WINDOW_WIDTH);
 
 	int v31 = 50;
 	while (true) {
@@ -2240,7 +2239,7 @@ static int pipboyRenderScreensaver() {
 			}
 
 			if (index < PIPBOY_BOMB_COUNT) {
-				PipboyBomb* bomb = &(bombs[index]);
+				PipboyBomb *bomb = &(bombs[index]);
 				int v27 = (350 - _pipboyFrmImages[PIPBOY_FRM_BOMB].getWidth() / 4) + (406 - _pipboyFrmImages[PIPBOY_FRM_BOMB].getHeight() / 4);
 				int v5 = (int)((double)randomBetween(0, PIPBOY_RAND_MAX) / (double)PIPBOY_RAND_MAX * (double)v27);
 				int v6 = _pipboyFrmImages[PIPBOY_FRM_BOMB].getHeight() / 4;
@@ -2260,15 +2259,15 @@ static int pipboyRenderScreensaver() {
 
 		if (v31 == 0) {
 			blitBufferToBuffer(_pipboyFrmImages[PIPBOY_FRM_BACKGROUND].getData() + PIPBOY_WINDOW_WIDTH * PIPBOY_WINDOW_CONTENT_VIEW_Y + PIPBOY_WINDOW_CONTENT_VIEW_X,
-			                   PIPBOY_WINDOW_CONTENT_VIEW_WIDTH,
-			                   PIPBOY_WINDOW_CONTENT_VIEW_HEIGHT,
-			                   PIPBOY_WINDOW_WIDTH,
-			                   gPipboyWindowBuffer + PIPBOY_WINDOW_WIDTH * PIPBOY_WINDOW_CONTENT_VIEW_Y + PIPBOY_WINDOW_CONTENT_VIEW_X,
-			                   PIPBOY_WINDOW_WIDTH);
+							   PIPBOY_WINDOW_CONTENT_VIEW_WIDTH,
+							   PIPBOY_WINDOW_CONTENT_VIEW_HEIGHT,
+							   PIPBOY_WINDOW_WIDTH,
+							   gPipboyWindowBuffer + PIPBOY_WINDOW_WIDTH * PIPBOY_WINDOW_CONTENT_VIEW_Y + PIPBOY_WINDOW_CONTENT_VIEW_X,
+							   PIPBOY_WINDOW_WIDTH);
 		}
 
 		for (int index = 0; index < PIPBOY_BOMB_COUNT; index++) {
-			PipboyBomb* bomb = &(bombs[index]);
+			PipboyBomb *bomb = &(bombs[index]);
 			if (bomb->field_10 != 1) {
 				continue;
 			}
@@ -2315,12 +2314,12 @@ static int pipboyRenderScreensaver() {
 
 			if (bomb->field_10 == 1 && v31 == 0) {
 				blitBufferToBufferTrans(
-				    _pipboyFrmImages[PIPBOY_FRM_BOMB].getData() + _pipboyFrmImages[PIPBOY_FRM_BOMB].getWidth() * srcY + srcX,
-				    srcWidth,
-				    srcHeight,
-				    _pipboyFrmImages[PIPBOY_FRM_BOMB].getWidth(),
-				    gPipboyWindowBuffer + PIPBOY_WINDOW_WIDTH * destY + destX,
-				    PIPBOY_WINDOW_WIDTH);
+					_pipboyFrmImages[PIPBOY_FRM_BOMB].getData() + _pipboyFrmImages[PIPBOY_FRM_BOMB].getWidth() * srcY + srcX,
+					srcWidth,
+					srcHeight,
+					_pipboyFrmImages[PIPBOY_FRM_BOMB].getWidth(),
+					gPipboyWindowBuffer + PIPBOY_WINDOW_WIDTH * destY + destX,
+					PIPBOY_WINDOW_WIDTH);
 			}
 
 			bomb->field_C += bomb->field_8;
@@ -2344,11 +2343,11 @@ static int pipboyRenderScreensaver() {
 	}
 
 	blitBufferToBuffer(buf,
-	                   PIPBOY_WINDOW_CONTENT_VIEW_WIDTH,
-	                   PIPBOY_WINDOW_CONTENT_VIEW_HEIGHT,
-	                   PIPBOY_WINDOW_CONTENT_VIEW_WIDTH,
-	                   gPipboyWindowBuffer + PIPBOY_WINDOW_WIDTH * PIPBOY_WINDOW_CONTENT_VIEW_Y + PIPBOY_WINDOW_CONTENT_VIEW_X,
-	                   PIPBOY_WINDOW_WIDTH);
+					   PIPBOY_WINDOW_CONTENT_VIEW_WIDTH,
+					   PIPBOY_WINDOW_CONTENT_VIEW_HEIGHT,
+					   PIPBOY_WINDOW_CONTENT_VIEW_WIDTH,
+					   gPipboyWindowBuffer + PIPBOY_WINDOW_WIDTH * PIPBOY_WINDOW_CONTENT_VIEW_Y + PIPBOY_WINDOW_CONTENT_VIEW_X,
+					   PIPBOY_WINDOW_WIDTH);
 
 	internal_free(buf);
 
@@ -2377,19 +2376,19 @@ static int questInit() {
 		return -1;
 	}
 
-	File* stream = fileOpen("data\\quests.txt", "rt");
+	File *stream = fileOpen("data\\quests.txt", "rt");
 	if (stream == NULL) {
 		return -1;
 	}
 
 	char string[256];
 	while (fileReadString(string, 256, stream)) {
-		const char* delim = " \t,";
-		char* tok;
+		const char *delim = " \t,";
+		char *tok;
 		QuestDescription entry;
 
-		char* pch = string;
-		while (isspace(*pch)) {
+		char *pch = string;
+		while (Common::isSpace(*pch)) {
 			pch++;
 		}
 
@@ -2432,7 +2431,7 @@ static int questInit() {
 
 		entry.completedThreshold = atoi(tok);
 
-		QuestDescription* entries = (QuestDescription*)internal_realloc(gQuestDescriptions, sizeof(*gQuestDescriptions) * (gQuestsCount + 1));
+		QuestDescription *entries = (QuestDescription *)internal_realloc(gQuestDescriptions, sizeof(*gQuestDescriptions) * (gQuestsCount + 1));
 		if (entries == NULL) {
 			goto err;
 		}
@@ -2469,9 +2468,9 @@ static void questFree() {
 }
 
 // 0x49A818
-static int questDescriptionCompare(const void* a1, const void* a2) {
-	QuestDescription* v1 = (QuestDescription*)a1;
-	QuestDescription* v2 = (QuestDescription*)a2;
+static int questDescriptionCompare(const void *a1, const void *a2) {
+	QuestDescription *v1 = (QuestDescription *)a1;
+	QuestDescription *v2 = (QuestDescription *)a2;
 	return v1->location - v2->location;
 }
 
@@ -2484,19 +2483,19 @@ static int holodiskInit() {
 
 	gHolodisksCount = 0;
 
-	File* stream = fileOpen("data\\holodisk.txt", "rt");
+	File *stream = fileOpen("data\\holodisk.txt", "rt");
 	if (stream == NULL) {
 		return -1;
 	}
 
 	char str[256];
 	while (fileReadString(str, sizeof(str), stream)) {
-		const char* delim = " \t,";
-		char* tok;
+		const char *delim = " \t,";
+		char *tok;
 		HolodiskDescription entry;
 
-		char* ch = str;
-		while (isspace(*ch)) {
+		char *ch = str;
+		while (Common::isSpace(*ch)) {
 			ch++;
 		}
 
@@ -2525,7 +2524,7 @@ static int holodiskInit() {
 
 		entry.description = atoi(tok);
 
-		HolodiskDescription* entries = (HolodiskDescription*)internal_realloc(gHolodiskDescriptions, sizeof(*gHolodiskDescriptions) * (gHolodisksCount + 1));
+		HolodiskDescription *entries = (HolodiskDescription *)internal_realloc(gHolodiskDescriptions, sizeof(*gHolodiskDescriptions) * (gHolodisksCount + 1));
 		if (entries == NULL) {
 			goto err;
 		}
@@ -2557,4 +2556,4 @@ static void holodiskFree() {
 	gHolodisksCount = 0;
 }
 
-} // namespace fallout
+} // namespace Fallout2

@@ -64,6 +64,7 @@
 #include "fallout2/palette.h"
 #include "fallout2/party_member.h"
 #include "fallout2/perk.h"
+#include "fallout2/pipboy.h"
 #include "fallout2/platform_compat.h"
 #include "fallout2/preferences.h"
 #include "fallout2/proto.h"
@@ -418,6 +419,10 @@ Common::Error Fallout2Engine::run() {
 	// init character editor
 	characterEditorInit();
 	debug("Initialized character editor!");
+
+	// init pipboy
+	pipboyInit();
+	debug("Initialized pipboy!");
 
 	// init dialog/barter subsystem
 	if (gameDialogInit() != 0)
