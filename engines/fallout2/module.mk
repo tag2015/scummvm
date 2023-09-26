@@ -49,6 +49,7 @@ MODULE_OBJS = \
 	item.o \
 	light.o \
 	lips.o \
+	loadsave.o \
 	mainmenu.o \
 	memory.o \
 	memory_manager.o \

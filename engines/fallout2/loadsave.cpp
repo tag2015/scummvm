@@ -1,62 +1,62 @@
-#include "loadsave.h"
+#include "fallout2/loadsave.h"
 
-#include <assert.h>
+/*#include <assert.h>
 #include <stdio.h>
 #include <string.h>
 #include <time.h>
 
-#include <algorithm>
+#include <algorithm>*/
 
-#include "art.h"
-#include "automap.h"
-#include "character_editor.h"
-#include "color.h"
-#include "combat.h"
-#include "combat_ai.h"
-#include "critter.h"
-#include "cycle.h"
-#include "db.h"
-#include "dbox.h"
-#include "debug.h"
-#include "display_monitor.h"
-#include "draw.h"
-#include "file_utils.h"
-#include "game.h"
-#include "game_mouse.h"
-#include "game_movie.h"
-#include "game_sound.h"
-#include "geometry.h"
-#include "input.h"
-#include "interface.h"
-#include "item.h"
-#include "kb.h"
-#include "map.h"
-#include "memory.h"
-#include "message.h"
-#include "mouse.h"
-#include "object.h"
-#include "party_member.h"
-#include "perk.h"
-#include "pipboy.h"
-#include "platform_compat.h"
-#include "preferences.h"
-#include "proto.h"
-#include "queue.h"
-#include "random.h"
-#include "scripts.h"
-#include "settings.h"
-#include "skill.h"
-#include "stat.h"
-#include "svga.h"
-#include "text_font.h"
-#include "tile.h"
-#include "trait.h"
-#include "version.h"
-#include "window_manager.h"
-#include "word_wrap.h"
-#include "worldmap.h"
+#include "fallout2/art.h"
+#include "fallout2/automap.h"
+#include "fallout2/character_editor.h"
+#include "fallout2/color.h"
+#include "fallout2/combat.h"
+#include "fallout2/combat_ai.h"
+#include "fallout2/critter.h"
+#include "fallout2/cycle.h"
+#include "fallout2/db.h"
+#include "fallout2/dbox.h"
+#include "fallout2/debug.h"
+#include "fallout2/display_monitor.h"
+#include "fallout2/draw.h"
+#include "fallout2/file_utils.h"
+#include "fallout2/game.h"
+#include "fallout2/game_mouse.h"
+//#include "fallout2/game_movie.h" TODO movie
+//#include "fallout2/game_sound.h" TODO audio
+#include "fallout2/geometry.h"
+#include "fallout2/input.h"
+#include "fallout2/interface.h"
+#include "fallout2/item.h"
+#include "fallout2/kb.h"
+#include "fallout2/map.h"
+#include "fallout2/memory.h"
+#include "fallout2/message.h"
+#include "fallout2/mouse.h"
+#include "fallout2/object.h"
+#include "fallout2/party_member.h"
+#include "fallout2/perk.h"
+#include "fallout2/pipboy.h"
+#include "fallout2/platform_compat.h"
+#include "fallout2/preferences.h"
+#include "fallout2/proto.h"
+#include "fallout2/queue.h"
+#include "fallout2/random.h"
+#include "fallout2/scripts.h"
+#include "fallout2/settings.h"
+#include "fallout2/skill.h"
+#include "fallout2/stat.h"
+#include "fallout2/svga.h"
+#include "fallout2/text_font.h"
+#include "fallout2/tile.h"
+#include "fallout2/trait.h"
+#include "fallout2/version.h"
+#include "fallout2/window_manager.h"
+#include "fallout2/word_wrap.h"
+#include "fallout2/worldmap.h"
 
-namespace fallout {
+namespace Fallout2 {
 
 #define LS_WINDOW_WIDTH 640
 #define LS_WINDOW_HEIGHT 480
@@ -104,8 +104,8 @@ typedef enum LoadSaveScrollDirection {
 	LOAD_SAVE_SCROLL_DIRECTION_DOWN,
 } LoadSaveScrollDirection;
 
-typedef int LoadGameHandler(File* stream);
-typedef int SaveGameHandler(File* stream);
+typedef int LoadGameHandler(File *stream);
+typedef int SaveGameHandler(File *stream);
 
 #define LSGAME_MSG_NAME ("LSGAME.MSG")
 
@@ -157,19 +157,19 @@ static void _ShowSlotList(int a1);
 static void _DrawInfoBox(int a1);
 static int _LoadTumbSlot(int a1);
 static int _GetComment(int a1);
-static int _get_input_str2(int win, int doneKeyCode, int cancelKeyCode, char* description, int maxLength, int x, int y, int textColor, int backgroundColor, int flags);
-static int _DummyFunc(File* stream);
-static int _PrepLoad(File* stream);
-static int _EndLoad(File* stream);
-static int _GameMap2Slot(File* stream);
-static int _SlotMap2Game(File* stream);
-static int _mygets(char* dest, File* stream);
-static int _copy_file(const char* a1, const char* a2);
-static int _MapDirErase(const char* path, const char* a2);
+static int _get_input_str2(int win, int doneKeyCode, int cancelKeyCode, char *description, int maxLength, int x, int y, int textColor, int backgroundColor, int flags);
+static int _DummyFunc(File *stream);
+static int _PrepLoad(File *stream);
+static int _EndLoad(File *stream);
+static int _GameMap2Slot(File *stream);
+static int _SlotMap2Game(File *stream);
+static int _mygets(char *dest, File *stream);
+static int _copy_file(const char *a1, const char *a2);
+static int _MapDirErase(const char *path, const char *a2);
 static int _SaveBackup();
 static int _RestoreSave();
-static int _LoadObjDudeCid(File* stream);
-static int _SaveObjDudeCid(File* stream);
+static int _LoadObjDudeCid(File *stream);
+static int _SaveObjDudeCid(File *stream);
 static int _EraseSave();
 
 // 0x47B7C0
@@ -177,8 +177,8 @@ static const int gLoadSaveFrmIds[LOAD_SAVE_FRM_COUNT] = {
 	237, // lsgame.frm - load/save game
 	238, // lsgbox.frm - load/save game
 	239, // lscover.frm - load/save game
-	9, // lilreddn.frm - little red button down
-	8, // lilredup.frm - little red button up
+	9,   // lilreddn.frm - little red button down
+	8,   // lilredup.frm - little red button up
 	181, // dnarwoff.frm - character editor
 	182, // dnarwon.frm - character editor
 	199, // uparwoff.frm - character editor
@@ -201,10 +201,10 @@ static int _map_backup_count = -1;
 static int _automap_db_flag = 0;
 
 // 0x5193CC
-static const char* _patches = NULL;
+static const char *_patches = NULL;
 
 // 0x5193EC
-static SaveGameHandler* _master_save_list[LOAD_SAVE_HANDLER_COUNT] = {
+static SaveGameHandler *_master_save_list[LOAD_SAVE_HANDLER_COUNT] = {
 	_DummyFunc,
 	_SaveObjDudeCid,
 	scriptsSaveGameGlobalVars,
@@ -226,7 +226,7 @@ static SaveGameHandler* _master_save_list[LOAD_SAVE_HANDLER_COUNT] = {
 	characterEditorSave,
 	wmWorldMap_save,
 	pipboySave,
-	gameMoviesSave,
+//	gameMoviesSave, TODO movie
 	skillsUsageSave,
 	partyMembersSave,
 	queueSave,
@@ -235,7 +235,7 @@ static SaveGameHandler* _master_save_list[LOAD_SAVE_HANDLER_COUNT] = {
 };
 
 // 0x519458
-static LoadGameHandler* _master_load_list[LOAD_SAVE_HANDLER_COUNT] = {
+static LoadGameHandler *_master_load_list[LOAD_SAVE_HANDLER_COUNT] = {
 	_PrepLoad,
 	_LoadObjDudeCid,
 	scriptsLoadGameGlobalVars,
@@ -257,7 +257,7 @@ static LoadGameHandler* _master_load_list[LOAD_SAVE_HANDLER_COUNT] = {
 	characterEditorLoad,
 	wmWorldMap_load,
 	pipboyLoad,
-	gameMoviesLoad,
+//	gameMoviesLoad, TODO movie
 	skillsUsageLoad,
 	partyMembersLoad,
 	queueLoad,
@@ -280,10 +280,10 @@ static STRUCT_613D30 _LSData[10];
 static int _LSstatus[10];
 
 // 0x6142A8
-static unsigned char* _thumbnail_image;
+static unsigned char *_thumbnail_image;
 
 // 0x6142AC
-static unsigned char* _snapshotBuf;
+static unsigned char *_snapshotBuf;
 
 // 0x6142B0
 static MessageListItem gLoadSaveMessageListItem;
@@ -295,7 +295,7 @@ static int _dbleclkcntr;
 static int gLoadSaveWindow;
 
 // 0x6142EC
-static unsigned char* _snapshot;
+static unsigned char *_snapshot;
 
 // 0x6142F0
 static char _str2[COMPAT_MAX_PATH];
@@ -310,13 +310,13 @@ static char _str1[COMPAT_MAX_PATH];
 static char _str[COMPAT_MAX_PATH];
 
 // 0x614700
-static unsigned char* gLoadSaveWindowBuffer;
+static unsigned char *gLoadSaveWindowBuffer;
 
 // 0x614704
 static char _gmpath[COMPAT_MAX_PATH];
 
 // 0x614808
-static File* _flptr;
+static File *_flptr;
 
 // 0x61480C
 static int _ls_error_code;
@@ -332,22 +332,22 @@ void _InitLoadSave() {
 	_slot_cursor = 0;
 	_patches = settings.system.master_patches_path.c_str();
 
-	_MapDirErase("MAPS\\", "SAV");
+/*	_MapDirErase("MAPS\\", "SAV");  TODO delete temp map files
 	_MapDirErase(PROTO_DIR_NAME "\\" CRITTERS_DIR_NAME "\\", PROTO_FILE_EXT);
-	_MapDirErase(PROTO_DIR_NAME "\\" ITEMS_DIR_NAME "\\", PROTO_FILE_EXT);
+	_MapDirErase(PROTO_DIR_NAME "\\" ITEMS_DIR_NAME "\\", PROTO_FILE_EXT);*/
 }
 
 // 0x47B85C
 void _ResetLoadSave() {
-	_MapDirErase("MAPS\\", "SAV");
+/*	_MapDirErase("MAPS\\", "SAV");  TODO delete temp map files
 	_MapDirErase(PROTO_DIR_NAME "\\" CRITTERS_DIR_NAME "\\", PROTO_FILE_EXT);
-	_MapDirErase(PROTO_DIR_NAME "\\" ITEMS_DIR_NAME "\\", PROTO_FILE_EXT);
+	_MapDirErase(PROTO_DIR_NAME "\\" ITEMS_DIR_NAME "\\", PROTO_FILE_EXT);*/
 }
 
 // SaveGame
 // 0x47B88C
 int lsgSaveGame(int mode) {
-	ScopedGameMode gm(GameMode::kSaveGame);
+/*	ScopedGameMode gm(GameMode::kSaveGame);  TODO savegame
 
 	MessageListItem messageListItem;
 
@@ -400,7 +400,7 @@ int lsgSaveGame(int mode) {
 		// Unable to save game.
 		strcpy(_str1, getmsg(&gLoadSaveMessageList, &messageListItem, 133));
 
-		const char* body[] = {
+		const char *body[] = {
 			_str1,
 		};
 		showDialogBox(_str0, body, 1, 169, 116, _colorTable[32328], NULL, _colorTable[32328], DIALOG_BOX_LARGE);
@@ -413,8 +413,8 @@ int lsgSaveGame(int mode) {
 	_quick_done = false;
 
 	int windowType = mode == LOAD_SAVE_MODE_QUICK
-	                 ? LOAD_SAVE_WINDOW_TYPE_PICK_QUICK_SAVE_SLOT
-	                 : LOAD_SAVE_WINDOW_TYPE_SAVE_GAME;
+						 ? LOAD_SAVE_WINDOW_TYPE_PICK_QUICK_SAVE_SLOT
+						 : LOAD_SAVE_WINDOW_TYPE_SAVE_GAME;
 	if (lsgWindowInit(windowType) == -1) {
 		debugPrint("\nLOADSAVE: ** Error loading save game screen data! **\n");
 		return -1;
@@ -435,7 +435,7 @@ int lsgSaveGame(int mode) {
 		// TODO: Check.
 		strcpy(_str2, getmsg(&gLoadSaveMessageList, &messageListItem, 108));
 
-		const char* body[] = {
+		const char *body[] = {
 			_str1,
 			_str2,
 		};
@@ -451,20 +451,20 @@ int lsgSaveGame(int mode) {
 	case SLOT_STATE_ERROR:
 	case SLOT_STATE_UNSUPPORTED_VERSION:
 		blitBufferToBuffer(_snapshotBuf,
-		                   LS_PREVIEW_WIDTH - 1,
-		                   LS_PREVIEW_HEIGHT - 1,
-		                   LS_PREVIEW_WIDTH,
-		                   gLoadSaveWindowBuffer + LS_WINDOW_WIDTH * 58 + 366,
-		                   LS_WINDOW_WIDTH);
+						   LS_PREVIEW_WIDTH - 1,
+						   LS_PREVIEW_HEIGHT - 1,
+						   LS_PREVIEW_WIDTH,
+						   gLoadSaveWindowBuffer + LS_WINDOW_WIDTH * 58 + 366,
+						   LS_WINDOW_WIDTH);
 		break;
 	default:
 		_LoadTumbSlot(_slot_cursor);
 		blitBufferToBuffer(_thumbnail_image,
-		                   LS_PREVIEW_WIDTH - 1,
-		                   LS_PREVIEW_HEIGHT - 1,
-		                   LS_PREVIEW_WIDTH,
-		                   gLoadSaveWindowBuffer + LS_WINDOW_WIDTH * 58 + 366,
-		                   LS_WINDOW_WIDTH);
+						   LS_PREVIEW_WIDTH - 1,
+						   LS_PREVIEW_HEIGHT - 1,
+						   LS_PREVIEW_WIDTH,
+						   gLoadSaveWindowBuffer + LS_WINDOW_WIDTH * 58 + 366,
+						   LS_WINDOW_WIDTH);
 		break;
 	}
 
@@ -574,7 +574,7 @@ int lsgSaveGame(int mode) {
 			if (_LSstatus[_slot_cursor] == SLOT_STATE_OCCUPIED) {
 				rc = 1;
 				// Save game already exists, overwrite?
-				const char* title = getmsg(&gLoadSaveMessageList, &gLoadSaveMessageListItem, 131);
+				const char *title = getmsg(&gLoadSaveMessageList, &gLoadSaveMessageListItem, 131);
 				if (showDialogBox(title, NULL, 0, 169, 131, _colorTable[32328], NULL, _colorTable[32328], DIALOG_BOX_YES_NO) == 0) {
 					rc = -1;
 				}
@@ -624,20 +624,20 @@ int lsgSaveGame(int mode) {
 					case SLOT_STATE_EMPTY:
 					case SLOT_STATE_ERROR:
 						blitBufferToBuffer(_snapshotBuf,
-						                   LS_PREVIEW_WIDTH - 1,
-						                   LS_PREVIEW_HEIGHT - 1,
-						                   LS_PREVIEW_WIDTH,
-						                   gLoadSaveWindowBuffer + LS_WINDOW_WIDTH * 58 + 366,
-						                   LS_WINDOW_WIDTH);
+										   LS_PREVIEW_WIDTH - 1,
+										   LS_PREVIEW_HEIGHT - 1,
+										   LS_PREVIEW_WIDTH,
+										   gLoadSaveWindowBuffer + LS_WINDOW_WIDTH * 58 + 366,
+										   LS_WINDOW_WIDTH);
 						break;
 					default:
 						_LoadTumbSlot(_slot_cursor);
 						blitBufferToBuffer(_thumbnail_image,
-						                   LS_PREVIEW_WIDTH - 1,
-						                   LS_PREVIEW_HEIGHT - 1,
-						                   LS_PREVIEW_WIDTH,
-						                   gLoadSaveWindowBuffer + LS_WINDOW_WIDTH * 58 + 366,
-						                   LS_WINDOW_WIDTH);
+										   LS_PREVIEW_WIDTH - 1,
+										   LS_PREVIEW_HEIGHT - 1,
+										   LS_PREVIEW_WIDTH,
+										   gLoadSaveWindowBuffer + LS_WINDOW_WIDTH * 58 + 366,
+										   LS_WINDOW_WIDTH);
 						break;
 					}
 
@@ -647,9 +647,11 @@ int lsgSaveGame(int mode) {
 				}
 
 				if (scrollCounter > 14.4) {
-					while (getTicksSince(start) < 1000 / scrollVelocity) { }
+					while (getTicksSince(start) < 1000 / scrollVelocity) {
+					}
 				} else {
-					while (getTicksSince(start) < 1000 / 24) { }
+					while (getTicksSince(start) < 1000 / 24) {
+					}
 				}
 
 				keyCode = inputGetInput();
@@ -664,20 +666,20 @@ int lsgSaveGame(int mode) {
 				case SLOT_STATE_ERROR:
 				case SLOT_STATE_UNSUPPORTED_VERSION:
 					blitBufferToBuffer(_snapshotBuf,
-					                   LS_PREVIEW_WIDTH - 1,
-					                   LS_PREVIEW_HEIGHT - 1,
-					                   LS_PREVIEW_WIDTH,
-					                   gLoadSaveWindowBuffer + LS_WINDOW_WIDTH * 58 + 366,
-					                   LS_WINDOW_WIDTH);
+									   LS_PREVIEW_WIDTH - 1,
+									   LS_PREVIEW_HEIGHT - 1,
+									   LS_PREVIEW_WIDTH,
+									   gLoadSaveWindowBuffer + LS_WINDOW_WIDTH * 58 + 366,
+									   LS_WINDOW_WIDTH);
 					break;
 				default:
 					_LoadTumbSlot(_slot_cursor);
 					blitBufferToBuffer(_thumbnail_image,
-					                   LS_PREVIEW_WIDTH - 1,
-					                   LS_PREVIEW_HEIGHT - 1,
-					                   LS_PREVIEW_WIDTH,
-					                   gLoadSaveWindowBuffer + LS_WINDOW_WIDTH * 58 + 366,
-					                   LS_WINDOW_WIDTH);
+									   LS_PREVIEW_WIDTH - 1,
+									   LS_PREVIEW_HEIGHT - 1,
+									   LS_PREVIEW_WIDTH,
+									   gLoadSaveWindowBuffer + LS_WINDOW_WIDTH * 58 + 366,
+									   LS_WINDOW_WIDTH);
 					break;
 				}
 
@@ -709,7 +711,7 @@ int lsgSaveGame(int mode) {
 				// Unable to save game.
 				strcpy(_str1, getmsg(&gLoadSaveMessageList, &gLoadSaveMessageListItem, 133));
 
-				const char* body[1] = {
+				const char *body[1] = {
 					_str1,
 				};
 				showDialogBox(_str0, body, 1, 169, 116, _colorTable[32328], NULL, _colorTable[32328], DIALOG_BOX_LARGE);
@@ -729,7 +731,7 @@ int lsgSaveGame(int mode) {
 
 					rc = -1;
 
-					const char* body[1] = {
+					const char *body[1] = {
 						_str1,
 					};
 					showDialogBox(_str0, body, 1, 169, 116, _colorTable[32328], NULL, _colorTable[32328], DIALOG_BOX_LARGE);
@@ -749,7 +751,7 @@ int lsgSaveGame(int mode) {
 						// Doesn't exist or is corrupted.
 						strcpy(text, getmsg(&gLoadSaveMessageList, &gLoadSaveMessageListItem, 107));
 
-						const char* body[2] = {
+						const char *body[2] = {
 							_str1,
 							_str2,
 						};
@@ -765,20 +767,20 @@ int lsgSaveGame(int mode) {
 					case SLOT_STATE_ERROR:
 					case SLOT_STATE_UNSUPPORTED_VERSION:
 						blitBufferToBuffer(_snapshotBuf,
-						                   LS_PREVIEW_WIDTH - 1,
-						                   LS_PREVIEW_HEIGHT - 1,
-						                   LS_PREVIEW_WIDTH,
-						                   gLoadSaveWindowBuffer + LS_WINDOW_WIDTH * 58 + 366,
-						                   LS_WINDOW_WIDTH);
+										   LS_PREVIEW_WIDTH - 1,
+										   LS_PREVIEW_HEIGHT - 1,
+										   LS_PREVIEW_WIDTH,
+										   gLoadSaveWindowBuffer + LS_WINDOW_WIDTH * 58 + 366,
+										   LS_WINDOW_WIDTH);
 						break;
 					default:
 						_LoadTumbSlot(_slot_cursor);
 						blitBufferToBuffer(_thumbnail_image,
-						                   LS_PREVIEW_WIDTH - 1,
-						                   LS_PREVIEW_HEIGHT - 1,
-						                   LS_PREVIEW_WIDTH,
-						                   gLoadSaveWindowBuffer + LS_WINDOW_WIDTH * 58 + 366,
-						                   LS_WINDOW_WIDTH);
+										   LS_PREVIEW_WIDTH - 1,
+										   LS_PREVIEW_HEIGHT - 1,
+										   LS_PREVIEW_WIDTH,
+										   gLoadSaveWindowBuffer + LS_WINDOW_WIDTH * 58 + 366,
+										   LS_WINDOW_WIDTH);
 						break;
 					}
 
@@ -806,12 +808,12 @@ int lsgSaveGame(int mode) {
 		}
 	}
 
-	return rc;
+	return rc;*/
 }
 
 // 0x47C5B4
 static int _QuickSnapShot() {
-	_snapshot = (unsigned char*)internal_malloc(LS_PREVIEW_SIZE);
+	_snapshot = (unsigned char *)internal_malloc(LS_PREVIEW_SIZE);
 	if (_snapshot == NULL) {
 		return -1;
 	}
@@ -830,18 +832,16 @@ static int _QuickSnapShot() {
 	}
 
 	// For preview take 640x380 area in the center of isometric window.
-	Window* window = windowGetWindow(gIsoWindow);
-	unsigned char* isoWindowBuffer = window->buffer
-	                                 + window->width * (window->height - ORIGINAL_ISO_WINDOW_HEIGHT) / 2
-	                                 + (window->width - ORIGINAL_ISO_WINDOW_WIDTH) / 2;
+	Window *window = windowGetWindow(gIsoWindow);
+	unsigned char *isoWindowBuffer = window->buffer + window->width * (window->height - ORIGINAL_ISO_WINDOW_HEIGHT) / 2 + (window->width - ORIGINAL_ISO_WINDOW_WIDTH) / 2;
 	blitBufferToBufferStretch(isoWindowBuffer,
-	                          ORIGINAL_ISO_WINDOW_WIDTH,
-	                          ORIGINAL_ISO_WINDOW_HEIGHT,
-	                          windowGetWidth(gIsoWindow),
-	                          _snapshot,
-	                          LS_PREVIEW_WIDTH,
-	                          LS_PREVIEW_HEIGHT,
-	                          LS_PREVIEW_WIDTH);
+							  ORIGINAL_ISO_WINDOW_WIDTH,
+							  ORIGINAL_ISO_WINDOW_HEIGHT,
+							  windowGetWidth(gIsoWindow),
+							  _snapshot,
+							  LS_PREVIEW_WIDTH,
+							  LS_PREVIEW_HEIGHT,
+							  LS_PREVIEW_WIDTH);
 
 	_snapshotBuf = _snapshot;
 
@@ -855,7 +855,7 @@ int lsgLoadGame(int mode) {
 
 	MessageListItem messageListItem;
 
-	const char* body[] = {
+	const char *body[] = {
 		_str1,
 		_str2,
 	};
@@ -867,13 +867,13 @@ int lsgLoadGame(int mode) {
 		int quickSaveWindowX = (screenGetWidth() - LS_WINDOW_WIDTH) / 2;
 		int quickSaveWindowY = (screenGetHeight() - LS_WINDOW_HEIGHT) / 2;
 		int window = windowCreate(quickSaveWindowX,
-		                          quickSaveWindowY,
-		                          LS_WINDOW_WIDTH,
-		                          LS_WINDOW_HEIGHT,
-		                          256,
-		                          WINDOW_MODAL | WINDOW_DONT_MOVE_TOP);
+								  quickSaveWindowY,
+								  LS_WINDOW_WIDTH,
+								  LS_WINDOW_HEIGHT,
+								  256,
+								  WINDOW_MODAL | WINDOW_DONT_MOVE_TOP);
 		if (window != -1) {
-			unsigned char* windowBuffer = windowGetBuffer(window);
+			unsigned char *windowBuffer = windowGetBuffer(window);
 			bufferFill(windowBuffer, LS_WINDOW_WIDTH, LS_WINDOW_HEIGHT, LS_WINDOW_WIDTH, _colorTable[0]);
 			windowRefresh(window);
 			renderPresent();
@@ -902,9 +902,9 @@ int lsgLoadGame(int mode) {
 		}
 
 		gameMouseSetCursor(MOUSE_CURSOR_ARROW);
-		soundPlayFile("iisxxxx1");
-		strcpy(_str0, getmsg(&gLoadSaveMessageList, &messageListItem, 134));
-		strcpy(_str1, getmsg(&gLoadSaveMessageList, &messageListItem, 135));
+//		soundPlayFile("iisxxxx1"); TODO audio
+		strncpy(_str0, getmsg(&gLoadSaveMessageList, &messageListItem, 134), sizeof(_str0) - 1);
+		strncpy(_str1, getmsg(&gLoadSaveMessageList, &messageListItem, 135), sizeof(_str1) - 1);
 		showDialogBox(_str0, body, 1, 169, 116, _colorTable[32328], 0, _colorTable[32328], DIALOG_BOX_LARGE);
 
 		messageListFree(&gLoadSaveMessageList);
@@ -940,9 +940,9 @@ int lsgLoadGame(int mode) {
 		gameMouseSetCursor(MOUSE_CURSOR_ARROW);
 		windowRefresh(gLoadSaveWindow);
 		renderPresent();
-		soundPlayFile("iisxxxx1");
-		strcpy(_str0, getmsg(&gLoadSaveMessageList, &gLoadSaveMessageListItem, 106));
-		strcpy(_str1, getmsg(&gLoadSaveMessageList, &gLoadSaveMessageListItem, 107));
+//		soundPlayFile("iisxxxx1"); TODO audio
+		strncpy(_str0, getmsg(&gLoadSaveMessageList, &gLoadSaveMessageListItem, 106), sizeof(_str0) - 1);
+		strncpy(_str1, getmsg(&gLoadSaveMessageList, &gLoadSaveMessageListItem, 107), sizeof(_str1) - 1);
 		snprintf(_str2, sizeof(_str2), "\"%s\\\"", "SAVEGAME");
 		showDialogBox(_str0, body, 2, 169, 116, _colorTable[32328], 0, _colorTable[32328], DIALOG_BOX_LARGE);
 		lsgWindowFree(windowType);
@@ -954,20 +954,20 @@ int lsgLoadGame(int mode) {
 	case SLOT_STATE_ERROR:
 	case SLOT_STATE_UNSUPPORTED_VERSION:
 		blitBufferToBuffer(_loadsaveFrmImages[LOAD_SAVE_FRM_PREVIEW_COVER].getData(),
-		                   _loadsaveFrmImages[LOAD_SAVE_FRM_PREVIEW_COVER].getWidth(),
-		                   _loadsaveFrmImages[LOAD_SAVE_FRM_PREVIEW_COVER].getHeight(),
-		                   _loadsaveFrmImages[LOAD_SAVE_FRM_PREVIEW_COVER].getWidth(),
-		                   gLoadSaveWindowBuffer + LS_WINDOW_WIDTH * 39 + 340,
-		                   LS_WINDOW_WIDTH);
+						   _loadsaveFrmImages[LOAD_SAVE_FRM_PREVIEW_COVER].getWidth(),
+						   _loadsaveFrmImages[LOAD_SAVE_FRM_PREVIEW_COVER].getHeight(),
+						   _loadsaveFrmImages[LOAD_SAVE_FRM_PREVIEW_COVER].getWidth(),
+						   gLoadSaveWindowBuffer + LS_WINDOW_WIDTH * 39 + 340,
+						   LS_WINDOW_WIDTH);
 		break;
 	default:
 		_LoadTumbSlot(_slot_cursor);
 		blitBufferToBuffer(_thumbnail_image,
-		                   LS_PREVIEW_WIDTH - 1,
-		                   LS_PREVIEW_HEIGHT - 1,
-		                   LS_PREVIEW_WIDTH,
-		                   gLoadSaveWindowBuffer + LS_WINDOW_WIDTH * 58 + 366,
-		                   LS_WINDOW_WIDTH);
+						   LS_PREVIEW_WIDTH - 1,
+						   LS_PREVIEW_HEIGHT - 1,
+						   LS_PREVIEW_WIDTH,
+						   gLoadSaveWindowBuffer + LS_WINDOW_WIDTH * 58 + 366,
+						   LS_WINDOW_WIDTH);
 		break;
 	}
 
@@ -1041,7 +1041,7 @@ int lsgLoadGame(int mode) {
 					_slot_cursor = clickedSlot;
 					if (clickedSlot == doubleClickSlot) {
 						keyCode = 500;
-						soundPlayFile("ib1p1xx1");
+//						soundPlayFile("ib1p1xx1"); TODO audio
 					}
 
 					selectionChanged = true;
@@ -1119,26 +1119,26 @@ int lsgLoadGame(int mode) {
 					case SLOT_STATE_ERROR:
 					case SLOT_STATE_UNSUPPORTED_VERSION:
 						blitBufferToBuffer(_loadsaveFrmImages[LOAD_SAVE_FRM_PREVIEW_COVER].getData(),
-						                   _loadsaveFrmImages[LOAD_SAVE_FRM_PREVIEW_COVER].getWidth(),
-						                   _loadsaveFrmImages[LOAD_SAVE_FRM_PREVIEW_COVER].getHeight(),
-						                   _loadsaveFrmImages[LOAD_SAVE_FRM_PREVIEW_COVER].getWidth(),
-						                   gLoadSaveWindowBuffer + LS_WINDOW_WIDTH * 39 + 340,
-						                   LS_WINDOW_WIDTH);
+										   _loadsaveFrmImages[LOAD_SAVE_FRM_PREVIEW_COVER].getWidth(),
+										   _loadsaveFrmImages[LOAD_SAVE_FRM_PREVIEW_COVER].getHeight(),
+										   _loadsaveFrmImages[LOAD_SAVE_FRM_PREVIEW_COVER].getWidth(),
+										   gLoadSaveWindowBuffer + LS_WINDOW_WIDTH * 39 + 340,
+										   LS_WINDOW_WIDTH);
 						break;
 					default:
 						_LoadTumbSlot(_slot_cursor);
 						blitBufferToBuffer(_loadsaveFrmImages[LOAD_SAVE_FRM_BACKGROUND].getData() + LS_WINDOW_WIDTH * 39 + 340,
-						                   _loadsaveFrmImages[LOAD_SAVE_FRM_PREVIEW_COVER].getWidth(),
-						                   _loadsaveFrmImages[LOAD_SAVE_FRM_PREVIEW_COVER].getHeight(),
-						                   LS_WINDOW_WIDTH,
-						                   gLoadSaveWindowBuffer + LS_WINDOW_WIDTH * 39 + 340,
-						                   LS_WINDOW_WIDTH);
+										   _loadsaveFrmImages[LOAD_SAVE_FRM_PREVIEW_COVER].getWidth(),
+										   _loadsaveFrmImages[LOAD_SAVE_FRM_PREVIEW_COVER].getHeight(),
+										   LS_WINDOW_WIDTH,
+										   gLoadSaveWindowBuffer + LS_WINDOW_WIDTH * 39 + 340,
+										   LS_WINDOW_WIDTH);
 						blitBufferToBuffer(_thumbnail_image,
-						                   LS_PREVIEW_WIDTH - 1,
-						                   LS_PREVIEW_HEIGHT - 1,
-						                   LS_PREVIEW_WIDTH,
-						                   gLoadSaveWindowBuffer + LS_WINDOW_WIDTH * 58 + 366,
-						                   LS_WINDOW_WIDTH);
+										   LS_PREVIEW_WIDTH - 1,
+										   LS_PREVIEW_HEIGHT - 1,
+										   LS_PREVIEW_WIDTH,
+										   gLoadSaveWindowBuffer + LS_WINDOW_WIDTH * 58 + 366,
+										   LS_WINDOW_WIDTH);
 						break;
 					}
 
@@ -1148,9 +1148,11 @@ int lsgLoadGame(int mode) {
 				}
 
 				if (scrollCounter > 14.4) {
-					while (getTicksSince(start) < 1000 / scrollVelocity) { }
+					while (getTicksSince(start) < 1000 / scrollVelocity) {
+					}
 				} else {
-					while (getTicksSince(start) < 1000 / 24) { }
+					while (getTicksSince(start) < 1000 / 24) {
+					}
 				}
 
 				keyCode = inputGetInput();
@@ -1165,26 +1167,26 @@ int lsgLoadGame(int mode) {
 				case SLOT_STATE_ERROR:
 				case SLOT_STATE_UNSUPPORTED_VERSION:
 					blitBufferToBuffer(_loadsaveFrmImages[LOAD_SAVE_FRM_PREVIEW_COVER].getData(),
-					                   _loadsaveFrmImages[LOAD_SAVE_FRM_PREVIEW_COVER].getWidth(),
-					                   _loadsaveFrmImages[LOAD_SAVE_FRM_PREVIEW_COVER].getHeight(),
-					                   _loadsaveFrmImages[LOAD_SAVE_FRM_PREVIEW_COVER].getWidth(),
-					                   gLoadSaveWindowBuffer + LS_WINDOW_WIDTH * 39 + 340,
-					                   LS_WINDOW_WIDTH);
+									   _loadsaveFrmImages[LOAD_SAVE_FRM_PREVIEW_COVER].getWidth(),
+									   _loadsaveFrmImages[LOAD_SAVE_FRM_PREVIEW_COVER].getHeight(),
+									   _loadsaveFrmImages[LOAD_SAVE_FRM_PREVIEW_COVER].getWidth(),
+									   gLoadSaveWindowBuffer + LS_WINDOW_WIDTH * 39 + 340,
+									   LS_WINDOW_WIDTH);
 					break;
 				default:
 					_LoadTumbSlot(_slot_cursor);
 					blitBufferToBuffer(_loadsaveFrmImages[LOAD_SAVE_FRM_BACKGROUND].getData() + LS_WINDOW_WIDTH * 39 + 340,
-					                   _loadsaveFrmImages[LOAD_SAVE_FRM_PREVIEW_COVER].getWidth(),
-					                   _loadsaveFrmImages[LOAD_SAVE_FRM_PREVIEW_COVER].getHeight(),
-					                   LS_WINDOW_WIDTH,
-					                   gLoadSaveWindowBuffer + LS_WINDOW_WIDTH * 39 + 340,
-					                   LS_WINDOW_WIDTH);
+									   _loadsaveFrmImages[LOAD_SAVE_FRM_PREVIEW_COVER].getWidth(),
+									   _loadsaveFrmImages[LOAD_SAVE_FRM_PREVIEW_COVER].getHeight(),
+									   LS_WINDOW_WIDTH,
+									   gLoadSaveWindowBuffer + LS_WINDOW_WIDTH * 39 + 340,
+									   LS_WINDOW_WIDTH);
 					blitBufferToBuffer(_thumbnail_image,
-					                   LS_PREVIEW_WIDTH - 1,
-					                   LS_PREVIEW_HEIGHT - 1,
-					                   LS_PREVIEW_WIDTH,
-					                   gLoadSaveWindowBuffer + LS_WINDOW_WIDTH * 58 + 366,
-					                   LS_WINDOW_WIDTH);
+									   LS_PREVIEW_WIDTH - 1,
+									   LS_PREVIEW_HEIGHT - 1,
+									   LS_PREVIEW_WIDTH,
+									   gLoadSaveWindowBuffer + LS_WINDOW_WIDTH * 58 + 366,
+									   LS_WINDOW_WIDTH);
 					break;
 				}
 
@@ -1200,32 +1202,33 @@ int lsgLoadGame(int mode) {
 				doubleClickSlot = -1;
 			}
 
-			while (getTicksSince(time) < 1000 / 24) { }
+			while (getTicksSince(time) < 1000 / 24) {
+			}
 		}
 
 		if (rc == 1) {
 			switch (_LSstatus[_slot_cursor]) {
 			case SLOT_STATE_UNSUPPORTED_VERSION:
-				soundPlayFile("iisxxxx1");
-				strcpy(_str0, getmsg(&gLoadSaveMessageList, &gLoadSaveMessageListItem, 134));
-				strcpy(_str1, getmsg(&gLoadSaveMessageList, &gLoadSaveMessageListItem, 136));
-				strcpy(_str2, getmsg(&gLoadSaveMessageList, &gLoadSaveMessageListItem, 135));
+//				soundPlayFile("iisxxxx1"); TODO audio
+				strncpy(_str0, getmsg(&gLoadSaveMessageList, &gLoadSaveMessageListItem, 134), sizeof(_str0) - 1);
+				strncpy(_str1, getmsg(&gLoadSaveMessageList, &gLoadSaveMessageListItem, 136), sizeof(_str1) - 1);
+				strncpy(_str2, getmsg(&gLoadSaveMessageList, &gLoadSaveMessageListItem, 135), sizeof(_str2) - 1);
 				showDialogBox(_str0, body, 2, 169, 116, _colorTable[32328], 0, _colorTable[32328], DIALOG_BOX_LARGE);
 				rc = -1;
 				break;
 			case SLOT_STATE_ERROR:
-				soundPlayFile("iisxxxx1");
-				strcpy(_str0, getmsg(&gLoadSaveMessageList, &gLoadSaveMessageListItem, 134));
-				strcpy(_str1, getmsg(&gLoadSaveMessageList, &gLoadSaveMessageListItem, 136));
+//				soundPlayFile("iisxxxx1"); TODO audio
+				strncpy(_str0, getmsg(&gLoadSaveMessageList, &gLoadSaveMessageListItem, 134), sizeof(_str0) - 1);
+				strncpy(_str1, getmsg(&gLoadSaveMessageList, &gLoadSaveMessageListItem, 136), sizeof(_str1) - 1);
 				showDialogBox(_str0, body, 1, 169, 116, _colorTable[32328], 0, _colorTable[32328], DIALOG_BOX_LARGE);
 				rc = -1;
 				break;
 			default:
 				if (lsgLoadGameInSlot(_slot_cursor) == -1) {
 					gameMouseSetCursor(MOUSE_CURSOR_ARROW);
-					soundPlayFile("iisxxxx1");
-					strcpy(_str0, getmsg(&gLoadSaveMessageList, &gLoadSaveMessageListItem, 134));
-					strcpy(_str1, getmsg(&gLoadSaveMessageList, &gLoadSaveMessageListItem, 135));
+//					soundPlayFile("iisxxxx1"); TODO audio
+					strncpy(_str0, getmsg(&gLoadSaveMessageList, &gLoadSaveMessageListItem, 134), sizeof(_str0) - 1);
+					strncpy(_str1, getmsg(&gLoadSaveMessageList, &gLoadSaveMessageListItem, 135), sizeof(_str1) - 1);
 					showDialogBox(_str0, body, 1, 169, 116, _colorTable[32328], 0, _colorTable[32328], DIALOG_BOX_LARGE);
 					mapNewMap();
 					_game_user_wants_to_quit = 2;
@@ -1240,8 +1243,8 @@ int lsgLoadGame(int mode) {
 	}
 
 	lsgWindowFree(mode == LOAD_SAVE_MODE_FROM_MAIN_MENU
-	              ? LOAD_SAVE_WINDOW_TYPE_LOAD_GAME_FROM_MAIN_MENU
-	              : LOAD_SAVE_WINDOW_TYPE_LOAD_GAME);
+					  ? LOAD_SAVE_WINDOW_TYPE_LOAD_GAME_FROM_MAIN_MENU
+					  : LOAD_SAVE_WINDOW_TYPE_LOAD_GAME);
 
 	if (mode == LOAD_SAVE_MODE_QUICK) {
 		if (rc == 1) {
@@ -1267,7 +1270,7 @@ static int lsgWindowInit(int windowType) {
 		return -1;
 	}
 
-	_snapshot = (unsigned char*)internal_malloc(61632);
+	_snapshot = (unsigned char *)internal_malloc(61632);
 	if (_snapshot == NULL) {
 		messageListFree(&gLoadSaveMessageList);
 		fontSetCurrent(gLoadSaveWindowOldFont);
@@ -1300,18 +1303,16 @@ static int lsgWindowInit(int windowType) {
 		}
 
 		// For preview take 640x380 area in the center of isometric window.
-		Window* window = windowGetWindow(gIsoWindow);
-		unsigned char* isoWindowBuffer = window->buffer
-		                                 + window->width * (window->height - ORIGINAL_ISO_WINDOW_HEIGHT) / 2
-		                                 + (window->width - ORIGINAL_ISO_WINDOW_WIDTH) / 2;
+		Window *window = windowGetWindow(gIsoWindow);
+		unsigned char *isoWindowBuffer = window->buffer + window->width * (window->height - ORIGINAL_ISO_WINDOW_HEIGHT) / 2 + (window->width - ORIGINAL_ISO_WINDOW_WIDTH) / 2;
 		blitBufferToBufferStretch(isoWindowBuffer,
-		                          ORIGINAL_ISO_WINDOW_WIDTH,
-		                          ORIGINAL_ISO_WINDOW_HEIGHT,
-		                          windowGetWidth(gIsoWindow),
-		                          _snapshotBuf,
-		                          LS_PREVIEW_WIDTH,
-		                          LS_PREVIEW_HEIGHT,
-		                          LS_PREVIEW_WIDTH);
+								  ORIGINAL_ISO_WINDOW_WIDTH,
+								  ORIGINAL_ISO_WINDOW_HEIGHT,
+								  windowGetWidth(gIsoWindow),
+								  _snapshotBuf,
+								  LS_PREVIEW_WIDTH,
+								  LS_PREVIEW_HEIGHT,
+								  LS_PREVIEW_WIDTH);
 	}
 
 	for (int index = 0; index < LOAD_SAVE_FRM_COUNT; index++) {
@@ -1339,11 +1340,11 @@ static int lsgWindowInit(int windowType) {
 	int lsWindowX = (screenGetWidth() - LS_WINDOW_WIDTH) / 2;
 	int lsWindowY = (screenGetHeight() - LS_WINDOW_HEIGHT) / 2;
 	gLoadSaveWindow = windowCreate(lsWindowX,
-	                               lsWindowY,
-	                               LS_WINDOW_WIDTH,
-	                               LS_WINDOW_HEIGHT,
-	                               256,
-	                               WINDOW_MODAL | WINDOW_MOVE_ON_TOP);
+								   lsWindowY,
+								   LS_WINDOW_WIDTH,
+								   LS_WINDOW_HEIGHT,
+								   256,
+								   WINDOW_MODAL | WINDOW_MOVE_ON_TOP);
 	if (gLoadSaveWindow == -1) {
 		// FIXME: Leaking frms.
 		internal_free(_snapshot);
@@ -1387,7 +1388,7 @@ static int lsgWindowInit(int windowType) {
 		assert(false && "Should be unreachable");
 	}
 
-	char* msg;
+	char *msg;
 
 	msg = getmsg(&gLoadSaveMessageList, &gLoadSaveMessageListItem, messageId);
 	fontDrawText(gLoadSaveWindowBuffer + LS_WINDOW_WIDTH * 27 + 48, msg, LS_WINDOW_WIDTH, LS_WINDOW_WIDTH, _colorTable[18979]);
@@ -1403,71 +1404,71 @@ static int lsgWindowInit(int windowType) {
 	int btn;
 
 	btn = buttonCreate(gLoadSaveWindow,
-	                   391,
-	                   349,
-	                   _loadsaveFrmImages[LOAD_SAVE_FRM_RED_BUTTON_PRESSED].getWidth(),
-	                   _loadsaveFrmImages[LOAD_SAVE_FRM_RED_BUTTON_PRESSED].getHeight(),
-	                   -1,
-	                   -1,
-	                   -1,
-	                   500,
-	                   _loadsaveFrmImages[LOAD_SAVE_FRM_RED_BUTTON_NORMAL].getData(),
-	                   _loadsaveFrmImages[LOAD_SAVE_FRM_RED_BUTTON_PRESSED].getData(),
-	                   NULL,
-	                   BUTTON_FLAG_TRANSPARENT);
+					   391,
+					   349,
+					   _loadsaveFrmImages[LOAD_SAVE_FRM_RED_BUTTON_PRESSED].getWidth(),
+					   _loadsaveFrmImages[LOAD_SAVE_FRM_RED_BUTTON_PRESSED].getHeight(),
+					   -1,
+					   -1,
+					   -1,
+					   500,
+					   _loadsaveFrmImages[LOAD_SAVE_FRM_RED_BUTTON_NORMAL].getData(),
+					   _loadsaveFrmImages[LOAD_SAVE_FRM_RED_BUTTON_PRESSED].getData(),
+					   NULL,
+					   BUTTON_FLAG_TRANSPARENT);
 	if (btn != -1) {
-		buttonSetCallbacks(btn, _gsound_red_butt_press, _gsound_red_butt_release);
+//		buttonSetCallbacks(btn, _gsound_red_butt_press, _gsound_red_butt_release); TODO audio
 	}
 
 	btn = buttonCreate(gLoadSaveWindow,
-	                   495,
-	                   349,
-	                   _loadsaveFrmImages[LOAD_SAVE_FRM_RED_BUTTON_PRESSED].getWidth(),
-	                   _loadsaveFrmImages[LOAD_SAVE_FRM_RED_BUTTON_PRESSED].getHeight(),
-	                   -1,
-	                   -1,
-	                   -1,
-	                   501,
-	                   _loadsaveFrmImages[LOAD_SAVE_FRM_RED_BUTTON_NORMAL].getData(),
-	                   _loadsaveFrmImages[LOAD_SAVE_FRM_RED_BUTTON_PRESSED].getData(),
-	                   NULL,
-	                   BUTTON_FLAG_TRANSPARENT);
+					   495,
+					   349,
+					   _loadsaveFrmImages[LOAD_SAVE_FRM_RED_BUTTON_PRESSED].getWidth(),
+					   _loadsaveFrmImages[LOAD_SAVE_FRM_RED_BUTTON_PRESSED].getHeight(),
+					   -1,
+					   -1,
+					   -1,
+					   501,
+					   _loadsaveFrmImages[LOAD_SAVE_FRM_RED_BUTTON_NORMAL].getData(),
+					   _loadsaveFrmImages[LOAD_SAVE_FRM_RED_BUTTON_PRESSED].getData(),
+					   NULL,
+					   BUTTON_FLAG_TRANSPARENT);
 	if (btn != -1) {
-		buttonSetCallbacks(btn, _gsound_red_butt_press, _gsound_red_butt_release);
+//		buttonSetCallbacks(btn, _gsound_red_butt_press, _gsound_red_butt_release); TODO audio
 	}
 
 	btn = buttonCreate(gLoadSaveWindow,
-	                   35,
-	                   58,
-	                   _loadsaveFrmImages[LOAD_SAVE_FRM_ARROW_UP_PRESSED].getWidth(),
-	                   _loadsaveFrmImages[LOAD_SAVE_FRM_ARROW_UP_PRESSED].getHeight(),
-	                   -1,
-	                   505,
-	                   506,
-	                   505,
-	                   _loadsaveFrmImages[LOAD_SAVE_FRM_ARROW_UP_NORMAL].getData(),
-	                   _loadsaveFrmImages[LOAD_SAVE_FRM_ARROW_UP_PRESSED].getData(),
-	                   NULL,
-	                   BUTTON_FLAG_TRANSPARENT);
+					   35,
+					   58,
+					   _loadsaveFrmImages[LOAD_SAVE_FRM_ARROW_UP_PRESSED].getWidth(),
+					   _loadsaveFrmImages[LOAD_SAVE_FRM_ARROW_UP_PRESSED].getHeight(),
+					   -1,
+					   505,
+					   506,
+					   505,
+					   _loadsaveFrmImages[LOAD_SAVE_FRM_ARROW_UP_NORMAL].getData(),
+					   _loadsaveFrmImages[LOAD_SAVE_FRM_ARROW_UP_PRESSED].getData(),
+					   NULL,
+					   BUTTON_FLAG_TRANSPARENT);
 	if (btn != -1) {
-		buttonSetCallbacks(btn, _gsound_red_butt_press, _gsound_red_butt_release);
+//		buttonSetCallbacks(btn, _gsound_red_butt_press, _gsound_red_butt_release); TODO audio
 	}
 
 	btn = buttonCreate(gLoadSaveWindow,
-	                   35,
-	                   _loadsaveFrmImages[LOAD_SAVE_FRM_ARROW_UP_PRESSED].getHeight() + 58,
-	                   _loadsaveFrmImages[LOAD_SAVE_FRM_ARROW_DOWN_PRESSED].getWidth(),
-	                   _loadsaveFrmImages[LOAD_SAVE_FRM_ARROW_DOWN_PRESSED].getHeight(),
-	                   -1,
-	                   503,
-	                   504,
-	                   503,
-	                   _loadsaveFrmImages[LOAD_SAVE_FRM_ARROW_DOWN_NORMAL].getData(),
-	                   _loadsaveFrmImages[LOAD_SAVE_FRM_ARROW_DOWN_PRESSED].getData(),
-	                   NULL,
-	                   BUTTON_FLAG_TRANSPARENT);
+					   35,
+					   _loadsaveFrmImages[LOAD_SAVE_FRM_ARROW_UP_PRESSED].getHeight() + 58,
+					   _loadsaveFrmImages[LOAD_SAVE_FRM_ARROW_DOWN_PRESSED].getWidth(),
+					   _loadsaveFrmImages[LOAD_SAVE_FRM_ARROW_DOWN_PRESSED].getHeight(),
+					   -1,
+					   503,
+					   504,
+					   503,
+					   _loadsaveFrmImages[LOAD_SAVE_FRM_ARROW_DOWN_NORMAL].getData(),
+					   _loadsaveFrmImages[LOAD_SAVE_FRM_ARROW_DOWN_PRESSED].getData(),
+					   NULL,
+					   BUTTON_FLAG_TRANSPARENT);
 	if (btn != -1) {
-		buttonSetCallbacks(btn, _gsound_red_butt_press, _gsound_red_butt_release);
+//		buttonSetCallbacks(btn, _gsound_red_butt_press, _gsound_red_butt_release); TODO audio
 	}
 
 	buttonCreate(gLoadSaveWindow, 55, 87, 230, 353, -1, -1, -1, 502, NULL, NULL, NULL, BUTTON_FLAG_TRANSPARENT);
@@ -1502,7 +1503,7 @@ static int lsgWindowFree(int windowType) {
 
 // 0x47D88C
 static int lsgPerformSaveGame() {
-	_ls_error_code = 0;
+/*	_ls_error_code = 0; TODO savegame
 	_map_backup_count = -1;
 	gameMouseSetCursor(MOUSE_CURSOR_WAIT_PLANET);
 
@@ -1517,7 +1518,7 @@ static int lsgPerformSaveGame() {
 	strcat(_gmpath, "\\" PROTO_DIR_NAME);
 	compat_mkdir(_gmpath);
 
-	char* protoBasePath = _gmpath + strlen(_gmpath);
+	char *protoBasePath = _gmpath + strlen(_gmpath);
 
 	strcpy(protoBasePath, "\\" CRITTERS_DIR_NAME);
 	compat_mkdir(_gmpath);
@@ -1560,7 +1561,7 @@ static int lsgPerformSaveGame() {
 
 	for (int index = 0; index < LOAD_SAVE_HANDLER_COUNT; index++) {
 		long pos = fileTell(_flptr);
-		SaveGameHandler* handler = _master_save_list[index];
+		SaveGameHandler *handler = _master_save_list[index];
 		if (handler(_flptr) == -1) {
 			debugPrint("\nLOADSAVE: ** Error writing save function #%d data! **\n", index);
 			fileClose(_flptr);
@@ -1591,7 +1592,7 @@ static int lsgPerformSaveGame() {
 
 	backgroundSoundResume();
 
-	return 0;
+	return 0;*/
 }
 
 // 0x47DC60
@@ -1610,9 +1611,9 @@ static int lsgLoadGameInSlot(int slot) {
 	}
 
 	snprintf(_gmpath, sizeof(_gmpath), "%s\\%s%.2d\\", "SAVEGAME", "SLOT", _slot_cursor + 1);
-	strcat(_gmpath, "SAVE.DAT");
+	strcat_s(_gmpath, sizeof(_gmpath), "SAVE.DAT");
 
-	STRUCT_613D30* ptr = &(_LSData[slot]);
+	STRUCT_613D30 *ptr = &(_LSData[slot]);
 	debugPrint("\nLOADSAVE: Load name: %s\n", ptr->description);
 
 	_flptr = fileOpen(_gmpath, "rb");
@@ -1635,7 +1636,7 @@ static int lsgLoadGameInSlot(int slot) {
 
 	for (int index = 0; index < LOAD_SAVE_HANDLER_COUNT; index += 1) {
 		long pos = fileTell(_flptr);
-		LoadGameHandler* handler = _master_load_list[index];
+		LoadGameHandler *handler = _master_load_list[index];
 		if (handler(_flptr) == -1) {
 			debugPrint("\nLOADSAVE: ** Error reading load function #%d data! **\n", index);
 			int v12 = fileTell(_flptr);
@@ -1671,9 +1672,9 @@ static int lsgLoadGameInSlot(int slot) {
 
 // 0x47DF10
 static int lsgSaveHeaderInSlot(int slot) {
-	_ls_error_code = 4;
+/*	_ls_error_code = 4; TODO save header
 
-	STRUCT_613D30* ptr = &(_LSData[slot]);
+	STRUCT_613D30 *ptr = &(_LSData[slot]);
 	strncpy(ptr->field_0, "FALLOUT SAVE FILE", 24);
 
 	if (fileWrite(ptr->field_0, 1, 24, _flptr) == -1) {
@@ -1696,7 +1697,7 @@ static int lsgSaveHeaderInSlot(int slot) {
 		return -1;
 	}
 
-	char* characterName = critterGetName(gDude);
+	char *characterName = critterGetName(gDude);
 	strncpy(ptr->character_name, characterName, 32);
 
 	if (fileWrite(ptr->character_name, 32, 1, _flptr) != 1) {
@@ -1708,7 +1709,7 @@ static int lsgSaveHeaderInSlot(int slot) {
 	}
 
 	time_t now = time(NULL);
-	struct tm* local = localtime(&now);
+	struct tm *local = localtime(&now);
 
 	temp[0] = local->tm_mday;
 	temp[1] = local->tm_mon + 1;
@@ -1759,7 +1760,7 @@ static int lsgSaveHeaderInSlot(int slot) {
 	strcpy(mapName, gMapHeader.name);
 
 	// NOTE: Uppercased from "sav".
-	char* v1 = _strmfe(_str, mapName, "SAV");
+	char *v1 = _strmfe(_str, mapName, "SAV");
 	strncpy(ptr->file_name, v1, 16);
 	if (fileWrite(ptr->file_name, 16, 1, _flptr) != 1) {
 		return -1;
@@ -1776,14 +1777,14 @@ static int lsgSaveHeaderInSlot(int slot) {
 
 	_ls_error_code = 0;
 
-	return 0;
+	return 0;*/
 }
 
 // 0x47E2E4
 static int lsgLoadHeaderInSlot(int slot) {
 	_ls_error_code = 3;
 
-	STRUCT_613D30* ptr = &(_LSData[slot]);
+	STRUCT_613D30 *ptr = &(_LSData[slot]);
 
 	if (fileRead(ptr->field_0, 1, 24, _flptr) != 24) {
 		return -1;
@@ -1913,14 +1914,14 @@ static void _ShowSlotList(int a1) {
 	for (int index = 0; index < 10; index += 1) {
 
 		int color = index == _slot_cursor ? _colorTable[32747] : _colorTable[992];
-		const char* text = getmsg(&gLoadSaveMessageList, &gLoadSaveMessageListItem, a1 != 0 ? 110 : 109);
+		const char *text = getmsg(&gLoadSaveMessageList, &gLoadSaveMessageListItem, a1 != 0 ? 110 : 109);
 		snprintf(_str, sizeof(_str), "[   %s %.2d:   ]", text, index + 1);
 		fontDrawText(gLoadSaveWindowBuffer + LS_WINDOW_WIDTH * y + 55, _str, LS_WINDOW_WIDTH, LS_WINDOW_WIDTH, color);
 
 		y += fontGetLineHeight();
 		switch (_LSstatus[index]) {
 		case SLOT_STATE_OCCUPIED:
-			strcpy(_str, _LSData[index].description);
+			strncpy(_str, _LSData[index].description, sizeof(_str) - 1);
 			break;
 		case SLOT_STATE_EMPTY:
 			// - EMPTY -
@@ -1950,14 +1951,14 @@ static void _ShowSlotList(int a1) {
 static void _DrawInfoBox(int a1) {
 	blitBufferToBuffer(_loadsaveFrmImages[LOAD_SAVE_FRM_BACKGROUND].getData() + LS_WINDOW_WIDTH * 254 + 396, 164, 60, LS_WINDOW_WIDTH, gLoadSaveWindowBuffer + LS_WINDOW_WIDTH * 254 + 396, 640);
 
-	unsigned char* dest;
-	const char* text;
+	unsigned char *dest;
+	const char *text;
 	int color = _colorTable[992];
 
 	switch (_LSstatus[a1]) {
 	case SLOT_STATE_OCCUPIED:
 		do {
-			STRUCT_613D30* ptr = &(_LSData[a1]);
+			STRUCT_613D30 *ptr = &(_LSData[a1]);
 			fontDrawText(gLoadSaveWindowBuffer + LS_WINDOW_WIDTH * 254 + 396, ptr->character_name, LS_WINDOW_WIDTH, LS_WINDOW_WIDTH, color);
 
 			int v4 = ptr->field_70 / 600;
@@ -1971,8 +1972,8 @@ static void _DrawInfoBox(int a1) {
 			int v2 = fontGetLineHeight();
 			fontDrawText(gLoadSaveWindowBuffer + LS_WINDOW_WIDTH * (256 + v2) + 397, _str, LS_WINDOW_WIDTH, LS_WINDOW_WIDTH, color);
 
-			const char* v22 = mapGetName(ptr->field_76, ptr->field_74);
-			const char* v9 = mapGetCityName(ptr->field_76);
+			const char *v22 = mapGetName(ptr->field_76, ptr->field_74);
+			const char *v9 = mapGetCityName(ptr->field_76);
 			snprintf(_str, sizeof(_str), "%s %s", v9, v22);
 
 			int y = v2 + 3 + v2 + 256;
@@ -1980,8 +1981,8 @@ static void _DrawInfoBox(int a1) {
 			short count;
 			if (wordWrap(_str, 164, beginnings, &count) == 0) {
 				for (int index = 0; index < count - 1; index += 1) {
-					char* beginning = _str + beginnings[index];
-					char* ending = _str + beginnings[index + 1];
+					char *beginning = _str + beginnings[index];
+					char *ending = _str + beginnings[index + 1];
 					char c = *ending;
 					*ending = '\0';
 					fontDrawText(gLoadSaveWindowBuffer + LS_WINDOW_WIDTH * y + 399, beginning, 164, LS_WINDOW_WIDTH, color);
@@ -2016,7 +2017,7 @@ static void _DrawInfoBox(int a1) {
 
 // 0x47EC48
 static int _LoadTumbSlot(int a1) {
-	File* stream;
+	File *stream;
 	int v2;
 
 	v2 = _LSstatus[_slot_cursor];
@@ -2052,58 +2053,58 @@ static int _LoadTumbSlot(int a1) {
 static int _GetComment(int a1) {
 	// Maintain original position in original resolution, otherwise center it.
 	int commentWindowX = screenGetWidth() != 640
-	                     ? (screenGetWidth() - _loadsaveFrmImages[LOAD_SAVE_FRM_BOX].getWidth()) / 2
-	                     : LS_COMMENT_WINDOW_X;
+							 ? (screenGetWidth() - _loadsaveFrmImages[LOAD_SAVE_FRM_BOX].getWidth()) / 2
+							 : LS_COMMENT_WINDOW_X;
 	int commentWindowY = screenGetHeight() != 480
-	                     ? (screenGetHeight() - _loadsaveFrmImages[LOAD_SAVE_FRM_BOX].getHeight()) / 2
-	                     : LS_COMMENT_WINDOW_Y;
+							 ? (screenGetHeight() - _loadsaveFrmImages[LOAD_SAVE_FRM_BOX].getHeight()) / 2
+							 : LS_COMMENT_WINDOW_Y;
 	int window = windowCreate(commentWindowX,
-	                          commentWindowY,
-	                          _loadsaveFrmImages[LOAD_SAVE_FRM_BOX].getWidth(),
-	                          _loadsaveFrmImages[LOAD_SAVE_FRM_BOX].getHeight(),
-	                          256,
-	                          WINDOW_MODAL | WINDOW_MOVE_ON_TOP);
+							  commentWindowY,
+							  _loadsaveFrmImages[LOAD_SAVE_FRM_BOX].getWidth(),
+							  _loadsaveFrmImages[LOAD_SAVE_FRM_BOX].getHeight(),
+							  256,
+							  WINDOW_MODAL | WINDOW_MOVE_ON_TOP);
 	if (window == -1) {
 		return -1;
 	}
 
-	unsigned char* windowBuffer = windowGetBuffer(window);
+	unsigned char *windowBuffer = windowGetBuffer(window);
 	memcpy(windowBuffer,
-	       _loadsaveFrmImages[LOAD_SAVE_FRM_BOX].getData(),
-	       _loadsaveFrmImages[LOAD_SAVE_FRM_BOX].getHeight() * _loadsaveFrmImages[LOAD_SAVE_FRM_BOX].getWidth());
+		   _loadsaveFrmImages[LOAD_SAVE_FRM_BOX].getData(),
+		   _loadsaveFrmImages[LOAD_SAVE_FRM_BOX].getHeight() * _loadsaveFrmImages[LOAD_SAVE_FRM_BOX].getWidth());
 
 	fontSetCurrent(103);
 
-	const char* msg;
+	const char *msg;
 
 	// DONE
 	msg = getmsg(&gLoadSaveMessageList, &gLoadSaveMessageListItem, 104);
 	fontDrawText(windowBuffer + _loadsaveFrmImages[LOAD_SAVE_FRM_BOX].getWidth() * 57 + 56,
-	             msg,
-	             _loadsaveFrmImages[LOAD_SAVE_FRM_BOX].getWidth(),
-	             _loadsaveFrmImages[LOAD_SAVE_FRM_BOX].getWidth(),
-	             _colorTable[18979]);
+				 msg,
+				 _loadsaveFrmImages[LOAD_SAVE_FRM_BOX].getWidth(),
+				 _loadsaveFrmImages[LOAD_SAVE_FRM_BOX].getWidth(),
+				 _colorTable[18979]);
 
 	// CANCEL
 	msg = getmsg(&gLoadSaveMessageList, &gLoadSaveMessageListItem, 105);
 	fontDrawText(windowBuffer + _loadsaveFrmImages[LOAD_SAVE_FRM_BOX].getWidth() * 57 + 181,
-	             msg,
-	             _loadsaveFrmImages[LOAD_SAVE_FRM_BOX].getWidth(),
-	             _loadsaveFrmImages[LOAD_SAVE_FRM_BOX].getWidth(),
-	             _colorTable[18979]);
+				 msg,
+				 _loadsaveFrmImages[LOAD_SAVE_FRM_BOX].getWidth(),
+				 _loadsaveFrmImages[LOAD_SAVE_FRM_BOX].getWidth(),
+				 _colorTable[18979]);
 
 	// DESCRIPTION
 	msg = getmsg(&gLoadSaveMessageList, &gLoadSaveMessageListItem, 130);
 
 	char title[260];
-	strcpy(title, msg);
+	strncpy(title, msg, sizeof(title) - 1);
 
 	int width = fontGetStringWidth(title);
 	fontDrawText(windowBuffer + _loadsaveFrmImages[LOAD_SAVE_FRM_BOX].getWidth() * 7 + (_loadsaveFrmImages[LOAD_SAVE_FRM_BOX].getWidth() - width) / 2,
-	             title,
-	             _loadsaveFrmImages[LOAD_SAVE_FRM_BOX].getWidth(),
-	             _loadsaveFrmImages[LOAD_SAVE_FRM_BOX].getWidth(),
-	             _colorTable[18979]);
+				 title,
+				 _loadsaveFrmImages[LOAD_SAVE_FRM_BOX].getWidth(),
+				 _loadsaveFrmImages[LOAD_SAVE_FRM_BOX].getWidth(),
+				 _colorTable[18979]);
 
 	fontSetCurrent(101);
 
@@ -2111,38 +2112,38 @@ static int _GetComment(int a1) {
 
 	// DONE
 	btn = buttonCreate(window,
-	                   34,
-	                   58,
-	                   _loadsaveFrmImages[LOAD_SAVE_FRM_RED_BUTTON_PRESSED].getWidth(),
-	                   _loadsaveFrmImages[LOAD_SAVE_FRM_RED_BUTTON_PRESSED].getHeight(),
-	                   -1,
-	                   -1,
-	                   -1,
-	                   507,
-	                   _loadsaveFrmImages[LOAD_SAVE_FRM_RED_BUTTON_NORMAL].getData(),
-	                   _loadsaveFrmImages[LOAD_SAVE_FRM_RED_BUTTON_PRESSED].getData(),
-	                   NULL,
-	                   BUTTON_FLAG_TRANSPARENT);
+					   34,
+					   58,
+					   _loadsaveFrmImages[LOAD_SAVE_FRM_RED_BUTTON_PRESSED].getWidth(),
+					   _loadsaveFrmImages[LOAD_SAVE_FRM_RED_BUTTON_PRESSED].getHeight(),
+					   -1,
+					   -1,
+					   -1,
+					   507,
+					   _loadsaveFrmImages[LOAD_SAVE_FRM_RED_BUTTON_NORMAL].getData(),
+					   _loadsaveFrmImages[LOAD_SAVE_FRM_RED_BUTTON_PRESSED].getData(),
+					   NULL,
+					   BUTTON_FLAG_TRANSPARENT);
 	if (btn == -1) {
-		buttonSetCallbacks(btn, _gsound_red_butt_press, _gsound_red_butt_release);
+//		buttonSetCallbacks(btn, _gsound_red_butt_press, _gsound_red_butt_release); TODO audio
 	}
 
 	// CANCEL
 	btn = buttonCreate(window,
-	                   160,
-	                   58,
-	                   _loadsaveFrmImages[LOAD_SAVE_FRM_RED_BUTTON_PRESSED].getWidth(),
-	                   _loadsaveFrmImages[LOAD_SAVE_FRM_RED_BUTTON_PRESSED].getHeight(),
-	                   -1,
-	                   -1,
-	                   -1,
-	                   508,
-	                   _loadsaveFrmImages[LOAD_SAVE_FRM_RED_BUTTON_NORMAL].getData(),
-	                   _loadsaveFrmImages[LOAD_SAVE_FRM_RED_BUTTON_PRESSED].getData(),
-	                   NULL,
-	                   BUTTON_FLAG_TRANSPARENT);
+					   160,
+					   58,
+					   _loadsaveFrmImages[LOAD_SAVE_FRM_RED_BUTTON_PRESSED].getWidth(),
+					   _loadsaveFrmImages[LOAD_SAVE_FRM_RED_BUTTON_PRESSED].getHeight(),
+					   -1,
+					   -1,
+					   -1,
+					   508,
+					   _loadsaveFrmImages[LOAD_SAVE_FRM_RED_BUTTON_NORMAL].getData(),
+					   _loadsaveFrmImages[LOAD_SAVE_FRM_RED_BUTTON_PRESSED].getData(),
+					   NULL,
+					   BUTTON_FLAG_TRANSPARENT);
 	if (btn == -1) {
-		buttonSetCallbacks(btn, _gsound_red_butt_press, _gsound_red_butt_release);
+//		buttonSetCallbacks(btn, _gsound_red_butt_press, _gsound_red_butt_release); TODO audio
 	}
 
 	windowRefresh(window);
@@ -2171,17 +2172,17 @@ static int _GetComment(int a1) {
 }
 
 // 0x47F084
-static int _get_input_str2(int win, int doneKeyCode, int cancelKeyCode, char* description, int maxLength, int x, int y, int textColor, int backgroundColor, int flags) {
+static int _get_input_str2(int win, int doneKeyCode, int cancelKeyCode, char *description, int maxLength, int x, int y, int textColor, int backgroundColor, int flags) {
 	int cursorWidth = fontGetStringWidth("_") - 4;
 	int windowWidth = windowGetWidth(win);
 	int lineHeight = fontGetLineHeight();
-	unsigned char* windowBuffer = windowGetBuffer(win);
+	unsigned char *windowBuffer = windowGetBuffer(win);
 	if (maxLength > 255) {
 		maxLength = 255;
 	}
 
 	char text[256];
-	strcpy(text, description);
+	strncpy(text, description, sizeof(text) - 1);
 
 	size_t textLength = strlen(text);
 	text[textLength] = ' ';
@@ -2270,19 +2271,19 @@ static int _get_input_str2(int win, int doneKeyCode, int cancelKeyCode, char* de
 
 	if (rc == 0) {
 		text[textLength] = '\0';
-		strcpy(description, text);
+		strncpy(description, text, LOAD_SAVE_DESCRIPTION_LENGTH - 1);
 	}
 
 	return rc;
 }
 
 // 0x47F48C
-static int _DummyFunc(File* stream) {
+static int _DummyFunc(File *stream) {
 	return 0;
 }
 
 // 0x47F490
-static int _PrepLoad(File* stream) {
+static int _PrepLoad(File *stream) {
 	gameReset();
 	gameMouseSetCursor(MOUSE_CURSOR_WAIT_PLANET);
 	gMapHeader.name[0] = '\0';
@@ -2291,8 +2292,8 @@ static int _PrepLoad(File* stream) {
 }
 
 // 0x47F4C8
-static int _EndLoad(File* stream) {
-	wmMapMusicStart();
+static int _EndLoad(File *stream) {
+//	wmMapMusicStart(); TODO audio
 	dudeSetName(_LSData[_slot_cursor].character_name);
 	interfaceBarRefresh();
 	indicatorBarRefresh();
@@ -2304,8 +2305,8 @@ static int _EndLoad(File* stream) {
 }
 
 // 0x47F510
-static int _GameMap2Slot(File* stream) {
-	if (_partyMemberPrepSave() == -1) {
+static int _GameMap2Slot(File *stream) {
+/*	if (_partyMemberPrepSave() == -1) { TODO save map
 		return -1;
 	}
 
@@ -2324,9 +2325,9 @@ static int _GameMap2Slot(File* stream) {
 			continue;
 		}
 
-		const char* critterItemPath = (pid >> 24) == OBJ_TYPE_CRITTER
-		                              ? PROTO_DIR_NAME "\\" CRITTERS_DIR_NAME
-		                              : PROTO_DIR_NAME "\\" ITEMS_DIR_NAME;
+		const char *critterItemPath = (pid >> 24) == OBJ_TYPE_CRITTER
+										  ? PROTO_DIR_NAME "\\" CRITTERS_DIR_NAME
+										  : PROTO_DIR_NAME "\\" ITEMS_DIR_NAME;
 		snprintf(_str0, sizeof(_str0), "%s\\%s\\%s", _patches, critterItemPath, path);
 		snprintf(_str1, sizeof(_str1), "%s\\%s\\%s%.2d\\%s\\%s", _patches, "SAVEGAME", "SLOT", _slot_cursor + 1, critterItemPath, path);
 		if (fileCopyCompressed(_str0, _str1) == -1) {
@@ -2336,7 +2337,7 @@ static int _GameMap2Slot(File* stream) {
 
 	snprintf(_str0, sizeof(_str0), "%s\\*.%s", "MAPS", "SAV");
 
-	char** fileNameList;
+	char **fileNameList;
 	int fileNameListLength = fileNameListInit(_str0, &fileNameList, 0, 0);
 	if (fileNameListLength == -1) {
 		return -1;
@@ -2365,7 +2366,7 @@ static int _GameMap2Slot(File* stream) {
 	compat_remove(_gmpath);
 
 	for (int index = 0; index < fileNameListLength; index += 1) {
-		char* string = fileNameList[index];
+		char *string = fileNameList[index];
 		if (fileWrite(string, strlen(string) + 1, 1, stream) == -1) {
 			fileNameListFree(&fileNameList, 0);
 			return -1;
@@ -2390,7 +2391,7 @@ static int _GameMap2Slot(File* stream) {
 	}
 
 	snprintf(_str0, sizeof(_str0), "%s\\%s", "MAPS", "AUTOMAP.DB");
-	File* inStream = fileOpen(_str0, "rb");
+	File *inStream = fileOpen(_str0, "rb");
 	if (inStream == NULL) {
 		return -1;
 	}
@@ -2411,13 +2412,13 @@ static int _GameMap2Slot(File* stream) {
 		return -1;
 	}
 
-	return 0;
+	return 0;*/
 }
 
 // SlotMap2Game
 // 0x47F990
-static int _SlotMap2Game(File* stream) {
-	debugPrint("LOADSAVE: in SlotMap2Game\n");
+static int _SlotMap2Game(File *stream) {
+/*	debugPrint("LOADSAVE: in SlotMap2Game\n");  TODO map to game
 
 	int fileNameListLength;
 	if (fileReadInt32(stream, &fileNameListLength) == -1) {
@@ -2457,9 +2458,9 @@ static int _SlotMap2Game(File* stream) {
 		if (pid != -2) {
 			char protoPath[COMPAT_MAX_PATH];
 			if (_proto_list_str(pid, protoPath) == 0) {
-				const char* basePath = PID_TYPE(pid) == OBJ_TYPE_CRITTER
-				                       ? PROTO_DIR_NAME "\\" CRITTERS_DIR_NAME
-				                       : PROTO_DIR_NAME "\\" ITEMS_DIR_NAME;
+				const char *basePath = PID_TYPE(pid) == OBJ_TYPE_CRITTER
+										   ? PROTO_DIR_NAME "\\" CRITTERS_DIR_NAME
+										   : PROTO_DIR_NAME "\\" ITEMS_DIR_NAME;
 				snprintf(_str0, sizeof(_str0), "%s\\%s\\%s", _patches, basePath, protoPath);
 				snprintf(_str1, sizeof(_str1), "%s\\%s\\%s%.2d\\%s\\%s", _patches, "SAVEGAME", "SLOT", _slot_cursor + 1, basePath, protoPath);
 
@@ -2486,7 +2487,7 @@ static int _SlotMap2Game(File* stream) {
 		}
 	}
 
-	const char* automapFileName = _strmfe(_str1, "AUTOMAP.DB", "SAV");
+	const char *automapFileName = _strmfe(_str1, "AUTOMAP.DB", "SAV");
 	snprintf(_str0, sizeof(_str0), "%s\\%s\\%s%.2d\\%s", _patches, "SAVEGAME", "SLOT", _slot_cursor + 1, automapFileName);
 	snprintf(_str1, sizeof(_str1), "%s\\%s\\%s", _patches, "MAPS", "AUTOMAP.DB");
 	if (fileCopyDecompressed(_str0, _str1) == -1) {
@@ -2507,11 +2508,11 @@ static int _SlotMap2Game(File* stream) {
 		return -1;
 	}
 
-	return 0;
+	return 0;*/
 }
 
 // 0x47FE14
-static int _mygets(char* dest, File* stream) {
+static int _mygets(char *dest, File *stream) {
 	int index = 14;
 	while (true) {
 		int c = fileReadChar(stream);
@@ -2537,12 +2538,12 @@ static int _mygets(char* dest, File* stream) {
 }
 
 // 0x47FE58
-static int _copy_file(const char* a1, const char* a2) {
-	File* stream1;
-	File* stream2;
+static int _copy_file(const char *a1, const char *a2) {
+/*	File *stream1; TODO copy
+	File *stream2;
 	int length;
 	int chunk_length;
-	void* buf;
+	void *buf;
 	int result;
 
 	stream1 = NULL;
@@ -2604,7 +2605,7 @@ out:
 		internal_free(buf);
 	}
 
-	return result;
+	return result;*/
 }
 
 // InitLoadSave
@@ -2612,15 +2613,15 @@ out:
 void lsgInit() {
 	char path[COMPAT_MAX_PATH];
 	snprintf(path, sizeof(path), "%s\\", "MAPS");
-	_MapDirErase(path, "SAV");
+//	_MapDirErase(path, "SAV"); TODO delete maps
 }
 
 // 0x480040
-static int _MapDirErase(const char* relativePath, const char* extension) {
-	char path[COMPAT_MAX_PATH];
+static int _MapDirErase(const char *relativePath, const char *extension) {
+/*	char path[COMPAT_MAX_PATH];
 	snprintf(path, sizeof(path), "%s*.%s", relativePath, extension);
 
-	char** fileList;
+	char **fileList;
 	int fileListLength = fileNameListInit(path, &fileList, 0, 0);
 	while (--fileListLength >= 0) {
 		snprintf(path, sizeof(path), "%s\\%s%s", _patches, relativePath, fileList[fileListLength]);
@@ -2628,24 +2629,24 @@ static int _MapDirErase(const char* relativePath, const char* extension) {
 	}
 	fileNameListFree(&fileList, 0);
 
-	return 0;
+	return 0;*/
 }
 
 // 0x4800C8
-int _MapDirEraseFile_(const char* a1, const char* a2) {
-	char path[COMPAT_MAX_PATH];
+int _MapDirEraseFile_(const char *a1, const char *a2) {
+/*	char path[COMPAT_MAX_PATH];
 
 	snprintf(path, sizeof(path), "%s\\%s%s", _patches, a1, a2);
 	if (compat_remove(path) != 0) {
 		return -1;
 	}
 
-	return 0;
+	return 0;*/
 }
 
 // 0x480104
 static int _SaveBackup() {
-	debugPrint("\nLOADSAVE: Backing up save slot files..\n");
+/*	debugPrint("\nLOADSAVE: Backing up save slot files..\n");
 
 	snprintf(_gmpath, sizeof(_gmpath), "%s\\%s\\%s%.2d\\", _patches, "SAVEGAME", "SLOT", _slot_cursor + 1);
 	strcpy(_str0, _gmpath);
@@ -2654,7 +2655,7 @@ static int _SaveBackup() {
 
 	_strmfe(_str1, _str0, "BAK");
 
-	File* stream1 = fileOpen(_str0, "rb");
+	File *stream1 = fileOpen(_str0, "rb");
 	if (stream1 != NULL) {
 		fileClose(stream1);
 		if (compat_rename(_str0, _str1) != 0) {
@@ -2665,7 +2666,7 @@ static int _SaveBackup() {
 	snprintf(_gmpath, sizeof(_gmpath), "%s\\%s%.2d\\", "SAVEGAME", "SLOT", _slot_cursor + 1);
 	snprintf(_str0, sizeof(_str0), "%s*.%s", _gmpath, "SAV");
 
-	char** fileList;
+	char **fileList;
 	int fileListLength = fileNameListInit(_str0, &fileList, 0, 0);
 	if (fileListLength == -1) {
 		return -1;
@@ -2691,15 +2692,15 @@ static int _SaveBackup() {
 
 	snprintf(_gmpath, sizeof(_gmpath), "%s\\%s%.2d\\", "SAVEGAME", "SLOT", _slot_cursor + 1);
 
-	char* v1 = _strmfe(_str2, "AUTOMAP.DB", "SAV");
+	char *v1 = _strmfe(_str2, "AUTOMAP.DB", "SAV");
 	snprintf(_str0, sizeof(_str0), "%s\\%s", _gmpath, v1);
 
-	char* v2 = _strmfe(_str2, "AUTOMAP.DB", "BAK");
+	char *v2 = _strmfe(_str2, "AUTOMAP.DB", "BAK");
 	snprintf(_str1, sizeof(_str1), "%s\\%s", _gmpath, v2);
 
 	_automap_db_flag = 0;
 
-	File* stream2 = fileOpen(_str0, "rb");
+	File *stream2 = fileOpen(_str0, "rb");
 	if (stream2 != NULL) {
 		fileClose(stream2);
 
@@ -2710,12 +2711,12 @@ static int _SaveBackup() {
 		_automap_db_flag = 1;
 	}
 
-	return 0;
+	return 0;*/
 }
 
 // 0x4803D8
 static int _RestoreSave() {
-	debugPrint("\nLOADSAVE: Restoring save file backup...\n");
+/*	debugPrint("\nLOADSAVE: Restoring save file backup...\n");
 
 	_EraseSave();
 
@@ -2733,7 +2734,7 @@ static int _RestoreSave() {
 	snprintf(_gmpath, sizeof(_gmpath), "%s\\%s%.2d\\", "SAVEGAME", "SLOT", _slot_cursor + 1);
 	snprintf(_str0, sizeof(_str0), "%s*.%s", _gmpath, "BAK");
 
-	char** fileList;
+	char **fileList;
 	int fileListLength = fileNameListInit(_str0, &fileList, 0, 0);
 	if (fileListLength == -1) {
 		return -1;
@@ -2766,11 +2767,11 @@ static int _RestoreSave() {
 	}
 
 	snprintf(_gmpath, sizeof(_gmpath), "%s\\%s\\%s%.2d\\", _patches, "SAVEGAME", "SLOT", _slot_cursor + 1);
-	char* v1 = _strmfe(_str2, "AUTOMAP.DB", "BAK");
+	char *v1 = _strmfe(_str2, "AUTOMAP.DB", "BAK");
 	strcpy(_str0, _gmpath);
 	strcat(_str0, v1);
 
-	char* v2 = _strmfe(_str2, "AUTOMAP.DB", "SAV");
+	char *v2 = _strmfe(_str2, "AUTOMAP.DB", "SAV");
 	strcpy(_str1, _gmpath);
 	strcat(_str1, v2);
 
@@ -2779,11 +2780,11 @@ static int _RestoreSave() {
 		return -1;
 	}
 
-	return 0;
+	return 0;*/
 }
 
 // 0x480710
-static int _LoadObjDudeCid(File* stream) {
+static int _LoadObjDudeCid(File *stream) {
 	int value;
 
 	if (fileReadInt32(stream, &value) == -1) {
@@ -2796,13 +2797,13 @@ static int _LoadObjDudeCid(File* stream) {
 }
 
 // 0x480734
-static int _SaveObjDudeCid(File* stream) {
+static int _SaveObjDudeCid(File *stream) {
 	return fileWriteInt32(stream, gDude->cid);
 }
 
 // 0x480754
 static int _EraseSave() {
-	debugPrint("\nLOADSAVE: Erasing save(bad) slot...\n");
+/*	debugPrint("\nLOADSAVE: Erasing save(bad) slot...\n");
 
 	snprintf(_gmpath, sizeof(_gmpath), "%s\\%s\\%s%.2d\\", _patches, "SAVEGAME", "SLOT", _slot_cursor + 1);
 	strcpy(_str0, _gmpath);
@@ -2812,7 +2813,7 @@ static int _EraseSave() {
 	snprintf(_gmpath, sizeof(_gmpath), "%s\\%s%.2d\\", "SAVEGAME", "SLOT", _slot_cursor + 1);
 	snprintf(_str0, sizeof(_str0), "%s*.%s", _gmpath, "SAV");
 
-	char** fileList;
+	char **fileList;
 	int fileListLength = fileNameListInit(_str0, &fileList, 0, 0);
 	if (fileListLength == -1) {
 		return -1;
@@ -2829,13 +2830,13 @@ static int _EraseSave() {
 
 	snprintf(_gmpath, sizeof(_gmpath), "%s\\%s\\%s%.2d\\", _patches, "SAVEGAME", "SLOT", _slot_cursor + 1);
 
-	char* v1 = _strmfe(_str1, "AUTOMAP.DB", "SAV");
+	char *v1 = _strmfe(_str1, "AUTOMAP.DB", "SAV");
 	strcpy(_str0, _gmpath);
 	strcat(_str0, v1);
 
 	compat_remove(_str0);
 
-	return 0;
+	return 0;*/
 }
 
-} // namespace fallout
+} // namespace Fallout2
