@@ -12,7 +12,7 @@
 
 #include "fallout2/animation.h"
 #include "fallout2/art.h"
-// #include "fallout2/automap.h" TODO automap
+#include "fallout2/automap.h"
 #include "fallout2/color.h"
 #include "fallout2/combat.h"
 #include "fallout2/combat_ai.h"
@@ -2707,7 +2707,7 @@ static int wmMapInit() {
 					return -1;
 				}
 
-//				automapSetDisplayMap(mapIdx, num); TODO automap
+				automapSetDisplayMap(mapIdx, num);
 			}
 
 			if (configGetString(&config, section, "random_start_point_0", &str)) {
