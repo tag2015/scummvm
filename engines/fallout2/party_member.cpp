@@ -15,7 +15,7 @@
 #include "fallout2/game.h"
 #include "fallout2/game_dialog.h"
 #include "fallout2/item.h"
-// #include "fallout2/loadsave.h" TODO loadsave
+#include "fallout2/loadsave.h"
 #include "fallout2/map.h"
 #include "fallout2/memory.h"
 #include "fallout2/message.h"
@@ -649,9 +649,9 @@ int _partyMemberRecoverLoad() {
 
 	_partyStatePrepped = 0;
 
-//	if (!_isLoadingGame()) {  // TODO loadsave.cpp
+	if (!_isLoadingGame()) {
 		_partyFixMultipleMembers();
-//	}
+	}
 
 	return 0;
 }

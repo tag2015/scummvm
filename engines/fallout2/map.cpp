@@ -26,7 +26,7 @@
 #include "fallout2/interface.h"
 #include "fallout2/item.h"
 #include "fallout2/light.h"
-// #include "fallout2/loadsave.h" TODO loadsave
+#include "fallout2/loadsave.h"
 #include "fallout2/memory.h"
 #include "fallout2/object.h"
 #include "fallout2/palette.h"
