@@ -23,7 +23,7 @@
 #include "fallout2/interface.h"
 #include "fallout2/item.h"
 #include "fallout2/light.h"
-// #include "fallout2/loadsave.h" TODO loadsave
+#include "fallout2/loadsave.h"
 #include "fallout2/map.h"
 #include "fallout2/object.h"
 #include "fallout2/palette.h"
@@ -858,7 +858,7 @@ static void opCreateObject(Program *program) {
 
 	Object *object = NULL;
 
-	if (/*_isLoadingGame() != 0*/ 0) {  // TODO loadsave
+	if (_isLoadingGame() != 0) {
 		debugPrint("\nError: attempt to Create critter in load/save-game: %s!", program->name);
 		goto out;
 	}
@@ -943,7 +943,7 @@ static void opDestroyObject(Program *program) {
 	}
 
 	if (PID_TYPE(object->pid) == OBJ_TYPE_CRITTER) {
-		if (/*_isLoadingGame()*/ 0) { // TODO loadsave
+		if (_isLoadingGame()) {
 			debugPrint("\nError: attempt to destroy critter in load/save-game: %s!", program->name);
 			program->flags &= ~PROGRAM_FLAG_0x20;
 			return;
@@ -2016,7 +2016,7 @@ static void opSetObjectVisibility(Program *program) {
 		return;
 	}
 
-	if (/*_isLoadingGame()*/ 0) { // TODO loadsave
+	if (_isLoadingGame()) {
 		debugPrint("Error: attempt to set_obj_visibility in load/save-game: %s!", program->name);
 		return;
 	}
@@ -2227,7 +2227,7 @@ static void opKillCritter(Program *program) {
 		return;
 	}
 
-	if (/*_isLoadingGame()*/ 0) { // TODO saveload
+	if (_isLoadingGame()) {
 		debugPrint("\nError: attempt to destroy critter in load/save-game: %s!", program->name);
 	}
 
@@ -2298,7 +2298,7 @@ static void opKillCritterType(Program *program) {
 	int deathFrame = programStackPopInteger(program);
 	int pid = programStackPopInteger(program);
 
-	if (/*_isLoadingGame()*/ 0) { // TODO loadsave
+	if (_isLoadingGame()) {
 		debugPrint("\nError: attempt to destroy critter in load/save-game: %s!", program->name);
 		return;
 	}
@@ -2802,9 +2802,9 @@ static void opCritterAddTrait(Program *program) {
 						break;
 					}
 
-//					if (_isLoadingGame()) {  TODO loadsave
-//						break;
-//					}
+					if (_isLoadingGame()) {
+						break;
+					}
 
 					critterSetTeam(object, value);
 					break;
@@ -3119,7 +3119,7 @@ static void opMetarule(Program *program) {
 		result = wmMapIsKnown(param.integerValue);
 		break;
 	case METARULE_IS_LOADGAME:
-//		result = _isLoadingGame(); TODO loadsave
+		result = _isLoadingGame();
 		break;
 	case METARULE_CAR_CURRENT_TOWN:
 		result = wmCarCurrentArea();
