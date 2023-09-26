@@ -33,6 +33,7 @@
 
 #include "fallout2/animation.h"
 #include "fallout2/art.h"
+#include "fallout2/automap.h"
 #include "fallout2/character_editor.h"
 #include "fallout2/character_selector.h"
 #include "fallout2/color.h"
@@ -429,6 +430,12 @@ Common::Error Fallout2Engine::run() {
 		debugPrint("Failed on combat_init\n");
 	else
 		debug("Initialized combat system!");
+
+	// init auto minimap
+	if (automapInit() != 0)
+		warning("Failed on automap_init");
+	else
+		debug("Initialized automap!");
 
 	char path[COMPAT_MAX_PATH];
 
