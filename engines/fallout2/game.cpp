@@ -31,7 +31,7 @@
 #include "fallout2/inventory.h"
 #include "fallout2/item.h"
 #include "fallout2/kb.h"
-// #include "loadsave.h"
+#include "fallout2/loadsave.h"
 #include "fallout2/map.h"
 #include "fallout2/memory.h"
 #include "fallout2/mouse.h"
@@ -846,21 +846,21 @@ int gameHandleKey(int eventCode, bool isInCombatMode) {
 		break;
 	case KEY_CTRL_S:
 	case KEY_F4:
-/*		soundPlayFile("ib1p1xx1");  TODO loadsave
+//		soundPlayFile("ib1p1xx1");  TODO audio
 		if (lsgSaveGame(1) == -1) {
 			debugPrint("\n ** Error calling SaveGame()! **\n");
-		}*/
+		}
 		break;
 	case KEY_CTRL_L:
 	case KEY_F5:
-/*		soundPlayFile("ib1p1xx1"); TODO loadsave
+//		soundPlayFile("ib1p1xx1"); TODO audio
 		if (lsgLoadGame(LOAD_SAVE_MODE_NORMAL) == -1) {
 			debugPrint("\n ** Error calling LoadGame()! **\n");
-		}*/
+		}
 		break;
 	case KEY_F6:
 		if (1) {
-/*			soundPlayFile("ib1p1xx1"); TODO loadsave
+//			soundPlayFile("ib1p1xx1");  TODO audio
 
 			int rc = lsgSaveGame(LOAD_SAVE_MODE_QUICK);
 			if (rc == -1) {
@@ -870,12 +870,12 @@ int gameHandleKey(int eventCode, bool isInCombatMode) {
 				// Quick save game successfully saved.
 				char* msg = getmsg(&gMiscMessageList, &messageListItem, 5);
 				displayMonitorAddMessage(msg);
-			}*/
+			}
 		}
 		break;
 	case KEY_F7:
 		if (1) {
-/*			soundPlayFile("ib1p1xx1"); TODO loadsave
+//			soundPlayFile("ib1p1xx1"); TODO audio
 
 			int rc = lsgLoadGame(LOAD_SAVE_MODE_QUICK);
 			if (rc == -1) {
@@ -885,7 +885,7 @@ int gameHandleKey(int eventCode, bool isInCombatMode) {
 				// Quick load game successfully loaded.
 				char* msg = getmsg(&gMiscMessageList, &messageListItem, 4);
 				displayMonitorAddMessage(msg);
-			}*/
+			}
 		}
 		break;
 	case KEY_CTRL_V:
