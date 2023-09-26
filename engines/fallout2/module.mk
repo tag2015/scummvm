@@ -7,6 +7,7 @@ MODULE_OBJS = \
 	actions.o \
 	art.o \
 	animation.o \
+	automap.o \
 	cache.o \
 	character_editor.o \
 	character_selector.o \

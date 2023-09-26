@@ -1,33 +1,33 @@
-#include "automap.h"
+#include "fallout2/automap.h"
 
-#include <stdio.h>
+/*#include <stdio.h>
 #include <string.h>
 
-#include <algorithm>
+#include <algorithm>*/
 
-#include "art.h"
-#include "color.h"
-#include "config.h"
-#include "dbox.h"
-#include "debug.h"
-#include "draw.h"
-#include "game.h"
-#include "game_mouse.h"
-#include "game_sound.h"
-#include "graph_lib.h"
-#include "input.h"
-#include "item.h"
-#include "kb.h"
-#include "map.h"
-#include "memory.h"
-#include "object.h"
-#include "platform_compat.h"
-#include "settings.h"
-#include "svga.h"
-#include "text_font.h"
-#include "window_manager.h"
+#include "fallout2/art.h"
+#include "fallout2/color.h"
+#include "fallout2/config.h"
+#include "fallout2/dbox.h"
+#include "fallout2/debug.h"
+#include "fallout2/draw.h"
+#include "fallout2/game.h"
+#include "fallout2/game_mouse.h"
+// #include "fallout2/game_sound.h" TODO audio
+#include "fallout2/graph_lib.h"
+#include "fallout2/input.h"
+#include "fallout2/item.h"
+#include "fallout2/kb.h"
+#include "fallout2/map.h"
+#include "fallout2/memory.h"
+#include "fallout2/object.h"
+#include "fallout2/platform_compat.h"
+#include "fallout2/settings.h"
+#include "fallout2/svga.h"
+#include "fallout2/text_font.h"
+#include "fallout2/window_manager.h"
 
-namespace fallout {
+namespace Fallout2 {
 
 #define AUTOMAP_OFFSET_COUNT (AUTOMAP_MAP_COUNT * ELEVATION_COUNT)
 
@@ -37,14 +37,14 @@ namespace fallout {
 #define AUTOMAP_PIPBOY_VIEW_X (238)
 #define AUTOMAP_PIPBOY_VIEW_Y (105)
 
-static void automapRenderInMapWindow(int window, int elevation, unsigned char* backgroundData, int flags);
-static int automapSaveEntry(File* stream);
+static void automapRenderInMapWindow(int window, int elevation, unsigned char *backgroundData, int flags);
+static int automapSaveEntry(File *stream);
 static int automapLoadEntry(int map, int elevation);
-static int automapSaveHeader(File* stream);
-static int automapLoadHeader(File* stream);
+static int automapSaveHeader(File *stream);
+static int automapLoadHeader(File *stream);
 static void _decode_map_data(int elevation);
 static int automapCreate();
-static int _copy_file_data(File* stream1, File* stream2, int length);
+static int _copy_file_data(File *stream1, File *stream2, int length);
 
 typedef enum AutomapFrm {
 	AUTOMAP_FRM_BACKGROUND,
@@ -58,15 +58,15 @@ typedef enum AutomapFrm {
 typedef struct AutomapEntry {
 	int dataSize;
 	unsigned char isCompressed;
-	unsigned char* compressedData;
-	unsigned char* data;
+	unsigned char *compressedData;
+	unsigned char *data;
 } AutomapEntry;
 
 // 0x41ADE0
 static const int _defam[AUTOMAP_MAP_COUNT][ELEVATION_COUNT] = {
-	{ -1, -1, -1 },
-	{ -1, -1, -1 },
-	{ -1, -1, -1 },
+	{-1, -1, -1},
+	{-1, -1, -1},
+	{-1, -1, -1},
 };
 
 // 0x41B560
@@ -236,8 +236,8 @@ static int _displayMapList[AUTOMAP_MAP_COUNT] = {
 // 0x41B7E0
 static const int gAutomapFrmIds[AUTOMAP_FRM_COUNT] = {
 	171, // automap.frm - automap window
-	8, // lilredup.frm - little red button up
-	9, // lilreddn.frm - little red button down
+	8,   // lilredup.frm - little red button up
+	9,   // lilreddn.frm - little red button down
 	172, // autoup.frm - switch up
 	173, // autodwn.frm - switch down
 };
@@ -274,12 +274,12 @@ void automapExit() {
 }
 
 // 0x41B87C
-int automapLoad(File* stream) {
+int automapLoad(File *stream) {
 	return fileReadInt32(stream, &gAutomapFlags);
 }
 
 // 0x41B898
-int automapSave(File* stream) {
+int automapSave(File *stream) {
 	return fileWriteInt32(stream, gAutomapFlags);
 }
 
@@ -319,54 +319,54 @@ void automapShow(bool isInGame, bool isUsingScanner) {
 	int window = windowCreate(automapWindowX, automapWindowY, AUTOMAP_WINDOW_WIDTH, AUTOMAP_WINDOW_HEIGHT, color, WINDOW_MODAL | WINDOW_MOVE_ON_TOP);
 
 	int scannerBtn = buttonCreate(window,
-	                              111,
-	                              454,
-	                              15,
-	                              16,
-	                              -1,
-	                              -1,
-	                              -1,
-	                              KEY_LOWERCASE_S,
-	                              frmImages[AUTOMAP_FRM_BUTTON_UP].getData(),
-	                              frmImages[AUTOMAP_FRM_BUTTON_DOWN].getData(),
-	                              NULL,
-	                              BUTTON_FLAG_TRANSPARENT);
+								  111,
+								  454,
+								  15,
+								  16,
+								  -1,
+								  -1,
+								  -1,
+								  KEY_LOWERCASE_S,
+								  frmImages[AUTOMAP_FRM_BUTTON_UP].getData(),
+								  frmImages[AUTOMAP_FRM_BUTTON_DOWN].getData(),
+								  NULL,
+								  BUTTON_FLAG_TRANSPARENT);
 	if (scannerBtn != -1) {
-		buttonSetCallbacks(scannerBtn, _gsound_red_butt_press, _gsound_red_butt_release);
+//		buttonSetCallbacks(scannerBtn, _gsound_red_butt_press, _gsound_red_butt_release); TODO audio
 	}
 
 	int cancelBtn = buttonCreate(window,
-	                             277,
-	                             454,
-	                             15,
-	                             16,
-	                             -1,
-	                             -1,
-	                             -1,
-	                             KEY_ESCAPE,
-	                             frmImages[AUTOMAP_FRM_BUTTON_UP].getData(),
-	                             frmImages[AUTOMAP_FRM_BUTTON_DOWN].getData(),
-	                             NULL,
-	                             BUTTON_FLAG_TRANSPARENT);
+								 277,
+								 454,
+								 15,
+								 16,
+								 -1,
+								 -1,
+								 -1,
+								 KEY_ESCAPE,
+								 frmImages[AUTOMAP_FRM_BUTTON_UP].getData(),
+								 frmImages[AUTOMAP_FRM_BUTTON_DOWN].getData(),
+								 NULL,
+								 BUTTON_FLAG_TRANSPARENT);
 	if (cancelBtn != -1) {
-		buttonSetCallbacks(cancelBtn, _gsound_red_butt_press, _gsound_red_butt_release);
+//		buttonSetCallbacks(cancelBtn, _gsound_red_butt_press, _gsound_red_butt_release); TODO audio
 	}
 
 	int switchBtn = buttonCreate(window,
-	                             457,
-	                             340,
-	                             42,
-	                             74,
-	                             -1,
-	                             -1,
-	                             KEY_LOWERCASE_L,
-	                             KEY_LOWERCASE_H,
-	                             frmImages[AUTOMAP_FRM_SWITCH_UP].getData(),
-	                             frmImages[AUTOMAP_FRM_SWITCH_DOWN].getData(),
-	                             NULL,
-	                             BUTTON_FLAG_TRANSPARENT | BUTTON_FLAG_0x01);
+								 457,
+								 340,
+								 42,
+								 74,
+								 -1,
+								 -1,
+								 KEY_LOWERCASE_L,
+								 KEY_LOWERCASE_H,
+								 frmImages[AUTOMAP_FRM_SWITCH_UP].getData(),
+								 frmImages[AUTOMAP_FRM_SWITCH_DOWN].getData(),
+								 NULL,
+								 BUTTON_FLAG_TRANSPARENT | BUTTON_FLAG_0x01);
 	if (switchBtn != -1) {
-		buttonSetCallbacks(switchBtn, _gsound_toggle_butt_press_, _gsound_toggle_butt_press_);
+//		buttonSetCallbacks(switchBtn, _gsound_toggle_butt_press_, _gsound_toggle_butt_press_); TODO audio
 	}
 
 	if ((gAutomapFlags & AUTOMAP_WTH_HIGH_DETAILS) == 0) {
@@ -428,13 +428,13 @@ void automapShow(bool isInGame, bool isUsingScanner) {
 			}
 
 			if ((gAutomapFlags & AUTOMAP_WITH_SCANNER) == 0) {
-				Object* scanner = NULL;
+				Object *scanner = NULL;
 
-				Object* item1 = critterGetItem1(gDude);
+				Object *item1 = critterGetItem1(gDude);
 				if (item1 != NULL && item1->pid == PROTO_ID_MOTION_SENSOR) {
 					scanner = item1;
 				} else {
-					Object* item2 = critterGetItem2(gDude);
+					Object *item2 = critterGetItem2(gDude);
 					if (item2 != NULL && item2->pid == PROTO_ID_MOTION_SENSOR) {
 						scanner = item2;
 					}
@@ -445,12 +445,12 @@ void automapShow(bool isInGame, bool isUsingScanner) {
 					gAutomapFlags |= AUTOMAP_WITH_SCANNER;
 					miscItemConsumeCharge(scanner);
 				} else {
-					soundPlayFile("iisxxxx1");
+//					soundPlayFile("iisxxxx1"); TODO audio
 
 					MessageListItem messageListItem;
 					// 17 - The motion sensor is not installed.
 					// 18 - The motion sensor has no charges remaining.
-					const char* title = getmsg(&gMiscMessageList, &messageListItem, scanner != NULL ? 18 : 17);
+					const char *title = getmsg(&gMiscMessageList, &messageListItem, scanner != NULL ? 18 : 17);
 					showDialogBox(title, NULL, 0, 165, 140, _colorTable[32328], NULL, _colorTable[32328], 0);
 				}
 			}
@@ -462,7 +462,7 @@ void automapShow(bool isInGame, bool isUsingScanner) {
 			showQuitConfirmationDialog();
 			break;
 		case KEY_F12:
-			takeScreenshot();
+//			takeScreenshot(); TODO game
 			break;
 		}
 
@@ -490,7 +490,7 @@ void automapShow(bool isInGame, bool isUsingScanner) {
 // Renders automap in Map window.
 //
 // 0x41BD1C
-static void automapRenderInMapWindow(int window, int elevation, unsigned char* backgroundData, int flags) {
+static void automapRenderInMapWindow(int window, int elevation, unsigned char *backgroundData, int flags) {
 	int color;
 	if ((flags & AUTOMAP_IN_GAME) != 0) {
 		color = _colorTable[8456];
@@ -501,10 +501,10 @@ static void automapRenderInMapWindow(int window, int elevation, unsigned char* b
 	windowFill(window, 0, 0, AUTOMAP_WINDOW_WIDTH, AUTOMAP_WINDOW_HEIGHT, color);
 	windowDrawBorder(window);
 
-	unsigned char* windowBuffer = windowGetBuffer(window);
+	unsigned char *windowBuffer = windowGetBuffer(window);
 	blitBufferToBuffer(backgroundData, AUTOMAP_WINDOW_WIDTH, AUTOMAP_WINDOW_HEIGHT, AUTOMAP_WINDOW_WIDTH, windowBuffer, AUTOMAP_WINDOW_WIDTH);
 
-	for (Object* object = objectFindFirstAtElevation(elevation); object != NULL; object = objectFindNextAtElevation()) {
+	for (Object *object = objectFindFirstAtElevation(elevation); object != NULL; object = objectFindNextAtElevation()) {
 		if (object->tile == -1) {
 			continue;
 		}
@@ -513,10 +513,7 @@ static void automapRenderInMapWindow(int window, int elevation, unsigned char* b
 		unsigned char objectColor;
 
 		if ((flags & AUTOMAP_IN_GAME) != 0) {
-			if (objectType == OBJ_TYPE_CRITTER
-			        && (object->flags & OBJECT_HIDDEN) == 0
-			        && (flags & AUTOMAP_WITH_SCANNER) != 0
-			        && (object->data.critter.combat.results & DAM_DEAD) == 0) {
+			if (objectType == OBJ_TYPE_CRITTER && (object->flags & OBJECT_HIDDEN) == 0 && (flags & AUTOMAP_WITH_SCANNER) != 0 && (object->data.critter.combat.results & DAM_DEAD) == 0) {
 				objectColor = _colorTable[31744];
 			} else {
 				if ((object->flags & OBJECT_SEEN) == 0) {
@@ -527,9 +524,7 @@ static void automapRenderInMapWindow(int window, int elevation, unsigned char* b
 					objectColor = _colorTable[32328];
 				} else if (objectType == OBJ_TYPE_WALL) {
 					objectColor = _colorTable[992];
-				} else if (objectType == OBJ_TYPE_SCENERY
-				           && (flags & AUTOMAP_WTH_HIGH_DETAILS) != 0
-				           && object->pid != PROTO_ID_0x2000158) {
+				} else if (objectType == OBJ_TYPE_SCENERY && (flags & AUTOMAP_WTH_HIGH_DETAILS) != 0 && object->pid != PROTO_ID_0x2000158) {
 					objectColor = _colorTable[480];
 				} else if (object == gDude) {
 					objectColor = _colorTable[31744];
@@ -563,7 +558,7 @@ static void automapRenderInMapWindow(int window, int elevation, unsigned char* b
 		}
 
 		if (objectColor != _colorTable[0]) {
-			unsigned char* v12 = windowBuffer + v10;
+			unsigned char *v12 = windowBuffer + v10;
 			if ((flags & AUTOMAP_IN_GAME) != 0) {
 				if (*v12 != _colorTable[992] || objectColor != _colorTable[480]) {
 					v12[0] = objectColor;
@@ -597,10 +592,10 @@ static void automapRenderInMapWindow(int window, int elevation, unsigned char* b
 	}
 
 	if (mapGetCurrentMap() != -1) {
-		char* areaName = mapGetCityName(mapGetCurrentMap());
+		char *areaName = mapGetCityName(mapGetCurrentMap());
 		windowDrawText(window, areaName, 240, 150, 380, textColor | 0x2000000);
 
-		char* mapName = mapGetName(mapGetCurrentMap(), elevation);
+		char *mapName = mapGetName(mapGetCurrentMap(), elevation);
 		windowDrawText(window, mapName, 240, 150, 396, textColor | 0x2000000);
 	}
 
@@ -611,12 +606,12 @@ static void automapRenderInMapWindow(int window, int elevation, unsigned char* b
 //
 // 0x41C004
 int automapRenderInPipboyWindow(int window, int map, int elevation) {
-	unsigned char* windowBuffer = windowGetBuffer(window) + 640 * AUTOMAP_PIPBOY_VIEW_Y + AUTOMAP_PIPBOY_VIEW_X;
+	unsigned char *windowBuffer = windowGetBuffer(window) + 640 * AUTOMAP_PIPBOY_VIEW_Y + AUTOMAP_PIPBOY_VIEW_X;
 
 	unsigned char wallColor = _colorTable[992];
 	unsigned char sceneryColor = _colorTable[480];
 
-	gAutomapEntry.data = (unsigned char*)internal_malloc(11024);
+	gAutomapEntry.data = (unsigned char *)internal_malloc(11024);
 	if (gAutomapEntry.data == NULL) {
 		debugPrint("\nAUTOMAP: Error allocating data buffer!\n");
 		return -1;
@@ -629,7 +624,7 @@ int automapRenderInPipboyWindow(int window, int map, int elevation) {
 
 	int v1 = 0;
 	unsigned char v2 = 0;
-	unsigned char* ptr = gAutomapEntry.data;
+	unsigned char *ptr = gAutomapEntry.data;
 
 	// FIXME: This loop is implemented incorrectly. Automap requires 400x400 px,
 	// but it's top offset is 105, which gives max y 505. It only works because
@@ -683,9 +678,9 @@ int automapSaveCurrent() {
 	debugPrint("\nAUTOMAP: Saving AutoMap DB index %d, level %d\n", map, elevation);
 
 	bool dataBuffersAllocated = false;
-	gAutomapEntry.data = (unsigned char*)internal_malloc(11024);
+	gAutomapEntry.data = (unsigned char *)internal_malloc(11024);
 	if (gAutomapEntry.data != NULL) {
-		gAutomapEntry.compressedData = (unsigned char*)internal_malloc(11024);
+		gAutomapEntry.compressedData = (unsigned char *)internal_malloc(11024);
 		if (gAutomapEntry.compressedData != NULL) {
 			dataBuffersAllocated = true;
 		}
@@ -701,7 +696,7 @@ int automapSaveCurrent() {
 	char path[256];
 	snprintf(path, sizeof(path), "%s\\%s", "MAPS", AUTOMAP_DB);
 
-	File* stream1 = fileOpen(path, "r+b");
+	File *stream1 = fileOpen(path, "r+b");
 	if (stream1 == NULL) {
 		debugPrint("\nAUTOMAP: Error opening automap database file!\n");
 		debugPrint("Error continued: automap_pip_save: path: %s", path);
@@ -732,7 +727,7 @@ int automapSaveCurrent() {
 	if (entryOffset != 0) {
 		snprintf(path, sizeof(path), "%s\\%s", "MAPS", AUTOMAP_TMP);
 
-		File* stream2 = fileOpen(path, "wb");
+		File *stream2 = fileOpen(path, "wb");
 		if (stream2 == NULL) {
 			debugPrint("\nAUTOMAP: Error creating temp file!\n");
 			internal_free(gAutomapEntry.data);
@@ -884,8 +879,8 @@ int automapSaveCurrent() {
 // Saves automap entry into stream.
 //
 // 0x41C844
-static int automapSaveEntry(File* stream) {
-	unsigned char* buffer;
+static int automapSaveEntry(File *stream) {
+	unsigned char *buffer;
 	if (gAutomapEntry.isCompressed == 1) {
 		buffer = gAutomapEntry.compressedData;
 	} else {
@@ -923,7 +918,7 @@ static int automapLoadEntry(int map, int elevation) {
 
 	bool success = true;
 
-	File* stream = fileOpen(path, "r+b");
+	File *stream = fileOpen(path, "r+b");
 	if (stream == NULL) {
 		debugPrint("\nAUTOMAP: Error opening automap database file!\n");
 		debugPrint("Error continued: AM_ReadEntry: path: %s", path);
@@ -957,7 +952,7 @@ static int automapLoadEntry(int map, int elevation) {
 	}
 
 	if (gAutomapEntry.isCompressed == 1) {
-		gAutomapEntry.compressedData = (unsigned char*)internal_malloc(11024);
+		gAutomapEntry.compressedData = (unsigned char *)internal_malloc(11024);
 		if (gAutomapEntry.compressedData == NULL) {
 			debugPrint("\nAUTOMAP: Error allocating decompression buffer!\n");
 			fileClose(stream);
@@ -1001,7 +996,7 @@ out:
 // Saves automap.db header.
 //
 // 0x41CAD8
-static int automapSaveHeader(File* stream) {
+static int automapSaveHeader(File *stream) {
 	fileRewind(stream);
 
 	if (fileWriteUInt8(stream, gAutomapHeader.version) == -1) {
@@ -1012,7 +1007,7 @@ static int automapSaveHeader(File* stream) {
 		goto err;
 	}
 
-	if (_db_fwriteLongCount(stream, (int*)gAutomapHeader.offsets, AUTOMAP_OFFSET_COUNT) == -1) {
+	if (_db_fwriteLongCount(stream, (int *)gAutomapHeader.offsets, AUTOMAP_OFFSET_COUNT) == -1) {
 		goto err;
 	}
 
@@ -1030,7 +1025,7 @@ err:
 // Loads automap.db header.
 //
 // 0x41CB50
-static int automapLoadHeader(File* stream) {
+static int automapLoadHeader(File *stream) {
 
 	if (fileReadUInt8(stream, &(gAutomapHeader.version)) == -1) {
 		return -1;
@@ -1040,7 +1035,7 @@ static int automapLoadHeader(File* stream) {
 		return -1;
 	}
 
-	if (_db_freadIntCount(stream, (int*)gAutomapHeader.offsets, AUTOMAP_OFFSET_COUNT) == -1) {
+	if (_db_freadIntCount(stream, (int *)gAutomapHeader.offsets, AUTOMAP_OFFSET_COUNT) == -1) {
 		return -1;
 	}
 
@@ -1057,7 +1052,7 @@ static void _decode_map_data(int elevation) {
 
 	_obj_process_seen();
 
-	Object* object = objectFindFirstAtElevation(elevation);
+	Object *object = objectFindFirstAtElevation(elevation);
 	while (object != NULL) {
 		if (object->tile != -1 && (object->flags & OBJECT_SEEN) != 0) {
 			int contentType;
@@ -1092,7 +1087,7 @@ static int automapCreate() {
 	char path[COMPAT_MAX_PATH];
 	snprintf(path, sizeof(path), "%s\\%s", "MAPS", AUTOMAP_DB);
 
-	File* stream = fileOpen(path, "wb");
+	File *stream = fileOpen(path, "wb");
 	if (stream == NULL) {
 		debugPrint("\nAUTOMAP: Error creating automap database file!\n");
 		return -1;
@@ -1110,15 +1105,15 @@ static int automapCreate() {
 // Copy data from stream1 to stream2.
 //
 // 0x41CD6C
-static int _copy_file_data(File* stream1, File* stream2, int length) {
-	void* buffer = internal_malloc(0xFFFF);
+static int _copy_file_data(File *stream1, File *stream2, int length) {
+	void *buffer = internal_malloc(0xFFFF);
 	if (buffer == NULL) {
 		return -1;
 	}
 
 	// NOTE: Original code is slightly different, but does the same thing.
 	while (length != 0) {
-		int chunkLength = std::min(length, 0xFFFF);
+		int chunkLength = MIN(length, 0xFFFF);
 
 		if (fileRead(buffer, chunkLength, 1, stream1) != 1) {
 			break;
@@ -1141,11 +1136,11 @@ static int _copy_file_data(File* stream1, File* stream2, int length) {
 }
 
 // 0x41CE74
-int automapGetHeader(AutomapHeader** automapHeaderPtr) {
+int automapGetHeader(AutomapHeader **automapHeaderPtr) {
 	char path[COMPAT_MAX_PATH];
 	snprintf(path, sizeof(path), "%s\\%s", "MAPS", AUTOMAP_DB);
 
-	File* stream = fileOpen(path, "rb");
+	File *stream = fileOpen(path, "rb");
 	if (stream == NULL) {
 		debugPrint("\nAUTOMAP: Error opening database file for reading!\n");
 		debugPrint("Error continued: ReadAMList: path: %s", path);
@@ -1171,4 +1166,4 @@ void automapSetDisplayMap(int map, bool available) {
 	}
 }
 
-} // namespace fallout
+} // namespace Fallout2
