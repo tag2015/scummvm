@@ -7,6 +7,8 @@
 
 #include <algorithm>*/
 
+#include "fallout2/fallout2.h"
+
 #include "fallout2/art.h"
 #include "fallout2/automap.h"
 #include "fallout2/character_editor.h"
@@ -55,6 +57,9 @@
 #include "fallout2/window_manager.h"
 #include "fallout2/word_wrap.h"
 #include "fallout2/worldmap.h"
+
+#include "common/savefile.h"
+#include "common/str-array.h"
 
 namespace Fallout2 {
 
@@ -317,6 +322,8 @@ static char _gmpath[COMPAT_MAX_PATH];
 
 // 0x614808
 static File *_flptr;
+Common::OutSaveFile *newSave;
+Common::InSaveFile *loadSave;
 
 // 0x61480C
 static int _ls_error_code;
@@ -347,7 +354,7 @@ void _ResetLoadSave() {
 // SaveGame
 // 0x47B88C
 int lsgSaveGame(int mode) {
-/*	ScopedGameMode gm(GameMode::kSaveGame);  TODO savegame
+	ScopedGameMode gm(GameMode::kSaveGame);
 
 	MessageListItem messageListItem;
 
@@ -356,7 +363,7 @@ int lsgSaveGame(int mode) {
 
 	if (mode == LOAD_SAVE_MODE_QUICK && _quick_done) {
 		snprintf(_gmpath, sizeof(_gmpath), "%s\\%s%.2d\\", "SAVEGAME", "SLOT", _slot_cursor + 1);
-		strcat(_gmpath, "SAVE.DAT");
+		strcat_s(_gmpath, sizeof(_gmpath), "SAVE.DAT");
 
 		_flptr = fileOpen(_gmpath, "rb");
 		if (_flptr != NULL) {
@@ -393,12 +400,12 @@ int lsgSaveGame(int mode) {
 			return -1;
 		}
 
-		soundPlayFile("iisxxxx1");
+//		soundPlayFile("iisxxxx1"); TODO audio
 
 		// Error saving game!
-		strcpy(_str0, getmsg(&gLoadSaveMessageList, &messageListItem, 132));
+		strncpy(_str0, getmsg(&gLoadSaveMessageList, &messageListItem, 132), sizeof(_str0) - 1);
 		// Unable to save game.
-		strcpy(_str1, getmsg(&gLoadSaveMessageList, &messageListItem, 133));
+		strncpy(_str1, getmsg(&gLoadSaveMessageList, &messageListItem, 133), sizeof(_str1) - 1);
 
 		const char *body[] = {
 			_str1,
@@ -423,17 +430,17 @@ int lsgSaveGame(int mode) {
 	if (_GetSlotList() == -1) {
 		windowRefresh(gLoadSaveWindow);
 
-		soundPlayFile("iisxxxx1");
+//		soundPlayFile("iisxxxx1"); TODO audio
 
 		// Error loading save game list!
-		strcpy(_str0, getmsg(&gLoadSaveMessageList, &messageListItem, 106));
+		strncpy(_str0, getmsg(&gLoadSaveMessageList, &messageListItem, 106), sizeof(_str0) - 1);
 		// Save game directory:
-		strcpy(_str1, getmsg(&gLoadSaveMessageList, &messageListItem, 107));
+		strncpy(_str1, getmsg(&gLoadSaveMessageList, &messageListItem, 107), sizeof(_str1) - 1);
 
 		snprintf(_str2, sizeof(_str2), "\"%s\\\"", "SAVEGAME");
 
 		// TODO: Check.
-		strcpy(_str2, getmsg(&gLoadSaveMessageList, &messageListItem, 108));
+		strncpy(_str2, getmsg(&gLoadSaveMessageList, &messageListItem, 108), sizeof(_str2) - 1);
 
 		const char *body[] = {
 			_str1,
@@ -540,7 +547,7 @@ int lsgSaveGame(int mode) {
 
 					if (_slot_cursor == doubleClickSlot) {
 						keyCode = 500;
-						soundPlayFile("ib1p1xx1");
+//						soundPlayFile("ib1p1xx1"); TODO audio
 					}
 
 					doubleClickSlot = _slot_cursor;
@@ -703,13 +710,13 @@ int lsgSaveGame(int mode) {
 			int v50 = _GetComment(_slot_cursor);
 			if (v50 == -1) {
 				gameMouseSetCursor(MOUSE_CURSOR_ARROW);
-				soundPlayFile("iisxxxx1");
+//				soundPlayFile("iisxxxx1"); TODO audio
 				debugPrint("\nLOADSAVE: ** Error getting save file comment **\n");
 
 				// Error saving game!
-				strcpy(_str0, getmsg(&gLoadSaveMessageList, &gLoadSaveMessageListItem, 132));
+				strncpy(_str0, getmsg(&gLoadSaveMessageList, &gLoadSaveMessageListItem, 132), sizeof(_str0) - 1);
 				// Unable to save game.
-				strcpy(_str1, getmsg(&gLoadSaveMessageList, &gLoadSaveMessageListItem, 133));
+				strncpy(_str1, getmsg(&gLoadSaveMessageList, &gLoadSaveMessageListItem, 133), sizeof(_str1) - 1);
 
 				const char *body[1] = {
 					_str1,
@@ -720,14 +727,15 @@ int lsgSaveGame(int mode) {
 				gameMouseSetCursor(MOUSE_CURSOR_ARROW);
 				rc = -1;
 			} else if (v50 == 1) {
+				debug("Starting lsgPerformSaveGame!");
 				if (lsgPerformSaveGame() == -1) {
 					gameMouseSetCursor(MOUSE_CURSOR_ARROW);
-					soundPlayFile("iisxxxx1");
+//					soundPlayFile("iisxxxx1"); TODO audio
 
 					// Error saving game!
-					strcpy(_str0, getmsg(&gLoadSaveMessageList, &gLoadSaveMessageListItem, 132));
+					strncpy(_str0, getmsg(&gLoadSaveMessageList, &gLoadSaveMessageListItem, 132), sizeof(_str0) - 1);
 					// Unable to save game.
-					strcpy(_str1, getmsg(&gLoadSaveMessageList, &gLoadSaveMessageListItem, 133));
+					strncpy(_str1, getmsg(&gLoadSaveMessageList, &gLoadSaveMessageListItem, 133), sizeof(_str1) - 1);
 
 					rc = -1;
 
@@ -738,23 +746,23 @@ int lsgSaveGame(int mode) {
 
 					if (_GetSlotList() == -1) {
 						windowRefresh(gLoadSaveWindow);
-						soundPlayFile("iisxxxx1");
+//						soundPlayFile("iisxxxx1"); TODO audio
 
 						// Error loading save agme list!
-						strcpy(_str0, getmsg(&gLoadSaveMessageList, &gLoadSaveMessageListItem, 106));
+						strncpy(_str0, getmsg(&gLoadSaveMessageList, &gLoadSaveMessageListItem, 106), sizeof(_str0) - 1);
 						// Save game directory:
-						strcpy(_str1, getmsg(&gLoadSaveMessageList, &gLoadSaveMessageListItem, 107));
+//						strncpy(_str1, getmsg(&gLoadSaveMessageList, &gLoadSaveMessageListItem, 107), sizeof(_str1) - 1);
 
-						snprintf(_str2, sizeof(_str2), "\"%s\\\"", "SAVEGAME");
+//						snprintf(_str2, sizeof(_str2), "\"%s\\\"", "SAVEGAME");
 
-						char text[260];
+//						char text[260];
 						// Doesn't exist or is corrupted.
-						strcpy(text, getmsg(&gLoadSaveMessageList, &gLoadSaveMessageListItem, 107));
+//						strncpy(text, getmsg(&gLoadSaveMessageList, &gLoadSaveMessageListItem, 107), sizeof(text) - 1);
 
-						const char *body[2] = {
-							_str1,
+//						const char *body[2] = {
+//							_str1,
 							_str2,
-						};
+//						};
 						showDialogBox(_str0, body, 2, 169, 116, _colorTable[32328], NULL, _colorTable[32328], DIALOG_BOX_LARGE);
 
 						lsgWindowFree(0);
@@ -808,7 +816,7 @@ int lsgSaveGame(int mode) {
 		}
 	}
 
-	return rc;*/
+	return rc;
 }
 
 // 0x47C5B4
@@ -1503,96 +1511,123 @@ static int lsgWindowFree(int windowType) {
 
 // 0x47D88C
 static int lsgPerformSaveGame() {
-/*	_ls_error_code = 0; TODO savegame
+	_ls_error_code = 0;  // TODO save
 	_map_backup_count = -1;
 	gameMouseSetCursor(MOUSE_CURSOR_WAIT_PLANET);
 
-	backgroundSoundPause();
+//	backgroundSoundPause(); TODO audio
 
-	snprintf(_gmpath, sizeof(_gmpath), "%s\\%s", _patches, "SAVEGAME");
-	compat_mkdir(_gmpath);
+	Common::SaveFileManager *saveMan = g_system->getSavefileManager();
+	Common::String newSaveName(g_engine->getTargetName());
+	Common::String newSaveDat, newSaveCritters, newSaveItems;
 
-	snprintf(_gmpath, sizeof(_gmpath), "%s\\%s\\%s%.2d", _patches, "SAVEGAME", "SLOT", _slot_cursor + 1);
-	compat_mkdir(_gmpath);
+	char slotname[30];
+	Common::sprintf_s(slotname, "_slot%03d_", _slot_cursor + 1);
 
-	strcat(_gmpath, "\\" PROTO_DIR_NAME);
-	compat_mkdir(_gmpath);
+	newSaveName += slotname;
+	newSaveDat = newSaveName + "save.dat";
+	newSaveCritters = newSaveName + "critters.dat";
+	newSaveItems = newSaveName + "items.dat";
 
-	char *protoBasePath = _gmpath + strlen(_gmpath);
+//	snprintf(_gmpath, sizeof(_gmpath), "%s\\%s", _patches, "SAVEGAME");
+//	compat_mkdir(_gmpath);
 
-	strcpy(protoBasePath, "\\" CRITTERS_DIR_NAME);
-	compat_mkdir(_gmpath);
+//	snprintf(_gmpath, sizeof(_gmpath), "%s\\%s\\%s%.2d", _patches, "SAVEGAME", "SLOT", _slot_cursor + 1);
+//	compat_mkdir(_gmpath);
 
-	strcpy(protoBasePath, "\\" ITEMS_DIR_NAME);
-	compat_mkdir(_gmpath);
+//	strcat_s(_gmpath, sizeof(_gmpath), "\\" PROTO_DIR_NAME);
+//	compat_mkdir(_gmpath);
 
-	if (_SaveBackup() == -1) {
-		debugPrint("\nLOADSAVE: Warning, can't backup save file!\n");
+//	char *protoBasePath = _gmpath + strlen(_gmpath);
+
+//	strncpy(protoBasePath, "\\" CRITTERS_DIR_NAME, sizeof(protoBasePath) - 1);
+//	compat_mkdir(_gmpath);
+
+//	strncpy(protoBasePath, "\\" ITEMS_DIR_NAME, sizeof(protoBasePath) - 1);
+//	compat_mkdir(_gmpath);
+
+//	if (_SaveBackup() == -1) {
+//		debugPrint("\nLOADSAVE: Warning, can't backup save file!\n");
+//	}
+
+//	snprintf(_gmpath, sizeof(_gmpath), "%s\\%s%.2d\\", "SAVEGAME", "SLOT", _slot_cursor + 1);
+//	strcat_s(_gmpath, sizeof(_gmpath), "SAVE.DAT");
+
+//	debugPrint("\nLOADSAVE: Save name: %s\n", _gmpath);
+	debugPrint("\nLOADSAVE: Save Dat: %s", newSaveDat.c_str());
+	debugPrint("\nLOADSAVE: Save Proto Critters: %s", newSaveCritters.c_str());
+	debugPrint("\nLOADSAVE: Save Proto Items: %s", newSaveItems.c_str());
+
+	newSave = saveMan->openForSaving(newSaveDat, false);
+	if(newSave == NULL)
+		return -1;
+
+	if (lsgSaveHeaderInSlot(_slot_cursor) == -1) {
+		debugPrint("\nLOADSAVE: ** Error writing save game header! **\n");
+		return -1;
 	}
 
-	snprintf(_gmpath, sizeof(_gmpath), "%s\\%s%.2d\\", "SAVEGAME", "SLOT", _slot_cursor + 1);
-	strcat(_gmpath, "SAVE.DAT");
+	debugPrint("Written header!");
+	return -1;
 
-	debugPrint("\nLOADSAVE: Save name: %s\n", _gmpath);
-
-	_flptr = fileOpen(_gmpath, "wb");
-	if (_flptr == NULL) {
+//	_flptr = fileOpen(_gmpath, "wb");
+/*	if (_flptr == NULL) {
 		debugPrint("\nLOADSAVE: ** Error opening save game for writing! **\n");
 		_RestoreSave();
 		snprintf(_gmpath, sizeof(_gmpath), "%s\\%s%.2d\\", "SAVEGAME", "SLOT", _slot_cursor + 1);
 		_MapDirErase(_gmpath, "BAK");
 		_partyMemberUnPrepSave();
-		backgroundSoundResume();
+//		backgroundSoundResume(); TODO audio
 		return -1;
-	}
+	}*/
 
-	long pos = fileTell(_flptr);
-	if (lsgSaveHeaderInSlot(_slot_cursor) == -1) {
-		debugPrint("\nLOADSAVE: ** Error writing save game header! **\n");
-		debugPrint("LOADSAVE: Save file header size written: %d bytes.\n", fileTell(_flptr) - pos);
-		fileClose(_flptr);
-		_RestoreSave();
-		snprintf(_gmpath, sizeof(_gmpath), "%s\\%s%.2d\\", "SAVEGAME", "SLOT", _slot_cursor + 1);
-		_MapDirErase(_gmpath, "BAK");
-		_partyMemberUnPrepSave();
-		backgroundSoundResume();
-		return -1;
-	}
+//	long pos = fileTell(_flptr);
+//	if (lsgSaveHeaderInSlot(_slot_cursor) == -1) {
+//		debugPrint("\nLOADSAVE: ** Error writing save game header! **\n");
+//		debugPrint("LOADSAVE: Save file header size written: %d bytes.\n", fileTell(_flptr) - pos);
+//		fileClose(_flptr);
+//		_RestoreSave();
+//		snprintf(_gmpath, sizeof(_gmpath), "%s\\%s%.2d\\", "SAVEGAME", "SLOT", _slot_cursor + 1);
+//		_MapDirErase(_gmpath, "BAK");
+//		_partyMemberUnPrepSave();
+//		backgroundSoundResume(); TODO audio
+//		return -1;
+//	}
 
-	for (int index = 0; index < LOAD_SAVE_HANDLER_COUNT; index++) {
-		long pos = fileTell(_flptr);
-		SaveGameHandler *handler = _master_save_list[index];
-		if (handler(_flptr) == -1) {
-			debugPrint("\nLOADSAVE: ** Error writing save function #%d data! **\n", index);
-			fileClose(_flptr);
-			_RestoreSave();
-			snprintf(_gmpath, sizeof(_gmpath), "%s\\%s%.2d\\", "SAVEGAME", "SLOT", _slot_cursor + 1);
-			_MapDirErase(_gmpath, "BAK");
-			_partyMemberUnPrepSave();
-			backgroundSoundResume();
-			return -1;
-		}
+//	for (int index = 0; index < LOAD_SAVE_HANDLER_COUNT; index++) {
+//		long pos = fileTell(_flptr);
+//		SaveGameHandler *handler = _master_save_list[index];
+//		if (handler(_flptr) == -1) {
+//			debugPrint("\nLOADSAVE: ** Error writing save function #%d data! **\n", index);
+//			fileClose(_flptr);
+//			_RestoreSave();
+// 			snprintf(_gmpath, sizeof(_gmpath), "%s\\%s%.2d\\", "SAVEGAME", "SLOT", _slot_cursor + 1);
+// 			_MapDirErase(_gmpath, "BAK");
+// 			_partyMemberUnPrepSave();
+// //			backgroundSoundResume(); TODO audio
+// 			return -1;
+// 		}
 
-		debugPrint("LOADSAVE: Save function #%d data size written: %d bytes.\n", index, fileTell(_flptr) - pos);
-	}
+// 		debugPrint("LOADSAVE: Save function #%d data size written: %d bytes.\n", index, fileTell(_flptr) - pos);
+// 	}
 
-	debugPrint("LOADSAVE: Total save data written: %ld bytes.\n", fileTell(_flptr));
+//	debugPrint("LOADSAVE: Total save data written: %ld bytes.\n", fileTell(_flptr));
 
-	fileClose(_flptr);
+//	fileClose(_flptr);
 
-	snprintf(_gmpath, sizeof(_gmpath), "%s\\%s%.2d\\", "SAVEGAME", "SLOT", _slot_cursor + 1);
-	_MapDirErase(_gmpath, "BAK");
+//	snprintf(_gmpath, sizeof(_gmpath), "%s\\%s%.2d\\", "SAVEGAME", "SLOT", _slot_cursor + 1);
+//	_MapDirErase(_gmpath, "BAK");
 
-	gLoadSaveMessageListItem.num = 140;
-	if (messageListGetItem(&gLoadSaveMessageList, &gLoadSaveMessageListItem)) {
-		displayMonitorAddMessage(gLoadSaveMessageListItem.text);
-	} else {
-		debugPrint("\nError: Couldn't find LoadSave Message!");
-	}
+	// gLoadSaveMessageListItem.num = 140;
+	// if (messageListGetItem(&gLoadSaveMessageList, &gLoadSaveMessageListItem)) {
+	// 	displayMonitorAddMessage(gLoadSaveMessageListItem.text);
+	// } else {
+	// 	debugPrint("\nError: Couldn't find LoadSave Message!");
+	// }
 
-	backgroundSoundResume();
+//	backgroundSoundResume(); TODO audio
 
-	return 0;*/
+	return 0;
 }
 
 // 0x47DC60
@@ -1672,14 +1707,12 @@ static int lsgLoadGameInSlot(int slot) {
 
 // 0x47DF10
 static int lsgSaveHeaderInSlot(int slot) {
-/*	_ls_error_code = 4; TODO save header
 
+	_ls_error_code = 4;
 	STRUCT_613D30 *ptr = &(_LSData[slot]);
 	strncpy(ptr->field_0, "FALLOUT SAVE FILE", 24);
 
-	if (fileWrite(ptr->field_0, 1, 24, _flptr) == -1) {
-		return -1;
-	}
+	newSave->write(ptr->field_0, 24);
 
 	short temp[3];
 	temp[0] = VERSION_MAJOR;
@@ -1687,47 +1720,37 @@ static int lsgSaveHeaderInSlot(int slot) {
 
 	ptr->field_18 = temp[0];
 	ptr->field_1A = temp[1];
-
-	if (fileWriteInt16List(_flptr, temp, 2) == -1) {
-		return -1;
-	}
-
 	ptr->field_1C = VERSION_RELEASE;
-	if (fileWriteUInt8(_flptr, VERSION_RELEASE) == -1) {
-		return -1;
-	}
+
+	newSave->writeUint16BE(temp[0]);
+	newSave->writeUint16BE(temp[1]);
+	newSave->writeByte(VERSION_RELEASE);
 
 	char *characterName = critterGetName(gDude);
 	strncpy(ptr->character_name, characterName, 32);
+	newSave->write(ptr->character_name, 32);
 
-	if (fileWrite(ptr->character_name, 32, 1, _flptr) != 1) {
-		return -1;
-	}
+	newSave->write(ptr->description, 30);
 
-	if (fileWrite(ptr->description, 30, 1, _flptr) != 1) {
-		return -1;
-	}
+	// Save system time
+	TimeDate local;
+	g_system->getTimeAndDate(local);
 
-	time_t now = time(NULL);
-	struct tm *local = localtime(&now);
-
-	temp[0] = local->tm_mday;
-	temp[1] = local->tm_mon + 1;
-	temp[2] = local->tm_year + 1900;
+	temp[0] = local.tm_mday;
+	temp[1] = local.tm_mon + 1;
+	temp[2] = local.tm_year + 1900;
 
 	ptr->field_5E = temp[0];
 	ptr->field_5C = temp[1];
 	ptr->field_60 = temp[2];
-	ptr->field_64 = local->tm_hour + local->tm_min;
+	ptr->field_64 = local.tm_hour + local.tm_min;
 
-	if (fileWriteInt16List(_flptr, temp, 3) == -1) {
-		return -1;
-	}
+	newSave->writeUint16BE(temp[0]);
+	newSave->writeUint16BE(temp[1]);
+	newSave->writeUint16BE(temp[2]);
+	newSave->writeUint32BE(ptr->field_64);
 
-	if (_db_fwriteLong(_flptr, ptr->field_64) == -1) {
-		return -1;
-	}
-
+	// Save game time
 	int month;
 	int day;
 	int year;
@@ -1738,46 +1761,144 @@ static int lsgSaveHeaderInSlot(int slot) {
 	temp[2] = year;
 	ptr->field_70 = gameTimeGetTime();
 
-	if (fileWriteInt16List(_flptr, temp, 3) == -1) {
-		return -1;
-	}
-
-	if (_db_fwriteLong(_flptr, ptr->field_70) == -1) {
-		return -1;
-	}
+	newSave->writeUint16BE(temp[0]);
+	newSave->writeUint16BE(temp[1]);
+	newSave->writeUint16BE(temp[2]);
+	newSave->writeUint32BE(ptr->field_70);
 
 	ptr->field_74 = gElevation;
-	if (fileWriteInt16(_flptr, ptr->field_74) == -1) {
-		return -1;
-	}
+	newSave->writeUint16BE(ptr->field_74);
 
 	ptr->field_76 = mapGetCurrentMap();
-	if (fileWriteInt16(_flptr, ptr->field_76) == -1) {
-		return -1;
-	}
+	newSave->writeUint16BE(ptr->field_76);
 
 	char mapName[128];
-	strcpy(mapName, gMapHeader.name);
+	strncpy(mapName, gMapHeader.name, sizeof(mapName) - 1);
 
 	// NOTE: Uppercased from "sav".
 	char *v1 = _strmfe(_str, mapName, "SAV");
 	strncpy(ptr->file_name, v1, 16);
-	if (fileWrite(ptr->file_name, 16, 1, _flptr) != 1) {
-		return -1;
-	}
+	newSave->write(ptr->file_name, 16);
 
-	if (fileWrite(_snapshotBuf, LS_PREVIEW_SIZE, 1, _flptr) != 1) {
-		return -1;
-	}
+	newSave->write(_snapshotBuf, LS_PREVIEW_SIZE);
 
 	memset(mapName, 0, 128);
-	if (fileWrite(mapName, 1, 128, _flptr) != 128) {
-		return -1;
-	}
+	newSave->write(mapName, 128);
 
 	_ls_error_code = 0;
 
-	return 0;*/
+	return 0;
+
+	//	if (fileWrite(ptr->field_0, 1, 24, _flptr) == -1) {
+	//		return -1;
+	//	}
+
+	/*	_ls_error_code = 4; TODO save header
+
+		STRUCT_613D30 *ptr = &(_LSData[slot]);
+		strncpy(ptr->field_0, "FALLOUT SAVE FILE", 24);
+
+		if (fileWrite(ptr->field_0, 1, 24, _flptr) == -1) {
+			return -1;
+		}
+
+		short temp[3];
+		temp[0] = VERSION_MAJOR;
+		temp[1] = VERSION_MINOR;
+
+		ptr->field_18 = temp[0];
+		ptr->field_1A = temp[1];
+
+		if (fileWriteInt16List(_flptr, temp, 2) == -1) {
+			return -1;
+		}
+
+		ptr->field_1C = VERSION_RELEASE;
+		if (fileWriteUInt8(_flptr, VERSION_RELEASE) == -1) {
+			return -1;
+		}
+
+		char *characterName = critterGetName(gDude);
+		strncpy(ptr->character_name, characterName, 32);
+
+		if (fileWrite(ptr->character_name, 32, 1, _flptr) != 1) {
+			return -1;
+		}
+
+		if (fileWrite(ptr->description, 30, 1, _flptr) != 1) {
+			return -1;
+		}
+
+		time_t now = time(NULL);
+		struct tm *local = localtime(&now);
+
+		temp[0] = local->tm_mday;
+		temp[1] = local->tm_mon + 1;
+		temp[2] = local->tm_year + 1900;
+
+		ptr->field_5E = temp[0];
+		ptr->field_5C = temp[1];
+		ptr->field_60 = temp[2];
+		ptr->field_64 = local->tm_hour + local->tm_min;
+
+		if (fileWriteInt16List(_flptr, temp, 3) == -1) {
+			return -1;
+		}
+
+		if (_db_fwriteLong(_flptr, ptr->field_64) == -1) {
+			return -1;
+		}
+
+		int month;
+		int day;
+		int year;
+		gameTimeGetDate(&month, &day, &year);
+
+		temp[0] = month;
+		temp[1] = day;
+		temp[2] = year;
+		ptr->field_70 = gameTimeGetTime();
+
+		if (fileWriteInt16List(_flptr, temp, 3) == -1) {
+			return -1;
+		}
+
+		if (_db_fwriteLong(_flptr, ptr->field_70) == -1) {
+			return -1;
+		}
+
+		ptr->field_74 = gElevation;
+		if (fileWriteInt16(_flptr, ptr->field_74) == -1) {
+			return -1;
+		}
+
+		ptr->field_76 = mapGetCurrentMap();
+		if (fileWriteInt16(_flptr, ptr->field_76) == -1) {
+			return -1;
+		}
+
+		char mapName[128];
+		strcpy(mapName, gMapHeader.name);
+
+		// NOTE: Uppercased from "sav".
+		char *v1 = _strmfe(_str, mapName, "SAV");
+		strncpy(ptr->file_name, v1, 16);
+		if (fileWrite(ptr->file_name, 16, 1, _flptr) != 1) {
+			return -1;
+		}
+
+		if (fileWrite(_snapshotBuf, LS_PREVIEW_SIZE, 1, _flptr) != 1) {
+			return -1;
+		}
+
+		memset(mapName, 0, 128);
+		if (fileWrite(mapName, 1, 128, _flptr) != 128) {
+			return -1;
+		}
+
+		_ls_error_code = 0;
+
+		return 0;*/
 }
 
 // 0x47E2E4
@@ -1786,9 +1907,12 @@ static int lsgLoadHeaderInSlot(int slot) {
 
 	STRUCT_613D30 *ptr = &(_LSData[slot]);
 
-	if (fileRead(ptr->field_0, 1, 24, _flptr) != 24) {
+	if(loadSave->read(ptr->field_0, 24) != 24)
 		return -1;
-	}
+
+//	if (fileRead(ptr->field_0, 1, 24, _flptr) != 24) {
+//		return -1;
+//	}
 
 	if (strncmp(ptr->field_0, "FALLOUT SAVE FILE", 18) != 0) {
 		debugPrint("\nLOADSAVE: ** Invalid save file on load! **\n");
@@ -1797,16 +1921,21 @@ static int lsgLoadHeaderInSlot(int slot) {
 	}
 
 	short v8[3];
-	if (fileReadInt16List(_flptr, v8, 2) == -1) {
-		return -1;
-	}
+	v8[0]=loadSave->readUint16BE();
+	v8[1]=loadSave->readUint16BE();
+
+//	if (fileReadInt16List(_flptr, v8, 2) == -1) {
+//		return -1;
+//	}
 
 	ptr->field_18 = v8[0];
 	ptr->field_1A = v8[1];
 
-	if (fileReadUInt8(_flptr, &(ptr->field_1C)) == -1) {
-		return -1;
-	}
+	ptr->field_1C = loadSave->readByte();
+
+//	if (fileReadUInt8(_flptr, &(ptr->field_1C)) == -1) {
+//		return -1;
+//	}
 
 	if (ptr->field_18 != 1 || ptr->field_1A != 2 || ptr->field_1C != 'R') {
 		debugPrint("\nLOADSAVE: Load slot #%d Version: %d.%d%c\n", slot, ptr->field_18, ptr->field_1A, ptr->field_1C);
@@ -1814,79 +1943,135 @@ static int lsgLoadHeaderInSlot(int slot) {
 		return -1;
 	}
 
-	if (fileRead(ptr->character_name, 32, 1, _flptr) != 1) {
+	if(loadSave->read(ptr->character_name, 32) != 32) {
 		return -1;
 	}
 
-	if (fileRead(ptr->description, 30, 1, _flptr) != 1) {
+//	if (fileRead(ptr->character_name, 32, 1, _flptr) != 1) {
+//		return -1;
+//	}
+
+	if(loadSave->read(ptr->description, 30) != 30) {
 		return -1;
 	}
 
-	if (fileReadInt16List(_flptr, v8, 3) == -1) {
-		return -1;
-	}
+//	if (fileRead(ptr->description, 30, 1, _flptr) != 1) {
+//		return -1;
+//	}
+
+	v8[0] = loadSave->readUint16BE();
+	v8[1] = loadSave->readUint16BE();
+	v8[2] = loadSave->readUint16BE();
+
+//	if (fileReadInt16List(_flptr, v8, 3) == -1) {
+//		return -1;
+//	}
 
 	ptr->field_5C = v8[0];
 	ptr->field_5E = v8[1];
 	ptr->field_60 = v8[2];
 
-	if (_db_freadInt(_flptr, &(ptr->field_64)) == -1) {
-		return -1;
-	}
+	ptr->field_64 = loadSave->readUint32BE();
+//	if (_db_freadInt(_flptr, &(ptr->field_64)) == -1) {
+//		return -1;
+//	}
 
-	if (fileReadInt16List(_flptr, v8, 3) == -1) {
-		return -1;
-	}
+	v8[0] = loadSave->readUint16BE();
+	v8[1] = loadSave->readUint16BE();
+	v8[2] = loadSave->readUint16BE();
+
+//	if (fileReadInt16List(_flptr, v8, 3) == -1) {
+//		return -1;
+//	}
 
 	ptr->field_68 = v8[0];
 	ptr->field_6A = v8[1];
 	ptr->field_6C = v8[2];
 
-	if (_db_freadInt(_flptr, &(ptr->field_70)) == -1) {
-		return -1;
-	}
+	ptr->field_70 = loadSave->readUint32BE();
+//	if (_db_freadInt(_flptr, &(ptr->field_70)) == -1) {
+//		return -1;
+//	}
 
-	if (fileReadInt16(_flptr, &(ptr->field_74)) == -1) {
-		return -1;
-	}
+	ptr->field_74 = loadSave->readUint16BE();
+//	if (fileReadInt16(_flptr, &(ptr->field_74)) == -1) {
+//		return -1;
+//	}
 
-	if (fileReadInt16(_flptr, &(ptr->field_76)) == -1) {
-		return -1;
-	}
+	ptr->field_76 = loadSave->readUint16BE();
+//	if (fileReadInt16(_flptr, &(ptr->field_76)) == -1) {
+//		return -1;
+//	}
 
-	if (fileRead(ptr->file_name, 1, 16, _flptr) != 16) {
+	if(loadSave->read(ptr->file_name, 16) != 16) {
 		return -1;
 	}
+//	if (fileRead(ptr->file_name, 1, 16, _flptr) != 16) {
+//		return -1;
+//	}
 
-	if (fileSeek(_flptr, LS_PREVIEW_SIZE, SEEK_CUR) != 0) {
+	if(!loadSave->seek(LS_PREVIEW_SIZE, SEEK_CUR)) {
 		return -1;
 	}
+//	if (fileSeek(_flptr, LS_PREVIEW_SIZE, SEEK_CUR) != 0) {
+//		return -1;
+//	}
 
-	if (fileSeek(_flptr, 128, 1) != 0) {
+	if(!loadSave->seek(128, SEEK_CUR)) {
 		return -1;
 	}
+//	if (fileSeek(_flptr, 128, 1) != 0) {
+//		return -1;
+//	}
 
 	_ls_error_code = 0;
-
+	debug("HEADER READ!");
 	return 0;
 }
 
 // 0x47E5D0
 static int _GetSlotList() {
+	Common::SaveFileManager *saveMan = g_system->getSavefileManager();
+
+	Common::String pattern = g_engine->getTargetName();
+	pattern += "_slot???_save.dat";
+
+	Common::StringArray filenames;
+	filenames = saveMan->listSavefiles(pattern);
+
 	int index = 0;
 	for (; index < 10; index += 1) {
-		snprintf(_str, sizeof(_str), "%s\\%s%.2d\\%s", "SAVEGAME", "SLOT", index + 1, "SAVE.DAT");
+//		snprintf(_str, sizeof(_str), "%s\\%s%.2d\\%s", "SAVEGAME", "SLOT", index + 1, "SAVE.DAT");
+
+		char index_tmp[4];
+		snprintf(index_tmp, sizeof(index_tmp), "%03d", index);
+		Common::StringArray::const_iterator filename;
+		for (filename = filenames.begin(); filename != filenames.end() && !filename->contains(index_tmp); ++filename)
+			;
+
+		debug("Looking for file %s", index_tmp);
 
 		int fileSize;
-		if (dbGetFileSize(_str, &fileSize) != 0) {
+		if (/*dbGetFileSize(_str, &fileSize) != 0*/ !filename->contains(index_tmp)) {
+			debug("slot is empty!");
 			_LSstatus[index] = SLOT_STATE_EMPTY;
 		} else {
-			_flptr = fileOpen(_str, "rb");
+			strncpy(_str, filename->c_str(), COMPAT_MAX_PATH - 1);
+			debug("found save in slot %d", index);
 
-			if (_flptr == NULL) {
+
+			loadSave = saveMan->openForLoading(filename->c_str());
+			if (loadSave == NULL) {
 				debugPrint("\nLOADSAVE: ** Error opening save  game for reading! **\n");
 				return -1;
 			}
+
+			// _flptr = fileOpen(_str, "rb");
+
+			// if (_flptr == NULL) {
+			// 	debugPrint("\nLOADSAVE: ** Error opening save  game for reading! **\n");
+			// 	return -1;
+			// }
 
 			if (lsgLoadHeaderInSlot(index) == -1) {
 				if (_ls_error_code == 1) {
@@ -1900,7 +2085,7 @@ static int _GetSlotList() {
 				_LSstatus[index] = SLOT_STATE_OCCUPIED;
 			}
 
-			fileClose(_flptr);
+			// fileClose(_flptr);
 		}
 	}
 	return index;
@@ -2196,7 +2381,7 @@ static int _get_input_str2(int win, int doneKeyCode, int cancelKeyCode, char *de
 	windowRefresh(win);
 	renderPresent();
 
-	beginTextInput();
+/*	beginTextInput(); TODO kb
 
 	int blinkCounter = 3;
 	bool blink = false;
@@ -2267,8 +2452,11 @@ static int _get_input_str2(int win, int doneKeyCode, int cancelKeyCode, char *de
 		sharedFpsLimiter.throttle();
 	}
 
-	endTextInput();
+	endTextInput();*/
 
+	strncpy(text, "New Save", sizeof(text) - 1); // TODO remove
+	textLength = strlen(text);  // TODO remove
+	int rc = 0;  // TODO remove
 	if (rc == 0) {
 		text[textLength] = '\0';
 		strncpy(description, text, LOAD_SAVE_DESCRIPTION_LENGTH - 1);
