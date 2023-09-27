@@ -96,6 +96,8 @@ public:
 		return syncGame(s);
 	}
 
+	Common::String getTargetName() const;
+
 	void showSplash();
 };
 
