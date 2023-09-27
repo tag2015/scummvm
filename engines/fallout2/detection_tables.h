@@ -33,7 +33,7 @@ const ADGameDescription gameDescriptions[] = {
 		AD_ENTRY1s("critter.dat", "3d1634029b7806cfeb24c9e93ded578f", 166951131),
 		Common::EN_ANY,
 		Common::kPlatformWindows,
-		ADGF_UNSTABLE,
+		ADGF_UNSTABLE | ADGF_DROPPLATFORM,
 		GUIO1(GUIO_NONE)
 	},
 
