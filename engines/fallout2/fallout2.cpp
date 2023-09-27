@@ -651,4 +651,8 @@ Common::Error Fallout2Engine::syncGame(Common::Serializer &s) {
 	return Common::kNoError;
 }
 
+Common::String Fallout2Engine::getTargetName() const {
+	return _targetName;
+}
+
 } // End of namespace Fallout2
