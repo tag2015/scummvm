@@ -450,7 +450,7 @@ int showPause(bool a1) {
 			brightnessDecrease();
 			break;
 		default:
-			if (keyCode != -1 && keyCode != -2) {
+			if (keyCode == KEY_SPACE || keyCode == KEY_RETURN || keyCode == KEY_ESCAPE) {
 				done = true;
 			}
 
