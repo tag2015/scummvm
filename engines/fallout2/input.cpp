@@ -376,7 +376,7 @@ static void pauseGame() {
 
 // 0x4C8E38
 static int pauseHandlerDefaultImpl() {
-/*	int windowWidth = fontGetStringWidth("Paused") + 32; TODO pause window_manager.cpp
+	int windowWidth = fontGetStringWidth("Paused") + 32;
 	int windowHeight = 3 * fontGetLineHeight() + 16;
 
 	int win = windowCreate((rectGetWidth(&_scr_size) - windowWidth) / 2,
@@ -410,7 +410,7 @@ static int pauseHandlerDefaultImpl() {
 
 	windowRefresh(win);
 
-	return win; */
+	return win;
 }
 
 // 0x4C8F34
