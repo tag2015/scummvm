@@ -623,8 +623,6 @@ int gameHandleKey(int eventCode, bool isInCombatMode) {
 		// pause
 		if ((gPressedPhysicalKeys[Common::KEYCODE_RCTRL] == 1) || (gPressedPhysicalKeys[Common::KEYCODE_LCTRL] == 1)) {
 			//		soundPlayFile("ib1p1xx1"); TODO audio
-			gPressedPhysicalKeys[Common::KEYCODE_RCTRL] = gPressedPhysicalKeys[Common::KEYCODE_LCTRL] = 0; // debounce
-			g_system->delayMillis(50);
 			showPause(false);
 			break;
 		}
