@@ -17,6 +17,7 @@ typedef struct MouseData {
 
 typedef struct KeyboardData {
 	int key;
+	int ascii;
 	char down;
 } KeyboardData;
 
