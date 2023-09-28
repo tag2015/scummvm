@@ -547,8 +547,12 @@ int gameHandleKey(int eventCode, bool isInCombatMode) {
 			_gmouse_handle_event(mouseX, mouseY, mouseEvent);
 		}
 		break;
-	case KEY_CTRL_Q:
-	case KEY_CTRL_X:
+	case KEY_LOWERCASE_Q:
+	case KEY_UPPERCASE_Q:
+	case KEY_LOWERCASE_X:
+	case KEY_UPPERCASE_X:
+		if ((gPressedPhysicalKeys[Common::KEYCODE_RCTRL] == 0) && (gPressedPhysicalKeys[Common::KEYCODE_LCTRL] == 0))
+			break;
 	case KEY_F10:
 //		soundPlayFile("ib1p1xx1"); TODO audio
 		showQuitConfirmationDialog();
@@ -558,10 +562,6 @@ int gameHandleKey(int eventCode, bool isInCombatMode) {
 //			soundPlayFile("ib1p1xx1"); TODO audio
 			automapShow(true, false);
 		}
-		break;
-	case KEY_CTRL_P:
-//		soundPlayFile("ib1p1xx1"); TODO audio
-		showPause(false);
 		break;
 	case KEY_UPPERCASE_A:
 	case KEY_LOWERCASE_A:
@@ -620,6 +620,14 @@ int gameHandleKey(int eventCode, bool isInCombatMode) {
 		break;
 	case KEY_UPPERCASE_P:
 	case KEY_LOWERCASE_P:
+		// pause
+		if ((gPressedPhysicalKeys[Common::KEYCODE_RCTRL] == 1) || (gPressedPhysicalKeys[Common::KEYCODE_LCTRL] == 1)) {
+			//		soundPlayFile("ib1p1xx1"); TODO audio
+			gPressedPhysicalKeys[Common::KEYCODE_RCTRL] = gPressedPhysicalKeys[Common::KEYCODE_LCTRL] = 0; // debounce
+			g_system->delayMillis(50);
+			showPause(false);
+			break;
+		}
 		// pipboy
 		if (interfaceBarEnabled()) {
 			if (isInCombatMode) {
@@ -888,16 +896,17 @@ int gameHandleKey(int eventCode, bool isInCombatMode) {
 			}
 		}
 		break;
-	case KEY_CTRL_V:
-		if (1) {
-//			soundPlayFile("ib1p1xx1"); TODO audio
+	case KEY_UPPERCASE_V:
+	case KEY_LOWERCASE_V: {
+		if ((gPressedPhysicalKeys[Common::KEYCODE_RCTRL] == 0) && (gPressedPhysicalKeys[Common::KEYCODE_LCTRL] == 0))
+			break;
+		//	soundPlayFile("ib1p1xx1"); TODO audio
 
-			char version[VERSION_MAX];
-			versionGetVersion(version, sizeof(version));
-			displayMonitorAddMessage(version);
-			displayMonitorAddMessage(_aDec11199816543);
-		}
-		break;
+		char version[VERSION_MAX];
+		versionGetVersion(version, sizeof(version));
+		displayMonitorAddMessage(version);
+		displayMonitorAddMessage(_aDec11199816543);
+	} break;
 	case KEY_ARROW_LEFT:
 		mapScroll(-1, 0);
 		break;
