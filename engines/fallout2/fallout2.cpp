@@ -45,6 +45,7 @@
 #include "fallout2/db.h"
 #include "fallout2/debug.h"
 #include "fallout2/draw.h"
+#include "fallout2/endgame.h"
 #include "fallout2/font_manager.h"
 #include "fallout2/game.h"
 #include "fallout2/game_dialog.h"
@@ -54,6 +55,7 @@
 #include "fallout2/input.h"
 #include "fallout2/inventory.h"
 #include "fallout2/item.h"
+#include "fallout2/kb.h"
 #include "fallout2/loadsave.h"
 #include "fallout2/map.h"
 #include "fallout2/mainmenu.h"
@@ -83,9 +85,12 @@
 #include "fallout2/win32.h"
 #include "fallout2/window.h"
 #include "fallout2/window_manager.h"
+#include "fallout2/word_wrap.h"
 #include "fallout2/worldmap.h"
 
 #define SPLASH_COUNT (10)
+#define DEATH_WINDOW_WIDTH 640
+#define DEATH_WINDOW_HEIGHT 480
 
 namespace Fallout2 {
 
@@ -110,6 +115,13 @@ Common::String Fallout2Engine::getGameId() const {
 
 static char _mainMap[] = "artemple.map";
 static int _main_game_paused = 0;
+static bool _main_show_death_scene = false;
+static bool _main_death_voiceover_done;
+
+static void showDeath();
+static void _main_death_voiceover_callback();
+static int _mainDeathGrabTextFile(const char *fileName, char *dest);
+static int _mainDeathWordWrap(char *text, int width, short *beginnings, short *count);
 
 void Fallout2Engine::showSplash() {
 	int splash = settings.system.splash;
@@ -236,6 +248,218 @@ void Fallout2Engine::showSplash() {
 	internal_free(palette);
 
 	settings.system.splash = splash + 1;
+}
+
+static void showDeath() {
+	artCacheFlush();
+	colorCycleDisable();
+	gameMouseSetCursor(MOUSE_CURSOR_NONE);
+
+	bool oldCursorIsHidden = cursorIsHidden();
+	if (oldCursorIsHidden) {
+		mouseShowCursor();
+	}
+
+	int deathWindowX = (screenGetWidth() - DEATH_WINDOW_WIDTH) / 2;
+	int deathWindowY = (screenGetHeight() - DEATH_WINDOW_HEIGHT) / 2;
+	int win = windowCreate(deathWindowX,
+						   deathWindowY,
+						   DEATH_WINDOW_WIDTH,
+						   DEATH_WINDOW_HEIGHT,
+						   0,
+						   WINDOW_MOVE_ON_TOP);
+	if (win != -1) {
+		do {
+			unsigned char *windowBuffer = windowGetBuffer(win);
+			if (windowBuffer == NULL) {
+				break;
+			}
+
+			// DEATH.FRM
+			FrmImage backgroundFrmImage;
+			int fid = buildFid(OBJ_TYPE_INTERFACE, 309, 0, 0, 0);
+			if (!backgroundFrmImage.lock(fid)) {
+				break;
+			}
+
+			while (mouseGetEvent() != 0) {
+				sharedFpsLimiter.mark();
+
+				inputGetInput();
+
+				renderPresent();
+				sharedFpsLimiter.throttle();
+			}
+
+			keyboardReset();
+			inputEventQueueReset();
+
+			blitBufferToBuffer(backgroundFrmImage.getData(), 640, 480, 640, windowBuffer, 640);
+			backgroundFrmImage.unlock();
+
+			const char *deathFileName = endgameDeathEndingGetFileName();
+
+			if (settings.preferences.subtitles) {
+				char text[512];
+				if (_mainDeathGrabTextFile(deathFileName, text) == 0) {
+					debugPrint("\n((ShowDeath)): %s\n", text);
+
+					short beginnings[WORD_WRAP_MAX_COUNT];
+					short count;
+					if (_mainDeathWordWrap(text, 560, beginnings, &count) == 0) {
+						unsigned char *p = windowBuffer + 640 * (480 - fontGetLineHeight() * count - 8);
+						bufferFill(p - 602, 564, fontGetLineHeight() * count + 2, 640, 0);
+						p += 40;
+						for (int index = 0; index < count; index++) {
+							fontDrawText(p, text + beginnings[index], 560, 640, _colorTable[32767]);
+							p += 640 * fontGetLineHeight();
+						}
+					}
+				}
+			}
+
+			windowRefresh(win);
+
+			colorPaletteLoad("art\\intrface\\death.pal");
+			paletteFadeTo(_cmap);
+
+			_main_death_voiceover_done = false;
+//			speechSetEndCallback(_main_death_voiceover_callback); TODO audio
+
+			unsigned int delay;
+//			if (speechLoad(deathFileName, 10, 14, 15) == -1) { TODO audio
+//				delay = 3000;
+//			} else {
+				delay = UINT_MAX;
+//			}
+
+//			_gsound_speech_play_preloaded(); TODO audio
+
+			// SFALL: Fix the playback of the speech sound file for the death
+			// screen.
+			inputBlockForTocks(100);
+
+			unsigned int time = getTicks();
+			int keyCode;
+			do {
+				sharedFpsLimiter.mark();
+
+				keyCode = inputGetInput();
+
+				renderPresent();
+				sharedFpsLimiter.throttle();
+			} while (keyCode == -1 && !_main_death_voiceover_done && getTicksSince(time) < delay);
+
+//			speechSetEndCallback(NULL); TODO audio
+
+//			speechDelete();
+
+			while (mouseGetEvent() != 0) {
+				sharedFpsLimiter.mark();
+
+				inputGetInput();
+
+				renderPresent();
+				sharedFpsLimiter.throttle();
+			}
+
+			if (keyCode == -1) {
+				inputPauseForTocks(500);
+			}
+
+			paletteFadeTo(gPaletteBlack);
+			colorPaletteLoad("color.pal");
+		} while (0);
+		windowDestroy(win);
+	}
+
+	if (oldCursorIsHidden) {
+		mouseHideCursor();
+	}
+
+	gameMouseSetCursor(MOUSE_CURSOR_ARROW);
+
+	colorCycleEnable();
+}
+
+
+static void _main_death_voiceover_callback() {
+	_main_death_voiceover_done = true;
+}
+
+
+// Read endgame subtitle.
+//
+static int _mainDeathGrabTextFile(const char *fileName, char *dest) {
+	const char *p = strrchr(fileName, '\\');
+	if (p == NULL) {
+		return -1;
+	}
+
+	char path[COMPAT_MAX_PATH];
+	snprintf(path, sizeof(path), "text\\%s\\cuts\\%s%s", settings.system.language.c_str(), p + 1, ".TXT");
+
+	File *stream = fileOpen(path, "rt");
+	if (stream == NULL) {
+		return -1;
+	}
+
+	while (true) {
+		int c = fileReadChar(stream);
+		if (c == -1) {
+			break;
+		}
+
+		if (c == '\n') {
+			c = ' ';
+		}
+
+		*dest++ = (c & 0xFF);
+	}
+
+	fileClose(stream);
+
+	*dest = '\0';
+
+	return 0;
+}
+
+// 0x481598
+static int _mainDeathWordWrap(char *text, int width, short *beginnings, short *count) {
+	while (true) {
+		char *sep = strchr(text, ':');
+		if (sep == NULL) {
+			break;
+		}
+
+		if (sep - 1 < text) {
+			break;
+		}
+		sep[0] = ' ';
+		sep[-1] = ' ';
+	}
+
+	if (wordWrap(text, width, beginnings, count) == -1) {
+		return -1;
+	}
+
+	// TODO: Probably wrong.
+	*count -= 1;
+
+	for (int index = 1; index < *count; index++) {
+		char *p = text + beginnings[index];
+		while (p >= text && *p != ' ') {
+			p--;
+			beginnings[index]--;
+		}
+
+		if (p != NULL) {
+			*p = '\0';
+			beginnings[index]++;
+		}
+	}
+
+	return 0;
 }
 
 Common::Error Fallout2Engine::run() {
@@ -474,6 +698,12 @@ Common::Error Fallout2Engine::run() {
 	else
 		debug("Initialized options!");
 
+	// init ending/death cutscenes
+	if (endgameDeathEndingInit() != 0)
+		warning("Failed on endgameDeathEndingInit");
+	else
+		debug("Initialized ending/death scenes!");
+
 	// SFALL
 	premadeCharactersInit();
 
@@ -549,11 +779,11 @@ Common::Error Fallout2Engine::run() {
 						_main_game_paused = 0;
 					}
 
-					// if ((gDude->data.critter.combat.results & (DAM_DEAD | DAM_KNOCKED_OUT)) != 0) {
-					//		endgameSetupDeathEnding(ENDGAME_DEATH_ENDING_REASON_DEATH);
-					//		_main_show_death_scene = 1;
-					//		_game_user_wants_to_quit = 2;
-					// }
+					if ((gDude->data.critter.combat.results & (DAM_DEAD | DAM_KNOCKED_OUT)) != 0) {
+						endgameSetupDeathEnding(ENDGAME_DEATH_ENDING_REASON_DEATH);
+						_main_show_death_scene = 1;
+						_game_user_wants_to_quit = 2;
+					}
 
 					renderPresent();
 					sharedFpsLimiter.throttle();
@@ -569,6 +799,11 @@ Common::Error Fallout2Engine::run() {
 			_map_exit();
 
 			gameReset();
+
+			if (_main_show_death_scene != 0) {
+				showDeath();
+				_main_show_death_scene = 0;
+			}
 
 			mainMenuWindowInit();
 			break;
