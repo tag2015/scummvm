@@ -28,6 +28,7 @@ MODULE_OBJS = \
 	display_monitor.o \
 	draw.o \
 	elevator.o \
+	endgame.o \
 	export.o \
 	file_find.o \
 	font_manager.o \

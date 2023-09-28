@@ -1,7 +1,7 @@
-#ifndef ENDGAME_H
-#define ENDGAME_H
+#ifndef FALLOUT2_ENDGAME_H
+#define FALLOUT2_ENDGAME_H
 
-namespace fallout {
+namespace Fallout2 {
 
 typedef enum EndgameDeathEndingReason {
 	// Dude died.
@@ -18,8 +18,8 @@ void endgamePlayMovie();
 int endgameDeathEndingInit();
 int endgameDeathEndingExit();
 void endgameSetupDeathEnding(int reason);
-char* endgameDeathEndingGetFileName();
+char *endgameDeathEndingGetFileName();
 
-} // namespace fallout
+} // namespace Fallout2
 
-#endif /* ENDGAME_H */
+#endif
