@@ -109,6 +109,7 @@ Common::String Fallout2Engine::getGameId() const {
 }
 
 static char _mainMap[] = "artemple.map";
+static int _main_game_paused = 0;
 
 void Fallout2Engine::showSplash() {
 	int splash = settings.system.splash;
@@ -531,8 +532,9 @@ Common::Error Fallout2Engine::run() {
 					mouseShowCursor();
 				}
 
-				mouseShowCursor();
+				_main_game_paused = 0;
 				scriptsEnable();
+
 				while (_game_user_wants_to_quit == 0) {
 					sharedFpsLimiter.mark();
 
@@ -543,9 +545,9 @@ Common::Error Fallout2Engine::run() {
 
 					mapHandleTransition();
 
-					//	if (_main_game_paused != 0) {
-					//		_main_game_paused = 0;
-					//	}
+					if (_main_game_paused != 0) {
+						_main_game_paused = 0;
+					}
 
 					// if ((gDude->data.critter.combat.results & (DAM_DEAD | DAM_KNOCKED_OUT)) != 0) {
 					//		endgameSetupDeathEnding(ENDGAME_DEATH_ENDING_REASON_DEATH);
