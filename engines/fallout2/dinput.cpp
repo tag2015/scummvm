@@ -1,5 +1,8 @@
-#include "fallout2/dinput.h"
 #include "fallout2/fallout2.h"
+
+#include "fallout2/dinput.h"
+#include "fallout2/mouse.h"
+#include "fallout2/svga.h"
 
 namespace Fallout2 {
 
@@ -114,6 +117,9 @@ bool mouseDeviceGetData(MouseData *mouseState) {
 
 	// EventManager can't return the relative mouse position, so keep track manually
 	if (lastMousePosX == -1) { // first time
+		g_system->warpMouse(_scr_size.right / 2, _scr_size.bottom / 2);
+		_mouse_set_position(-1, -1); // force clip
+		mousePos = g_engine->getEventManager()->getMousePos();
 		mouseState->x = mousePos.x;
 		mouseState->y = mousePos.y;
 	} else {
