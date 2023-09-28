@@ -75,10 +75,10 @@ public:
 	};
 
 	bool canLoadGameStateCurrently() override {
-		return true;
+		return false;
 	}
 	bool canSaveGameStateCurrently() override {
-		return true;
+		return false;
 	}
 
 	/**

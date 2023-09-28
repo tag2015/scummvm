@@ -34,7 +34,7 @@ const ADGameDescription gameDescriptions[] = {
 		Common::EN_ANY,
 		Common::kPlatformWindows,
 		ADGF_UNSTABLE | ADGF_DROPPLATFORM,
-		GUIO1(GUIO_NONE)
+		GUIO1(GUIO_NOLAUNCHLOAD)
 	},
 
 	AD_TABLE_END_MARKER
