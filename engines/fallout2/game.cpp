@@ -561,7 +561,7 @@ int gameHandleKey(int eventCode, bool isInCombatMode) {
 		break;
 	case KEY_CTRL_P:
 //		soundPlayFile("ib1p1xx1"); TODO audio
-//		showPause(false); TODO pause
+		showPause(false);
 		break;
 	case KEY_UPPERCASE_A:
 	case KEY_LOWERCASE_A:
@@ -835,8 +835,8 @@ int gameHandleKey(int eventCode, bool isInCombatMode) {
 		}
 		break;
 	case KEY_F1:
-//		soundPlayFile("ib1p1xx1"); TODO help
-//		showHelp();
+//		soundPlayFile("ib1p1xx1"); TODO audio
+		showHelp();
 		break;
 	case KEY_F2:
 //		gameSoundSetMasterVolume(gameSoundGetMasterVolume() - 2047); TODO audio
@@ -1147,8 +1147,6 @@ static void gameFreeGlobalVars() {
 	}
 }
 
-// TODO show help
-#if 0
 // 0x443F74
 static void showHelp() {
 	ScopedGameMode gm(GameMode::kHelp);
@@ -1226,9 +1224,6 @@ static void showHelp() {
 		isoEnable();
 	}
 }
-#endif
-
-// TODO quit yes/no win
 
 // 0x4440B8
 int showQuitConfirmationDialog() {
