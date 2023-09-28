@@ -8,7 +8,7 @@
 #include "fallout2/game.h"
 // #include "game_sound.h"  TODO audio
 #include "fallout2/input.h"
-#include "fallout2/kb.h" // TODO kb
+#include "fallout2/kb.h"
 #include "fallout2/mouse.h"
 #include "fallout2/palette.h"
 #include "fallout2/preferences.h"

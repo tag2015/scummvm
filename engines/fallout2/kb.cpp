@@ -1,12 +1,12 @@
-#include "kb.h"
+#include "fallout2/kb.h"
 
-#include <string.h>
+// #include <string.h>
 
-#include "input.h"
-#include "svga.h"
-#include "vcr.h"
+#include "fallout2/input.h"
+#include "fallout2/svga.h"
+// #include "fallout2/vcr.h" TODO vcr
 
-namespace fallout {
+namespace Fallout2 {
 
 typedef struct LogicalKeyEntry {
 	short field_0;
@@ -20,6 +20,7 @@ typedef struct LogicalKeyEntry {
 typedef struct KeyboardEvent {
 	int scanCode;
 	unsigned short modifiers;
+	int asciiCode;
 } KeyboardEvent;
 
 static int _kb_next_ascii_English_US();
@@ -30,7 +31,7 @@ static void keyboardBuildGermanConfiguration();
 static void keyboardBuildItalianConfiguration();
 static void keyboardBuildSpanishConfiguration();
 static void _kb_init_lock_status();
-static int keyboardPeekEvent(int index, KeyboardEvent** keyboardEventPtr);
+static int keyboardPeekEvent(int index, KeyboardEvent **keyboardEventPtr);
 
 // 0x51E2D0
 static unsigned char _kb_installed = 0;
@@ -141,6 +142,9 @@ int _kb_getch() {
 		rc = _kb_scan_to_ascii();
 	}
 
+	if (rc != -1)
+		debug(5, "KB: kb_getch from queue (ASCII): %d", rc);
+
 	return rc;
 }
 
@@ -166,8 +170,8 @@ void keyboardSetLayout(int keyboardLayout) {
 
 	switch (keyboardLayout) {
 	case KEYBOARD_LAYOUT_QWERTY:
-		_kb_scan_to_ascii = _kb_next_ascii_English_US;
-		keyboardBuildQwertyConfiguration();
+//		_kb_scan_to_ascii = _kb_next_ascii_English_US;
+//		keyboardBuildQwertyConfiguration(); TODO
 		break;
 	// case KEYBOARD_LAYOUT_FRENCH:
 	//    _kb_scan_to_ascii = sub_4CC5BC;
@@ -197,10 +201,10 @@ int keyboardGetLayout() {
 }
 
 // TODO: Key type is likely short.
-void _kb_simulate_key(KeyboardData* data) {
-	if (gVcrState == 0) {
+void _kb_simulate_key(KeyboardData *data) {
+/*	if (gVcrState == 0) { TODO vcr
 		if (_vcr_buffer_index != VCR_BUFFER_CAPACITY - 1) {
-			VcrEntry* vcrEntry = &(_vcr_buffer[_vcr_buffer_index]);
+			VcrEntry *vcrEntry = &(_vcr_buffer[_vcr_buffer_index]);
 			vcrEntry->type = VCR_ENTRY_TYPE_KEYBOARD_EVENT;
 			vcrEntry->keyboardEvent.key = data->key & 0xFFFF;
 			vcrEntry->time = _vcr_time;
@@ -208,7 +212,7 @@ void _kb_simulate_key(KeyboardData* data) {
 
 			_vcr_buffer_index++;
 		}
-	}
+	}*/
 
 	_kb_idle_start_time = _get_bk_time();
 
@@ -232,9 +236,10 @@ void _kb_simulate_key(KeyboardData* data) {
 
 	if (keyState != KEY_STATE_UP) {
 		gLastKeyboardEvent.scanCode = physicalKey;
+		gLastKeyboardEvent.asciiCode = data->ascii;
 		gLastKeyboardEvent.modifiers = 0;
 
-		if (physicalKey == SDL_SCANCODE_CAPSLOCK) {
+		/*if (physicalKey == SDL_SCANCODE_CAPSLOCK) {
 			if (gPressedPhysicalKeys[SDL_SCANCODE_LCTRL] == KEY_STATE_UP && gPressedPhysicalKeys[SDL_SCANCODE_RCTRL] == KEY_STATE_UP) {
 				// TODO: Missing check for QWERTY keyboard layout.
 				if ((gModifierKeysState & MODIFIER_KEY_STATE_CAPS_LOCK) != 0) {
@@ -307,19 +312,20 @@ void _kb_simulate_key(KeyboardData* data) {
 
 		if (gPressedPhysicalKeys[SDL_SCANCODE_RCTRL] != KEY_STATE_UP) {
 			gLastKeyboardEvent.modifiers |= KEYBOARD_EVENT_MODIFIER_RIGHT_CONTROL;
-		}
-
+		}*/
 		if (((gKeyboardEventQueueWriteIndex + 1) & 0x3F) != gKeyboardEventQueueReadIndex) {
 			gKeyboardEventsQueue[gKeyboardEventQueueWriteIndex] = gLastKeyboardEvent;
 			gKeyboardEventQueueWriteIndex++;
 			gKeyboardEventQueueWriteIndex &= 0x3F;
+
+			debug(5, "KB: Saved keypress %d (ASCII %d) to queue!", gLastKeyboardEvent.scanCode, gLastKeyboardEvent.asciiCode);
 		}
 	}
 }
 
 // 0x4CC2F0
 static int _kb_next_ascii_English_US() {
-	KeyboardEvent* keyboardEvent;
+/*	KeyboardEvent *keyboardEvent;  TODO unneeded?
 	if (keyboardPeekEvent(0, &keyboardEvent) != 0) {
 		return -1;
 	}
@@ -361,32 +367,7 @@ static int _kb_next_ascii_English_US() {
 		}
 
 		int scanCode = keyboardEvent->scanCode;
-		if (scanCode == a
-		        || scanCode == SDL_SCANCODE_B
-		        || scanCode == SDL_SCANCODE_C
-		        || scanCode == SDL_SCANCODE_D
-		        || scanCode == SDL_SCANCODE_E
-		        || scanCode == SDL_SCANCODE_F
-		        || scanCode == SDL_SCANCODE_G
-		        || scanCode == SDL_SCANCODE_H
-		        || scanCode == SDL_SCANCODE_I
-		        || scanCode == SDL_SCANCODE_J
-		        || scanCode == SDL_SCANCODE_K
-		        || scanCode == SDL_SCANCODE_L
-		        || scanCode == m
-		        || scanCode == SDL_SCANCODE_N
-		        || scanCode == SDL_SCANCODE_O
-		        || scanCode == SDL_SCANCODE_P
-		        || scanCode == q
-		        || scanCode == SDL_SCANCODE_R
-		        || scanCode == SDL_SCANCODE_S
-		        || scanCode == SDL_SCANCODE_T
-		        || scanCode == SDL_SCANCODE_U
-		        || scanCode == SDL_SCANCODE_V
-		        || scanCode == w
-		        || scanCode == SDL_SCANCODE_X
-		        || scanCode == y
-		        || scanCode == z) {
+		if (scanCode == a || scanCode == SDL_SCANCODE_B || scanCode == SDL_SCANCODE_C || scanCode == SDL_SCANCODE_D || scanCode == SDL_SCANCODE_E || scanCode == SDL_SCANCODE_F || scanCode == SDL_SCANCODE_G || scanCode == SDL_SCANCODE_H || scanCode == SDL_SCANCODE_I || scanCode == SDL_SCANCODE_J || scanCode == SDL_SCANCODE_K || scanCode == SDL_SCANCODE_L || scanCode == m || scanCode == SDL_SCANCODE_N || scanCode == SDL_SCANCODE_O || scanCode == SDL_SCANCODE_P || scanCode == q || scanCode == SDL_SCANCODE_R || scanCode == SDL_SCANCODE_S || scanCode == SDL_SCANCODE_T || scanCode == SDL_SCANCODE_U || scanCode == SDL_SCANCODE_V || scanCode == w || scanCode == SDL_SCANCODE_X || scanCode == y || scanCode == z) {
 			if (keyboardEvent->modifiers & KEYBOARD_EVENT_MODIFIER_ANY_SHIFT) {
 				keyboardEvent->modifiers &= ~KEYBOARD_EVENT_MODIFIER_ANY_SHIFT;
 			} else {
@@ -395,17 +376,17 @@ static int _kb_next_ascii_English_US() {
 		}
 	}
 
-	return keyboardDequeueLogicalKeyCode();
+	return keyboardDequeueLogicalKeyCode();*/
 }
 
 // 0x4CDA4C
 static int keyboardDequeueLogicalKeyCode() {
-	KeyboardEvent* keyboardEvent;
+	KeyboardEvent *keyboardEvent;
 	if (keyboardPeekEvent(0, &keyboardEvent) != 0) {
 		return -1;
 	}
 
-	switch (keyboardEvent->scanCode) {
+/*	switch (keyboardEvent->scanCode) {
 	case SDL_SCANCODE_KP_DIVIDE:
 	case SDL_SCANCODE_KP_MULTIPLY:
 	case SDL_SCANCODE_KP_MINUS:
@@ -450,7 +431,7 @@ static int keyboardDequeueLogicalKeyCode() {
 
 	int logicalKey = -1;
 
-	LogicalKeyEntry* logicalKeyDescription = &(gLogicalKeyEntries[keyboardEvent->scanCode]);
+	LogicalKeyEntry *logicalKeyDescription = &(gLogicalKeyEntries[keyboardEvent->scanCode]);
 	if ((keyboardEvent->modifiers & KEYBOARD_EVENT_MODIFIER_ANY_CONTROL) != 0) {
 		logicalKey = logicalKeyDescription->ctrl;
 	} else if ((keyboardEvent->modifiers & KEYBOARD_EVENT_MODIFIER_RIGHT_ALT) != 0) {
@@ -461,19 +442,20 @@ static int keyboardDequeueLogicalKeyCode() {
 		logicalKey = logicalKeyDescription->shift;
 	} else {
 		logicalKey = logicalKeyDescription->unmodified;
-	}
+	}*/
 
 	if (gKeyboardEventQueueReadIndex != gKeyboardEventQueueWriteIndex) {
 		gKeyboardEventQueueReadIndex++;
 		gKeyboardEventQueueReadIndex &= (KEY_QUEUE_SIZE - 1);
 	}
 
-	return logicalKey;
+//	return logicalKey;
+	return keyboardEvent->asciiCode;
 }
 
 // 0x4CDC08
 static void keyboardBuildQwertyConfiguration() {
-	int k;
+/*	int k;  TODO unneeded?
 
 	for (k = 0; k < SDL_NUM_SCANCODES; k++) {
 		gLogicalKeyEntries[k].field_0 = -1;
@@ -1265,9 +1247,10 @@ static void keyboardBuildQwertyConfiguration() {
 	gLogicalKeyEntries[SDL_SCANCODE_KP_DECIMAL].shift = KEY_DOT;
 	gLogicalKeyEntries[SDL_SCANCODE_KP_DECIMAL].lmenu = -1;
 	gLogicalKeyEntries[SDL_SCANCODE_KP_DECIMAL].rmenu = KEY_ALT_DELETE;
-	gLogicalKeyEntries[SDL_SCANCODE_KP_DECIMAL].ctrl = KEY_CTRL_DELETE;
+	gLogicalKeyEntries[SDL_SCANCODE_KP_DECIMAL].ctrl = KEY_CTRL_DELETE;*/
 }
 
+/* TODO unused
 // 0x4D0400
 static void keyboardBuildFrenchConfiguration() {
 	int k;
@@ -1950,29 +1933,29 @@ static void keyboardBuildSpanishConfiguration() {
 	gLogicalKeyEntries[k].lmenu = -1;
 	gLogicalKeyEntries[k].rmenu = -1;
 	gLogicalKeyEntries[k].ctrl = -1;
-}
+}*/
 
 // 0x4D24F8
 static void _kb_init_lock_status() {
-	if ((SDL_GetModState() & KMOD_CAPS) != 0) {
-		gModifierKeysState |= MODIFIER_KEY_STATE_CAPS_LOCK;
-	}
+	/*	if ((SDL_GetModState() & KMOD_CAPS) != 0) {  TODO sdl
+			gModifierKeysState |= MODIFIER_KEY_STATE_CAPS_LOCK;
+		}
 
-	if ((SDL_GetModState() & KMOD_NUM) != 0) {
-		gModifierKeysState |= MODIFIER_KEY_STATE_NUM_LOCK;
-	}
+		if ((SDL_GetModState() & KMOD_NUM) != 0) {
+			gModifierKeysState |= MODIFIER_KEY_STATE_NUM_LOCK;
+		}
 
-#if SDL_VERSION_ATLEAST(2, 0, 18)
-	if ((SDL_GetModState() & KMOD_SCROLL) != 0) {
-		gModifierKeysState |= MODIFIER_KEY_STATE_SCROLL_LOCK;
-	}
-#endif
+	#if SDL_VERSION_ATLEAST(2, 0, 18)
+		if ((SDL_GetModState() & KMOD_SCROLL) != 0) {
+			gModifierKeysState |= MODIFIER_KEY_STATE_SCROLL_LOCK;
+		}
+	#endif */
 }
 
 // Get pointer to pending key event from the queue but do not consume it.
 //
 // 0x4D2614
-static int keyboardPeekEvent(int index, KeyboardEvent** keyboardEventPtr) {
+static int keyboardPeekEvent(int index, KeyboardEvent **keyboardEventPtr) {
 	int rc = -1;
 
 	if (gKeyboardEventQueueReadIndex != gKeyboardEventQueueWriteIndex) {
@@ -1993,4 +1976,4 @@ static int keyboardPeekEvent(int index, KeyboardEvent** keyboardEventPtr) {
 	return rc;
 }
 
-} // namespace fallout
+} // namespace Fallout2
