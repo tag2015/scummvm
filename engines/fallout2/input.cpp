@@ -1099,7 +1099,7 @@ void _GNW95_process_message() {
 		}
 	}
 
-	if (gProgramIsActive/* && !keyboardIsDisabled()*/) {  // TODO kb.cpp
+	if (gProgramIsActive && !keyboardIsDisabled()) {
 		// NOTE: Uninline
 		int tick = getTicks();
 

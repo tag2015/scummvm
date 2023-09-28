@@ -18,6 +18,8 @@
 #include "fallout2/version.h"
 #include "fallout2/window_manager.h"
 
+#include "common/keyboard.h"
+
 namespace Fallout2 {
 
 #define MAIN_MENU_WINDOW_WIDTH 640
@@ -317,9 +319,10 @@ int mainMenuWindowHandleEvents() {
 
 				rc = _return_values[buttonIndex];
 
-//				if (buttonIndex == MAIN_MENU_BUTTON_CREDITS && (gPressedPhysicalKeys[SDL_SCANCODE_RSHIFT] != KEY_STATE_UP || gPressedPhysicalKeys[SDL_SCANCODE_LSHIFT] != KEY_STATE_UP)) {
-//					rc = MAIN_MENU_QUOTES;  TODO kb.cpp
-//				}
+				if (buttonIndex == MAIN_MENU_BUTTON_CREDITS &&
+					(gPressedPhysicalKeys[Common::KEYCODE_LSHIFT] != KEY_STATE_UP || gPressedPhysicalKeys[Common::KEYCODE_RSHIFT] != KEY_STATE_UP)) {
+					rc = MAIN_MENU_QUOTES;
+				}
 
 				break;
 			}
