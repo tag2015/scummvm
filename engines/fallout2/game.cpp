@@ -19,7 +19,7 @@
 #include "fallout2/debug.h"
 #include "fallout2/display_monitor.h"
 #include "fallout2/draw.h"
-// #include "endgame.h"
+#include "fallout2/endgame.h"
 #include "fallout2/font_manager.h"
 #include "fallout2/game_dialog.h"
 // #include "game_memory.h"
@@ -445,7 +445,7 @@ void gameExit() {
 	paletteExit();
 	wmWorldMap_exit();
 	partyMembersExit();
-//	endgameDeathEndingExit();
+	endgameDeathEndingExit();
 	interfaceFontsExit();
 	_windowClose();
 	messageListRepositoryExit();
