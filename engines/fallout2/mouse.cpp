@@ -659,7 +659,7 @@ void mouseGetWheel(int *x, int *y) {
 }
 
 void convertMouseWheelToArrowKey(int *keyCodePtr) {
-/*	if (*keyCodePtr == -1) {  TODO kb.cpp
+	if (*keyCodePtr == -1) {
 		if ((mouseGetEvent() & MOUSE_EVENT_WHEEL) != 0) {
 			int wheelX;
 			int wheelY;
@@ -671,7 +671,7 @@ void convertMouseWheelToArrowKey(int *keyCodePtr) {
 				*keyCodePtr = KEY_ARROW_DOWN;
 			}
 		}
-	}*/
+	}
 }
 
 int mouse_get_last_buttons() {

@@ -179,9 +179,9 @@ void handleMouseEvent(const Common::Event *event) {
 	// processed later in `mouseDeviceGetData` via `SDL_GetRelativeMouseState`.
 
 	if (event->type == Common::EVENT_WHEELUP)
-		gMouseWheelDeltaY -= 5; // FIXME
+		gMouseWheelDeltaY += 5;
 	else if (event->type == Common::EVENT_WHEELDOWN) {
-		gMouseWheelDeltaY += 5; // FIXME
+		gMouseWheelDeltaY -= 5;
 	}
 
 	if (gLastInputType != INPUT_TYPE_MOUSE) {
