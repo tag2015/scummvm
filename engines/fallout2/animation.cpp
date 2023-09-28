@@ -2886,7 +2886,7 @@ int _check_move(int *actionPointsPtr) {
 
 	if (isInCombat()) {
 		if (*actionPointsPtr != -1) {
-			if (/*gPressedPhysicalKeys[SDL_SCANCODE_RCTRL] || gPressedPhysicalKeys[SDL_SCANCODE_LCTRL]*/ 0) {  // TODO kb
+			if (gPressedPhysicalKeys[Common::KEYCODE_RCTRL] || gPressedPhysicalKeys[Common::KEYCODE_RCTRL]) {
 				int hitMode;
 				bool aiming;
 				interfaceGetCurrentHitMode(&hitMode, &aiming);
