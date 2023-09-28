@@ -921,7 +921,7 @@ void gameUiDisable(int a1) {
 	if (!gGameUiDisabled) {
 		gameMouseObjectsHide();
 		_gmouse_disable(a1);
-//		keyboardDisable(); TODO kb
+		keyboardDisable();
 		interfaceBarDisable();
 		gGameUiDisabled = true;
 	}
@@ -932,8 +932,8 @@ void gameUiDisable(int a1) {
 void gameUiEnable() {
 	if (gGameUiDisabled) {
 		interfaceBarEnable();
-//		keyboardEnable();  TODO kb
-//		keyboardReset();
+		keyboardEnable();
+		keyboardReset();
 		_gmouse_enable();
 		gameMouseObjectsShow();
 		gGameUiDisabled = false;
