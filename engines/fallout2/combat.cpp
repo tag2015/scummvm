@@ -3203,7 +3203,7 @@ static int _combat_turn(Object *a1, bool a2) {
 		a1->data.critter.combat.results &= ~DAM_LOSE_TURN;
 	} else {
 		if (a1 == gDude) {
-//			keyboardReset(); TODO kb
+			keyboardReset();
 			interfaceRenderArmorClass(true);
 			_combat_free_move = 2 * perkGetRank(gDude, PERK_BONUS_MOVE);
 			interfaceRenderActionPoints(gDude->data.critter.combat.ap, _combat_free_move);

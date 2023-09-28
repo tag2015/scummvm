@@ -554,7 +554,7 @@ int gameHandleKey(int eventCode, bool isInCombatMode) {
 		showQuitConfirmationDialog();
 		break;
 	case KEY_TAB:
-		if (interfaceBarEnabled() /*&& gPressedPhysicalKeys[SDL_SCANCODE_LALT] == 0 && gPressedPhysicalKeys[SDL_SCANCODE_RALT] == 0*/) {  // TODO kb
+		if (interfaceBarEnabled() && gPressedPhysicalKeys[Common::KEYCODE_TAB] == 0 && gPressedPhysicalKeys[Common::KEYCODE_RALT] == 0) {
 //			soundPlayFile("ib1p1xx1"); TODO audio
 			automapShow(true, false);
 		}

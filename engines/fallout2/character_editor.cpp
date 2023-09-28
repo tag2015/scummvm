@@ -1930,7 +1930,7 @@ static int _get_input_str(int win, int cancelKeyCode, char *text, int maxLength,
 
 	windowRefresh(win);
 
-	beginTextInput();  // TODO kb
+//	beginTextInput();
 
 	int blinkingCounter = 3;
 	bool blink = false;
@@ -1996,7 +1996,7 @@ static int _get_input_str(int win, int cancelKeyCode, char *text, int maxLength,
 		sharedFpsLimiter.throttle();
 	}
 
-	endTextInput();  // TODO kb
+//	endTextInput();
 
 	if (rc == 0 || nameLength > 0) {
 		copy[nameLength] = '\0';

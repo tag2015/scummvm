@@ -920,7 +920,7 @@ void _gmouse_handle_event(int mouseX, int mouseY, int mouseState) {
 				actionPoints = -1;
 			}
 
-			if (/*gPressedPhysicalKeys[SDL_SCANCODE_LSHIFT] || gPressedPhysicalKeys[SDL_SCANCODE_RSHIFT]*/ 0) {  // TODO kb sdl
+			if (gPressedPhysicalKeys[Common::KEYCODE_LSHIFT] || gPressedPhysicalKeys[Common::KEYCODE_RSHIFT]) {
 				if (settings.preferences.running) {
 					_dude_move(actionPoints);
 					return;
