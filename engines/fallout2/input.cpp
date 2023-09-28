@@ -14,6 +14,8 @@
 // #include "vcr.h" TODO vcr
 #include "fallout2/win32.h"
 
+#include "common/keyboard.h"
+
 namespace Fallout2 {
 
 typedef struct InputEvent {
@@ -122,9 +124,9 @@ int inputInit(int a1) {
 		return -1;
 	}
 
-/*	if (keyboardInit() == -1) { TODO kb.cpp
+	if (keyboardInit() == -1) {
 		return -1;
-	}*/
+	}
 
 	if (mouseInit() == -1) {
 		return -1;
@@ -161,7 +163,7 @@ int inputInit(int a1) {
 void inputExit() {
 	_GNW95_input_init();
 	mouseFree();
-	// keyboardFree(); TODO kb.cpp
+	keyboardFree();
 	directInputFree();
 
 	TickerListNode *curr = gTickerListHead;
@@ -211,11 +213,11 @@ void _process_bk() {
 		return;
 	}
 
-/*	v1 = _kb_getch();  TODO kb.cpp
+	v1 = _kb_getch();
 	if (v1 != -1) {
 		enqueueInputEvent(v1);
 		return;
-	}*/
+	}
 }
 
 // 0x4C8C04
@@ -1058,11 +1060,19 @@ void _GNW95_process_message() {
 			break;*/
 		case /*SDL_KEYDOWN:*/ Common::EVENT_KEYDOWN:
 		case /*SDL_KEYUP:*/  Common::EVENT_KEYUP:
-/*			if (!keyboardIsDisabled()) {  TODO kb.cpp
-				keyboardData.key = e.key.keysym.scancode;
-				keyboardData.down = (e.key.state & SDL_PRESSED) != 0;
+			if (!keyboardIsDisabled()) {
+				if (e.type == Common::EVENT_KEYDOWN)
+					debug(5, "EVENT: Keydown: %d", e.kbd.keycode);
+				else
+					debug(5, "EVENT: Keyup: %d", e.kbd.keycode);
+				keyboardData.key = e.kbd.keycode;
+				keyboardData.ascii = e.kbd.ascii;
+				keyboardData.down = (e.type == Common::EVENT_KEYDOWN) ? 1 : 0;
+
+//				keyboardData.key = e.key.keysym.scancode;
+//				keyboardData.down = (e.key.state & SDL_PRESSED) != 0;
 				_GNW95_process_key(&keyboardData);
-			}*/
+			}
 			break;
 /*		case SDL_WINDOWEVENT:
 			switch (e.window.event) {
@@ -1125,14 +1135,14 @@ static void _GNW95_process_key(KeyboardData *data) {
 	// timestamps, see usage from |_GNW95_process_message|.
 	int scanCode = data->key;
 
-/*	data->key = gNormalizedQwertyKeys[data->key]; TODO vcr.cpp kb.cpp
+//	data->key = gNormalizedQwertyKeys[data->key]; TODO vcr
 
-	if (gVcrState == VCR_STATE_PLAYING) {
-		if ((gVcrTerminateFlags & VCR_TERMINATE_ON_KEY_PRESS) != 0) {
-			gVcrPlaybackCompletionReason = VCR_PLAYBACK_COMPLETION_REASON_TERMINATED;
-			vcrStop();
-		}
-	} else {
+	// if (gVcrState == VCR_STATE_PLAYING) {
+	// 	if ((gVcrTerminateFlags & VCR_TERMINATE_ON_KEY_PRESS) != 0) {
+	// 		gVcrPlaybackCompletionReason = VCR_PLAYBACK_COMPLETION_REASON_TERMINATED;
+	// 		vcrStop();
+	// 	}
+	// } else {
 		RepeatInfo *ptr = &(_GNW95_key_time_stamps[scanCode]);
 		if (data->down == 1) {
 			ptr->tick = getTicks();
@@ -1147,7 +1157,7 @@ static void _GNW95_process_key(KeyboardData *data) {
 		}
 
 		_kb_simulate_key(data);
-	}*/
+//	}
 }
 
 // 0x4C9EEC

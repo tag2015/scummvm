@@ -47,6 +47,7 @@ MODULE_OBJS = \
 	interpreter_lib.o \
 	inventory.o \
 	item.o \
+	kb.o \
 	light.o \
 	lips.o \
 	loadsave.o \
