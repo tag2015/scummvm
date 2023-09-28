@@ -1185,11 +1185,11 @@ static void idleImpl() {
 }
 
 void beginTextInput() {
-//	SDL_StartTextInput();  TODO SDL
+	//	SDL_StartTextInput();
 }
 
 void endTextInput() {
-//	SDL_StopTextInput();  TODO SDL
+	//	SDL_StopTextInput();
 }
 
 } // namespace Fallout2
