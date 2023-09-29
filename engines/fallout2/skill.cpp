@@ -183,9 +183,19 @@ int skillsLoad(File *stream) {
 	return fileReadInt32List(stream, gTaggedSkills, NUM_TAGGED_SKILLS);
 }
 
+int skillsLoadScumm(Common::InSaveFile *stream) {
+	for (int i = 0; i < NUM_TAGGED_SKILLS; i++)
+		gTaggedSkills[i] = stream->readSint32BE();
+	//	return fileReadInt32List(stream, gTaggedSkills, NUM_TAGGED_SKILLS);
+	return 0;
+}
+
 // 0x4AA4A8
-int skillsSave(File *stream) {
-	return fileWriteInt32List(stream, gTaggedSkills, NUM_TAGGED_SKILLS);
+int skillsSave(Common::OutSaveFile *stream) {
+	for (int i = 0; i < NUM_TAGGED_SKILLS; i++)
+		stream->writeSint32BE(gTaggedSkills[i]);
+	//	return fileWriteInt32List(stream, gTaggedSkills, NUM_TAGGED_SKILLS);
+	return 0;
 }
 
 // 0x4AA4C8
