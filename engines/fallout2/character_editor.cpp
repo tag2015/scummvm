@@ -1,5 +1,6 @@
 #include "fallout2/character_editor.h"
 
+
 /*#include <assert.h>
 #include <ctype.h>
 #include <stdio.h>
@@ -7,6 +8,8 @@
 
 #include <algorithm>
 #include <vector>*/
+
+#include "fallout2/fallout2.h"
 
 #include "fallout2/art.h"
 #include "fallout2/color.h"
@@ -47,8 +50,9 @@
 #include "fallout2/worldmap.h"
 
 #include "common/array.h"
+#include "common/savefile.h"
+#include "common/str-array.h"
 #include "common/util.h"
-
 
 namespace Fallout2 {
 
@@ -3924,13 +3928,20 @@ static int characterEditorShowOptions() {
 				}
 			} else if (keyCode == 502 || keyCode == KEY_UPPERCASE_P || keyCode == KEY_LOWERCASE_P) {
 				// PRINT TO FILE
+				// TODO: Should show file selector here, currently it just outputs to fallout2_<charactername>.txt
+				Common::SaveFileManager *saveMan = g_system->getSavefileManager();
+				Common::String txtFileName(g_engine->getTargetName());
+
+				char *str = critterGetName(gDude);
+				txtFileName += "_" + Common::String(str) + ".txt";
+
 				string4[0] = '\0';
 
 				strcat_s(string4, sizeof(string4), "*.");
 				strcat_s(string4, sizeof(string4), "TXT");
 
 				char **fileList;
-				int fileListLength = fileNameListInit(string4, &fileList, 0, 0);
+				int fileListLength = 1; // fileNameListInit(string4, &fileList, 0, 0);
 				if (fileListLength != -1) {
 					// PRINT
 					strncpy(string1, getmsg(&gCharacterEditorMessageList, &gCharacterEditorMessageListItem, 616), sizeof(string1) - 1);
@@ -3938,18 +3949,18 @@ static int characterEditorShowOptions() {
 					// PRINT TO FILE
 					strncpy(string4, getmsg(&gCharacterEditorMessageList, &gCharacterEditorMessageListItem, 602), sizeof(string4) - 1);
 
-					if (showSaveFileDialog(string4, fileList, string1, fileListLength, 168, 80, 0) == 0) {
+					if (/*showSaveFileDialog(string4, fileList, string1, fileListLength, 168, 80, 0) == 0*/ 1) {
 						strcat_s(string1, sizeof(string1), ".");
 						strcat_s(string1, sizeof(string1), "TXT");
 
 						string4[0] = '\0';
 						strcat_s(string4, sizeof(string4), string1);
 
-						if (characterFileExists(string4)) {
+						if (/*characterFileExists(string4)*/ saveMan->exists(txtFileName)) {
 							// already exists
 							snprintf(string4, sizeof(string4),
 									 "%s %s",
-									 compat_strupr(string1),
+									 compat_strupr(/*string1*/ const_cast<char *>(txtFileName.c_str())),
 									 getmsg(&gCharacterEditorMessageList, &gCharacterEditorMessageListItem, 609));
 
 							strncpy(string5, getmsg(&gCharacterEditorMessageList, &gCharacterEditorMessageListItem, 610), sizeof(string5) - 1);
@@ -3965,12 +3976,12 @@ static int characterEditorShowOptions() {
 
 						if (rc != 0) {
 							string4[0] = '\0';
-							strcat_s(string4, sizeof(string4), string1);
+							strcat_s(string4, sizeof(string4), /*string1*/ const_cast<char *>(txtFileName.c_str()));
 
 							if (characterPrintToFile(string4) == 0) {
 								snprintf(string4, sizeof(string4),
 										 "%s%s",
-										 compat_strupr(string1),
+										 compat_strupr(/*string1*/ const_cast<char *>(txtFileName.c_str())),
 										 getmsg(&gCharacterEditorMessageList, &gCharacterEditorMessageListItem, 607));
 								showDialogBox(string4, NULL, 0, 169, 126, _colorTable[992], NULL, _colorTable[992], 0);
 							} else {
@@ -3979,7 +3990,7 @@ static int characterEditorShowOptions() {
 								snprintf(string4, sizeof(string4),
 										 "%s%s%s",
 										 getmsg(&gCharacterEditorMessageList, &gCharacterEditorMessageListItem, 611),
-										 compat_strupr(string1),
+										 compat_strupr(/*string1*/ const_cast<char *>(txtFileName.c_str())),
 										 "!");
 								showDialogBox(string4, NULL, 0, 169, 126, _colorTable[32328], NULL, _colorTable[992], 0x01);
 							}
@@ -4182,7 +4193,7 @@ static int characterEditorShowOptions() {
 	strncpy(pattern, "*.TXT", sizeof(pattern) - 1);
 
 	char **fileNames;
-	int filesCount = fileNameListInit(pattern, &fileNames, 0, 0);
+	int filesCount = 1; // fileNameListInit(pattern, &fileNames, 0, 0);
 	if (filesCount == -1) {
 //		soundPlayFile("iisxxxx1"); TODO audio
 
@@ -4199,17 +4210,25 @@ static int characterEditorShowOptions() {
 	char title[512];
 	strncpy(title, getmsg(&gCharacterEditorMessageList, &gCharacterEditorMessageListItem, 602), sizeof(title) - 1);
 
-	if (showSaveFileDialog(title, fileNames, fileName, filesCount, 168, 80, 0) == 0) {
+	// TODO: Should show file selector here, currently it just outputs to fallout2_<charactername>.txt
+
+	Common::SaveFileManager *saveMan = g_system->getSavefileManager();
+	Common::String txtFileName(g_engine->getTargetName());
+
+	char *str = critterGetName(gDude);
+	txtFileName += "_" + Common::String(str) + ".txt";
+
+	if (/*showSaveFileDialog(title, fileNames, fileName, filesCount, 168, 80, 0) == 0*/ 1) {
 		strcat_s(fileName, sizeof(fileName), ".TXT");
 
 		title[0] = '\0';
 		strcat_s(title, sizeof(title), fileName);
 
 		int v42 = 0;
-		if (characterFileExists(title)) {
+		if (/*characterFileExists(title)*/ saveMan->exists(txtFileName)) {
 			snprintf(title, sizeof(title),
 					 "%s %s",
-					 compat_strupr(fileName),
+					 compat_strupr(const_cast<char *>(txtFileName.c_str())),
 					 getmsg(&gCharacterEditorMessageList, &gCharacterEditorMessageListItem, 609));
 
 			char line2[512];
@@ -4226,15 +4245,15 @@ static int characterEditorShowOptions() {
 
 		if (v42) {
 			title[0] = '\0';
-			strncpy(title, fileName, sizeof(title) - 1);
+			strncpy(title, /*fileName*/ const_cast<char *>(txtFileName.c_str()), sizeof(title) - 1);
 
-			if (characterPrintToFile(title) != 0) {
+			if (characterPrintToFile(txtFileName.c_str()) != 0) {
 //				soundPlayFile("iisxxxx1"); TODO audio
 
 				snprintf(title, sizeof(title),
 						 "%s%s%s",
 						 getmsg(&gCharacterEditorMessageList, &gCharacterEditorMessageListItem, 611),
-						 compat_strupr(fileName),
+						 compat_strupr(const_cast<char *>(txtFileName.c_str())),
 						 "!");
 				showDialogBox(title, NULL, 0, 169, 126, _colorTable[32328], NULL, _colorTable[32328], 1);
 			}
@@ -4259,13 +4278,17 @@ static bool characterFileExists(const char *fname) {
 
 // 0x4390D0
 static int characterPrintToFile(const char *fileName) {
-	File *stream = fileOpen(fileName, "wt");
+	Common::SaveFileManager *saveMan = g_system->getSavefileManager();
+	Common::OutSaveFile *stream = saveMan->openForSaving(Common::String(fileName), false);
+//	File *stream = fileOpen(fileName, "wt");
 	if (stream == NULL) {
 		return -1;
 	}
 
-	fileWriteString("\n", stream);
-	fileWriteString("\n", stream);
+	stream->writeString("\n");
+	stream->writeString("\n");
+//	fileWriteString("\n", stream);
+//	fileWriteString("\n", stream);
 
 	char title1[256];
 	char title2[256];
@@ -4281,7 +4304,8 @@ static int characterPrintToFile(const char *fileName) {
 
 	strcat_s(padding, sizeof(padding), title1);
 	strcat_s(padding, sizeof(padding), "\n");
-	fileWriteString(padding, stream);
+	stream->writeString(padding);
+//	fileWriteString(padding, stream);
 
 	// VAULT-13 PERSONNEL RECORD
 	strncpy(title1, getmsg(&gCharacterEditorMessageList, &gCharacterEditorMessageListItem, 621), sizeof(title1) - 1);
@@ -4292,7 +4316,8 @@ static int characterPrintToFile(const char *fileName) {
 
 	strcat_s(padding, sizeof(padding), title1);
 	strcat_s(padding, sizeof(padding), "\n");
-	fileWriteString(padding, stream);
+	stream->writeString(padding);
+//	fileWriteString(padding, stream);
 
 	int month;
 	int day;
@@ -4312,10 +4337,12 @@ static int characterPrintToFile(const char *fileName) {
 
 	strcat_s(padding, sizeof(padding), title1);
 	strcat_s(padding, sizeof(padding), "\n");
-	fileWriteString(padding, stream);
+	stream->writeString(padding);
+//	fileWriteString(padding, stream);
 
 	// Blank line
-	fileWriteString("\n", stream);
+	stream->writeString("\n");
+//	fileWriteString("\n", stream);
 
 	// Name
 	snprintf(title1, sizeof(title1),
@@ -4346,8 +4373,10 @@ static int characterPrintToFile(const char *fileName) {
 			 getmsg(&gCharacterEditorMessageList, &gCharacterEditorMessageListItem, 644),
 			 getmsg(&gCharacterEditorMessageList, &gCharacterEditorMessageListItem, 645 + critterGetStat(gDude, STAT_GENDER)));
 
-	fileWriteString(title3, stream);
-	fileWriteString("\n", stream);
+	stream->writeString(title3);
+	stream->writeString("\n");
+//	fileWriteString(title3, stream);
+//	fileWriteString("\n", stream);
 
 	snprintf(title1, sizeof(title1),
 			 "%s %.2d %s %s ",
@@ -4370,16 +4399,19 @@ static int characterPrintToFile(const char *fileName) {
 			 title1,
 			 getmsg(&gCharacterEditorMessageList, &gCharacterEditorMessageListItem, 649),
 			 _itostndn(pcGetExperienceForNextLevel(), title3));
-	fileWriteString(title2, stream);
-	fileWriteString("\n", stream);
-	fileWriteString("\n", stream);
+	stream->writeString(title2);
+	stream->writeString("\n");
+	stream->writeString("\n");
+//	fileWriteString(title2, stream);
+//	fileWriteString("\n", stream);
+//	fileWriteString("\n", stream);
 
 	// Statistics
 	snprintf(title1, sizeof(title1), "%s\n", getmsg(&gCharacterEditorMessageList, &gCharacterEditorMessageListItem, 623));
+	stream->writeString(title1);  // FIXME missing writestring in upstream
 
 	// Strength / Hit Points / Sequence
 	//
-	// FIXME: There is bug - it shows strength instead of sequence.
 	snprintf(title1, sizeof(title1),
 			 "%s %.2d %s %.3d/%.3d %s %.2d",
 			 getmsg(&gCharacterEditorMessageList, &gCharacterEditorMessageListItem, 624),
@@ -4388,9 +4420,11 @@ static int characterPrintToFile(const char *fileName) {
 			 critterGetHitPoints(gDude),
 			 critterGetStat(gDude, STAT_MAXIMUM_HIT_POINTS),
 			 getmsg(&gCharacterEditorMessageList, &gCharacterEditorMessageListItem, 626),
-			 critterGetStat(gDude, STAT_STRENGTH));
-	fileWriteString(title1, stream);
-	fileWriteString("\n", stream);
+			 critterGetStat(gDude, STAT_SEQUENCE));  // FIXME: bug in upstream
+	stream->writeString(title1);
+	stream->writeString("\n");
+//	fileWriteString(title1, stream);
+//	fileWriteString("\n", stream);
 
 	// Perception / Armor Class / Healing Rate
 	snprintf(title1, sizeof(title1),
@@ -4401,8 +4435,10 @@ static int characterPrintToFile(const char *fileName) {
 			 critterGetStat(gDude, STAT_ARMOR_CLASS),
 			 getmsg(&gCharacterEditorMessageList, &gCharacterEditorMessageListItem, 629),
 			 critterGetStat(gDude, STAT_HEALING_RATE));
-	fileWriteString(title1, stream);
-	fileWriteString("\n", stream);
+	stream->writeString(title1);
+	stream->writeString("\n");
+//	fileWriteString(title1, stream);
+//	fileWriteString("\n", stream);
 
 	// Endurance / Action Points / Critical Chance
 	snprintf(title1, sizeof(title1),
@@ -4413,8 +4449,10 @@ static int characterPrintToFile(const char *fileName) {
 			 critterGetStat(gDude, STAT_MAXIMUM_ACTION_POINTS),
 			 getmsg(&gCharacterEditorMessageList, &gCharacterEditorMessageListItem, 632),
 			 critterGetStat(gDude, STAT_CRITICAL_CHANCE));
-	fileWriteString(title1, stream);
-	fileWriteString("\n", stream);
+	stream->writeString(title1);
+	stream->writeString("\n");
+//	fileWriteString(title1, stream);
+//	fileWriteString("\n", stream);
 
 	// SFALL: Display melee damage without "Bonus HtH Damage" bonus.
 	int meleeDamage = critterGetStat(gDude, STAT_MELEE_DAMAGE);
@@ -4431,8 +4469,10 @@ static int characterPrintToFile(const char *fileName) {
 			 meleeDamage,
 			 getmsg(&gCharacterEditorMessageList, &gCharacterEditorMessageListItem, 635),
 			 critterGetStat(gDude, STAT_CARRY_WEIGHT));
-	fileWriteString(title1, stream);
-	fileWriteString("\n", stream);
+	stream->writeString(title1);
+	stream->writeString("\n");
+//	fileWriteString(title1, stream);
+//	fileWriteString("\n", stream);
 
 	// Intelligence / Damage Resistance
 	snprintf(title1, sizeof(title1),
@@ -4441,8 +4481,10 @@ static int characterPrintToFile(const char *fileName) {
 			 critterGetStat(gDude, STAT_INTELLIGENCE),
 			 getmsg(&gCharacterEditorMessageList, &gCharacterEditorMessageListItem, 637),
 			 critterGetStat(gDude, STAT_DAMAGE_RESISTANCE));
-	fileWriteString(title1, stream);
-	fileWriteString("\n", stream);
+	stream->writeString(title1);
+	stream->writeString("\n");
+//	fileWriteString(title1, stream);
+//	fileWriteString("\n", stream);
 
 	// Agility / Radiation Resistance
 	snprintf(title1, sizeof(title1),
@@ -4451,8 +4493,10 @@ static int characterPrintToFile(const char *fileName) {
 			 critterGetStat(gDude, STAT_AGILITY),
 			 getmsg(&gCharacterEditorMessageList, &gCharacterEditorMessageListItem, 639),
 			 critterGetStat(gDude, STAT_RADIATION_RESISTANCE));
-	fileWriteString(title1, stream);
-	fileWriteString("\n", stream);
+	stream->writeString(title1);
+	stream->writeString("\n");
+//	fileWriteString(title1, stream);
+//	fileWriteString("\n", stream);
 
 	// Luck / Poison Resistance
 	snprintf(title1, sizeof(title1),
@@ -4461,23 +4505,30 @@ static int characterPrintToFile(const char *fileName) {
 			 critterGetStat(gDude, STAT_LUCK),
 			 getmsg(&gCharacterEditorMessageList, &gCharacterEditorMessageListItem, 641),
 			 critterGetStat(gDude, STAT_POISON_RESISTANCE));
-	fileWriteString(title1, stream);
-	fileWriteString("\n", stream);
+	stream->writeString(title1);
+	stream->writeString("\n");
+//	fileWriteString(title1, stream);
+//	fileWriteString("\n", stream);
 
-	fileWriteString("\n", stream);
-	fileWriteString("\n", stream);
+	stream->writeString("\n");
+	stream->writeString("\n");
+//	fileWriteString("\n", stream);
+//	fileWriteString("\n", stream);
 
 	if (gCharacterEditorTempTraits[0] != -1) {
 		// ::: Traits :::
 		snprintf(title1, sizeof(title1), "%s\n", getmsg(&gCharacterEditorMessageList, &gCharacterEditorMessageListItem, 650));
-		fileWriteString(title1, stream);
+		stream->writeString(title1);
+//		fileWriteString(title1, stream);
 
 		// NOTE: The original code does not use loop, or it was optimized away.
 		for (int index = 0; index < TRAITS_MAX_SELECTED_COUNT; index++) {
 			if (gCharacterEditorTempTraits[index] != -1) {
 				snprintf(title1, sizeof(title1), "  %s", traitGetName(gCharacterEditorTempTraits[index]));
-				fileWriteString(title1, stream);
-				fileWriteString("\n", stream);
+				stream->writeString(title1);
+				stream->writeString("\n");
+//				fileWriteString(title1, stream);
+//				fileWriteString("\n", stream);
 			}
 		}
 	}
@@ -4492,7 +4543,8 @@ static int characterPrintToFile(const char *fileName) {
 	if (perk < PERK_COUNT) {
 		// ::: Perks :::
 		snprintf(title1, sizeof(title1), "%s\n", getmsg(&gCharacterEditorMessageList, &gCharacterEditorMessageListItem, 651));
-		fileWriteString(title1, stream);
+		stream->writeString(title1);
+//		fileWriteString(title1, stream);
 
 		for (perk = 0; perk < PERK_COUNT; perk++) {
 			int rank = perkGetRank(gDude, perk);
@@ -4503,17 +4555,21 @@ static int characterPrintToFile(const char *fileName) {
 					snprintf(title1, sizeof(title1), "  %s (%d)", perkGetName(perk), rank);
 				}
 
-				fileWriteString(title1, stream);
-				fileWriteString("\n", stream);
+				stream->writeString(title1);
+				stream->writeString("\n");
+//				fileWriteString(title1, stream);
+//				fileWriteString("\n", stream);
 			}
 		}
 	}
 
-	fileWriteString("\n", stream);
+	stream->writeString("\n");
+//	fileWriteString("\n", stream);
 
 	// ::: Karma :::
 	snprintf(title1, sizeof(title1), "%s\n", getmsg(&gCharacterEditorMessageList, &gCharacterEditorMessageListItem, 652));
-	fileWriteString(title1, stream);
+	stream->writeString(title1);
+//	fileWriteString(title1, stream);
 
 	for (int index = 0; index < gKarmaEntriesLength; index++) {
 		KarmaEntry *karmaEntry = &(gKarmaEntries[index]);
@@ -4533,14 +4589,18 @@ static int characterPrintToFile(const char *fileName) {
 						 getmsg(&gCharacterEditorMessageList, &gCharacterEditorMessageListItem, 125),
 						 compat_itoa(gGameGlobalVars[GVAR_PLAYER_REPUTATION], title2, 10),
 						 getmsg(&gCharacterEditorMessageList, &gCharacterEditorMessageListItem, reputationDescription->name));
-				fileWriteString(title1, stream);
-				fileWriteString("\n", stream);
+				stream->writeString(title1);
+				stream->writeString("\n");
+//				fileWriteString(title1, stream);
+//				fileWriteString("\n", stream);
 			}
 		} else {
 			if (gGameGlobalVars[karmaEntry->gvar] != 0) {
 				snprintf(title1, sizeof(title1), "  %s", getmsg(&gCharacterEditorMessageList, &gCharacterEditorMessageListItem, karmaEntry->name));
-				fileWriteString(title1, stream);
-				fileWriteString("\n", stream);
+				stream->writeString(title1);
+				stream->writeString("\n");
+//				fileWriteString(title1, stream);
+//				fileWriteString("\n", stream);
 			}
 		}
 	}
@@ -4551,11 +4611,13 @@ static int characterPrintToFile(const char *fileName) {
 		const TownReputationEntry *pair = &(gCustomTownReputationEntries[index]);
 		if (wmAreaIsKnown(pair->city)) {
 			if (!hasTownReputationHeading) {
-				fileWriteString("\n", stream);
+				stream->writeString("\n");
+//				fileWriteString("\n", stream);
 
 				// ::: Reputation :::
 				snprintf(title1, sizeof(title1), "%s\n", getmsg(&gCharacterEditorMessageList, &gCharacterEditorMessageListItem, 657));
-				fileWriteString(title1, stream);
+				stream->writeString(title1);
+//				fileWriteString(title1, stream);
 				hasTownReputationHeading = true;
 			}
 
@@ -4585,8 +4647,10 @@ static int characterPrintToFile(const char *fileName) {
 					 "  %s: %s",
 					 title2,
 					 getmsg(&gCharacterEditorMessageList, &gCharacterEditorMessageListItem, townReputationMessageId));
-			fileWriteString(title1, stream);
-			fileWriteString("\n", stream);
+			stream->writeString(title1);
+			stream->writeString("\n");
+//			fileWriteString(title1, stream);
+//			fileWriteString("\n", stream);
 		}
 	}
 
@@ -4594,27 +4658,33 @@ static int characterPrintToFile(const char *fileName) {
 	for (int index = 0; index < ADDICTION_REPUTATION_COUNT; index++) {
 		if (gGameGlobalVars[gAddictionReputationVars[index]] != 0) {
 			if (!hasAddictionsHeading) {
-				fileWriteString("\n", stream);
+				stream->writeString("\n");
+//				fileWriteString("\n", stream);
 
 				// ::: Addictions :::
 				snprintf(title1, sizeof(title1), "%s\n", getmsg(&gCharacterEditorMessageList, &gCharacterEditorMessageListItem, 656));
-				fileWriteString(title1, stream);
+				stream->writeString(title1);
+//				fileWriteString(title1, stream);
 				hasAddictionsHeading = true;
 			}
 
 			snprintf(title1, sizeof(title1),
 					 "  %s",
 					 getmsg(&gCharacterEditorMessageList, &gCharacterEditorMessageListItem, 1004 + index));
-			fileWriteString(title1, stream);
-			fileWriteString("\n", stream);
+			stream->writeString(title1);
+			stream->writeString("\n");
+//			fileWriteString(title1, stream);
+//			fileWriteString("\n", stream);
 		}
 	}
 
-	fileWriteString("\n", stream);
+	stream->writeString("\n");
+//	fileWriteString("\n", stream);
 
 	// ::: Skills ::: / ::: Kills :::
 	snprintf(title1, sizeof(title1), "%s\n", getmsg(&gCharacterEditorMessageList, &gCharacterEditorMessageListItem, 653));
-	fileWriteString(title1, stream);
+	stream->writeString(title1);
+//	fileWriteString(title1, stream);
 
 	int killType = 0;
 	for (int skill = 0; skill < SKILL_COUNT; skill++) {
@@ -4625,6 +4695,7 @@ static int characterPrintToFile(const char *fileName) {
 
 		bool hasKillType = false;
 
+		// FIXME There are 18 skills and 19 killtypes, so the "Big Bad Boss" entry may not be printed
 		for (; killType < KILL_TYPE_COUNT; killType++) {
 			int killsCount = killsGetByType(killType);
 			if (killsCount > 0) {
@@ -4640,6 +4711,7 @@ static int characterPrintToFile(const char *fileName) {
 						 title2,
 						 killsCount);
 				hasKillType = true;
+				killType++; // otherwise the same entry is duplicated FIXME fix in upstream!!
 				break;
 			}
 		}
@@ -4650,14 +4722,19 @@ static int characterPrintToFile(const char *fileName) {
 					 title1,
 					 skillGetValue(gDude, skill));
 		}
+
+		stream->writeString(title3);  // FIXME missing writestring in upstream
 	}
 
-	fileWriteString("\n", stream);
-	fileWriteString("\n", stream);
+	stream->writeString("\n");
+	stream->writeString("\n");
+//	fileWriteString("\n", stream);
+//	fileWriteString("\n", stream);
 
 	// ::: Inventory :::
 	snprintf(title1, sizeof(title1), "%s\n", getmsg(&gCharacterEditorMessageList, &gCharacterEditorMessageListItem, 654));
-	fileWriteString(title1, stream);
+	stream->writeString(title1);
+//	fileWriteString(title1, stream);
 
 	Inventory *inventory = &(gDude->data.inventory);
 	for (int index = 0; index < inventory->length; index += 3) {
@@ -4687,22 +4764,31 @@ static int characterPrintToFile(const char *fileName) {
 		}
 
 		strcat_s(title1, sizeof(title1), "\n");
-		fileWriteString(title1, stream);
+		stream->writeString(title1);
+//		fileWriteString(title1, stream);
 	}
 
-	fileWriteString("\n", stream);
+	stream->writeString("\n");
+//	fileWriteString("\n", stream);
 
 	// Total Weight:
 	snprintf(title1, sizeof(title1),
 			 "%s %d lbs.",
 			 getmsg(&gCharacterEditorMessageList, &gCharacterEditorMessageListItem, 655),
 			 objectGetInventoryWeight(gDude));
-	fileWriteString(title1, stream);
+	stream->writeString(title1);
+//	fileWriteString(title1, stream);
 
-	fileWriteString("\n", stream);
-	fileWriteString("\n", stream);
-	fileWriteString("\n", stream);
-	fileClose(stream);
+	stream->writeString("\n");
+	stream->writeString("\n");
+	stream->writeString("\n");
+//	fileWriteString("\n", stream);
+//	fileWriteString("\n", stream);
+//	fileWriteString("\n", stream);
+
+	stream->finalize();
+	delete stream;
+//	fileClose(stream);
 
 	return 0;
 }
