@@ -109,11 +109,21 @@ int traitsLoad(File *stream) {
 	return fileReadInt32List(stream, gSelectedTraits, TRAITS_MAX_SELECTED_COUNT);
 }
 
+int traitsLoadScumm(Common::InSaveFile *stream) {
+	for (int i = 0; i < TRAITS_MAX_SELECTED_COUNT; i++)
+		gSelectedTraits[i] = stream->readSint32BE();
+	//	return fileReadInt32List(stream, gSelectedTraits, TRAITS_MAX_SELECTED_COUNT);
+	return 0;
+}
+
 // Saves trait system state to save game.
 //
 // 0x4B3B28
-int traitsSave(File *stream) {
-	return fileWriteInt32List(stream, gSelectedTraits, TRAITS_MAX_SELECTED_COUNT);
+int traitsSave(Common::OutSaveFile *stream) {
+	for (int i = 0; i < TRAITS_MAX_SELECTED_COUNT; i++)
+		stream->writeSint32BE(gSelectedTraits[i]);
+	//	return fileWriteInt32List(stream, gSelectedTraits, TRAITS_MAX_SELECTED_COUNT);
+	return 0;
 }
 
 // Sets selected traits.
