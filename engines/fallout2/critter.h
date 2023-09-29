@@ -52,6 +52,7 @@ bool critterIsCrippled(Object *critter);
 bool _critter_is_prone(Object *critter);
 int critterGetBodyType(Object *critter);
 int gcdLoad(const char *path);
+int gcdLoadScumm(const char *path);
 int protoCritterDataRead(File *stream, CritterProtoData *critterData);
 int gcdSave(const char *path);
 int protoCritterDataWrite(File *stream, CritterProtoData *critterData);
