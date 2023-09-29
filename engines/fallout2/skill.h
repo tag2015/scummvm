@@ -6,6 +6,8 @@
 #include "fallout2/proto_types.h"
 #include "fallout2/skill_defs.h"
 
+#include "common/savefile.h"
+
 namespace Fallout2 {
 
 extern int _gIsSteal;
@@ -16,7 +18,8 @@ int skillsInit();
 void skillsReset();
 void skillsExit();
 int skillsLoad(File *stream);
-int skillsSave(File *stream);
+int skillsLoadScumm(Common::InSaveFile *stream);
+int skillsSave(Common::OutSaveFile *stream);
 void protoCritterDataResetSkills(CritterProtoData *data);
 void skillsSetTagged(int *skills, int count);
 void skillsGetTagged(int *skills, int count);
