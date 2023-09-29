@@ -4008,31 +4008,38 @@ static int characterEditorShowOptions() {
 				}
 			} else if (keyCode == 501 || keyCode == KEY_UPPERCASE_L || keyCode == KEY_LOWERCASE_L) {
 				// LOAD
+				// TODO: Should show file selector here, currently it just looks for fallout2_<charactername>.gcd
+				Common::SaveFileManager *saveMan = g_system->getSavefileManager();
+				Common::String gcdFileName(g_engine->getTargetName());
+
+				char *str = critterGetName(gDude);
+				gcdFileName += "_" + Common::String(str) + ".gcd";
+
 				string4[0] = '\0';
 				strcat_s(string4, sizeof(string4), "*.");
 				strcat_s(string4, sizeof(string4), "GCD");
 
 				char **fileNameList;
-				int fileNameListLength = fileNameListInit(string4, &fileNameList, 0, 0);
+				int fileNameListLength = 1; //fileNameListInit(string4, &fileNameList, 0, 0);
 				if (fileNameListLength != -1) {
 					// NOTE: This value is not copied as in save dialog.
 					char *title = getmsg(&gCharacterEditorMessageList, &gCharacterEditorMessageListItem, 601);
-					int loadFileDialogRc = showLoadFileDialog(title, fileNameList, string3, fileNameListLength, 168, 80, 0);
+					int loadFileDialogRc = 0; /*showLoadFileDialog(title, fileNameList, string3, fileNameListLength, 168, 80, 0);*/
 					if (loadFileDialogRc == -1) {
 						fileNameListFree(&fileNameList, 0);
 						// FIXME: This branch ignores cleanup at the end of the loop.
 						return -1;
 					}
 
-					if (loadFileDialogRc == 0) {
+					if (/*loadFileDialogRc == 0*/ saveMan->exists(gcdFileName)) {
 						string4[0] = '\0';
-						strcat_s(string4, sizeof(string4), string3);
+						strcat_s(string4, sizeof(string4), /*string3*/ gcdFileName.c_str());
 
 						int oldRemainingCharacterPoints = gCharacterEditorRemainingCharacterPoints;
 
 						_ResetPlayer();
 
-						if (gcdLoad(string4) == 0) {
+						if (gcdLoadScumm(string4) == 0) {
 							critterUpdateDerivedStats(gDude);
 							pcStatsReset();
 							for (int stat = 0; stat < SAVEABLE_STAT_COUNT; stat++) {
@@ -4088,6 +4095,10 @@ static int characterEditorShowOptions() {
 
 						characterEditorResetScreen();
 					}
+				else {
+					gcdFileName += " NOT FOUND!";
+					showDialogBox(gcdFileName.c_str(), NULL, 0, 169, 126, _colorTable[32328], NULL, _colorTable[32328], 0);
+				}
 
 					fileNameListFree(&fileNameList, 0);
 				} else {
@@ -4101,17 +4112,24 @@ static int characterEditorShowOptions() {
 				}
 			} else if (keyCode == 500 || keyCode == KEY_UPPERCASE_S || keyCode == KEY_LOWERCASE_S) {
 				// SAVE
+				// TODO: Should show file selector here, currently it just outputs to fallout2_<charactername>.gcd
+				Common::SaveFileManager *saveMan = g_system->getSavefileManager();
+				Common::String gcdFileName(g_engine->getTargetName());
+
+				char *str = critterGetName(gDude);
+				gcdFileName += "_" + Common::String(str) + ".gcd";
+
 				string4[0] = '\0';
 				strcat_s(string4, sizeof(string4), "*.");
 				strcat_s(string4, sizeof(string4), "GCD");
 
 				char **fileNameList;
-				int fileNameListLength = fileNameListInit(string4, &fileNameList, 0, 0);
+				int fileNameListLength = 1; //fileNameListInit(string4, &fileNameList, 0, 0);
 				if (fileNameListLength != -1) {
 					strncpy(string1, getmsg(&gCharacterEditorMessageList, &gCharacterEditorMessageListItem, 617), sizeof(string1) - 1);
 					strncpy(string4, getmsg(&gCharacterEditorMessageList, &gCharacterEditorMessageListItem, 600), sizeof(string4) - 1);
 
-					if (showSaveFileDialog(string4, fileNameList, string1, fileNameListLength, 168, 80, 0) == 0) {
+					if (/* showSaveFileDialog(string4, fileNameList, string1, fileNameListLength, 168, 80, 0) == 0*/ 1) {
 						strcat_s(string1, sizeof(string1), ".");
 						strcat_s(string1, sizeof(string1), "GCD");
 
@@ -4119,9 +4137,9 @@ static int characterEditorShowOptions() {
 						strcat_s(string4, sizeof(string4), string1);
 
 						bool shouldSave;
-						if (characterFileExists(string4)) {
+						if (/*characterFileExists(string4)*/ saveMan->exists(gcdFileName)) {
 							snprintf(string4, sizeof(string4), "%s %s",
-									 compat_strupr(string1),
+									 compat_strupr(/*string1*/ const_cast<char *>(gcdFileName.c_str())),
 									 getmsg(&gCharacterEditorMessageList, &gCharacterEditorMessageListItem, 609));
 							strncpy(string5, getmsg(&gCharacterEditorMessageList, &gCharacterEditorMessageListItem, 610), sizeof(string5) - 1);
 
@@ -4139,18 +4157,18 @@ static int characterEditorShowOptions() {
 							traitsSetSelected(gCharacterEditorTempTraits[0], gCharacterEditorTempTraits[1]);
 
 							string4[0] = '\0';
-							strcat_s(string4, sizeof(string4), string1);
+							strcat_s(string4, sizeof(string4), /*string1*/ const_cast<char *>(gcdFileName.c_str()));
 
 							if (gcdSave(string4) != 0) {
 //								soundPlayFile("iisxxxx1"); TODO audio
 								snprintf(string4, sizeof(string4), "%s%s!",
-										 compat_strupr(string1),
+										 compat_strupr(/*string1*/ const_cast<char *>(gcdFileName.c_str())),
 										 getmsg(&gCharacterEditorMessageList, &gCharacterEditorMessageListItem, 611));
 								showDialogBox(string4, NULL, 0, 169, 126, _colorTable[32328], NULL, _colorTable[32328], DIALOG_BOX_LARGE);
 								rc = 0;
 							} else {
 								snprintf(string4, sizeof(string4), "%s%s",
-										 compat_strupr(string1),
+										 compat_strupr(/*string1*/ const_cast<char *>(gcdFileName.c_str())),
 										 getmsg(&gCharacterEditorMessageList, &gCharacterEditorMessageListItem, 607));
 								showDialogBox(string4, NULL, 0, 169, 126, _colorTable[992], NULL, _colorTable[992], DIALOG_BOX_LARGE);
 								rc = 1;
