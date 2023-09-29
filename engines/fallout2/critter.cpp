@@ -1020,6 +1020,58 @@ int gcdLoad(const char *path) {
 	return 0;
 }
 
+
+int gcdLoadScumm(const char *path) {
+	Common::SaveFileManager *saveMan = g_system->getSavefileManager();
+	Common::InSaveFile *stream = saveMan->openForLoading(Common::String(path));
+	if (stream == NULL) {
+		return -1;
+	}
+
+	Proto *proto;
+	protoGetProto(gDude->pid, &proto);
+
+	// TODO : replace with protoCritterDataRead when implemented
+	proto->critter.data.flags = stream->readSint32BE();
+
+	int i;
+	for (i = 0; i < SAVEABLE_STAT_COUNT; i++)
+		proto->critter.data.baseStats[i] = stream->readSint32BE();
+	for (i = 0; i < SAVEABLE_STAT_COUNT; i++)
+		proto->critter.data.bonusStats[i] = stream->readSint32BE();
+	for (i = 0; i < SKILL_COUNT; i++)
+		proto->critter.data.skills[i] = stream->readSint32BE();
+
+	proto->critter.data.bodyType = stream->readSint32BE();
+	proto->critter.data.experience = stream->readSint32BE();
+	proto->critter.data.killType = stream->readSint32BE();
+	proto->critter.data.damageType = stream->readSint32BE();
+	if(stream->err())
+		proto->critter.data.damageType = DAMAGE_TYPE_NORMAL;
+
+	stream->read(gDudeName, DUDE_NAME_MAX_LENGTH);
+
+	if (skillsLoadScumm(stream) == -1) {
+		delete stream;
+		return -1;
+	}
+
+	if (traitsLoadScumm(stream) == -1) {
+		delete stream;
+		return -1;
+	}
+
+	gCharacterEditorRemainingCharacterPoints = stream->readSint32BE();
+
+	proto->critter.data.baseStats[STAT_DAMAGE_RESISTANCE_EMP] = 100;
+	proto->critter.data.bodyType = 0;
+	proto->critter.data.experience = 0;
+	proto->critter.data.killType = 0;
+
+	delete stream;
+	return 0;
+}
+
 // 0x42DF70
 int protoCritterDataRead(File *stream, CritterProtoData *critterData) {
 	if (fileReadInt32(stream, &(critterData->flags)) == -1)
@@ -1058,7 +1110,9 @@ int protoCritterDataRead(File *stream, CritterProtoData *critterData) {
 
 // 0x42E08C
 int gcdSave(const char *path) {
-	File *stream = fileOpen(path, "wb");
+	Common::SaveFileManager *saveMan = g_system->getSavefileManager();
+	Common::OutSaveFile *stream = saveMan->openForSaving(Common::String(path), false);
+//	File *stream = fileOpen(path, "wb");
 	if (stream == NULL) {
 		return -1;
 	}
@@ -1066,29 +1120,55 @@ int gcdSave(const char *path) {
 	Proto *proto;
 	protoGetProto(gDude->pid, &proto);
 
-	if (protoCritterDataWrite(stream, &(proto->critter.data)) == -1) {
-		fileClose(stream);
-		return -1;
-	}
+	// TODO : replace with protoCritterDataWrite when implemented
+	stream->writeSint32BE(proto->critter.data.flags);
 
-	fileWrite(gDudeName, DUDE_NAME_MAX_LENGTH, 1, stream);
+	int i;
+	for (i = 0; i < SAVEABLE_STAT_COUNT; i++)
+		stream->writeSint32BE(proto->critter.data.baseStats[i]);
+	for (i = 0; i < SAVEABLE_STAT_COUNT; i++)
+		stream->writeSint32BE(proto->critter.data.bonusStats[i]);
+	for (i = 0; i < SKILL_COUNT; i++)
+		stream->writeSint32BE(proto->critter.data.skills[i]);
+
+	stream->writeSint32BE(proto->critter.data.bodyType);
+	stream->writeSint32BE(proto->critter.data.experience);
+	stream->writeSint32BE(proto->critter.data.killType);
+	stream->writeSint32BE(proto->critter.data.damageType);
+
+	/*	if (protoCritterDataWrite(stream, &(proto->critter.data)) == -1) {
+			fileClose(stream);
+			return -1;
+		}*/
+
+	stream->write(gDudeName, DUDE_NAME_MAX_LENGTH);
+//	fileWrite(gDudeName, DUDE_NAME_MAX_LENGTH, 1, stream);
 
 	if (skillsSave(stream) == -1) {
-		fileClose(stream);
+//		fileClose(stream);
+		stream->finalize();
+		delete stream;
 		return -1;
 	}
 
 	if (traitsSave(stream) == -1) {
-		fileClose(stream);
+//		fileClose(stream);
+		stream->finalize();
+		delete stream;
 		return -1;
 	}
 
-	if (fileWriteInt32(stream, gCharacterEditorRemainingCharacterPoints) == -1) {
-		fileClose(stream);
-		return -1;
-	}
+	stream->writeSint32BE(gCharacterEditorRemainingCharacterPoints);
 
-	fileClose(stream);
+//	if (fileWriteInt32(stream, gCharacterEditorRemainingCharacterPoints) == -1) {
+//		fileClose(stream);
+//		return -1;
+//	}
+
+//	fileClose(stream);
+
+	stream->finalize();
+	delete stream;
 	return 0;
 }
 
