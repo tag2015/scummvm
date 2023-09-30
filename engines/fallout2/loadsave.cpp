@@ -2403,7 +2403,7 @@ static int _get_input_str2(int win, int doneKeyCode, int cancelKeyCode, char *de
 	windowRefresh(win);
 	renderPresent();
 
-/*	beginTextInput(); TODO kb
+//	beginTextInput();
 
 	int blinkCounter = 3;
 	bool blink = false;
@@ -2474,11 +2474,8 @@ static int _get_input_str2(int win, int doneKeyCode, int cancelKeyCode, char *de
 		sharedFpsLimiter.throttle();
 	}
 
-	endTextInput();*/
+//	endTextInput();
 
-	strncpy(text, "New Save", sizeof(text) - 1); // TODO remove
-	textLength = strlen(text);  // TODO remove
-	int rc = 0;  // TODO remove
 	if (rc == 0) {
 		text[textLength] = '\0';
 		strncpy(description, text, LOAD_SAVE_DESCRIPTION_LENGTH - 1);
