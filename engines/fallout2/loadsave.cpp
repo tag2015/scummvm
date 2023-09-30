@@ -751,18 +751,18 @@ int lsgSaveGame(int mode) {
 						// Error loading save agme list!
 						strncpy(_str0, getmsg(&gLoadSaveMessageList, &gLoadSaveMessageListItem, 106), sizeof(_str0) - 1);
 						// Save game directory:
-//						strncpy(_str1, getmsg(&gLoadSaveMessageList, &gLoadSaveMessageListItem, 107), sizeof(_str1) - 1);
+						strncpy(_str1, getmsg(&gLoadSaveMessageList, &gLoadSaveMessageListItem, 107), sizeof(_str1) - 1);
 
-//						snprintf(_str2, sizeof(_str2), "\"%s\\\"", "SAVEGAME");
+						snprintf(_str2, sizeof(_str2), "\"%s\\\"", "SAVEGAME");
 
-//						char text[260];
+						char text[260];
 						// Doesn't exist or is corrupted.
-//						strncpy(text, getmsg(&gLoadSaveMessageList, &gLoadSaveMessageListItem, 107), sizeof(text) - 1);
+						strncpy(text, getmsg(&gLoadSaveMessageList, &gLoadSaveMessageListItem, 107), sizeof(text) - 1);
 
-//						const char *body[2] = {
-//							_str1,
+						const char *body[2] = {
+							_str1,
 							_str2,
-//						};
+						};
 						showDialogBox(_str0, body, 2, 169, 116, _colorTable[32328], NULL, _colorTable[32328], DIALOG_BOX_LARGE);
 
 						lsgWindowFree(0);
@@ -1568,7 +1568,7 @@ static int lsgPerformSaveGame() {
 	}
 
 	debugPrint("Written header!");
-	return -1;
+	return 0;
 
 //	_flptr = fileOpen(_gmpath, "wb");
 /*	if (_flptr == NULL) {
@@ -2044,7 +2044,7 @@ static int _GetSlotList() {
 //		snprintf(_str, sizeof(_str), "%s\\%s%.2d\\%s", "SAVEGAME", "SLOT", index + 1, "SAVE.DAT");
 
 		char index_tmp[4];
-		snprintf(index_tmp, sizeof(index_tmp), "%03d", index);
+		snprintf(index_tmp, sizeof(index_tmp), "%03d", index + 1);
 		Common::StringArray::const_iterator filename;
 		for (filename = filenames.begin(); filename != filenames.end() && !filename->contains(index_tmp); ++filename)
 			;
@@ -2052,7 +2052,7 @@ static int _GetSlotList() {
 		debug("Looking for file %s", index_tmp);
 
 		int fileSize;
-		if (/*dbGetFileSize(_str, &fileSize) != 0*/ !filename->contains(index_tmp)) {
+		if (/*dbGetFileSize(_str, &fileSize) != 0*/ !filename || !filename->contains(index_tmp)) {
 			debug("slot is empty!");
 			_LSstatus[index] = SLOT_STATE_EMPTY;
 		} else {
@@ -2202,33 +2202,55 @@ static void _DrawInfoBox(int a1) {
 
 // 0x47EC48
 static int _LoadTumbSlot(int a1) {
-	File *stream;
+//	File *stream;
 	int v2;
 
 	v2 = _LSstatus[_slot_cursor];
 	if (v2 != 0 && v2 != 2 && v2 != 3) {
-		snprintf(_str, sizeof(_str), "%s\\%s%.2d\\%s", "SAVEGAME", "SLOT", _slot_cursor + 1, "SAVE.DAT");
-		debugPrint(" Filename %s\n", _str);
+		Common::SaveFileManager *saveMan = g_system->getSavefileManager();
+		Common::InSaveFile *stream;
+		Common::String saveName = g_engine->getTargetName();
 
-		stream = fileOpen(_str, "rb");
+		char slotname[30];
+		Common::sprintf_s(slotname, "_slot%03d_", _slot_cursor + 1);
+		saveName += slotname;
+		saveName += "save.dat";
+
+		// snprintf(_str, sizeof(_str), "%s\\%s%.2d\\%s", "SAVEGAME", "SLOT", _slot_cursor + 1, "SAVE.DAT");
+		debugPrint(" Load thumb from %s\n", saveName.c_str());
+
+		if(saveMan->exists(saveName))
+			stream = saveMan->openForLoading(saveName);
+//			stream = fileOpen(_str, "rb");
 		if (stream == NULL) {
 			debugPrint("\nLOADSAVE: ** (A) Error reading thumbnail #%d! **\n", a1);
 			return -1;
 		}
 
-		if (fileSeek(stream, 131, SEEK_SET) != 0) {
+//		if (fileSeek(stream, 131, SEEK_SET) != 0) {
+		if(stream->seek(131, SEEK_SET) == false) {
 			debugPrint("\nLOADSAVE: ** (B) Error reading thumbnail #%d! **\n", a1);
-			fileClose(stream);
+//			fileClose(stream);
+			delete stream;
 			return -1;
 		}
 
-		if (fileRead(_thumbnail_image, LS_PREVIEW_SIZE, 1, stream) != 1) {
+		stream->read(_thumbnail_image, LS_PREVIEW_SIZE);
+		if (stream->err()) {
 			debugPrint("\nLOADSAVE: ** (C) Error reading thumbnail #%d! **\n", a1);
-			fileClose(stream);
+//			fileClose(stream);
+			delete stream;
 			return -1;
 		}
 
-		fileClose(stream);
+//		if (fileRead(_thumbnail_image, LS_PREVIEW_SIZE, 1, stream) != 1) {
+//			debugPrint("\nLOADSAVE: ** (C) Error reading thumbnail #%d! **\n", a1);
+//			fileClose(stream);
+//			return -1;
+//		}
+
+		//		fileClose(stream);
+		delete stream;
 	}
 
 	return 0;
