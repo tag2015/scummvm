@@ -27,6 +27,10 @@
 #include "fallout2/text_font.h"
 #include "fallout2/window_manager.h"
 
+#include "common/config-manager.h"
+#include "common/stream.h"
+
+
 namespace Fallout2 {
 
 #define AUTOMAP_OFFSET_COUNT (AUTOMAP_MAP_COUNT * ELEVATION_COUNT)
@@ -38,13 +42,13 @@ namespace Fallout2 {
 #define AUTOMAP_PIPBOY_VIEW_Y (105)
 
 static void automapRenderInMapWindow(int window, int elevation, unsigned char *backgroundData, int flags);
-static int automapSaveEntry(File *stream);
+static int automapSaveEntry(Common::WriteStream *stream);
 static int automapLoadEntry(int map, int elevation);
-static int automapSaveHeader(File *stream);
-static int automapLoadHeader(File *stream);
+static int automapSaveHeader(Common::SeekableWriteStream *stream);
+static int automapLoadHeader(Common::ReadStream *stream);
 static void _decode_map_data(int elevation);
 static int automapCreate();
-static int _copy_file_data(File *stream1, File *stream2, int length);
+static int _copy_file_data(Common::ReadStream *stream1, Common::WriteStream *stream2, int length);
 
 typedef enum AutomapFrm {
 	AUTOMAP_FRM_BACKGROUND,
@@ -693,10 +697,27 @@ int automapSaveCurrent() {
 	}
 
 	// NOTE: Not sure about the size.
-	char path[256];
-	snprintf(path, sizeof(path), "%s\\%s", "MAPS", AUTOMAP_DB);
+//	char path[256];
+//	snprintf(path, sizeof(path), "%s\\%s", "MAPS", AUTOMAP_DB);
 
-	File *stream1 = fileOpen(path, "r+b");
+	const Common::String &path = ConfMan.get("path");
+	Common::FSNode gameNode(path);
+	if (!gameNode.exists())
+		warning("AUTOMAP: Can't open gamedir");
+
+	Common::FSNode dataNode = gameNode.getChild("DATA");
+	if (!dataNode.exists())
+		dataNode.createDirectory();
+
+	Common::FSNode mapsNode = dataNode.getChild("MAPS");
+	if (!mapsNode.exists())
+		mapsNode.createDirectory();
+
+	Common::FSNode automapNode = mapsNode.getChild(AUTOMAP_DB);
+
+	Common::SeekableReadStream *stream1 = automapNode.createReadStream();
+
+//	File *stream1 = fileOpen(path, "r+b");
 	if (stream1 == NULL) {
 		debugPrint("\nAUTOMAP: Error opening automap database file!\n");
 		debugPrint("Error continued: automap_pip_save: path: %s", path);
@@ -709,7 +730,8 @@ int automapSaveCurrent() {
 		debugPrint("\nAUTOMAP: Error reading automap database file header!\n");
 		internal_free(gAutomapEntry.data);
 		internal_free(gAutomapEntry.compressedData);
-		fileClose(stream1);
+		delete stream1;
+//		fileClose(stream1);
 		return -1;
 	}
 
@@ -725,50 +747,69 @@ int automapSaveCurrent() {
 	}
 
 	if (entryOffset != 0) {
-		snprintf(path, sizeof(path), "%s\\%s", "MAPS", AUTOMAP_TMP);
+//		snprintf(path, sizeof(path), "%s\\%s", "MAPS", AUTOMAP_TMP);
 
-		File *stream2 = fileOpen(path, "wb");
+	// TODO Temp files should be removed, do this in save folder
+	Common::FSNode tmpmapNode = mapsNode.getChild(AUTOMAP_TMP);
+	Common::SeekableWriteStream *stream2 = tmpmapNode.createWriteStream();
+
+
+//		File *stream2 = fileOpen(path, "wb");
 		if (stream2 == NULL) {
 			debugPrint("\nAUTOMAP: Error creating temp file!\n");
 			internal_free(gAutomapEntry.data);
 			internal_free(gAutomapEntry.compressedData);
-			fileClose(stream1);
+			delete stream1;
+//			fileClose(stream1);
 			return -1;
 		}
 
-		fileRewind(stream1);
+//		fileRewind(stream1);
+		stream1->seek(0, SEEK_SET);
 
 		if (_copy_file_data(stream1, stream2, entryOffset) == -1) {
 			debugPrint("\nAUTOMAP: Error copying file data!\n");
-			fileClose(stream1);
-			fileClose(stream2);
+//			fileClose(stream1);
+//			fileClose(stream2);
+			delete stream1;
+			stream2->finalize();
+			delete stream2;
 			internal_free(gAutomapEntry.data);
 			internal_free(gAutomapEntry.compressedData);
 			return -1;
 		}
 
 		if (automapSaveEntry(stream2) == -1) {
-			fileClose(stream1);
+//			fileClose(stream1);
+			delete stream1;
 			internal_free(gAutomapEntry.data);
 			internal_free(gAutomapEntry.compressedData);
 			return -1;
 		}
 
 		int nextEntryDataSize;
-		if (fileReadInt32(stream1, &nextEntryDataSize) == -1) {
+//		if (fileReadInt32(stream1, &nextEntryDataSize) == -1) {
+		nextEntryDataSize = stream1->readSint32BE();
+		if(stream1->err()) {
 			debugPrint("\nAUTOMAP: Error reading database #1!\n");
-			fileClose(stream1);
-			fileClose(stream2);
+			delete stream1;
+			stream2->finalize();
+			delete stream2;
+//			fileClose(stream1);
+//			fileClose(stream2);
 			internal_free(gAutomapEntry.data);
 			internal_free(gAutomapEntry.compressedData);
 			return -1;
 		}
 
-		int automapDataSize = fileGetSize(stream1);
+		int automapDataSize = stream1->size(); // fileGetSize(stream1);
 		if (automapDataSize == -1) {
 			debugPrint("\nAUTOMAP: Error reading database #2!\n");
-			fileClose(stream1);
-			fileClose(stream2);
+			delete stream1;
+			stream2->finalize();
+			delete stream2;
+//			fileClose(stream1);
+//			fileClose(stream2);
 			internal_free(gAutomapEntry.data);
 			internal_free(gAutomapEntry.compressedData);
 			return -1;
@@ -776,10 +817,14 @@ int automapSaveCurrent() {
 
 		int nextEntryOffset = entryOffset + nextEntryDataSize + 5;
 		if (automapDataSize != nextEntryOffset) {
-			if (fileSeek(stream1, nextEntryOffset, SEEK_SET) == -1) {
+//			if (fileSeek(stream1, nextEntryOffset, SEEK_SET) == -1) {
+			if (stream1->seek(nextEntryOffset, SEEK_SET) == false) {
 				debugPrint("\nAUTOMAP: Error writing temp data!\n");
-				fileClose(stream1);
-				fileClose(stream2);
+				delete stream1;
+				stream2->finalize();
+				delete stream2;
+//				fileClose(stream1);
+//				fileClose(stream2);
 				internal_free(gAutomapEntry.data);
 				internal_free(gAutomapEntry.compressedData);
 				return -1;
@@ -787,8 +832,11 @@ int automapSaveCurrent() {
 
 			if (_copy_file_data(stream1, stream2, automapDataSize - nextEntryOffset) == -1) {
 				debugPrint("\nAUTOMAP: Error copying file data!\n");
-				fileClose(stream1);
-				fileClose(stream2);
+				delete stream1;
+				stream2->finalize();
+				delete stream2;
+//				fileClose(stream1);
+//				fileClose(stream2);
 				internal_free(gAutomapEntry.data);
 				internal_free(gAutomapEntry.compressedData);
 				return -1;
@@ -807,18 +855,37 @@ int automapSaveCurrent() {
 		gAutomapHeader.dataSize += diff;
 
 		if (automapSaveHeader(stream2) == -1) {
-			fileClose(stream1);
+//			fileClose(stream1);
+			delete stream1;
 			internal_free(gAutomapEntry.data);
 			internal_free(gAutomapEntry.compressedData);
 			return -1;
 		}
 
-		fileSeek(stream2, 0, SEEK_END);
-		fileClose(stream2);
-		fileClose(stream1);
+//		fileSeek(stream2, 0, SEEK_END);
+//		fileClose(stream2);
+//		fileClose(stream1);
+
+		delete stream1;
+		stream2->finalize();
+		delete stream2;
+
 		internal_free(gAutomapEntry.data);
 		internal_free(gAutomapEntry.compressedData);
 
+		// scummvm can't delete files outside the save dir
+
+		Common::ReadStream *tmp_stream = tmpmapNode.createReadStream();
+		Common::WriteStream *map_stream = automapNode.createWriteStream();
+
+		while (!tmp_stream->eos()) {
+			byte buf;
+			buf = tmp_stream->readByte();
+			if (tmp_stream->err())
+				break;
+			map_stream->writeByte(buf);
+		}
+/*
 		// NOTE: Not sure about the size.
 		char automapDbPath[512];
 		snprintf(automapDbPath, sizeof(automapDbPath), "%s\\%s\\%s", settings.system.master_patches_path.c_str(), "MAPS", AUTOMAP_DB);
@@ -833,24 +900,39 @@ int automapSaveCurrent() {
 		if (compat_rename(automapTmpPath, automapDbPath) != 0) {
 			debugPrint("\nAUTOMAP: Error renaming database!\n");
 			return -1;
-		}
+		}*/
+
 	} else {
 		bool proceed = true;
-		if (fileSeek(stream1, 0, SEEK_END) != -1) {
-			if (fileTell(stream1) != gAutomapHeader.dataSize) {
+		if (stream1->seek(0, SEEK_END)) {
+			if (stream1->pos() != gAutomapHeader.dataSize) {
 				proceed = false;
 			}
 		} else {
 			proceed = false;
 		}
 
+		// if (fileSeek(stream1, 0, SEEK_END) != -1) {
+		// 	if (fileTell(stream1) != gAutomapHeader.dataSize) {
+		// 		proceed = false;
+		// 	}
+		// } else {
+		// 	proceed = false;
+		// }
+
 		if (!proceed) {
 			debugPrint("\nAUTOMAP: Error reading automap database file header!\n");
 			internal_free(gAutomapEntry.data);
 			internal_free(gAutomapEntry.compressedData);
-			fileClose(stream1);
+			// fileClose(stream1);
+			delete stream1;
 			return -1;
 		}
+
+		// TODO this is probably wrong
+		delete stream1;
+		Common::SeekableWriteStream *stream1 = automapNode.createWriteStream();
+		stream1->seek(0, SEEK_END);
 
 		if (automapSaveEntry(stream1) == -1) {
 			internal_free(gAutomapEntry.data);
@@ -867,8 +949,9 @@ int automapSaveCurrent() {
 			return -1;
 		}
 
-		fileSeek(stream1, 0, SEEK_END);
-		fileClose(stream1);
+//		fileSeek(stream1, 0, SEEK_END);
+//		fileClose(stream1);
+		delete stream1;
 		internal_free(gAutomapEntry.data);
 		internal_free(gAutomapEntry.compressedData);
 	}
@@ -879,7 +962,7 @@ int automapSaveCurrent() {
 // Saves automap entry into stream.
 //
 // 0x41C844
-static int automapSaveEntry(File *stream) {
+static int automapSaveEntry(Common::WriteStream *stream) {
 	unsigned char *buffer;
 	if (gAutomapEntry.isCompressed == 1) {
 		buffer = gAutomapEntry.compressedData;
@@ -887,24 +970,37 @@ static int automapSaveEntry(File *stream) {
 		buffer = gAutomapEntry.data;
 	}
 
-	if (_db_fwriteLong(stream, gAutomapEntry.dataSize) == -1) {
+	stream->writeSint32BE(gAutomapEntry.dataSize);
+	if (stream->err())
 		goto err;
-	}
+	stream->writeByte(gAutomapEntry.isCompressed);
+	if (stream->err())
+		goto err;
+	for (int i = 0; i < gAutomapEntry.dataSize; i++)
+		stream->writeByte(*(buffer + i));
+	if (stream->err())
+		goto err;
 
-	if (fileWriteUInt8(stream, gAutomapEntry.isCompressed) == -1) {
-		goto err;
-	}
+	//	if (_db_fwriteLong(stream, gAutomapEntry.dataSize) == -1) {
+	//		goto err;
+	//	}
 
-	if (fileWriteUInt8List(stream, buffer, gAutomapEntry.dataSize) == -1) {
-		goto err;
-	}
+	//	if (fileWriteUInt8(stream, gAutomapEntry.isCompressed) == -1) {
+	//		goto err;
+	//	}
+
+//	if (fileWriteUInt8List(stream, buffer, gAutomapEntry.dataSize) == -1) {
+//		goto err;
+//	}
 
 	return 0;
 
 err:
 
 	debugPrint("\nAUTOMAP: Error writing automap database entry data!\n");
-	fileClose(stream);
+//	fileClose(stream);
+	stream->finalize();
+	delete stream;
 
 	return -1;
 }
@@ -913,12 +1009,27 @@ err:
 static int automapLoadEntry(int map, int elevation) {
 	gAutomapEntry.compressedData = NULL;
 
-	char path[COMPAT_MAX_PATH];
-	snprintf(path, sizeof(path), "%s\\%s", "MAPS", AUTOMAP_DB);
+//	char path[COMPAT_MAX_PATH];
+//	snprintf(path, sizeof(path), "%s\\%s", "MAPS", AUTOMAP_DB);
+	const Common::String &path = ConfMan.get("path");
+	Common::FSNode gameNode(path);
+	if (!gameNode.exists())
+		warning("AUTOMAP: Can't open gamedir");
+
+	Common::FSNode dataNode = gameNode.getChild("DATA");
+	if(!dataNode.exists())
+		dataNode.createDirectory();
+
+	Common::FSNode mapsNode = dataNode.getChild("MAPS");
+	if(!mapsNode.exists())
+		mapsNode.createDirectory();
+	Common::FSNode automapNode = mapsNode.getChild(AUTOMAP_DB);
+
+	Common::SeekableReadStream *stream = automapNode.createReadStream();
 
 	bool success = true;
 
-	File *stream = fileOpen(path, "r+b");
+//	File *stream = fileOpen(path, "r+b");
 	if (stream == NULL) {
 		debugPrint("\nAUTOMAP: Error opening automap database file!\n");
 		debugPrint("Error continued: AM_ReadEntry: path: %s", path);
@@ -927,7 +1038,8 @@ static int automapLoadEntry(int map, int elevation) {
 
 	if (automapLoadHeader(stream) == -1) {
 		debugPrint("\nAUTOMAP: Error reading automap database header!\n");
-		fileClose(stream);
+		delete stream;
+//		fileClose(stream);
 		return -1;
 	}
 
@@ -936,49 +1048,80 @@ static int automapLoadEntry(int map, int elevation) {
 		goto out;
 	}
 
-	if (fileSeek(stream, gAutomapHeader.offsets[map][elevation], SEEK_SET) == -1) {
+	if(stream->seek(gAutomapHeader.offsets[map][elevation], SEEK_SET) != true) {
 		success = false;
 		goto out;
 	}
 
-	if (_db_freadInt(stream, &(gAutomapEntry.dataSize)) == -1) {
+//	if (fileSeek(stream, gAutomapHeader.offsets[map][elevation], SEEK_SET) == -1) {
+//		success = false;
+//		goto out;
+//	}
+
+	gAutomapEntry.dataSize = stream->readSint32BE();
+	if(stream->err()) {
+		success = false;
+		goto out;
+	}
+	// if (_db_freadInt(stream, &(gAutomapEntry.dataSize)) == -1) {
+	// 	success = false;
+	// 	goto out;
+	// }
+
+	gAutomapEntry.isCompressed = stream->readByte();
+	if (stream->err()) {
 		success = false;
 		goto out;
 	}
 
-	if (fileReadUInt8(stream, &(gAutomapEntry.isCompressed)) == -1) {
-		success = false;
-		goto out;
-	}
+	// if (fileReadUInt8(stream, &(gAutomapEntry.isCompressed)) == -1) {
+	// 	success = false;
+	// 	goto out;
+	// }
 
 	if (gAutomapEntry.isCompressed == 1) {
 		gAutomapEntry.compressedData = (unsigned char *)internal_malloc(11024);
 		if (gAutomapEntry.compressedData == NULL) {
 			debugPrint("\nAUTOMAP: Error allocating decompression buffer!\n");
-			fileClose(stream);
+//			fileClose(stream);
+			delete stream;
 			return -1;
 		}
 
-		if (fileReadUInt8List(stream, gAutomapEntry.compressedData, gAutomapEntry.dataSize) == -1) {
-			success = 0;
-			goto out;
-		}
-
-		if (graphDecompress(gAutomapEntry.compressedData, gAutomapEntry.data, 10000) == -1) {
-			debugPrint("\nAUTOMAP: Error decompressing DB entry!\n");
-			fileClose(stream);
-			return -1;
-		}
-	} else {
-		if (fileReadUInt8List(stream, gAutomapEntry.data, gAutomapEntry.dataSize) == -1) {
+		for (int i = 0; i < gAutomapEntry.dataSize; i++)
+			*(gAutomapEntry.compressedData + i) = stream->readByte();
+		if (stream->err()) {
 			success = false;
 			goto out;
 		}
+//		if (fileReadUInt8List(stream, gAutomapEntry.compressedData, gAutomapEntry.dataSize) == -1) {
+//			success = 0;
+//			goto out;
+//		}
+
+		if (graphDecompress(gAutomapEntry.compressedData, gAutomapEntry.data, 10000) == -1) {
+			debugPrint("\nAUTOMAP: Error decompressing DB entry!\n");
+			delete stream;
+//			fileClose(stream);
+			return -1;
+		}
+	} else {
+		for (int i = 0; i < gAutomapEntry.dataSize; i++)
+			*(gAutomapEntry.data + i) = stream->readByte();
+		if (stream->err()) {
+			success = false;
+			goto out;
+		}
+//		if (fileReadUInt8List(stream, gAutomapEntry.data, gAutomapEntry.dataSize) == -1) {
+//			success = false;
+//			goto out;
+//		}
 	}
 
 out:
 
-	fileClose(stream);
+	delete stream;
+//	fileClose(stream);
 
 	if (!success) {
 		debugPrint("\nAUTOMAP: Error reading automap database entry data!\n");
@@ -996,10 +1139,20 @@ out:
 // Saves automap.db header.
 //
 // 0x41CAD8
-static int automapSaveHeader(File *stream) {
-	fileRewind(stream);
+static int automapSaveHeader(Common::SeekableWriteStream *stream) {
+	// fileRewind(stream);
+	stream->seek(0, SEEK_SET);
 
-	if (fileWriteUInt8(stream, gAutomapHeader.version) == -1) {
+	stream->writeByte(gAutomapHeader.version);
+	stream->writeSint32BE(gAutomapHeader.dataSize);
+
+	int *arr = (int *) gAutomapHeader.offsets;
+	for (int i = 0; i < AUTOMAP_OFFSET_COUNT; ++i) {
+		int value = arr[i];
+		stream->writeSint32BE(value);
+	}
+
+/*	if (fileWriteUInt8(stream, gAutomapHeader.version) == -1) {
 		goto err;
 	}
 
@@ -1009,7 +1162,7 @@ static int automapSaveHeader(File *stream) {
 
 	if (_db_fwriteLongCount(stream, (int *)gAutomapHeader.offsets, AUTOMAP_OFFSET_COUNT) == -1) {
 		goto err;
-	}
+	}*/
 
 	return 0;
 
@@ -1017,7 +1170,9 @@ err:
 
 	debugPrint("\nAUTOMAP: Error writing automap database header!\n");
 
-	fileClose(stream);
+//	fileClose(stream);
+	stream->finalize();
+	delete(stream);
 
 	return -1;
 }
@@ -1025,19 +1180,24 @@ err:
 // Loads automap.db header.
 //
 // 0x41CB50
-static int automapLoadHeader(File *stream) {
+static int automapLoadHeader(Common::ReadStream *stream) {
 
-	if (fileReadUInt8(stream, &(gAutomapHeader.version)) == -1) {
-		return -1;
-	}
+	gAutomapHeader.version = stream->readByte();
+//	if (fileReadUInt8(stream, &(gAutomapHeader.version)) == -1) {
+//		return -1;
+//	}
 
-	if (_db_freadInt(stream, &(gAutomapHeader.dataSize)) == -1) {
-		return -1;
-	}
+	gAutomapHeader.dataSize = stream->readSint32BE();
+//	if (_db_freadInt(stream, &(gAutomapHeader.dataSize)) == -1) {
+//		return -1;
+//	}
 
-	if (_db_freadIntCount(stream, (int *)gAutomapHeader.offsets, AUTOMAP_OFFSET_COUNT) == -1) {
-		return -1;
-	}
+	int *arr = (int *) gAutomapHeader.offsets;
+	for (int i = 0; i < AUTOMAP_OFFSET_COUNT; ++i)
+		arr[i] = stream->readSint32BE();
+//	if (_db_freadIntCount(stream, (int *)gAutomapHeader.offsets, AUTOMAP_OFFSET_COUNT) == -1) {
+//		return -1;
+//	}
 
 	if (gAutomapHeader.version != 1) {
 		return -1;
@@ -1084,20 +1244,41 @@ static int automapCreate() {
 	gAutomapHeader.dataSize = 1925;
 	memcpy(gAutomapHeader.offsets, _defam, sizeof(_defam));
 
-	char path[COMPAT_MAX_PATH];
-	snprintf(path, sizeof(path), "%s\\%s", "MAPS", AUTOMAP_DB);
+//	char path[COMPAT_MAX_PATH];
+//	snprintf(path, sizeof(path), "%s\\%s", "MAPS", AUTOMAP_DB);
 
-	File *stream = fileOpen(path, "wb");
-	if (stream == NULL) {
-		debugPrint("\nAUTOMAP: Error creating automap database file!\n");
-		return -1;
-	}
+	const Common::String &path = ConfMan.get("path");
+	Common::FSNode gameNode(path);
+	if (!gameNode.exists())
+		warning("AUTOMAP: Can't open gamedir");
+
+	Common::FSNode dataNode = gameNode.getChild("DATA");
+	if(!dataNode.exists())
+		dataNode.createDirectory();
+
+	Common::FSNode mapsNode = dataNode.getChild("MAPS");
+	if(!mapsNode.exists())
+		mapsNode.createDirectory();
+
+	Common::FSNode automapNode = mapsNode.getChild(AUTOMAP_DB);
+
+	Common::SeekableWriteStream *stream = automapNode.createWriteStream();
+	if(!stream)
+		warning("AUTOMAP: Couldn't create automap.db");
+
+//	File *stream = fileOpen(path, "wb");
+//	if (stream == NULL) {
+//		debugPrint("\nAUTOMAP: Error creating automap database file!\n");
+//		return -1;
+//	}
 
 	if (automapSaveHeader(stream) == -1) {
 		return -1;
 	}
 
-	fileClose(stream);
+//	fileClose(stream);
+	stream->finalize();
+	delete stream;
 
 	return 0;
 }
@@ -1105,7 +1286,7 @@ static int automapCreate() {
 // Copy data from stream1 to stream2.
 //
 // 0x41CD6C
-static int _copy_file_data(File *stream1, File *stream2, int length) {
+static int _copy_file_data(Common::ReadStream *stream1, Common::WriteStream *stream2, int length) {
 	void *buffer = internal_malloc(0xFFFF);
 	if (buffer == NULL) {
 		return -1;
@@ -1115,13 +1296,18 @@ static int _copy_file_data(File *stream1, File *stream2, int length) {
 	while (length != 0) {
 		int chunkLength = MIN(length, 0xFFFF);
 
-		if (fileRead(buffer, chunkLength, 1, stream1) != 1) {
+		// TODO check this
+		if (stream1->read(buffer, chunkLength) < chunkLength)
 			break;
-		}
+		//		if (fileRead(buffer, chunkLength, 1, stream1) != 1) {
+		//			break;
+		//		}
 
-		if (fileWrite(buffer, chunkLength, 1, stream2) != 1) {
+		if(stream2->write(buffer, chunkLength) < chunkLength)
 			break;
-		}
+		//		if (fileWrite(buffer, chunkLength, 1, stream2) != 1) {
+		//			break;
+		//		}
 
 		length -= chunkLength;
 	}
@@ -1137,10 +1323,26 @@ static int _copy_file_data(File *stream1, File *stream2, int length) {
 
 // 0x41CE74
 int automapGetHeader(AutomapHeader **automapHeaderPtr) {
-	char path[COMPAT_MAX_PATH];
-	snprintf(path, sizeof(path), "%s\\%s", "MAPS", AUTOMAP_DB);
+//	char path[COMPAT_MAX_PATH];
+//	snprintf(path, sizeof(path), "%s\\%s", "MAPS", AUTOMAP_DB);
 
-	File *stream = fileOpen(path, "rb");
+	const Common::String &path = ConfMan.get("path");
+	Common::FSNode gameNode(path);
+	if (!gameNode.exists())
+		warning("AUTOMAP: Can't open gamedir");
+
+	Common::FSNode dataNode = gameNode.getChild("DATA");
+	if (!dataNode.exists())
+		dataNode.createDirectory();
+
+	Common::FSNode mapsNode = dataNode.getChild("MAPS");
+	if (!mapsNode.exists())
+		mapsNode.createDirectory();
+
+	Common::FSNode automapNode = mapsNode.getChild(AUTOMAP_DB);
+
+	// File *stream = fileOpen(path, "rb");
+	Common::ReadStream *stream = automapNode.createReadStream();
 	if (stream == NULL) {
 		debugPrint("\nAUTOMAP: Error opening database file for reading!\n");
 		debugPrint("Error continued: ReadAMList: path: %s", path);
@@ -1149,11 +1351,13 @@ int automapGetHeader(AutomapHeader **automapHeaderPtr) {
 
 	if (automapLoadHeader(stream) == -1) {
 		debugPrint("\nAUTOMAP: Error reading automap database header pt2!\n");
-		fileClose(stream);
+//		fileClose(stream);
+		delete stream;
 		return -1;
 	}
 
-	fileClose(stream);
+//	fileClose(stream);
+	delete stream;
 
 	*automapHeaderPtr = &gAutomapHeader;
 
