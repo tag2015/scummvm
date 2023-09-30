@@ -218,14 +218,14 @@ static SaveGameHandler *_master_save_list[LOAD_SAVE_HANDLER_COUNT] = {
 	_obj_save_dude,
 	critterSave,
 	killsSave,
-	skillsSave,
+//	skillsSave,  TODO
 	randomSave,
 	perksSave,
 	combatSave,
 	aiSave,
 	statsSave,
 	itemsSave,
-	traitsSave,
+//	traitsSave,  TODO
 	automapSave,
 	preferencesSave,
 	characterEditorSave,
@@ -249,14 +249,14 @@ static LoadGameHandler *_master_load_list[LOAD_SAVE_HANDLER_COUNT] = {
 	_obj_load_dude,
 	critterLoad,
 	killsLoad,
-	skillsLoad,
+//	skillsLoad, TODO
 	randomLoad,
 	perksLoad,
 	combatLoad,
 	aiLoad,
 	statsLoad,
 	itemsLoad,
-	traitsLoad,
+//	traitsLoad, TODO
 	automapLoad,
 	preferencesLoad,
 	characterEditorLoad,
