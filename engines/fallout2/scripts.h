@@ -6,6 +6,8 @@
 #include "fallout2/interpreter.h"
 #include "fallout2/obj_types.h"
 
+#include "common/savefile.h"
+
 namespace Fallout2 {
 
 #define SCRIPT_FLAG_0x01 (0x01)
@@ -197,7 +199,7 @@ int scriptsEnable();
 int scriptsDisable();
 void _scr_enable_critters();
 void _scr_disable_critters();
-int scriptsSaveGameGlobalVars(File *stream);
+int scriptsSaveGameGlobalVars(Common::OutSaveFile *stream);
 int scriptsLoadGameGlobalVars(File *stream);
 int scriptsSkipGameGlobalVars(File *stream);
 int scriptSaveAll(File *stream);
