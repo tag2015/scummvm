@@ -166,7 +166,7 @@ static int _get_input_str2(int win, int doneKeyCode, int cancelKeyCode, char *de
 static int _DummyFunc(File *stream);
 static int _PrepLoad(File *stream);
 static int _EndLoad(File *stream);
-static int _GameMap2Slot(File *stream);
+static int _GameMap2Slot(Common::OutSaveFile *stream);
 static int _SlotMap2Game(File *stream);
 static int _mygets(char *dest, File *stream);
 static int _copy_file(const char *a1, const char *a2);
@@ -174,7 +174,7 @@ static int _MapDirErase(const char *path, const char *a2);
 static int _SaveBackup();
 static int _RestoreSave();
 static int _LoadObjDudeCid(File *stream);
-static int _SaveObjDudeCid(File *stream);
+static int _SaveObjDudeCid(Common::OutSaveFile *stream);
 static int _EraseSave();
 
 // 0x47B7C0
@@ -211,10 +211,10 @@ static const char *_patches = NULL;
 // 0x5193EC
 static SaveGameHandler *_master_save_list[LOAD_SAVE_HANDLER_COUNT] = {
 	_DummyFunc,
-	_SaveObjDudeCid,
-	scriptsSaveGameGlobalVars,
-	_GameMap2Slot,
-	scriptsSaveGameGlobalVars,
+//	_SaveObjDudeCid,
+//	scriptsSaveGameGlobalVars,
+//	_GameMap2Slot,
+//	scriptsSaveGameGlobalVars,
 	_obj_save_dude,
 	critterSave,
 	killsSave,
@@ -1568,18 +1568,17 @@ static int lsgPerformSaveGame() {
 	}
 
 	debugPrint("Written header!");
-	return 0;
 
 //	_flptr = fileOpen(_gmpath, "wb");
-/*	if (_flptr == NULL) {
-		debugPrint("\nLOADSAVE: ** Error opening save game for writing! **\n");
-		_RestoreSave();
-		snprintf(_gmpath, sizeof(_gmpath), "%s\\%s%.2d\\", "SAVEGAME", "SLOT", _slot_cursor + 1);
-		_MapDirErase(_gmpath, "BAK");
-		_partyMemberUnPrepSave();
+//	if (_flptr == NULL) {
+//		debugPrint("\nLOADSAVE: ** Error opening save game for writing! **\n");
+//		_RestoreSave();
+//		snprintf(_gmpath, sizeof(_gmpath), "%s\\%s%.2d\\", "SAVEGAME", "SLOT", _slot_cursor + 1);
+//		_MapDirErase(_gmpath, "BAK");
+//		_partyMemberUnPrepSave();
 //		backgroundSoundResume(); TODO audio
-		return -1;
-	}*/
+//		return -1;
+//	}
 
 //	long pos = fileTell(_flptr);
 //	if (lsgSaveHeaderInSlot(_slot_cursor) == -1) {
@@ -1593,6 +1592,18 @@ static int lsgPerformSaveGame() {
 //		backgroundSoundResume(); TODO audio
 //		return -1;
 //	}
+
+	if (_SaveObjDudeCid(newSave))
+		debugPrint("Error saving DudeCid");
+	else
+		debugPrint("Saved DudeCid");
+
+	if (scriptsSaveGameGlobalVars(newSave))
+		debugPrint("Error saving script global vars!");
+	else
+		debugPrint("Savied script global vars!");
+
+	return 0;
 
 //	for (int index = 0; index < LOAD_SAVE_HANDLER_COUNT; index++) {
 //		long pos = fileTell(_flptr);
@@ -2512,8 +2523,8 @@ static int _EndLoad(File *stream) {
 }
 
 // 0x47F510
-static int _GameMap2Slot(File *stream) {
-/*	if (_partyMemberPrepSave() == -1) { TODO save map
+static int _GameMap2Slot(Common::OutSaveFile *stream) {
+	if (_partyMemberPrepSave() == -1) {
 		return -1;
 	}
 
@@ -2521,7 +2532,7 @@ static int _GameMap2Slot(File *stream) {
 		return -1;
 	}
 
-	for (int index = 1; index < gPartyMemberDescriptionsLength; index += 1) {
+/*	for (int index = 1; index < gPartyMemberDescriptionsLength; index += 1) {
 		int pid = gPartyMemberPids[index];
 		if (pid == -2) {
 			continue;
@@ -3004,8 +3015,10 @@ static int _LoadObjDudeCid(File *stream) {
 }
 
 // 0x480734
-static int _SaveObjDudeCid(File *stream) {
-	return fileWriteInt32(stream, gDude->cid);
+static int _SaveObjDudeCid(Common::OutSaveFile *stream) {
+	stream->writeSint32BE(gDude->cid);
+	return stream->err();
+//	return fileWriteInt32(stream, gDude->cid);
 }
 
 // 0x480754

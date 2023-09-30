@@ -1653,8 +1653,11 @@ void _scr_disable_critters() {
 }
 
 // 0x4A5400
-int scriptsSaveGameGlobalVars(File *stream) {
-	return fileWriteInt32List(stream, gGameGlobalVars, gGameGlobalVarsLength);
+int scriptsSaveGameGlobalVars(Common::OutSaveFile *stream) {
+	for (int i = 0; i < gGameGlobalVarsLength; i++)
+		stream->writeSint32BE(gGameGlobalVars[i]);
+	return stream->err();
+//	return fileWriteInt32List(stream, gGameGlobalVars, gGameGlobalVarsLength);
 }
 
 // 0x4A5424
