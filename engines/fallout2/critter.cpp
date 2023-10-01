@@ -217,7 +217,7 @@ int critterSave(File *stream) {
 	Proto *proto;
 	protoGetProto(gDude->pid, &proto);
 
-	return protoCritterDataWrite(stream, &(proto->critter.data));
+//	return protoCritterDataWrite(stream, &(proto->critter.data)); TODO loadsave
 }
 
 // 0x42D094
@@ -1173,23 +1173,37 @@ int gcdSave(const char *path) {
 }
 
 // 0x42E174
-int protoCritterDataWrite(File *stream, CritterProtoData *critterData) {
-	if (fileWriteInt32(stream, critterData->flags) == -1)
-		return -1;
-	if (fileWriteInt32List(stream, critterData->baseStats, SAVEABLE_STAT_COUNT) == -1)
-		return -1;
-	if (fileWriteInt32List(stream, critterData->bonusStats, SAVEABLE_STAT_COUNT) == -1)
-		return -1;
-	if (fileWriteInt32List(stream, critterData->skills, SKILL_COUNT) == -1)
-		return -1;
-	if (fileWriteInt32(stream, critterData->bodyType) == -1)
-		return -1;
-	if (fileWriteInt32(stream, critterData->experience) == -1)
-		return -1;
-	if (fileWriteInt32(stream, critterData->killType) == -1)
-		return -1;
-	if (fileWriteInt32(stream, critterData->damageType) == -1)
-		return -1;
+int protoCritterDataWrite(Common::WriteStream *stream, CritterProtoData *critterData) {
+	int i;
+
+	stream->writeSint32BE(critterData->flags);
+	for (i = 0; i < SAVEABLE_STAT_COUNT; i++)
+		stream->writeSint32BE(critterData->baseStats[i]);
+	for (i = 0; i < SAVEABLE_STAT_COUNT; i++)
+		stream->writeSint32BE(critterData->bonusStats[i]);
+	for (i = 0; i < SKILL_COUNT; i++)
+		stream->writeSint32BE(critterData->skills[i]);
+	stream->writeSint32BE(critterData->bodyType);
+	stream->writeSint32BE(critterData->experience);
+	stream->writeSint32BE(critterData->killType);
+	stream->writeSint32BE(critterData->damageType);
+
+	/*	if (fileWriteInt32(stream, critterData->flags) == -1)
+			return -1;
+		if (fileWriteInt32List(stream, critterData->baseStats, SAVEABLE_STAT_COUNT) == -1)
+			return -1;
+		if (fileWriteInt32List(stream, critterData->bonusStats, SAVEABLE_STAT_COUNT) == -1)
+			return -1;
+		if (fileWriteInt32List(stream, critterData->skills, SKILL_COUNT) == -1)
+			return -1;
+		if (fileWriteInt32(stream, critterData->bodyType) == -1)
+			return -1;
+		if (fileWriteInt32(stream, critterData->experience) == -1)
+			return -1;
+		if (fileWriteInt32(stream, critterData->killType) == -1)
+			return -1;
+		if (fileWriteInt32(stream, critterData->damageType) == -1)
+			return -1;*/
 
 	return 0;
 }
