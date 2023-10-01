@@ -332,7 +332,7 @@ int fileReadInt32(File *stream, int *valuePtr) {
 		debug(5, "DB: Error reading int32");
 		return -1;
 	} else {
-		if (stream->dfile->entry->compressed) { // FIXME idk why compressed entries lose the pointer, for now just do it here
+		if (stream->type == XFILE_TYPE_DFILE && stream->dfile->entry->compressed) { // FIXME idk why compressed entries lose the pointer, for now just do it here
 
 			//			void *ptr = (byte *) malloc(sizeof(byte)*4);
 			//			memcpy( ptr, stream->dfile->decompressedData, sizeof(byte)*4);
@@ -344,7 +344,7 @@ int fileReadInt32(File *stream, int *valuePtr) {
 			stream->dfile->decompressed_position += 4;
 		}
 	}
-	if(stream->dfile->entry->compressed){
+	if(stream->type == XFILE_TYPE_DFILE && stream->dfile->entry->compressed){
 		debug(6, "DB: Read Int32 (uncompressed & shifted): %d", value);
 		*valuePtr = value;
 	}
