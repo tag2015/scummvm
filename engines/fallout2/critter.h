@@ -55,7 +55,7 @@ int gcdLoad(const char *path);
 int gcdLoadScumm(const char *path);
 int protoCritterDataRead(File *stream, CritterProtoData *critterData);
 int gcdSave(const char *path);
-int protoCritterDataWrite(File *stream, CritterProtoData *critterData);
+int protoCritterDataWrite(Common::WriteStream *stream, CritterProtoData *critterData);
 void dudeDisableState(int state);
 void dudeEnableState(int state);
 void dudeToggleState(int state);
