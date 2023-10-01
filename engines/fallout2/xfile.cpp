@@ -59,7 +59,7 @@ int xfileClose(XFile *stream) {
 		break;
 	default:
 		stream->file->close();
-		rc = !stream->file->err();
+		rc = 0;
 		break;
 	}
 
