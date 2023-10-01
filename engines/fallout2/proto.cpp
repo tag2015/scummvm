@@ -22,6 +22,9 @@
 #include "fallout2/stat.h"
 #include "fallout2/trait.h"
 
+#include "common/config-manager.h"
+#include "common/stream.h"
+
 namespace Fallout2 {
 
 static int _proto_critter_init(Proto *a1, int a2);
@@ -32,9 +35,9 @@ static int _proto_header_load();
 static int protoItemDataRead(ItemProtoData *item_data, int type, File *stream);
 static int protoSceneryDataRead(SceneryProtoData *scenery_data, int type, File *stream);
 static int protoRead(Proto *buf, File *stream);
-static int protoItemDataWrite(ItemProtoData *item_data, int type, File *stream);
-static int protoSceneryDataWrite(SceneryProtoData *scenery_data, int type, File *stream);
-static int protoWrite(Proto *buf, File *stream);
+static int protoItemDataWrite(ItemProtoData *item_data, int type, Common::WriteStream *stream);
+static int protoSceneryDataWrite(SceneryProtoData *scenery_data, int type, Common::WriteStream *stream);
+static int protoWrite(Proto *buf, Common::WriteStream *stream);
 static int _proto_load_pid(int pid, Proto **out_proto);
 static int _proto_find_free_subnode(int type, Proto **out_ptr);
 static void _proto_remove_some_list(int type);
@@ -1621,119 +1624,179 @@ static int protoRead(Proto *proto, File *stream) {
 }
 
 // 0x4A1390
-static int protoItemDataWrite(ItemProtoData *item_data, int type, File *stream) {
+static int protoItemDataWrite(ItemProtoData *item_data, int type, Common::WriteStream *stream) {
+	int i;
+
 	switch (type) {
 	case ITEM_TYPE_ARMOR:
-		if (fileWriteInt32(stream, item_data->armor.armorClass) == -1)
-			return -1;
-		if (fileWriteInt32List(stream, item_data->armor.damageResistance, 7) == -1)
-			return -1;
-		if (fileWriteInt32List(stream, item_data->armor.damageThreshold, 7) == -1)
-			return -1;
-		if (fileWriteInt32(stream, item_data->armor.perk) == -1)
-			return -1;
-		if (fileWriteInt32(stream, item_data->armor.maleFid) == -1)
-			return -1;
-		if (fileWriteInt32(stream, item_data->armor.femaleFid) == -1)
-			return -1;
+		stream->writeSint32BE(item_data->armor.armorClass);
+		for (i = 0; i < 7; i++)
+			stream->writeSint32BE(item_data->armor.damageResistance[i]);
+		for (i = 0; i < 7; i++)
+			stream->writeSint32BE(item_data->armor.damageThreshold[i]);
+		stream->writeSint32BE(item_data->armor.perk);
+		stream->writeSint32BE(item_data->armor.maleFid);
+		stream->writeSint32BE(item_data->armor.femaleFid);
+
+		/*		if (fileWriteInt32(stream, item_data->armor.armorClass) == -1)
+					return -1;
+				if (fileWriteInt32List(stream, item_data->armor.damageResistance, 7) == -1)
+					return -1;
+				if (fileWriteInt32List(stream, item_data->armor.damageThreshold, 7) == -1)
+					return -1;
+				if (fileWriteInt32(stream, item_data->armor.perk) == -1)
+					return -1;
+				if (fileWriteInt32(stream, item_data->armor.maleFid) == -1)
+					return -1;
+				if (fileWriteInt32(stream, item_data->armor.femaleFid) == -1)
+					return -1;*/
 
 		return 0;
 	case ITEM_TYPE_CONTAINER:
-		if (fileWriteInt32(stream, item_data->container.maxSize) == -1)
-			return -1;
-		if (fileWriteInt32(stream, item_data->container.openFlags) == -1)
-			return -1;
+		stream->writeSint32BE(item_data->container.maxSize);
+		stream->writeSint32BE(item_data->container.openFlags);
+
+		/*		if (fileWriteInt32(stream, item_data->container.maxSize) == -1)
+					return -1;
+				if (fileWriteInt32(stream, item_data->container.openFlags) == -1)
+					return -1;*/
 
 		return 0;
 	case ITEM_TYPE_DRUG:
-		if (fileWriteInt32(stream, item_data->drug.stat[0]) == -1)
-			return -1;
-		if (fileWriteInt32(stream, item_data->drug.stat[1]) == -1)
-			return -1;
-		if (fileWriteInt32(stream, item_data->drug.stat[2]) == -1)
-			return -1;
-		if (fileWriteInt32List(stream, item_data->drug.amount, 3) == -1)
-			return -1;
-		if (fileWriteInt32(stream, item_data->drug.duration1) == -1)
-			return -1;
-		if (fileWriteInt32List(stream, item_data->drug.amount1, 3) == -1)
-			return -1;
-		if (fileWriteInt32(stream, item_data->drug.duration2) == -1)
-			return -1;
-		if (fileWriteInt32List(stream, item_data->drug.amount2, 3) == -1)
-			return -1;
-		if (fileWriteInt32(stream, item_data->drug.addictionChance) == -1)
-			return -1;
-		if (fileWriteInt32(stream, item_data->drug.withdrawalEffect) == -1)
-			return -1;
-		if (fileWriteInt32(stream, item_data->drug.withdrawalOnset) == -1)
-			return -1;
+		stream->writeSint32BE(item_data->drug.stat[0]);
+		stream->writeSint32BE(item_data->drug.stat[1]);
+		stream->writeSint32BE(item_data->drug.stat[2]);
+		for (i = 0; i < 3; i++)
+			stream->writeSint32BE(item_data->drug.amount[i]);
+		stream->writeSint32BE(item_data->drug.duration1);
+		for (i = 0; i < 3; i++)
+			stream->writeSint32BE(item_data->drug.amount1[i]);
+		stream->writeSint32BE(item_data->drug.duration2);
+		for (i = 0; i < 3; i++)
+			stream->writeSint32BE(item_data->drug.amount2[i]);
+		stream->writeSint32BE(item_data->drug.addictionChance);
+		stream->writeSint32BE(item_data->drug.withdrawalEffect);
+		stream->writeSint32BE(item_data->drug.withdrawalOnset);
+
+		/*		if (fileWriteInt32(stream, item_data->drug.stat[0]) == -1)
+					return -1;
+				if (fileWriteInt32(stream, item_data->drug.stat[1]) == -1)
+					return -1;
+				if (fileWriteInt32(stream, item_data->drug.stat[2]) == -1)
+					return -1;
+				if (fileWriteInt32List(stream, item_data->drug.amount, 3) == -1)
+					return -1;
+				if (fileWriteInt32(stream, item_data->drug.duration1) == -1)
+					return -1;
+				if (fileWriteInt32List(stream, item_data->drug.amount1, 3) == -1)
+					return -1;
+				if (fileWriteInt32(stream, item_data->drug.duration2) == -1)
+					return -1;
+				if (fileWriteInt32List(stream, item_data->drug.amount2, 3) == -1)
+					return -1;
+				if (fileWriteInt32(stream, item_data->drug.addictionChance) == -1)
+					return -1;
+				if (fileWriteInt32(stream, item_data->drug.withdrawalEffect) == -1)
+					return -1;
+				if (fileWriteInt32(stream, item_data->drug.withdrawalOnset) == -1)
+					return -1;*/
 
 		return 0;
 	case ITEM_TYPE_WEAPON:
-		if (fileWriteInt32(stream, item_data->weapon.animationCode) == -1)
-			return -1;
-		if (fileWriteInt32(stream, item_data->weapon.maxDamage) == -1)
-			return -1;
-		if (fileWriteInt32(stream, item_data->weapon.minDamage) == -1)
-			return -1;
-		if (fileWriteInt32(stream, item_data->weapon.damageType) == -1)
-			return -1;
-		if (fileWriteInt32(stream, item_data->weapon.maxRange1) == -1)
-			return -1;
-		if (fileWriteInt32(stream, item_data->weapon.maxRange2) == -1)
-			return -1;
-		if (fileWriteInt32(stream, item_data->weapon.projectilePid) == -1)
-			return -1;
-		if (fileWriteInt32(stream, item_data->weapon.minStrength) == -1)
-			return -1;
-		if (fileWriteInt32(stream, item_data->weapon.actionPointCost1) == -1)
-			return -1;
-		if (fileWriteInt32(stream, item_data->weapon.actionPointCost2) == -1)
-			return -1;
-		if (fileWriteInt32(stream, item_data->weapon.criticalFailureType) == -1)
-			return -1;
-		if (fileWriteInt32(stream, item_data->weapon.perk) == -1)
-			return -1;
-		if (fileWriteInt32(stream, item_data->weapon.rounds) == -1)
-			return -1;
-		if (fileWriteInt32(stream, item_data->weapon.caliber) == -1)
-			return -1;
-		if (fileWriteInt32(stream, item_data->weapon.ammoTypePid) == -1)
-			return -1;
-		if (fileWriteInt32(stream, item_data->weapon.ammoCapacity) == -1)
-			return -1;
-		if (fileWriteUInt8(stream, item_data->weapon.soundCode) == -1)
-			return -1;
+		stream->writeSint32BE(item_data->weapon.animationCode);
+		stream->writeSint32BE(item_data->weapon.maxDamage);
+		stream->writeSint32BE(item_data->weapon.minDamage);
+		stream->writeSint32BE(item_data->weapon.damageType);
+		stream->writeSint32BE(item_data->weapon.maxRange1);
+		stream->writeSint32BE(item_data->weapon.maxRange2);
+		stream->writeSint32BE(item_data->weapon.projectilePid);
+		stream->writeSint32BE(item_data->weapon.minStrength);
+		stream->writeSint32BE(item_data->weapon.actionPointCost1);
+		stream->writeSint32BE(item_data->weapon.actionPointCost2);
+		stream->writeSint32BE(item_data->weapon.criticalFailureType);
+		stream->writeSint32BE(item_data->weapon.perk);
+		stream->writeSint32BE(item_data->weapon.rounds);
+		stream->writeSint32BE(item_data->weapon.caliber);
+		stream->writeSint32BE(item_data->weapon.ammoTypePid);
+		stream->writeSint32BE(item_data->weapon.ammoCapacity);
+		stream->writeByte(item_data->weapon.soundCode);
+
+		/*		if (fileWriteInt32(stream, item_data->weapon.animationCode) == -1)
+					return -1;
+				if (fileWriteInt32(stream, item_data->weapon.maxDamage) == -1)
+					return -1;
+				if (fileWriteInt32(stream, item_data->weapon.minDamage) == -1)
+					return -1;
+				if (fileWriteInt32(stream, item_data->weapon.damageType) == -1)
+					return -1;
+				if (fileWriteInt32(stream, item_data->weapon.maxRange1) == -1)
+					return -1;
+				if (fileWriteInt32(stream, item_data->weapon.maxRange2) == -1)
+					return -1;
+				if (fileWriteInt32(stream, item_data->weapon.projectilePid) == -1)
+					return -1;
+				if (fileWriteInt32(stream, item_data->weapon.minStrength) == -1)
+					return -1;
+				if (fileWriteInt32(stream, item_data->weapon.actionPointCost1) == -1)
+					return -1;
+				if (fileWriteInt32(stream, item_data->weapon.actionPointCost2) == -1)
+					return -1;
+				if (fileWriteInt32(stream, item_data->weapon.criticalFailureType) == -1)
+					return -1;
+				if (fileWriteInt32(stream, item_data->weapon.perk) == -1)
+					return -1;
+				if (fileWriteInt32(stream, item_data->weapon.rounds) == -1)
+					return -1;
+				if (fileWriteInt32(stream, item_data->weapon.caliber) == -1)
+					return -1;
+				if (fileWriteInt32(stream, item_data->weapon.ammoTypePid) == -1)
+					return -1;
+				if (fileWriteInt32(stream, item_data->weapon.ammoCapacity) == -1)
+					return -1;
+				if (fileWriteUInt8(stream, item_data->weapon.soundCode) == -1)
+					return -1;*/
 
 		return 0;
 	case ITEM_TYPE_AMMO:
-		if (fileWriteInt32(stream, item_data->ammo.caliber) == -1)
-			return -1;
-		if (fileWriteInt32(stream, item_data->ammo.quantity) == -1)
-			return -1;
-		if (fileWriteInt32(stream, item_data->ammo.armorClassModifier) == -1)
-			return -1;
-		if (fileWriteInt32(stream, item_data->ammo.damageResistanceModifier) == -1)
-			return -1;
-		if (fileWriteInt32(stream, item_data->ammo.damageMultiplier) == -1)
-			return -1;
-		if (fileWriteInt32(stream, item_data->ammo.damageDivisor) == -1)
-			return -1;
+		stream->writeSint32BE(item_data->ammo.caliber);
+		stream->writeSint32BE(item_data->ammo.quantity);
+		stream->writeSint32BE(item_data->ammo.armorClassModifier);
+		stream->writeSint32BE(item_data->ammo.damageResistanceModifier);
+		stream->writeSint32BE(item_data->ammo.damageMultiplier);
+		stream->writeSint32BE(item_data->ammo.damageDivisor);
+
+		/*		if (fileWriteInt32(stream, item_data->ammo.caliber) == -1)
+					return -1;
+				if (fileWriteInt32(stream, item_data->ammo.quantity) == -1)
+					return -1;
+				if (fileWriteInt32(stream, item_data->ammo.armorClassModifier) == -1)
+					return -1;
+				if (fileWriteInt32(stream, item_data->ammo.damageResistanceModifier) == -1)
+					return -1;
+				if (fileWriteInt32(stream, item_data->ammo.damageMultiplier) == -1)
+					return -1;
+				if (fileWriteInt32(stream, item_data->ammo.damageDivisor) == -1)
+					return -1;*/
 
 		return 0;
 	case ITEM_TYPE_MISC:
-		if (fileWriteInt32(stream, item_data->misc.powerTypePid) == -1)
-			return -1;
-		if (fileWriteInt32(stream, item_data->misc.powerType) == -1)
-			return -1;
-		if (fileWriteInt32(stream, item_data->misc.charges) == -1)
-			return -1;
+		stream->writeSint32BE(item_data->misc.powerTypePid);
+		stream->writeSint32BE(item_data->misc.powerType);
+		stream->writeSint32BE(item_data->misc.charges);
+
+		/*		if (fileWriteInt32(stream, item_data->misc.powerTypePid) == -1)
+					return -1;
+				if (fileWriteInt32(stream, item_data->misc.powerType) == -1)
+					return -1;
+				if (fileWriteInt32(stream, item_data->misc.charges) == -1)
+					return -1;*/
 
 		return 0;
 	case ITEM_TYPE_KEY:
-		if (fileWriteInt32(stream, item_data->key.keyCode) == -1)
-			return -1;
+		stream->writeSint32BE(item_data->key.keyCode);
+
+		/*		if (fileWriteInt32(stream, item_data->key.keyCode) == -1)
+					return -1;*/
 
 		return 0;
 	}
@@ -1742,38 +1805,49 @@ static int protoItemDataWrite(ItemProtoData *item_data, int type, File *stream) 
 }
 
 // 0x4A16E4
-static int protoSceneryDataWrite(SceneryProtoData *scenery_data, int type, File *stream) {
+static int protoSceneryDataWrite(SceneryProtoData *scenery_data, int type, Common::WriteStream *stream) {
 	switch (type) {
 	case SCENERY_TYPE_DOOR:
-		if (fileWriteInt32(stream, scenery_data->door.openFlags) == -1)
-			return -1;
-		if (fileWriteInt32(stream, scenery_data->door.keyCode) == -1)
-			return -1;
+		stream->writeSint32BE(scenery_data->door.openFlags);
+		stream->writeSint32BE(scenery_data->door.keyCode);
+
+		/*		if (fileWriteInt32(stream, scenery_data->door.openFlags) == -1)
+					return -1;
+				if (fileWriteInt32(stream, scenery_data->door.keyCode) == -1)
+					return -1;*/
 
 		return 0;
 	case SCENERY_TYPE_STAIRS:
-		if (fileWriteInt32(stream, scenery_data->stairs.field_0) == -1)
-			return -1;
-		if (fileWriteInt32(stream, scenery_data->stairs.field_4) == -1)
-			return -1;
+		stream->writeSint32BE(scenery_data->stairs.field_0);
+		stream->writeSint32BE(scenery_data->stairs.field_4);
+		/*		if (fileWriteInt32(stream, scenery_data->stairs.field_0) == -1)
+					return -1;
+				if (fileWriteInt32(stream, scenery_data->stairs.field_4) == -1)
+					return -1;*/
 
 		return 0;
 	case SCENERY_TYPE_ELEVATOR:
-		if (fileWriteInt32(stream, scenery_data->elevator.type) == -1)
-			return -1;
-		if (fileWriteInt32(stream, scenery_data->elevator.level) == -1)
-			return -1;
+		stream->writeSint32BE(scenery_data->elevator.type);
+		stream->writeSint32BE(scenery_data->elevator.level);
+		/*		if (fileWriteInt32(stream, scenery_data->elevator.type) == -1)
+					return -1;
+				if (fileWriteInt32(stream, scenery_data->elevator.level) == -1)
+					return -1;*/
 
 		return 0;
 	case SCENERY_TYPE_LADDER_UP:
 	case SCENERY_TYPE_LADDER_DOWN:
-		if (fileWriteInt32(stream, scenery_data->ladder.field_0) == -1)
-			return -1;
+		stream->writeSint32BE(scenery_data->ladder.field_0);
+
+		/*		if (fileWriteInt32(stream, scenery_data->ladder.field_0) == -1)
+					return -1;*/
 
 		return 0;
 	case SCENERY_TYPE_GENERIC:
-		if (fileWriteInt32(stream, scenery_data->generic.field_0) == -1)
-			return -1;
+		stream->writeSint32BE(scenery_data->generic.field_0);
+
+		/*		if (fileWriteInt32(stream, scenery_data->generic.field_0) == -1)
+					return -1;*/
 
 		return 0;
 	}
@@ -1782,119 +1856,171 @@ static int protoSceneryDataWrite(SceneryProtoData *scenery_data, int type, File 
 }
 
 // 0x4A17B4
-static int protoWrite(Proto *proto, File *stream) {
-	if (fileWriteInt32(stream, proto->pid) == -1)
-		return -1;
-	if (fileWriteInt32(stream, proto->messageId) == -1)
-		return -1;
-	if (fileWriteInt32(stream, proto->fid) == -1)
-		return -1;
+static int protoWrite(Proto *proto, Common::WriteStream *stream) {
+
+	stream->writeSint32BE(proto->pid);
+	stream->writeSint32BE(proto->messageId);
+	stream->writeSint32BE(proto->fid);
+
+	/*	if (fileWriteInt32(stream, proto->pid) == -1)
+			return -1;
+		if (fileWriteInt32(stream, proto->messageId) == -1)
+			return -1;
+		if (fileWriteInt32(stream, proto->fid) == -1)
+			return -1;*/
 
 	switch (PID_TYPE(proto->pid)) {
 	case OBJ_TYPE_ITEM:
-		if (fileWriteInt32(stream, proto->item.lightDistance) == -1)
-			return -1;
-		if (_db_fwriteLong(stream, proto->item.lightIntensity) == -1)
-			return -1;
-		if (fileWriteInt32(stream, proto->item.flags) == -1)
-			return -1;
-		if (fileWriteInt32(stream, proto->item.extendedFlags) == -1)
-			return -1;
-		if (fileWriteInt32(stream, proto->item.sid) == -1)
-			return -1;
-		if (fileWriteInt32(stream, proto->item.type) == -1)
-			return -1;
-		if (fileWriteInt32(stream, proto->item.material) == -1)
-			return -1;
-		if (fileWriteInt32(stream, proto->item.size) == -1)
-			return -1;
-		if (_db_fwriteLong(stream, proto->item.weight) == -1)
-			return -1;
-		if (fileWriteInt32(stream, proto->item.cost) == -1)
-			return -1;
-		if (fileWriteInt32(stream, proto->item.inventoryFid) == -1)
-			return -1;
-		if (fileWriteUInt8(stream, proto->item.field_80) == -1)
-			return -1;
+		stream->writeSint32BE(proto->item.lightDistance);
+		stream->writeSint32BE(proto->item.lightIntensity);
+		stream->writeSint32BE(proto->item.flags);
+		stream->writeSint32BE(proto->item.extendedFlags);
+		stream->writeSint32BE(proto->item.sid);
+		stream->writeSint32BE(proto->item.type);
+		stream->writeSint32BE(proto->item.material);
+		stream->writeSint32BE(proto->item.size);
+		stream->writeSint32BE(proto->item.weight);
+		stream->writeSint32BE(proto->item.cost);
+		stream->writeSint32BE(proto->item.inventoryFid);
+		stream->writeByte(proto->item.field_80);
+
+		/*		if (fileWriteInt32(stream, proto->item.lightDistance) == -1)
+					return -1;
+				if (_db_fwriteLong(stream, proto->item.lightIntensity) == -1)
+					return -1;
+				if (fileWriteInt32(stream, proto->item.flags) == -1)
+					return -1;
+				if (fileWriteInt32(stream, proto->item.extendedFlags) == -1)
+					return -1;
+				if (fileWriteInt32(stream, proto->item.sid) == -1)
+					return -1;
+				if (fileWriteInt32(stream, proto->item.type) == -1)
+					return -1;
+				if (fileWriteInt32(stream, proto->item.material) == -1)
+					return -1;
+				if (fileWriteInt32(stream, proto->item.size) == -1)
+					return -1;
+				if (_db_fwriteLong(stream, proto->item.weight) == -1)
+					return -1;
+				if (fileWriteInt32(stream, proto->item.cost) == -1)
+					return -1;
+				if (fileWriteInt32(stream, proto->item.inventoryFid) == -1)
+					return -1;
+				if (fileWriteUInt8(stream, proto->item.field_80) == -1)
+					return -1;*/
 		if (protoItemDataWrite(&(proto->item.data), proto->item.type, stream) == -1)
 			return -1;
 
 		return 0;
 	case OBJ_TYPE_CRITTER:
-		if (fileWriteInt32(stream, proto->critter.lightDistance) == -1)
-			return -1;
-		if (_db_fwriteLong(stream, proto->critter.lightIntensity) == -1)
-			return -1;
-		if (fileWriteInt32(stream, proto->critter.flags) == -1)
-			return -1;
-		if (fileWriteInt32(stream, proto->critter.extendedFlags) == -1)
-			return -1;
-		if (fileWriteInt32(stream, proto->critter.sid) == -1)
-			return -1;
-		if (fileWriteInt32(stream, proto->critter.headFid) == -1)
-			return -1;
-		if (fileWriteInt32(stream, proto->critter.aiPacket) == -1)
-			return -1;
-		if (fileWriteInt32(stream, proto->critter.team) == -1)
-			return -1;
+		stream->writeSint32BE(proto->critter.lightDistance);
+		stream->writeSint32BE(proto->critter.lightIntensity);
+		stream->writeSint32BE(proto->critter.flags);
+		stream->writeSint32BE(proto->critter.extendedFlags);
+		stream->writeSint32BE(proto->critter.sid);
+		stream->writeSint32BE(proto->critter.headFid);
+		stream->writeSint32BE(proto->critter.aiPacket);
+		stream->writeSint32BE(proto->critter.team);
+
+		/*		if (fileWriteInt32(stream, proto->critter.lightDistance) == -1)
+					return -1;
+				if (_db_fwriteLong(stream, proto->critter.lightIntensity) == -1)
+					return -1;
+				if (fileWriteInt32(stream, proto->critter.flags) == -1)
+					return -1;
+				if (fileWriteInt32(stream, proto->critter.extendedFlags) == -1)
+					return -1;
+				if (fileWriteInt32(stream, proto->critter.sid) == -1)
+					return -1;
+				if (fileWriteInt32(stream, proto->critter.headFid) == -1)
+					return -1;
+				if (fileWriteInt32(stream, proto->critter.aiPacket) == -1)
+					return -1;
+				if (fileWriteInt32(stream, proto->critter.team) == -1)
+					return -1;*/
 		if (protoCritterDataWrite(stream, &(proto->critter.data)) == -1)
 			return -1;
 
 		return 0;
 	case OBJ_TYPE_SCENERY:
-		if (fileWriteInt32(stream, proto->scenery.lightDistance) == -1)
-			return -1;
-		if (_db_fwriteLong(stream, proto->scenery.lightIntensity) == -1)
-			return -1;
-		if (fileWriteInt32(stream, proto->scenery.flags) == -1)
-			return -1;
-		if (fileWriteInt32(stream, proto->scenery.extendedFlags) == -1)
-			return -1;
-		if (fileWriteInt32(stream, proto->scenery.sid) == -1)
-			return -1;
-		if (fileWriteInt32(stream, proto->scenery.type) == -1)
-			return -1;
-		if (fileWriteInt32(stream, proto->scenery.field_2C) == -1)
-			return -1;
-		if (fileWriteUInt8(stream, proto->scenery.field_34) == -1)
-			return -1;
+		stream->writeSint32BE(proto->scenery.lightDistance);
+		stream->writeSint32BE(proto->scenery.lightIntensity);
+		stream->writeSint32BE(proto->scenery.flags);
+		stream->writeSint32BE(proto->scenery.extendedFlags);
+		stream->writeSint32BE(proto->scenery.sid);
+		stream->writeSint32BE(proto->scenery.type);
+		stream->writeSint32BE(proto->scenery.field_2C);
+		stream->writeByte(proto->scenery.field_34);
+
+		/*		if (fileWriteInt32(stream, proto->scenery.lightDistance) == -1)
+					return -1;
+				if (_db_fwriteLong(stream, proto->scenery.lightIntensity) == -1)
+					return -1;
+				if (fileWriteInt32(stream, proto->scenery.flags) == -1)
+					return -1;
+				if (fileWriteInt32(stream, proto->scenery.extendedFlags) == -1)
+					return -1;
+				if (fileWriteInt32(stream, proto->scenery.sid) == -1)
+					return -1;
+				if (fileWriteInt32(stream, proto->scenery.type) == -1)
+					return -1;
+				if (fileWriteInt32(stream, proto->scenery.field_2C) == -1)
+					return -1;
+				if (fileWriteUInt8(stream, proto->scenery.field_34) == -1)
+					return -1;*/
 		if (protoSceneryDataWrite(&(proto->scenery.data), proto->scenery.type, stream) == -1)
 			return -1;
 	case OBJ_TYPE_WALL:
-		if (fileWriteInt32(stream, proto->wall.lightDistance) == -1)
-			return -1;
-		if (_db_fwriteLong(stream, proto->wall.lightIntensity) == -1)
-			return -1;
-		if (fileWriteInt32(stream, proto->wall.flags) == -1)
-			return -1;
-		if (fileWriteInt32(stream, proto->wall.extendedFlags) == -1)
-			return -1;
-		if (fileWriteInt32(stream, proto->wall.sid) == -1)
-			return -1;
-		if (fileWriteInt32(stream, proto->wall.material) == -1)
-			return -1;
+		stream->writeSint32BE(proto->wall.lightDistance);
+		stream->writeSint32BE(proto->wall.lightIntensity);
+		stream->writeSint32BE(proto->wall.flags);
+		stream->writeSint32BE(proto->wall.extendedFlags);
+		stream->writeSint32BE(proto->wall.sid);
+		stream->writeSint32BE(proto->wall.material);
+
+		/*		if (fileWriteInt32(stream, proto->wall.lightDistance) == -1)
+					return -1;
+				if (_db_fwriteLong(stream, proto->wall.lightIntensity) == -1)
+					return -1;
+				if (fileWriteInt32(stream, proto->wall.flags) == -1)
+					return -1;
+				if (fileWriteInt32(stream, proto->wall.extendedFlags) == -1)
+					return -1;
+				if (fileWriteInt32(stream, proto->wall.sid) == -1)
+					return -1;
+				if (fileWriteInt32(stream, proto->wall.material) == -1)
+					return -1;*/
 
 		return 0;
 	case OBJ_TYPE_TILE:
-		if (fileWriteInt32(stream, proto->tile.flags) == -1)
-			return -1;
-		if (fileWriteInt32(stream, proto->tile.extendedFlags) == -1)
-			return -1;
-		if (fileWriteInt32(stream, proto->tile.sid) == -1)
-			return -1;
-		if (fileWriteInt32(stream, proto->tile.material) == -1)
-			return -1;
+		stream->writeSint32BE(proto->tile.flags);
+		stream->writeSint32BE(proto->tile.extendedFlags);
+		stream->writeSint32BE(proto->tile.sid);
+		stream->writeSint32BE(proto->tile.material);
+
+		/*		if (fileWriteInt32(stream, proto->tile.flags) == -1)
+					return -1;
+				if (fileWriteInt32(stream, proto->tile.extendedFlags) == -1)
+					return -1;
+				if (fileWriteInt32(stream, proto->tile.sid) == -1)
+					return -1;
+				if (fileWriteInt32(stream, proto->tile.material) == -1)
+					return -1;*/
 
 		return 0;
 	case OBJ_TYPE_MISC:
-		if (fileWriteInt32(stream, proto->misc.lightDistance) == -1)
-			return -1;
-		if (_db_fwriteLong(stream, proto->misc.lightIntensity) == -1)
-			return -1;
-		if (fileWriteInt32(stream, proto->misc.flags) == -1)
-			return -1;
-		if (fileWriteInt32(stream, proto->misc.extendedFlags) == -1)
-			return -1;
+		stream->writeSint32BE(proto->misc.lightDistance);
+		stream->writeSint32BE(proto->misc.lightIntensity);
+		stream->writeSint32BE(proto->misc.flags);
+		stream->writeSint32BE(proto->misc.extendedFlags);
+		/*		if (fileWriteInt32(stream, proto->misc.lightDistance) == -1)
+					return -1;
+				if (_db_fwriteLong(stream, proto->misc.lightIntensity) == -1)
+					return -1;
+				if (fileWriteInt32(stream, proto->misc.flags) == -1)
+					return -1;
+				if (fileWriteInt32(stream, proto->misc.extendedFlags) == -1)
+					return -1;*/
 
 		return 0;
 	}
@@ -1915,15 +2041,54 @@ int _proto_save_pid(int pid) {
 
 	_proto_list_str(pid, path + strlen(path));
 
-	File *stream = fileOpen(path, "wb");
+	// TODO move to init
+	const Common::String &gamePath = ConfMan.get("path");
+	Common::FSNode gameNode(gamePath);
+	if (!gameNode.exists())
+		warning("PROTO_SAVE_PID: Can't open gamedir");
+
+	Common::FSNode dataNode = gameNode.getChild("data");
+	if (!dataNode.exists())
+		dataNode.createDirectory();
+
+	Common::FSNode protoNode = dataNode.getChild("proto");
+	if (!protoNode.exists())
+		protoNode.createDirectory();
+
+	Common::FSNode crittersNode = protoNode.getChild("critters");
+	if (!crittersNode.exists())
+		crittersNode.createDirectory();
+
+	Common::FSNode itemsNode = protoNode.getChild("items");
+	if (!itemsNode.exists())
+		itemsNode.createDirectory();
+
+	path[strlen(path) - 13] = '\0';
+
+	Common::String fullPath(gamePath);
+	fullPath += "data\\";
+	fullPath += path;
+	Common::FSNode fullProtoPath(fullPath);
+	char fileName[13];
+	Common::sprintf_s(fileName, "%08d.pro", pid);
+
+	Common::FSNode proFile = fullProtoPath.getChild(fileName);
+
+	Common::WriteStream *stream = proFile.createWriteStream();
+
+	debug(5, "PROTO: Attempt to save proto %s in %s", fileName, fullPath.c_str());
+
+	//	File *stream = fileOpen(path, "wb");
 	if (stream == NULL) {
 		return -1;
-	}
+	} else
+		debug(5, "PROTO: Opened stream %s for writing", fileName);
 
 	int rc = protoWrite(proto, stream);
 
-	fileClose(stream);
-
+	//	fileClose(stream);
+	stream->finalize();
+	delete stream;
 	return rc;
 }
 
