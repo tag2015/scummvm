@@ -2794,13 +2794,19 @@ err:
 }
 
 // 0x47A254
-int drugEffectEventWrite(File *stream, void *data) {
+int drugEffectEventWrite(Common::OutSaveFile *stream, void *data) {
 	DrugEffectEvent *drugEffectEvent = (DrugEffectEvent *)data;
 
-	if (fileWriteInt32List(stream, drugEffectEvent->stats, 3) == -1)
-		return -1;
-	if (fileWriteInt32List(stream, drugEffectEvent->modifiers, 3) == -1)
-		return -1;
+	int i;
+	for (i = 0; i < 3; i++)
+		stream->writeSint32BE(drugEffectEvent->stats[i]);
+	for (i = 0; i < 3; i++)
+		stream->writeSint32BE(drugEffectEvent->modifiers[i]);
+
+	/*	if (fileWriteInt32List(stream, drugEffectEvent->stats, 3) == -1)
+			return -1;
+		if (fileWriteInt32List(stream, drugEffectEvent->modifiers, 3) == -1)
+			return -1;*/
 
 	return 0;
 }
@@ -2913,15 +2919,19 @@ err:
 }
 
 // 0x47A484
-int withdrawalEventWrite(File *stream, void *data) {
+int withdrawalEventWrite(Common::OutSaveFile *stream, void *data) {
 	WithdrawalEvent *withdrawalEvent = (WithdrawalEvent *)data;
 
-	if (fileWriteInt32(stream, withdrawalEvent->field_0) == -1)
-		return -1;
-	if (fileWriteInt32(stream, withdrawalEvent->pid) == -1)
-		return -1;
-	if (fileWriteInt32(stream, withdrawalEvent->perk) == -1)
-		return -1;
+	stream->writeSint32BE(withdrawalEvent->field_0);
+	stream->writeSint32BE(withdrawalEvent->pid);
+	stream->writeSint32BE(withdrawalEvent->perk);
+
+	/*	if (fileWriteInt32(stream, withdrawalEvent->field_0) == -1)
+			return -1;
+		if (fileWriteInt32(stream, withdrawalEvent->pid) == -1)
+			return -1;
+		if (fileWriteInt32(stream, withdrawalEvent->perk) == -1)
+			return -1;*/
 
 	return 0;
 }
