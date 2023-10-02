@@ -5720,11 +5720,19 @@ static void characterEditorDrawKarmaFolder() {
 }
 
 // 0x43C1B0
-int characterEditorSave(File *stream) {
-	if (fileWriteInt32(stream, gCharacterEditorLastLevel) == -1)
+int characterEditorSave(Common::OutSaveFile *stream) {
+	stream->writeSint32BE(gCharacterEditorLastLevel);
+	stream->writeByte(gCharacterEditorHasFreePerk);
+	if (stream->err()) {
+		stream->finalize();
+		delete stream;
 		return -1;
-	if (fileWriteUInt8(stream, gCharacterEditorHasFreePerk) == -1)
-		return -1;
+	}
+
+	/*	if (fileWriteInt32(stream, gCharacterEditorLastLevel) == -1)
+			return -1;
+		if (fileWriteUInt8(stream, gCharacterEditorHasFreePerk) == -1)
+			return -1;*/
 
 	return 0;
 }

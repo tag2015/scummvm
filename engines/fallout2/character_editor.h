@@ -3,6 +3,8 @@
 
 #include "fallout2/db.h"
 
+#include "common/savefile.h"
+
 namespace Fallout2 {
 
 extern int gCharacterEditorRemainingCharacterPoints;
@@ -11,7 +13,7 @@ int characterEditorShow(bool isCreationMode);
 void characterEditorInit();
 bool _isdoschar(int ch);
 char *_strmfe(char *dest, const char *name, const char *ext);
-int characterEditorSave(File *stream);
+int characterEditorSave(Common::OutSaveFile *stream);
 int characterEditorLoad(File *stream);
 void characterEditorReset();
 

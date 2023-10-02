@@ -228,7 +228,7 @@ static SaveGameHandler *_master_save_list[LOAD_SAVE_HANDLER_COUNT] = {
 //	traitsSave,  DONE
 //	automapSave, DONE
 //	preferencesSave, DONE
-	characterEditorSave,
+//	characterEditorSave, DONE
 	wmWorldMap_save,
 	pipboySave,
 //	gameMoviesSave, TODO movie
@@ -1662,6 +1662,11 @@ static int lsgPerformSaveGame() {
 		warning("Error saving preferences");
 	else
 		debug("Saved preferences");
+
+	if (characterEditorSave(newSave))
+		warning("Error saving character editor flags");
+	else
+		debug("Saved character editor flags");
 
 	return 0;
 
