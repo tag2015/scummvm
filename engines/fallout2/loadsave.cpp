@@ -213,7 +213,7 @@ static SaveGameHandler *_master_save_list[LOAD_SAVE_HANDLER_COUNT] = {
 	_DummyFunc,
 //	_SaveObjDudeCid, DONE
 //	scriptsSaveGameGlobalVars, DONE
-//	_GameMap2Slot, TODO
+//	_GameMap2Slot, TODO map
 //	scriptsSaveGameGlobalVars, DONE
 //	_obj_save_dude, DONE
 //	critterSave, DONE
@@ -230,10 +230,10 @@ static SaveGameHandler *_master_save_list[LOAD_SAVE_HANDLER_COUNT] = {
 //	preferencesSave, DONE
 //	characterEditorSave, DONE
 //	wmWorldMap_save, DONE
-	pipboySave,
+//	pipboySave, DONE
 //	gameMoviesSave, TODO movie
-	skillsUsageSave,
-	partyMembersSave,
+//	skillsUsageSave, DONE
+//	partyMembersSave, DONE
 	queueSave,
 	interfaceSave,
 	_DummyFunc,
@@ -1672,6 +1672,21 @@ static int lsgPerformSaveGame() {
 		warning("Error saving world map stats");
 	else
 		debug("Saved world map stats");
+
+	// TODO movie
+	for (int i = 0; i < 17; i++)
+		newSave->writeByte(0);
+	debug("Saved placeholder movie stats");
+
+	if (skillsUsageSave(newSave))
+		warning("Error saving skills usage");
+	else
+		debug("Saved skills usage");
+
+	if (partyMembersSave(newSave))
+		warning("Error saving party members");
+	else
+		debug("Saved party members");
 
 	return 0;
 
