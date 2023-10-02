@@ -5,13 +5,15 @@
 #include "fallout2/obj_types.h"
 #include "fallout2/perk_defs.h"
 
+#include "common/savefile.h"
+
 namespace Fallout2 {
 
 int perksInit();
 void perksReset();
 void perksExit();
 int perksLoad(File *stream);
-int perksSave(File *stream);
+int perksSave(Common::OutSaveFile *stream);
 int perkAdd(Object *critter, int perk);
 int perkAddForce(Object *critter, int perk);
 int perkRemove(Object *critter, int perk);
