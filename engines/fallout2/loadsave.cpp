@@ -226,8 +226,8 @@ static SaveGameHandler *_master_save_list[LOAD_SAVE_HANDLER_COUNT] = {
 //	statsSave, DONE
 //	itemsSave, DONE
 //	traitsSave,  DONE
-	automapSave,
-	preferencesSave,
+//	automapSave, DONE
+//	preferencesSave, DONE
 	characterEditorSave,
 	wmWorldMap_save,
 	pipboySave,
@@ -1652,6 +1652,16 @@ static int lsgPerformSaveGame() {
 		warning("Error saving traits");
 	else
 		debug("Saved character traits");
+
+	if (automapSave(newSave))
+		warning("Error saving automap flags");
+	else
+		debug("Saved automap flags");
+
+	if (preferencesSave(newSave))
+		warning("Error saving preferences");
+	else
+		debug("Saved preferences");
 
 	return 0;
 
