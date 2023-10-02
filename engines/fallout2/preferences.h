@@ -3,11 +3,13 @@
 
 #include "fallout2/db.h"
 
+#include "common/savefile.h"
+
 namespace Fallout2 {
 
 int preferencesInit();
 int doPreferences(bool animated);
-int preferencesSave(File *stream);
+int preferencesSave(Common::OutSaveFile *stream);
 int preferencesLoad(File *stream);
 void brightnessIncrease();
 void brightnessDecrease();
