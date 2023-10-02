@@ -234,7 +234,7 @@ static SaveGameHandler *_master_save_list[LOAD_SAVE_HANDLER_COUNT] = {
 //	gameMoviesSave, TODO movie
 //	skillsUsageSave, DONE
 //	partyMembersSave, DONE
-	queueSave,
+//	queueSave, DONE
 	interfaceSave,
 	_DummyFunc,
 };
@@ -1687,6 +1687,11 @@ static int lsgPerformSaveGame() {
 		warning("Error saving party members");
 	else
 		debug("Saved party members");
+
+	if (queueSave(newSave))
+		warning("Error saving events queue");
+	else
+		debug("Saved events queue");
 
 	return 0;
 

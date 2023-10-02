@@ -800,13 +800,16 @@ int scriptAddTimerEvent(int sid, int delay, int param) {
 }
 
 // 0x4A3EDC
-int scriptEventWrite(File *stream, void *data) {
+int scriptEventWrite(Common::OutSaveFile *stream, void *data) {
 	ScriptEvent *scriptEvent = (ScriptEvent *)data;
 
-	if (fileWriteInt32(stream, scriptEvent->sid) == -1)
-		return -1;
-	if (fileWriteInt32(stream, scriptEvent->fixedParam) == -1)
-		return -1;
+	stream->writeSint32BE(scriptEvent->sid);
+	stream->writeSint32BE(scriptEvent->fixedParam);
+
+	/*	if (fileWriteInt32(stream, scriptEvent->sid) == -1)
+			return -1;
+		if (fileWriteInt32(stream, scriptEvent->fixedParam) == -1)
+			return -1;*/
 
 	return 0;
 }
