@@ -211,11 +211,11 @@ static const char *_patches = NULL;
 // 0x5193EC
 static SaveGameHandler *_master_save_list[LOAD_SAVE_HANDLER_COUNT] = {
 	_DummyFunc,
-//	_SaveObjDudeCid,
-//	scriptsSaveGameGlobalVars,
-//	_GameMap2Slot,
-//	scriptsSaveGameGlobalVars,
-	_obj_save_dude,
+//	_SaveObjDudeCid, DONE
+//	scriptsSaveGameGlobalVars, DONE
+//	_GameMap2Slot, TODO
+//	scriptsSaveGameGlobalVars, DONE
+//	_obj_save_dude, DONE
 	critterSave,
 	killsSave,
 //	skillsSave,  TODO
@@ -1594,14 +1594,24 @@ static int lsgPerformSaveGame() {
 //	}
 
 	if (_SaveObjDudeCid(newSave))
-		debugPrint("Error saving DudeCid");
+		warning("Error saving DudeCid");
 	else
-		debugPrint("Saved DudeCid");
+		debug("Saved DudeCid");
 
 	if (scriptsSaveGameGlobalVars(newSave))
-		debugPrint("Error saving script global vars!");
+		warning("Error saving script global vars!");
 	else
-		debugPrint("Savied script global vars!");
+		debug("Saved script global vars!");
+
+	if (scriptsSaveGameGlobalVars(newSave)) // TODO check, why twice?
+		warning("Error saving script global vars!");
+	else
+		debug("Saved script global vars!");
+
+	if (_obj_save_dude(newSave))
+		warning("Error saving dude objects!");
+	else
+		debug("Saved dude objects (obj_save_dude)");
 
 	return 0;
 

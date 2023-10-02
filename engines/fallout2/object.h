@@ -7,6 +7,8 @@
 #include "fallout2/map_defs.h"
 #include "fallout2/obj_types.h"
 
+#include "common/savefile.h"
+
 namespace Fallout2 {
 
 typedef struct ObjectWithFlags {
@@ -95,7 +97,7 @@ void _obj_process_seen();
 char *objectGetName(Object *obj);
 char *objectGetDescription(Object *obj);
 void _obj_preload_art_cache(int flags);
-int _obj_save_dude(File *stream);
+int _obj_save_dude(Common::OutSaveFile *stream);
 int _obj_load_dude(File *stream);
 void _obj_fix_violence_settings(int *fid);
 
