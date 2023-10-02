@@ -223,9 +223,9 @@ static SaveGameHandler *_master_save_list[LOAD_SAVE_HANDLER_COUNT] = {
 //	perksSave, DONE
 //	combatSave, DONE
 //	aiSave, DONE
-	statsSave,
-	itemsSave,
-//	traitsSave,  TODO
+//	statsSave, DONE
+//	itemsSave, DONE
+//	traitsSave,  DONE
 	automapSave,
 	preferencesSave,
 	characterEditorSave,
@@ -1613,35 +1613,45 @@ static int lsgPerformSaveGame() {
 	else
 		debug("Saved dude objects (obj_save_dude)");
 
-	if(critterSave(newSave))
+	if (critterSave(newSave))
 		warning("Error saving critter status!");
 	else
 		debug("Saved critter status");
 
-	if(killsSave(newSave))
+	if (killsSave(newSave))
 		warning("Error saving kills list");
 	else
 		debug("Saved kills list");
 
-	if(skillsSave(newSave))
+	if (skillsSave(newSave))
 		warning("Error saving character skills list");
 	else
 		debug("Saved character skills list");
 
-	if(perksSave(newSave))
+	if (perksSave(newSave))
 		warning("Error saving perks");
 	else
 		debug("Saved character perks");
 
-	if(combatSave(newSave))
+	if (combatSave(newSave))
 		warning("Error saving combat status");
 	else
 		debug("Saved combat status");
 
-	if(aiSave(newSave))
+	if (aiSave(newSave))
 		warning("Error combat AI status");
 	else
 		debug("Saved combat AI status");
+
+	if (statsSave(newSave))
+		warning("Error saving stats");
+	else
+		debug("Saved character stats");
+
+	if (traitsSave(newSave))
+		warning("Error saving traits");
+	else
+		debug("Saved character traits");
 
 	return 0;
 
