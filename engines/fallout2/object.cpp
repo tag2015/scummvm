@@ -32,7 +32,7 @@ namespace Fallout2 {
 
 static int objectLoadAllInternal(File *stream);
 static void _object_fix_weapon_ammo(Object *obj);
-static int objectWrite(Object *obj, File *stream);
+static int objectWrite(Object *obj, Common::OutSaveFile *stream);
 static int _obj_offset_table_init();
 static void _obj_offset_table_exit();
 static int _obj_order_table_init();
@@ -44,7 +44,7 @@ static void _obj_render_table_exit();
 static void _obj_light_table_init();
 static void _obj_blend_table_init();
 static void _obj_blend_table_exit();
-static int _obj_save_obj(File *stream, Object *object);
+static int _obj_save_obj(Common::OutSaveFile *stream, Object *object);
 static int _obj_load_obj(File *stream, Object **objectPtr, int elevation, Object *owner);
 static int objectAllocate(Object **objectPtr);
 static void objectDeallocate(Object **objectPtr);
@@ -650,8 +650,27 @@ static void _object_fix_weapon_ammo(Object *obj) {
 }
 
 // 0x489200
-static int objectWrite(Object *obj, File *stream) {
-	if (fileWriteInt32(stream, obj->id) == -1)
+static int objectWrite(Object *obj, Common::OutSaveFile *stream) {
+	stream->writeSint32BE(obj->id);
+	stream->writeSint32BE(obj->tile);
+	stream->writeSint32BE(obj->x);
+	stream->writeSint32BE(obj->y);
+	stream->writeSint32BE(obj->sx);
+	stream->writeSint32BE(obj->sy);
+	stream->writeSint32BE(obj->frame);
+	stream->writeSint32BE(obj->rotation);
+	stream->writeSint32BE(obj->fid);
+	stream->writeSint32BE(obj->flags);
+	stream->writeSint32BE(obj->elevation);
+	stream->writeSint32BE(obj->pid);
+	stream->writeSint32BE(obj->cid);
+	stream->writeSint32BE(obj->lightDistance);
+	stream->writeSint32BE(obj->lightIntensity);
+	stream->writeSint32BE(obj->outline);
+	stream->writeSint32BE(obj->sid);
+	stream->writeSint32BE(obj->field_80);
+
+/*	if (fileWriteInt32(stream, obj->id) == -1)
 		return -1;
 	if (fileWriteInt32(stream, obj->tile) == -1)
 		return -1;
@@ -686,7 +705,8 @@ static int objectWrite(Object *obj, File *stream) {
 	if (fileWriteInt32(stream, obj->sid) == -1)
 		return -1;
 	if (fileWriteInt32(stream, obj->field_80) == -1)
-		return -1;
+		return -1;*/
+
 	if (objectDataWrite(obj, stream) == -1)
 		return -1;
 
@@ -741,9 +761,9 @@ int objectSaveAll(File *stream) {
 					}
 				}
 
-				if (objectWrite(object, stream) == -1) {
-					return -1;
-				}
+//				if (objectWrite(object, stream) == -1) { TODO saveload
+//					return -1;
+//				}
 
 				if (PID_TYPE(object->pid) == OBJ_TYPE_CRITTER) {
 					combatData->whoHitMe = whoHitMe;
@@ -757,9 +777,9 @@ int objectSaveAll(File *stream) {
 						return -1;
 					}
 
-					if (_obj_save_obj(stream, inventoryItem->item) == -1) {
-						return -1;
-					}
+//					if (_obj_save_obj(stream, inventoryItem->item) == -1) { TODO saveload
+//						return -1;
+//					}
 				}
 
 				objectCountAtElevation++;
@@ -3394,7 +3414,7 @@ static void _obj_blend_table_exit() {
 }
 
 // 0x48D348
-static int _obj_save_obj(File *stream, Object *object) {
+static int _obj_save_obj(Common::OutSaveFile *stream, Object *object) {
 	if ((object->flags & OBJECT_NO_SAVE) != 0) {
 		return 0;
 	}
@@ -3425,9 +3445,10 @@ static int _obj_save_obj(File *stream, Object *object) {
 	for (int index = 0; index < inventory->length; index++) {
 		InventoryItem *inventoryItem = &(inventory->items[index]);
 
-		if (fileWriteInt32(stream, inventoryItem->quantity) == -1) {
+		stream->writeSint32BE(inventoryItem->quantity);
+/*		if (fileWriteInt32(stream, inventoryItem->quantity) == -1) {
 			return -1;
-		}
+		}*/
 
 		if (_obj_save_obj(stream, inventoryItem->item) == -1) {
 			return -1;
@@ -3512,7 +3533,7 @@ static int _obj_load_obj(File *stream, Object **objectPtr, int elevation, Object
 
 // obj_save_dude
 // 0x48D59C
-int _obj_save_dude(File *stream) {
+int _obj_save_dude(Common::OutSaveFile *stream) {
 	int field_78 = gDude->sid;
 
 	gDude->flags &= ~OBJECT_NO_SAVE;
@@ -3523,10 +3544,16 @@ int _obj_save_dude(File *stream) {
 	gDude->sid = field_78;
 	gDude->flags |= OBJECT_NO_SAVE;
 
-	if (fileWriteInt32(stream, gCenterTile) == -1) {
-		fileClose(stream);
+	stream->writeSint32BE(gCenterTile);
+	if(stream->err()) {
+		stream->finalize();
+		delete stream;
 		return -1;
 	}
+/*	if (fileWriteInt32(stream, gCenterTile) == -1) {
+		fileClose(stream);
+		return -1;
+	}*/
 
 	return rc;
 }
