@@ -816,12 +816,39 @@ int _SavePrefs(bool save) {
 }
 
 // 0x493224
-int preferencesSave(File *stream) {
+int preferencesSave(Common::OutSaveFile *stream) {
 	float textBaseDelay = (float)gPreferencesTextBaseDelay1;
 	float brightness = (float)gPreferencesBrightness1;
 	float mouseSensitivity = (float)gPreferencesMouseSensitivity1;
 
-	if (fileWriteInt32(stream, gPreferencesGameDifficulty1) == -1)
+	stream->writeSint32BE(gPreferencesGameDifficulty1);
+	stream->writeSint32BE(gPreferencesCombatDifficulty1);
+	stream->writeSint32BE(gPreferencesViolenceLevel1);
+	stream->writeSint32BE(gPreferencesTargetHighlight1);
+	stream->writeSint32BE(gPreferencesCombatLooks1);
+	stream->writeSint32BE(gPreferencesCombatMessages1);
+	stream->writeSint32BE(gPreferencesCombatTaunts1);
+	stream->writeSint32BE(gPreferencesLanguageFilter1);
+	stream->writeSint32BE(gPreferencesRunning1);
+	stream->writeSint32BE(gPreferencesSubtitles1);
+	stream->writeSint32BE(gPreferencesItemHighlight1);
+	stream->writeSint32BE(gPreferencesCombatSpeed1);
+	stream->writeSint32BE(gPreferencesPlayerSpeedup1);
+	stream->writeSint32BE((int)textBaseDelay);
+	stream->writeSint32BE(gPreferencesMasterVolume1);
+	stream->writeSint32BE(gPreferencesMusicVolume1);
+	stream->writeSint32BE(gPreferencesSoundEffectsVolume1);
+	stream->writeSint32BE(gPreferencesSpeechVolume1);
+	stream->writeSint32BE((int)brightness);
+	stream->writeSint32BE((int)mouseSensitivity);
+
+	if(stream->err()) {
+		stream->finalize();
+		delete stream;
+		return -1;
+	}
+
+/*	if (fileWriteInt32(stream, gPreferencesGameDifficulty1) == -1)
 		goto err;
 	if (fileWriteInt32(stream, gPreferencesCombatDifficulty1) == -1)
 		goto err;
@@ -860,7 +887,7 @@ int preferencesSave(File *stream) {
 	if (fileWriteFloat(stream, brightness) == -1)
 		goto err;
 	if (fileWriteFloat(stream, mouseSensitivity) == -1)
-		goto err;
+		goto err;*/
 
 	return 0;
 

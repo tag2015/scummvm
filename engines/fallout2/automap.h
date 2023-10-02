@@ -4,6 +4,8 @@
 #include "fallout2/db.h"
 #include "fallout2/map_defs.h"
 
+#include "common/savefile.h"
+
 namespace Fallout2 {
 
 #define AUTOMAP_DB ("AUTOMAP.DB")
@@ -49,7 +51,7 @@ int automapInit();
 int automapReset();
 void automapExit();
 int automapLoad(File *stream);
-int automapSave(File *stream);
+int automapSave(Common::OutSaveFile *stream);
 int _automapDisplayMap(int map);
 void automapShow(bool isInGame, bool isUsingScanner);
 int automapRenderInPipboyWindow(int win, int map, int elevation);
