@@ -29,7 +29,7 @@ namespace Fallout2 {
 
 static int _proto_critter_init(Proto *a1, int a2);
 static int objectCritterCombatDataRead(CritterCombatData *data, File *stream);
-static int objectCritterCombatDataWrite(CritterCombatData *data, File *stream);
+static int objectCritterCombatDataWrite(CritterCombatData *data, Common::OutSaveFile *stream);
 static int _proto_update_gen(Object *obj);
 static int _proto_header_load();
 static int protoItemDataRead(ItemProtoData *item_data, int type, File *stream);
@@ -425,21 +425,29 @@ static int objectCritterCombatDataRead(CritterCombatData *data, File *stream) {
 }
 
 // 0x49EF40
-static int objectCritterCombatDataWrite(CritterCombatData *data, File *stream) {
-	if (fileWriteInt32(stream, data->damageLastTurn) == -1)
-		return -1;
-	if (fileWriteInt32(stream, data->maneuver) == -1)
-		return -1;
-	if (fileWriteInt32(stream, data->ap) == -1)
-		return -1;
-	if (fileWriteInt32(stream, data->results) == -1)
-		return -1;
-	if (fileWriteInt32(stream, data->aiPacket) == -1)
-		return -1;
-	if (fileWriteInt32(stream, data->team) == -1)
-		return -1;
-	if (fileWriteInt32(stream, data->whoHitMeCid) == -1)
-		return -1;
+static int objectCritterCombatDataWrite(CritterCombatData *data, Common::OutSaveFile *stream) {
+	stream->writeSint32BE(data->damageLastTurn);
+	stream->writeSint32BE(data->maneuver);
+	stream->writeSint32BE(data->ap);
+	stream->writeSint32BE(data->results);
+	stream->writeSint32BE(data->aiPacket);
+	stream->writeSint32BE(data->team);
+	stream->writeSint32BE(data->whoHitMeCid);
+
+	/*	if (fileWriteInt32(stream, data->damageLastTurn) == -1)
+			return -1;
+		if (fileWriteInt32(stream, data->maneuver) == -1)
+			return -1;
+		if (fileWriteInt32(stream, data->ap) == -1)
+			return -1;
+		if (fileWriteInt32(stream, data->results) == -1)
+			return -1;
+		if (fileWriteInt32(stream, data->aiPacket) == -1)
+			return -1;
+		if (fileWriteInt32(stream, data->team) == -1)
+			return -1;
+		if (fileWriteInt32(stream, data->whoHitMeCid) == -1)
+			return -1;*/
 
 	return 0;
 }
@@ -574,32 +582,44 @@ int objectDataRead(Object *obj, File *stream) {
 }
 
 // 0x49F428
-int objectDataWrite(Object *obj, File *stream) {
+int objectDataWrite(Object *obj, Common::OutSaveFile *stream) {
 	Proto *proto;
 
 	ObjectData *data = &(obj->data);
-	if (fileWriteInt32(stream, data->inventory.length) == -1)
-		return -1;
-	if (fileWriteInt32(stream, data->inventory.capacity) == -1)
-		return -1;
+	stream->writeSint32BE(data->inventory.length);
+	stream->writeSint32BE(data->inventory.capacity);
+	stream->writeSint32BE(0);
+
+	/*	if (fileWriteInt32(stream, data->inventory.length) == -1)
+			return -1;
+		if (fileWriteInt32(stream, data->inventory.capacity) == -1)
+			return -1; */
 	// CE: Original code writes inventory items pointer, which is meaningless.
-	if (fileWriteInt32(stream, 0) == -1)
-		return -1;
+	/*	if (fileWriteInt32(stream, 0) == -1)
+			return -1;*/
 
 	if (PID_TYPE(obj->pid) == OBJ_TYPE_CRITTER) {
-		if (fileWriteInt32(stream, data->flags) == -1)
-			return -1;
+		stream->writeSint32BE(data->flags);
 		if (objectCritterCombatDataWrite(&(obj->data.critter.combat), stream) == -1)
 			return -1;
-		if (fileWriteInt32(stream, data->critter.hp) == -1)
-			return -1;
-		if (fileWriteInt32(stream, data->critter.radiation) == -1)
-			return -1;
-		if (fileWriteInt32(stream, data->critter.poison) == -1)
-			return -1;
+		stream->writeSint32BE(data->critter.hp);
+		stream->writeSint32BE(data->critter.radiation);
+		stream->writeSint32BE(data->critter.poison);
+
+		/*		if (fileWriteInt32(stream, data->flags) == -1)
+					return -1;
+				if (objectCritterCombatDataWrite(&(obj->data.critter.combat), stream) == -1)
+					return -1;
+				if (fileWriteInt32(stream, data->critter.hp) == -1)
+					return -1;
+				if (fileWriteInt32(stream, data->critter.radiation) == -1)
+					return -1;
+				if (fileWriteInt32(stream, data->critter.poison) == -1)
+					return -1;*/
 	} else {
-		if (fileWriteInt32(stream, data->flags) == -1)
-			return -1;
+		stream->writeSint32BE(data->flags);
+//		if (fileWriteInt32(stream, data->flags) == -1)
+//			return -1;
 
 		switch (PID_TYPE(obj->pid)) {
 		case OBJ_TYPE_ITEM:
@@ -608,22 +628,28 @@ int objectDataWrite(Object *obj, File *stream) {
 
 			switch (proto->item.type) {
 			case ITEM_TYPE_WEAPON:
-				if (fileWriteInt32(stream, data->item.weapon.ammoQuantity) == -1)
+				stream->writeSint32BE(data->item.weapon.ammoQuantity);
+				stream->writeSint32BE(data->item.weapon.ammoTypePid);
+
+/*				if (fileWriteInt32(stream, data->item.weapon.ammoQuantity) == -1)
 					return -1;
 				if (fileWriteInt32(stream, data->item.weapon.ammoTypePid) == -1)
-					return -1;
+					return -1;*/
 				break;
 			case ITEM_TYPE_AMMO:
-				if (fileWriteInt32(stream, data->item.ammo.quantity) == -1)
-					return -1;
+				stream->writeSint32BE(data->item.ammo.quantity);
+/*				if (fileWriteInt32(stream, data->item.ammo.quantity) == -1)
+					return -1;*/
 				break;
 			case ITEM_TYPE_MISC:
-				if (fileWriteInt32(stream, data->item.misc.charges) == -1)
-					return -1;
+				stream->writeSint32BE(data->item.misc.charges);
+/*				if (fileWriteInt32(stream, data->item.misc.charges) == -1)
+					return -1;*/
 				break;
 			case ITEM_TYPE_KEY:
-				if (fileWriteInt32(stream, data->item.key.keyCode) == -1)
-					return -1;
+				stream->writeSint32BE(data->item.key.keyCode);
+//				if (fileWriteInt32(stream, data->item.key.keyCode) == -1)
+//					return -1;
 				break;
 			}
 			break;
@@ -633,32 +659,45 @@ int objectDataWrite(Object *obj, File *stream) {
 
 			switch (proto->scenery.type) {
 			case SCENERY_TYPE_DOOR:
-				if (fileWriteInt32(stream, data->scenery.door.openFlags) == -1)
-					return -1;
+				stream->writeSint32BE(data->scenery.door.openFlags);
+/*				if (fileWriteInt32(stream, data->scenery.door.openFlags) == -1)
+					return -1;*/
 				break;
 			case SCENERY_TYPE_STAIRS:
-				if (fileWriteInt32(stream, data->scenery.stairs.destinationBuiltTile) == -1)
+				stream->writeSint32BE(data->scenery.stairs.destinationBuiltTile);
+				stream->writeSint32BE(data->scenery.stairs.destinationMap);
+
+/*				if (fileWriteInt32(stream, data->scenery.stairs.destinationBuiltTile) == -1)
 					return -1;
 				if (fileWriteInt32(stream, data->scenery.stairs.destinationMap) == -1)
-					return -1;
+					return -1;*/
 				break;
 			case SCENERY_TYPE_ELEVATOR:
-				if (fileWriteInt32(stream, data->scenery.elevator.type) == -1)
+				stream->writeSint32BE(data->scenery.elevator.type);
+				stream->writeSint32BE(data->scenery.elevator.level);
+
+/*				if (fileWriteInt32(stream, data->scenery.elevator.type) == -1)
 					return -1;
 				if (fileWriteInt32(stream, data->scenery.elevator.level) == -1)
-					return -1;
+					return -1;*/
 				break;
 			case SCENERY_TYPE_LADDER_UP:
-				if (fileWriteInt32(stream, data->scenery.ladder.destinationMap) == -1)
+				stream->writeSint32BE(data->scenery.ladder.destinationMap);
+				stream->writeSint32BE(data->scenery.ladder.destinationBuiltTile);
+
+/*				if (fileWriteInt32(stream, data->scenery.ladder.destinationMap) == -1)
 					return -1;
 				if (fileWriteInt32(stream, data->scenery.ladder.destinationBuiltTile) == -1)
-					return -1;
+					return -1;*/
 				break;
 			case SCENERY_TYPE_LADDER_DOWN:
-				if (fileWriteInt32(stream, data->scenery.ladder.destinationMap) == -1)
+				stream->writeSint32BE(data->scenery.ladder.destinationMap);
+				stream->writeSint32BE(data->scenery.ladder.destinationBuiltTile);
+
+/*				if (fileWriteInt32(stream, data->scenery.ladder.destinationMap) == -1)
 					return -1;
 				if (fileWriteInt32(stream, data->scenery.ladder.destinationBuiltTile) == -1)
-					return -1;
+					return -1;*/
 				break;
 			default:
 				break;
@@ -666,14 +705,19 @@ int objectDataWrite(Object *obj, File *stream) {
 			break;
 		case OBJ_TYPE_MISC:
 			if (isExitGridPid(obj->pid)) {
-				if (fileWriteInt32(stream, data->misc.map) == -1)
+				stream->writeSint32BE(data->misc.map);
+				stream->writeSint32BE(data->misc.tile);
+				stream->writeSint32BE(data->misc.elevation);
+				stream->writeSint32BE(data->misc.rotation);
+
+/*				if (fileWriteInt32(stream, data->misc.map) == -1)
 					return -1;
 				if (fileWriteInt32(stream, data->misc.tile) == -1)
 					return -1;
 				if (fileWriteInt32(stream, data->misc.elevation) == -1)
 					return -1;
 				if (fileWriteInt32(stream, data->misc.rotation) == -1)
-					return -1;
+					return -1;*/
 			}
 			break;
 		default:
@@ -2102,7 +2146,7 @@ static int _proto_load_pid(int pid, Proto **protoPtr) {
 		return -1;
 	}
 
-	File *stream = fileOpen(path, "rb");
+	File *stream = fileOpen(path, "rb");  // TODO check that it loads from dir instead of archive if file is present
 	if (stream == NULL) {
 		debugPrint("\nError: Can't fopen proto!\n");
 		*protoPtr = NULL;
