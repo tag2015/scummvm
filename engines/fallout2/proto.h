@@ -7,6 +7,8 @@
 #include "fallout2/platform_compat.h"
 #include "fallout2/proto_types.h"
 
+#include "common/savefile.h"
+
 namespace Fallout2 {
 
 typedef enum ItemDataMember {
@@ -113,7 +115,7 @@ char *protoGetName(int pid);
 char *protoGetDescription(int pid);
 void objectDataReset(Object *obj);
 int objectDataRead(Object *obj, File *stream);
-int objectDataWrite(Object *obj, File *stream);
+int objectDataWrite(Object *obj, Common::OutSaveFile *stream);
 int _proto_update_init(Object *obj);
 int _proto_dude_update_gender();
 int _proto_dude_init(const char *path);
