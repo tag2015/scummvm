@@ -218,9 +218,9 @@ static SaveGameHandler *_master_save_list[LOAD_SAVE_HANDLER_COUNT] = {
 //	_obj_save_dude, DONE
 //	critterSave, DONE
 //	killsSave, DONE
-//	skillsSave,  TODO
-	randomSave,
-	perksSave,
+//	skillsSave,  DONE
+//	randomSave, DONE
+//	perksSave, DONE
 	combatSave,
 	aiSave,
 	statsSave,
@@ -1622,6 +1622,16 @@ static int lsgPerformSaveGame() {
 		warning("Error saving kills list");
 	else
 		debug("Saved kills list");
+
+	if(skillsSave(newSave))
+		warning("Error saving character skills list");
+	else
+		debug("Saved character skills list");
+
+	if(perksSave(newSave))
+		warning("Error saving perks");
+	else
+		debug("Saved character perks");
 
 	return 0;
 
