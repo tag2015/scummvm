@@ -6,6 +6,8 @@
 #include "fallout2/proto_types.h"
 #include "fallout2/stat_defs.h"
 
+#include "common/savefile.h"
+
 namespace Fallout2 {
 
 #define STAT_ERR_INVALID_STAT (-5)
@@ -14,7 +16,7 @@ int statsInit();
 int statsReset();
 int statsExit();
 int statsLoad(File *stream);
-int statsSave(File *stream);
+int statsSave(Common::OutSaveFile *stream);
 int critterGetStat(Object *critter, int stat);
 int critterGetBaseStatWithTraitModifier(Object *critter, int stat);
 int critterGetBaseStat(Object *critter, int stat);
