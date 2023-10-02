@@ -41,7 +41,7 @@ int skillUse(Object *obj, Object *a2, int skill, int a4);
 int skillsPerformStealing(Object *a1, Object *a2, Object *item, bool isPlanting);
 int skillGetGameDifficultyModifier(int skill);
 int skillUpdateLastUse(int skill);
-int skillsUsageSave(File *stream);
+int skillsUsageSave(Common::OutSaveFile *stream);
 int skillsUsageLoad(File *stream);
 char *skillsGetGenericResponse(Object *critter, bool isDude);
 
