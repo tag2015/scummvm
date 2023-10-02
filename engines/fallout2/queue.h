@@ -4,6 +4,8 @@
 #include "fallout2/db.h"
 #include "fallout2/obj_types.h"
 
+#include "common/savefile.h"
+
 namespace Fallout2 {
 
 typedef enum EventType {
@@ -53,12 +55,12 @@ typedef struct AmbientSoundEffectEvent {
 typedef int QueueEventHandler(Object *owner, void *data);
 typedef void QueueEventDataFreeProc(void *data);
 typedef int QueueEventDataReadProc(File *stream, void **dataPtr);
-typedef int QueueEventDataWriteProc(File *stream, void *data);
+typedef int QueueEventDataWriteProc(Common::OutSaveFile *stream, void *data);
 
 void queueInit();
 int queueExit();
 int queueLoad(File *stream);
-int queueSave(File *stream);
+int queueSave(Common::OutSaveFile *stream);
 int queueAddEvent(int delay, Object *owner, void *data, int eventType);
 int queueRemoveEvents(Object *owner);
 int queueRemoveEventsByType(Object *owner, int eventType);
