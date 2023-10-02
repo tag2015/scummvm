@@ -4,6 +4,8 @@
 #include "fallout2/db.h"
 #include "fallout2/obj_types.h"
 
+#include "common/savefile.h"
+
 namespace Fallout2 {
 
 extern int gPartyMemberDescriptionsLength;
@@ -16,7 +18,7 @@ int partyMemberAdd(Object *object);
 int partyMemberRemove(Object *object);
 int _partyMemberPrepSave();
 int _partyMemberUnPrepSave();
-int partyMembersSave(File *stream);
+int partyMembersSave(Common::OutSaveFile *stream);
 int _partyMemberPrepLoad();
 int _partyMemberRecoverLoad();
 int partyMembersLoad(File *stream);

@@ -509,26 +509,44 @@ int _partyMemberUnPrepSave() {
 }
 
 // 0x4946CC
-int partyMembersSave(File *stream) {
-	if (fileWriteInt32(stream, gPartyMembersLength) == -1)
-		return -1;
-	if (fileWriteInt32(stream, _partyMemberItemCount) == -1)
-		return -1;
+int partyMembersSave(Common::OutSaveFile *stream) {
+	stream->writeSint32BE(gPartyMembersLength);
+	stream->writeSint32BE(_partyMemberItemCount);
+
+	/*	if (fileWriteInt32(stream, gPartyMembersLength) == -1)
+			return -1;
+		if (fileWriteInt32(stream, _partyMemberItemCount) == -1)
+			return -1;*/
 
 	for (int index = 1; index < gPartyMembersLength; index++) {
 		STRUCT_519DA8 *partyMember = &(gPartyMembers[index]);
-		if (fileWriteInt32(stream, partyMember->object->id) == -1)
-			return -1;
+		stream->writeSint32BE(partyMember->object->id);
+		//		if (fileWriteInt32(stream, partyMember->object->id) == -1)
+		//			return -1;
+	}
+	if (stream->err()) {
+		stream->finalize();
+		delete stream;
+		return -1;
 	}
 
 	for (int index = 1; index < gPartyMemberDescriptionsLength; index++) {
 		STRU_519DBC *ptr = &(_partyMemberLevelUpInfoList[index]);
-		if (fileWriteInt32(stream, ptr->field_0) == -1)
-			return -1;
-		if (fileWriteInt32(stream, ptr->field_4) == -1)
-			return -1;
-		if (fileWriteInt32(stream, ptr->field_8) == -1)
-			return -1;
+		stream->writeSint32BE(ptr->field_0);
+		stream->writeSint32BE(ptr->field_4);
+		stream->writeSint32BE(ptr->field_8);
+
+		/*	if (fileWriteInt32(stream, ptr->field_0) == -1)
+				return -1;
+			if (fileWriteInt32(stream, ptr->field_4) == -1)
+				return -1;
+			if (fileWriteInt32(stream, ptr->field_8) == -1)
+				return -1;*/
+	}
+	if (stream->err()) {
+		stream->finalize();
+		delete stream;
+		return -1;
 	}
 
 	return 0;
