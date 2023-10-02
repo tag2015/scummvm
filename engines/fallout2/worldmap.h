@@ -3,6 +3,8 @@
 
 #include "fallout2/db.h"
 
+#include "common/savefile.h"
+
 namespace Fallout2 {
 
 #define CAR_FUEL_MAX (80000)
@@ -234,7 +236,7 @@ extern unsigned char *circleBlendTable;
 int wmWorldMap_init();
 void wmWorldMap_exit();
 int wmWorldMap_reset();
-int wmWorldMap_save(File *stream);
+int wmWorldMap_save(Common::OutSaveFile *stream);
 int wmWorldMap_load(File *stream);
 int wmMapMaxCount();
 int wmMapIdxToName(int mapIdx, char *dest, size_t size);

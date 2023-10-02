@@ -229,7 +229,7 @@ static SaveGameHandler *_master_save_list[LOAD_SAVE_HANDLER_COUNT] = {
 //	automapSave, DONE
 //	preferencesSave, DONE
 //	characterEditorSave, DONE
-	wmWorldMap_save,
+//	wmWorldMap_save, DONE
 	pipboySave,
 //	gameMoviesSave, TODO movie
 	skillsUsageSave,
@@ -1667,6 +1667,11 @@ static int lsgPerformSaveGame() {
 		warning("Error saving character editor flags");
 	else
 		debug("Saved character editor flags");
+
+	if (wmWorldMap_save(newSave))
+		warning("Error saving world map stats");
+	else
+		debug("Saved world map stats");
 
 	return 0;
 
