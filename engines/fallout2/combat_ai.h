@@ -6,6 +6,8 @@
 #include "fallout2/db.h"
 #include "fallout2/obj_types.h"
 
+#include "common/savefile.h"
+
 namespace Fallout2 {
 
 typedef enum AiMessageType {
@@ -29,7 +31,7 @@ int aiInit();
 void aiReset();
 int aiExit();
 int aiLoad(File *stream);
-int aiSave(File *stream);
+int aiSave(Common::OutSaveFile *stream);
 int aiGetAreaAttackMode(Object *obj);
 int aiGetRunAwayMode(Object *obj);
 int aiGetBestWeapon(Object *obj);
