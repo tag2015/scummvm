@@ -283,8 +283,15 @@ int automapLoad(File *stream) {
 }
 
 // 0x41B898
-int automapSave(File *stream) {
-	return fileWriteInt32(stream, gAutomapFlags);
+int automapSave(Common::OutSaveFile *stream) {
+	stream->writeSint32BE(gAutomapFlags);
+	if (stream->err()) {
+		stream->finalize();
+		delete stream;
+		return -1;
+	}
+	return 0;
+	//	return fileWriteInt32(stream, gAutomapFlags);
 }
 
 // 0x41B8B4
