@@ -209,15 +209,32 @@ int critterLoad(File *stream) {
 }
 
 // 0x42D058
-int critterSave(File *stream) {
-	if (fileWriteInt32(stream, _sneak_working) == -1) {
+int critterSave(Common::OutSaveFile *stream) {
+	stream->writeSint32BE(_sneak_working);
+/*	if (fileWriteInt32(stream, _sneak_working) == -1) {
 		return -1;
-	}
+	}*/
 
 	Proto *proto;
 	protoGetProto(gDude->pid, &proto);
 
-//	return protoCritterDataWrite(stream, &(proto->critter.data)); TODO loadsave
+	// TODO check
+	return protoCritterDataWrite(stream, &(proto->critter.data));
+
+/*	int i; TODO REMOVE
+
+	stream->writeSint32BE(proto->critter.data.flags);
+	for (i = 0; i < SAVEABLE_STAT_COUNT; i++)
+		stream->writeSint32BE(proto->critter.data.baseStats[i]);
+	for (i = 0; i < SAVEABLE_STAT_COUNT; i++)
+		stream->writeSint32BE(proto->critter.data.bonusStats[i]);
+	for (i = 0; i < SKILL_COUNT; i++)
+		stream->writeSint32BE(proto->critter.data.skills[i]);
+	stream->writeSint32BE(proto->critter.data.bodyType);
+	stream->writeSint32BE(proto->critter.data.experience);
+	stream->writeSint32BE(proto->critter.data.killType);
+	stream->writeSint32BE(proto->critter.data.damageType);*/
+
 }
 
 // 0x42D094
@@ -707,11 +724,20 @@ int killsLoad(File *stream) {
 }
 
 // 0x42D8F0
-int killsSave(File *stream) {
-	if (fileWriteInt32List(stream, gKillsByType, KILL_TYPE_COUNT) == -1) {
-		fileClose(stream);
+int killsSave(Common::OutSaveFile *stream) {
+
+	for (int i = 0; i < KILL_TYPE_COUNT; i++)
+		stream->writeSint32BE(gKillsByType[i]);
+	if (stream->err()) {
+		stream->finalize();
+		delete stream;
 		return -1;
 	}
+
+	//	if (fileWriteInt32List(stream, gKillsByType, KILL_TYPE_COUNT) == -1) {
+	//		fileClose(stream);
+	//		return -1;
+	//	}
 
 	return 0;
 }
