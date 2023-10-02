@@ -247,13 +247,20 @@ int perksLoad(File *stream) {
 }
 
 // 0x496738
-int perksSave(File *stream) {
+int perksSave(Common::OutSaveFile *stream) {
 	for (int index = 0; index < gPartyMemberDescriptionsLength; index++) {
 		PerkRankData *ranksData = &(gPartyMemberPerkRanks[index]);
 		for (int perk = 0; perk < PERK_COUNT; perk++) {
-			if (fileWriteInt32(stream, ranksData->ranks[perk]) == -1) {
+			stream->writeSint32BE(ranksData->ranks[perk]);
+			if (stream->err()) {
+				stream->finalize();
+				delete stream;
 				return -1;
 			}
+
+			//	if (fileWriteInt32(stream, ranksData->ranks[perk]) == -1) {
+			//		return -1;
+			//	}
 		}
 	}
 
