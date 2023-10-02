@@ -2,10 +2,9 @@
 
 // #include <stdio.h>
 // #include <string.h>
-
 // #include <vector>
 
-#include "common/array.h"
+#include "fallout2/fallout2.h"
 
 #include "fallout2/animation.h"
 #include "fallout2/art.h"
@@ -45,6 +44,10 @@
 #include "fallout2/window_manager_private.h"
 #include "fallout2/worldmap.h"
 
+#include "common/array.h"
+#include "common/savefile.h"
+
+
 namespace Fallout2 {
 
 static char *mapBuildPath(char *name);
@@ -52,7 +55,7 @@ static int mapLoad(File *stream);
 static int _map_age_dead_critters();
 static void _map_fix_critter_combat_data();
 static int _map_save();
-static int _map_save_file(File *stream);
+static int _map_save_file(Common::OutSaveFile *stream);
 static void mapMakeMapsDirectory();
 static void isoWindowRefreshRect(Rect *rect);
 static void isoWindowRefreshRectGame(Rect *rect);
@@ -67,7 +70,7 @@ static void _map_place_dude_and_mouse();
 static void square_init();
 static void _square_reset();
 static int _square_load(File *stream, int a2);
-static int mapHeaderWrite(MapHeader *ptr, File *stream);
+static int mapHeaderWrite(MapHeader *ptr, Common::OutSaveFile *stream);
 static int mapHeaderRead(MapHeader *ptr, File *stream);
 
 // 0x50B058
@@ -688,7 +691,12 @@ static char *mapBuildPath(char *name) {
 
 	if (*name != '\\') {
 		// NOTE: Uppercased from "maps".
-		snprintf(map_path, sizeof(map_path), "MAPS\\%s", name);
+		Common::String newMapName(g_engine->getTargetName());
+		if (Common::String(name).contains(".SAV"))
+			snprintf(map_path, sizeof(map_path), "%s_maps_%s", newMapName.c_str(), name);
+		else
+			snprintf(map_path, sizeof(map_path), "MAPS\\%s", name);
+		debug("Built map path: %s", map_path);
 		return map_path;
 	}
 	return name;
@@ -740,19 +748,21 @@ int mapLoadByName(char *fileName) {
 		strncpy(extension, ".SAV", 5);
 
 		const char *filePath = mapBuildPath(fileName);
+		// Check if .SAV map exists
 
-		File *stream = fileOpen(filePath, "rb");
+//		File *stream = fileOpen(filePath, "rb"); TODO saveload
 
 		strncpy(extension, ".MAP", 5);
 
-		if (stream != NULL) {
-			fileClose(stream);
-			rc = mapLoadSaved(fileName);
-			wmMapMusicStart();
-		}
+//		if (stream != NULL) {
+//			fileClose(stream);
+//			rc = mapLoadSaved(fileName);
+//			wmMapMusicStart();
+//		}
 	}
 
 	if (rc == -1) {
+		debug(".SAV map not found, looking for .MAP");
 		const char *filePath = mapBuildPath(fileName);
 		File *stream = fileOpen(filePath, "rb");
 		if (stream != NULL) {
@@ -1201,6 +1211,8 @@ int mapHandleTransition() {
 		return 0;
 	}
 
+	debug("Doing map transition!");
+
 	gameMouseObjectsHide();
 
 	gameMouseSetCursor(MOUSE_CURSOR_NONE);
@@ -1278,10 +1290,15 @@ static int _map_save() {
 	int rc = -1;
 	if (gMapHeader.name[0] != '\0') {
 		char *mapFileName = mapBuildPath(gMapHeader.name);
-		File *stream = fileOpen(mapFileName, "wb");
+		Common::SaveFileManager *saveMan = g_system->getSavefileManager();
+
+		Common::OutSaveFile *stream = saveMan->openForSaving(Common::String(mapFileName), false);
+//		File *stream = fileOpen(mapFileName, "wb");
 		if (stream != NULL) {
 			rc = _map_save_file(stream);
-			fileClose(stream);
+			stream->finalize();
+			delete stream;
+//			fileClose(stream);
 		} else {
 			snprintf(temp, sizeof(temp), "Unable to open %s to write!", gMapHeader.name);
 			debugPrint(temp);
@@ -1299,7 +1316,7 @@ static int _map_save() {
 }
 
 // 0x483980
-static int _map_save_file(File *stream) {
+static int _map_save_file(Common::OutSaveFile *stream) {
 	if (stream == NULL) {
 		return -1;
 	}
@@ -1350,22 +1367,28 @@ static int _map_save_file(File *stream) {
 	mapHeaderWrite(&gMapHeader, stream);
 
 	if (gMapHeader.globalVariablesCount != 0) {
-		fileWriteInt32List(stream, gMapGlobalVars, gMapHeader.globalVariablesCount);
+		for (int i = 0; i < gMapHeader.globalVariablesCount; i++)
+			stream->writeSint32BE(gMapGlobalVars[i]);
+		//fileWriteInt32List(stream, gMapGlobalVars, gMapHeader.globalVariablesCount);
 	}
 
 	if (gMapHeader.localVariablesCount != 0) {
-		fileWriteInt32List(stream, gMapLocalVars, gMapHeader.localVariablesCount);
+		for (int i = 0; i < gMapHeader.localVariablesCount; i++)
+			stream->writeSint32BE(gMapLocalVars[i]);
+		//fileWriteInt32List(stream, gMapLocalVars, gMapHeader.localVariablesCount);
 	}
 
 	for (int elevation = 0; elevation < ELEVATION_COUNT; elevation++) {
 		if ((gMapHeader.flags & _map_data_elev_flags[elevation]) == 0) {
-			_db_fwriteLongCount(stream, _square[elevation]->field_0, SQUARE_GRID_SIZE);
+			for (int i = 0; i < SQUARE_GRID_SIZE; i++)
+				stream->writeSint32BE(_square[elevation]->field_0[i]);
+			//_db_fwriteLongCount(stream, _square[elevation]->field_0, SQUARE_GRID_SIZE);
 		}
 	}
 
 	char err[80];
 
-	if (scriptSaveAll(stream) == -1) {
+/*	if (scriptSaveAll(stream) == -1) { TODO saveload
 		snprintf(err, sizeof(err), "Error saving scripts in %s", gMapHeader.name);
 		_win_msg(err, 80, 80, _colorTable[31744]);
 	}
@@ -1374,7 +1397,7 @@ static int _map_save_file(File *stream) {
 		snprintf(err, sizeof(err), "Error saving objects in %s", gMapHeader.name);
 		_win_msg(err, 80, 80, _colorTable[31744]);
 	}
-
+*/
 	scriptsEnable();
 
 	return 0;
@@ -1385,6 +1408,7 @@ int _map_save_in_game(bool a1) {
 	if (gMapHeader.name[0] == '\0') {
 		return 0;
 	}
+	debug("Attempting map_save_in_game! a1 = %d", a1);
 
 	animationStop();
 	_partyMemberSaveProtos();
@@ -1409,25 +1433,25 @@ int _map_save_in_game(bool a1) {
 
 	char name[16];
 
-/*	if (a1 && !wmMapIsSaveable()) { TODO world_map
+	if (a1 && !wmMapIsSaveable()) {
 		debugPrint("\nNot saving RANDOM encounter map.");
 
-		strcpy(name, gMapHeader.name);
+		strncpy(name, gMapHeader.name, sizeof(name) - 1);
 		_strmfe(gMapHeader.name, name, "SAV");
 		_MapDirEraseFile_("MAPS\\", gMapHeader.name);
-		strcpy(gMapHeader.name, name);
+		strncpy(gMapHeader.name, name, sizeof(gMapHeader.name) - 1);
 	} else {
 		debugPrint("\n Saving \".SAV\" map.");
 
-		strcpy(name, gMapHeader.name);
+		strncpy(name, gMapHeader.name, sizeof(name) - 1);
 		_strmfe(gMapHeader.name, name, "SAV");
 		if (_map_save() == -1) {
 			return -1;
 		}
 
-		strcpy(gMapHeader.name, name);
+		strncpy(gMapHeader.name, name, sizeof(gMapHeader.name) - 1);
 
-		automapSaveCurrent();
+		//	automapSaveCurrent();  // TODO automap
 
 		if (a1) {
 			gMapHeader.name[0] = '\0';
@@ -1436,7 +1460,7 @@ int _map_save_in_game(bool a1) {
 			_square_reset();
 			gameTimeScheduleUpdateEvent();
 		}
-	} */
+	}
 
 	return 0;
 }
@@ -1680,33 +1704,51 @@ static int _square_load(File *stream, int flags) {
 }
 
 // 0x4843B8
-static int mapHeaderWrite(MapHeader *ptr, File *stream) {
-	if (fileWriteInt32(stream, ptr->version) == -1)
-		return -1;
-	if (fileWriteFixedLengthString(stream, ptr->name, 16) == -1)
-		return -1;
-	if (fileWriteInt32(stream, ptr->enteringTile) == -1)
-		return -1;
-	if (fileWriteInt32(stream, ptr->enteringElevation) == -1)
-		return -1;
-	if (fileWriteInt32(stream, ptr->enteringRotation) == -1)
-		return -1;
-	if (fileWriteInt32(stream, ptr->localVariablesCount) == -1)
-		return -1;
-	if (fileWriteInt32(stream, ptr->scriptIndex) == -1)
-		return -1;
-	if (fileWriteInt32(stream, ptr->flags) == -1)
-		return -1;
-	if (fileWriteInt32(stream, ptr->darkness) == -1)
-		return -1;
-	if (fileWriteInt32(stream, ptr->globalVariablesCount) == -1)
-		return -1;
-	if (fileWriteInt32(stream, ptr->field_34) == -1)
-		return -1;
-	if (fileWriteInt32(stream, ptr->lastVisitTime) == -1)
-		return -1;
-	if (fileWriteInt32List(stream, ptr->field_3C, 44) == -1)
-		return -1;
+static int mapHeaderWrite(MapHeader *ptr, Common::OutSaveFile *stream) {
+	int i;
+
+	stream->writeSint32BE(ptr->version);
+	for (i = 0; i < 16; i++)
+		stream->writeByte(ptr->name[i]);
+	stream->writeSint32BE(ptr->enteringTile);
+	stream->writeSint32BE(ptr->enteringElevation);
+	stream->writeSint32BE(ptr->enteringRotation);
+	stream->writeSint32BE(ptr->localVariablesCount);
+	stream->writeSint32BE(ptr->scriptIndex);
+	stream->writeSint32BE(ptr->flags);
+	stream->writeSint32BE(ptr->darkness);
+	stream->writeSint32BE(ptr->globalVariablesCount);
+	stream->writeSint32BE(ptr->field_34);
+	stream->writeSint32BE(ptr->lastVisitTime);
+	for (i = 0; i < 44; i++)
+		stream->writeByte(ptr->field_3C[i]);
+
+	/*	if (fileWriteInt32(stream, ptr->version) == -1)
+			return -1;
+		if (fileWriteFixedLengthString(stream, ptr->name, 16) == -1)
+			return -1;
+		if (fileWriteInt32(stream, ptr->enteringTile) == -1)
+			return -1;
+		if (fileWriteInt32(stream, ptr->enteringElevation) == -1)
+			return -1;
+		if (fileWriteInt32(stream, ptr->enteringRotation) == -1)
+			return -1;
+		if (fileWriteInt32(stream, ptr->localVariablesCount) == -1)
+			return -1;
+		if (fileWriteInt32(stream, ptr->scriptIndex) == -1)
+			return -1;
+		if (fileWriteInt32(stream, ptr->flags) == -1)
+			return -1;
+		if (fileWriteInt32(stream, ptr->darkness) == -1)
+			return -1;
+		if (fileWriteInt32(stream, ptr->globalVariablesCount) == -1)
+			return -1;
+		if (fileWriteInt32(stream, ptr->field_34) == -1)
+			return -1;
+		if (fileWriteInt32(stream, ptr->lastVisitTime) == -1)
+			return -1;
+		if (fileWriteInt32List(stream, ptr->field_3C, 44) == -1)
+			return -1;*/
 
 	return 0;
 }
