@@ -221,8 +221,8 @@ static SaveGameHandler *_master_save_list[LOAD_SAVE_HANDLER_COUNT] = {
 //	skillsSave,  DONE
 //	randomSave, DONE
 //	perksSave, DONE
-	combatSave,
-	aiSave,
+//	combatSave, DONE
+//	aiSave, DONE
 	statsSave,
 	itemsSave,
 //	traitsSave,  TODO
@@ -1632,6 +1632,16 @@ static int lsgPerformSaveGame() {
 		warning("Error saving perks");
 	else
 		debug("Saved character perks");
+
+	if(combatSave(newSave))
+		warning("Error saving combat status");
+	else
+		debug("Saved combat status");
+
+	if(aiSave(newSave))
+		warning("Error combat AI status");
+	else
+		debug("Saved combat AI status");
 
 	return 0;
 
