@@ -165,11 +165,17 @@ int statsLoad(File *stream) {
 }
 
 // 0x4AEF20
-int statsSave(File *stream) {
+int statsSave(Common::OutSaveFile *stream) {
 	for (int index = 0; index < PC_STAT_COUNT; index++) {
-		if (fileWriteInt32(stream, gPcStatValues[index]) == -1) {
+		stream->writeSint32BE(gPcStatValues[index]);
+		if (stream->err()) {
+			stream->finalize();
+			delete stream;
 			return -1;
 		}
+		//		if (fileWriteInt32(stream, gPcStatValues[index]) == -1) {
+		//			return -1;
+		//		}
 	}
 
 	return 0;
