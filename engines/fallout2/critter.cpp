@@ -661,13 +661,16 @@ err:
 }
 
 // 0x42D7FC
-int radiationEventWrite(File *stream, void *data) {
+int radiationEventWrite(Common::OutSaveFile *stream, void *data) {
 	RadiationEvent *radiationEvent = (RadiationEvent *)data;
 
-	if (fileWriteInt32(stream, radiationEvent->radiationLevel) == -1)
+	stream->writeSint32BE(radiationEvent->radiationLevel);
+	stream->writeSint32BE(radiationEvent->isHealing);
+
+/*	if (fileWriteInt32(stream, radiationEvent->radiationLevel) == -1)
 		return -1;
 	if (fileWriteInt32(stream, radiationEvent->isHealing) == -1)
-		return -1;
+		return -1;*/
 
 	return 0;
 }
