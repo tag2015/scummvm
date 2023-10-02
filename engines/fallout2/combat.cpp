@@ -2221,32 +2221,50 @@ int combatLoad(File *stream) {
 }
 
 // 0x421244
-int combatSave(File *stream) {
-	if (fileWriteInt32(stream, gCombatState) == -1)
-		return -1;
+int combatSave(Common::OutSaveFile *stream) {
+	stream->writeSint32BE(gCombatState);
+	//	if (fileWriteInt32(stream, gCombatState) == -1)
+	//		return -1;
 
 	if (!isInCombat())
 		return 0;
 
-	if (fileWriteInt32(stream, _combat_turn_running) == -1)
-		return -1;
-	if (fileWriteInt32(stream, _combat_free_move) == -1)
-		return -1;
-	if (fileWriteInt32(stream, _combat_exps) == -1)
-		return -1;
-	if (fileWriteInt32(stream, _list_com) == -1)
-		return -1;
-	if (fileWriteInt32(stream, _list_noncom) == -1)
-		return -1;
-	if (fileWriteInt32(stream, _list_total) == -1)
-		return -1;
-	if (fileWriteInt32(stream, gDude->cid) == -1)
-		return -1;
+	stream->writeSint32BE(_combat_turn_running);
+	stream->writeSint32BE(_combat_free_move);
+	stream->writeSint32BE(_combat_exps);
+	stream->writeSint32BE(_list_com);
+	stream->writeSint32BE(_list_noncom);
+	stream->writeSint32BE(_list_total);
+	stream->writeSint32BE(gDude->cid);
+
+	/*	if (fileWriteInt32(stream, _combat_turn_running) == -1)
+			return -1;
+		if (fileWriteInt32(stream, _combat_free_move) == -1)
+			return -1;
+		if (fileWriteInt32(stream, _combat_exps) == -1)
+			return -1;
+		if (fileWriteInt32(stream, _list_com) == -1)
+			return -1;
+		if (fileWriteInt32(stream, _list_noncom) == -1)
+			return -1;
+		if (fileWriteInt32(stream, _list_total) == -1)
+			return -1;
+		if (fileWriteInt32(stream, gDude->cid) == -1)
+			return -1;*/
 
 	for (int index = 0; index < _list_total; index++) {
-		if (fileWriteInt32(stream, _combat_list[index]->cid) == -1)
-			return -1;
+		stream->writeSint32BE(_combat_list[index]->cid);
 	}
+
+	if (stream->err()) {
+		stream->finalize();
+		delete stream;
+		return -1;
+	}
+	/*	for (int index = 0; index < _list_total; index++) {
+			if (fileWriteInt32(stream, _combat_list[index]->cid) == -1)
+				return -1;
+		}*/
 
 	if (_aiInfoList == NULL) {
 		return -1;
@@ -2255,14 +2273,25 @@ int combatSave(File *stream) {
 	for (int index = 0; index < _list_total; index++) {
 		CombatAiInfo *aiInfo = &(_aiInfoList[index]);
 
-		if (fileWriteInt32(stream, aiInfo->friendlyDead != NULL ? aiInfo->friendlyDead->id : -1) == -1)
+		stream->writeSint32BE(aiInfo->friendlyDead != NULL ? aiInfo->friendlyDead->id : -1);
+		stream->writeSint32BE(aiInfo->lastTarget != NULL ? aiInfo->lastTarget->id : -1);
+		stream->writeSint32BE(aiInfo->lastItem != NULL ? aiInfo->lastItem->id : -1);
+		stream->writeSint32BE(aiInfo->lastMove);
+
+		if (stream->err()) {
+			stream->finalize();
+			delete stream;
 			return -1;
-		if (fileWriteInt32(stream, aiInfo->lastTarget != NULL ? aiInfo->lastTarget->id : -1) == -1)
-			return -1;
-		if (fileWriteInt32(stream, aiInfo->lastItem != NULL ? aiInfo->lastItem->id : -1) == -1)
-			return -1;
-		if (fileWriteInt32(stream, aiInfo->lastMove) == -1)
-			return -1;
+		}
+
+		/*		if (fileWriteInt32(stream, aiInfo->friendlyDead != NULL ? aiInfo->friendlyDead->id : -1) == -1)
+					return -1;
+				if (fileWriteInt32(stream, aiInfo->lastTarget != NULL ? aiInfo->lastTarget->id : -1) == -1)
+					return -1;
+				if (fileWriteInt32(stream, aiInfo->lastItem != NULL ? aiInfo->lastItem->id : -1) == -1)
+					return -1;
+				if (fileWriteInt32(stream, aiInfo->lastMove) == -1)
+					return -1;*/
 	}
 
 	return 0;
