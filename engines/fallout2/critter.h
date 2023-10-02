@@ -5,6 +5,8 @@
 #include "fallout2/obj_types.h"
 #include "fallout2/proto_types.h"
 
+#include "common/savefile.h"
+
 namespace Fallout2 {
 
 typedef enum DudeState {
@@ -17,7 +19,7 @@ int critterInit();
 void critterReset();
 void critterExit();
 int critterLoad(File *stream);
-int critterSave(File *stream);
+int critterSave(Common::OutSaveFile *stream);
 char *critterGetName(Object *obj);
 void critterProtoDataCopy(CritterProtoData *dest, CritterProtoData *src);
 int dudeSetName(const char *name);
@@ -39,7 +41,7 @@ int critterGetDamageType(Object *critter);
 int killsIncByType(int killType);
 int killsGetByType(int killType);
 int killsLoad(File *stream);
-int killsSave(File *stream);
+int killsSave(Common::OutSaveFile *stream);
 int critterGetKillType(Object *critter);
 char *killTypeGetName(int killType);
 char *killTypeGetDescription(int killType);

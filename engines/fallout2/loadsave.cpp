@@ -216,8 +216,8 @@ static SaveGameHandler *_master_save_list[LOAD_SAVE_HANDLER_COUNT] = {
 //	_GameMap2Slot, TODO
 //	scriptsSaveGameGlobalVars, DONE
 //	_obj_save_dude, DONE
-	critterSave,
-	killsSave,
+//	critterSave, DONE
+//	killsSave, DONE
 //	skillsSave,  TODO
 	randomSave,
 	perksSave,
@@ -1612,6 +1612,16 @@ static int lsgPerformSaveGame() {
 		warning("Error saving dude objects!");
 	else
 		debug("Saved dude objects (obj_save_dude)");
+
+	if(critterSave(newSave))
+		warning("Error saving critter status!");
+	else
+		debug("Saved critter status");
+
+	if(killsSave(newSave))
+		warning("Error saving kills list");
+	else
+		debug("Saved kills list");
 
 	return 0;
 
