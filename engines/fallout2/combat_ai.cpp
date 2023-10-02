@@ -105,7 +105,7 @@ static void _parse_hurt_str(char *str, int *out_value);
 static int _cai_match_str_to_list(const char *str, const char **list, int count, int *out_value);
 static void aiPacketInit(AiPacket *ai);
 static int aiPacketRead(File *stream, AiPacket *ai);
-static int aiPacketWrite(File *stream, AiPacket *ai);
+static int aiPacketWrite(Common::OutSaveFile *stream, AiPacket *ai);
 static AiPacket *aiGetPacket(Object *obj);
 static AiPacket *aiGetPacketByNum(int aiPacketNum);
 static int _ai_magic_hands(Object *a1, Object *a2, int num);
@@ -619,7 +619,7 @@ int aiLoad(File *stream) {
 }
 
 // 0x427B50
-int aiSave(File *stream) {
+int aiSave(Common::OutSaveFile *stream) {
 	for (int index = 0; index < gPartyMemberDescriptionsLength; index++) {
 		int pid = gPartyMemberPids[index];
 		if (pid != -1 && PID_TYPE(pid) == OBJ_TYPE_CRITTER) {
@@ -711,74 +711,116 @@ static int aiPacketRead(File *stream, AiPacket *ai) {
 }
 
 // 0x427E1C
-static int aiPacketWrite(File *stream, AiPacket *ai) {
-	if (fileWriteInt32(stream, ai->packet_num) == -1)
+static int aiPacketWrite(Common::OutSaveFile *stream, AiPacket *ai) {
+	stream->writeSint32BE(ai->packet_num);
+	stream->writeSint32BE(ai->max_dist);
+	stream->writeSint32BE(ai->min_to_hit);
+	stream->writeSint32BE(ai->min_hp);
+	stream->writeSint32BE(ai->aggression);
+	stream->writeSint32BE(ai->hurt_too_much);
+	stream->writeSint32BE(ai->secondary_freq);
+	stream->writeSint32BE(ai->called_freq);
+	stream->writeSint32BE(ai->font);
+	stream->writeSint32BE(ai->color);
+	stream->writeSint32BE(ai->outline_color);
+	stream->writeSint32BE(ai->chance);
+	stream->writeSint32BE(ai->run.start);
+	stream->writeSint32BE(ai->run.end);
+	stream->writeSint32BE(ai->move.start);
+	stream->writeSint32BE(ai->move.end);
+	stream->writeSint32BE(ai->attack.start);
+	stream->writeSint32BE(ai->attack.end);
+	stream->writeSint32BE(ai->miss.start);
+	stream->writeSint32BE(ai->miss.end);
+
+	if (stream->err()) {
+		stream->finalize();
+		delete stream;
 		return -1;
-	if (fileWriteInt32(stream, ai->max_dist) == -1)
-		return -1;
-	if (fileWriteInt32(stream, ai->min_to_hit) == -1)
-		return -1;
-	if (fileWriteInt32(stream, ai->min_hp) == -1)
-		return -1;
-	if (fileWriteInt32(stream, ai->aggression) == -1)
-		return -1;
-	if (fileWriteInt32(stream, ai->hurt_too_much) == -1)
-		return -1;
-	if (fileWriteInt32(stream, ai->secondary_freq) == -1)
-		return -1;
-	if (fileWriteInt32(stream, ai->called_freq) == -1)
-		return -1;
-	if (fileWriteInt32(stream, ai->font) == -1)
-		return -1;
-	if (fileWriteInt32(stream, ai->color) == -1)
-		return -1;
-	if (fileWriteInt32(stream, ai->outline_color) == -1)
-		return -1;
-	if (fileWriteInt32(stream, ai->chance) == -1)
-		return -1;
-	if (fileWriteInt32(stream, ai->run.start) == -1)
-		return -1;
-	if (fileWriteInt32(stream, ai->run.end) == -1)
-		return -1;
-	if (fileWriteInt32(stream, ai->move.start) == -1)
-		return -1;
-	if (fileWriteInt32(stream, ai->move.end) == -1)
-		return -1;
-	if (fileWriteInt32(stream, ai->attack.start) == -1)
-		return -1;
-	if (fileWriteInt32(stream, ai->attack.end) == -1)
-		return -1;
-	if (fileWriteInt32(stream, ai->miss.start) == -1)
-		return -1;
-	if (fileWriteInt32(stream, ai->miss.end) == -1)
-		return -1;
+	}
+	/*	if (fileWriteInt32(stream, ai->packet_num) == -1)
+			return -1;
+		if (fileWriteInt32(stream, ai->max_dist) == -1)
+			return -1;
+		if (fileWriteInt32(stream, ai->min_to_hit) == -1)
+			return -1;
+		if (fileWriteInt32(stream, ai->min_hp) == -1)
+			return -1;
+		if (fileWriteInt32(stream, ai->aggression) == -1)
+			return -1;
+		if (fileWriteInt32(stream, ai->hurt_too_much) == -1)
+			return -1;
+		if (fileWriteInt32(stream, ai->secondary_freq) == -1)
+			return -1;
+		if (fileWriteInt32(stream, ai->called_freq) == -1)
+			return -1;
+		if (fileWriteInt32(stream, ai->font) == -1)
+			return -1;
+		if (fileWriteInt32(stream, ai->color) == -1)
+			return -1;
+		if (fileWriteInt32(stream, ai->outline_color) == -1)
+			return -1;
+		if (fileWriteInt32(stream, ai->chance) == -1)
+			return -1;
+		if (fileWriteInt32(stream, ai->run.start) == -1)
+			return -1;
+		if (fileWriteInt32(stream, ai->run.end) == -1)
+			return -1;
+		if (fileWriteInt32(stream, ai->move.start) == -1)
+			return -1;
+		if (fileWriteInt32(stream, ai->move.end) == -1)
+			return -1;
+		if (fileWriteInt32(stream, ai->attack.start) == -1)
+			return -1;
+		if (fileWriteInt32(stream, ai->attack.end) == -1)
+			return -1;
+		if (fileWriteInt32(stream, ai->miss.start) == -1)
+			return -1;
+		if (fileWriteInt32(stream, ai->miss.end) == -1)
+			return -1;*/
 
 	for (int index = 0; index < HIT_LOCATION_SPECIFIC_COUNT; index++) {
 		AiMessageRange *range = &(ai->hit[index]);
-		if (fileWriteInt32(stream, range->start) == -1)
-			return -1;
-		if (fileWriteInt32(stream, range->end) == -1)
-			return -1;
+		stream->writeSint32BE(range->start);
+		stream->writeSint32BE(range->end);
+		/*	if (fileWriteInt32(stream, range->start) == -1)
+				return -1;
+			if (fileWriteInt32(stream, range->end) == -1)
+				return -1;*/
 	}
 
-	if (fileWriteInt32(stream, ai->area_attack_mode) == -1)
-		return -1;
-	if (fileWriteInt32(stream, ai->best_weapon) == -1)
-		return -1;
-	if (fileWriteInt32(stream, ai->distance) == -1)
-		return -1;
-	if (fileWriteInt32(stream, ai->attack_who) == -1)
-		return -1;
-	if (fileWriteInt32(stream, ai->chem_use) == -1)
-		return -1;
-	if (fileWriteInt32(stream, ai->run_away_mode) == -1)
-		return -1;
+	stream->writeSint32BE(ai->area_attack_mode);
+	stream->writeSint32BE(ai->best_weapon);
+	stream->writeSint32BE(ai->distance);
+	stream->writeSint32BE(ai->attack_who);
+	stream->writeSint32BE(ai->chem_use);
+	stream->writeSint32BE(ai->run_away_mode);
+
+	/*	if (fileWriteInt32(stream, ai->area_attack_mode) == -1)
+			return -1;
+		if (fileWriteInt32(stream, ai->best_weapon) == -1)
+			return -1;
+		if (fileWriteInt32(stream, ai->distance) == -1)
+			return -1;
+		if (fileWriteInt32(stream, ai->attack_who) == -1)
+			return -1;
+		if (fileWriteInt32(stream, ai->chem_use) == -1)
+			return -1;
+		if (fileWriteInt32(stream, ai->run_away_mode) == -1)
+			return -1;*/
 
 	for (int index = 0; index < AI_PACKET_CHEM_PRIMARY_DESIRE_COUNT; index++) {
 		// TODO: Check, probably writes chem_primary_desire[0] three times,
 		// might be a bug in original source code.
-		if (fileWriteInt32(stream, ai->chem_primary_desire[index]) == -1)
-			return -1;
+		/*		if (fileWriteInt32(stream, ai->chem_primary_desire[index]) == -1)
+					return -1;*/
+		stream->writeSint32BE(ai->chem_primary_desire[index]);
+	}
+
+	if (stream->err()) {
+		stream->finalize();
+		delete stream;
+		return -1;
 	}
 
 	return 0;
