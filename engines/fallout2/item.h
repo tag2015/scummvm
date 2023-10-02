@@ -4,6 +4,8 @@
 #include "fallout2/db.h"
 #include "fallout2/obj_types.h"
 
+#include "common/savefile.h"
+
 namespace Fallout2 {
 
 typedef enum AttackType {
@@ -122,11 +124,11 @@ int _item_d_take_drug(Object *critter_obj, Object *item_obj);
 int _item_d_clear(Object *obj, void *data);
 int drugEffectEventProcess(Object *obj, void *data);
 int drugEffectEventRead(File *stream, void **dataPtr);
-int drugEffectEventWrite(File *stream, void *data);
+int drugEffectEventWrite(Common::OutSaveFile *stream, void *data);
 int _item_wd_clear(Object *obj, void *a2);
 int withdrawalEventProcess(Object *obj, void *data);
 int withdrawalEventRead(File *stream, void **dataPtr);
-int withdrawalEventWrite(File *stream, void *data);
+int withdrawalEventWrite(Common::OutSaveFile *stream, void *data);
 int itemGetTotalCaps(Object *obj);
 int itemCapsAdjust(Object *obj, int amount);
 int itemGetMoney(Object *obj);

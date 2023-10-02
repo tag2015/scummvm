@@ -194,7 +194,7 @@ int queueLoad(File *stream) {
 }
 
 // 0x4A24E0
-int queueSave(File *stream) {
+int queueSave(Common::OutSaveFile *stream) {
 	QueueListNode *queueListNode;
 
 	int count = 0;
@@ -205,26 +205,30 @@ int queueSave(File *stream) {
 		queueListNode = queueListNode->next;
 	}
 
-	if (fileWriteInt32(stream, count) == -1) {
+	stream->writeSint32BE(count);
+/*	if (fileWriteInt32(stream, count) == -1) {
 		return -1;
-	}
+	}*/
 
 	queueListNode = gQueueListHead;
 	while (queueListNode != NULL) {
 		Object *object = queueListNode->owner;
 		int objectId = object != NULL ? object->id : -2;
 
-		if (fileWriteInt32(stream, queueListNode->time) == -1) {
+		stream->writeSint32BE(queueListNode->time);
+/*		if (fileWriteInt32(stream, queueListNode->time) == -1) {
 			return -1;
-		}
+		}*/
 
-		if (fileWriteInt32(stream, queueListNode->type) == -1) {
+		stream->writeSint32BE(queueListNode->type);
+/*		if (fileWriteInt32(stream, queueListNode->type) == -1) {
 			return -1;
-		}
+		}*/
 
-		if (fileWriteInt32(stream, objectId) == -1) {
+		stream->writeSint32BE(objectId);
+/*		if (fileWriteInt32(stream, objectId) == -1) {
 			return -1;
-		}
+		}*/
 
 		EventTypeDescription *eventTypeDescription = &(gEventTypeDescriptions[queueListNode->type]);
 		if (eventTypeDescription->writeProc != NULL) {
@@ -234,6 +238,12 @@ int queueSave(File *stream) {
 		}
 
 		queueListNode = queueListNode->next;
+
+		if (stream->err()) {
+			stream->finalize();
+			delete stream;
+			return -1;
+		}
 	}
 
 	return 0;

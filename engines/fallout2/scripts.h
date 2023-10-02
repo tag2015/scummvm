@@ -167,7 +167,7 @@ int scriptSetActionBeingUsed(int sid, int a2);
 void _scrSetQueueTestVals(Object *a1, int a2);
 int _scrQueueRemoveFixed(Object *obj, void *data);
 int scriptAddTimerEvent(int sid, int delay, int param);
-int scriptEventWrite(File *stream, void *data);
+int scriptEventWrite(Common::OutSaveFile *stream, void *data);
 int scriptEventRead(File *stream, void **dataPtr);
 int scriptEventProcess(Object *obj, void *data);
 int _scripts_clear_combat_requests(Script *script);
