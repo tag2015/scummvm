@@ -468,7 +468,7 @@ int _obj_examine_func(Object *critter, Object *target, void (*fn)(char *string))
 			}
 
 			if (car != 0) {
-//				snprintf(formattedText, sizeof(formattedText), carMessageListItem.text, 100 * wmCarGasAmount() / 80000);  TODO world_map
+				snprintf(formattedText, sizeof(formattedText), carMessageListItem.text, 100 * wmCarGasAmount() / 80000);
 			} else {
 				strncpy(formattedText, carMessageListItem.text, sizeof(formattedText));
 			}
@@ -938,7 +938,7 @@ static int _obj_use_power_on_car(Object *item) {
 
 	// SFALL: Fix for cells getting consumed even when the car is already fully
 	// charged.
-/*	int rc;  TODO world_map
+	int rc;
 	if (wmCarGasAmount() < CAR_FUEL_MAX) {
 		int energy = ammoGetQuantity(item) * energyDensity;
 		int capacity = ammoGetCapacity(item);
@@ -956,12 +956,11 @@ static int _obj_use_power_on_car(Object *item) {
 		messageNum = 596;
 		rc = 0;
 	}
-*/
+
 	char *text = getmsg(&gProtoMessageList, &messageListItem, messageNum);
 	displayMonitorAddMessage(text);
 
-//	return rc;  // TODO
-	return 0;
+	return rc;
 }
 
 // 0x49BE88
