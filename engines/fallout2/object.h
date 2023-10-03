@@ -28,7 +28,7 @@ void objectsReset();
 void objectsExit();
 int objectRead(Object *obj, File *stream);
 int objectLoadAll(File *stream);
-int objectSaveAll(File *stream);
+int objectSaveAll(Common::OutSaveFile *stream);
 void _obj_render_pre_roof(Rect *rect, int elevation);
 void _obj_render_post_roof(Rect *rect, int elevation);
 int objectCreateWithFidPid(Object **objectPtr, int fid, int pid);

@@ -714,7 +714,7 @@ static int objectWrite(Object *obj, Common::OutSaveFile *stream) {
 }
 
 // 0x48935C
-int objectSaveAll(File *stream) {
+int objectSaveAll(Common::OutSaveFile *stream) {
 	if (stream == NULL) {
 		return -1;
 	}
@@ -723,18 +723,21 @@ int objectSaveAll(File *stream) {
 
 	int objectCount = 0;
 
-	long objectCountPos = fileTell(stream);
-	if (fileWriteInt32(stream, objectCount) == -1) {
+	long objectCountPos = stream->pos();
+
+	stream->writeSint32BE(objectCount);
+/*	if (fileWriteInt32(stream, objectCount) == -1) {
 		return -1;
-	}
+	}*/
 
 	for (int elevation = 0; elevation < ELEVATION_COUNT; elevation++) {
 		int objectCountAtElevation = 0;
 
-		long objectCountAtElevationPos = fileTell(stream);
-		if (fileWriteInt32(stream, objectCountAtElevation) == -1) {
+		long objectCountAtElevationPos = stream->pos();
+		stream->writeSint32BE(objectCountAtElevation);
+/*		if (fileWriteInt32(stream, objectCountAtElevation) == -1) {
 			return -1;
-		}
+		}*/
 
 		for (int tile = 0; tile < HEX_GRID_SIZE; tile++) {
 			for (ObjectListNode *objectListNode = gObjectListHeadByTile[tile]; objectListNode != NULL; objectListNode = objectListNode->next) {
@@ -761,9 +764,9 @@ int objectSaveAll(File *stream) {
 					}
 				}
 
-//				if (objectWrite(object, stream) == -1) { TODO saveload
-//					return -1;
-//				}
+				if (objectWrite(object, stream) == -1) {
+					return -1;
+				}
 
 				if (PID_TYPE(object->pid) == OBJ_TYPE_CRITTER) {
 					combatData->whoHitMe = whoHitMe;
@@ -773,31 +776,38 @@ int objectSaveAll(File *stream) {
 				for (int index = 0; index < inventory->length; index++) {
 					InventoryItem *inventoryItem = &(inventory->items[index]);
 
-					if (fileWriteInt32(stream, inventoryItem->quantity) == -1) {
+					stream->writeSint32BE(inventoryItem->quantity);
+/*					if (fileWriteInt32(stream, inventoryItem->quantity) == -1) {
+						return -1;
+					}*/
+
+					if (_obj_save_obj(stream, inventoryItem->item) == -1) {
 						return -1;
 					}
-
-//					if (_obj_save_obj(stream, inventoryItem->item) == -1) { TODO saveload
-//						return -1;
-//					}
 				}
 
 				objectCountAtElevation++;
 			}
 		}
 
-		long pos = fileTell(stream);
-		fileSeek(stream, objectCountAtElevationPos, SEEK_SET);
-		fileWriteInt32(stream, objectCountAtElevation);
-		fileSeek(stream, pos, SEEK_SET);
+		long pos = stream->pos();
+		stream->seek(objectCountAtElevationPos, SEEK_SET);
+//		fileSeek(stream, objectCountAtElevationPos, SEEK_SET);
+		stream->writeSint32BE(objectCountAtElevation);
+//		fileWriteInt32(stream, objectCountAtElevation);
+		stream->seek(pos, SEEK_SET);
+//		fileSeek(stream, pos, SEEK_SET);
 
 		objectCount += objectCountAtElevation;
 	}
 
-	long pos = fileTell(stream);
-	fileSeek(stream, objectCountPos, SEEK_SET);
-	fileWriteInt32(stream, objectCount);
-	fileSeek(stream, pos, SEEK_SET);
+	long pos = stream->pos();
+	stream->seek(objectCountPos, SEEK_SET);
+//	fileSeek(stream, objectCountPos, SEEK_SET);
+	stream->writeSint32BE(objectCount);
+//	fileWriteInt32(stream, objectCount);
+	stream->seek(pos, SEEK_SET);
+//	fileSeek(stream, pos, SEEK_SET);
 
 	return 0;
 }
