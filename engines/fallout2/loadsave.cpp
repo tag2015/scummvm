@@ -235,7 +235,7 @@ static SaveGameHandler *_master_save_list[LOAD_SAVE_HANDLER_COUNT] = {
 //	skillsUsageSave, DONE
 //	partyMembersSave, DONE
 //	queueSave, DONE
-	interfaceSave,
+//	interfaceSave, DONE
 	_DummyFunc,
 };
 
@@ -1693,7 +1693,10 @@ static int lsgPerformSaveGame() {
 	else
 		debug("Saved events queue");
 
-	return 0;
+	if (interfaceSave(newSave))
+		warning("Error saving interface status");
+	else
+		debug("Saved interface status");
 
 //	for (int index = 0; index < LOAD_SAVE_HANDLER_COUNT; index++) {
 //		long pos = fileTell(_flptr);
@@ -1719,12 +1722,12 @@ static int lsgPerformSaveGame() {
 //	snprintf(_gmpath, sizeof(_gmpath), "%s\\%s%.2d\\", "SAVEGAME", "SLOT", _slot_cursor + 1);
 //	_MapDirErase(_gmpath, "BAK");
 
-	// gLoadSaveMessageListItem.num = 140;
-	// if (messageListGetItem(&gLoadSaveMessageList, &gLoadSaveMessageListItem)) {
-	// 	displayMonitorAddMessage(gLoadSaveMessageListItem.text);
-	// } else {
-	// 	debugPrint("\nError: Couldn't find LoadSave Message!");
-	// }
+	gLoadSaveMessageListItem.num = 140;
+	if (messageListGetItem(&gLoadSaveMessageList, &gLoadSaveMessageListItem)) {
+		displayMonitorAddMessage(gLoadSaveMessageListItem.text);
+	} else {
+		debugPrint("\nError: Couldn't find LoadSave Message!");
+	}
 
 //	backgroundSoundResume(); TODO audio
 
