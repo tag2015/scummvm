@@ -76,8 +76,8 @@ static int scriptsLoadScriptsList();
 static int scriptsFreeScriptsList();
 static int scriptsGetFileName(int scriptIndex, char *name, size_t size);
 static int _scr_header_load();
-static int scriptWrite(Script *scr, File *stream);
-static int scriptListExtentWrite(ScriptListExtent *a1, File *stream);
+static int scriptWrite(Script *scr, Common::OutSaveFile *stream);
+static int scriptListExtentWrite(ScriptListExtent *a1, Common::OutSaveFile *stream);
 static int scriptRead(Script *scr, File *stream);
 static int scriptListExtentRead(ScriptListExtent *a1, File *stream);
 static int scriptGetNewId(int scriptType);
@@ -1730,60 +1730,91 @@ static int _scr_header_load() {
 }
 
 // 0x4A5590
-static int scriptWrite(Script *scr, File *stream) {
-	if (fileWriteInt32(stream, scr->sid) == -1)
-		return -1;
-	if (fileWriteInt32(stream, scr->field_4) == -1)
-		return -1;
+static int scriptWrite(Script *scr, Common::OutSaveFile *stream) {
+	stream->writeSint32BE(scr->sid);
+	stream->writeSint32BE(scr->field_4);
+	/*	if (fileWriteInt32(stream, scr->sid) == -1)
+			return -1;
+		if (fileWriteInt32(stream, scr->field_4) == -1)
+			return -1;*/
 
 	switch (SID_TYPE(scr->sid)) {
 	case SCRIPT_TYPE_SPATIAL:
-		if (fileWriteInt32(stream, scr->sp.built_tile) == -1)
-			return -1;
-		if (fileWriteInt32(stream, scr->sp.radius) == -1)
-			return -1;
+		stream->writeSint32BE(scr->sp.built_tile);
+		stream->writeSint32BE(scr->sp.radius);
+		/*		if (fileWriteInt32(stream, scr->sp.built_tile) == -1)
+					return -1;
+				if (fileWriteInt32(stream, scr->sp.radius) == -1)
+					return -1;*/
 		break;
 	case SCRIPT_TYPE_TIMED:
-		if (fileWriteInt32(stream, scr->tm.time) == -1)
-			return -1;
+		stream->writeSint32BE(scr->tm.time);
+		/*		if (fileWriteInt32(stream, scr->tm.time) == -1)
+					return -1;*/
 		break;
 	}
+	if (stream->err()) {
+		stream->finalize();
+		delete stream;
+		return -1;
+	}
 
-	if (fileWriteInt32(stream, scr->flags) == -1)
+	stream->writeSint32BE(scr->flags);
+	stream->writeSint32BE(scr->field_14);
+	stream->writeSint32BE(0);
+	stream->writeSint32BE(scr->field_1C);
+	stream->writeSint32BE(scr->localVarsOffset);
+	stream->writeSint32BE(scr->localVarsCount);
+	stream->writeSint32BE(scr->field_28);
+	stream->writeSint32BE(scr->action);
+	stream->writeSint32BE(scr->fixedParam);
+	stream->writeSint32BE(scr->actionBeingUsed);
+	stream->writeSint32BE(scr->scriptOverrides);
+	stream->writeSint32BE(scr->field_48);
+	stream->writeSint32BE(scr->howMuch);
+	stream->writeSint32BE(scr->field_50);
+
+	if (stream->err()) {
+		stream->finalize();
+		delete stream;
 		return -1;
-	if (fileWriteInt32(stream, scr->field_14) == -1)
-		return -1;
-	// NOTE: Original code writes `scr->program` pointer which is meaningless.
-	if (fileWriteInt32(stream, 0) == -1)
-		return -1;
-	if (fileWriteInt32(stream, scr->field_1C) == -1)
-		return -1;
-	if (fileWriteInt32(stream, scr->localVarsOffset) == -1)
-		return -1;
-	if (fileWriteInt32(stream, scr->localVarsCount) == -1)
-		return -1;
-	if (fileWriteInt32(stream, scr->field_28) == -1)
-		return -1;
-	if (fileWriteInt32(stream, scr->action) == -1)
-		return -1;
-	if (fileWriteInt32(stream, scr->fixedParam) == -1)
-		return -1;
-	if (fileWriteInt32(stream, scr->actionBeingUsed) == -1)
-		return -1;
-	if (fileWriteInt32(stream, scr->scriptOverrides) == -1)
-		return -1;
-	if (fileWriteInt32(stream, scr->field_48) == -1)
-		return -1;
-	if (fileWriteInt32(stream, scr->howMuch) == -1)
-		return -1;
-	if (fileWriteInt32(stream, scr->field_50) == -1)
-		return -1;
+	}
+
+	/*	if (fileWriteInt32(stream, scr->flags) == -1)
+			return -1;
+		if (fileWriteInt32(stream, scr->field_14) == -1)
+			return -1;
+		// NOTE: Original code writes `scr->program` pointer which is meaningless.
+		if (fileWriteInt32(stream, 0) == -1)
+			return -1;
+		if (fileWriteInt32(stream, scr->field_1C) == -1)
+			return -1;
+		if (fileWriteInt32(stream, scr->localVarsOffset) == -1)
+			return -1;
+		if (fileWriteInt32(stream, scr->localVarsCount) == -1)
+			return -1;
+		if (fileWriteInt32(stream, scr->field_28) == -1)
+			return -1;
+		if (fileWriteInt32(stream, scr->action) == -1)
+			return -1;
+		if (fileWriteInt32(stream, scr->fixedParam) == -1)
+			return -1;
+		if (fileWriteInt32(stream, scr->actionBeingUsed) == -1)
+			return -1;
+		if (fileWriteInt32(stream, scr->scriptOverrides) == -1)
+			return -1;
+		if (fileWriteInt32(stream, scr->field_48) == -1)
+			return -1;
+		if (fileWriteInt32(stream, scr->howMuch) == -1)
+			return -1;
+		if (fileWriteInt32(stream, scr->field_50) == -1)
+			return -1; */
 
 	return 0;
 }
 
 // 0x4A5704
-static int scriptListExtentWrite(ScriptListExtent *a1, File *stream) {
+static int scriptListExtentWrite(ScriptListExtent *a1, Common::OutSaveFile *stream) {
 	for (int index = 0; index < SCRIPT_LIST_EXTENT_SIZE; index++) {
 		Script *script = &(a1->scripts[index]);
 		if (scriptWrite(script, stream) != 0) {
@@ -1791,20 +1822,28 @@ static int scriptListExtentWrite(ScriptListExtent *a1, File *stream) {
 		}
 	}
 
-	if (fileWriteInt32(stream, a1->length) != 0) {
+	stream->writeSint32BE(a1->length);
+	stream->writeSint32BE(0);
+	if (stream->err()) {
+		stream->finalize();
+		delete stream;
 		return -1;
 	}
 
-	// NOTE: Original code writes `a1->next` pointer which is meaningless.
-	if (fileWriteInt32(stream, 0) != 0) {
-		return -1;
-	}
+	/*	if (fileWriteInt32(stream, a1->length) != 0) {
+			return -1;
+		}
+
+		// NOTE: Original code writes `a1->next` pointer which is meaningless.
+		if (fileWriteInt32(stream, 0) != 0) {
+			return -1;
+		}*/
 
 	return 0;
 }
 
 // 0x4A5768
-int scriptSaveAll(File *stream) {
+int scriptSaveAll(Common::OutSaveFile *stream) {
 	for (int scriptType = 0; scriptType < SCRIPT_TYPE_COUNT; scriptType++) {
 		ScriptList *scriptList = &(gScriptLists[scriptType]);
 
@@ -1860,9 +1899,10 @@ int scriptSaveAll(File *stream) {
 			scriptExtent = scriptExtent->next;
 		}
 
-		if (fileWriteInt32(stream, scriptCount) == -1) {
+		stream->writeSint32BE(scriptCount);
+/*		if (fileWriteInt32(stream, scriptCount) == -1) {
 			return -1;
-		}
+		}*/
 
 		if (scriptCount > 0) {
 			ScriptListExtent *scriptExtent = scriptList->head;
