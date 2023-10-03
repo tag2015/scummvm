@@ -4,6 +4,8 @@
 #include "fallout2/db.h"
 #include "fallout2/obj_types.h"
 
+#include "common/savefile.h"
+
 namespace Fallout2 {
 
 typedef enum Hand {
@@ -43,7 +45,7 @@ int interfaceInit();
 void interfaceReset();
 void interfaceFree();
 int interfaceLoad(File *stream);
-int interfaceSave(File *stream);
+int interfaceSave(Common::OutSaveFile *stream);
 void interfaceBarHide();
 void interfaceBarShow();
 void interfaceBarEnable();

@@ -767,19 +767,30 @@ int interfaceLoad(File *stream) {
 }
 
 // 0x45E988
-int interfaceSave(File *stream) {
+int interfaceSave(Common::OutSaveFile *stream) {
 	if (gInterfaceBarWindow == -1) {
 		return -1;
 	}
 
-	if (fileWriteBool(stream, gInterfaceBarEnabled) == -1)
+	stream->writeSint32BE(gInterfaceBarEnabled ? 1 : 0);
+	stream->writeSint32BE(gInterfaceBarHidden ? 1 : 0);
+	stream->writeSint32BE(gInterfaceCurrentHand);
+	stream->writeSint32BE(gInterfaceBarEndButtonsIsVisible ? 1 : 0);
+
+	if (stream->err()) {
+		stream->finalize();
+		delete stream;
 		return -1;
-	if (fileWriteBool(stream, gInterfaceBarHidden) == -1)
-		return -1;
-	if (fileWriteInt32(stream, gInterfaceCurrentHand) == -1)
-		return -1;
-	if (fileWriteBool(stream, gInterfaceBarEndButtonsIsVisible) == -1)
-		return -1;
+	}
+
+	/*	if (fileWriteBool(stream, gInterfaceBarEnabled) == -1)
+			return -1;
+		if (fileWriteBool(stream, gInterfaceBarHidden) == -1)
+			return -1;
+		if (fileWriteInt32(stream, gInterfaceCurrentHand) == -1)
+			return -1;
+		if (fileWriteBool(stream, gInterfaceBarEndButtonsIsVisible) == -1)
+			return -1;*/
 
 	return 0;
 }
