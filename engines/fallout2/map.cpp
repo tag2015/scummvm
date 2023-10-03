@@ -1397,11 +1397,13 @@ static int _map_save_file(Common::OutSaveFile *stream) {
 	else
 		debug("Saved map scripts");
 
-/*	if (objectSaveAll(stream) == -1) { TODO saveload
+	if (objectSaveAll(stream) == -1) {
 		snprintf(err, sizeof(err), "Error saving objects in %s", gMapHeader.name);
 		_win_msg(err, 80, 80, _colorTable[31744]);
 	}
-*/
+	else
+		debug("Saved map objects");
+
 	scriptsEnable();
 
 	return 0;
