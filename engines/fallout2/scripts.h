@@ -202,7 +202,7 @@ void _scr_disable_critters();
 int scriptsSaveGameGlobalVars(Common::OutSaveFile *stream);
 int scriptsLoadGameGlobalVars(File *stream);
 int scriptsSkipGameGlobalVars(File *stream);
-int scriptSaveAll(File *stream);
+int scriptSaveAll(Common::OutSaveFile *stream);
 int scriptLoadAll(File *stream);
 int scriptGetScript(int sid, Script **script);
 int scriptAdd(int *sidPtr, int scriptType);
