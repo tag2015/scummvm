@@ -88,7 +88,8 @@ XFile *xfileOpen(const char *filePath, const char *mode) {
 	compat_splitpath(filePath, drive, dir, NULL, NULL);
 
 	char path[COMPAT_MAX_PATH];
-	if (drive[0] != '\0' || dir[0] == '\\' || dir[0] == '/' || dir[0] == '.') {
+	// WORKAROUND: If we are opening a .SAV (from scummvm's save folder), force absolute path to avoid prepending data
+	if (drive[0] != '\0' || dir[0] == '\\' || dir[0] == '/' || dir[0] == '.' || strstr(filePath, ".SAV")) {
 		// [filePath] is an absolute path. Attempt to open as plain stream.
 		stream->file = compat_fopen(filePath, mode);
 		if (stream->file == NULL) {

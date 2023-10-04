@@ -46,7 +46,7 @@
 
 #include "common/array.h"
 #include "common/savefile.h"
-
+#include "common/config-manager.h"
 
 namespace Fallout2 {
 
@@ -749,22 +749,38 @@ int mapLoadByName(char *fileName) {
 
 		const char *filePath = mapBuildPath(fileName);
 		// Check if .SAV map exists
-
-//		File *stream = fileOpen(filePath, "rb"); TODO saveload
-
+		Common::SaveFileManager *saveMan = g_system->getSavefileManager();
+		// File *stream = fileOpen(filePath, "rb");
+		if (saveMan->exists(filePath)) {
+			debug("Found a saved .SAV map!");
+			Common::InSaveFile *stream = saveMan->openForLoading(Common::String(filePath));
+			debug(".SAV map loading is not yet supported! Falling back to .MAP");  // TODO saveload
+			stream = NULL;  // TODO remove
+			if (stream != NULL) {
+				// fileClose(stream);
+				delete stream;
+				rc = mapLoadSaved(fileName);
+				// wmMapMusicStart();  TODO audio
+			}
+		}
 		strncpy(extension, ".MAP", 5);
-
-//		if (stream != NULL) {
-//			fileClose(stream);
-//			rc = mapLoadSaved(fileName);
-//			wmMapMusicStart();
-//		}
 	}
 
 	if (rc == -1) {
-		debug(".SAV map not found, looking for .MAP");
+		Common::String newPath;
 		const char *filePath = mapBuildPath(fileName);
-		File *stream = fileOpen(filePath, "rb");
+		char *extension = strstr(fileName, ".SAV");
+		if (extension != NULL) {
+			// newPath = ConfMan.get("savepath").c_str();
+			// newPath += Common::String("/");
+			newPath += Common::String(filePath);
+		} else {
+			newPath = "MAPS\\";
+			newPath += Common::String(fileName);
+		}
+		debug("MapLoadByName map path: %s", newPath.c_str());
+
+		File *stream = fileOpen(newPath.c_str(), "rb");
 		if (stream != NULL) {
 			rc = mapLoad(stream);
 			fileClose(stream);
@@ -1727,7 +1743,7 @@ static int mapHeaderWrite(MapHeader *ptr, Common::OutSaveFile *stream) {
 	stream->writeSint32BE(ptr->field_34);
 	stream->writeSint32BE(ptr->lastVisitTime);
 	for (i = 0; i < 44; i++)
-		stream->writeByte(ptr->field_3C[i]);
+		stream->writeSint32BE(ptr->field_3C[i]);
 
 	/*	if (fileWriteInt32(stream, ptr->version) == -1)
 			return -1;
