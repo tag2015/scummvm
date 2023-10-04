@@ -1677,16 +1677,20 @@ int scriptsLoadGameGlobalVars(Common::InSaveFile *stream) {
 // using this function.
 //
 // 0x4A5448
-int scriptsSkipGameGlobalVars(File *stream) {
+int scriptsSkipGameGlobalVars(Common::InSaveFile *stream) {
 	int *vars = (int *)internal_malloc(sizeof(*vars) * gGameGlobalVarsLength);
 	if (vars == NULL) {
 		return -1;
 	}
 
-	if (fileReadInt32List(stream, vars, gGameGlobalVarsLength) == -1) {
+//	if (fileReadInt32List(stream, vars, gGameGlobalVarsLength) == -1) {
 		// FIXME: Leaks vars.
+//		return -1;
+//	}
+	for (int i = 0; i < gGameGlobalVarsLength; i++)
+		stream->readSint32BE();
+	if (stream->err())
 		return -1;
-	}
 
 	internal_free(vars);
 
