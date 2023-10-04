@@ -164,7 +164,7 @@ static int _LoadTumbSlot(int a1);
 static int _GetComment(int a1);
 static int _get_input_str2(int win, int doneKeyCode, int cancelKeyCode, char *description, int maxLength, int x, int y, int textColor, int backgroundColor, int flags);
 static int _DummyFunc(File *stream);
-static int _PrepLoad(File *stream);
+static int _PrepLoad(Common::InSaveFile *stream);
 static int _EndLoad(File *stream);
 static int _GameMap2Slot(Common::OutSaveFile *stream);
 static int _SlotMap2Game(File *stream);
@@ -173,7 +173,7 @@ static int _copy_file(const char *a1, const char *a2);
 static int _MapDirErase(const char *path, const char *a2);
 static int _SaveBackup();
 static int _RestoreSave();
-static int _LoadObjDudeCid(File *stream);
+static int _LoadObjDudeCid(Common::InSaveFile *stream);
 static int _SaveObjDudeCid(Common::OutSaveFile *stream);
 static int _EraseSave();
 
@@ -241,9 +241,9 @@ static SaveGameHandler *_master_save_list[LOAD_SAVE_HANDLER_COUNT] = {
 
 // 0x519458
 static LoadGameHandler *_master_load_list[LOAD_SAVE_HANDLER_COUNT] = {
-	_PrepLoad,
-	_LoadObjDudeCid,
-	scriptsLoadGameGlobalVars,
+//	_PrepLoad, DONE
+//	_LoadObjDudeCid, DONE
+//	scriptsLoadGameGlobalVars, DONE
 	_SlotMap2Game,
 	scriptsSkipGameGlobalVars,
 	_obj_load_dude,
@@ -1754,31 +1754,69 @@ static int lsgLoadGameInSlot(int slot) {
 		gameMouseSetCursor(MOUSE_CURSOR_WAIT_PLANET);
 	}
 
-	snprintf(_gmpath, sizeof(_gmpath), "%s\\%s%.2d\\", "SAVEGAME", "SLOT", _slot_cursor + 1);
-	strcat_s(_gmpath, sizeof(_gmpath), "SAVE.DAT");
+//	snprintf(_gmpath, sizeof(_gmpath), "%s\\%s%.2d\\", "SAVEGAME", "SLOT", _slot_cursor + 1);
+//	strcat_s(_gmpath, sizeof(_gmpath), "SAVE.DAT");
+
+	Common::SaveFileManager *saveMan = g_system->getSavefileManager();
+	Common::String loadSaveName(g_engine->getTargetName());
+	Common::String loadSaveDat, loadSaveCritters, loadSaveItems;
+
+	char slotname[30];
+	Common::sprintf_s(slotname, "_slot%03d_", _slot_cursor + 1);
+
+	loadSaveName += slotname;
+	loadSaveDat = loadSaveName + "save.dat";
+	loadSaveCritters = loadSaveName + "critters.dat";
+	loadSaveItems = loadSaveName + "items.dat";
 
 	STRUCT_613D30 *ptr = &(_LSData[slot]);
 	debugPrint("\nLOADSAVE: Load name: %s\n", ptr->description);
 
-	_flptr = fileOpen(_gmpath, "rb");
-	if (_flptr == NULL) {
+	loadSave = saveMan->openForLoading(loadSaveDat);
+	if (loadSave == NULL) {
 		debugPrint("\nLOADSAVE: ** Error opening load game file for reading! **\n");
 		_loadingGame = 0;
 		return -1;
 	}
 
-	long pos = fileTell(_flptr);
+
+	// _flptr = fileOpen(_gmpath, "rb");
+	// if (_flptr == NULL) {
+	// 	debugPrint("\nLOADSAVE: ** Error opening load game file for reading! **\n");
+	// 	_loadingGame = 0;
+	// 	return -1;
+	// }
+
+//	long pos = fileTell(_flptr);
+	long pos = loadSave->pos();
 	if (lsgLoadHeaderInSlot(slot) == -1) {
 		debugPrint("\nLOADSAVE: ** Error reading save  game header! **\n");
-		fileClose(_flptr);
+		delete loadSave;
+//		fileClose(_flptr);
 		gameReset();
 		_loadingGame = 0;
 		return -1;
 	}
 
-	debugPrint("LOADSAVE: Load file header size read: %d bytes.\n", fileTell(_flptr) - pos);
+//	debugPrint("LOADSAVE: Load file header size read: %d bytes.\n", fileTell(_flptr) - pos);
+	debugPrint("LOADSAVE: Load file header size read: %d bytes.\n", loadSave->pos() - pos);
 
-	for (int index = 0; index < LOAD_SAVE_HANDLER_COUNT; index += 1) {
+	if (_PrepLoad(loadSave))
+		warning("Error prepping for loading!");
+	else
+		debug("Prepped for loading!");
+
+	if (_LoadObjDudeCid(loadSave))
+		warning("Error loading DudeCid!");
+	else
+		debug("Loaded DudeCid!");
+
+	if (scriptsLoadGameGlobalVars(loadSave))
+		warning("Error loadgin script global vars!");
+	else
+		debug("Loaded script global vars!");
+
+/*	for (int index = 0; index < LOAD_SAVE_HANDLER_COUNT; index += 1) {
 		long pos = fileTell(_flptr);
 		LoadGameHandler *handler = _master_load_list[index];
 		if (handler(_flptr) == -1) {
@@ -1792,10 +1830,13 @@ static int lsgLoadGameInSlot(int slot) {
 		}
 
 		debugPrint("LOADSAVE: Load function #%d data size read: %d bytes.\n", index, fileTell(_flptr) - pos);
-	}
+	}*/
 
-	debugPrint("LOADSAVE: Total load data read: %ld bytes.\n", fileTell(_flptr));
-	fileClose(_flptr);
+//	debugPrint("LOADSAVE: Total load data read: %ld bytes.\n", fileTell(_flptr));
+	debugPrint("LOADSAVE: Total load data read: %ld bytes.\n", loadSave->pos());
+
+//	fileClose(_flptr);
+	delete loadSave;
 
 	snprintf(_str, sizeof(_str), "%s\\", "MAPS");
 	_MapDirErase(_str, "BAK");
@@ -2599,7 +2640,7 @@ static int _DummyFunc(File *stream) {
 }
 
 // 0x47F490
-static int _PrepLoad(File *stream) {
+static int _PrepLoad(Common::InSaveFile *stream) {
 	gameReset();
 	gameMouseSetCursor(MOUSE_CURSOR_WAIT_PLANET);
 	gMapHeader.name[0] = '\0';
@@ -3107,12 +3148,15 @@ static int _RestoreSave() {
 }
 
 // 0x480710
-static int _LoadObjDudeCid(File *stream) {
+static int _LoadObjDudeCid(Common::InSaveFile *stream) {
 	int value;
 
-	if (fileReadInt32(stream, &value) == -1) {
+	value = stream->readSint32BE();
+	if (stream->err())
 		return -1;
-	}
+	//	if (fileReadInt32(stream, &value) == -1) {
+	//		return -1;
+	//	}
 
 	gDude->cid = value;
 

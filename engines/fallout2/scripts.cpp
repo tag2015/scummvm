@@ -1664,8 +1664,11 @@ int scriptsSaveGameGlobalVars(Common::OutSaveFile *stream) {
 }
 
 // 0x4A5424
-int scriptsLoadGameGlobalVars(File *stream) {
-	return fileReadInt32List(stream, gGameGlobalVars, gGameGlobalVarsLength);
+int scriptsLoadGameGlobalVars(Common::InSaveFile *stream) {
+	for (int i = 0; i < gGameGlobalVarsLength; i++)
+		gGameGlobalVars[i] = stream->readSint32BE();
+	return stream->err();
+//	return fileReadInt32List(stream, gGameGlobalVars, gGameGlobalVarsLength);
 }
 
 // NOTE: For unknown reason save game files contains two identical sets of game
