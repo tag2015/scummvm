@@ -167,8 +167,8 @@ static int _DummyFunc(File *stream);
 static int _PrepLoad(Common::InSaveFile *stream);
 static int _EndLoad(File *stream);
 static int _GameMap2Slot(Common::OutSaveFile *stream);
-static int _SlotMap2Game(File *stream);
-static int _mygets(char *dest, File *stream);
+static int _SlotMap2Game(Common::InSaveFile *stream);
+static int _mygets(char *dest, Common::InSaveFile *stream);
 static int _copy_file(const char *a1, const char *a2);
 static int _MapDirErase(const char *path, const char *a2);
 static int _SaveBackup();
@@ -244,8 +244,8 @@ static LoadGameHandler *_master_load_list[LOAD_SAVE_HANDLER_COUNT] = {
 //	_PrepLoad, DONE
 //	_LoadObjDudeCid, DONE
 //	scriptsLoadGameGlobalVars, DONE
-	_SlotMap2Game,
-	scriptsSkipGameGlobalVars,
+//	_SlotMap2Game, TODO map
+//	scriptsSkipGameGlobalVars, DONE
 	_obj_load_dude,
 	critterLoad,
 	killsLoad,
@@ -1816,6 +1816,17 @@ static int lsgLoadGameInSlot(int slot) {
 	else
 		debug("Loaded script global vars!");
 
+	if(_SlotMap2Game(loadSave))
+		warning("Error loading map stats");
+	else
+		warning("Loaded placeholder map stats");
+
+	if (scriptsSkipGameGlobalVars(loadSave))
+		warning("Error skipping redundant global vars!");
+	else
+		debug("Skipped redundant global vars!");
+
+
 /*	for (int index = 0; index < LOAD_SAVE_HANDLER_COUNT; index += 1) {
 		long pos = fileTell(_flptr);
 		LoadGameHandler *handler = _master_load_list[index];
@@ -2781,10 +2792,13 @@ static int _GameMap2Slot(Common::OutSaveFile *stream) {
 
 // SlotMap2Game
 // 0x47F990
-static int _SlotMap2Game(File *stream) {
-/*	debugPrint("LOADSAVE: in SlotMap2Game\n");  TODO map to game
+static int _SlotMap2Game(Common::InSaveFile *stream) {
+	debugPrint("LOADSAVE: in SlotMap2Game\n");  // TODO map to game
 
-	int fileNameListLength;
+	// TODO saved maps loading is not yet implemented,
+	int fileNameListLength = stream->readSint32BE();  // number of saved maps
+
+/*	int fileNameListLength;
 	if (fileReadInt32(stream, &fileNameListLength) == -1) {
 		debugPrint("LOADSAVE: returning 1\n");
 		return -1;
@@ -2834,24 +2848,24 @@ static int _SlotMap2Game(File *stream) {
 				}
 			}
 		}
-	}
+	}*/
 
 	for (int index = 0; index < fileNameListLength; index += 1) {
 		char fileName[COMPAT_MAX_PATH];
-		if (_mygets(fileName, stream) == -1) {
+		if (_mygets(fileName, stream) == -1) {  // saved map names
 			break;
 		}
 
-		snprintf(_str0, sizeof(_str0), "%s\\%s\\%s%.2d\\%s", _patches, "SAVEGAME", "SLOT", _slot_cursor + 1, fileName);
+/*		snprintf(_str0, sizeof(_str0), "%s\\%s\\%s%.2d\\%s", _patches, "SAVEGAME", "SLOT", _slot_cursor + 1, fileName);
 		snprintf(_str1, sizeof(_str1), "%s\\%s\\%s", _patches, "MAPS", fileName);
 
 		if (_gzdecompress_file(_str0, _str1) == -1) {
 			debugPrint("LOADSAVE: returning 7\n");
 			return -1;
-		}
+		}*/
 	}
 
-	const char *automapFileName = _strmfe(_str1, "AUTOMAP.DB", "SAV");
+/*	const char *automapFileName = _strmfe(_str1, "AUTOMAP.DB", "SAV");
 	snprintf(_str0, sizeof(_str0), "%s\\%s\\%s%.2d\\%s", _patches, "SAVEGAME", "SLOT", _slot_cursor + 1, automapFileName);
 	snprintf(_str1, sizeof(_str1), "%s\\%s\\%s", _patches, "MAPS", "AUTOMAP.DB");
 	if (fileCopyDecompressed(_str0, _str1) == -1) {
@@ -2859,27 +2873,27 @@ static int _SlotMap2Game(File *stream) {
 		return -1;
 	}
 
-	snprintf(_str1, sizeof(_str1), "%s\\%s", "MAPS", "AUTOMAP.DB");
+	snprintf(_str1, sizeof(_str1), "%s\\%s", "MAPS", "AUTOMAP.DB");*/
 
-	int v12;
-	if (fileReadInt32(stream, &v12) == -1) {
+	int v12 = stream->readSint32BE();  // automap size
+/*	if (fileReadInt32(stream, &v12) == -1) {
 		debugPrint("LOADSAVE: returning 9\n");
 		return -1;
-	}
+	}*/
 
-	if (mapLoadSaved(_LSData[_slot_cursor].file_name) == -1) {
+/*	if (mapLoadSaved(_LSData[_slot_cursor].file_name) == -1) {
 		debugPrint("LOADSAVE: returning 13\n");
 		return -1;
-	}
+	}*/
 
-	return 0;*/
+	return 0;
 }
 
 // 0x47FE14
-static int _mygets(char *dest, File *stream) {
+static int _mygets(char *dest, Common::InSaveFile *stream) {
 	int index = 14;
 	while (true) {
-		int c = fileReadChar(stream);
+		int c = /*fileReadChar(stream);*/ stream->readByte();
 		if (c == -1) {
 			return -1;
 		}
