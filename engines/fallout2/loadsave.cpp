@@ -1603,6 +1603,11 @@ static int lsgPerformSaveGame() {
 	else
 		debug("Saved script global vars!");
 
+	if(_GameMap2Slot(newSave))
+		warning("Error saving map stats");
+	else
+		warning("Saved placeholder map stats");
+
 	if (scriptsSaveGameGlobalVars(newSave)) // TODO check, why twice?
 		warning("Error saving script global vars!");
 	else
@@ -1676,7 +1681,7 @@ static int lsgPerformSaveGame() {
 	// TODO movie
 	for (int i = 0; i < 17; i++)
 		newSave->writeByte(0);
-	debug("Saved placeholder movie stats");
+	warning("Saved placeholder movie stats");
 
 	if (skillsUsageSave(newSave))
 		warning("Error saving skills usage");
@@ -2624,6 +2629,13 @@ static int _GameMap2Slot(Common::OutSaveFile *stream) {
 	if (_map_save_in_game(false) == -1) {
 		return -1;
 	}
+
+	// TODO map save is not implemented, saving placeholder values
+	stream->writeSint32BE(1);  // number of visited maps
+	stream->writeString("ARTEMPLE.SAV");  // filelist of visited maps
+	stream->writeByte(0);
+	stream->writeSint32BE(1); // size of automap.db
+	return 0;
 
 /*	for (int index = 1; index < gPartyMemberDescriptionsLength; index += 1) {
 		int pid = gPartyMemberPids[index];
