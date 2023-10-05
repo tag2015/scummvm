@@ -260,7 +260,7 @@ static LoadGameHandler *_master_load_list[LOAD_SAVE_HANDLER_COUNT] = {
 //	automapLoad, DONE
 //	preferencesLoad, DONE
 //	characterEditorLoad, DONE
-	wmWorldMap_load,
+//	wmWorldMap_load, DONE
 	pipboyLoad,
 //	gameMoviesLoad, TODO movie
 	skillsUsageLoad,
@@ -1878,6 +1878,11 @@ static int lsgLoadGameInSlot(int slot) {
 		warning("Error loading character editor flags");
 	else
 		debug("Loaded character editor flags");
+
+	if (wmWorldMap_load(loadSave))
+		warning("Error loading world map stats");
+	else
+		debug("Loaded world map stats");
 
 /*	for (int index = 0; index < LOAD_SAVE_HANDLER_COUNT; index += 1) {
 		long pos = fileTell(_flptr);
