@@ -197,15 +197,18 @@ void critterExit() {
 }
 
 // 0x42D01C
-int critterLoad(File *stream) {
-	if (fileReadInt32(stream, &_sneak_working) == -1) {
+int critterLoad(Common::InSaveFile *stream) {
+	_sneak_working = stream->readSint32BE();
+	if (stream->err())
 		return -1;
-	}
+/*	if (fileReadInt32(stream, &_sneak_working) == -1) {
+		return -1;
+	}*/
 
 	Proto *proto;
 	protoGetProto(gDude->pid, &proto);
 
-	return protoCritterDataRead(stream, &(proto->critter.data));
+	return protoCritterDataReadScumm(stream, &(proto->critter.data));
 }
 
 // 0x42D058
@@ -1145,6 +1148,30 @@ int protoCritterDataRead(File *stream, CritterProtoData *critterData) {
 	if (fileReadInt32(stream, &(critterData->damageType)) == -1) {
 		critterData->damageType = DAMAGE_TYPE_NORMAL;
 	}
+
+	return 0;
+}
+
+int protoCritterDataReadScumm(Common::InSaveFile *stream, CritterProtoData *critterData) {
+	critterData->flags = stream->readSint32BE();
+
+	int i;
+	for (i = 0; i < SAVEABLE_STAT_COUNT; i++)
+		critterData->baseStats[i] = stream->readSint32BE();
+	for (i = 0; i < SAVEABLE_STAT_COUNT; i++)
+		critterData->bonusStats[i] = stream->readSint32BE();
+	for (i = 0; i < SKILL_COUNT; i++)
+		critterData->skills[i] = stream->readSint32BE();
+
+	critterData->bodyType = stream->readSint32BE();
+	critterData->experience = stream->readSint32BE();
+	critterData->killType = stream->readSint32BE();
+	if (stream->err())
+		return -1;
+
+	critterData->damageType = stream->readSint32BE();
+	if (stream->err())
+		critterData->damageType = DAMAGE_TYPE_NORMAL;
 
 	return 0;
 }
