@@ -706,15 +706,21 @@ void interfaceFree() {
 }
 
 // 0x45E860
-int interfaceLoad(File *stream) {
+int interfaceLoad(Common::InSaveFile *stream) {
 	if (gInterfaceBarWindow == -1) {
 		if (interfaceInit() == -1) {
 			return -1;
 		}
 	}
 
-	bool interfaceBarEnabled;
-	if (fileReadBool(stream, &interfaceBarEnabled) == -1)
+	bool interfaceBarEnabled = (bool)stream->readSint32BE();
+	bool interfaceBarHidden = (bool)stream->readSint32BE();
+	int interfaceCurrentHand = stream->readSint32BE();
+	bool interfaceBarEndButtonsIsVisible = (bool)stream->readSint32BE();
+	if (stream->err())
+		return -1;
+
+/*	if (fileReadBool(stream, &interfaceBarEnabled) == -1)
 		return -1;
 
 	bool interfaceBarHidden;
@@ -727,7 +733,7 @@ int interfaceLoad(File *stream) {
 
 	bool interfaceBarEndButtonsIsVisible;
 	if (fileReadBool(stream, &interfaceBarEndButtonsIsVisible) == -1)
-		return -1;
+		return -1;*/
 
 	if (!gInterfaceBarEnabled) {
 		interfaceBarEnable();
