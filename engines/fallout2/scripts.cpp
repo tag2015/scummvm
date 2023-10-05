@@ -815,16 +815,21 @@ int scriptEventWrite(Common::OutSaveFile *stream, void *data) {
 }
 
 // 0x4A3F04
-int scriptEventRead(File *stream, void **dataPtr) {
+int scriptEventRead(Common::InSaveFile *stream, void **dataPtr) {
 	ScriptEvent *scriptEvent = (ScriptEvent *)internal_malloc(sizeof(*scriptEvent));
 	if (scriptEvent == NULL) {
 		return -1;
 	}
 
-	if (fileReadInt32(stream, &(scriptEvent->sid)) == -1)
+	scriptEvent->sid = stream->readSint32BE();
+	scriptEvent->fixedParam = stream->readSint32BE();
+	if (stream->err())
+		goto err;
+
+/*	if (fileReadInt32(stream, &(scriptEvent->sid)) == -1)
 		goto err;
 	if (fileReadInt32(stream, &(scriptEvent->fixedParam)) == -1)
-		goto err;
+		goto err;*/
 
 	*dataPtr = scriptEvent;
 
