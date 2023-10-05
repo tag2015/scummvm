@@ -278,8 +278,12 @@ void automapExit() {
 }
 
 // 0x41B87C
-int automapLoad(File *stream) {
-	return fileReadInt32(stream, &gAutomapFlags);
+int automapLoad(Common::InSaveFile *stream) {
+	gAutomapFlags = stream->readSint32BE();
+	if (stream->err())
+		return -1;
+	return 0;
+	//	return fileReadInt32(stream, &gAutomapFlags);
 }
 
 // 0x41B898

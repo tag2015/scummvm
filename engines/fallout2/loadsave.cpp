@@ -257,8 +257,8 @@ static LoadGameHandler *_master_load_list[LOAD_SAVE_HANDLER_COUNT] = {
 //	statsLoad, DONE
 //	itemsLoad, DONE
 //	traitsLoad, DONE
-	automapLoad,
-	preferencesLoad,
+//	automapLoad, DONE
+//	preferencesLoad, DONE
 	characterEditorLoad,
 	wmWorldMap_load,
 	pipboyLoad,
@@ -1863,6 +1863,16 @@ static int lsgLoadGameInSlot(int slot) {
 		warning("Error loading traits");
 	else
 		debug("Loaded character traits");
+
+	if (automapLoad(loadSave))
+		warning("Error loading automap flags");
+	else
+		debug("Loaded automap flags");
+
+	if (preferencesLoad(loadSave))
+		warning("Error loading preferences");
+	else
+		debug("Loaded preferences");
 
 /*	for (int index = 0; index < LOAD_SAVE_HANDLER_COUNT; index += 1) {
 		long pos = fileTell(_flptr);
