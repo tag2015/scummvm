@@ -115,6 +115,7 @@ char *protoGetName(int pid);
 char *protoGetDescription(int pid);
 void objectDataReset(Object *obj);
 int objectDataRead(Object *obj, File *stream);
+int objectDataReadScumm(Object *obj, Common::InSaveFile *stream);
 int objectDataWrite(Object *obj, Common::OutSaveFile *stream);
 int _proto_update_init(Object *obj);
 int _proto_dude_update_gender();
