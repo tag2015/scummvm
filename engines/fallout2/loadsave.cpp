@@ -165,7 +165,7 @@ static int _GetComment(int a1);
 static int _get_input_str2(int win, int doneKeyCode, int cancelKeyCode, char *description, int maxLength, int x, int y, int textColor, int backgroundColor, int flags);
 static int _DummyFunc(File *stream);
 static int _PrepLoad(Common::InSaveFile *stream);
-static int _EndLoad(File *stream);
+static int _EndLoad(Common::InSaveFile *stream);
 static int _GameMap2Slot(Common::OutSaveFile *stream);
 static int _SlotMap2Game(Common::InSaveFile *stream);
 static int _mygets(char *dest, Common::InSaveFile *stream);
@@ -267,7 +267,7 @@ static LoadGameHandler *_master_load_list[LOAD_SAVE_HANDLER_COUNT] = {
 //	partyMembersLoad, DONE
 //	queueLoad, DONE
 //	interfaceLoad, DONE
-	_EndLoad,
+//	_EndLoad, DONE
 };
 
 // 0x5194C4
@@ -1909,6 +1909,8 @@ static int lsgLoadGameInSlot(int slot) {
 	else
 		debug("Loaded interface status");
 
+	_EndLoad(loadSave);
+
 /*	for (int index = 0; index < LOAD_SAVE_HANDLER_COUNT; index += 1) {
 		long pos = fileTell(_flptr);
 		LoadGameHandler *handler = _master_load_list[index];
@@ -2742,7 +2744,7 @@ static int _PrepLoad(Common::InSaveFile *stream) {
 }
 
 // 0x47F4C8
-static int _EndLoad(File *stream) {
+static int _EndLoad(Common::InSaveFile *stream) {
 //	wmMapMusicStart(); TODO audio
 	dudeSetName(_LSData[_slot_cursor].character_name);
 	interfaceBarRefresh();
