@@ -44,7 +44,7 @@ extern bool gInterfaceSidePanelsExtendFromScreenEdge;
 int interfaceInit();
 void interfaceReset();
 void interfaceFree();
-int interfaceLoad(File *stream);
+int interfaceLoad(Common::InSaveFile *stream);
 int interfaceSave(Common::OutSaveFile *stream);
 void interfaceBarHide();
 void interfaceBarShow();
