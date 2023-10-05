@@ -259,7 +259,7 @@ static LoadGameHandler *_master_load_list[LOAD_SAVE_HANDLER_COUNT] = {
 //	traitsLoad, DONE
 //	automapLoad, DONE
 //	preferencesLoad, DONE
-	characterEditorLoad,
+//	characterEditorLoad, DONE
 	wmWorldMap_load,
 	pipboyLoad,
 //	gameMoviesLoad, TODO movie
@@ -1873,6 +1873,11 @@ static int lsgLoadGameInSlot(int slot) {
 		warning("Error loading preferences");
 	else
 		debug("Loaded preferences");
+
+	if (characterEditorLoad(loadSave))
+		warning("Error loading character editor flags");
+	else
+		debug("Loaded character editor flags");
 
 /*	for (int index = 0; index < LOAD_SAVE_HANDLER_COUNT; index += 1) {
 		long pos = fileTell(_flptr);
