@@ -30,7 +30,7 @@ extern const char *gHurtTooMuchKeys[HURT_COUNT];
 int aiInit();
 void aiReset();
 int aiExit();
-int aiLoad(File *stream);
+int aiLoad(Common::InSaveFile *stream);
 int aiSave(Common::OutSaveFile *stream);
 int aiGetAreaAttackMode(Object *obj);
 int aiGetRunAwayMode(Object *obj);

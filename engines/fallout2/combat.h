@@ -19,7 +19,7 @@ int combatInit();
 void combatReset();
 void combatExit();
 int _find_cid(int a1, int a2, Object **a3, int a4);
-int combatLoad(File *stream);
+int combatLoad(Common::InSaveFile *stream);
 int combatSave(Common::OutSaveFile *stream);
 bool _combat_safety_invalidate_weapon(Object *attacker, Object *weapon, int hitMode, Object *defender, int *safeDistancePtr);
 bool _combatTestIncidentalHit(Object *attacker, Object *defender, Object *attackerFriend, Object *weapon);

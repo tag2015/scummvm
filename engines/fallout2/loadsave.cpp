@@ -252,8 +252,8 @@ static LoadGameHandler *_master_load_list[LOAD_SAVE_HANDLER_COUNT] = {
 //	skillsLoad, DONE
 //	randomLoad, DONE
 //	perksLoad, DONE
-	combatLoad,
-	aiLoad,
+//	combatLoad, DONE
+//	aiLoad, DONE
 	statsLoad,
 	itemsLoad,
 //	traitsLoad, TODO
@@ -1644,7 +1644,7 @@ static int lsgPerformSaveGame() {
 		debug("Saved combat status");
 
 	if (aiSave(newSave))
-		warning("Error combat AI status");
+		warning("Error saving combat AI status");
 	else
 		debug("Saved combat AI status");
 
@@ -1843,6 +1843,16 @@ static int lsgLoadGameInSlot(int slot) {
 		warning("Error loading perks");
 	else
 		debug("Loaded character perks!");
+
+	if (combatLoad(loadSave))
+		warning("Error loading combat status");
+	else
+		debug("Loaded combat status");
+
+	if (aiLoad(loadSave))
+		warning("Error loading combat AI status");
+	else
+		debug("Loaded combat AI status");
 
 /*	for (int index = 0; index < LOAD_SAVE_HANDLER_COUNT; index += 1) {
 		long pos = fileTell(_flptr);

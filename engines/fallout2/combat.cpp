@@ -2085,9 +2085,12 @@ int _find_cid(int a1, int cid, Object **critterList, int critterListLength) {
 }
 
 // 0x420E4C
-int combatLoad(File *stream) {
-	if (fileReadUInt32(stream, &gCombatState) == -1)
+int combatLoad(Common::InSaveFile *stream) {
+	gCombatState = stream->readSint32BE();
+	if(stream->err())
 		return -1;
+//	if (fileReadUInt32(stream, &gCombatState) == -1)
+//		return -1;
 
 	if (!isInCombat()) {
 		Object *obj = objectFindFirst();
@@ -2102,7 +2105,16 @@ int combatLoad(File *stream) {
 		return 0;
 	}
 
-	if (fileReadInt32(stream, &_combat_turn_running) == -1)
+	_combat_turn_running = stream->readSint32BE();
+	_combat_free_move = stream->readSint32BE();
+	_combat_exps = stream->readSint32BE();
+	_list_com = stream->readSint32BE();
+	_list_noncom = stream->readSint32BE();
+	_list_total = stream->readSint32BE();
+	if(stream->err())
+		return -1;
+
+/*	if (fileReadInt32(stream, &_combat_turn_running) == -1)
 		return -1;
 	if (fileReadInt32(stream, &_combat_free_move) == -1)
 		return -1;
@@ -2113,15 +2125,18 @@ int combatLoad(File *stream) {
 	if (fileReadInt32(stream, &_list_noncom) == -1)
 		return -1;
 	if (fileReadInt32(stream, &_list_total) == -1)
-		return -1;
+		return -1;*/
 
 	if (objectListCreate(-1, gElevation, OBJ_TYPE_CRITTER, &_combat_list) != _list_total) {
 		objectListFree(_combat_list);
 		return -1;
 	}
 
-	if (fileReadInt32(stream, &(gDude->cid)) == -1)
+	gDude->cid = stream->readSint32BE();
+	if(stream->err())
 		return -1;
+/*	if (fileReadInt32(stream, &(gDude->cid)) == -1)
+		return -1;*/
 
 	for (int index = 0; index < _list_total; index++) {
 		if (_combat_list[index]->data.critter.combat.whoHitMeCid == -1) {
@@ -2139,8 +2154,12 @@ int combatLoad(File *stream) {
 
 	for (int index = 0; index < _list_total; index++) {
 		int cid;
-		if (fileReadInt32(stream, &cid) == -1)
+		cid = stream->readSint32BE();
+		if (stream->err())
 			return -1;
+
+//		if (fileReadInt32(stream, &cid) == -1)
+//			return -1;
 
 		// NOTE: Uninline.
 		int found = _find_cid(index, cid, _combat_list, _list_total);
@@ -2170,8 +2189,12 @@ int combatLoad(File *stream) {
 		CombatAiInfo *aiInfo = &(_aiInfoList[index]);
 
 		int friendlyId;
-		if (fileReadInt32(stream, &friendlyId) == -1)
+		friendlyId = stream->readSint32BE();
+		if (stream->err())
 			return -1;
+
+//		if (fileReadInt32(stream, &friendlyId) == -1)
+//			return -1;
 
 		if (friendlyId == -1) {
 			aiInfo->friendlyDead = NULL;
@@ -2184,8 +2207,12 @@ int combatLoad(File *stream) {
 		}
 
 		int targetId;
-		if (fileReadInt32(stream, &targetId) == -1)
+		targetId = stream->readSint32BE();
+		if (stream->err())
 			return -1;
+
+//		if (fileReadInt32(stream, &targetId) == -1)
+//			return -1;
 
 		if (targetId == -1) {
 			aiInfo->lastTarget = NULL;
@@ -2198,8 +2225,12 @@ int combatLoad(File *stream) {
 		}
 
 		int itemId;
-		if (fileReadInt32(stream, &itemId) == -1)
+		itemId = stream->readSint32BE();
+		if (stream->err())
 			return -1;
+
+//		if (fileReadInt32(stream, &itemId) == -1)
+//			return -1;
 
 		if (itemId == -1) {
 			aiInfo->lastItem = NULL;
@@ -2211,8 +2242,11 @@ int combatLoad(File *stream) {
 				return -1;
 		}
 
-		if (fileReadInt32(stream, &(aiInfo->lastMove)) == -1)
+		aiInfo->lastMove = stream->readSint32BE();
+		if (stream->err())
 			return -1;
+//		if (fileReadInt32(stream, &(aiInfo->lastMove)) == -1)
+//			return -1;
 	}
 
 	_combat_begin_extra(gDude);
