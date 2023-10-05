@@ -81,11 +81,14 @@ int queueExit() {
 }
 
 // 0x4A2338
-int queueLoad(File *stream) {
+int queueLoad(Common::InSaveFile *stream) {
 	int count;
-	if (fileReadInt32(stream, &count) == -1) {
+	count = stream->readSint32BE();
+	if (stream->err())
 		return -1;
-	}
+/*	if (fileReadInt32(stream, &count) == -1) {
+		return -1;
+	}*/
 
 	QueueListNode *oldListHead = gQueueListHead;
 	gQueueListHead = NULL;
@@ -100,13 +103,17 @@ int queueLoad(File *stream) {
 			break;
 		}
 
-		if (fileReadInt32(stream, &(queueListNode->time)) == -1) {
+		queueListNode->time = stream->readSint32BE();
+		queueListNode->type = stream->readSint32BE();
+		int objectId = stream->readSint32BE();
+
+		if (stream->err()) {
 			internal_free(queueListNode);
 			rc = -1;
 			break;
 		}
 
-		if (fileReadInt32(stream, &(queueListNode->type)) == -1) {
+/*		if (fileReadInt32(stream, &(queueListNode->type)) == -1) {
 			internal_free(queueListNode);
 			rc = -1;
 			break;
@@ -117,7 +124,7 @@ int queueLoad(File *stream) {
 			internal_free(queueListNode);
 			rc = -1;
 			break;
-		}
+		}*/
 
 		Object *obj;
 		if (objectId == -2) {
