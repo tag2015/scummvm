@@ -266,7 +266,7 @@ static LoadGameHandler *_master_load_list[LOAD_SAVE_HANDLER_COUNT] = {
 //	skillsUsageLoad, DONE
 //	partyMembersLoad, DONE
 //	queueLoad, DONE
-	interfaceLoad,
+//	interfaceLoad, DONE
 	_EndLoad,
 };
 
@@ -1903,6 +1903,11 @@ static int lsgLoadGameInSlot(int slot) {
 		warning("Error loading events queue");
 	else
 		debug("Loaded events queue");
+
+	if (interfaceLoad(loadSave))
+		warning("Error loading interface status");
+	else
+		debug("Loaded interface status");
 
 /*	for (int index = 0; index < LOAD_SAVE_HANDLER_COUNT; index += 1) {
 		long pos = fileTell(_flptr);
