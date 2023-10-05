@@ -717,11 +717,18 @@ int killsGetByType(int killType) {
 }
 
 // 0x42D8C0
-int killsLoad(File *stream) {
-	if (fileReadInt32List(stream, gKillsByType, KILL_TYPE_COUNT) == -1) {
-		fileClose(stream);
+int killsLoad(Common::InSaveFile *stream) {
+
+	for (int i = 0; i < KILL_TYPE_COUNT; i++)
+		gKillsByType[i] = stream->readSint32BE();
+	if (stream->err()) {
+		delete stream;
 		return -1;
 	}
+	//	if (fileReadInt32List(stream, gKillsByType, KILL_TYPE_COUNT) == -1) {
+	//		fileClose(stream);
+	//		return -1;
+	//	}
 
 	return 0;
 }
