@@ -12,7 +12,7 @@ namespace Fallout2 {
 int perksInit();
 void perksReset();
 void perksExit();
-int perksLoad(File *stream);
+int perksLoad(Common::InSaveFile *stream);
 int perksSave(Common::OutSaveFile *stream);
 int perkAdd(Object *critter, int perk);
 int perkAddForce(Object *critter, int perk);

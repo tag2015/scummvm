@@ -248,10 +248,10 @@ static LoadGameHandler *_master_load_list[LOAD_SAVE_HANDLER_COUNT] = {
 //	scriptsSkipGameGlobalVars, DONE
 	_obj_load_dude,
 	critterLoad,
-	killsLoad,
-//	skillsLoad, TODO
-	randomLoad,
-	perksLoad,
+//	killsLoad, DONE
+//	skillsLoad, DONE
+//	randomLoad, DONE
+//	perksLoad, DONE
 	combatLoad,
 	aiLoad,
 	statsLoad,
@@ -1802,17 +1802,17 @@ static int lsgLoadGameInSlot(int slot) {
 	debugPrint("LOADSAVE: Load file header size read: %d bytes.\n", loadSave->pos() - pos);
 
 	if (_PrepLoad(loadSave))
-		warning("Error prepping for loading!");
+		warning("Error prepping for loading");
 	else
 		debug("Prepped for loading!");
 
 	if (_LoadObjDudeCid(loadSave))
-		warning("Error loading DudeCid!");
+		warning("Error loading DudeCid");
 	else
 		debug("Loaded DudeCid!");
 
 	if (scriptsLoadGameGlobalVars(loadSave))
-		warning("Error loadgin script global vars!");
+		warning("Error loading script global vars");
 	else
 		debug("Loaded script global vars!");
 
@@ -1822,10 +1822,27 @@ static int lsgLoadGameInSlot(int slot) {
 		warning("Loaded placeholder map stats");
 
 	if (scriptsSkipGameGlobalVars(loadSave))
-		warning("Error skipping redundant global vars!");
+		warning("Error skipping redundant global vars");
 	else
 		debug("Skipped redundant global vars!");
 
+	// TODO object
+	// TODO critter
+
+	if (killsLoad(loadSave))
+		warning("Error loading kills list");
+	else
+		debug("Loaded kills list!");
+
+	if (skillsLoadScumm(loadSave))
+		warning("Error loading character skills list");
+	else
+		debug("Loaded character skills list!");
+
+	if (perksLoad(loadSave))
+		warning("Error loading perks");
+	else
+		debug("Loaded character perks!");
 
 /*	for (int index = 0; index < LOAD_SAVE_HANDLER_COUNT; index += 1) {
 		long pos = fileTell(_flptr);

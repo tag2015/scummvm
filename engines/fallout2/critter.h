@@ -40,7 +40,7 @@ int radiationEventWrite(Common::OutSaveFile *stream, void *data);
 int critterGetDamageType(Object *critter);
 int killsIncByType(int killType);
 int killsGetByType(int killType);
-int killsLoad(File *stream);
+int killsLoad(Common::InSaveFile *stream);
 int killsSave(Common::OutSaveFile *stream);
 int critterGetKillType(Object *critter);
 char *killTypeGetName(int killType);
