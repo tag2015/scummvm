@@ -154,11 +154,14 @@ int statsExit() {
 }
 
 // 0x4AEEF4
-int statsLoad(File *stream) {
+int statsLoad(Common::InSaveFile *stream) {
 	for (int index = 0; index < PC_STAT_COUNT; index++) {
-		if (fileReadInt32(stream, &(gPcStatValues[index])) == -1) {
+		gPcStatValues[index] = stream->readSint32BE();
+		if (stream->err())
 			return -1;
-		}
+		//		if (fileReadInt32(stream, &(gPcStatValues[index])) == -1) {
+		//			return -1;
+		//		}
 	}
 
 	return 0;

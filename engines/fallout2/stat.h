@@ -15,7 +15,7 @@ namespace Fallout2 {
 int statsInit();
 int statsReset();
 int statsExit();
-int statsLoad(File *stream);
+int statsLoad(Common::InSaveFile *stream);
 int statsSave(Common::OutSaveFile *stream);
 int critterGetStat(Object *critter, int stat);
 int critterGetBaseStatWithTraitModifier(Object *critter, int stat);
