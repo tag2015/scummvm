@@ -104,7 +104,7 @@ typedef struct AiRetargetData {
 static void _parse_hurt_str(char *str, int *out_value);
 static int _cai_match_str_to_list(const char *str, const char **list, int count, int *out_value);
 static void aiPacketInit(AiPacket *ai);
-static int aiPacketRead(File *stream, AiPacket *ai);
+static int aiPacketRead(Common::InSaveFile *stream, AiPacket *ai);
 static int aiPacketWrite(Common::OutSaveFile *stream, AiPacket *ai);
 static AiPacket *aiGetPacket(Object *obj);
 static AiPacket *aiGetPacketByNum(int aiPacketNum);
@@ -599,7 +599,7 @@ int aiExit() {
 }
 
 // 0x427AD8
-int aiLoad(File *stream) {
+int aiLoad(Common::InSaveFile *stream) {
 	for (int index = 0; index < gPartyMemberDescriptionsLength; index++) {
 		int pid = gPartyMemberPids[index];
 		if (pid != -1 && PID_TYPE(pid) == OBJ_TYPE_CRITTER) {
@@ -639,8 +639,52 @@ int aiSave(Common::OutSaveFile *stream) {
 }
 
 // 0x427BC8
-static int aiPacketRead(File *stream, AiPacket *ai) {
-	if (fileReadInt32(stream, &(ai->packet_num)) == -1)
+static int aiPacketRead(Common::InSaveFile *stream, AiPacket *ai) {
+	ai->packet_num = stream->readSint32BE();
+	ai->max_dist = stream->readSint32BE();
+	ai->min_to_hit = stream->readSint32BE();
+	ai->min_hp = stream->readSint32BE();
+	ai->aggression = stream->readSint32BE();
+	ai->hurt_too_much = stream->readSint32BE();
+	ai->secondary_freq = stream->readSint32BE();
+	ai->called_freq = stream->readSint32BE();
+	ai->font = stream->readSint32BE();
+	ai->color = stream->readSint32BE();
+	ai->outline_color = stream->readSint32BE();
+	ai->chance = stream->readSint32BE();
+	ai->run.start = stream->readSint32BE();
+	ai->run.end = stream->readSint32BE();
+	ai->move.start = stream->readSint32BE();
+	ai->move.end = stream->readSint32BE();
+	ai->attack.start = stream->readSint32BE();
+	ai->attack.end = stream->readSint32BE();
+	ai->miss.start = stream->readSint32BE();
+	ai->miss.end = stream->readSint32BE();
+	if(stream->err())
+		return -1;
+
+	for (int index = 0; index < HIT_LOCATION_SPECIFIC_COUNT; index++) {
+		AiMessageRange *range = &(ai->hit[index]);
+		range->start = stream->readSint32BE();
+		range->end = stream->readSint32BE();
+		if(stream->err())
+			return -1;
+/*		if (fileReadInt32(stream, &(range->start)) == -1)
+			return -1;
+		if (fileReadInt32(stream, &(range->end)) == -1)
+			return -1;*/
+	}
+
+	ai->area_attack_mode = stream->readSint32BE();
+	ai->best_weapon = stream->readSint32BE();
+	ai->distance = stream->readSint32BE();
+	ai->attack_who = stream->readSint32BE();
+	ai->chem_use = stream->readSint32BE();
+	ai->run_away_mode = stream->readSint32BE();
+	if(stream->err())
+		return -1;
+
+/*	if (fileReadInt32(stream, &(ai->packet_num)) == -1)
 		return -1;
 	if (fileReadInt32(stream, &(ai->max_dist)) == -1)
 		return -1;
@@ -679,17 +723,17 @@ static int aiPacketRead(File *stream, AiPacket *ai) {
 	if (fileReadInt32(stream, &(ai->miss.start)) == -1)
 		return -1;
 	if (fileReadInt32(stream, &(ai->miss.end)) == -1)
-		return -1;
+		return -1;*/
 
-	for (int index = 0; index < HIT_LOCATION_SPECIFIC_COUNT; index++) {
+/*	for (int index = 0; index < HIT_LOCATION_SPECIFIC_COUNT; index++) {
 		AiMessageRange *range = &(ai->hit[index]);
 		if (fileReadInt32(stream, &(range->start)) == -1)
 			return -1;
 		if (fileReadInt32(stream, &(range->end)) == -1)
 			return -1;
-	}
+	} */
 
-	if (fileReadInt32(stream, &(ai->area_attack_mode)) == -1)
+/*	if (fileReadInt32(stream, &(ai->area_attack_mode)) == -1)
 		return -1;
 	if (fileReadInt32(stream, &(ai->best_weapon)) == -1)
 		return -1;
@@ -700,11 +744,14 @@ static int aiPacketRead(File *stream, AiPacket *ai) {
 	if (fileReadInt32(stream, &(ai->chem_use)) == -1)
 		return -1;
 	if (fileReadInt32(stream, &(ai->run_away_mode)) == -1)
-		return -1;
+		return -1;*/
 
 	for (int index = 0; index < AI_PACKET_CHEM_PRIMARY_DESIRE_COUNT; index++) {
-		if (fileReadInt32(stream, &(ai->chem_primary_desire[index])) == -1)
+		ai->chem_primary_desire[index] = stream->readSint32BE();
+		if(stream->err())
 			return -1;
+//		if (fileReadInt32(stream, &(ai->chem_primary_desire[index])) == -1)
+//			return -1;
 	}
 
 	return 0;
