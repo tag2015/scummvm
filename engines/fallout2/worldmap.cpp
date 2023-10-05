@@ -1198,8 +1198,22 @@ int wmWorldMap_save(Common::OutSaveFile *stream) {
 }
 
 // 0x4BD28C
-int wmWorldMap_load(File *stream) {
-	if (fileReadBool(stream, &(wmGenData.didMeetFrankHorrigan)) == -1)
+int wmWorldMap_load(Common::InSaveFile *stream) {
+	wmGenData.didMeetFrankHorrigan = (bool) stream->readSint32BE();
+	wmGenData.currentAreaId = stream->readSint32BE();
+	wmGenData.worldPosX = stream->readSint32BE();
+	wmGenData.worldPosY = stream->readSint32BE();
+	wmGenData.encounterIconIsVisible = (bool) stream->readSint32BE();
+	wmGenData.encounterMapId = stream->readSint32BE();
+	wmGenData.encounterTableId = stream->readSint32BE();
+	wmGenData.encounterEntryId = stream->readSint32BE();
+	wmGenData.isInCar = (bool) stream->readSint32BE();
+	wmGenData.currentCarAreaId = stream->readSint32BE();
+	wmGenData.carFuel = stream->readSint32BE();
+	if (stream->err())
+		return -1;
+
+/*	if (fileReadBool(stream, &(wmGenData.didMeetFrankHorrigan)) == -1)
 		return -1;
 	if (fileReadInt32(stream, &(wmGenData.currentAreaId)) == -1)
 		return -1;
@@ -1220,45 +1234,71 @@ int wmWorldMap_load(File *stream) {
 	if (fileReadInt32(stream, &(wmGenData.currentCarAreaId)) == -1)
 		return -1;
 	if (fileReadInt32(stream, &(wmGenData.carFuel)) == -1)
-		return -1;
+		return -1; */
 
 	int numCities;
-	if (fileReadInt32(stream, &numCities) == -1)
+	numCities = stream->readSint32BE();
+	if (stream->err())
 		return -1;
+/*	if (fileReadInt32(stream, &numCities) == -1)
+		return -1;*/
 
 	for (int areaIdx = 0; areaIdx < numCities; areaIdx++) {
 		CityInfo *city = &(wmAreaInfoList[areaIdx]);
 
-		if (fileReadInt32(stream, &(city->x)) == -1)
+		city->x = stream->readSint32BE();
+		city->y = stream->readSint32BE();
+		city->state = stream->readSint32BE();
+		city->visitedState = stream->readSint32BE();
+		if (stream->err())
+			return -1;
+
+/*		if (fileReadInt32(stream, &(city->x)) == -1)
 			return -1;
 		if (fileReadInt32(stream, &(city->y)) == -1)
 			return -1;
 		if (fileReadInt32(stream, &(city->state)) == -1)
 			return -1;
 		if (fileReadInt32(stream, &(city->visitedState)) == -1)
-			return -1;
+			return -1; */
 
 		int entranceCount;
-		if (fileReadInt32(stream, &(entranceCount)) == -1) {
+		entranceCount = stream->readSint32BE();
+		if (stream->err())
 			return -1;
-		}
+
+/*		if (fileReadInt32(stream, &(entranceCount)) == -1) {
+			return -1;
+		}*/
 
 		for (int entranceIdx = 0; entranceIdx < entranceCount; entranceIdx++) {
 			EntranceInfo *entrance = &(city->entrances[entranceIdx]);
 
-			if (fileReadInt32(stream, &(entrance->state)) == -1) {
+			entrance->state = stream->readSint32BE();
+			if (stream->err())
 				return -1;
-			}
+
+/*			if (fileReadInt32(stream, &(entrance->state)) == -1) {
+				return -1;
+			}*/
 		}
 	}
 
 	int numTiles;
-	if (fileReadInt32(stream, &numTiles) == -1)
+	numTiles = stream->readSint32BE();
+	if (stream->err())
 		return -1;
 
+/*	if (fileReadInt32(stream, &numTiles) == -1)
+		return -1;*/
+
 	int numHorizontalTiles;
-	if (fileReadInt32(stream, &numHorizontalTiles) == -1)
+	numHorizontalTiles = stream->readSint32BE();
+	if (stream->err())
 		return -1;
+
+/*	if (fileReadInt32(stream, &numHorizontalTiles) == -1)
+		return -1;*/
 
 	for (int tileIndex = 0; tileIndex < numTiles; tileIndex++) {
 		TileInfo *tile = &(wmTileInfoList[tileIndex]);
@@ -1267,29 +1307,40 @@ int wmWorldMap_load(File *stream) {
 			for (int row = 0; row < SUBTILE_GRID_WIDTH; row++) {
 				SubtileInfo *subtile = &(tile->subtiles[column][row]);
 
-				if (fileReadInt32(stream, &(subtile->state)) == -1)
+				subtile->state = stream->readSint32BE();
+				if (stream->err())
 					return -1;
+/*				if (fileReadInt32(stream, &(subtile->state)) == -1)
+					return -1;*/
 			}
 		}
 	}
 
 	int numCounters;
-	if (fileReadInt32(stream, &numCounters) == -1)
+	numCounters = stream->readSint32BE();
+	if (stream->err())
 		return -1;
+/*	if (fileReadInt32(stream, &numCounters) == -1)
+		return -1;*/
 
 	for (int counterIdx = 0; counterIdx < numCounters; counterIdx++) {
 		int encounterTableIdx;
 		int encounterTableEntryIdx;
 
-		if (fileReadInt32(stream, &encounterTableIdx) == -1)
-			return -1;
+/*		if (fileReadInt32(stream, &encounterTableIdx) == -1)
+			return -1;*/
+		encounterTableIdx = stream->readSint32BE();
 		EncounterTable *encounterTable = &(wmEncounterTableList[encounterTableIdx]);
 
-		if (fileReadInt32(stream, &encounterTableEntryIdx) == -1)
-			return -1;
+/*		if (fileReadInt32(stream, &encounterTableEntryIdx) == -1)
+			return -1;*/
+		encounterTableEntryIdx = stream->readSint32BE();
 		EncounterTableEntry *encounterTableEntry = &(encounterTable->entries[encounterTableEntryIdx]);
 
-		if (fileReadInt32(stream, &(encounterTableEntry->counter)) == -1)
+/*		if (fileReadInt32(stream, &(encounterTableEntry->counter)) == -1)
+			return -1;*/
+		encounterTableEntry->counter = stream->readSint32BE();
+		if (stream->err())
 			return -1;
 	}
 
@@ -1325,7 +1376,13 @@ static int wmWorldMapSaveTempData() {
 
 // 0x4BD6B4
 static int wmWorldMapLoadTempData() {
-	File *stream = fileOpen("worldmap.dat", "rb");
+//	File *stream = fileOpen("worldmap.dat", "rb");
+	Common::SaveFileManager *saveMan = g_system->getSavefileManager();
+	Common::String wMapFileName(g_engine->getTargetName());
+	wMapFileName += "_worldmap.dat";
+
+	Common::InSaveFile *stream = saveMan->openForLoading(wMapFileName);
+
 	if (stream == NULL) {
 		return -1;
 	}
@@ -1335,7 +1392,8 @@ static int wmWorldMapLoadTempData() {
 		rc = -1;
 	}
 
-	fileClose(stream);
+//	fileClose(stream);
+	delete stream;
 
 	return rc;
 }
