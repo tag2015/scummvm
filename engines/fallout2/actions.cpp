@@ -1178,7 +1178,7 @@ int actionPickUp(Object *critter, Object *item) {
 		char sfx[16];
 		if (artCopyFileName(FID_TYPE(item->fid), item->fid & 0xFFF, sfx) == 0) {
 			// NOTE: looks like they copy sfx one more time, what for?
-			animationRegisterPlaySoundEffect(item, sfx, actionFrame);
+//			animationRegisterPlaySoundEffect(item, sfx, actionFrame); TODO audio
 		}
 
 		animationRegisterCallback(critter, item, (AnimationCallback *)_obj_pickup, actionFrame);
