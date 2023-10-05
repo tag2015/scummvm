@@ -18,7 +18,7 @@ typedef enum DudeState {
 int critterInit();
 void critterReset();
 void critterExit();
-int critterLoad(File *stream);
+int critterLoad(Common::InSaveFile *stream);
 int critterSave(Common::OutSaveFile *stream);
 char *critterGetName(Object *obj);
 void critterProtoDataCopy(CritterProtoData *dest, CritterProtoData *src);
@@ -56,6 +56,7 @@ int critterGetBodyType(Object *critter);
 int gcdLoad(const char *path);
 int gcdLoadScumm(const char *path);
 int protoCritterDataRead(File *stream, CritterProtoData *critterData);
+int protoCritterDataReadScumm(Common::InSaveFile *stream, CritterProtoData *critterData);
 int gcdSave(const char *path);
 int protoCritterDataWrite(Common::WriteStream *stream, CritterProtoData *critterData);
 void dudeDisableState(int state);

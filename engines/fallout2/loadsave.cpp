@@ -247,7 +247,7 @@ static LoadGameHandler *_master_load_list[LOAD_SAVE_HANDLER_COUNT] = {
 //	_SlotMap2Game, TODO map
 //	scriptsSkipGameGlobalVars, DONE
 //	_obj_load_dude, DONE
-	critterLoad,
+//	critterLoad, DONE
 //	killsLoad, DONE
 //	skillsLoad, DONE
 //	randomLoad, DONE
@@ -1831,7 +1831,10 @@ static int lsgLoadGameInSlot(int slot) {
 	else
 		debug("Loaded dude objects (obj_load_dude)");
 
-	// TODO critter
+	if (critterLoad(loadSave))
+		warning("Error loading critter status!");
+	else
+		debug("Loaded critter status");
 
 	if (killsLoad(loadSave))
 		warning("Error loading kills list");
@@ -1937,8 +1940,8 @@ static int lsgLoadGameInSlot(int slot) {
 //	fileClose(_flptr);
 	delete loadSave;
 
-	snprintf(_str, sizeof(_str), "%s\\", "MAPS");
-	_MapDirErase(_str, "BAK");
+//	snprintf(_str, sizeof(_str), "%s\\", "MAPS");
+//	_MapDirErase(_str, "BAK");
 	_proto_dude_update_gender();
 
 	// Game Loaded.
@@ -2301,7 +2304,7 @@ static int _GetSlotList() {
 		debug("Looking for file %s", index_tmp);
 
 		int fileSize;
-		if (/*dbGetFileSize(_str, &fileSize) != 0*/ !filename || !filename->contains(index_tmp)) {
+		if (/*dbGetFileSize(_str, &fileSize) != 0*/ filename == filenames.end()) {
 			debug("slot is empty!");
 			_LSstatus[index] = SLOT_STATE_EMPTY;
 		} else {
