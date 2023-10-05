@@ -2773,16 +2773,24 @@ int drugEffectEventProcess(Object *obj, void *data) {
 }
 
 // 0x47A1D0
-int drugEffectEventRead(File *stream, void **dataPtr) {
+int drugEffectEventRead(Common::InSaveFile *stream, void **dataPtr) {
 	DrugEffectEvent *drugEffectEvent = (DrugEffectEvent *)internal_malloc(sizeof(*drugEffectEvent));
 	if (drugEffectEvent == NULL) {
 		return -1;
 	}
 
-	if (fileReadInt32List(stream, drugEffectEvent->stats, 3) == -1)
+	int i;
+	for (i = 0; i < 3; i++)
+		drugEffectEvent->stats[i] = stream->readSint32BE();
+	for (i = 0; i < 3; i++)
+		drugEffectEvent->modifiers[i] = stream->readSint32BE();
+
+	if (stream->err())
+		goto err;
+/*	if (fileReadInt32List(stream, drugEffectEvent->stats, 3) == -1)
 		goto err;
 	if (fileReadInt32List(stream, drugEffectEvent->modifiers, 3) == -1)
-		goto err;
+		goto err;*/
 
 	*dataPtr = drugEffectEvent;
 	return 0;
@@ -2896,18 +2904,24 @@ int withdrawalEventProcess(Object *obj, void *data) {
 
 // read withdrawal event
 // 0x47A404
-int withdrawalEventRead(File *stream, void **dataPtr) {
+int withdrawalEventRead(Common::InSaveFile *stream, void **dataPtr) {
 	WithdrawalEvent *withdrawalEvent = (WithdrawalEvent *)internal_malloc(sizeof(*withdrawalEvent));
 	if (withdrawalEvent == NULL) {
 		return -1;
 	}
 
-	if (fileReadInt32(stream, &(withdrawalEvent->field_0)) == -1)
+	withdrawalEvent->field_0 = stream->readSint32BE();
+	withdrawalEvent->pid = stream->readSint32BE();
+	withdrawalEvent->perk = stream->readSint32BE();
+	if (stream->err())
+		goto err;
+
+/*	if (fileReadInt32(stream, &(withdrawalEvent->field_0)) == -1)
 		goto err;
 	if (fileReadInt32(stream, &(withdrawalEvent->pid)) == -1)
 		goto err;
 	if (fileReadInt32(stream, &(withdrawalEvent->perk)) == -1)
-		goto err;
+		goto err;*/
 
 	*dataPtr = withdrawalEvent;
 	return 0;

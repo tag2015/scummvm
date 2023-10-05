@@ -265,7 +265,7 @@ static LoadGameHandler *_master_load_list[LOAD_SAVE_HANDLER_COUNT] = {
 //	gameMoviesLoad, TODO movie
 //	skillsUsageLoad, DONE
 //	partyMembersLoad, DONE
-	queueLoad,
+//	queueLoad, DONE
 	interfaceLoad,
 	_EndLoad,
 };
@@ -1898,6 +1898,11 @@ static int lsgLoadGameInSlot(int slot) {
 		warning("Error loading party members");
 	else
 		debug("Loaded party members");
+
+	if (queueLoad(loadSave))
+		warning("Error loading events queue");
+	else
+		debug("Loaded events queue");
 
 /*	for (int index = 0; index < LOAD_SAVE_HANDLER_COUNT; index += 1) {
 		long pos = fileTell(_flptr);

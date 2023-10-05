@@ -54,12 +54,12 @@ typedef struct AmbientSoundEffectEvent {
 
 typedef int QueueEventHandler(Object *owner, void *data);
 typedef void QueueEventDataFreeProc(void *data);
-typedef int QueueEventDataReadProc(File *stream, void **dataPtr);
+typedef int QueueEventDataReadProc(Common::InSaveFile *stream, void **dataPtr);
 typedef int QueueEventDataWriteProc(Common::OutSaveFile *stream, void *data);
 
 void queueInit();
 int queueExit();
-int queueLoad(File *stream);
+int queueLoad(Common::InSaveFile *stream);
 int queueSave(Common::OutSaveFile *stream);
 int queueAddEvent(int delay, Object *owner, void *data, int eventType);
 int queueRemoveEvents(Object *owner);

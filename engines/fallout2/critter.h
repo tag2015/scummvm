@@ -35,7 +35,7 @@ int _critter_check_rads(Object *critter);
 int _clear_rad_damage(Object *obj, void *data);
 void _process_rads(Object *obj, int radiationLevel, bool direction);
 int radiationEventProcess(Object *obj, void *data);
-int radiationEventRead(File *stream, void **dataPtr);
+int radiationEventRead(Common::InSaveFile *stream, void **dataPtr);
 int radiationEventWrite(Common::OutSaveFile *stream, void *data);
 int critterGetDamageType(Object *critter);
 int killsIncByType(int killType);
