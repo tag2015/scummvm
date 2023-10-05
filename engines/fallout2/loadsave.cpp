@@ -246,7 +246,7 @@ static LoadGameHandler *_master_load_list[LOAD_SAVE_HANDLER_COUNT] = {
 //	scriptsLoadGameGlobalVars, DONE
 //	_SlotMap2Game, TODO map
 //	scriptsSkipGameGlobalVars, DONE
-	_obj_load_dude,
+//	_obj_load_dude, DONE
 	critterLoad,
 //	killsLoad, DONE
 //	skillsLoad, DONE
@@ -1826,7 +1826,11 @@ static int lsgLoadGameInSlot(int slot) {
 	else
 		debug("Skipped redundant global vars!");
 
-	// TODO object
+	if (_obj_load_dude(loadSave))
+		warning("Error loading dude objects!");
+	else
+		debug("Loaded dude objects (obj_load_dude)");
+
 	// TODO critter
 
 	if (killsLoad(loadSave))

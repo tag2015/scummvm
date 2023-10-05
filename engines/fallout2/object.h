@@ -27,6 +27,7 @@ int objectsInit(unsigned char *buf, int width, int height, int pitch);
 void objectsReset();
 void objectsExit();
 int objectRead(Object *obj, File *stream);
+int objectReadScumm(Object *obj, Common::InSaveFile *stream);
 int objectLoadAll(File *stream);
 int objectSaveAll(Common::OutSaveFile *stream);
 void _obj_render_pre_roof(Rect *rect, int elevation);
@@ -98,7 +99,7 @@ char *objectGetName(Object *obj);
 char *objectGetDescription(Object *obj);
 void _obj_preload_art_cache(int flags);
 int _obj_save_dude(Common::OutSaveFile *stream);
-int _obj_load_dude(File *stream);
+int _obj_load_dude(Common::InSaveFile *stream);
 void _obj_fix_violence_settings(int *fid);
 
 Object *objectTypedFindById(int id, int type);
