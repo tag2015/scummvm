@@ -254,9 +254,9 @@ static LoadGameHandler *_master_load_list[LOAD_SAVE_HANDLER_COUNT] = {
 //	perksLoad, DONE
 //	combatLoad, DONE
 //	aiLoad, DONE
-	statsLoad,
-	itemsLoad,
-//	traitsLoad, TODO
+//	statsLoad, DONE
+//	itemsLoad, DONE
+//	traitsLoad, DONE
 	automapLoad,
 	preferencesLoad,
 	characterEditorLoad,
@@ -1853,6 +1853,16 @@ static int lsgLoadGameInSlot(int slot) {
 		warning("Error loading combat AI status");
 	else
 		debug("Loaded combat AI status");
+
+	if (statsLoad(loadSave))
+		warning("Error loading stats");
+	else
+		debug("Loaded character stats");
+
+	if (traitsLoadScumm(loadSave))
+		warning("Error loading traits");
+	else
+		debug("Loaded character traits");
 
 /*	for (int index = 0; index < LOAD_SAVE_HANDLER_COUNT; index += 1) {
 		long pos = fileTell(_flptr);
