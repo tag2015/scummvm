@@ -640,16 +640,21 @@ int radiationEventProcess(Object *obj, void *data) {
 }
 
 // 0x42D7A0
-int radiationEventRead(File *stream, void **dataPtr) {
+int radiationEventRead(Common::InSaveFile *stream, void **dataPtr) {
 	RadiationEvent *radiationEvent = (RadiationEvent *)internal_malloc(sizeof(*radiationEvent));
 	if (radiationEvent == NULL) {
 		return -1;
 	}
 
-	if (fileReadInt32(stream, &(radiationEvent->radiationLevel)) == -1)
+	radiationEvent->radiationLevel = stream->readSint32BE();
+	radiationEvent->isHealing = stream->readSint32BE();
+	if (stream->err())
+		goto err;
+
+/*	if (fileReadInt32(stream, &(radiationEvent->radiationLevel)) == -1)
 		goto err;
 	if (fileReadInt32(stream, &(radiationEvent->isHealing)) == -1)
-		goto err;
+		goto err;*/
 
 	*dataPtr = radiationEvent;
 	return 0;
