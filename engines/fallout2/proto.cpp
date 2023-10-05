@@ -29,6 +29,7 @@ namespace Fallout2 {
 
 static int _proto_critter_init(Proto *a1, int a2);
 static int objectCritterCombatDataRead(CritterCombatData *data, File *stream);
+static int objectCritterCombatDataReadScumm(CritterCombatData *data, Common::InSaveFile *stream);
 static int objectCritterCombatDataWrite(CritterCombatData *data, Common::OutSaveFile *stream);
 static int _proto_update_gen(Object *obj);
 static int _proto_header_load();
@@ -424,6 +425,35 @@ static int objectCritterCombatDataRead(CritterCombatData *data, File *stream) {
 	return 0;
 }
 
+static int objectCritterCombatDataReadScumm(CritterCombatData *data, Common::InSaveFile *stream) {
+	data->damageLastTurn = stream->readSint32BE();
+	data->maneuver = stream->readSint32BE();
+	data->ap = stream->readSint32BE();
+	data->results = stream->readSint32BE();
+	data->aiPacket = stream->readSint32BE();
+	data->team = stream->readSint32BE();
+	data->whoHitMeCid = stream->readSint32BE();
+	if (stream->err())
+		return -1;
+
+	/*	if (fileReadInt32(stream, &(data->damageLastTurn)) == -1)
+			return -1;
+		if (fileReadInt32(stream, &(data->maneuver)) == -1)
+			return -1;
+		if (fileReadInt32(stream, &(data->ap)) == -1)
+			return -1;
+		if (fileReadInt32(stream, &(data->results)) == -1)
+			return -1;
+		if (fileReadInt32(stream, &(data->aiPacket)) == -1)
+			return -1;
+		if (fileReadInt32(stream, &(data->team)) == -1)
+			return -1;
+		if (fileReadInt32(stream, &(data->whoHitMeCid)) == -1)
+			return -1;*/
+
+	return 0;
+}
+
 // 0x49EF40
 static int objectCritterCombatDataWrite(CritterCombatData *data, Common::OutSaveFile *stream) {
 	stream->writeSint32BE(data->damageLastTurn);
@@ -577,6 +607,169 @@ int objectDataRead(Object *obj, File *stream) {
 		}
 	}
 
+	debug(6, "Object proto loaded properly");
+	return 0;
+}
+
+int objectDataReadScumm(Object *obj, Common::InSaveFile *stream) {
+	Proto *proto;
+	int temp;
+
+	debug(6, "Attempt to load object proto PID: %d (aka %d) from savefile", PID_TYPE(obj->pid), obj->pid);
+	Inventory *inventory = &(obj->data.inventory);
+	inventory->length = stream->readSint32BE();
+	inventory->capacity = stream->readSint32BE();
+	temp = stream->readSint32BE();
+	if (stream->err())
+		return -1;
+/*	if (fileReadInt32(stream, &(inventory->length)) == -1)
+		return -1;
+	if (fileReadInt32(stream, &(inventory->capacity)) == -1)
+		return -1;
+	// CE: Original code reads inventory items pointer which is meaningless.
+	if (fileReadInt32(stream, &temp) == -1)
+		return -1;*/
+
+	if (PID_TYPE(obj->pid) == OBJ_TYPE_CRITTER) {
+		obj->data.critter.field_0 = stream->readSint32BE();
+/*		if (fileReadInt32(stream, &(obj->data.critter.field_0)) == -1)
+			return -1;*/
+		if (objectCritterCombatDataReadScumm(&(obj->data.critter.combat), stream) == -1)
+			return -1;
+		obj->data.critter.hp = stream->readSint32BE();
+		obj->data.critter.radiation = stream->readSint32BE();
+		obj->data.critter.poison = stream->readSint32BE();
+		if (stream->err())
+			return -1;
+/*		if (fileReadInt32(stream, &(obj->data.critter.hp)) == -1)
+			return -1;
+		if (fileReadInt32(stream, &(obj->data.critter.radiation)) == -1)
+			return -1;
+		if (fileReadInt32(stream, &(obj->data.critter.poison)) == -1)
+			return -1;*/
+	} else {
+		obj->data.flags = stream->readSint32BE();
+/*		if (fileReadInt32(stream, &(obj->data.flags)) == -1)
+			return -1;*/
+
+		if (obj->data.flags == 0xCCCCCCCC) {
+			debugPrint("\nNote: Reading pud: updated_flags was un-Set!");
+			obj->data.flags = 0;
+		}
+
+		switch (PID_TYPE(obj->pid)) {
+		case OBJ_TYPE_ITEM:
+			if (protoGetProto(obj->pid, &proto) == -1)
+				return -1;
+
+			switch (proto->item.type) {
+			case ITEM_TYPE_WEAPON:
+				obj->data.item.weapon.ammoQuantity = stream->readSint32BE();
+				obj->data.item.weapon.ammoTypePid = stream->readSint32BE();
+
+/*				if (fileReadInt32(stream, &(obj->data.item.weapon.ammoQuantity)) == -1)
+					return -1;
+				if (fileReadInt32(stream, &(obj->data.item.weapon.ammoTypePid)) == -1)
+					return -1;*/
+				break;
+			case ITEM_TYPE_AMMO:
+				obj->data.item.ammo.quantity = stream->readSint32BE();
+/*				if (fileReadInt32(stream, &(obj->data.item.ammo.quantity)) == -1)
+					return -1;*/
+				break;
+			case ITEM_TYPE_MISC:
+				obj->data.item.misc.charges = stream->readSint32BE();
+/*				if (fileReadInt32(stream, &(obj->data.item.misc.charges)) == -1)
+					return -1;*/
+				break;
+			case ITEM_TYPE_KEY:
+				obj->data.item.key.keyCode = stream->readSint32BE();
+/*				if (fileReadInt32(stream, &(obj->data.item.key.keyCode)) == -1)
+					return -1;*/
+				break;
+			default:
+				break;
+			}
+
+			break;
+		case OBJ_TYPE_SCENERY:
+			if (protoGetProto(obj->pid, &proto) == -1)
+				return -1;
+
+			switch (proto->scenery.type) {
+			case SCENERY_TYPE_DOOR:
+				obj->data.scenery.door.openFlags = stream->readSint32BE();
+/*				if (fileReadInt32(stream, &(obj->data.scenery.door.openFlags)) == -1)
+					return -1;*/
+				break;
+			case SCENERY_TYPE_STAIRS:
+				obj->data.scenery.stairs.destinationBuiltTile = stream->readSint32BE();
+				obj->data.scenery.stairs.destinationMap = stream->readSint32BE();
+/*				if (fileReadInt32(stream, &(obj->data.scenery.stairs.destinationBuiltTile)) == -1)
+					return -1;
+				if (fileReadInt32(stream, &(obj->data.scenery.stairs.destinationMap)) == -1)
+					return -1;*/
+				break;
+			case SCENERY_TYPE_ELEVATOR:
+				obj->data.scenery.elevator.type = stream->readSint32BE();
+				obj->data.scenery.elevator.level = stream->readSint32BE();
+/*				if (fileReadInt32(stream, &(obj->data.scenery.elevator.type)) == -1)
+					return -1;
+				if (fileReadInt32(stream, &(obj->data.scenery.elevator.level)) == -1)
+					return -1;*/
+				break;
+			case SCENERY_TYPE_LADDER_UP:
+				if (gMapHeader.version == 19) {
+					obj->data.scenery.ladder.destinationBuiltTile = stream->readSint32BE();
+/*					if (fileReadInt32(stream, &(obj->data.scenery.ladder.destinationBuiltTile)) == -1)
+						return -1;*/
+				} else {
+					obj->data.scenery.ladder.destinationMap = stream->readSint32BE();
+					obj->data.scenery.ladder.destinationBuiltTile = stream->readSint32BE();
+/*					if (fileReadInt32(stream, &(obj->data.scenery.ladder.destinationMap)) == -1)
+						return -1;
+					if (fileReadInt32(stream, &(obj->data.scenery.ladder.destinationBuiltTile)) == -1)
+						return -1;*/
+				}
+				break;
+			case SCENERY_TYPE_LADDER_DOWN:
+				if (gMapHeader.version == 19) {
+					obj->data.scenery.ladder.destinationBuiltTile = stream->readSint32BE();
+/*					if (fileReadInt32(stream, &(obj->data.scenery.ladder.destinationBuiltTile)) == -1)
+						return -1;*/
+				} else {
+					obj->data.scenery.ladder.destinationMap = stream->readSint32BE();
+					obj->data.scenery.ladder.destinationBuiltTile = stream->readSint32BE();
+/*					if (fileReadInt32(stream, &(obj->data.scenery.ladder.destinationMap)) == -1)
+						return -1;
+					if (fileReadInt32(stream, &(obj->data.scenery.ladder.destinationBuiltTile)) == -1)
+						return -1;*/
+				}
+				break;
+			}
+
+			break;
+		case OBJ_TYPE_MISC:
+			if (isExitGridPid(obj->pid)) {
+				obj->data.misc.map = stream->readSint32BE();
+				obj->data.misc.tile = stream->readSint32BE();
+				obj->data.misc.elevation = stream->readSint32BE();
+				obj->data.misc.rotation = stream->readSint32BE();
+
+/*				if (fileReadInt32(stream, &(obj->data.misc.map)) == -1)
+					return -1;
+				if (fileReadInt32(stream, &(obj->data.misc.tile)) == -1)
+					return -1;
+				if (fileReadInt32(stream, &(obj->data.misc.elevation)) == -1)
+					return -1;
+				if (fileReadInt32(stream, &(obj->data.misc.rotation)) == -1)
+					return -1;*/
+			}
+			break;
+		}
+	}
+	if(stream->err())
+		return -1;
 	debug(6, "Object proto loaded properly");
 	return 0;
 }

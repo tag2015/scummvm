@@ -46,6 +46,7 @@ static void _obj_blend_table_init();
 static void _obj_blend_table_exit();
 static int _obj_save_obj(Common::OutSaveFile *stream, Object *object);
 static int _obj_load_obj(File *stream, Object **objectPtr, int elevation, Object *owner);
+static int _obj_load_obj_scumm(Common::InSaveFile *stream, Object **objectPtr, int elevation, Object *owner);
 static int objectAllocate(Object **objectPtr);
 static void objectDeallocate(Object **objectPtr);
 static int objectListNodeCreate(ObjectListNode **nodePtr);
@@ -451,6 +452,92 @@ int objectRead(Object *obj, File *stream) {
 	obj->owner = NULL;
 
 	if (objectDataRead(obj, stream) != 0) {
+		return -1;
+	}
+
+	if (isExitGridPid(obj->pid)) {
+		if (obj->data.misc.map <= 0) {
+			if ((obj->fid & 0xFFF) < 33) {
+				obj->fid = buildFid(OBJ_TYPE_MISC, (obj->fid & 0xFFF) + 16, FID_ANIM_TYPE(obj->fid), 0, 0);
+			}
+		}
+	} else {
+		if (PID_TYPE(obj->pid) && !(gMapHeader.flags & 0x01)) {
+			_object_fix_weapon_ammo(obj);
+		}
+	}
+
+	return 0;
+}
+
+int objectReadScumm(Object *obj, Common::InSaveFile *stream) {
+	int field_74;
+
+	obj->id = stream->readSint32BE();
+	if (stream->err())
+		return -1;
+	/*	if (fileReadInt32(stream, &(obj->id)) == -1)
+			return -1;*/
+	debug(6, "Reading Object - id %d from save", obj->id);
+	obj->tile = stream->readSint32BE();
+	obj->x = stream->readSint32BE();
+	obj->y = stream->readSint32BE();
+	obj->sx = stream->readSint32BE();
+	obj->sy = stream->readSint32BE();
+	obj->frame = stream->readSint32BE();
+	obj->rotation = stream->readSint32BE();
+	obj->fid = stream->readSint32BE();
+	obj->flags = stream->readSint32BE();
+	obj->elevation = stream->readSint32BE();
+	obj->pid = stream->readSint32BE();
+	obj->cid = stream->readSint32BE();
+	obj->lightDistance = stream->readSint32BE();
+	obj->lightIntensity = stream->readSint32BE();
+	field_74 = stream->readSint32BE();
+	obj->sid = stream->readSint32BE();
+	obj->field_80 = stream->readSint32BE();
+	if (stream->err())
+		return -1;
+
+/*	if (fileReadInt32(stream, &(obj->tile)) == -1)
+		return -1;
+	if (fileReadInt32(stream, &(obj->x)) == -1)
+		return -1;
+	if (fileReadInt32(stream, &(obj->y)) == -1)
+		return -1;
+	if (fileReadInt32(stream, &(obj->sx)) == -1)
+		return -1;
+	if (fileReadInt32(stream, &(obj->sy)) == -1)
+		return -1;
+	if (fileReadInt32(stream, &(obj->frame)) == -1)
+		return -1;
+	if (fileReadInt32(stream, &(obj->rotation)) == -1)
+		return -1;
+	if (fileReadInt32(stream, &(obj->fid)) == -1)
+		return -1;
+	if (fileReadInt32(stream, &(obj->flags)) == -1)
+		return -1;
+	if (fileReadInt32(stream, &(obj->elevation)) == -1)
+		return -1;
+	if (fileReadInt32(stream, &(obj->pid)) == -1)
+		return -1;
+	if (fileReadInt32(stream, &(obj->cid)) == -1)
+		return -1;
+	if (fileReadInt32(stream, &(obj->lightDistance)) == -1)
+		return -1;
+	if (fileReadInt32(stream, &(obj->lightIntensity)) == -1)
+		return -1;
+	if (fileReadInt32(stream, &field_74) == -1)
+		return -1;
+	if (fileReadInt32(stream, &(obj->sid)) == -1)
+		return -1;
+	if (fileReadInt32(stream, &(obj->field_80)) == -1)
+		return -1;*/
+	debug(6, "Object header read successfully");
+	obj->outline = 0;
+	obj->owner = NULL;
+
+	if (objectDataReadScumm(obj, stream) != 0) {
 		return -1;
 	}
 
@@ -3541,6 +3628,77 @@ static int _obj_load_obj(File *stream, Object **objectPtr, int elevation, Object
 	return 0;
 }
 
+static int _obj_load_obj_scumm(Common::InSaveFile *stream, Object **objectPtr, int elevation, Object *owner) {
+	Object *obj;
+
+	if (objectAllocate(&obj) == -1) {
+		*objectPtr = NULL;
+		return -1;
+	}
+
+	if (objectReadScumm(obj, stream) != 0) {
+		*objectPtr = NULL;
+		return -1;
+	}
+
+	if (obj->sid != -1) {
+		Script *script;
+		if (scriptGetScript(obj->sid, &script) == -1) {
+			obj->sid = -1;
+		} else {
+			script->owner = obj;
+		}
+	}
+
+	_obj_fix_violence_settings(&(obj->fid));
+
+	if (!_art_fid_valid(obj->fid)) {
+		debugPrint("\nError: invalid object art fid: %u\n", obj->fid);
+		// NOTE: Uninline.
+		objectDeallocate(&obj);
+		return -2;
+	}
+
+	if (elevation == -1) {
+		elevation = obj->elevation;
+	} else {
+		obj->elevation = elevation;
+	}
+
+	obj->owner = owner;
+
+	Inventory *inventory = &(obj->data.inventory);
+	if (inventory->length <= 0) {
+		inventory->capacity = 0;
+		inventory->items = NULL;
+		*objectPtr = obj;
+		return 0;
+	}
+
+	InventoryItem *inventoryItems = inventory->items = (InventoryItem *)internal_malloc(sizeof(*inventoryItems) * inventory->capacity);
+	if (inventoryItems == NULL) {
+		return -1;
+	}
+
+	for (int inventoryItemIndex = 0; inventoryItemIndex < inventory->length; inventoryItemIndex++) {
+		InventoryItem *inventoryItem = &(inventoryItems[inventoryItemIndex]);
+		inventoryItem->quantity = stream->readSint32BE();
+		if (stream->err())
+			return -1;
+/*		if (fileReadInt32(stream, &(inventoryItem->quantity)) != 0) {
+			return -1;
+		}*/
+
+		if (_obj_load_obj_scumm(stream, &(inventoryItem->item), elevation, obj) != 0) {
+			return -1;
+		}
+	}
+
+	*objectPtr = obj;
+
+	return 0;
+}
+
 // obj_save_dude
 // 0x48D59C
 int _obj_save_dude(Common::OutSaveFile *stream) {
@@ -3570,7 +3728,7 @@ int _obj_save_dude(Common::OutSaveFile *stream) {
 
 // obj_load_dude
 // 0x48D600
-int _obj_load_dude(File *stream) {
+int _obj_load_dude(Common::InSaveFile *stream) {
 	int savedTile = gDude->tile;
 	int savedElevation = gDude->elevation;
 	int savedRotation = gDude->rotation;
@@ -3579,7 +3737,7 @@ int _obj_load_dude(File *stream) {
 	scriptsClearDudeScript();
 
 	Object *temp;
-	int rc = _obj_load_obj(stream, &temp, -1, NULL);
+	int rc = _obj_load_obj_scumm(stream, &temp, -1, NULL);
 
 	memcpy(gDude, temp, sizeof(*gDude));
 
@@ -3630,11 +3788,15 @@ int _obj_load_dude(File *stream) {
 
 	_inven_reset_dude();
 
-	int tile;
-	if (fileReadInt32(stream, &tile) == -1) {
-		fileClose(stream);
+	int tile = stream->readSint32BE();
+	if (stream->err()) {
+		delete stream;
 		return -1;
 	}
+/*	if (fileReadInt32(stream, &tile) == -1) {
+		fileClose(stream);
+		return -1;
+	}*/
 
 	tileSetCenter(tile, TILE_SET_CENTER_REFRESH_WINDOW | TILE_SET_CENTER_FLAG_IGNORE_SCROLL_RESTRICTIONS);
 
