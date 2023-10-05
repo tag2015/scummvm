@@ -233,13 +233,18 @@ void perksExit() {
 }
 
 // 0x4966E4
-int perksLoad(File *stream) {
+int perksLoad(Common::InSaveFile *stream) {
 	for (int index = 0; index < gPartyMemberDescriptionsLength; index++) {
 		PerkRankData *ranksData = &(gPartyMemberPerkRanks[index]);
 		for (int perk = 0; perk < PERK_COUNT; perk++) {
-			if (fileReadInt32(stream, &(ranksData->ranks[perk])) == -1) {
+			ranksData->ranks[perk] = stream->readSint32BE();
+			if(stream->err()) {
+				delete stream;
 				return -1;
 			}
+//			if (fileReadInt32(stream, &(ranksData->ranks[perk])) == -1) {
+//				return -1;
+//			}
 		}
 	}
 
