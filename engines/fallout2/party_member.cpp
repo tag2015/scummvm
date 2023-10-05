@@ -721,25 +721,32 @@ static int _partyMemberRecoverLoadInstance(STRUCT_519DA8 *a1) {
 }
 
 // 0x494BBC
-int partyMembersLoad(File *stream) {
+int partyMembersLoad(Common::InSaveFile *stream) {
 	int *partyMemberObjectIds = (int *)internal_malloc(sizeof(*partyMemberObjectIds) * (gPartyMemberDescriptionsLength + 20));
 	if (partyMemberObjectIds == NULL) {
 		return -1;
 	}
 
 	// FIXME: partyMemberObjectIds is never free'd in this function, obviously memory leak.
+	gPartyMembersLength = stream->readSint32BE();
+	_partyMemberItemCount = stream->readSint32BE();
+	if (stream->err())
+		return -1;
 
-	if (fileReadInt32(stream, &gPartyMembersLength) == -1)
-		return -1;
-	if (fileReadInt32(stream, &_partyMemberItemCount) == -1)
-		return -1;
+	/*	if (fileReadInt32(stream, &gPartyMembersLength) == -1)
+			return -1;
+		if (fileReadInt32(stream, &_partyMemberItemCount) == -1)
+			return -1;*/
 
 	gPartyMembers->object = gDude;
 
 	if (gPartyMembersLength != 0) {
 		for (int index = 1; index < gPartyMembersLength; index++) {
-			if (fileReadInt32(stream, &(partyMemberObjectIds[index])) == -1)
+			partyMemberObjectIds[index] = stream->readSint32BE();
+			if (stream->err())
 				return -1;
+/*			if (fileReadInt32(stream, &(partyMemberObjectIds[index])) == -1)
+				return -1;*/
 		}
 
 		for (int index = 1; index < gPartyMembersLength; index++) {
@@ -778,12 +785,17 @@ int partyMembersLoad(File *stream) {
 	for (int index = 1; index < gPartyMemberDescriptionsLength; index++) {
 		STRU_519DBC *ptr_519DBC = &(_partyMemberLevelUpInfoList[index]);
 
-		if (fileReadInt32(stream, &(ptr_519DBC->field_0)) == -1)
+		ptr_519DBC->field_0 = stream->readSint32BE();
+		ptr_519DBC->field_4 = stream->readSint32BE();
+		ptr_519DBC->field_8 = stream->readSint32BE();
+		if (stream->err())
+			return -1;
+/*		if (fileReadInt32(stream, &(ptr_519DBC->field_0)) == -1)
 			return -1;
 		if (fileReadInt32(stream, &(ptr_519DBC->field_4)) == -1)
 			return -1;
 		if (fileReadInt32(stream, &(ptr_519DBC->field_8)) == -1)
-			return -1;
+			return -1;*/
 	}
 
 	return 0;

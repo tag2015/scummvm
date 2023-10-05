@@ -261,10 +261,10 @@ static LoadGameHandler *_master_load_list[LOAD_SAVE_HANDLER_COUNT] = {
 //	preferencesLoad, DONE
 //	characterEditorLoad, DONE
 //	wmWorldMap_load, DONE
-	pipboyLoad,
+//	pipboyLoad, DONE
 //	gameMoviesLoad, TODO movie
-	skillsUsageLoad,
-	partyMembersLoad,
+//	skillsUsageLoad, DONE
+//	partyMembersLoad, DONE
 	queueLoad,
 	interfaceLoad,
 	_EndLoad,
@@ -1883,6 +1883,21 @@ static int lsgLoadGameInSlot(int slot) {
 		warning("Error loading world map stats");
 	else
 		debug("Loaded world map stats");
+
+	// TODO movie
+	for (int i = 0; i < 17; i++)
+		loadSave->readByte();
+	warning("Skipped loading movie stats");
+
+	if (skillsUsageLoad(loadSave))
+		warning("Error loading skills usage");
+	else
+		debug("Loaded skills usage");
+
+	if (partyMembersLoad(loadSave))
+		warning("Error loading party members");
+	else
+		debug("Loaded party members");
 
 /*	for (int index = 0; index < LOAD_SAVE_HANDLER_COUNT; index += 1) {
 		long pos = fileTell(_flptr);
