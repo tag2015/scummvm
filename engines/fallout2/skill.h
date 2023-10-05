@@ -42,7 +42,7 @@ int skillsPerformStealing(Object *a1, Object *a2, Object *item, bool isPlanting)
 int skillGetGameDifficultyModifier(int skill);
 int skillUpdateLastUse(int skill);
 int skillsUsageSave(Common::OutSaveFile *stream);
-int skillsUsageLoad(File *stream);
+int skillsUsageLoad(Common::InSaveFile *stream);
 char *skillsGetGenericResponse(Object *critter, bool isDude);
 
 // Returns true if skill is valid.

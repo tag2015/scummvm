@@ -1170,8 +1170,8 @@ int skill_use_slot_clear() {
 
 // 0x4ABF3C
 int skillsUsageSave(Common::OutSaveFile *stream) {
+	int *arr = (int *)_timesSkillUsed;
 	for (int i = 0; i < SKILL_COUNT * SKILLS_MAX_USES_PER_DAY; i++) {
-		int *arr = (int *)_timesSkillUsed;
 		stream->writeSint32BE(*(arr + i));
 	}
 	if (stream->err()) {
@@ -1185,8 +1185,16 @@ int skillsUsageSave(Common::OutSaveFile *stream) {
 }
 
 // 0x4ABF5C
-int skillsUsageLoad(File *stream) {
-	return fileReadInt32List(stream, (int *)_timesSkillUsed, SKILL_COUNT * SKILLS_MAX_USES_PER_DAY);
+int skillsUsageLoad(Common::InSaveFile *stream) {
+	int *arr = (int *)_timesSkillUsed;
+	for (int i = 0; i < SKILL_COUNT * SKILLS_MAX_USES_PER_DAY; i++) {
+		*(arr + i) = stream->readSint32BE();
+	}
+	if (stream->err())
+		return -1;
+
+	return 0;
+	//	return fileReadInt32List(stream, (int *)_timesSkillUsed, SKILL_COUNT * SKILLS_MAX_USES_PER_DAY);
 }
 
 // 0x4ABF7C

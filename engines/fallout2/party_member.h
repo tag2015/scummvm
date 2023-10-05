@@ -21,7 +21,7 @@ int _partyMemberUnPrepSave();
 int partyMembersSave(Common::OutSaveFile *stream);
 int _partyMemberPrepLoad();
 int _partyMemberRecoverLoad();
-int partyMembersLoad(File *stream);
+int partyMembersLoad(Common::InSaveFile *stream);
 void _partyMemberClear();
 int _partyMemberSyncPosition();
 int _partyMemberRestingHeal(int a1);
