@@ -14,7 +14,7 @@ void characterEditorInit();
 bool _isdoschar(int ch);
 char *_strmfe(char *dest, const char *name, const char *ext);
 int characterEditorSave(Common::OutSaveFile *stream);
-int characterEditorLoad(File *stream);
+int characterEditorLoad(Common::InSaveFile *stream);
 void characterEditorReset();
 
 } // namespace Fallout2

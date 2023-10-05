@@ -5738,11 +5738,15 @@ int characterEditorSave(Common::OutSaveFile *stream) {
 }
 
 // 0x43C1E0
-int characterEditorLoad(File *stream) {
-	if (fileReadInt32(stream, &gCharacterEditorLastLevel) == -1)
+int characterEditorLoad(Common::InSaveFile *stream) {
+	gCharacterEditorLastLevel = stream->readSint32BE();
+	gCharacterEditorHasFreePerk = stream->readByte();
+	if (stream->err())
+		return -1;
+/*	if (fileReadInt32(stream, &gCharacterEditorLastLevel) == -1)
 		return -1;
 	if (fileReadUInt8(stream, &gCharacterEditorHasFreePerk) == -1)
-		return -1;
+		return -1;*/
 
 	return 0;
 }
