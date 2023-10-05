@@ -50,7 +50,7 @@ typedef struct AutomapHeader {
 int automapInit();
 int automapReset();
 void automapExit();
-int automapLoad(File *stream);
+int automapLoad(Common::InSaveFile *stream);
 int automapSave(Common::OutSaveFile *stream);
 int _automapDisplayMap(int map);
 void automapShow(bool isInGame, bool isUsingScanner);
