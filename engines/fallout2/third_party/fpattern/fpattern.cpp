@@ -159,7 +159,7 @@ int fpattern_isvalid(const char *pat) {
 	int	len;
 
 
-	debug("fpattern_isvalid: pat=%04p:\"%s\"", pat, pat ? pat : "");
+	debug("fpattern_isvalid: pat=%p:\"%s\"", pat, pat ? pat : "");
 
 	/* Check args */
 	if (pat == NULL) {
@@ -445,7 +445,7 @@ static int fpattern_submatch(const char *pat, const char *fname) {
 int fpattern_match(const char *pat, const char *fname) {
 	int	rc;
 
-	debug("fpattern_match: fname=%04p:\"%s\", pat=%04p:\"%s\"",
+	debug("fpattern_match: fname=%p:\"%s\", pat=%p:\"%s\"",
 	      fname, fname ? fname : "", pat, pat ? pat : "");
 
 	/* Check args */
@@ -500,7 +500,7 @@ int fpattern_match(const char *pat, const char *fname) {
 int fpattern_matchn(const char *pat, const char *fname) {
 	int	rc;
 
-	debug("fpattern_matchn: fname=%04p:\"%s\", pat=%04p:\"%s\"",
+	debug("fpattern_matchn: fname=%p:\"%s\", pat=%p:\"%s\"",
 	      fname, fname ? fname : "", pat, pat ? pat : "");
 
 	/* Check args */
