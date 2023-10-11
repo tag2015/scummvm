@@ -3757,7 +3757,7 @@ int wmSetupRandomEncounter() {
 		}
 
 		if (critterCount != 0) {
-			Object *critter;
+			Object *critter = NULL;
 			if (wmSetupCritterObjs(encounterTableSubEntry->encounterIndex, &critter, critterCount) == -1) {
 				scriptsRequestWorldMap();
 				return -1;
@@ -3841,7 +3841,7 @@ static int wmSetupCritterObjs(int encounterIndex, Object **critterPtr, int critt
 			continue;
 		}
 
-		int encounterEntryCritterCount;
+		int encounterEntryCritterCount = 0;
 		switch (encounterEntry->field_2C) {
 		case 0:
 			encounterEntryCritterCount = encounterEntry->ratio * critterCount / 100;
@@ -4011,7 +4011,7 @@ static int wmSetupRndNextTileNumInit(Encounter *encounter) {
 // wmSetupRndNextTileNum
 // 0x4C16F0
 static int wmSetupRndNextTileNum(Encounter *encounter, EncounterEntry *encounterEntry, int *tilePtr) {
-	int tile;
+	int tile = 0;
 
 	int attempt = 0;
 	while (1) {
