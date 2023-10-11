@@ -1472,7 +1472,7 @@ static int wmConfigInit() {
 
 			char *walkMaskName;
 			if (configGetString(&config, section, "walk_mask_name", &walkMaskName)) {
-				strncpy(tile->walkMaskName, walkMaskName, TILE_WALK_MASK_NAME_SIZE);
+				strncpy(tile->walkMaskName, walkMaskName, TILE_WALK_MASK_NAME_SIZE - 1);
 			}
 
 			for (int column = 0; column < SUBTILE_GRID_HEIGHT; column++) {
@@ -1518,7 +1518,7 @@ static int wmReadEncounterType(Config *config, char *lookupName, char *sectionKe
 	wmEncounterTableSlotInit(encounterTable);
 
 	encounterTable->index = wmMaxEncounterInfoTables - 1;
-	strncpy(encounterTable->lookupName, lookupName, 40);
+	strncpy(encounterTable->lookupName, lookupName, 39);
 
 	char *str;
 	if (configGetString(config, sectionKey, "maps", &str)) {
@@ -1777,7 +1777,7 @@ static int wmReadEncBaseType(char *name, int *valuePtr) {
 	// NOTE: Uninline.
 	wmEncBaseTypeSlotInit(encounter);
 
-	strncpy(encounter->name, name, 40);
+	strncpy(encounter->name, name, 39);
 
 	while (1) {
 		if (wmParseEncBaseSubTypeStr(&(encounter->entries[encounter->entriesLength]), &string) == -1) {
@@ -2013,7 +2013,7 @@ static int wmParseTerrainTypes(Config *config, char *string) {
 		char delimeter = pch[delimeterPos];
 		pch[delimeterPos] = '\0';
 
-		strncpy(terrain->lookupName, pch, 40);
+		strncpy(terrain->lookupName, pch, 39);
 		terrain->difficulty = atoi(pch + delimeterPos + 1);
 
 		pch[delimeterPos] = delimeter;
@@ -2554,7 +2554,7 @@ static int wmAreaInit() {
 				error("wmConfigInit::Error loading areas");
 			}
 
-			strncpy(city->name, str, 40);
+			strncpy(city->name, str, CITY_NAME_SIZE - 1);
 
 			if (!configGetString(&cfg, section, "world_pos", &str)) {
 				showMesageBox("\nwmConfigInit::Error loading areas!");
@@ -2729,7 +2729,7 @@ static int wmMapInit() {
 			map = &(maps[wmMaxMapNum - 1]);
 			wmMapSlotInit(map);
 
-			strncpy(map->lookupName, str, 40);
+			strncpy(map->lookupName, str, 39);
 
 			if (!configGetString(&config, section, "map_name", &str)) {
 				showMesageBox("\nwmConfigInit::Error loading maps!");
@@ -2737,10 +2737,10 @@ static int wmMapInit() {
 			}
 
 			compat_strlwr(str);
-			strncpy(map->mapFileName, str, 40);
+			strncpy(map->mapFileName, str, 39);
 
 			if (configGetString(&config, section, "music", &str)) {
-				strncpy(map->music, str, 40);
+				strncpy(map->music, str, 39);
 			}
 
 			if (configGetString(&config, section, "ambient_sfx", &str)) {
@@ -5421,7 +5421,7 @@ static int wmInterfaceDrawCircleOverlay(CityInfo *city, CitySizeDescription *cit
 			// NOTE: Uninline.
 			wmGetAreaName(city, name);
 		} else {
-			strncpy(name, getmsg(&wmMsgFile, &messageListItem, 1004), 40);
+			strncpy(name, getmsg(&wmMsgFile, &messageListItem, 1004), 39);
 		}
 
 		int width = fontGetStringWidth(name);
@@ -5558,7 +5558,7 @@ static int wmGetAreaName(CityInfo *city, char *name) {
 	MessageListItem messageListItem;
 
 	getmsg(&gMapMessageList, &messageListItem, city->areaId + 1500);
-	strncpy(name, messageListItem.text, 40);
+	strncpy(name, messageListItem.text, 39);
 
 	return 0;
 }
@@ -6489,7 +6489,7 @@ int wmSetMapMusic(int mapIdx, const char *name) {
 
 	MapInfo *map = &(wmMapInfoList[mapIdx]);
 
-	strncpy(map->music, name, 40);
+	strncpy(map->music, name, 39);
 	map->music[39] = '\0';
 
 	if (mapGetCurrentMap() == mapIdx) {
