@@ -1,19 +1,19 @@
-#include "sound_effects_cache.h"
+#include "fallout2/sound_effects_cache.h"
 
-#include <assert.h>
+/*#include <assert.h>
 #include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
+#include <string.h>*/
 
-#include "cache.h"
-#include "db.h"
-#include "memory.h"
-#include "settings.h"
-#include "sound_decoder.h"
-#include "sound_effects_list.h"
+#include "fallout2/cache.h"
+#include "fallout2/db.h"
+#include "fallout2/memory.h"
+#include "fallout2/settings.h"
+#include "fallout2/sound_decoder.h"
+#include "fallout2/sound_effects_list.h"
 
-namespace fallout {
+namespace Fallout2 {
 
 #define SOUND_EFFECTS_CACHE_MIN_SIZE (0x40000)
 
@@ -22,28 +22,28 @@ typedef struct SoundEffect {
 	// cmp for checking implying it's not bitwise flags. Therefore it's better
 	// to express it as boolean.
 	bool used;
-	CacheEntry* cacheHandle;
+	CacheEntry *cacheHandle;
 	int tag;
 	int dataSize;
 	int fileSize;
 	// TODO: Make size_t.
 	int position;
 	int dataPosition;
-	unsigned char* data;
+	unsigned char *data;
 } SoundEffect;
 
-static int soundEffectsCacheGetFileSizeImpl(int tag, int* sizePtr);
-static int soundEffectsCacheReadDataImpl(int tag, int* sizePtr, unsigned char* data);
-static void soundEffectsCacheFreeImpl(void* ptr);
+static int soundEffectsCacheGetFileSizeImpl(int tag, int *sizePtr);
+static int soundEffectsCacheReadDataImpl(int tag, int *sizePtr, unsigned char *data);
+static void soundEffectsCacheFreeImpl(void *ptr);
 static int soundEffectsCacheCreateHandles();
 static void soundEffectsCacheFreeHandles();
-static int soundEffectsCreate(int* handlePtr, int id, void* data, CacheEntry* cacheHandle);
+static int soundEffectsCreate(int *handlePtr, int id, void *data, CacheEntry *cacheHandle);
 static bool soundEffectsIsValidHandle(int a1);
-static int soundEffectsCacheFileReadCompressed(int handle, void* buf, unsigned int size);
-static int soundEffectsCacheSoundDecoderReadHandler(void* data, void* buf, unsigned int size);
+static int soundEffectsCacheFileReadCompressed(int handle, void *buf, unsigned int size);
+static int soundEffectsCacheSoundDecoderReadHandler(void *data, void *buf, unsigned int size);
 
 // 0x50DE04
-static const char* off_50DE04 = "";
+static const char *off_50DE04 = "";
 
 // sfxc_initialized
 // 0x51C8F0
@@ -54,24 +54,24 @@ static int _sfxc_cmpr = 1;
 
 // sfxc_pcache
 // 0x51C8EC
-static Cache* gSoundEffectsCache = NULL;
+static Cache *gSoundEffectsCache = NULL;
 
 // sfxc_dlevel
 // 0x51C8DC
 static int gSoundEffectsCacheDebugLevel = INT_MAX;
 
 // 0x51C8E0
-static char* gSoundEffectsCacheEffectsPath = NULL;
+static char *gSoundEffectsCacheEffectsPath = NULL;
 
 // 0x51C8E4
-static SoundEffect* gSoundEffects = NULL;
+static SoundEffect *gSoundEffects = NULL;
 
 // 0x51C8E8
 static int _sfxc_files_open = 0;
 
 // sfxc_init
 // 0x4A8FC0
-int soundEffectsCacheInit(int cacheSize, const char* effectsPath) {
+int soundEffectsCacheInit(int cacheSize, const char *effectsPath) {
 	gSoundEffectsCacheDebugLevel = settings.sound.debug_sfxc;
 
 	if (cacheSize <= SOUND_EFFECTS_CACHE_MIN_SIZE) {
@@ -98,7 +98,7 @@ int soundEffectsCacheInit(int cacheSize, const char* effectsPath) {
 		return -1;
 	}
 
-	gSoundEffectsCache = (Cache*)internal_malloc(sizeof(*gSoundEffectsCache));
+	gSoundEffectsCache = (Cache *)internal_malloc(sizeof(*gSoundEffectsCache));
 	if (gSoundEffectsCache == NULL) {
 		soundEffectsCacheFreeHandles();
 		soundEffectsListExit();
@@ -150,12 +150,12 @@ void soundEffectsCacheFlush() {
 
 // sfxc_cached_open
 // 0x4A915C
-int soundEffectsCacheFileOpen(const char* fname, int* sampleRate) {
+int soundEffectsCacheFileOpen(const char *fname, int *sampleRate) {
 	if (_sfxc_files_open >= SOUND_EFFECTS_MAX_COUNT) {
 		return -1;
 	}
 
-	char* copy = internal_strdup(fname);
+	char *copy = internal_strdup(fname);
 	if (copy == NULL) {
 		return -1;
 	}
@@ -169,8 +169,8 @@ int soundEffectsCacheFileOpen(const char* fname, int* sampleRate) {
 		return -1;
 	}
 
-	void* data;
-	CacheEntry* cacheHandle;
+	void *data;
+	CacheEntry *cacheHandle;
 	if (!cacheLock(gSoundEffectsCache, tag, &data, &cacheHandle)) {
 		return -1;
 	}
@@ -191,7 +191,7 @@ int soundEffectsCacheFileClose(int handle) {
 		return -1;
 	}
 
-	SoundEffect* soundEffect = &(gSoundEffects[handle]);
+	SoundEffect *soundEffect = &(gSoundEffects[handle]);
 	if (!cacheUnlock(gSoundEffectsCache, soundEffect->cacheHandle)) {
 		return -1;
 	}
@@ -208,7 +208,7 @@ int soundEffectsCacheFileClose(int handle) {
 }
 
 // 0x4A9274
-int soundEffectsCacheFileRead(int handle, void* buf, unsigned int size) {
+int soundEffectsCacheFileRead(int handle, void *buf, unsigned int size) {
 	if (!soundEffectsIsValidHandle(handle)) {
 		return -1;
 	}
@@ -217,7 +217,7 @@ int soundEffectsCacheFileRead(int handle, void* buf, unsigned int size) {
 		return 0;
 	}
 
-	SoundEffect* soundEffect = &(gSoundEffects[handle]);
+	SoundEffect *soundEffect = &(gSoundEffects[handle]);
 	if (soundEffect->dataSize - soundEffect->position <= 0) {
 		return 0;
 	}
@@ -249,7 +249,7 @@ int soundEffectsCacheFileRead(int handle, void* buf, unsigned int size) {
 }
 
 // 0x4A9350
-int soundEffectsCacheFileWrite(int handle, const void* buf, unsigned int size) {
+int soundEffectsCacheFileWrite(int handle, const void *buf, unsigned int size) {
 	return -1;
 }
 
@@ -259,7 +259,7 @@ long soundEffectsCacheFileSeek(int handle, long offset, int origin) {
 		return -1;
 	}
 
-	SoundEffect* soundEffect = &(gSoundEffects[handle]);
+	SoundEffect *soundEffect = &(gSoundEffects[handle]);
 
 	int position;
 	switch (origin) {
@@ -303,7 +303,7 @@ long soundEffectsCacheFileTell(int handle) {
 		return -1;
 	}
 
-	SoundEffect* soundEffect = &(gSoundEffects[handle]);
+	SoundEffect *soundEffect = &(gSoundEffects[handle]);
 	return soundEffect->position;
 }
 
@@ -313,13 +313,13 @@ long soundEffectsCacheFileLength(int handle) {
 		return 0;
 	}
 
-	SoundEffect* soundEffect = &(gSoundEffects[handle]);
+	SoundEffect *soundEffect = &(gSoundEffects[handle]);
 	return soundEffect->dataSize;
 }
 
 // sfxc_cached_file_size
 // 0x4A9434
-static int soundEffectsCacheGetFileSizeImpl(int tag, int* sizePtr) {
+static int soundEffectsCacheGetFileSizeImpl(int tag, int *sizePtr) {
 	int size;
 	if (soundEffectsListGetFileSize(tag, &size) == -1) {
 		return -1;
@@ -331,7 +331,7 @@ static int soundEffectsCacheGetFileSizeImpl(int tag, int* sizePtr) {
 }
 
 // 0x4A945C
-static int soundEffectsCacheReadDataImpl(int tag, int* sizePtr, unsigned char* data) {
+static int soundEffectsCacheReadDataImpl(int tag, int *sizePtr, unsigned char *data) {
 	if (!soundEffectsListIsValidTag(tag)) {
 		return -1;
 	}
@@ -339,7 +339,7 @@ static int soundEffectsCacheReadDataImpl(int tag, int* sizePtr, unsigned char* d
 	int size;
 	soundEffectsListGetFileSize(tag, &size);
 
-	char* name;
+	char *name;
 	soundEffectsListGetFilePath(tag, &name);
 
 	if (dbGetFileContents(name, data)) {
@@ -355,19 +355,19 @@ static int soundEffectsCacheReadDataImpl(int tag, int* sizePtr, unsigned char* d
 }
 
 // 0x4A94CC
-static void soundEffectsCacheFreeImpl(void* ptr) {
+static void soundEffectsCacheFreeImpl(void *ptr) {
 	internal_free(ptr);
 }
 
 // 0x4A94D4
 static int soundEffectsCacheCreateHandles() {
-	gSoundEffects = (SoundEffect*)internal_malloc(sizeof(*gSoundEffects) * SOUND_EFFECTS_MAX_COUNT);
+	gSoundEffects = (SoundEffect *)internal_malloc(sizeof(*gSoundEffects) * SOUND_EFFECTS_MAX_COUNT);
 	if (gSoundEffects == NULL) {
 		return -1;
 	}
 
 	for (int index = 0; index < SOUND_EFFECTS_MAX_COUNT; index++) {
-		SoundEffect* soundEffect = &(gSoundEffects[index]);
+		SoundEffect *soundEffect = &(gSoundEffects[index]);
 		soundEffect->used = false;
 	}
 
@@ -380,7 +380,7 @@ static int soundEffectsCacheCreateHandles() {
 static void soundEffectsCacheFreeHandles() {
 	if (_sfxc_files_open) {
 		for (int index = 0; index < SOUND_EFFECTS_MAX_COUNT; index++) {
-			SoundEffect* soundEffect = &(gSoundEffects[index]);
+			SoundEffect *soundEffect = &(gSoundEffects[index]);
 			if (!soundEffect->used) {
 				soundEffectsCacheFileClose(index);
 			}
@@ -391,12 +391,12 @@ static void soundEffectsCacheFreeHandles() {
 }
 
 // 0x4A9550
-static int soundEffectsCreate(int* handlePtr, int tag, void* data, CacheEntry* cacheHandle) {
+static int soundEffectsCreate(int *handlePtr, int tag, void *data, CacheEntry *cacheHandle) {
 	if (_sfxc_files_open >= SOUND_EFFECTS_MAX_COUNT) {
 		return -1;
 	}
 
-	SoundEffect* soundEffect;
+	SoundEffect *soundEffect;
 	int index;
 	for (index = 0; index < SOUND_EFFECTS_MAX_COUNT; index++) {
 		soundEffect = &(gSoundEffects[index]);
@@ -419,7 +419,7 @@ static int soundEffectsCreate(int* handlePtr, int tag, void* data, CacheEntry* c
 	soundEffect->position = 0;
 	soundEffect->dataPosition = 0;
 
-	soundEffect->data = (unsigned char*)data;
+	soundEffect->data = (unsigned char *)data;
 
 	*handlePtr = index;
 
@@ -432,7 +432,7 @@ static bool soundEffectsIsValidHandle(int handle) {
 		return false;
 	}
 
-	SoundEffect* soundEffect = &gSoundEffects[handle];
+	SoundEffect *soundEffect = &gSoundEffects[handle];
 
 	if (!soundEffect->used) {
 		return false;
@@ -446,21 +446,21 @@ static bool soundEffectsIsValidHandle(int handle) {
 }
 
 // 0x4A967C
-static int soundEffectsCacheFileReadCompressed(int handle, void* buf, unsigned int size) {
+static int soundEffectsCacheFileReadCompressed(int handle, void *buf, unsigned int size) {
 	if (!soundEffectsIsValidHandle(handle)) {
 		return -1;
 	}
 
-	SoundEffect* soundEffect = &(gSoundEffects[handle]);
+	SoundEffect *soundEffect = &(gSoundEffects[handle]);
 	soundEffect->dataPosition = 0;
 
 	int channels;
 	int sampleRate;
 	int sampleCount;
-	SoundDecoder* soundDecoder = soundDecoderInit(soundEffectsCacheSoundDecoderReadHandler, &handle, &channels, &sampleRate, &sampleCount);
+	SoundDecoder *soundDecoder = soundDecoderInit(soundEffectsCacheSoundDecoderReadHandler, &handle, &channels, &sampleRate, &sampleCount);
 
 	if (soundEffect->position != 0) {
-		void* temp = internal_malloc(soundEffect->position);
+		void *temp = internal_malloc(soundEffect->position);
 		if (temp == NULL) {
 			soundDecoderFree(soundDecoder);
 			return -1;
@@ -486,13 +486,13 @@ static int soundEffectsCacheFileReadCompressed(int handle, void* buf, unsigned i
 }
 
 // 0x4A9774
-static int soundEffectsCacheSoundDecoderReadHandler(void* data, void* buf, unsigned int size) {
+static int soundEffectsCacheSoundDecoderReadHandler(void *data, void *buf, unsigned int size) {
 	if (size == 0) {
 		return 0;
 	}
 
-	int handle = *reinterpret_cast<int*>(data);
-	SoundEffect* soundEffect = &(gSoundEffects[handle]);
+	int handle = *reinterpret_cast<int *>(data);
+	SoundEffect *soundEffect = &(gSoundEffects[handle]);
 
 	unsigned int bytesToRead = soundEffect->fileSize - soundEffect->dataPosition;
 	if (size <= bytesToRead) {
@@ -506,4 +506,4 @@ static int soundEffectsCacheSoundDecoderReadHandler(void* data, void* buf, unsig
 	return bytesToRead;
 }
 
-} // namespace fallout
+} // namespace Fallout2

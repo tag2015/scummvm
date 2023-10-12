@@ -5,44 +5,44 @@
 // I made an exception and extracted it into separate functions to increase
 // readability.
 
-#include "sound_decoder.h"
+#include "fallout2/sound_decoder.h"
 
-#include <limits.h>
+/*#include <limits.h>
 #include <stdlib.h>
-#include <string.h>
+#include <string.h>*/
 
-namespace fallout {
+namespace Fallout2 {
 
 #define SOUND_DECODER_IN_BUFFER_SIZE (512)
 
-typedef int (*ReadBandFunc)(SoundDecoder* soundDecoder, int offset, int bits);
+typedef int (*ReadBandFunc)(SoundDecoder *soundDecoder, int offset, int bits);
 
-static bool soundDecoderPrepare(SoundDecoder* soundDecoder, SoundDecoderReadProc* readProc, void* data);
-static unsigned char soundDecoderReadNextChunk(SoundDecoder* soundDecoder);
+static bool soundDecoderPrepare(SoundDecoder *soundDecoder, SoundDecoderReadProc *readProc, void *data);
+static unsigned char soundDecoderReadNextChunk(SoundDecoder *soundDecoder);
 static void init_pack_tables();
-static int ReadBand_Fail(SoundDecoder* soundDecoder, int offset, int bits);
-static int ReadBand_Fmt0(SoundDecoder* soundDecoder, int offset, int bits);
-static int ReadBand_Fmt3_16(SoundDecoder* soundDecoder, int offset, int bits);
-static int ReadBand_Fmt17(SoundDecoder* soundDecoder, int offset, int bits);
-static int ReadBand_Fmt18(SoundDecoder* soundDecoder, int offset, int bits);
-static int ReadBand_Fmt19(SoundDecoder* soundDecoder, int offset, int bits);
-static int ReadBand_Fmt20(SoundDecoder* soundDecoder, int offset, int bits);
-static int ReadBand_Fmt21(SoundDecoder* soundDecoder, int offset, int bits);
-static int ReadBand_Fmt22(SoundDecoder* soundDecoder, int offset, int bits);
-static int ReadBand_Fmt23(SoundDecoder* soundDecoder, int offset, int bits);
-static int ReadBand_Fmt24(SoundDecoder* soundDecoder, int offset, int bits);
-static int ReadBand_Fmt26(SoundDecoder* soundDecoder, int offset, int bits);
-static int ReadBand_Fmt27(SoundDecoder* soundDecoder, int offset, int bits);
-static int ReadBand_Fmt29(SoundDecoder* soundDecoder, int offset, int bits);
-static bool ReadBands(SoundDecoder* soundDecoder);
-static void untransform_subband0(unsigned char* a1, unsigned char* a2, int a3, int a4);
-static void untransform_subband(unsigned char* a1, unsigned char* a2, int a3, int a4);
-static void untransform_all(SoundDecoder* soundDecoder);
-static bool soundDecoderFill(SoundDecoder* soundDecoder);
+static int ReadBand_Fail(SoundDecoder *soundDecoder, int offset, int bits);
+static int ReadBand_Fmt0(SoundDecoder *soundDecoder, int offset, int bits);
+static int ReadBand_Fmt3_16(SoundDecoder *soundDecoder, int offset, int bits);
+static int ReadBand_Fmt17(SoundDecoder *soundDecoder, int offset, int bits);
+static int ReadBand_Fmt18(SoundDecoder *soundDecoder, int offset, int bits);
+static int ReadBand_Fmt19(SoundDecoder *soundDecoder, int offset, int bits);
+static int ReadBand_Fmt20(SoundDecoder *soundDecoder, int offset, int bits);
+static int ReadBand_Fmt21(SoundDecoder *soundDecoder, int offset, int bits);
+static int ReadBand_Fmt22(SoundDecoder *soundDecoder, int offset, int bits);
+static int ReadBand_Fmt23(SoundDecoder *soundDecoder, int offset, int bits);
+static int ReadBand_Fmt24(SoundDecoder *soundDecoder, int offset, int bits);
+static int ReadBand_Fmt26(SoundDecoder *soundDecoder, int offset, int bits);
+static int ReadBand_Fmt27(SoundDecoder *soundDecoder, int offset, int bits);
+static int ReadBand_Fmt29(SoundDecoder *soundDecoder, int offset, int bits);
+static bool ReadBands(SoundDecoder *soundDecoder);
+static void untransform_subband0(unsigned char *a1, unsigned char *a2, int a3, int a4);
+static void untransform_subband(unsigned char *a1, unsigned char *a2, int a3, int a4);
+static void untransform_all(SoundDecoder *soundDecoder);
+static bool soundDecoderFill(SoundDecoder *soundDecoder);
 
-static inline void soundDecoderRequireBits(SoundDecoder* soundDecoder, int bits);
-static inline void soundDecoderDropBits(SoundDecoder* soundDecoder, int bits);
-static int ReadBand_Fmt31(SoundDecoder* soundDecoder, int offset, int bits);
+static inline void soundDecoderRequireBits(SoundDecoder *soundDecoder, int bits);
+static inline void soundDecoderDropBits(SoundDecoder *soundDecoder, int bits);
+static int ReadBand_Fmt31(SoundDecoder *soundDecoder, int offset, int bits);
 
 // 0x51E328
 static int gSoundDecodersCount = 0;
@@ -93,17 +93,17 @@ static unsigned char pack3_3[32];
 static unsigned short pack5_3[128];
 
 // 0x6ADB00
-static unsigned char* _AudioDecoder_scale0;
+static unsigned char *_AudioDecoder_scale0;
 
 // 0x6ADB04
-static unsigned char* _AudioDecoder_scale_tbl;
+static unsigned char *_AudioDecoder_scale_tbl;
 
 // 0x4D3BB0
-static bool soundDecoderPrepare(SoundDecoder* soundDecoder, SoundDecoderReadProc* readProc, void* data) {
+static bool soundDecoderPrepare(SoundDecoder *soundDecoder, SoundDecoderReadProc *readProc, void *data) {
 	soundDecoder->readProc = readProc;
 	soundDecoder->data = data;
 
-	soundDecoder->bufferIn = (unsigned char*)malloc(SOUND_DECODER_IN_BUFFER_SIZE);
+	soundDecoder->bufferIn = (unsigned char *)malloc(SOUND_DECODER_IN_BUFFER_SIZE);
 	if (soundDecoder->bufferIn == NULL) {
 		return false;
 	}
@@ -115,7 +115,7 @@ static bool soundDecoderPrepare(SoundDecoder* soundDecoder, SoundDecoderReadProc
 }
 
 // 0x4D3BE0
-static unsigned char soundDecoderReadNextChunk(SoundDecoder* soundDecoder) {
+static unsigned char soundDecoderReadNextChunk(SoundDecoder *soundDecoder) {
 	soundDecoder->remainingInSize = soundDecoder->readProc(soundDecoder->data, soundDecoder->bufferIn, soundDecoder->bufferInSize);
 	if (soundDecoder->remainingInSize == 0) {
 		memset(soundDecoder->bufferIn, 0, soundDecoder->bufferInSize);
@@ -166,13 +166,13 @@ static void init_pack_tables() {
 }
 
 // 0x4D3D9C
-static int ReadBand_Fail(SoundDecoder* soundDecoder, int offset, int bits) {
+static int ReadBand_Fail(SoundDecoder *soundDecoder, int offset, int bits) {
 	return 0;
 }
 
 // 0x4D3DA0
-static int ReadBand_Fmt0(SoundDecoder* soundDecoder, int offset, int bits) {
-	int* p = (int*)soundDecoder->samples;
+static int ReadBand_Fmt0(SoundDecoder *soundDecoder, int offset, int bits) {
+	int *p = (int *)soundDecoder->samples;
 	p += offset;
 
 	int i = soundDecoder->samples_per_subband;
@@ -186,14 +186,14 @@ static int ReadBand_Fmt0(SoundDecoder* soundDecoder, int offset, int bits) {
 }
 
 // 0x4D3DC8
-static int ReadBand_Fmt3_16(SoundDecoder* soundDecoder, int offset, int bits) {
+static int ReadBand_Fmt3_16(SoundDecoder *soundDecoder, int offset, int bits) {
 	int value;
 	int v14;
 
-	short* base = (short*)_AudioDecoder_scale0;
+	short *base = (short *)_AudioDecoder_scale0;
 	base += (int)(UINT_MAX << (bits - 1));
 
-	int* p = (int*)soundDecoder->samples;
+	int *p = (int *)soundDecoder->samples;
 	p += offset;
 
 	v14 = (1 << bits) - 1;
@@ -214,10 +214,10 @@ static int ReadBand_Fmt3_16(SoundDecoder* soundDecoder, int offset, int bits) {
 }
 
 // 0x4D3E90
-static int ReadBand_Fmt17(SoundDecoder* soundDecoder, int offset, int bits) {
-	short* base = (short*)_AudioDecoder_scale0;
+static int ReadBand_Fmt17(SoundDecoder *soundDecoder, int offset, int bits) {
+	short *base = (short *)_AudioDecoder_scale0;
 
-	int* p = (int*)soundDecoder->samples;
+	int *p = (int *)soundDecoder->samples;
 	p += offset;
 
 	int i = soundDecoder->samples_per_subband;
@@ -267,10 +267,10 @@ static int ReadBand_Fmt17(SoundDecoder* soundDecoder, int offset, int bits) {
 }
 
 // 0x4D3F98
-static int ReadBand_Fmt18(SoundDecoder* soundDecoder, int offset, int bits) {
-	short* base = (short*)_AudioDecoder_scale0;
+static int ReadBand_Fmt18(SoundDecoder *soundDecoder, int offset, int bits) {
+	short *base = (short *)_AudioDecoder_scale0;
 
-	int* p = (int*)soundDecoder->samples;
+	int *p = (int *)soundDecoder->samples;
 	p += offset;
 
 	int i = soundDecoder->samples_per_subband;
@@ -304,11 +304,11 @@ static int ReadBand_Fmt18(SoundDecoder* soundDecoder, int offset, int bits) {
 }
 
 // 0x4D4068
-static int ReadBand_Fmt19(SoundDecoder* soundDecoder, int offset, int bits) {
-	short* base = (short*)_AudioDecoder_scale0;
+static int ReadBand_Fmt19(SoundDecoder *soundDecoder, int offset, int bits) {
+	short *base = (short *)_AudioDecoder_scale0;
 	base -= 1;
 
-	int* p = (int*)soundDecoder->samples;
+	int *p = (int *)soundDecoder->samples;
 	p += offset;
 
 	int i = soundDecoder->samples_per_subband;
@@ -341,10 +341,10 @@ static int ReadBand_Fmt19(SoundDecoder* soundDecoder, int offset, int bits) {
 }
 
 // 0x4D4158
-static int ReadBand_Fmt20(SoundDecoder* soundDecoder, int offset, int bits) {
-	short* base = (short*)_AudioDecoder_scale0;
+static int ReadBand_Fmt20(SoundDecoder *soundDecoder, int offset, int bits) {
+	short *base = (short *)_AudioDecoder_scale0;
 
-	int* p = (int*)soundDecoder->samples;
+	int *p = (int *)soundDecoder->samples;
 	p += offset;
 
 	int i = soundDecoder->samples_per_subband;
@@ -403,10 +403,10 @@ static int ReadBand_Fmt20(SoundDecoder* soundDecoder, int offset, int bits) {
 }
 
 // 0x4D4254
-static int ReadBand_Fmt21(SoundDecoder* soundDecoder, int offset, int bits) {
-	short* base = (short*)_AudioDecoder_scale0;
+static int ReadBand_Fmt21(SoundDecoder *soundDecoder, int offset, int bits) {
+	short *base = (short *)_AudioDecoder_scale0;
 
-	int* p = (int*)soundDecoder->samples;
+	int *p = (int *)soundDecoder->samples;
 	p += offset;
 
 	int i = soundDecoder->samples_per_subband;
@@ -449,11 +449,11 @@ static int ReadBand_Fmt21(SoundDecoder* soundDecoder, int offset, int bits) {
 }
 
 // 0x4D4338
-static int ReadBand_Fmt22(SoundDecoder* soundDecoder, int offset, int bits) {
-	short* base = (short*)_AudioDecoder_scale0;
+static int ReadBand_Fmt22(SoundDecoder *soundDecoder, int offset, int bits) {
+	short *base = (short *)_AudioDecoder_scale0;
 	base -= 2;
 
-	int* p = (int*)soundDecoder->samples;
+	int *p = (int *)soundDecoder->samples;
 	p += offset;
 
 	int i = soundDecoder->samples_per_subband;
@@ -490,10 +490,10 @@ static int ReadBand_Fmt22(SoundDecoder* soundDecoder, int offset, int bits) {
 }
 
 // 0x4D4434
-static int ReadBand_Fmt23(SoundDecoder* soundDecoder, int offset, int bits) {
-	short* base = (short*)_AudioDecoder_scale0;
+static int ReadBand_Fmt23(SoundDecoder *soundDecoder, int offset, int bits) {
+	short *base = (short *)_AudioDecoder_scale0;
 
-	int* p = (int*)soundDecoder->samples;
+	int *p = (int *)soundDecoder->samples;
 	p += offset;
 
 	int i = soundDecoder->samples_per_subband;
@@ -558,10 +558,10 @@ static int ReadBand_Fmt23(SoundDecoder* soundDecoder, int offset, int bits) {
 }
 
 // 0x4D4584
-static int ReadBand_Fmt24(SoundDecoder* soundDecoder, int offset, int bits) {
-	short* base = (short*)_AudioDecoder_scale0;
+static int ReadBand_Fmt24(SoundDecoder *soundDecoder, int offset, int bits) {
+	short *base = (short *)_AudioDecoder_scale0;
 
-	int* p = (int*)soundDecoder->samples;
+	int *p = (int *)soundDecoder->samples;
 	p += offset;
 
 	int i = soundDecoder->samples_per_subband;
@@ -611,10 +611,10 @@ static int ReadBand_Fmt24(SoundDecoder* soundDecoder, int offset, int bits) {
 }
 
 // 0x4D4698
-static int ReadBand_Fmt26(SoundDecoder* soundDecoder, int offset, int bits) {
-	short* base = (short*)_AudioDecoder_scale0;
+static int ReadBand_Fmt26(SoundDecoder *soundDecoder, int offset, int bits) {
+	short *base = (short *)_AudioDecoder_scale0;
 
-	int* p = (int*)soundDecoder->samples;
+	int *p = (int *)soundDecoder->samples;
 	p += offset;
 
 	int i = soundDecoder->samples_per_subband;
@@ -666,10 +666,10 @@ static int ReadBand_Fmt26(SoundDecoder* soundDecoder, int offset, int bits) {
 }
 
 // 0x4D47A4
-static int ReadBand_Fmt27(SoundDecoder* soundDecoder, int offset, int bits) {
-	short* base = (short*)_AudioDecoder_scale0;
+static int ReadBand_Fmt27(SoundDecoder *soundDecoder, int offset, int bits) {
+	short *base = (short *)_AudioDecoder_scale0;
 
-	int* p = (int*)soundDecoder->samples;
+	int *p = (int *)soundDecoder->samples;
 	p += offset;
 
 	int i = soundDecoder->samples_per_subband;
@@ -705,10 +705,10 @@ static int ReadBand_Fmt27(SoundDecoder* soundDecoder, int offset, int bits) {
 }
 
 // 0x4D4870
-static int ReadBand_Fmt29(SoundDecoder* soundDecoder, int offset, int bits) {
-	short* base = (short*)_AudioDecoder_scale0;
+static int ReadBand_Fmt29(SoundDecoder *soundDecoder, int offset, int bits) {
+	short *base = (short *)_AudioDecoder_scale0;
 
-	int* p = (int*)soundDecoder->samples;
+	int *p = (int *)soundDecoder->samples;
 	p += offset;
 
 	int i = soundDecoder->samples_per_subband;
@@ -736,12 +736,12 @@ static int ReadBand_Fmt29(SoundDecoder* soundDecoder, int offset, int bits) {
 }
 
 // 0x4D493C
-static bool ReadBands(SoundDecoder* soundDecoder) {
+static bool ReadBands(SoundDecoder *soundDecoder) {
 	int v9;
 	int v15;
 	int v17;
 	int v19;
-	unsigned short* v18;
+	unsigned short *v18;
 	int v21;
 	ReadBandFunc fn;
 
@@ -755,7 +755,7 @@ static bool ReadBands(SoundDecoder* soundDecoder) {
 
 	v17 = 1 << v9;
 
-	v18 = (unsigned short*)_AudioDecoder_scale0;
+	v18 = (unsigned short *)_AudioDecoder_scale0;
 	v19 = v17;
 	v21 = 0;
 	while (v19--) {
@@ -763,7 +763,7 @@ static bool ReadBands(SoundDecoder* soundDecoder) {
 		v21 += v15;
 	}
 
-	v18 = (unsigned short*)_AudioDecoder_scale0;
+	v18 = (unsigned short *)_AudioDecoder_scale0;
 	v19 = v17;
 	v21 = -v15;
 	while (v19--) {
@@ -788,10 +788,10 @@ static bool ReadBands(SoundDecoder* soundDecoder) {
 }
 
 // 0x4D4ADC
-static void untransform_subband0(unsigned char* a1, unsigned char* a2, int a3, int a4) {
-	short* p;
+static void untransform_subband0(unsigned char *a1, unsigned char *a2, int a3, int a4) {
+	short *p;
 
-	p = (short*)a2;
+	p = (short *)a2;
 	p += a3;
 
 	if (a4 == 2) {
@@ -801,23 +801,23 @@ static void untransform_subband0(unsigned char* a1, unsigned char* a2, int a3, i
 		}
 	} else if (a4 == 4) {
 		int v31 = a3;
-		int* v9 = (int*)a2;
+		int *v9 = (int *)a2;
 		v9 += a3;
 
-		int* v10 = (int*)a2;
+		int *v10 = (int *)a2;
 		v10 += a3 * 3;
 
-		int* v11 = (int*)a2;
+		int *v11 = (int *)a2;
 		v11 += a3 * 2;
 
 		while (v31 != 0) {
-			int* v33 = (int*)a2;
-			int* v34 = (int*)a1;
+			int *v33 = (int *)a2;
+			int *v34 = (int *)a1;
 
 			int v12 = *v34 >> 16;
 
 			int v13 = *v33;
-			*v33 = (int)(*(short*)v34) + 2 * v12 + v13;
+			*v33 = (int)(*(short *)v34) + 2 * v12 + v13;
 
 			int v14 = *v9;
 			*v9 = 2 * v13 - v12 - v14;
@@ -832,8 +832,8 @@ static void untransform_subband0(unsigned char* a1, unsigned char* a2, int a3, i
 			v11++;
 			v9++;
 
-			*(short*)a1 = v15 & 0xFFFF;
-			*(short*)(a1 + 2) = v16 & 0xFFFF;
+			*(short *)a1 = v15 & 0xFFFF;
+			*(short *)(a1 + 2) = v16 & 0xFFFF;
 
 			a1 += 4;
 			a2 += 4;
@@ -844,15 +844,15 @@ static void untransform_subband0(unsigned char* a1, unsigned char* a2, int a3, i
 		int v30 = a4 >> 1;
 		int v32 = a3;
 		while (v32 != 0) {
-			int* v19 = (int*)a2;
+			int *v19 = (int *)a2;
 
 			int v20;
 			int v22;
 			if (v30 & 0x01) {
 
 			} else {
-				v20 = (int)*(short*)a1;
-				v22 = *(int*)a1 >> 16;
+				v20 = (int)*(short *)a1;
+				v22 = *(int *)a1 >> 16;
 			}
 
 			int v23 = v30 >> 1;
@@ -874,8 +874,8 @@ static void untransform_subband0(unsigned char* a1, unsigned char* a2, int a3, i
 				v19 += a3;
 			}
 
-			*(short*)a1 = v20 & 0xFFFF;
-			*(short*)(a1 + 2) = v22 & 0xFFFF;
+			*(short *)a1 = v20 & 0xFFFF;
+			*(short *)(a1 + 2) = v22 & 0xFFFF;
 
 			a1 += 4;
 			a2 += 4;
@@ -885,52 +885,52 @@ static void untransform_subband0(unsigned char* a1, unsigned char* a2, int a3, i
 }
 
 // 0x4D4D1C
-static void untransform_subband(unsigned char* a1, unsigned char* a2, int a3, int a4) {
+static void untransform_subband(unsigned char *a1, unsigned char *a2, int a3, int a4) {
 	int v13;
-	int* v14;
-	int* v25;
-	int* v26;
+	int *v14;
+	int *v25;
+	int *v26;
 	int v15;
 	int v16;
 	int v17;
 
-	int* v18;
+	int *v18;
 	int v19;
-	int* v20;
-	int* v21;
+	int *v20;
+	int *v21;
 
-	v26 = (int*)a1;
-	v25 = (int*)a2;
+	v26 = (int *)a1;
+	v25 = (int *)a2;
 
 	if (a4 == 4) {
-		unsigned char* v4 = a2 + 4 * a3;
-		unsigned char* v5 = a2 + 3 * a3;
-		unsigned char* v6 = a2 + 2 * a3;
+		unsigned char *v4 = a2 + 4 * a3;
+		unsigned char *v5 = a2 + 3 * a3;
+		unsigned char *v6 = a2 + 2 * a3;
 		int v7;
 		int v8;
 		int v9;
 		int v10;
 		int v11;
 		while (a3--) {
-			v7 = *(unsigned int*)(v26 + 4);
-			v8 = *(unsigned int*)v25;
-			*(unsigned int*)v25 = *(unsigned int*)v26 + 2 * v7;
+			v7 = *(unsigned int *)(v26 + 4);
+			v8 = *(unsigned int *)v25;
+			*(unsigned int *)v25 = *(unsigned int *)v26 + 2 * v7;
 
-			v9 = *(unsigned int*)v4;
-			*(unsigned int*)v4 = 2 * v8 - v7 - v9;
+			v9 = *(unsigned int *)v4;
+			*(unsigned int *)v4 = 2 * v8 - v7 - v9;
 
-			v10 = *(unsigned int*)v6;
+			v10 = *(unsigned int *)v6;
 			v5 += 4;
 			*v6 += 2 * v9 + v8;
 
-			v11 = *(unsigned int*)(v5 - 4);
+			v11 = *(unsigned int *)(v5 - 4);
 			v6 += 4;
 
-			*(unsigned int*)(v5 - 4) = 2 * v10 - v9 - v11;
+			*(unsigned int *)(v5 - 4) = 2 * v10 - v9 - v11;
 			v4 += 4;
 
-			*(unsigned int*)v26 = v10;
-			*(unsigned int*)(v26 + 4) = v11;
+			*(unsigned int *)v26 = v10;
+			*(unsigned int *)(v26 + 4) = v11;
 
 			v26 += 2;
 			v25 += 1;
@@ -975,14 +975,14 @@ static void untransform_subband(unsigned char* a1, unsigned char* a2, int a3, in
 }
 
 // 0x4D4E80
-static void untransform_all(SoundDecoder* soundDecoder) {
+static void untransform_all(SoundDecoder *soundDecoder) {
 	int v8;
-	unsigned char* ptr;
+	unsigned char *ptr;
 	int v3;
 	int v4;
-	unsigned char* j;
+	unsigned char *j;
 	int v6;
-	int* v5;
+	int *v5;
 
 	if (!soundDecoder->levels) {
 		return;
@@ -1002,7 +1002,7 @@ static void untransform_all(SoundDecoder* soundDecoder) {
 
 		untransform_subband0(soundDecoder->prev_samples, ptr, v3, v4);
 
-		v5 = (int*)ptr;
+		v5 = (int *)ptr;
 		for (v6 = 0; v6 < v4; v6++) {
 			*v5 += 1;
 			v5 += v3;
@@ -1027,7 +1027,7 @@ static void untransform_all(SoundDecoder* soundDecoder) {
 // NOTE: Inlined.
 //
 // 0x4D4F58
-static bool soundDecoderFill(SoundDecoder* soundDecoder) {
+static bool soundDecoderFill(SoundDecoder *soundDecoder) {
 	// CE: Implementation is slightly different. `ReadBands` now handles new
 	// Fmt31 used in some Russian localizations. The appropriate handler acts as
 	// both decoder and transformer, so there is no need to untransform bands
@@ -1050,12 +1050,12 @@ static bool soundDecoderFill(SoundDecoder* soundDecoder) {
 }
 
 // 0x4D4FA0
-size_t soundDecoderDecode(SoundDecoder* soundDecoder, void* buffer, size_t size) {
-	unsigned char* dest;
-	unsigned char* samp_ptr;
+size_t soundDecoderDecode(SoundDecoder *soundDecoder, void *buffer, size_t size) {
+	unsigned char *dest;
+	unsigned char *samp_ptr;
 	int samp_cnt;
 
-	dest = (unsigned char*)buffer;
+	dest = (unsigned char *)buffer;
 	samp_ptr = soundDecoder->samp_ptr;
 	samp_cnt = soundDecoder->samp_cnt;
 
@@ -1075,9 +1075,9 @@ size_t soundDecoderDecode(SoundDecoder* soundDecoder, void* buffer, size_t size)
 			samp_cnt = soundDecoder->samp_cnt;
 		}
 
-		int sample = *(int*)samp_ptr;
+		int sample = *(int *)samp_ptr;
 		samp_ptr += 4;
-		*(unsigned short*)(dest + bytesRead) = (sample >> soundDecoder->levels) & 0xFFFF;
+		*(unsigned short *)(dest + bytesRead) = (sample >> soundDecoder->levels) & 0xFFFF;
 		samp_cnt--;
 	}
 
@@ -1088,7 +1088,7 @@ size_t soundDecoderDecode(SoundDecoder* soundDecoder, void* buffer, size_t size)
 }
 
 // 0x4D5048
-void soundDecoderFree(SoundDecoder* soundDecoder) {
+void soundDecoderFree(SoundDecoder *soundDecoder) {
 	if (soundDecoder->bufferIn != NULL) {
 		free(soundDecoder->bufferIn);
 	}
@@ -1114,12 +1114,12 @@ void soundDecoderFree(SoundDecoder* soundDecoder) {
 }
 
 // 0x4D50A8
-SoundDecoder* soundDecoderInit(SoundDecoderReadProc* readProc, void* data, int* channelsPtr, int* sampleRatePtr, int* sampleCountPtr) {
+SoundDecoder *soundDecoderInit(SoundDecoderReadProc *readProc, void *data, int *channelsPtr, int *sampleRatePtr, int *sampleCountPtr) {
 	int v14;
 	int v20;
 	int v73;
 
-	SoundDecoder* soundDecoder = (SoundDecoder*)malloc(sizeof(*soundDecoder));
+	SoundDecoder *soundDecoder = (SoundDecoder *)malloc(sizeof(*soundDecoder));
 	if (soundDecoder == NULL) {
 		return NULL;
 	}
@@ -1191,15 +1191,15 @@ SoundDecoder* soundDecoderInit(SoundDecoderReadProc* readProc, void* data, int* 
 	soundDecoder->block_total_samples = soundDecoder->block_samples_per_subband * soundDecoder->subbands;
 
 	if (v73 != 0) {
-		soundDecoder->prev_samples = (unsigned char*)malloc(sizeof(unsigned char*) * v73);
+		soundDecoder->prev_samples = (unsigned char *)malloc(sizeof(unsigned char *) * v73);
 		if (soundDecoder->prev_samples == NULL) {
 			goto L66;
 		}
 
-		memset(soundDecoder->prev_samples, 0, sizeof(unsigned char*) * v73);
+		memset(soundDecoder->prev_samples, 0, sizeof(unsigned char *) * v73);
 	}
 
-	soundDecoder->samples = (unsigned char*)malloc(sizeof(unsigned char*) * soundDecoder->total_samples);
+	soundDecoder->samples = (unsigned char *)malloc(sizeof(unsigned char *) * soundDecoder->total_samples);
 	if (soundDecoder->samples == NULL) {
 		goto L66;
 	}
@@ -1207,7 +1207,7 @@ SoundDecoder* soundDecoderInit(SoundDecoderReadProc* readProc, void* data, int* 
 	soundDecoder->samp_cnt = 0;
 
 	if (gSoundDecodersCount == 1) {
-		_AudioDecoder_scale_tbl = (unsigned char*)malloc(0x20000);
+		_AudioDecoder_scale_tbl = (unsigned char *)malloc(0x20000);
 		_AudioDecoder_scale0 = _AudioDecoder_scale_tbl + 0x10000;
 	}
 
@@ -1228,7 +1228,7 @@ L66:
 	return 0;
 }
 
-static inline void soundDecoderRequireBits(SoundDecoder* soundDecoder, int bits) {
+static inline void soundDecoderRequireBits(SoundDecoder *soundDecoder, int bits) {
 	while (soundDecoder->bits < bits) {
 		soundDecoder->remainingInSize--;
 
@@ -1243,13 +1243,13 @@ static inline void soundDecoderRequireBits(SoundDecoder* soundDecoder, int bits)
 	}
 }
 
-static inline void soundDecoderDropBits(SoundDecoder* soundDecoder, int bits) {
+static inline void soundDecoderDropBits(SoundDecoder *soundDecoder, int bits) {
 	soundDecoder->hold >>= bits;
 	soundDecoder->bits -= bits;
 }
 
-static int ReadBand_Fmt31(SoundDecoder* soundDecoder, int offset, int bits) {
-	int* samples = (int*)soundDecoder->samples;
+static int ReadBand_Fmt31(SoundDecoder *soundDecoder, int offset, int bits) {
+	int *samples = (int *)soundDecoder->samples;
 
 	int remaining_samples = soundDecoder->total_samples;
 	while (remaining_samples != 0) {
@@ -1265,4 +1265,4 @@ static int ReadBand_Fmt31(SoundDecoder* soundDecoder, int offset, int bits) {
 	return 0;
 }
 
-} // namespace fallout
+} // namespace Fallout2
