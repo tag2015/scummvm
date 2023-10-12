@@ -1,16 +1,16 @@
-#include "audio_file.h"
+#include "fallout2/audio_file.h"
 
-#include <assert.h>
+/*#include <assert.h>
 #include <stdio.h>
-#include <string.h>
+#include <string.h>*/
 
-#include "debug.h"
-#include "memory_manager.h"
-#include "platform_compat.h"
-#include "sound.h"
-#include "sound_decoder.h"
+#include "fallout2/debug.h"
+#include "fallout2/memory_manager.h"
+#include "fallout2/platform_compat.h"
+#include "fallout2/sound.h"
+#include "fallout2/sound_decoder.h"
 
-namespace fallout {
+namespace Fallout2 {
 
 typedef enum AudioFileFlags {
 	AUDIO_FILE_IN_USE = 0x01,
@@ -19,45 +19,48 @@ typedef enum AudioFileFlags {
 
 typedef struct AudioFile {
 	int flags;
-	FILE* stream;
-	SoundDecoder* soundDecoder;
+	Common::File *stream;
+	SoundDecoder *soundDecoder;
 	int fileSize;
 	int sampleRate;
 	int channels;
 	int position;
 } AudioFile;
 
-static bool defaultCompressionFunc(char* filePath);
-static int audioFileSoundDecoderReadHandler(void* data, void* buffer, unsigned int size);
+static bool defaultCompressionFunc(char *filePath);
+static int audioFileSoundDecoderReadHandler(void *data, void *buffer, unsigned int size);
 
 // 0x5108C0
-static AudioFileQueryCompressedFunc* queryCompressedFunc = defaultCompressionFunc;
+static AudioFileQueryCompressedFunc *queryCompressedFunc = defaultCompressionFunc;
 
 // 0x56CB10
-static AudioFile* gAudioFileList;
+static AudioFile *gAudioFileList;
 
 // 0x56CB14
 static int gAudioFileListLength;
 
 // 0x41A850
-static bool defaultCompressionFunc(char* filePath) {
-	char* pch = strrchr(filePath, '.');
+static bool defaultCompressionFunc(char *filePath) {
+	char *pch = strrchr(filePath, '.');
 	if (pch != NULL) {
-		strcpy(pch + 1, "raw");
+		strncpy(pch + 1, "raw", 4);
 	}
 
 	return false;
 }
 
 // 0x41A870
-static int audioFileSoundDecoderReadHandler(void* data, void* buffer, unsigned int size) {
-	return fread(buffer, 1, size, reinterpret_cast<FILE*>(data));
+static int audioFileSoundDecoderReadHandler(void *data, void *buffer, unsigned int size) {
+
+//	return fread(buffer, 1, size, reinterpret_cast<FILE *>(data));
+	return reinterpret_cast<Common::File *>(data)->read(buffer, size);
+
 }
 
 // 0x41A88C
-int audioFileOpen(const char* fname, int* sampleRate) {
+int audioFileOpen(const char *fname, int *sampleRate) {
 	char path[COMPAT_MAX_PATH];
-	strcpy(path, fname);
+	strncpy(path, fname, COMPAT_MAX_PATH - 1);
 
 	int compression;
 	if (queryCompressedFunc(path)) {
@@ -66,7 +69,7 @@ int audioFileOpen(const char* fname, int* sampleRate) {
 		compression = 0;
 	}
 
-	FILE* stream = compat_fopen(path, "rb");
+	Common::File *stream = compat_fopen(path, "rb");
 	if (stream == NULL) {
 		return -1;
 	}
@@ -80,14 +83,14 @@ int audioFileOpen(const char* fname, int* sampleRate) {
 
 	if (index == gAudioFileListLength) {
 		if (gAudioFileList != NULL) {
-			gAudioFileList = (AudioFile*)internal_realloc_safe(gAudioFileList, sizeof(*gAudioFileList) * (gAudioFileListLength + 1), __FILE__, __LINE__); // "..\int\audiof.c", 207
+			gAudioFileList = (AudioFile *)internal_realloc_safe(gAudioFileList, sizeof(*gAudioFileList) * (gAudioFileListLength + 1), __FILE__, __LINE__); // "..\int\audiof.c", 207
 		} else {
-			gAudioFileList = (AudioFile*)internal_malloc_safe(sizeof(*gAudioFileList), __FILE__, __LINE__); // "..\int\audiof.c", 209
+			gAudioFileList = (AudioFile *)internal_malloc_safe(sizeof(*gAudioFileList), __FILE__, __LINE__); // "..\int\audiof.c", 209
 		}
 		gAudioFileListLength++;
 	}
 
-	AudioFile* audioFile = &(gAudioFileList[index]);
+	AudioFile *audioFile = &(gAudioFileList[index]);
 	audioFile->flags = AUDIO_FILE_IN_USE;
 	audioFile->stream = stream;
 
@@ -108,8 +111,9 @@ int audioFileOpen(const char* fname, int* sampleRate) {
 
 // 0x41AAA0
 int audioFileClose(int handle) {
-	AudioFile* audioFile = &(gAudioFileList[handle - 1]);
-	fclose(audioFile->stream);
+	AudioFile *audioFile = &(gAudioFileList[handle - 1]);
+//	fclose(audioFile->stream);
+	audioFile->stream->close();
 
 	if ((audioFile->flags & AUDIO_FILE_COMPRESSED) != 0) {
 		soundDecoderFree(audioFile->soundDecoder);
@@ -122,15 +126,16 @@ int audioFileClose(int handle) {
 }
 
 // 0x41AB08
-int audioFileRead(int handle, void* buffer, unsigned int size) {
+int audioFileRead(int handle, void *buffer, unsigned int size) {
 
-	AudioFile* ptr = &(gAudioFileList[handle - 1]);
+	AudioFile *ptr = &(gAudioFileList[handle - 1]);
 
 	int bytesRead;
 	if ((ptr->flags & AUDIO_FILE_COMPRESSED) != 0) {
 		bytesRead = soundDecoderDecode(ptr->soundDecoder, buffer, size);
 	} else {
-		bytesRead = fread(buffer, 1, size, ptr->stream);
+//		bytesRead = fread(buffer, 1, size, ptr->stream);
+		bytesRead = ptr->stream->read(buffer, size);
 	}
 
 	ptr->position += bytesRead;
@@ -140,11 +145,11 @@ int audioFileRead(int handle, void* buffer, unsigned int size) {
 
 // 0x41AB74
 long audioFileSeek(int handle, long offset, int origin) {
-	void* buf;
+	void *buf;
 	int remaining;
 	int a4;
 
-	AudioFile* audioFile = &(gAudioFileList[handle - 1]);
+	AudioFile *audioFile = &(gAudioFileList[handle - 1]);
 
 	switch (origin) {
 	case SEEK_SET:
@@ -164,7 +169,8 @@ long audioFileSeek(int handle, long offset, int origin) {
 		if (a4 <= audioFile->position) {
 			soundDecoderFree(audioFile->soundDecoder);
 
-			fseek(audioFile->stream, 0, 0);
+//			fseek(audioFile->stream, 0, 0);
+			audioFile->stream->seek(0, 0);
 
 			audioFile->soundDecoder = soundDecoderInit(audioFileSoundDecoderReadHandler, audioFile->stream, &(audioFile->channels), &(audioFile->sampleRate), &(audioFile->fileSize));
 			audioFile->fileSize *= 2;
@@ -196,30 +202,31 @@ long audioFileSeek(int handle, long offset, int origin) {
 		return audioFile->position;
 	}
 
-	return fseek(audioFile->stream, offset, origin);
+//	return fseek(audioFile->stream, offset, origin);
+	return audioFile->stream->seek(offset, origin) ? 0 : 1;
 }
 
 // 0x41AD20
 long audioFileGetSize(int handle) {
-	AudioFile* audioFile = &(gAudioFileList[handle - 1]);
+	AudioFile *audioFile = &(gAudioFileList[handle - 1]);
 	return audioFile->fileSize;
 }
 
 // 0x41AD3C
 long audioFileTell(int handle) {
-	AudioFile* audioFile = &(gAudioFileList[handle - 1]);
+	AudioFile *audioFile = &(gAudioFileList[handle - 1]);
 	return audioFile->position;
 }
 
 // AudiofWrite
 // 0x41AD58
-int audioFileWrite(int handle, const void* buffer, unsigned int size) {
+int audioFileWrite(int handle, const void *buffer, unsigned int size) {
 	debugPrint("AudiofWrite shouldn't be ever called\n");
 	return 0;
 }
 
 // 0x41AD68
-int audioFileInit(AudioFileQueryCompressedFunc* func) {
+int audioFileInit(AudioFileQueryCompressedFunc *func) {
 	queryCompressedFunc = func;
 	gAudioFileList = NULL;
 	gAudioFileListLength = 0;
@@ -237,4 +244,4 @@ void audioFileExit() {
 	gAudioFileList = NULL;
 }
 
-} // namespace fallout
+} // namespace Fallout2
