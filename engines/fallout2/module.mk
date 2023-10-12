@@ -8,6 +8,7 @@ MODULE_OBJS = \
 	art.o \
 	animation.o \
 	audio.o \
+	audio_engine.o \
 	audio_file.o \
 	automap.o \
 	cache.o \
