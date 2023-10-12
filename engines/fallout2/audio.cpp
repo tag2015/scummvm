@@ -1,16 +1,16 @@
-#include "audio.h"
+#include "fallout2/audio.h"
 
-#include <assert.h>
+/* #include <assert.h>
 #include <stdio.h>
-#include <string.h>
+#include <string.h> */
 
-#include "db.h"
-#include "debug.h"
-#include "memory_manager.h"
-#include "sound.h"
-#include "sound_decoder.h"
+#include "fallout2/db.h"
+#include "fallout2/debug.h"
+#include "fallout2/memory_manager.h"
+#include "fallout2/sound.h"
+#include "fallout2/sound_decoder.h"
 
-namespace fallout {
+namespace Fallout2 {
 
 typedef enum AudioFlags {
 	AUDIO_IN_USE = 0x01,
@@ -19,44 +19,44 @@ typedef enum AudioFlags {
 
 typedef struct Audio {
 	int flags;
-	File* stream;
-	SoundDecoder* soundDecoder;
+	File *stream;
+	SoundDecoder *soundDecoder;
 	int fileSize;
 	int sampleRate;
 	int channels;
 	int position;
 } Audio;
 
-static bool defaultCompressionFunc(char* filePath);
-static int audioSoundDecoderReadHandler(void* data, void* buf, unsigned int size);
+static bool defaultCompressionFunc(char *filePath);
+static int audioSoundDecoderReadHandler(void *data, void *buf, unsigned int size);
 
 // 0x5108BC
-static AudioQueryCompressedFunc* queryCompressedFunc = defaultCompressionFunc;
+static AudioQueryCompressedFunc *queryCompressedFunc = defaultCompressionFunc;
 
 // 0x56CB00
 static int gAudioListLength;
 
 // 0x56CB04
-static Audio* gAudioList;
+static Audio *gAudioList;
 
 // 0x41A2B0
-static bool defaultCompressionFunc(char* filePath) {
-	char* pch = strrchr(filePath, '.');
+static bool defaultCompressionFunc(char *filePath) {
+	char *pch = strrchr(filePath, '.');
 	if (pch != NULL) {
-		strcpy(pch + 1, "raw");
+		strncpy(pch + 1, "raw", 4);
 	}
 
 	return false;
 }
 
 // 0x41A2D0
-static int audioSoundDecoderReadHandler(void* data, void* buffer, unsigned int size) {
-	return fileRead(buffer, 1, size, reinterpret_cast<File*>(data));
+static int audioSoundDecoderReadHandler(void *data, void *buffer, unsigned int size) {
+	return fileRead(buffer, 1, size, reinterpret_cast<File *>(data));
 }
 
 // AudioOpen
 // 0x41A2EC
-int audioOpen(const char* fname, int* sampleRate) {
+int audioOpen(const char *fname, int *sampleRate) {
 	char path[80];
 	snprintf(path, sizeof(path), "%s", fname);
 
@@ -67,7 +67,7 @@ int audioOpen(const char* fname, int* sampleRate) {
 		compression = 0;
 	}
 
-	File* stream = fileOpen(path, "rb");
+	File *stream = fileOpen(path, "rb");
 	if (stream == NULL) {
 		debugPrint("AudioOpen: Couldn't open %s for read\n", path);
 		return -1;
@@ -82,14 +82,14 @@ int audioOpen(const char* fname, int* sampleRate) {
 
 	if (index == gAudioListLength) {
 		if (gAudioList != NULL) {
-			gAudioList = (Audio*)internal_realloc_safe(gAudioList, sizeof(*gAudioList) * (gAudioListLength + 1), __FILE__, __LINE__); // "..\int\audio.c", 216
+			gAudioList = (Audio *)internal_realloc_safe(gAudioList, sizeof(*gAudioList) * (gAudioListLength + 1), __FILE__, __LINE__); // "..\int\audio.c", 216
 		} else {
-			gAudioList = (Audio*)internal_malloc_safe(sizeof(*gAudioList), __FILE__, __LINE__); // "..\int\audio.c", 218
+			gAudioList = (Audio *)internal_malloc_safe(sizeof(*gAudioList), __FILE__, __LINE__); // "..\int\audio.c", 218
 		}
 		gAudioListLength++;
 	}
 
-	Audio* audioFile = &(gAudioList[index]);
+	Audio *audioFile = &(gAudioList[index]);
 	audioFile->flags = AUDIO_IN_USE;
 	audioFile->stream = stream;
 
@@ -110,7 +110,7 @@ int audioOpen(const char* fname, int* sampleRate) {
 
 // 0x41A50C
 int audioClose(int handle) {
-	Audio* audioFile = &(gAudioList[handle - 1]);
+	Audio *audioFile = &(gAudioList[handle - 1]);
 	fileClose(audioFile->stream);
 
 	if ((audioFile->flags & AUDIO_COMPRESSED) != 0) {
@@ -123,8 +123,8 @@ int audioClose(int handle) {
 }
 
 // 0x41A574
-int audioRead(int handle, void* buffer, unsigned int size) {
-	Audio* audioFile = &(gAudioList[handle - 1]);
+int audioRead(int handle, void *buffer, unsigned int size) {
+	Audio *audioFile = &(gAudioList[handle - 1]);
 
 	int bytesRead;
 	if ((audioFile->flags & AUDIO_COMPRESSED) != 0) {
@@ -141,10 +141,10 @@ int audioRead(int handle, void* buffer, unsigned int size) {
 // 0x41A5E0
 long audioSeek(int handle, long offset, int origin) {
 	int pos;
-	unsigned char* buf;
+	unsigned char *buf;
 	int v10;
 
-	Audio* audioFile = &(gAudioList[handle - 1]);
+	Audio *audioFile = &(gAudioList[handle - 1]);
 
 	switch (origin) {
 	case SEEK_SET:
@@ -169,7 +169,7 @@ long audioSeek(int handle, long offset, int origin) {
 			audioFile->fileSize *= 2;
 
 			if (pos != 0) {
-				buf = (unsigned char*)internal_malloc_safe(4096, __FILE__, __LINE__); // "..\int\audio.c", 361
+				buf = (unsigned char *)internal_malloc_safe(4096, __FILE__, __LINE__); // "..\int\audio.c", 361
 				while (pos > 4096) {
 					pos -= 4096;
 					audioRead(handle, buf, 4096);
@@ -182,7 +182,7 @@ long audioSeek(int handle, long offset, int origin) {
 				internal_free_safe(buf, __FILE__, __LINE__); // // "..\int\audio.c", 367
 			}
 		} else {
-			buf = (unsigned char*)internal_malloc_safe(1024, __FILE__, __LINE__); // "..\int\audio.c", 321
+			buf = (unsigned char *)internal_malloc_safe(1024, __FILE__, __LINE__); // "..\int\audio.c", 321
 			v10 = audioFile->position - pos;
 			while (v10 > 1024) {
 				v10 -= 1024;
@@ -204,25 +204,25 @@ long audioSeek(int handle, long offset, int origin) {
 
 // 0x41A78C
 long audioGetSize(int handle) {
-	Audio* audioFile = &(gAudioList[handle - 1]);
+	Audio *audioFile = &(gAudioList[handle - 1]);
 	return audioFile->fileSize;
 }
 
 // 0x41A7A8
 long audioTell(int handle) {
-	Audio* audioFile = &(gAudioList[handle - 1]);
+	Audio *audioFile = &(gAudioList[handle - 1]);
 	return audioFile->position;
 }
 
 // AudioWrite
 // 0x41A7C4
-int audioWrite(int handle, const void* buf, unsigned int size) {
+int audioWrite(int handle, const void *buf, unsigned int size) {
 	debugPrint("AudioWrite shouldn't be ever called\n");
 	return 0;
 }
 
 // 0x41A7D4
-int audioInit(AudioQueryCompressedFunc* func) {
+int audioInit(AudioQueryCompressedFunc *func) {
 	queryCompressedFunc = func;
 	gAudioList = NULL;
 	gAudioListLength = 0;
@@ -240,4 +240,4 @@ void audioExit() {
 	gAudioList = NULL;
 }
 
-} // namespace fallout
+} // namespace Fallout2
