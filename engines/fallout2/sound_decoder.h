@@ -1,20 +1,23 @@
-#ifndef SOUND_DECODER_H
-#define SOUND_DECODER_H
+#ifndef FALLOUT2_SOUND_DECODER_H
+#define FALLOUT2_SOUND_DECODER_H
 
-#include <stddef.h>
+// #include <stddef.h>
 
-namespace fallout {
+#include "common/scummsys.h"
+#include "common/system.h"
 
-typedef int(SoundDecoderReadProc)(void* data, void* buffer, unsigned int size);
+namespace Fallout2 {
+
+typedef int(SoundDecoderReadProc)(void *data, void *buffer, unsigned int size);
 
 typedef struct SoundDecoder {
-	SoundDecoderReadProc* readProc;
-	void* data;
-	unsigned char* bufferIn;
+	SoundDecoderReadProc *readProc;
+	void *data;
+	unsigned char *bufferIn;
 	size_t bufferInSize;
 
 	// Next input byte.
-	unsigned char* nextIn;
+	unsigned char *nextIn;
 
 	// Number of bytes remaining in the input buffer.
 	int remainingInSize;
@@ -28,21 +31,21 @@ typedef struct SoundDecoder {
 	int subbands;
 	int samples_per_subband;
 	int total_samples;
-	unsigned char* prev_samples;
-	unsigned char* samples;
+	unsigned char *prev_samples;
+	unsigned char *samples;
 	int block_samples_per_subband;
 	int block_total_samples;
 	int channels;
 	int rate;
 	int file_cnt;
-	unsigned char* samp_ptr;
+	unsigned char *samp_ptr;
 	int samp_cnt;
 } SoundDecoder;
 
-size_t soundDecoderDecode(SoundDecoder* soundDecoder, void* buffer, size_t size);
-void soundDecoderFree(SoundDecoder* soundDecoder);
-SoundDecoder* soundDecoderInit(SoundDecoderReadProc* readProc, void* data, int* channelsPtr, int* sampleRatePtr, int* sampleCountPtr);
+size_t soundDecoderDecode(SoundDecoder *soundDecoder, void *buffer, size_t size);
+void soundDecoderFree(SoundDecoder *soundDecoder);
+SoundDecoder *soundDecoderInit(SoundDecoderReadProc *readProc, void *data, int *channelsPtr, int *sampleRatePtr, int *sampleCountPtr);
 
-} // namespace fallout
+} // namespace Fallout2
 
-#endif /* SOUND_DECODER_H */
+#endif

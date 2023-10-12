@@ -84,6 +84,9 @@ MODULE_OBJS = \
 	skilldex.o \
 	stat.o \
 	string_parsers.o \
+	sound_decoder.o \
+	sound_effects_cache.o \
+	sound_effects_list.o \
 	svga.o \
 	text_font.o \
 	text_object.o \
