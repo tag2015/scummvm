@@ -2,6 +2,7 @@
 #define FALLOUT2_INTERPRETER_H
 
 #define FORBIDDEN_SYMBOL_EXCEPTION_setjmp
+#define FORBIDDEN_SYMBOL_EXCEPTION_longjmp
 #include <setjmp.h>
 
 // #include <vector>
