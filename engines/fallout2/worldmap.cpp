@@ -3974,33 +3974,32 @@ static int wmSetupRndNextTileNumInit(Encounter *encounter) {
 	case ENCOUNTER_FORMATION_TYPE_DOUBLE_LINE:
 	case ENCOUNTER_FORMATION_TYPE_WEDGE:
 	case ENCOUNTER_FORMATION_TYPE_CONE:
-	case ENCOUNTER_FORMATION_TYPE_HUDDLE:
-		if (1) {
-			MapInfo *map = &(wmMapInfoList[gMapHeader.field_34]);
-			if (map->startPointsLength != 0) {
-				int rspIndex = randomBetween(0, map->startPointsLength - 1);
-				MapStartPointInfo *rsp = &(map->startPoints[rspIndex]);
+	case ENCOUNTER_FORMATION_TYPE_HUDDLE: {
+		MapInfo *map = &(wmMapInfoList[gMapHeader.field_34]);
+		if (map->startPointsLength != 0) {
+			int rspIndex = randomBetween(0, map->startPointsLength - 1);
+			MapStartPointInfo *rsp = &(map->startPoints[rspIndex]);
 
-				wmRndCenterTiles[0] = rsp->tile;
-				wmRndCenterTiles[1] = wmRndCenterTiles[0];
+			wmRndCenterTiles[0] = rsp->tile;
+			wmRndCenterTiles[1] = wmRndCenterTiles[0];
 
-				wmRndCenterRotations[0] = rsp->rotation;
-				wmRndCenterRotations[1] = wmRndCenterRotations[0];
-			} else {
-				wmRndCenterRotations[0] = 0;
-				wmRndCenterRotations[1] = 0;
+			wmRndCenterRotations[0] = rsp->rotation;
+			wmRndCenterRotations[1] = wmRndCenterRotations[0];
+		} else {
+			wmRndCenterRotations[0] = 0;
+			wmRndCenterRotations[1] = 0;
 
-				wmRndCenterTiles[0] = gDude->tile;
-				wmRndCenterTiles[1] = gDude->tile;
-			}
-
-			wmRndTileDirs[0] = tileGetRotationTo(wmRndCenterTiles[0], gDude->tile);
-			wmRndTileDirs[1] = tileGetRotationTo(wmRndCenterTiles[1], gDude->tile);
-
-			wmRndOriginalCenterTile = wmRndCenterTiles[0];
-
-			return 0;
+			wmRndCenterTiles[0] = gDude->tile;
+			wmRndCenterTiles[1] = gDude->tile;
 		}
+
+		wmRndTileDirs[0] = tileGetRotationTo(wmRndCenterTiles[0], gDude->tile);
+		wmRndTileDirs[1] = tileGetRotationTo(wmRndCenterTiles[1], gDude->tile);
+
+		wmRndOriginalCenterTile = wmRndCenterTiles[0];
+
+		return 0;
+	}
 	default:
 		debugPrint("\nERROR: wmSetupCritterObjs: invalid Formation Type!");
 
@@ -6364,8 +6363,8 @@ static int wmMakeTabsLabelList(int **quickDestinationsPtr, int *quickDestination
 
 // 0x4C56C8
 static int wmTabsCompareNames(const void *a1, const void *a2) {
-	int index1 = *(int *)a1;
-	int index2 = *(int *)a2;
+	int index1 = *(const int *)a1;
+	int index2 = *(const int *)a2;
 
 	CityInfo *city1 = &(wmAreaInfoList[index1]);
 	CityInfo *city2 = &(wmAreaInfoList[index2]);
