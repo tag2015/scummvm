@@ -17,6 +17,9 @@
 #include "fallout2/platform_compat.h"
 #include "fallout2/svga.h"
 
+#define FORBIDDEN_SYMBOL_EXCEPTION_setjmp
+#define FORBIDDEN_SYMBOL_EXCEPTION_longjmp
+
 namespace Fallout2 {
 
 typedef struct ProgramListNode {
