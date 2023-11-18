@@ -49,6 +49,7 @@ private:
 	Common::StringArray _traFileNames;
 
 	GUI::CheckboxWidget *_forceTextAACheckbox;
+	GUI::CheckboxWidget *_forceLegacyUpscaleCheckbox;
 	GUI::CheckboxWidget *_displayFPSCheckbox;
 };
 
@@ -78,6 +79,9 @@ AGSOptionsWidget::AGSOptionsWidget(GuiObject *boss, const Common::String &name, 
 	// Force font antialiasing
 	_forceTextAACheckbox = new GUI::CheckboxWidget(widgetsBoss(), _dialogLayout + ".textAA", _("Force antialiased text"), _("Use antialiasing to draw text even if the game does not ask for it"));
 
+	// Force legacy upscaling
+	_forceLegacyUpscaleCheckbox = new GUI::CheckboxWidget(widgetsBoss(), _dialogLayout + ".upscale", _("Force legacy hi-res mode"), _("Force upscaling in old AGS games, enabling hi-res fonts e.g. in Maniac Mansion Deluxe."));
+
 	// Display fps
 	_displayFPSCheckbox = new GUI::CheckboxWidget(widgetsBoss(), _dialogLayout + ".displayFPS", _("Show FPS"), _("Show the current FPS-rate, while you play."));
 }
@@ -91,6 +95,7 @@ void AGSOptionsWidget::defineLayout(GUI::ThemeEval &layouts, const Common::Strin
 	layouts.addWidget("translation", "PopUp").closeLayout();
 
 	layouts.addWidget("textAA", "Checkbox");
+	layouts.addWidget("upscale", "Checkbox");
 	layouts.addWidget("displayFPS", "Checkbox");
 
 	layouts.closeLayout().closeDialog();
@@ -122,6 +127,14 @@ void AGSOptionsWidget::load() {
 			_forceTextAACheckbox->setState(val);
 	}
 
+	Common::String forceUpscale;
+	gameConfig->tryGetVal("force_upscale", forceUpscale);
+	if (!forceUpscale.empty()) {
+		bool val;
+		if (parseBool(forceUpscale, val))
+			_forceLegacyUpscaleCheckbox->setState(val);
+	}
+
 	Common::String displayFPS;
 	gameConfig->tryGetVal("display_fps", displayFPS);
 	if (!displayFPS.empty()) {
@@ -139,6 +152,7 @@ bool AGSOptionsWidget::save() {
 		ConfMan.removeKey("translation", _domain);
 
 	ConfMan.setBool("force_text_aa", _forceTextAACheckbox->getState(), _domain);
+	ConfMan.setBool("force_upscale", _forceLegacyUpscaleCheckbox->getState(), _domain);
 	ConfMan.setBool("display_fps", _displayFPSCheckbox->getState(), _domain);
 
 	return true;
