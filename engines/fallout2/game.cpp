@@ -50,6 +50,7 @@
 #include "fallout2/random.h"
 #include "fallout2/scripts.h"
 #include "fallout2/settings.h"
+// #include "fallout2/sfall_arrays.h"
 #include "fallout2/sfall_config.h"
 // #include "sfall_global_vars.h"
 // #include "sfall_lists.h"
@@ -352,6 +353,11 @@ int gameInitWithOptions(const char* windowTitle, bool isMapper, int font, int a4
 		return -1;
 	}
 
+	if (!sfallArraysInit()) {
+		debugPrint("Failed on sfallArraysInit");
+		return -1;
+	}
+
 	messageListRepositorySetStandardMessageList(STANDARD_MESSAGE_LIST_MISC, &gMiscMessageList);
 
 	return 0;
@@ -400,6 +406,7 @@ void gameReset() {
 //	sfallGlobalVarsReset();
 //	sfallListsReset();
 	messageListRepositoryReset();
+//	sfallArraysReset();
 }
 
 
@@ -409,6 +416,7 @@ void gameExit() {
 	debugPrint("\nGame Exit\n");
 
 	// SFALL
+//	sfallArraysExit();
 //	sfallListsExit();
 //	sfallGlobalVarsExit();
 //	premadeCharactersExit();
