@@ -11,6 +11,7 @@
 #include "fallout2/mouse.h"
 #include "fallout2/svga.h"
 #include "fallout2/text_font.h"
+// #include "fallout2/touch.h" TODO touch
 // #include "vcr.h" TODO vcr
 #include "fallout2/win32.h"
 
@@ -1053,10 +1054,14 @@ void _GNW95_process_message() {
 		case /*SDL_MOUSEWHEEL:*/ Common::EVENT_WHEELUP:
 			handleMouseEvent(&e);
 			break;
-		/*case SDL_FINGERDOWN:  TODO SDL Touch
+/*		case SDL_FINGERDOWN:  TODO SDL touch
+			touch_handle_start(&(e.tfinger));
+			break;
 		case SDL_FINGERMOTION:
+			touch_handle_move(&(e.tfinger));
+			break;
 		case SDL_FINGERUP:
-			handleTouchEvent(&e);
+			touch_handle_end(&(e.tfinger));
 			break;*/
 		case /*SDL_KEYDOWN:*/ Common::EVENT_KEYDOWN:
 		case /*SDL_KEYUP:*/  Common::EVENT_KEYUP:
@@ -1098,6 +1103,8 @@ void _GNW95_process_message() {
 			break;*/
 		}
 	}
+
+	// touch_process_gesture();  TODO touch
 
 	if (gProgramIsActive && !keyboardIsDisabled()) {
 		// NOTE: Uninline
