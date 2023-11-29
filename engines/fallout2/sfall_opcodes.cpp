@@ -493,7 +493,7 @@ static void opGetMessage(Program* program) {
 	programStackPushString(program, text);
 }
 
-// get_array_key
+// array_key
 static void opGetArrayKey(Program *program) {
 	auto index = programStackPopInteger(program);
 	auto arrayId = programStackPopInteger(program);
@@ -547,7 +547,7 @@ static void opStackArray(Program *program) {
 	programStackPushInteger(program, returnValue);
 }
 
-// scan array
+// scan_array
 static void opScanArray(Program *program) {
 	auto value = programStackPopValue(program);
 	auto arrayId = programStackPopInteger(program);
