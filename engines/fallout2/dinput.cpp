@@ -53,8 +53,16 @@ bool mouseDeviceUnacquire() {
 // 0x4E053C
 bool mouseDeviceGetData(MouseData *mouseState) {
 
-	Common::Point mousePos = g_engine->getEventManager()->getMousePos();
+	// CE: This function is sometimes called outside loops calling `get_input`
+	// and subsequently `GNW95_process_message`, so mouse events might not be
+	// handled by SDL yet.
+	//
+	// TODO: Move mouse events processing into `GNW95_process_message` and
+	// update mouse position manually.
 
+	// SDL_PumpEvents();
+
+	Common::Point mousePos = g_engine->getEventManager()->getMousePos();
 	// EventManager can't return the relative mouse position, so keep track manually
 	if (lastMousePosX == -1) { // first time
 		g_system->warpMouse(_scr_size.right / 2, _scr_size.bottom / 2);
