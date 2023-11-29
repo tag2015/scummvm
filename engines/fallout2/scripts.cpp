@@ -29,6 +29,7 @@
 #include "fallout2/proto.h"
 #include "fallout2/proto_instance.h"
 #include "fallout2/queue.h"
+// #include "fallout2/sfall_arrays.h"  TODO sfall
 #include "fallout2/sfall_config.h"
 #include "fallout2/stat.h"
 #include "fallout2/svga.h"
@@ -1004,6 +1005,8 @@ int scriptsHandleRequests() {
 		gScriptsRequests &= ~SCRIPT_REQUEST_STEALING;
 		inventoryOpenStealing(gScriptsRequestedStealingBy, gScriptsRequestedStealingFrom);
 	}
+
+//	DeleteAllTempArrays(); TODO sfall
 
 	return 0;
 }
