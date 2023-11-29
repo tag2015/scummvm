@@ -53,6 +53,7 @@
 // #include "fallout2/sfall_arrays.h"
 #include "fallout2/sfall_config.h"
 // #include "sfall_global_vars.h"
+// #include "sfall_ini.h"
 // #include "sfall_lists.h"
 #include "fallout2/skill.h"
 #include "fallout2/skilldex.h"
@@ -357,6 +358,10 @@ int gameInitWithOptions(const char* windowTitle, bool isMapper, int font, int a4
 		debugPrint("Failed on sfallArraysInit");
 		return -1;
 	}
+
+	char* customConfigBasePath;
+	configGetString(&gSfallConfig, SFALL_CONFIG_SCRIPTS_KEY, SFALL_CONFIG_INI_CONFIG_FOLDER, &customConfigBasePath);
+	sfall_ini_set_base_path(customConfigBasePath);
 
 	messageListRepositorySetStandardMessageList(STANDARD_MESSAGE_LIST_MISC, &gMiscMessageList);
 
