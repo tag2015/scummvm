@@ -65,6 +65,7 @@
 #include "fallout2/trait.h"
 #include "fallout2/version.h"
 #include "fallout2/window_manager.h"
+#include "fallout2/window_manager_private.h"
 #include "fallout2/worldmap.h"
 
 #include "graphics/palette.h"
@@ -170,6 +171,20 @@ int gameInitWithOptions(const char* windowTitle, bool isMapper, int font, int a4
 
 	if (!gIsMapper && skipOpeningMovies < 2) {
 		showSplash();
+	}
+
+	// CE: Handle debug mode (exactly as seen in `mapper2.exe`).
+	const char* debugMode = settings.debug.mode.c_str();
+	if (compat_stricmp(debugMode, "environment") == 0) {
+		_debug_register_env();
+	} else if (compat_stricmp(debugMode, "screen") == 0) {
+		_debug_register_screen();
+	} else if (compat_stricmp(debugMode, "log") == 0) {
+		_debug_register_log("debug.log", "wt");
+	} else if (compat_stricmp(debugMode, "mono") == 0) {
+		_debug_register_mono();
+	} else if (compat_stricmp(debugMode, "gnw") == 0) {
+		_debug_register_func(_win_debug);
 	}
 
 	interfaceFontsInit();
