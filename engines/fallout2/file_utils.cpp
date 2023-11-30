@@ -13,11 +13,11 @@
 
 namespace fallout {
 
-static void fileCopy(const char* existingFilePath, const char* newFilePath);
+static void fileCopy(const char *existingFilePath, const char *newFilePath);
 
 // 0x452740
-int fileCopyDecompressed(const char* existingFilePath, const char* newFilePath) {
-	FILE* stream = compat_fopen(existingFilePath, "rb");
+int fileCopyDecompressed(const char *existingFilePath, const char *newFilePath) {
+	FILE *stream = compat_fopen(existingFilePath, "rb");
 	if (stream == NULL) {
 		return -1;
 	}
@@ -29,7 +29,7 @@ int fileCopyDecompressed(const char* existingFilePath, const char* newFilePath) 
 
 	if (magic[0] == 0x1F && magic[1] == 0x8B) {
 		gzFile inStream = compat_gzopen(existingFilePath, "rb");
-		FILE* outStream = compat_fopen(newFilePath, "wb");
+		FILE *outStream = compat_fopen(newFilePath, "wb");
 
 		if (inStream != NULL && outStream != NULL) {
 			for (;;) {
@@ -62,8 +62,8 @@ int fileCopyDecompressed(const char* existingFilePath, const char* newFilePath) 
 }
 
 // 0x452804
-int fileCopyCompressed(const char* existingFilePath, const char* newFilePath) {
-	FILE* inStream = compat_fopen(existingFilePath, "rb");
+int fileCopyCompressed(const char *existingFilePath, const char *newFilePath) {
+	FILE *inStream = compat_fopen(existingFilePath, "rb");
 	if (inStream == NULL) {
 		return -1;
 	}
@@ -103,8 +103,8 @@ int fileCopyCompressed(const char* existingFilePath, const char* newFilePath) {
 }
 
 // TODO: Check, implementation looks odd.
-int _gzdecompress_file(const char* existingFilePath, const char* newFilePath) {
-	FILE* stream = compat_fopen(existingFilePath, "rb");
+int _gzdecompress_file(const char *existingFilePath, const char *newFilePath) {
+	FILE *stream = compat_fopen(existingFilePath, "rb");
 	if (stream == NULL) {
 		return -1;
 	}
@@ -145,17 +145,9 @@ int _gzdecompress_file(const char* existingFilePath, const char* newFilePath) {
 	return 0;
 }
 
-static void fileCopy(const char* existingFilePath, const char* newFilePath) {
-	char nativeExistingFilePath[COMPAT_MAX_PATH];
-	strcpy(nativeExistingFilePath, existingFilePath);
-	compat_windows_path_to_native(nativeExistingFilePath);
-
-	char nativeNewFilePath[COMPAT_MAX_PATH];
-	strcpy(nativeNewFilePath, newFilePath);
-	compat_windows_path_to_native(nativeNewFilePath);
-
-	FILE* in = fopen(nativeExistingFilePath, "rb");
-	FILE* out = fopen(nativeNewFilePath, "wb");
+static void fileCopy(const char *existingFilePath, const char *newFilePath) {
+	FILE *in = compat_fopen(existingFilePath, "rb");
+	FILE *out = compat_fopen(newFilePath, "wb");
 	if (in != NULL && out != NULL) {
 		std::vector<unsigned char> buffer(0xFFFF);
 
