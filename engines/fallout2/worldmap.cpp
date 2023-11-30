@@ -43,6 +43,7 @@
 #include "fallout2/scripts.h"
 #include "fallout2/settings.h"
 #include "fallout2/sfall_config.h"
+// #include "fallout2/sfall_global_scripts.h" TODO sfall
 #include "fallout2/skill.h"
 #include "fallout2/stat.h"
 #include "fallout2/string_parsers.h"
@@ -3083,6 +3084,10 @@ static int wmWorldMapFunc(int a1) {
 		sharedFpsLimiter.mark();
 
 		int keyCode = inputGetInput();
+
+		// SFALL: WorldmapLoopHook.
+		// sfall_gl_scr_process_worldmap(); TODO sfall
+
 		unsigned int now = getTicks();
 
 		int mouseX;

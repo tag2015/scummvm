@@ -47,7 +47,6 @@ static opcode_t programReturnStackPopInt16(Program *program);
 static int programReturnStackPopInt32(Program *program);
 static void _detachProgram(Program *program);
 static void _purgeProgram(Program *program);
-static void programFree(Program *program);
 static opcode_t _getOp(Program *program);
 static void programMarkHeap(Program *program);
 static void opNoop(Program *program);
@@ -404,7 +403,7 @@ static void _purgeProgram(Program *program) {
 }
 
 // 0x467614
-static void programFree(Program *program) {
+void programFree(Program *program) {
 	// NOTE: Uninline.
 	_detachProgram(program);
 

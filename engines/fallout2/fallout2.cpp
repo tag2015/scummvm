@@ -757,6 +757,9 @@ Common::Error Fallout2Engine::run() {
 				paletteFadeTo(_cmap);
 				free(mapNameCopy);
 
+				// SFALL: AfterNewGameStartHook.
+				// sfall_gl_scr_exec_start_proc(); TODO sfall
+
 				bool cursorWasHidden = cursorIsHidden();
 				if (cursorWasHidden) {
 					mouseShowCursor();
@@ -769,6 +772,10 @@ Common::Error Fallout2Engine::run() {
 					sharedFpsLimiter.mark();
 
 					int keyCode = inputGetInput();
+
+					// SFALL: MainLoopHook.
+					// sfall_gl_scr_process_main(); TODO sfall
+
 					gameHandleKey(keyCode, false);
 
 					scriptsHandleRequests();
