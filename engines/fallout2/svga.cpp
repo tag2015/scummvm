@@ -100,34 +100,47 @@ void _zero_vid_mem() {
 // 0x4CAE1C
 int _GNW95_init_mode_ex(int width, int height, int bpp) {
 	bool fullscreen = true;
+	int scale = 1;
 
-/*	Config resolutionConfig; TODO read config
-	if (configInit(&resolutionConfig)) {
-		if (configRead(&resolutionConfig, "f2_res.ini", false)) {
-			int screenWidth;
-			if (configGetInt(&resolutionConfig, "MAIN", "SCR_WIDTH", &screenWidth)) {
-				width = screenWidth;
+	/*	Config resolutionConfig; TODO read config
+		if (configInit(&resolutionConfig)) {
+			if (configRead(&resolutionConfig, "f2_res.ini", false)) {
+				int screenWidth;
+				if (configGetInt(&resolutionConfig, "MAIN", "SCR_WIDTH", &screenWidth)) {
+					width = screenWidth;
+				}
+
+				int screenHeight;
+				if (configGetInt(&resolutionConfig, "MAIN", "SCR_HEIGHT", &screenHeight)) {
+					height = screenHeight;
+				}
+
+				bool windowed;
+				if (configGetBool(&resolutionConfig, "MAIN", "WINDOWED", &windowed)) {
+					fullscreen = !windowed;
+				}
+
+				int scaleValue;
+				if (configGetInt(&resolutionConfig, "MAIN", "SCALE_2X", &scaleValue)) {
+					scale = scaleValue + 1; // 0 = 1x, 1 = 2x
+					// Only allow scaling if resulting game resolution is >= 640x480
+					if ((width / scale) < 640 || (height / scale) < 480) {
+						scale = 1;
+					} else {
+						width /= scale;
+						height /= scale;
+					}
+				}
+
+				configGetBool(&resolutionConfig, "IFACE", "IFACE_BAR_MODE", &gInterfaceBarMode);
+				configGetInt(&resolutionConfig, "IFACE", "IFACE_BAR_WIDTH", &gInterfaceBarWidth);
+				configGetInt(&resolutionConfig, "IFACE", "IFACE_BAR_SIDE_ART", &gInterfaceSidePanelsImageId);
+				configGetBool(&resolutionConfig, "IFACE", "IFACE_BAR_SIDES_ORI", &gInterfaceSidePanelsExtendFromScreenEdge);
 			}
+			configFree(&resolutionConfig);
+		}*/
 
-			int screenHeight;
-			if (configGetInt(&resolutionConfig, "MAIN", "SCR_HEIGHT", &screenHeight)) {
-				height = screenHeight;
-			}
-
-			bool windowed;
-			if (configGetBool(&resolutionConfig, "MAIN", "WINDOWED", &windowed)) {
-				fullscreen = !windowed;
-			}
-
-			configGetBool(&resolutionConfig, "IFACE", "IFACE_BAR_MODE", &gInterfaceBarMode);
-			configGetInt(&resolutionConfig, "IFACE", "IFACE_BAR_WIDTH", &gInterfaceBarWidth);
-			configGetInt(&resolutionConfig, "IFACE", "IFACE_BAR_SIDE_ART", &gInterfaceSidePanelsImageId);
-			configGetBool(&resolutionConfig, "IFACE", "IFACE_BAR_SIDES_ORI", &gInterfaceSidePanelsExtendFromScreenEdge);
-		}
-		configFree(&resolutionConfig);
-	}*/
-
-	if (_GNW95_init_window(width, height, fullscreen) == -1) {
+	if (_GNW95_init_window(width, height, fullscreen, scale) == -1) {
 		return -1;
 	}
 
@@ -154,7 +167,7 @@ int _init_vesa_mode(int width, int height) {
 }
 
 // 0x4CAEDC
-int _GNW95_init_window(int width, int height, bool fullscreen) {
+int _GNW95_init_window(int width, int height, bool fullscreen, int scale) {
 //	if (gSdlWindow == NULL) {
 //		SDL_SetHint(SDL_HINT_RENDER_DRIVER, "opengl");
 
@@ -168,7 +181,7 @@ int _GNW95_init_window(int width, int height, bool fullscreen) {
 //			windowFlags |= SDL_WINDOW_FULLSCREEN;
 //		}
 
-//		gSdlWindow = SDL_CreateWindow(gProgramWindowTitle, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, width, height, windowFlags);
+//		gSdlWindow = SDL_CreateWindow(gProgramWindowTitle, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, width * scale, height * scale, windowFlags);
 //		if (gSdlWindow == NULL) {
 //			return -1;
 //		}
