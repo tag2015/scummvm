@@ -547,9 +547,9 @@ void windowDrawText(int win, const char *str, int width, int x, int y, int color
 		}
 	}
 
-	if (color & 0xFF00) {
-		int t = (color & 0xFF00) >> 8;
-		textColor = (color & ~0xFFFF) | _colorTable[_GNW_wcolor[t]];
+	if ((color & 0xFF00) != 0) {
+		int colorIndex = (color & 0xFF) - 1;
+		textColor = (color & ~0xFFFF) | _colorTable[_GNW_wcolor[colorIndex]];
 	} else {
 		textColor = color;
 	}
@@ -579,9 +579,9 @@ void windowDrawLine(int win, int left, int top, int right, int bottom, int color
 		return;
 	}
 
-	if (color & 0xFF00) {
-		int t = (color & 0xFF00) >> 8;
-		color = (color & ~0xFFFF) | _colorTable[_GNW_wcolor[t]];
+	if ((color & 0xFF00) != 0) {
+		int colorIndex = (color & 0xFF) - 1;
+		color = (color & ~0xFFFF) | _colorTable[_GNW_wcolor[colorIndex]];
 	}
 
 	bufferDrawLine(window->buffer, window->width, left, top, right, bottom, color);
@@ -600,8 +600,8 @@ void windowDrawRect(int win, int left, int top, int right, int bottom, int color
 	}
 
 	if ((color & 0xFF00) != 0) {
-		int v1 = (color & 0xFF00) >> 8;
-		color = (color & ~0xFFFF) | _colorTable[_GNW_wcolor[v1]];
+		int colorIndex = (color & 0xFF) - 1;
+		color = (color & ~0xFFFF) | _colorTable[_GNW_wcolor[colorIndex]];
 	}
 
 	if (right < left) {
@@ -638,8 +638,8 @@ void windowFill(int win, int x, int y, int width, int height, int color) {
 			color = _colorTable[_GNW_wcolor[0]] & 0xFF;
 		}
 	} else if ((color & 0xFF00) != 0) {
-		int v1 = (color & 0xFF00) >> 8;
-		color = (color & ~0xFFFF) | _colorTable[_GNW_wcolor[v1]];
+		int colorIndex = (color & 0xFF) - 1;
+		color = (color & ~0xFFFF) | _colorTable[_GNW_wcolor[colorIndex]];
 	}
 
 	if (color < 256) {
