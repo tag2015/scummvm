@@ -135,7 +135,7 @@ typedef struct LoadSaveSlotData {
 	short gameMonth;
 	short gameDay;
 	short gameYear;
-	int gameTime;
+	unsigned int gameTime;
 	short elevation;
 	short map;
 	char fileName[16];
