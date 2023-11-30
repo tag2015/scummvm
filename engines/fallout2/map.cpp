@@ -1741,7 +1741,7 @@ static int mapHeaderWrite(MapHeader *ptr, Common::OutSaveFile *stream) {
 	stream->writeSint32BE(ptr->darkness);
 	stream->writeSint32BE(ptr->globalVariablesCount);
 	stream->writeSint32BE(ptr->field_34);
-	stream->writeSint32BE(ptr->lastVisitTime);
+	stream->writeUint32BE(ptr->lastVisitTime);
 	for (i = 0; i < 44; i++)
 		stream->writeSint32BE(ptr->field_3C[i]);
 
@@ -1810,7 +1810,7 @@ static int mapHeaderRead(MapHeader *ptr, File *stream) {
 	if (fileReadInt32(stream, &(ptr->field_34)) == -1)
 		return -1;
 	debug(5, "Map Header - field_34: %d", ptr->field_34);
-	if (fileReadInt32(stream, &(ptr->lastVisitTime)) == -1)
+	if (fileReadUInt32(stream, &(ptr->lastVisitTime)) == -1)
 		return -1;
 	debug(5, "Map Header - lastVisitTime: %d", ptr->lastVisitTime);
 	if (fileReadInt32List(stream, ptr->field_3C, 44) == -1)

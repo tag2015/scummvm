@@ -96,7 +96,7 @@ int randomRoll(int difficulty, int criticalSuccessModifier, int *howMuchPtr) {
 //
 // 0x4A3030
 static int randomTranslateRoll(int delta, int criticalSuccessModifier) {
-	int gameTime = gameTimeGetTime();
+	unsigned int gameTime = gameTimeGetTime();
 
 	// SFALL: Remove criticals time limits.
 	// TODO: Time limits are already disabled
