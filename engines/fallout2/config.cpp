@@ -387,7 +387,7 @@ static bool configParseLine(Config *config, char *string) {
 	// keys there.
 
 	// Skip leading whitespace.
-	while (Common::isSpace(*string)) {
+	while (Common::isSpace(static_cast<unsigned char>(*string))) {
 		string++;
 	}
 
@@ -487,7 +487,7 @@ static bool configTrimString(char *string) {
 	// Starting from the end of the string, loop while it's a whitespace and
 	// decrement string length.
 	char *pch = string + length - 1;
-	while (length != 0 && Common::isSpace(*pch)) {
+	while (length != 0 && Common::isSpace(static_cast<unsigned char>(*pch))) {
 		length--;
 		pch--;
 	}
@@ -498,7 +498,7 @@ static bool configTrimString(char *string) {
 	// Starting from the beginning of the string loop while it's a whitespace
 	// and decrement string length.
 	pch = string;
-	while (Common::isSpace(*pch)) {
+	while (Common::isSpace(static_cast<unsigned char>(*pch))) {
 		pch++;
 		length--;
 	}

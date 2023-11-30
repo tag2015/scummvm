@@ -47,6 +47,7 @@
 #include "fallout2/random.h"
 #include "fallout2/scripts.h"
 #include "fallout2/settings.h"
+// #include "fallout2/sfall_global_scripts.h" TODO sfall
 #include "fallout2/skill.h"
 #include "fallout2/stat.h"
 #include "fallout2/svga.h"
@@ -1953,6 +1954,9 @@ static int lsgLoadGameInSlot(int slot) {
 	}
 
 	_loadingGame = 0;
+
+	// SFALL: Start global scripts.
+	// sfall_gl_scr_exec_start_proc(); TODO sfall
 
 	return 0;
 }
