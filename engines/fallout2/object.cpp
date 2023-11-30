@@ -2478,9 +2478,9 @@ bool _obj_occupied(int tile, int elevation) {
 }
 
 // 0x48B848
-Object *_obj_blocking_at(Object *a1, int tile, int elev) {
+Object *_obj_blocking_at(Object *excludeObj, int tile, int elev) {
 	ObjectListNode *objectListNode;
-	Object *v7;
+	Object *obj;
 	int type;
 
 	if (!hexGridTileIsValid(tile)) {
@@ -2489,12 +2489,12 @@ Object *_obj_blocking_at(Object *a1, int tile, int elev) {
 
 	objectListNode = gObjectListHeadByTile[tile];
 	while (objectListNode != NULL) {
-		v7 = objectListNode->obj;
-		if (v7->elevation == elev) {
-			if ((v7->flags & OBJECT_HIDDEN) == 0 && (v7->flags & OBJECT_NO_BLOCK) == 0 && v7 != a1) {
-				type = FID_TYPE(v7->fid);
+		obj = objectListNode->obj;
+		if (obj->elevation == elev) {
+			if ((obj->flags & OBJECT_HIDDEN) == 0 && (obj->flags & OBJECT_NO_BLOCK) == 0 && obj != excludeObj) {
+				type = FID_TYPE(obj->fid);
 				if (type == OBJ_TYPE_CRITTER || type == OBJ_TYPE_SCENERY || type == OBJ_TYPE_WALL) {
-					return v7;
+					return obj;
 				}
 			}
 		}
@@ -2506,13 +2506,13 @@ Object *_obj_blocking_at(Object *a1, int tile, int elev) {
 		if (hexGridTileIsValid(neighboor)) {
 			objectListNode = gObjectListHeadByTile[neighboor];
 			while (objectListNode != NULL) {
-				v7 = objectListNode->obj;
-				if ((v7->flags & OBJECT_MULTIHEX) != 0) {
-					if (v7->elevation == elev) {
-						if ((v7->flags & OBJECT_HIDDEN) == 0 && (v7->flags & OBJECT_NO_BLOCK) == 0 && v7 != a1) {
-							type = FID_TYPE(v7->fid);
+				obj = objectListNode->obj;
+				if ((obj->flags & OBJECT_MULTIHEX) != 0) {
+					if (obj->elevation == elev) {
+						if ((obj->flags & OBJECT_HIDDEN) == 0 && (obj->flags & OBJECT_NO_BLOCK) == 0 && obj != excludeObj) {
+							type = FID_TYPE(obj->fid);
 							if (type == OBJ_TYPE_CRITTER || type == OBJ_TYPE_SCENERY || type == OBJ_TYPE_WALL) {
-								return v7;
+								return obj;
 							}
 						}
 					}
@@ -2577,7 +2577,7 @@ Object *_obj_shoot_blocking_at(Object *obj, int tile, int elev) {
 }
 
 // 0x48BA20
-Object *_obj_ai_blocking_at(Object *a1, int tile, int elevation) {
+Object *_obj_ai_blocking_at(Object *excludeObj, int tile, int elevation) {
 	if (!hexGridTileIsValid(tile)) {
 		return NULL;
 	}
@@ -2586,7 +2586,7 @@ Object *_obj_ai_blocking_at(Object *a1, int tile, int elevation) {
 	while (objectListNode != NULL) {
 		Object *object = objectListNode->obj;
 		if (object->elevation == elevation) {
-			if ((object->flags & OBJECT_HIDDEN) == 0 && (object->flags & OBJECT_NO_BLOCK) == 0 && object != a1) {
+			if ((object->flags & OBJECT_HIDDEN) == 0 && (object->flags & OBJECT_NO_BLOCK) == 0 && object != excludeObj) {
 				int objectType = FID_TYPE(object->fid);
 				if (objectType == OBJ_TYPE_CRITTER || objectType == OBJ_TYPE_SCENERY || objectType == OBJ_TYPE_WALL) {
 					if (_moveBlockObj != NULL || objectType != OBJ_TYPE_CRITTER) {
@@ -2611,7 +2611,7 @@ Object *_obj_ai_blocking_at(Object *a1, int tile, int elevation) {
 			Object *object = objectListNode->obj;
 			if ((object->flags & OBJECT_MULTIHEX) != 0) {
 				if (object->elevation == elevation) {
-					if ((object->flags & OBJECT_HIDDEN) == 0 && (object->flags & OBJECT_NO_BLOCK) == 0 && object != a1) {
+					if ((object->flags & OBJECT_HIDDEN) == 0 && (object->flags & OBJECT_NO_BLOCK) == 0 && object != excludeObj) {
 						int objectType = FID_TYPE(object->fid);
 						if (objectType == OBJ_TYPE_CRITTER || objectType == OBJ_TYPE_SCENERY || objectType == OBJ_TYPE_WALL) {
 							if (_moveBlockObj != NULL || objectType != OBJ_TYPE_CRITTER) {
@@ -2654,11 +2654,11 @@ int _obj_scroll_blocking_at(int tile, int elev) {
 }
 
 // 0x48BB88
-Object *_obj_sight_blocking_at(Object *a1, int tile, int elevation) {
+Object *_obj_sight_blocking_at(Object *excludeObj, int tile, int elevation) {
 	ObjectListNode *objectListNode = gObjectListHeadByTile[tile];
 	while (objectListNode != NULL) {
 		Object *object = objectListNode->obj;
-		if (object->elevation == elevation && (object->flags & OBJECT_HIDDEN) == 0 && (object->flags & OBJECT_LIGHT_THRU) == 0 && object != a1) {
+		if (object->elevation == elevation && (object->flags & OBJECT_HIDDEN) == 0 && (object->flags & OBJECT_LIGHT_THRU) == 0 && object != excludeObj) {
 			int objectType = FID_TYPE(object->fid);
 			if (objectType == OBJ_TYPE_SCENERY || objectType == OBJ_TYPE_WALL) {
 				return object;
