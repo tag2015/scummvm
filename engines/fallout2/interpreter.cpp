@@ -15,6 +15,7 @@
 #include "fallout2/interpreter_lib.h"
 #include "fallout2/memory_manager.h"
 #include "fallout2/platform_compat.h"
+// #include "fallout2/sfall_global_scripts.h" TODO sfall
 #include "fallout2/svga.h"
 
 #define FORBIDDEN_SYMBOL_EXCEPTION_setjmp
@@ -2895,6 +2896,16 @@ Program *runScript(char *name) {
 
 // 0x46E1EC
 void _updatePrograms() {
+	// CE: Implementation is different. Sfall inserts global scripts into
+	// program list upon creation, so engine does not diffirentiate between
+	// global and normal scripts. Global scripts in CE are not part of program
+	// list, so we need a separate call to continue execution (usually
+	// non-critical calls scheduled from managed windows). One more thing to
+	// note is that global scripts in CE cannot handle conditional/timed procs
+	// (which are not used anyway).
+
+	// sfall_gl_scr_update(_cpuBurstSize); TODO sfall
+
 	ProgramListNode *curr = gInterpreterProgramListHead;
 	while (curr != NULL) {
 		ProgramListNode *next = curr->next;
