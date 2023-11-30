@@ -714,6 +714,12 @@ int _win_debug(char *string) {
 		return -1;
 	}
 
+	// CE: Debug window metrics were designed for default DOS-style font (0).
+	// We don't expect caller to properly set one, so without manually forcing
+	// it debug window might contain mixed fonts.
+	int oldFont = fontGetCurrent();
+	fontSetCurrent(0);
+
 	int lineHeight = fontGetLineHeight();
 
 	if (_wd == -1) {
@@ -819,6 +825,9 @@ int _win_debug(char *string) {
 	}
 
 	windowRefresh(_wd);
+
+	// CE: Restore font.
+	fontSetCurrent(oldFont);
 
 	return 0;
 }
