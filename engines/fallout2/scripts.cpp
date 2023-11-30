@@ -31,6 +31,7 @@
 #include "fallout2/queue.h"
 // #include "fallout2/sfall_arrays.h"  TODO sfall
 #include "fallout2/sfall_config.h"
+// #include "fallout2/sfall_global_scripts.h"  TODO sfall
 #include "fallout2/stat.h"
 #include "fallout2/svga.h"
 #include "fallout2/tile.h"
@@ -145,7 +146,7 @@ static const int gGameTimeDaysPerMonth[12] = {
 };
 
 // 0x51C758
-static const char *gScriptProcNames[28] = {
+const char *gScriptProcNames[SCRIPT_PROC_COUNT] = {
 	"no_p_proc",
 	"start",
 	"spatial_p_proc",
@@ -2596,6 +2597,9 @@ void scriptsExecMapUpdateProc() {
 // scr_exec_map_update_scripts
 // 0x4A67EC
 void scriptsExecMapUpdateScripts(int proc) {
+	// SFALL: Run global scripts.
+	// sfall_gl_scr_exec_map_update_scripts(proc); TODO sfall
+
 	_scr_SpatialsEnabled = false;
 
 	int fixedParam = 0;
