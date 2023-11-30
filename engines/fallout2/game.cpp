@@ -52,6 +52,7 @@
 #include "fallout2/settings.h"
 // #include "fallout2/sfall_arrays.h"
 #include "fallout2/sfall_config.h"
+// #include "sfall_global_scripts.h"
 // #include "sfall_global_vars.h"
 // #include "sfall_ini.h"
 // #include "sfall_lists.h"
@@ -359,6 +360,11 @@ int gameInitWithOptions(const char* windowTitle, bool isMapper, int font, int a4
 		return -1;
 	}
 
+	if (!sfall_gl_scr_init()) {
+		debugPrint("Failed on sfall_gl_scr_init");
+		return -1;
+	}
+
 	char* customConfigBasePath;
 	configGetString(&gSfallConfig, SFALL_CONFIG_SCRIPTS_KEY, SFALL_CONFIG_INI_CONFIG_FOLDER, &customConfigBasePath);
 	sfall_ini_set_base_path(customConfigBasePath);
@@ -412,6 +418,7 @@ void gameReset() {
 //	sfallListsReset();
 	messageListRepositoryReset();
 //	sfallArraysReset();
+//	sfall_gl_scr_reset();
 }
 
 
@@ -421,6 +428,7 @@ void gameExit() {
 	debugPrint("\nGame Exit\n");
 
 	// SFALL
+//	sfall_gl_scr_exit();
 //	sfallArraysExit();
 //	sfallListsExit();
 //	sfallGlobalVarsExit();
