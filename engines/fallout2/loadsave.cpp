@@ -3170,7 +3170,7 @@ out:
 	}
 
 	if (stream2 != NULL) {
-		fileClose(stream1);
+		fileClose(stream2);
 	}
 
 	if (buf != NULL) {
