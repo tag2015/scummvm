@@ -321,7 +321,7 @@ int _win_list_select_at(const char *title, char **items, int itemsLength, ListSe
 				 NULL,
 				 NULL,
 				 NULL,
-				 BUTTON_FLAG_0x10);
+				 BUTTON_DRAG_HANDLE);
 
 	windowRefresh(win);
 
@@ -876,7 +876,7 @@ int _win_debug(char *string) {
 					 NULL,
 					 NULL,
 					 NULL,
-					 BUTTON_FLAG_0x10);
+					 BUTTON_DRAG_HANDLE);
 	}
 
 	char temp[2];
