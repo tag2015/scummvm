@@ -123,10 +123,18 @@ bool gameConfigInit(bool isMapper, int argc, char **argv) {
 	char *ch = strrchr(executable, '\\');
 	if (ch != NULL) {
 		*ch = '\0';
-		snprintf(gGameConfigFilePath, sizeof(gGameConfigFilePath), "%s\\%s", executable, GAME_CONFIG_FILE_NAME);
+		if (isMapper) {
+			snprintf(gGameConfigFilePath, sizeof(gGameConfigFilePath), "%s\\%s", executable, MAPPER_CONFIG_FILE_NAME);
+		} else {
+			snprintf(gGameConfigFilePath, sizeof(gGameConfigFilePath), "%s\\%s", executable, GAME_CONFIG_FILE_NAME);
+		}
 		*ch = '\\';
 	} else {
-		strncpy(gGameConfigFilePath, GAME_CONFIG_FILE_NAME, sizeof(gGameConfigFilePath) - 1);
+		if (isMapper) {
+			strncpy(gGameConfigFilePath, MAPPER_CONFIG_FILE_NAME, sizeof(gGameConfigFilePath) - 1);
+		} else {
+			strncpy(gGameConfigFilePath, GAME_CONFIG_FILE_NAME, sizeof(gGameConfigFilePath) - 1);
+		}
 	}
 
 	// Read contents of `fallout2.cfg` into config. The values from the file
