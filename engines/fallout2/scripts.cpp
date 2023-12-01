@@ -893,8 +893,8 @@ int scriptsHandleRequests() {
 		}
 	}
 
-	if ((gScriptsRequests & SCRIPT_REQUEST_0x02) != 0) {
-		gScriptsRequests &= ~SCRIPT_REQUEST_0x02;
+	if ((gScriptsRequests & SCRIPT_REQUEST_TOWN_MAP) != 0) {
+		gScriptsRequests &= ~SCRIPT_REQUEST_TOWN_MAP;
 		wmTownMap();
 	}
 
@@ -1097,6 +1097,15 @@ void _scripts_request_combat_locked(STRUCT_664980 *a1) {
 	}
 
 	gScriptsRequests |= (SCRIPT_REQUEST_0x0400 | SCRIPT_REQUEST_COMBAT);
+}
+
+// 0x4A461C
+void scripts_request_townmap() {
+	if (isInCombat()) {
+		_game_user_wants_to_quit = 1;
+	}
+
+	gScriptsRequests |= SCRIPT_REQUEST_TOWN_MAP;
 }
 
 // request_world_map()
