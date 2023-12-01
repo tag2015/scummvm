@@ -608,17 +608,17 @@ int _win_get_str(char *dest, int length, const char *title, int x, int y) {
 
 	windowRefresh(win);
 
-	_win_input_str(win,
-				   dest,
-				   length,
-				   16,
-				   fontGetLineHeight() + 16,
-				   _colorTable[_GNW_wcolor[3]],
-				   _colorTable[_GNW_wcolor[0]]);
+	int rc = _win_input_str(win,
+							dest,
+							length,
+							16,
+							fontGetLineHeight() + 16,
+							_colorTable[_GNW_wcolor[3]],
+							_colorTable[_GNW_wcolor[0]]);
 
 	windowDestroy(win);
 
-	return 0;
+	return rc;
 }
 
 // 0x4DB920
