@@ -120,6 +120,7 @@ int objectDataWrite(Object *obj, Common::OutSaveFile *stream);
 int _proto_update_init(Object *obj);
 int _proto_dude_update_gender();
 int _proto_dude_init(const char *path);
+int proto_copy_proto(int srcPid, int dstPid);
 bool proto_is_subtype(Proto *proto, int subtype);
 int protoGetDataMember(int pid, int member, ProtoDataMemberValue *value);
 int protoInit();
