@@ -18,6 +18,7 @@
 namespace Fallout2 {
 
 static int categoryHide();
+static int categoryToggleState();
 static int categoryUnhide();
 static bool proto_user_is_librarian();
 static void redraw_toolname();
@@ -51,6 +52,15 @@ int categoryHide() {
 	categoryIsHidden = true;
 
 	return 0;
+}
+
+// 0x487768
+int categoryToggleState() {
+	if (categoryIsHidden) {
+		return categoryUnhide();
+	} else {
+		return categoryHide();
+	}
 }
 
 // 0x487774
