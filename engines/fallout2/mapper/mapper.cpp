@@ -6,14 +6,31 @@
 #include "fallout2/inventory.h"
 #include "fallout2/object.h"
 #include "fallout2/proto.h"
+#include "fallout2/svga.h"
+#include "fallout2/window_manager.h"
 
 namespace Fallout2 {
 
+static void redraw_toolname();
 static int mapper_mark_exit_grid();
 static void mapper_mark_all_exit_grids();
 
 // 0x559748
 MapTransition mapInfo = {-1, -1, 0, 0};
+
+// 0x6EC4AC
+int tool_win;
+
+// 0x48B230
+void redraw_toolname() {
+	Rect rect;
+
+	rect.left = _scr_size.right - _scr_size.left - 149;
+	rect.top = 60;
+	rect.right = _scr_size.right - _scr_size.left + 1;
+	rect.bottom = 95;
+	windowRefreshRect(tool_win, &rect);
+}
 
 // 0x48C604
 int mapper_inven_unwield(Object *obj, int right_hand) {
