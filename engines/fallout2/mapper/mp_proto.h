@@ -5,6 +5,8 @@ namespace Fallout2 {
 
 extern bool can_modify_protos;
 
+void init_mapper_protos();
+
 } // namespace Fallout2
 
 #endif
