@@ -174,7 +174,6 @@ static int _GameMap2Slot(Common::OutSaveFile *stream);
 static int _SlotMap2Game(Common::InSaveFile *stream);
 static int _mygets(char *dest, Common::InSaveFile *stream);
 static int _copy_file(const char *existingFileName, const char *newFileName);
-static int _MapDirErase(const char *path, const char *extension);
 static int _SaveBackup();
 static int _RestoreSave();
 static int _LoadObjDudeCid(Common::InSaveFile *stream);
@@ -346,9 +345,9 @@ void _InitLoadSave() {
 	_slot_cursor = 0;
 	_patches = settings.system.master_patches_path.c_str();
 
-/*	_MapDirErase("MAPS\\", "SAV");  TODO delete temp map files
-	_MapDirErase(PROTO_DIR_NAME "\\" CRITTERS_DIR_NAME "\\", PROTO_FILE_EXT);
-	_MapDirErase(PROTO_DIR_NAME "\\" ITEMS_DIR_NAME "\\", PROTO_FILE_EXT);*/
+/*	MapDirErase("MAPS\\", "SAV");  TODO delete temp map files
+	MapDirErase(PROTO_DIR_NAME "\\" CRITTERS_DIR_NAME "\\", PROTO_FILE_EXT);
+	MapDirErase(PROTO_DIR_NAME "\\" ITEMS_DIR_NAME "\\", PROTO_FILE_EXT);*/
 
 //	configGetInt(&gSfallConfig, SFALL_CONFIG_MISC_KEY, SFALL_CONFIG_AUTO_QUICK_SAVE, &quickSaveSlots); TODO sfall
 //	if (quickSaveSlots > 0 && quickSaveSlots <= 10) {
@@ -358,9 +357,9 @@ void _InitLoadSave() {
 
 // 0x47B85C
 void _ResetLoadSave() {
-/*	_MapDirErase("MAPS\\", "SAV");  TODO delete temp map files
-	_MapDirErase(PROTO_DIR_NAME "\\" CRITTERS_DIR_NAME "\\", PROTO_FILE_EXT);
-	_MapDirErase(PROTO_DIR_NAME "\\" ITEMS_DIR_NAME "\\", PROTO_FILE_EXT);*/
+/*	MapDirErase("MAPS\\", "SAV");  TODO delete temp map files
+	MapDirErase(PROTO_DIR_NAME "\\" CRITTERS_DIR_NAME "\\", PROTO_FILE_EXT);
+	MapDirErase(PROTO_DIR_NAME "\\" ITEMS_DIR_NAME "\\", PROTO_FILE_EXT);*/
 }
 
 // SaveGame
@@ -1597,7 +1596,7 @@ static int lsgPerformSaveGame() {
 //		debugPrint("\nLOADSAVE: ** Error opening save game for writing! **\n");
 //		_RestoreSave();
 //		snprintf(_gmpath, sizeof(_gmpath), "%s\\%s%.2d\\", "SAVEGAME", "SLOT", _slot_cursor + 1);
-//		_MapDirErase(_gmpath, "BAK");
+//		MapDirErase(_gmpath, "BAK");
 //		_partyMemberUnPrepSave();
 //		backgroundSoundResume(); TODO audio
 //		return -1;
@@ -1610,7 +1609,7 @@ static int lsgPerformSaveGame() {
 //		fileClose(_flptr);
 //		_RestoreSave();
 //		snprintf(_gmpath, sizeof(_gmpath), "%s\\%s%.2d\\", "SAVEGAME", "SLOT", _slot_cursor + 1);
-//		_MapDirErase(_gmpath, "BAK");
+//		MapDirErase(_gmpath, "BAK");
 //		_partyMemberUnPrepSave();
 //		backgroundSoundResume(); TODO audio
 //		return -1;
@@ -1734,7 +1733,7 @@ static int lsgPerformSaveGame() {
 //			fileClose(_flptr);
 //			_RestoreSave();
 // 			snprintf(_gmpath, sizeof(_gmpath), "%s\\%s%.2d\\", "SAVEGAME", "SLOT", _slot_cursor + 1);
-// 			_MapDirErase(_gmpath, "BAK");
+// 			MapDirErase(_gmpath, "BAK");
 // 			_partyMemberUnPrepSave();
 // //			backgroundSoundResume(); TODO audio
 // 			return -1;
@@ -1815,7 +1814,7 @@ static int lsgPerformSaveGame() {
     } */
 
 //	snprintf(_gmpath, sizeof(_gmpath), "%s\\%s%.2d\\", "SAVEGAME", "SLOT", _slot_cursor + 1);
-//	_MapDirErase(_gmpath, "BAK");
+//	MapDirErase(_gmpath, "BAK");
 
 	gLoadSaveMessageListItem.num = 140;
 	if (messageListGetItem(&gLoadSaveMessageList, &gLoadSaveMessageListItem)) {
@@ -2049,7 +2048,7 @@ static int lsgLoadGameInSlot(int slot) {
 	} */
 
 //	snprintf(_str, sizeof(_str), "%s\\", "MAPS");
-//	_MapDirErase(_str, "BAK");
+//	MapDirErase(_str, "BAK");
 	_proto_dude_update_gender();
 
 	// Game Loaded.
@@ -2924,7 +2923,7 @@ static int _GameMap2Slot(Common::OutSaveFile *stream) {
 
 	snprintf(_gmpath, sizeof(_gmpath), "%s\\%s%.2d\\", "SAVEGAME", "SLOT", _slot_cursor + 1);
 
-	if (_MapDirErase(_gmpath, "SAV") == -1) {
+	if (MapDirErase(_gmpath, "SAV") == -1) {
 		fileNameListFree(&fileNameList, 0);
 		return -1;
 	}
@@ -3005,19 +3004,19 @@ static int _SlotMap2Game(Common::InSaveFile *stream) {
 
 	snprintf(_str0, sizeof(_str0), "%s\\", PROTO_DIR_NAME "\\" CRITTERS_DIR_NAME);
 
-	if (_MapDirErase(_str0, PROTO_FILE_EXT) == -1) {
+	if (MapDirErase(_str0, PROTO_FILE_EXT) == -1) {
 		debugPrint("LOADSAVE: returning 3\n");
 		return -1;
 	}
 
 	snprintf(_str0, sizeof(_str0), "%s\\", PROTO_DIR_NAME "\\" ITEMS_DIR_NAME);
-	if (_MapDirErase(_str0, PROTO_FILE_EXT) == -1) {
+	if (MapDirErase(_str0, PROTO_FILE_EXT) == -1) {
 		debugPrint("LOADSAVE: returning 4\n");
 		return -1;
 	}
 
 	snprintf(_str0, sizeof(_str0), "%s\\", "MAPS");
-	if (_MapDirErase(_str0, "SAV") == -1) {
+	if (MapDirErase(_str0, "SAV") == -1) {
 		debugPrint("LOADSAVE: returning 5\n");
 		return -1;
 	}
@@ -3185,11 +3184,11 @@ out:
 void lsgInit() {
 	char path[COMPAT_MAX_PATH];
 	snprintf(path, sizeof(path), "%s\\", "MAPS");
-//	_MapDirErase(path, "SAV"); TODO delete maps
+//	MapDirErase(path, "SAV"); TODO delete maps
 }
 
 // 0x480040
-static int _MapDirErase(const char *relativePath, const char *extension) {
+int MapDirErase(const char *relativePath, const char *extension) {
 /*	char path[COMPAT_MAX_PATH];
 	snprintf(path, sizeof(path), "%s*.%s", relativePath, extension);
 
