@@ -63,6 +63,23 @@ unsigned char *tool;
 // 0x6EC4AC
 int tool_win;
 
+// gnw_main
+// 0x485DD0
+int mapper_main(int argc, char **argv) {
+	MapperInit();
+
+	if (mapper_edit_init(argc, argv) == -1) {
+		mem_check();
+		return 0;
+	}
+
+	edit_mapper();
+	mapper_edit_exit();
+	mem_check();
+
+	return 0;
+}
+
 // 0x485E00
 void MapperInit() {
 	menu_val_0[0] = KEY_ALT_N;
@@ -104,6 +121,18 @@ void MapperInit() {
 	menu_val_2[5] = KEY_GRAVE;
 	menu_val_2[6] = KEY_ALT_W;
 	menu_val_2[7] = 5544;
+}
+
+// 0x485F94
+int mapper_edit_init(int argc, char **argv) {
+	// TODO: Incomplete.
+
+	return 0;
+}
+
+// 0x48752C
+void mapper_edit_exit() {
+	// TODO: Incomplete.
 }
 
 // 0x4875B4
@@ -195,6 +224,11 @@ bool proto_user_is_librarian() {
 
 	can_modify_protos = true;
 	return true;
+}
+
+// 0x4877D0
+void edit_mapper() {
+	// TODO: Incomplete.
 }
 
 // 0x48B16C
