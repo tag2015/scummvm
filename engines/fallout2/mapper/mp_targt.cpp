@@ -1,0 +1,17 @@
+#include "fallout2/mapper/mp_targt.h"
+
+namespace Fallout2 {
+
+// 0x49B2F0
+void target_override_protection() {
+	// TODO: Incomplete.
+}
+
+// 0x49B424
+int target_init() {
+	// TODO: Incomplete.
+
+	return 0;
+}
+
+} // namespace Fallout2
