@@ -17,6 +17,7 @@
 
 namespace Fallout2 {
 
+static int categoryInit();
 static int categoryExit();
 static int categoryHide();
 static int categoryToggleState();
@@ -42,6 +43,11 @@ unsigned char *tool;
 
 // 0x6EC4AC
 int tool_win;
+
+// 0x4875B4
+int categoryInit() {
+	return 0;
+}
 
 // 0x487700
 int categoryExit() {
