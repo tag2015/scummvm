@@ -17,6 +17,7 @@
 
 namespace Fallout2 {
 
+static void bookmarkHide();
 static void bookmarkUnHide();
 static int categoryInit();
 static int categoryExit();
@@ -47,6 +48,13 @@ unsigned char *tool;
 
 // 0x6EC4AC
 int tool_win;
+
+// 0x4875E0
+void bookmarkHide() {
+	if (bookmarkWin != -1) {
+		windowHide(bookmarkWin);
+	}
+}
 
 // 0x4875F8
 void bookmarkUnHide() {
