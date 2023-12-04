@@ -1,6 +1,8 @@
 #include "fallout2/mapper/map_func.h"
 
+#include "fallout2/memory.h"
 #include "fallout2/proto.h"
+#include "fallout2/svga.h"
 #include "fallout2/window_manager.h"
 
 namespace Fallout2 {
@@ -16,6 +18,29 @@ void setup_map_dirs() {
 // 0x4826B4
 void copy_proto_lists() {
 	// TODO: Incomplete.
+}
+
+// 0x4842D4
+void draw_rect(Rect *rect, unsigned char color) {
+	int width = rect->right - rect->left;
+	int height = rect->bottom - rect->top;
+	int max_dimension;
+
+	if (height < width) {
+		max_dimension = width;
+	} else {
+		max_dimension = height;
+	}
+
+	unsigned char *buffer = (unsigned char *)internal_malloc(max_dimension);
+	if (buffer != NULL) {
+		memset(buffer, color, max_dimension);
+		_scr_blit(buffer, width, 1, 0, 0, width, 1, rect->left, rect->top);
+		_scr_blit(buffer, 1, height, 0, 0, 1, height, rect->left, rect->top);
+		_scr_blit(buffer, width, 1, 0, 0, width, 1, rect->left, rect->bottom);
+		_scr_blit(buffer, 1, height, 0, 0, 1, height, rect->right, rect->top);
+		internal_free(buffer);
+	}
 }
 
 // 0x4843A0
