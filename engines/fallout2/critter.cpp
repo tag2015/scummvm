@@ -1532,4 +1532,21 @@ void critter_flag_set(int pid, int flag) {
 	proto->critter.data.flags |= flag;
 }
 
+// 0x42E71C
+void critter_flag_unset(int pid, int flag) {
+	Proto *proto;
+
+	if (pid == -1) {
+		return;
+	}
+
+	if (PID_TYPE(pid) != OBJ_TYPE_CRITTER) {
+		return;
+	}
+
+	protoGetProto(pid, &proto);
+
+	proto->critter.data.flags &= ~flag;
+}
+
 } // namespace Fallout2
