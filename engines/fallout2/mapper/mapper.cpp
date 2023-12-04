@@ -12,6 +12,7 @@
 #include "fallout2/graph_lib.h"
 #include "fallout2/inventory.h"
 #include "fallout2/kb.h"
+#include "fallout2/loadsave.h"
 #include "fallout2/memory.h"
 #include "fallout2/mouse.h"
 #include "fallout2/object.h"
@@ -98,6 +99,8 @@ static char kRebuildBinary[] = " Rebuild Binary ";
 static char kArtToProtos[] = " Art => New Protos ";
 static char kSwapPrototypse[] = " Swap Prototypes ";
 
+static char kTmpMapName[] = "TMP$MAP#.MAP";
+
 // 0x559648
 char *menu_0[] = {
 	kNew,
@@ -177,6 +180,9 @@ int art_scale_width = 49;
 
 // 0x559888
 int art_scale_height = 48;
+
+// 0x5598A4
+static char *tmp_map_name = kTmpMapName;
 
 // 0x5598A8
 static int bookmarkWin = -1;
@@ -1216,7 +1222,31 @@ int mapper_edit_init(int argc, char **argv) {
 
 // 0x48752C
 void mapper_edit_exit() {
-	// TODO: Incomplete.
+	remove(tmp_map_name);
+	remove("\\fallout\\cd\\data\\maps\\TMP$MAP#.MAP");
+	remove("\\fallout\\cd\\data\\maps\\TMP$MAP#.CFG");
+
+	MapDirErase("MAPS\\", "SAV");
+
+	if (can_modify_protos) {
+		copy_proto_lists();
+
+		// NOTE: There is a call to an ambiguous function at `0x4B9ACC`, likely
+		// `proto_save`.
+	}
+
+	target_exit();
+	_map_exit();
+	bookmarkExit();
+	categoryExit();
+
+	windowDestroy(tool_win);
+	tool = NULL;
+
+	windowDestroy(menu_bar);
+
+	internal_free(art_shape);
+	gameExit();
 }
 
 // 0x4875B4

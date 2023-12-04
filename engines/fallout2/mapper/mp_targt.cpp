@@ -14,4 +14,11 @@ int target_init() {
 	return 0;
 }
 
+// 0x49B434
+int target_exit() {
+	// TODO: Incomplete.
+
+	return 0;
+}
+
 } // namespace Fallout2
