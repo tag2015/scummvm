@@ -1,9 +1,10 @@
 #include "fallout2/mapper/mp_targt.h"
 
-#include <string.h>
+// #include <string.h>
 
 #include "fallout2/art.h"
 #include "fallout2/proto.h"
+#include "fallout2/window_manager_private.h"
 
 namespace Fallout2 {
 
@@ -52,6 +53,19 @@ int target_exit() {
 	// TODO: Incomplete.
 
 	return 0;
+}
+
+// 0x49BD98
+int pick_rot() {
+	int value;
+	win_get_num_i(&value,
+				  -1,
+				  5,
+				  false,
+				  "Rotation",
+				  100,
+				  100);
+	return value;
 }
 
 } // namespace Fallout2
