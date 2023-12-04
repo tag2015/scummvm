@@ -23,7 +23,7 @@ typedef struct TargetNode {
 typedef struct TargetList {
 	TargetNode *tail;
 	int count;
-	int field_8;
+	int next_tid;
 } TargetList;
 
 // 0x53F354
@@ -236,12 +236,47 @@ int target_find_free_subnode(TargetSubNode **subnode_ptr) {
 
 	*subnode_ptr = &(node->subnode);
 
-	node->subnode.field_0 = -1;
+	node->subnode.pid = -1;
 	node->subnode.next = NULL;
 	node->next = targetlist.tail;
 
 	targetlist.tail = node;
 	targetlist.count++;
+
+	return 0;
+}
+
+// 0x49BA10
+int target_new(int pid, int *tid_ptr) {
+	TargetSubNode *subnode;
+	TargetSubNode *new_subnode;
+
+	if (target_ptr(pid, &subnode) == -1) {
+		if (target_find_free_subnode(&subnode) == -1) {
+			return -1;
+		}
+	}
+
+	new_subnode = (TargetSubNode *)internal_malloc(sizeof(TargetSubNode));
+	if (new_subnode == NULL) {
+		return -1;
+	}
+
+	new_subnode->next = NULL;
+
+	while (subnode->next != NULL) {
+		subnode = subnode->next;
+	}
+
+	subnode->next = new_subnode;
+
+	new_subnode->pid = pid;
+	new_subnode->tid = targetlist.next_tid;
+
+	*tid_ptr = targetlist.next_tid;
+
+	targetlist.count++;
+	targetlist.next_tid++;
 
 	return 0;
 }
@@ -254,7 +289,7 @@ int target_remove(int pid) {
 
 	node = targetlist.tail;
 	while (node != NULL) {
-		if (node->subnode.field_0 == pid) {
+		if (node->subnode.pid == pid) {
 			break;
 		}
 		node = node->next;
@@ -289,7 +324,7 @@ int target_remove_tid(int pid, int tid) {
 
 	node = targetlist.tail;
 	while (node != NULL) {
-		if (node->subnode.field_0 == pid) {
+		if (node->subnode.pid == pid) {
 			break;
 		}
 		node = node->next;
@@ -299,7 +334,7 @@ int target_remove_tid(int pid, int tid) {
 		return -1;
 	}
 
-	if (node->subnode.field_4 == tid) {
+	if (node->subnode.tid == tid) {
 		subnode_next = node->subnode.next;
 		if (subnode_next != NULL) {
 			memcpy(&(node->subnode), subnode_next, sizeof(TargetSubNode));
@@ -313,7 +348,7 @@ int target_remove_tid(int pid, int tid) {
 		subnode = &(node->subnode);
 		while (subnode != NULL) {
 			subnode_next = subnode->next;
-			if (subnode_next->field_4 == tid) {
+			if (subnode_next->tid == tid) {
 				subnode->next = subnode_next->next;
 				internal_free(subnode_next);
 				return 0;
@@ -357,7 +392,7 @@ int target_remove_all() {
 int target_ptr(int pid, TargetSubNode **subnode_ptr) {
 	TargetNode *node = targetlist.tail;
 	while (node != NULL) {
-		if (node->subnode.field_0 == pid) {
+		if (node->subnode.pid == pid) {
 			*subnode_ptr = &(node->subnode);
 			return 0;
 		}
@@ -374,7 +409,7 @@ int target_tid_ptr(int pid, int tid, TargetSubNode **subnode_ptr) {
 	}
 
 	while (subnode != NULL) {
-		if (subnode->field_4 == tid) {
+		if (subnode->tid == tid) {
 			*subnode_ptr = subnode;
 			return 0;
 		}
