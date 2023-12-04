@@ -4,6 +4,7 @@
 namespace Fallout2 {
 
 void setup_map_dirs();
+void copy_proto_lists();
 
 } // namespace Fallout2
 
