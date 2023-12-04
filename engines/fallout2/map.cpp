@@ -113,7 +113,7 @@ int *gMapLocalVars = NULL;
 
 // map_vars
 // 0x51956C
-static int *gMapGlobalVars = NULL;
+int *gMapGlobalVars = NULL;
 
 // local_vars_num
 // 0x519570
@@ -121,7 +121,7 @@ int gMapLocalVarsLength = 0;
 
 // map_vars_num
 // 0x519574
-static int gMapGlobalVarsLength = 0;
+int gMapGlobalVarsLength = 0;
 
 // Current elevation.
 //
