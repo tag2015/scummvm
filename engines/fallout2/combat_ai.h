@@ -33,6 +33,7 @@ int aiExit();
 int aiLoad(Common::InSaveFile *stream);
 int aiSave(Common::OutSaveFile *stream);
 int combat_ai_num();
+char *combat_ai_name(int packet_num);
 int aiGetAreaAttackMode(Object *obj);
 int aiGetRunAwayMode(Object *obj);
 int aiGetBestWeapon(Object *obj);
