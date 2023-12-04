@@ -3,6 +3,7 @@
 
 namespace Fallout2 {
 
+int map_scr_remove_spatial(int tile, int elevation);
 int map_scr_remove_all_spatials();
 
 } // namespace Fallout2
