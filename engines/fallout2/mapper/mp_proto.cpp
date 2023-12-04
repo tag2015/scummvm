@@ -7,6 +7,7 @@
 #include "fallout2/critter.h"
 #include "fallout2/input.h"
 #include "fallout2/kb.h"
+#include "fallout2/mapper/mp_targt.h"
 #include "fallout2/memory.h"
 #include "fallout2/proto.h"
 #include "fallout2/svga.h"
@@ -80,7 +81,8 @@ static const char *critFlagStrs[CRITTER_FLAG_COUNT] = {
 
 // 0x4922F8
 void init_mapper_protos() {
-	// TODO: Incomplete.
+	edit_window_color = _colorTable[10570];
+	can_modify_protos = target_overriden();
 }
 
 // 0x492840
