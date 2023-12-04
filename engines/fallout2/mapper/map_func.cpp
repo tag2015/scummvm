@@ -1,5 +1,7 @@
 #include "fallout2/mapper/map_func.h"
 
+#include "fallout2/proto.h"
+
 namespace Fallout2 {
 
 // 0x5595CC
@@ -13,6 +15,15 @@ void setup_map_dirs() {
 // 0x4826B4
 void copy_proto_lists() {
 	// TODO: Incomplete.
+}
+
+// 0x484400
+int toolbar_proto(int type, int id) {
+	if (id < proto_max_id(type)) {
+		return (type << 24) | id;
+	} else {
+		return -1;
+	}
 }
 
 // 0x485D44

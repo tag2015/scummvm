@@ -139,6 +139,7 @@ int proto_new(int *pid, int type);
 void _proto_remove_all();
 int protoGetProto(int pid, Proto **protoPtr);
 int _ResetPlayer();
+int proto_max_id(int type);
 
 static bool isExitGridPid(int pid) {
 	return pid >= FIRST_EXIT_GRID_PID && pid <= LAST_EXIT_GRID_PID;
