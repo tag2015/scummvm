@@ -5,6 +5,7 @@ namespace Fallout2 {
 
 void target_override_protection();
 bool target_overriden();
+void target_make_path(char *path, int pid);
 int target_init();
 int target_exit();
 
