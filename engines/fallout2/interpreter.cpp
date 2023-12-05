@@ -1,3 +1,7 @@
+#define FORBIDDEN_SYMBOL_EXCEPTION_setjmp
+#define FORBIDDEN_SYMBOL_EXCEPTION_longjmp
+#include <setjmp.h>
+
 #include "fallout2/interpreter.h"
 
 /*#include <assert.h>
@@ -18,8 +22,7 @@
 // #include "fallout2/sfall_global_scripts.h" TODO sfall
 #include "fallout2/svga.h"
 
-#define FORBIDDEN_SYMBOL_EXCEPTION_setjmp
-#define FORBIDDEN_SYMBOL_EXCEPTION_longjmp
+
 
 namespace Fallout2 {
 
