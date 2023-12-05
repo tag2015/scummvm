@@ -1,13 +1,17 @@
 #include "fallout2/mapper/map_func.h"
 
+#include "fallout2/actions.h"
 #include "fallout2/color.h"
 #include "fallout2/game_mouse.h"
 #include "fallout2/input.h"
+#include "fallout2/map.h"
 #include "fallout2/memory.h"
 #include "fallout2/mouse.h"
 #include "fallout2/proto.h"
 #include "fallout2/svga.h"
+#include "fallout2/tile.h"
 #include "fallout2/window_manager.h"
+#include "fallout2/window_manager_private.h"
 
 namespace Fallout2 {
 
@@ -22,6 +26,31 @@ void setup_map_dirs() {
 // 0x4826B4
 void copy_proto_lists() {
 	// TODO: Incomplete.
+}
+
+// 0x482708
+void place_entrance_hex() {
+	int x;
+	int y;
+	int tile;
+
+	while (inputGetInput() != -2) {
+	}
+
+	if ((mouseGetEvent() & MOUSE_EVENT_LEFT_BUTTON_DOWN) != 0) {
+		if (_mouse_click_in(0, 0, _scr_size.right - _scr_size.left, _scr_size.bottom - _scr_size.top - 100)) {
+			mouseGetPosition(&x, &y);
+
+			tile = tileFromScreenXY(x, y, gElevation);
+			if (tile != -1) {
+				if (tileSetCenter(tile, TILE_SET_CENTER_FLAG_IGNORE_SCROLL_RESTRICTIONS) == 0) {
+					mapSetEnteringLocation(tile, gElevation, rotation);
+				} else {
+					win_timed_msg("ERROR: Entrance out of range!", _colorTable[31744]);
+				}
+			}
+		}
+	}
 }
 
 // 0x4841C4
