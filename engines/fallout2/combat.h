@@ -76,6 +76,7 @@ bool damageModGetDisplayBonusDamage();
 int combat_get_hit_location_penalty(int hit_location);
 void combat_set_hit_location_penalty(int hit_location, int penalty);
 void combat_reset_hit_location_penalty();
+Attack *combat_get_data();
 
 static inline bool isInCombat() {
 	return (gCombatState & COMBAT_STATE_0x01) != 0;
