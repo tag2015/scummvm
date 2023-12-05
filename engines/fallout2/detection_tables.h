@@ -23,6 +23,8 @@ namespace Fallout2 {
 
 const PlainGameDescriptor fallout2Games[] = {
 	{ "fallout2", "Fallout 2" },
+	{ "f2sonora", "Fallout: Sonora" },
+	{ "olympus2207", "Olympus 2207" },
 	{ 0, 0 }
 };
 
@@ -31,6 +33,26 @@ const ADGameDescription gameDescriptions[] = {
 		"fallout2",
 		nullptr,
 		AD_ENTRY1s("critter.dat", "3d1634029b7806cfeb24c9e93ded578f", 166951131),
+		Common::EN_ANY,
+		Common::kPlatformWindows,
+		ADGF_UNSTABLE | ADGF_DROPPLATFORM,
+		GUIO1(GUIO_NOLAUNCHLOAD)
+	},
+
+	{
+		"f2sonora",
+		"v1.12",
+		AD_ENTRY1s("critter.dat", "2a6638e1798adbef4ad5d062430a1a80", 183044210),
+		Common::RU_RUS,
+		Common::kPlatformWindows,
+		ADGF_UNSTABLE | ADGF_DROPPLATFORM,
+		GUIO1(GUIO_NOLAUNCHLOAD)
+	},
+
+	{
+		"olympus2207",
+		nullptr,
+		AD_ENTRY1s("critter.dat", "00cc751243358bc005f77656c125e45f", 378144430),
 		Common::EN_ANY,
 		Common::kPlatformWindows,
 		ADGF_UNSTABLE | ADGF_DROPPLATFORM,
