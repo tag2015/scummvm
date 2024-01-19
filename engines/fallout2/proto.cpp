@@ -2539,7 +2539,7 @@ int _proto_save_pid(int pid) {
 	_proto_list_str(pid, path + strlen(path));
 
 	// TODO move to init
-	const Common::String &gamePath = ConfMan.get("path");
+	const Common::Path &gamePath = ConfMan.getPath("path");
 	Common::FSNode gameNode(gamePath);
 	if (!gameNode.exists())
 		warning("PROTO_SAVE_PID: Can't open gamedir");
@@ -2562,9 +2562,9 @@ int _proto_save_pid(int pid) {
 
 	path[strlen(path) - 13] = '\0';
 
-	Common::String fullPath(gamePath);
-	fullPath += "data\\";
-	fullPath += path;
+	Common::Path fullPath(gamePath);
+	fullPath.appendComponent("data\\");
+	fullPath.appendComponent(path);
 	Common::FSNode fullProtoPath(fullPath);
 	char fileName[13];
 	Common::sprintf_s(fileName, "%08d.pro", pid);
@@ -2573,7 +2573,7 @@ int _proto_save_pid(int pid) {
 
 	Common::WriteStream *stream = proFile.createWriteStream();
 
-	debug(5, "PROTO: Attempt to save proto %s in %s", fileName, fullPath.c_str());
+	debug(5, "PROTO: Attempt to save proto %s in %s", fileName, fullPath.toString('/').c_str());
 
 	//	File *stream = fileOpen(path, "wb");
 	if (stream == NULL) {
