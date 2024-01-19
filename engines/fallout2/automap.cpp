@@ -711,7 +711,7 @@ int automapSaveCurrent() {
 //	char path[256];
 //	snprintf(path, sizeof(path), "%s\\%s", "MAPS", AUTOMAP_DB);
 
-	const Common::String &path = ConfMan.get("path");
+	const Common::Path &path = ConfMan.getPath("path");
 	Common::FSNode gameNode(path);
 	if (!gameNode.exists())
 		warning("AUTOMAP: Can't open gamedir");
@@ -1022,7 +1022,7 @@ static int automapLoadEntry(int map, int elevation) {
 
 //	char path[COMPAT_MAX_PATH];
 //	snprintf(path, sizeof(path), "%s\\%s", "MAPS", AUTOMAP_DB);
-	const Common::String &path = ConfMan.get("path");
+	const Common::Path &path = ConfMan.getPath("path");
 	Common::FSNode gameNode(path);
 	if (!gameNode.exists())
 		warning("AUTOMAP: Can't open gamedir");
@@ -1258,7 +1258,7 @@ static int automapCreate() {
 //	char path[COMPAT_MAX_PATH];
 //	snprintf(path, sizeof(path), "%s\\%s", "MAPS", AUTOMAP_DB);
 
-	const Common::String &path = ConfMan.get("path");
+	const Common::Path &path = ConfMan.getPath("path");
 	Common::FSNode gameNode(path);
 	if (!gameNode.exists())
 		warning("AUTOMAP: Can't open gamedir");
@@ -1337,7 +1337,7 @@ int automapGetHeader(AutomapHeader **automapHeaderPtr) {
 //	char path[COMPAT_MAX_PATH];
 //	snprintf(path, sizeof(path), "%s\\%s", "MAPS", AUTOMAP_DB);
 
-	const Common::String &path = ConfMan.get("path");
+	const Common::Path &path = ConfMan.getPath("path");
 	Common::FSNode gameNode(path);
 	if (!gameNode.exists())
 		warning("AUTOMAP: Can't open gamedir");
