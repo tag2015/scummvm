@@ -4,6 +4,7 @@
 
 // #include "audio_engine.h"  TODO audio_engine
 #include "fallout2/color.h"
+#include "fallout2/delay.h"
 #include "fallout2/dinput.h"
 #include "fallout2/draw.h"
 #include "fallout2/kb.h"
@@ -620,12 +621,7 @@ void inputPauseForTocks(unsigned int delay) {
 
 // 0x4C93B8
 void inputBlockForTocks(unsigned int ms) {
-	unsigned int start = /*SDL_GetTicks();*/ g_system->getMillis();
-	unsigned int diff;
-	do {
-		// NOTE: Uninline
-		diff = getTicksSince(start);
-	} while (diff < ms);
+	delay_ms(ms);
 }
 
 // 0x4C93E0

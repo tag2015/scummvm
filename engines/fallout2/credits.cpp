@@ -11,6 +11,7 @@
 #include "fallout2/cycle.h"
 #include "fallout2/db.h"
 #include "fallout2/debug.h"
+#include "fallout2/delay.h"
 #include "fallout2/draw.h"
 #include "fallout2/game_mouse.h"
 #include "fallout2/input.h"
@@ -173,8 +174,7 @@ void creditsOpen(const char *filePath, int backgroundFid, bool useReversedStyle)
 																windowBuffer,
 																windowWidth);
 
-										while (getTicksSince(tick) < CREDITS_WINDOW_SCROLLING_DELAY) {
-										}
+										delay_ms(CREDITS_WINDOW_SCROLLING_DELAY - (getTicks() - tick));
 
 										tick = getTicks();
 
@@ -216,8 +216,7 @@ void creditsOpen(const char *filePath, int backgroundFid, bool useReversedStyle)
 																windowBuffer,
 																windowWidth);
 
-										while (getTicksSince(tick) < CREDITS_WINDOW_SCROLLING_DELAY) {
-										}
+										delay_ms(CREDITS_WINDOW_SCROLLING_DELAY - (getTicks() - tick));
 
 										tick = getTicks();
 

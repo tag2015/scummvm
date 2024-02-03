@@ -13,6 +13,7 @@
 #include "fallout2/critter.h"
 #include "fallout2/cycle.h"
 #include "fallout2/debug.h"
+#include "fallout2/delay.h"
 #include "fallout2/dialog.h"
 #include "fallout2/display_monitor.h"
 #include "fallout2/draw.h"
@@ -2873,7 +2874,6 @@ void _gdialog_scroll_subwin(int win, int a2, unsigned char *a3, unsigned char *a
 	int v7;
 	unsigned char *v9;
 	Rect rect;
-	unsigned int tick;
 
 	v7 = a6;
 	v9 = a4;
@@ -2908,9 +2908,7 @@ void _gdialog_scroll_subwin(int win, int a2, unsigned char *a3, unsigned char *a
 			v7 += 10;
 			v9 -= 10 * (GAME_DIALOG_WINDOW_WIDTH);
 
-			tick = getTicks();
-			while (getTicksSince(tick) < 33) {
-			}
+			delay_ms(33);
 
 			renderPresent();
 			sharedFpsLimiter.throttle();
@@ -2948,9 +2946,7 @@ void _gdialog_scroll_subwin(int win, int a2, unsigned char *a3, unsigned char *a
 
 			rect.top += 10;
 
-			tick = getTicks();
-			while (getTicksSince(tick) < 33) {
-			}
+			delay_ms(33);
 
 			renderPresent();
 			sharedFpsLimiter.throttle();
