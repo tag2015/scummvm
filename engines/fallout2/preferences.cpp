@@ -9,6 +9,7 @@
 #include "fallout2/combat.h"
 #include "fallout2/combat_ai.h"
 #include "fallout2/debug.h"
+#include "fallout2/delay.h"
 #include "fallout2/draw.h"
 #include "fallout2/game.h"
 #include "fallout2/game_mouse.h"
@@ -1650,8 +1651,7 @@ static void _DoThing(int eventCode) {
 			blitBufferToBufferTrans(_preferencesFrmImages[PREFERENCES_WINDOW_FRM_KNOB_ON].getData(), 21, 12, 21, gPreferencesWindowBuffer + PREFERENCES_WINDOW_WIDTH * meta->knobY + v31, PREFERENCES_WINDOW_WIDTH);
 			windowRefresh(gPreferencesWindow);
 
-			while (getTicksSince(tick) < 35)
-				;
+			delay_ms(35 - (getTicks() - tick));
 
 			renderPresent();
 			sharedFpsLimiter.throttle();
