@@ -24,6 +24,7 @@ MODULE_OBJS = \
 	datafile.o \
 	db.o \
 	dbox.o \
+	delay.o \
 	dfile.o \
 	dialog.o \
 	dictionary.o \

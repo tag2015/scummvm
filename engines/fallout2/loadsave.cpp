@@ -20,6 +20,7 @@
 #include "fallout2/db.h"
 #include "fallout2/dbox.h"
 #include "fallout2/debug.h"
+#include "fallout2/delay.h"
 #include "fallout2/display_monitor.h"
 #include "fallout2/draw.h"
 #include "fallout2/file_utils.h"
@@ -676,11 +677,9 @@ int lsgSaveGame(int mode) {
 				}
 
 				if (scrollCounter > 14.4) {
-					while (getTicksSince(start) < 1000 / scrollVelocity) {
-					}
+					delay_ms(1000 / scrollVelocity - (getTicks() - start));
 				} else {
-					while (getTicksSince(start) < 1000 / 24) {
-					}
+					delay_ms(1000 / 24 - (getTicks() - start));
 				}
 
 				keyCode = inputGetInput();
@@ -724,8 +723,7 @@ int lsgSaveGame(int mode) {
 				doubleClickSlot = -1;
 			}
 
-			while (getTicksSince(tick) < 1000 / 24) {
-			}
+			delay_ms(1000 / 24 - (getTicks() - tick));
 		}
 
 		if (rc == 1) {
@@ -1178,11 +1176,9 @@ int lsgLoadGame(int mode) {
 				}
 
 				if (scrollCounter > 14.4) {
-					while (getTicksSince(start) < 1000 / scrollVelocity) {
-					}
+					delay_ms(1000 / scrollVelocity - (getTicks() - start));
 				} else {
-					while (getTicksSince(start) < 1000 / 24) {
-					}
+					delay_ms(1000 / 24 - (getTicks() - start));
 				}
 
 				keyCode = inputGetInput();
@@ -1232,8 +1228,7 @@ int lsgLoadGame(int mode) {
 				doubleClickSlot = -1;
 			}
 
-			while (getTicksSince(time) < 1000 / 24) {
-			}
+			delay_ms(1000 / 24 - (getTicks() - time));
 		}
 
 		if (rc == 1) {
@@ -2821,8 +2816,7 @@ static int _get_input_str2(int win, int doneKeyCode, int cancelKeyCode, char *de
 			windowRefresh(win);
 		}
 
-		while (getTicksSince(tick) < 1000 / 24) {
-		}
+		delay_ms(1000 / 24 - (getTicks() - tick));
 
 		renderPresent();
 		sharedFpsLimiter.throttle();

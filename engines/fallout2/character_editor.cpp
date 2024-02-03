@@ -19,6 +19,7 @@
 #include "fallout2/db.h"
 #include "fallout2/dbox.h"
 #include "fallout2/debug.h"
+#include "fallout2/delay.h"
 #include "fallout2/draw.h"
 #include "fallout2/game.h"
 #include "fallout2/game_mouse.h"
@@ -1993,8 +1994,7 @@ static int _get_input_str(int win, int cancelKeyCode, char *text, int maxLength,
 
 		windowRefresh(win);
 
-		while (getTicksSince(_frame_time) < 1000 / 24) {
-		}
+		delay_ms(1000 / 24 - (getTicks() - _frame_time));
 
 		renderPresent();
 		sharedFpsLimiter.throttle();
@@ -2277,8 +2277,7 @@ static void characterEditorDrawBigNumber(int x, int y, int flags, int value, int
 								   windowWidth);
 				windowRefreshRect(windowHandle, &rect);
 				renderPresent();
-				while (getTicksSince(_frame_time) < BIG_NUM_ANIMATION_DELAY)
-					;
+				delay_ms(BIG_NUM_ANIMATION_DELAY - (getTicks() - _frame_time));
 			}
 
 			blitBufferToBuffer(numbersGraphicBufferPtr + BIG_NUM_WIDTH * ones,
@@ -2300,8 +2299,7 @@ static void characterEditorDrawBigNumber(int x, int y, int flags, int value, int
 								   windowWidth);
 				windowRefreshRect(windowHandle, &rect);
 				renderPresent();
-				while (getTicksSince(_frame_time) < BIG_NUM_ANIMATION_DELAY)
-					;
+				delay_ms(BIG_NUM_ANIMATION_DELAY - (getTicks() - _frame_time));
 			}
 
 			blitBufferToBuffer(numbersGraphicBufferPtr + BIG_NUM_WIDTH * tens,
@@ -3515,11 +3513,9 @@ static int characterEditorEditAge() {
 				}
 
 				if (v33 > dbl_50170B) {
-					while (getTicksSince(_frame_time) < 1000 / _repFtime)
-						;
+					delay_ms(1000 / _repFtime - (getTicks() - _frame_time));
 				} else {
-					while (getTicksSince(_frame_time) < 1000 / 24)
-						;
+					delay_ms(1000 / 24 - (getTicks() - _frame_time));
 				}
 
 				keyCode = inputGetInput();
@@ -3532,9 +3528,7 @@ static int characterEditorEditAge() {
 			}
 		} else {
 			windowRefresh(win);
-
-			while (getTicksSince(_frame_time) < 1000 / 24)
-				;
+			delay_ms(1000 / 24 - (getTicks() - _frame_time));
 		}
 
 		renderPresent();
@@ -3681,8 +3675,7 @@ static void characterEditorEditGender() {
 
 		windowRefresh(win);
 
-		while (getTicksSince(_frame_time) < 41)
-			;
+		delay_ms(41 - (getTicks() - _frame_time));
 
 		renderPresent();
 		sharedFpsLimiter.throttle();
@@ -3759,12 +3752,9 @@ static void characterEditorAdjustPrimaryStat(int eventCode) {
 		}
 
 		if (v11 >= 19.2) {
-			unsigned int delay = 1000 / _repFtime;
-			while (getTicksSince(_frame_time) < delay) {
-			}
+			delay_ms(1000 / _repFtime - (getTicks() - _frame_time));
 		} else {
-			while (getTicksSince(_frame_time) < 1000 / 24) {
-			}
+			delay_ms(1000 / 24 - (getTicks() - _frame_time));
 		}
 
 		renderPresent();
@@ -5346,11 +5336,9 @@ static void characterEditorHandleAdjustSkillButtonPressed(int keyCode) {
 		if (!isUsingKeyboard) {
 			unspentSp = pcGetStat(PC_STAT_UNSPENT_SKILL_POINTS);
 			if (repeatDelay >= dbl_5018F0) {
-				while (getTicksSince(_frame_time) < 1000 / _repFtime) {
-				}
+				delay_ms(1000 / _repFtime - (getTicks() - _frame_time));
 			} else {
-				while (getTicksSince(_frame_time) < 1000 / 24) {
-				}
+				delay_ms(1000 / 24 - (getTicks() - _frame_time));
 			}
 
 			int keyCode = inputGetInput();
@@ -6209,11 +6197,9 @@ static int perkDialogHandleInput(int count, void (*refreshProc)()) {
 					}
 
 					if (v19 < dbl_5019BE) {
-						while (getTicksSince(_frame_time) < 1000 / 24) {
-						}
+						delay_ms(1000 / 24 - (getTicks() - _frame_time));
 					} else {
-						while (getTicksSince(_frame_time) < 1000 / _repFtime) {
-						}
+						delay_ms(1000 / _repFtime - (getTicks() - _frame_time));
 					}
 
 					renderPresent();
@@ -6256,11 +6242,9 @@ static int perkDialogHandleInput(int count, void (*refreshProc)()) {
 						}
 
 						if (v19 < dbl_5019BE) {
-							while (getTicksSince(_frame_time) < 1000 / 24) {
-							}
+							delay_ms(1000 / 24 - (getTicks() - _frame_time));
 						} else {
-							while (getTicksSince(_frame_time) < 1000 / _repFtime) {
-							}
+							delay_ms(1000 / _repFtime - (getTicks() - _frame_time));
 						}
 
 						renderPresent();
@@ -6292,11 +6276,9 @@ static int perkDialogHandleInput(int count, void (*refreshProc)()) {
 						}
 
 						if (v19 < dbl_5019BE) {
-							while (getTicksSince(_frame_time) < 1000 / 24) {
-							}
+							delay_ms(1000 / 24 - (getTicks() - _frame_time));
 						} else {
-							while (getTicksSince(_frame_time) < 1000 / _repFtime) {
-							}
+							delay_ms(1000 / _repFtime - (getTicks() - _frame_time));
 						}
 
 						renderPresent();

@@ -13,6 +13,7 @@
 #include "fallout2/cycle.h"
 #include "fallout2/dbox.h"
 #include "fallout2/debug.h"
+#include "fallout2/delay.h"
 #include "fallout2/draw.h"
 #include "fallout2/game.h"
 #include "fallout2/game_mouse.h"
@@ -1972,8 +1973,7 @@ static bool pipboyRest(int hours, int minutes, int duration) {
 					pipboyDrawDate();
 					windowRefresh(gPipboyWindow);
 
-					while (getTicksSince(start) < 50) {
-					}
+					delay_ms(50 - (getTicks() - start));
 				}
 
 				renderPresent();
@@ -2043,8 +2043,7 @@ static bool pipboyRest(int hours, int minutes, int duration) {
 					pipboyDrawHitPoints();
 					windowRefresh(gPipboyWindow);
 
-					while (getTicksSince(start) < 50) {
-					}
+					delay_ms(50 - (getTicks() - start));
 				}
 
 				renderPresent();
@@ -2332,8 +2331,7 @@ static int pipboyRenderScreensaver() {
 			v31 -= 1;
 		} else {
 			windowRefreshRect(gPipboyWindow, &gPipboyWindowContentRect);
-			while (getTicksSince(time) < 50) {
-			}
+			delay_ms(50 - (getTicks() - time));
 		}
 
 		renderPresent();

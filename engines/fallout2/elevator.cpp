@@ -10,6 +10,7 @@
 #include "fallout2/art.h"
 #include "fallout2/cycle.h"
 #include "fallout2/debug.h"
+#include "fallout2/delay.h"
 #include "fallout2/draw.h"
 #include "fallout2/game_mouse.h"
 // #include "fallout2/game_sound.h" TODO audio
@@ -454,8 +455,7 @@ int elevatorSelectLevel(int elevator, int *mapPtr, int *elevationPtr, int *tileP
 
 				windowRefresh(gElevatorWindow);
 
-				while (getTicksSince(tick) < delay) {
-				}
+				delay_ms(delay - (getTicks() - tick));
 
 				renderPresent();
 				sharedFpsLimiter.throttle();
