@@ -1,5 +1,7 @@
 #include "fallout2/game_config.h"
 
+#include "fallout2/sfall_config.h"
+
 /*#include <stdio.h>
 #include <string.h>*/
 
@@ -118,6 +120,14 @@ bool gameConfigInit(bool isMapper, int argc, char **argv) {
 		configSetInt(&gGameConfig, GAME_CONFIG_MAPPER_KEY, GAME_CONFIG_SORT_SCRIPT_LIST_KEY, 0);
 	}
 
+	// SFALL: custom config file name.
+	char *configFileName = nullptr;
+	if (configGetString(&gSfallConfig, SFALL_CONFIG_MISC_KEY, SFALL_CONFIG_CONFIG_FILE, &configFileName)) {
+		if (configFileName == nullptr || *configFileName == '\0') {
+			configFileName = DEFAULT_GAME_CONFIG_FILE_NAME;
+		}
+	}
+
 	// Make `fallout2.cfg` file path.
 	char *executable ="fallout2.exe"/* argv[0]*/;
 	char *ch = strrchr(executable, '\\');
@@ -126,14 +136,14 @@ bool gameConfigInit(bool isMapper, int argc, char **argv) {
 		if (isMapper) {
 			snprintf(gGameConfigFilePath, sizeof(gGameConfigFilePath), "%s\\%s", executable, MAPPER_CONFIG_FILE_NAME);
 		} else {
-			snprintf(gGameConfigFilePath, sizeof(gGameConfigFilePath), "%s\\%s", executable, GAME_CONFIG_FILE_NAME);
+			snprintf(gGameConfigFilePath, sizeof(gGameConfigFilePath), "%s\\%s", executable, configFileName);
 		}
 		*ch = '\\';
 	} else {
 		if (isMapper) {
 			strncpy(gGameConfigFilePath, MAPPER_CONFIG_FILE_NAME, sizeof(gGameConfigFilePath) - 1);
 		} else {
-			strncpy(gGameConfigFilePath, GAME_CONFIG_FILE_NAME, sizeof(gGameConfigFilePath) - 1);
+			strncpy(gGameConfigFilePath, configFileName, sizeof(gGameConfigFilePath) - 1);
 		}
 	}
 
