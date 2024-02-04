@@ -33,7 +33,7 @@ char gGameConfigFilePath[COMPAT_MAX_PATH];
 //
 // [argc] and [argv] are command line arguments. The engine assumes there is
 // at least 1 element which is executable path at index 0. There is no
-// additional check for [argc], so it will crash if you pass NULL, or an empty
+// additional check for [argc], so it will crash if you pass nullptr, or an empty
 // array into [argv].
 //
 // The executable path from [argv] is used resolve path to `fallout2.cfg`,
@@ -131,7 +131,7 @@ bool gameConfigInit(bool isMapper, int argc, char **argv) {
 	// Make `fallout2.cfg` file path.
 	char *executable ="fallout2.exe"/* argv[0]*/;
 	char *ch = strrchr(executable, '\\');
-	if (ch != NULL) {
+	if (ch != nullptr) {
 		*ch = '\0';
 		if (isMapper) {
 			snprintf(gGameConfigFilePath, sizeof(gGameConfigFilePath), "%s\\%s", executable, MAPPER_CONFIG_FILE_NAME);

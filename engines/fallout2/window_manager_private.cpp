@@ -32,7 +32,7 @@ static bool tm_index_active(int queueIndex);
 static int _wd = -1;
 
 // 0x51E418
-static MenuBar *_curr_menu = NULL;
+static MenuBar *_curr_menu = nullptr;
 
 // 0x51E41C
 static bool tm_watch_active = false;
@@ -270,9 +270,9 @@ int _win_list_select_at(const char *title, char **items, int itemsLength, ListSe
 				 -1,
 				 2048,
 				 -1,
-				 NULL,
-				 NULL,
-				 NULL,
+				 nullptr,
+				 nullptr,
+				 nullptr,
 				 0);
 
 	bufferDrawRectShadowed(windowBuffer,
@@ -304,9 +304,9 @@ int _win_list_select_at(const char *title, char **items, int itemsLength, ListSe
 					 -1,
 					 1024 + index,
 					 -1,
-					 NULL,
-					 NULL,
-					 NULL,
+					 nullptr,
+					 nullptr,
+					 nullptr,
 					 0);
 	}
 
@@ -319,9 +319,9 @@ int _win_list_select_at(const char *title, char **items, int itemsLength, ListSe
 				 -1,
 				 -1,
 				 -1,
-				 NULL,
-				 NULL,
-				 NULL,
+				 nullptr,
+				 nullptr,
+				 nullptr,
 				 BUTTON_DRAG_HANDLE);
 
 	windowRefresh(win);
@@ -342,7 +342,7 @@ int _win_list_select_at(const char *title, char **items, int itemsLength, ListSe
 			if (selectedItemIndex != -1) {
 				absoluteSelectedItemIndex = scrollOffset + selectedItemIndex;
 				if (absoluteSelectedItemIndex < itemsLength) {
-					if (callback == NULL) {
+					if (callback == nullptr) {
 						break;
 					}
 
@@ -488,7 +488,7 @@ int _win_list_select_at(const char *title, char **items, int itemsLength, ListSe
 							 scrollbarKnobSize,
 							 windowWidth);
 
-				_GNW_win_refresh(window, windowRect, NULL);
+				_GNW_win_refresh(window, windowRect, nullptr);
 			}
 		} else if (keyCode == -3) {
 			Rect itemRect;
@@ -519,7 +519,7 @@ int _win_list_select_at(const char *title, char **items, int itemsLength, ListSe
 							 windowWidth,
 							 textColor);
 
-				_GNW_win_refresh(window, &itemRect, NULL);
+				_GNW_win_refresh(window, &itemRect, nullptr);
 			}
 
 			if (selectedItemIndex != -1) {
@@ -531,7 +531,7 @@ int _win_list_select_at(const char *title, char **items, int itemsLength, ListSe
 							 fontGetLineHeight(),
 							 windowWidth);
 
-				_GNW_win_refresh(window, &itemRect, NULL);
+				_GNW_win_refresh(window, &itemRect, nullptr);
 			}
 		}
 
@@ -772,7 +772,7 @@ int _win_pull_down(char **items, int itemsLength, int x, int y, int color) {
 		return -1;
 	}
 
-	return process_pull_down(win, &rect, items, itemsLength, color, _colorTable[_GNW_wcolor[0]], NULL, -1);
+	return process_pull_down(win, &rect, items, itemsLength, color, _colorTable[_GNW_wcolor[0]], nullptr, -1);
 }
 
 // 0x4DBC34
@@ -863,7 +863,7 @@ int _win_debug(char *string) {
 											-1,
 											"Close",
 											0);
-		buttonSetMouseCallbacks(btn, NULL, NULL, NULL, _win_debug_delete);
+		buttonSetMouseCallbacks(btn, nullptr, nullptr, nullptr, _win_debug_delete);
 
 		buttonCreate(_wd,
 					 8,
@@ -874,9 +874,9 @@ int _win_debug(char *string) {
 					 -1,
 					 -1,
 					 -1,
-					 NULL,
-					 NULL,
-					 NULL,
+					 nullptr,
+					 nullptr,
+					 nullptr,
 					 BUTTON_DRAG_HANDLE);
 	}
 
@@ -935,11 +935,11 @@ int _win_register_menu_bar(int win, int x, int y, int width, int height, int for
 		return -1;
 	}
 
-	if (window == NULL) {
+	if (window == nullptr) {
 		return -1;
 	}
 
-	if (window->menuBar != NULL) {
+	if (window->menuBar != nullptr) {
 		return -1;
 	}
 
@@ -954,7 +954,7 @@ int _win_register_menu_bar(int win, int x, int y, int width, int height, int for
 	}
 
 	MenuBar *menuBar = window->menuBar = (MenuBar *)internal_malloc(sizeof(MenuBar));
-	if (menuBar == NULL) {
+	if (menuBar == nullptr) {
 		return -1;
 	}
 
@@ -981,12 +981,12 @@ int _win_register_menu_pulldown(int win, int x, char *title, int keyCode, int it
 		return -1;
 	}
 
-	if (window == NULL) {
+	if (window == nullptr) {
 		return -1;
 	}
 
 	MenuBar *menuBar = window->menuBar;
-	if (menuBar == NULL) {
+	if (menuBar == nullptr) {
 		return -1;
 	}
 
@@ -1005,9 +1005,9 @@ int _win_register_menu_pulldown(int win, int x, char *title, int keyCode, int it
 						   -1,
 						   keyCode,
 						   -1,
-						   NULL,
-						   NULL,
-						   NULL,
+						   nullptr,
+						   nullptr,
+						   nullptr,
 						   0);
 	if (btn == -1) {
 		return -1;
@@ -1039,11 +1039,11 @@ void _win_delete_menu_bar(int win) {
 		return;
 	}
 
-	if (window == NULL) {
+	if (window == nullptr) {
 		return;
 	}
 
-	if (window->menuBar == NULL) {
+	if (window->menuBar == nullptr) {
 		return;
 	}
 
@@ -1055,7 +1055,7 @@ void _win_delete_menu_bar(int win) {
 			   window->color);
 
 	internal_free(window->menuBar);
-	window->menuBar = NULL;
+	window->menuBar = nullptr;
 }
 
 // 0x4DC9F0
@@ -1107,7 +1107,7 @@ int _win_input_str(int win, char *dest, int maxLength, int x, int y, int textCol
 	dirtyRect.top = window->rect.top + y;
 	dirtyRect.right = dirtyRect.left + stringWidth;
 	dirtyRect.bottom = dirtyRect.top + lineHeight;
-	_GNW_win_refresh(window, &dirtyRect, NULL);
+	_GNW_win_refresh(window, &dirtyRect, nullptr);
 
 	// NOTE: This loop is slightly different compared to other input handling
 	// loops. Cursor position is managed inside an incrementing loop. Cursor is
@@ -1134,7 +1134,7 @@ int _win_input_str(int win, char *dest, int maxLength, int x, int y, int textCol
 						dirtyRect.top = window->rect.top + y;
 						dirtyRect.right = dirtyRect.left + stringWidth;
 						dirtyRect.bottom = dirtyRect.top + lineHeight;
-						_GNW_win_refresh(window, &dirtyRect, NULL);
+						_GNW_win_refresh(window, &dirtyRect, nullptr);
 
 						dest[0] = '_';
 						dest[1] = '\0';
@@ -1151,7 +1151,7 @@ int _win_input_str(int win, char *dest, int maxLength, int x, int y, int textCol
 					dirtyRect.top = window->rect.top + y;
 					dirtyRect.right = dirtyRect.left + stringWidth;
 					dirtyRect.bottom = dirtyRect.top + lineHeight;
-					_GNW_win_refresh(window, &dirtyRect, NULL);
+					_GNW_win_refresh(window, &dirtyRect, nullptr);
 
 					dest[cursorPos] = '\0';
 					cursorPos -= 2;
@@ -1179,7 +1179,7 @@ int _win_input_str(int win, char *dest, int maxLength, int x, int y, int textCol
 						dirtyRect.top = window->rect.top + y;
 						dirtyRect.right = dirtyRect.left + stringWidth;
 						dirtyRect.bottom = dirtyRect.top + lineHeight;
-						_GNW_win_refresh(window, &dirtyRect, NULL);
+						_GNW_win_refresh(window, &dirtyRect, nullptr);
 
 						isFirstKey = false;
 					} else {
@@ -1278,7 +1278,7 @@ int win_get_num_i(int *value, int min, int max, bool clear, const char *title, i
 							  0);
 
 	char *hint = (char *)internal_malloc(80);
-	if (hint == NULL) {
+	if (hint == nullptr) {
 		return -1;
 	}
 
@@ -1308,7 +1308,7 @@ int win_get_num_i(int *value, int min, int max, bool clear, const char *title, i
 
 // 0x4DBD04
 int process_pull_down(int win, Rect *rect, char **items, int itemsLength, int foregroundColor, int backgroundColor, MenuBar *menuBar, int pulldownIndex) {
-	if (menuBar != NULL) {
+	if (menuBar != nullptr) {
 		unsigned char *parentWindowBuffer = windowGetWindow(menuBar->win)->buffer;
 		MenuPulldown *pulldown = &(menuBar->pulldowns[pulldownIndex]);
 
@@ -1376,7 +1376,7 @@ int process_pull_down(int win, Rect *rect, char **items, int itemsLength, int fo
 		mouseGetPosition(&mx2, &my2);
 
 		if (input == -2) {
-			if (menuBar != NULL) {
+			if (menuBar != nullptr) {
 				if (_mouse_click_in(menuBar->rect.left, menuBar->rect.top, menuBar->rect.right, menuBar->rect.bottom)) {
 					int index;
 					for (index = 0; index < menuBar->pulldownsLength; index++) {
@@ -1414,13 +1414,13 @@ int process_pull_down(int win, Rect *rect, char **items, int itemsLength, int fo
 			done = true;
 			break;
 		case KEY_ARROW_LEFT:
-			if (menuBar != NULL && pulldownIndex > 0) {
+			if (menuBar != nullptr && pulldownIndex > 0) {
 				rc = -2 - (pulldownIndex - 1);
 				done = true;
 			}
 			break;
 		case KEY_ARROW_RIGHT:
-			if (menuBar != NULL && pulldownIndex < menuBar->pulldownsLength - 1) {
+			if (menuBar != nullptr && pulldownIndex < menuBar->pulldownsLength - 1) {
 				rc = -2 - (pulldownIndex + 1);
 				done = true;
 			}
@@ -1485,7 +1485,7 @@ int process_pull_down(int win, Rect *rect, char **items, int itemsLength, int fo
 		sharedFpsLimiter.throttle();
 	}
 
-	if (menuBar != NULL) {
+	if (menuBar != nullptr) {
 		unsigned char *parentWindowBuffer = windowGetWindow(menuBar->win)->buffer;
 		MenuPulldown *pulldown = &(menuBar->pulldowns[pulldownIndex]);
 
@@ -1524,7 +1524,7 @@ int process_pull_down(int win, Rect *rect, char **items, int itemsLength, int fo
 
 // 0x4DC930
 int _GNW_process_menu(MenuBar *menuBar, int pulldownIndex) {
-	if (_curr_menu != NULL) {
+	if (_curr_menu != nullptr) {
 		return -1;
 	}
 
@@ -1542,7 +1542,7 @@ int _GNW_process_menu(MenuBar *menuBar, int pulldownIndex) {
 									pulldown->backgroundColor,
 									&rect);
 		if (win == -1) {
-			_curr_menu = NULL;
+			_curr_menu = nullptr;
 			return -1;
 		}
 
@@ -1558,7 +1558,7 @@ int _GNW_process_menu(MenuBar *menuBar, int pulldownIndex) {
 		keyCode = menuBar->pulldowns[pulldownIndex].keyCode;
 	}
 
-	_curr_menu = NULL;
+	_curr_menu = nullptr;
 
 	return keyCode;
 }
@@ -1568,7 +1568,7 @@ int _GNW_process_menu(MenuBar *menuBar, int pulldownIndex) {
 // 0x4DD03C
 size_t _calc_max_field_chars_wcursor(int value1, int value2) {
 	char *str = (char *)internal_malloc(17);
-	if (str == NULL) {
+	if (str == nullptr) {
 		return -1;
 	}
 
@@ -1588,7 +1588,7 @@ int get_num_i(int win, int *value, int max_chars_wcursor, bool clear, bool allow
 	bool first_press = false;
 
 	Window *window = windowGetWindow(win);
-	if (window == NULL) {
+	if (window == nullptr) {
 		return -1;
 	}
 
@@ -1770,11 +1770,11 @@ int win_timed_msg(const char *msg, int color) {
 						   -1,
 						   -1,
 						   -1,
-						   NULL,
-						   NULL,
-						   NULL,
+						   nullptr,
+						   nullptr,
+						   nullptr,
 						   0);
-	buttonSetMouseCallbacks(btn, NULL, NULL, NULL, tm_click_response);
+	buttonSetMouseCallbacks(btn, nullptr, nullptr, nullptr, tm_click_response);
 
 	windowRefresh(win);
 

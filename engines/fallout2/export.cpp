@@ -59,7 +59,7 @@ ExternalProcedure *externalProcedureFind(const char *identifier) {
 	unsigned int v2 = v1;
 
 	ExternalProcedure *externalProcedure = &(gExternalProcedures[v1]);
-	if (externalProcedure->program != NULL) {
+	if (externalProcedure->program != nullptr) {
 		if (compat_stricmp(externalProcedure->name, identifier) == 0) {
 			return externalProcedure;
 		}
@@ -72,14 +72,14 @@ ExternalProcedure *externalProcedureFind(const char *identifier) {
 		}
 
 		externalProcedure = &(gExternalProcedures[v1]);
-		if (externalProcedure->program != NULL) {
+		if (externalProcedure->program != nullptr) {
 			if (compat_stricmp(externalProcedure->name, identifier) == 0) {
 				return externalProcedure;
 			}
 		}
 	} while (v1 != v2);
 
-	return NULL;
+	return nullptr;
 }
 
 // 0x441018
@@ -105,7 +105,7 @@ ExternalProcedure *externalProcedureAdd(const char *identifier) {
 		}
 	} while (v1 != a2);
 
-	return NULL;
+	return nullptr;
 }
 
 // 0x4410AC
@@ -136,7 +136,7 @@ ExternalVariable *externalVariableFind(const char *identifier) {
 		}
 	} while (v1 != v2);
 
-	return NULL;
+	return nullptr;
 }
 
 // 0x44118C
@@ -162,13 +162,13 @@ ExternalVariable *externalVariableAdd(const char *identifier) {
 		}
 	} while (v1 != v2);
 
-	return NULL;
+	return nullptr;
 }
 
 // 0x44127C
 int externalVariableSetValue(Program *program, const char *name, ProgramValue &programValue) {
 	ExternalVariable *exportedVariable = externalVariableFind(name);
-	if (exportedVariable == NULL) {
+	if (exportedVariable == nullptr) {
 		return 1;
 	}
 
@@ -177,7 +177,7 @@ int externalVariableSetValue(Program *program, const char *name, ProgramValue &p
 	}
 
 	if ((programValue.opcode & VALUE_TYPE_MASK) == VALUE_TYPE_STRING) {
-		if (program != NULL) {
+		if (program != nullptr) {
 			const char *stringValue = programGetString(program, programValue.opcode, programValue.integerValue);
 			exportedVariable->value.opcode = VALUE_TYPE_DYNAMIC_STRING;
 
@@ -194,7 +194,7 @@ int externalVariableSetValue(Program *program, const char *name, ProgramValue &p
 // 0x4413D4
 int externalVariableGetValue(Program *program, const char *name, ProgramValue &value) {
 	ExternalVariable *exportedVariable = externalVariableFind(name);
-	if (exportedVariable == NULL) {
+	if (exportedVariable == nullptr) {
 		return 1;
 	}
 
@@ -213,7 +213,7 @@ int externalVariableCreate(Program *program, const char *identifier) {
 	const char *programName = program->name;
 	ExternalVariable *exportedVariable = externalVariableFind(identifier);
 
-	if (exportedVariable != NULL) {
+	if (exportedVariable != nullptr) {
 		if (compat_stricmp(exportedVariable->programName, programName) != 0) {
 			return 1;
 		}
@@ -223,7 +223,7 @@ int externalVariableCreate(Program *program, const char *identifier) {
 		}
 	} else {
 		exportedVariable = externalVariableAdd(identifier);
-		if (exportedVariable == NULL) {
+		if (exportedVariable == nullptr) {
 			return 1;
 		}
 
@@ -245,7 +245,7 @@ void _removeProgramReferences(Program *program) {
 		ExternalProcedure *externalProcedure = &(gExternalProcedures[index]);
 		if (externalProcedure->program == program) {
 			externalProcedure->name[0] = '\0';
-			externalProcedure->program = NULL;
+			externalProcedure->program = nullptr;
 		}
 	}
 }
@@ -273,12 +273,12 @@ void externalVariablesClear() {
 // 0x44158C
 Program *externalProcedureGetProgram(const char *identifier, int *addressPtr, int *argumentCountPtr) {
 	ExternalProcedure *externalProcedure = externalProcedureFind(identifier);
-	if (externalProcedure == NULL) {
-		return NULL;
+	if (externalProcedure == nullptr) {
+		return nullptr;
 	}
 
-	if (externalProcedure->program == NULL) {
-		return NULL;
+	if (externalProcedure->program == nullptr) {
+		return nullptr;
 	}
 
 	*addressPtr = externalProcedure->address;
@@ -290,13 +290,13 @@ Program *externalProcedureGetProgram(const char *identifier, int *addressPtr, in
 // 0x4415B0
 int externalProcedureCreate(Program *program, const char *identifier, int address, int argumentCount) {
 	ExternalProcedure *externalProcedure = externalProcedureFind(identifier);
-	if (externalProcedure != NULL) {
+	if (externalProcedure != nullptr) {
 		if (program != externalProcedure->program) {
 			return 1;
 		}
 	} else {
 		externalProcedure = externalProcedureAdd(identifier);
-		if (externalProcedure == NULL) {
+		if (externalProcedure == nullptr) {
 			return 1;
 		}
 
@@ -316,14 +316,14 @@ void _exportClearAllVariables() {
 		ExternalVariable *exportedVariable = &(gExternalVariables[index]);
 		if (exportedVariable->name[0] != '\0') {
 			if ((exportedVariable->value.opcode & VALUE_TYPE_MASK) == VALUE_TYPE_STRING) {
-				if (exportedVariable->stringValue != NULL) {
+				if (exportedVariable->stringValue != nullptr) {
 					internal_free_safe(exportedVariable->stringValue, __FILE__, __LINE__); // "..\\int\\EXPORT.C", 387
 				}
 			}
 
-			if (exportedVariable->programName != NULL) {
+			if (exportedVariable->programName != nullptr) {
 				internal_free_safe(exportedVariable->programName, __FILE__, __LINE__); // "..\\int\\EXPORT.C", 393
-				exportedVariable->programName = NULL;
+				exportedVariable->programName = nullptr;
 			}
 
 			exportedVariable->name[0] = '\0';
