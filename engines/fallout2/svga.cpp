@@ -268,8 +268,8 @@ void directDrawSetPaletteInRange(unsigned char *palette, int start, int count) {
 
 	unsigned char new_palette[768];
 	if (count != 0)
-		for (int index = 0; index < 768; index++)
-			new_palette[count] = palette[index] << 2;
+		for (int index = 0; index < (count * 3); index++)
+			new_palette[index] = palette[index] << 2;
 
 	g_system->getPaletteManager()->setPalette(new_palette, start, count);
 	g_system->updateScreen();
