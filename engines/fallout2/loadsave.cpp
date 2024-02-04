@@ -210,7 +210,7 @@ static int _map_backup_count = -1;
 static bool _automap_db_flag = false;
 
 // 0x5193CC
-static const char *_patches = NULL;
+static const char *_patches = nullptr;
 
 // 0x5193EC
 static SaveGameHandler *_master_save_list[LOAD_SAVE_HANDLER_COUNT] = {
@@ -389,12 +389,12 @@ int lsgSaveGame(int mode) {
 		strcat_s(_gmpath, sizeof(_gmpath), "SAVE.DAT");
 
 		_flptr = fileOpen(_gmpath, "rb");
-		if (_flptr != NULL) {
+		if (_flptr != nullptr) {
 			lsgLoadHeaderInSlot(_slot_cursor);
 			fileClose(_flptr);
 		}
 
-		_snapshotBuf = NULL;
+		_snapshotBuf = nullptr;
 		int v6 = _QuickSnapShot();
 		if (v6 == 1) {
 			int v7 = lsgPerformSaveGame();
@@ -403,7 +403,7 @@ int lsgSaveGame(int mode) {
 			}
 		}
 
-		if (_snapshotBuf != NULL) {
+		if (_snapshotBuf != nullptr) {
 			internal_free(_snapshot);
 		}
 
@@ -433,7 +433,7 @@ int lsgSaveGame(int mode) {
 		const char *body[] = {
 			_str1,
 		};
-		showDialogBox(_str0, body, 1, 169, 116, _colorTable[32328], NULL, _colorTable[32328], DIALOG_BOX_LARGE);
+		showDialogBox(_str0, body, 1, 169, 116, _colorTable[32328], nullptr, _colorTable[32328], DIALOG_BOX_LARGE);
 
 		messageListFree(&gLoadSaveMessageList);
 
@@ -469,7 +469,7 @@ int lsgSaveGame(int mode) {
 			_str1,
 			_str2,
 		};
-		showDialogBox(_str0, body, 2, 169, 116, _colorTable[32328], NULL, _colorTable[32328], DIALOG_BOX_LARGE);
+		showDialogBox(_str0, body, 2, 169, 116, _colorTable[32328], nullptr, _colorTable[32328], DIALOG_BOX_LARGE);
 
 		lsgWindowFree(0);
 
@@ -605,7 +605,7 @@ int lsgSaveGame(int mode) {
 				rc = 1;
 				// Save game already exists, overwrite?
 				const char *title = getmsg(&gLoadSaveMessageList, &gLoadSaveMessageListItem, 131);
-				if (showDialogBox(title, NULL, 0, 169, 131, _colorTable[32328], NULL, _colorTable[32328], DIALOG_BOX_YES_NO) == 0) {
+				if (showDialogBox(title, nullptr, 0, 169, 131, _colorTable[32328], nullptr, _colorTable[32328], DIALOG_BOX_YES_NO) == 0) {
 					rc = -1;
 				}
 			} else {
@@ -741,7 +741,7 @@ int lsgSaveGame(int mode) {
 				const char *body[1] = {
 					_str1,
 				};
-				showDialogBox(_str0, body, 1, 169, 116, _colorTable[32328], NULL, _colorTable[32328], DIALOG_BOX_LARGE);
+				showDialogBox(_str0, body, 1, 169, 116, _colorTable[32328], nullptr, _colorTable[32328], DIALOG_BOX_LARGE);
 				rc = -1;
 			} else if (v50 == 0) {
 				gameMouseSetCursor(MOUSE_CURSOR_ARROW);
@@ -762,7 +762,7 @@ int lsgSaveGame(int mode) {
 					const char *body[1] = {
 						_str1,
 					};
-					showDialogBox(_str0, body, 1, 169, 116, _colorTable[32328], NULL, _colorTable[32328], DIALOG_BOX_LARGE);
+					showDialogBox(_str0, body, 1, 169, 116, _colorTable[32328], nullptr, _colorTable[32328], DIALOG_BOX_LARGE);
 
 					if (_GetSlotList() == -1) {
 						windowRefresh(gLoadSaveWindow);
@@ -783,7 +783,7 @@ int lsgSaveGame(int mode) {
 							_str1,
 							_str2,
 						};
-						showDialogBox(_str0, body, 2, 169, 116, _colorTable[32328], NULL, _colorTable[32328], DIALOG_BOX_LARGE);
+						showDialogBox(_str0, body, 2, 169, 116, _colorTable[32328], nullptr, _colorTable[32328], DIALOG_BOX_LARGE);
 
 						lsgWindowFree(0);
 
@@ -842,7 +842,7 @@ int lsgSaveGame(int mode) {
 // 0x47C5B4
 static int _QuickSnapShot() {
 	_snapshot = (unsigned char *)internal_malloc(LS_PREVIEW_SIZE);
-	if (_snapshot == NULL) {
+	if (_snapshot == nullptr) {
 		return -1;
 	}
 
@@ -1296,7 +1296,7 @@ static int lsgWindowInit(int windowType) {
 	}
 
 	_snapshot = (unsigned char *)internal_malloc(61632);
-	if (_snapshot == NULL) {
+	if (_snapshot == nullptr) {
 		messageListFree(&gLoadSaveMessageList);
 		fontSetCurrent(gLoadSaveWindowOldFont);
 		return -1;
@@ -1439,7 +1439,7 @@ static int lsgWindowInit(int windowType) {
 					   500,
 					   _loadsaveFrmImages[LOAD_SAVE_FRM_RED_BUTTON_NORMAL].getData(),
 					   _loadsaveFrmImages[LOAD_SAVE_FRM_RED_BUTTON_PRESSED].getData(),
-					   NULL,
+					   nullptr,
 					   BUTTON_FLAG_TRANSPARENT);
 	if (btn != -1) {
 //		buttonSetCallbacks(btn, _gsound_red_butt_press, _gsound_red_butt_release); TODO audio
@@ -1456,7 +1456,7 @@ static int lsgWindowInit(int windowType) {
 					   501,
 					   _loadsaveFrmImages[LOAD_SAVE_FRM_RED_BUTTON_NORMAL].getData(),
 					   _loadsaveFrmImages[LOAD_SAVE_FRM_RED_BUTTON_PRESSED].getData(),
-					   NULL,
+					   nullptr,
 					   BUTTON_FLAG_TRANSPARENT);
 	if (btn != -1) {
 //		buttonSetCallbacks(btn, _gsound_red_butt_press, _gsound_red_butt_release); TODO audio
@@ -1473,7 +1473,7 @@ static int lsgWindowInit(int windowType) {
 					   505,
 					   _loadsaveFrmImages[LOAD_SAVE_FRM_ARROW_UP_NORMAL].getData(),
 					   _loadsaveFrmImages[LOAD_SAVE_FRM_ARROW_UP_PRESSED].getData(),
-					   NULL,
+					   nullptr,
 					   BUTTON_FLAG_TRANSPARENT);
 	if (btn != -1) {
 //		buttonSetCallbacks(btn, _gsound_red_butt_press, _gsound_red_butt_release); TODO audio
@@ -1490,13 +1490,13 @@ static int lsgWindowInit(int windowType) {
 					   503,
 					   _loadsaveFrmImages[LOAD_SAVE_FRM_ARROW_DOWN_NORMAL].getData(),
 					   _loadsaveFrmImages[LOAD_SAVE_FRM_ARROW_DOWN_PRESSED].getData(),
-					   NULL,
+					   nullptr,
 					   BUTTON_FLAG_TRANSPARENT);
 	if (btn != -1) {
 //		buttonSetCallbacks(btn, _gsound_red_butt_press, _gsound_red_butt_release); TODO audio
 	}
 
-	buttonCreate(gLoadSaveWindow, 55, 87, 230, 353, -1, -1, -1, 502, NULL, NULL, NULL, BUTTON_FLAG_TRANSPARENT);
+	buttonCreate(gLoadSaveWindow, 55, 87, 230, 353, -1, -1, -1, 502, nullptr, nullptr, nullptr, BUTTON_FLAG_TRANSPARENT);
 	fontSetCurrent(101);
 
 	return 0;
@@ -1576,7 +1576,7 @@ static int lsgPerformSaveGame() {
 	debugPrint("\nLOADSAVE: Save Proto Items: %s", newSaveItems.c_str());
 
 	newSave = saveMan->openForSaving(newSaveDat, false);
-	if(newSave == NULL)
+	if(newSave == nullptr)
 		return -1;
 
 	if (lsgSaveHeaderInSlot(_slot_cursor) == -1) {
@@ -1587,7 +1587,7 @@ static int lsgPerformSaveGame() {
 	debugPrint("Written header!");
 
 //	_flptr = fileOpen(_gmpath, "wb");
-//	if (_flptr == NULL) {
+//	if (_flptr == nullptr) {
 //		debugPrint("\nLOADSAVE: ** Error opening save game for writing! **\n");
 //		_RestoreSave();
 //		snprintf(_gmpath, sizeof(_gmpath), "%s\\%s%.2d\\", "SAVEGAME", "SLOT", _slot_cursor + 1);
@@ -1746,7 +1746,7 @@ static int lsgPerformSaveGame() {
     strcat(_gmpath, "sfallgv.sav");
 
     _flptr = fileOpen(_gmpath, "wb");
-    if (_flptr != NULL) {
+    if (_flptr != nullptr) {
         do {
             if (!sfall_gl_vars_save(_flptr)) {
                 debugPrint("LOADSAVE (SFALL): ** Error saving global vars **\n");
@@ -1857,7 +1857,7 @@ static int lsgLoadGameInSlot(int slot) {
 	debugPrint("\nLOADSAVE: Load name: %s\n", ptr->description);
 
 	loadSave = saveMan->openForLoading(loadSaveDat);
-	if (loadSave == NULL) {
+	if (loadSave == nullptr) {
 		debugPrint("\nLOADSAVE: ** Error opening load game file for reading! **\n");
 		_loadingGame = false;
 		return -1;
@@ -1865,7 +1865,7 @@ static int lsgLoadGameInSlot(int slot) {
 
 
 	// _flptr = fileOpen(_gmpath, "rb");
-	// if (_flptr == NULL) {
+	// if (_flptr == nullptr) {
 	// 	debugPrint("\nLOADSAVE: ** Error opening load game file for reading! **\n");
 	// 	_loadingGame = false;
 	// 	return -1;
@@ -2029,7 +2029,7 @@ static int lsgLoadGameInSlot(int slot) {
 	strcat(_gmpath, "sfallgv.sav");
 
 	_flptr = fileOpen(_gmpath, "rb");
-	if (_flptr != NULL) {
+	if (_flptr != nullptr) {
 		do {
 			if (!sfall_gl_vars_load(_flptr)) {
 				debugPrint("LOADSAVE (SFALL): ** Error loading global vars **\n");
@@ -2186,7 +2186,7 @@ static int lsgSaveHeaderInSlot(int slot) {
 			return -1;
 		}
 
-		time_t now = time(NULL);
+		time_t now = time(nullptr);
 		struct tm *local = localtime(&now);
 
 		temp[0] = local->tm_mday;
@@ -2418,14 +2418,14 @@ static int _GetSlotList() {
 
 
 			loadSave = saveMan->openForLoading(filename->c_str());
-			if (loadSave == NULL) {
+			if (loadSave == nullptr) {
 				debugPrint("\nLOADSAVE: ** Error opening save  game for reading! **\n");
 				return -1;
 			}
 
 			// _flptr = fileOpen(_str, "rb");
 
-			// if (_flptr == NULL) {
+			// if (_flptr == nullptr) {
 			// 	debugPrint("\nLOADSAVE: ** Error opening save  game for reading! **\n");
 			// 	return -1;
 			// }
@@ -2571,7 +2571,7 @@ static int _LoadTumbSlot(int slot) {
 		if(saveMan->exists(saveName))
 			stream = saveMan->openForLoading(saveName);
 //			File *stream = fileOpen(_str, "rb");
-		if (stream == NULL) {
+		if (stream == nullptr) {
 			debugPrint("\nLOADSAVE: ** (A) Error reading thumbnail #%d! **\n", slot);
 			return -1;
 		}
@@ -2678,7 +2678,7 @@ static int _GetComment(int slot) {
 					   507,
 					   _loadsaveFrmImages[LOAD_SAVE_FRM_RED_BUTTON_NORMAL].getData(),
 					   _loadsaveFrmImages[LOAD_SAVE_FRM_RED_BUTTON_PRESSED].getData(),
-					   NULL,
+					   nullptr,
 					   BUTTON_FLAG_TRANSPARENT);
 	if (btn == -1) {
 //		buttonSetCallbacks(btn, _gsound_red_butt_press, _gsound_red_butt_release); TODO audio
@@ -2696,7 +2696,7 @@ static int _GetComment(int slot) {
 					   508,
 					   _loadsaveFrmImages[LOAD_SAVE_FRM_RED_BUTTON_NORMAL].getData(),
 					   _loadsaveFrmImages[LOAD_SAVE_FRM_RED_BUTTON_PRESSED].getData(),
-					   NULL,
+					   nullptr,
 					   BUTTON_FLAG_TRANSPARENT);
 	if (btn == -1) {
 //		buttonSetCallbacks(btn, _gsound_red_butt_press, _gsound_red_butt_release); TODO audio
@@ -2854,7 +2854,7 @@ static int _EndLoad(Common::InSaveFile *stream) {
 	indicatorBarRefresh();
 	tileWindowRefresh();
 	if (isInCombat()) {
-		scriptsRequestCombat(NULL);
+		scriptsRequestCombat(nullptr);
 	}
 	return 0;
 }
@@ -2954,7 +2954,7 @@ static int _GameMap2Slot(Common::OutSaveFile *stream) {
 
 	snprintf(_str0, sizeof(_str0), "%s\\%s", "MAPS", "AUTOMAP.DB");
 	File *inStream = fileOpen(_str0, "rb");
-	if (inStream == NULL) {
+	if (inStream == nullptr) {
 		return -1;
 	}
 
@@ -3111,13 +3111,13 @@ static int _copy_file(const char *existingFileName, const char *newFileName) {
 	void *buf;
 	int result;
 
-	stream1 = NULL;
-	stream2 = NULL;
-	buf = NULL;
+	stream1 = nullptr;
+	stream2 = nullptr;
+	buf = nullptr;
 	result = -1;
 
 	stream1 = fileOpen(existingFileName, "rb");
-	if (stream1 == NULL) {
+	if (stream1 == nullptr) {
 		goto out;
 	}
 
@@ -3127,12 +3127,12 @@ static int _copy_file(const char *existingFileName, const char *newFileName) {
 	}
 
 	stream2 = fileOpen(newFileName, "wb");
-	if (stream2 == NULL) {
+	if (stream2 == nullptr) {
 		goto out;
 	}
 
 	buf = internal_malloc(0xFFFF);
-	if (buf == NULL) {
+	if (buf == nullptr) {
 		goto out;
 	}
 
@@ -3158,15 +3158,15 @@ static int _copy_file(const char *existingFileName, const char *newFileName) {
 
 out:
 
-	if (stream1 != NULL) {
+	if (stream1 != nullptr) {
 		fileClose(stream1);
 	}
 
-	if (stream2 != NULL) {
+	if (stream2 != nullptr) {
 		fileClose(stream2);
 	}
 
-	if (buf != NULL) {
+	if (buf != nullptr) {
 		internal_free(buf);
 	}
 
@@ -3221,7 +3221,7 @@ static int _SaveBackup() {
 	_strmfe(_str1, _str0, "BAK");
 
 	File *stream1 = fileOpen(_str0, "rb");
-	if (stream1 != NULL) {
+	if (stream1 != nullptr) {
 		fileClose(stream1);
 		if (compat_rename(_str0, _str1) != 0) {
 			return -1;
@@ -3266,7 +3266,7 @@ static int _SaveBackup() {
 	_automap_db_flag = false;
 
 	File *stream2 = fileOpen(_str0, "rb");
-	if (stream2 != NULL) {
+	if (stream2 != nullptr) {
 		fileClose(stream2);
 
 		if (_copy_file(_str0, _str1) == -1) {

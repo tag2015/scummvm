@@ -51,7 +51,7 @@ void _regionSetBound(Region *region) {
 
 // 0x4A2C14
 bool regionContainsPoint(Region *region, int x, int y) {
-	if (region == NULL) {
+	if (region == nullptr) {
 		return false;
 	}
 
@@ -133,7 +133,7 @@ Region *regionCreate(int initialCapacity) {
 		region->points = (Point *)internal_malloc_safe(sizeof(*region->points) * (initialCapacity + 1), __FILE__, __LINE__); // "..\int\REGION.C", 147
 		region->pointsCapacity = initialCapacity + 1;
 	} else {
-		region->points = NULL;
+		region->points = nullptr;
 		region->pointsCapacity = 0;
 	}
 
@@ -148,8 +148,8 @@ Region *regionCreate(int initialCapacity) {
 	region->rightProcs[0] = 0;
 	region->field_70 = 0;
 	region->rightProcs[2] = 0;
-	region->mouseEventCallback = NULL;
-	region->rightMouseEventCallback = NULL;
+	region->mouseEventCallback = nullptr;
+	region->rightMouseEventCallback = nullptr;
 	region->mouseEventCallbackUserData = 0;
 	region->rightMouseEventCallbackUserData = 0;
 	region->pointsLength = 0;
@@ -166,12 +166,12 @@ Region *regionCreate(int initialCapacity) {
 // regionAddPoint
 // 0x4A2E68
 void regionAddPoint(Region *region, int x, int y) {
-	if (region == NULL) {
+	if (region == nullptr) {
 		debugPrint("regionAddPoint(): null region ptr\n");
 		return;
 	}
 
-	if (region->points != NULL) {
+	if (region->points != nullptr) {
 		if (region->pointsCapacity - 1 == region->pointsLength) {
 			region->points = (Point *)internal_realloc_safe(region->points, sizeof(*region->points) * (region->pointsCapacity + 1), __FILE__, __LINE__); // "..\int\REGION.C", 190
 			region->pointsCapacity++;
@@ -197,12 +197,12 @@ void regionAddPoint(Region *region, int x, int y) {
 // regionDelete
 // 0x4A2F0C
 void regionDelete(Region *region) {
-	if (region == NULL) {
+	if (region == nullptr) {
 		debugPrint("regionDelete(): null region ptr\n");
 		return;
 	}
 
-	if (region->points != NULL) {
+	if (region->points != nullptr) {
 		internal_free_safe(region->points, __FILE__, __LINE__); // "..\int\REGION.C", 206
 	}
 
@@ -212,12 +212,12 @@ void regionDelete(Region *region) {
 // regionAddName
 // 0x4A2F54
 void regionSetName(Region *region, const char *name) {
-	if (region == NULL) {
+	if (region == nullptr) {
 		debugPrint("regionAddName(): null region ptr\n");
 		return;
 	}
 
-	if (name == NULL) {
+	if (name == nullptr) {
 		region->name[0] = '\0';
 		return;
 	}
@@ -228,7 +228,7 @@ void regionSetName(Region *region, const char *name) {
 // regionGetName
 // 0x4A2F80
 char *regionGetName(Region *region) {
-	if (region == NULL) {
+	if (region == nullptr) {
 		debugPrint("regionGetName(): null region ptr\n");
 		return _aNull;
 	}
@@ -239,9 +239,9 @@ char *regionGetName(Region *region) {
 // regionGetUserData
 // 0x4A2F98
 void *regionGetUserData(Region *region) {
-	if (region == NULL) {
+	if (region == nullptr) {
 		debugPrint("regionGetUserData(): null region ptr\n");
-		return NULL;
+		return nullptr;
 	}
 
 	return region->userData;
@@ -250,7 +250,7 @@ void *regionGetUserData(Region *region) {
 // regionSetUserData
 // 0x4A2FB4
 void regionSetUserData(Region *region, void *data) {
-	if (region == NULL) {
+	if (region == nullptr) {
 		debugPrint("regionSetUserData(): null region ptr\n");
 		return;
 	}

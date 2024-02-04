@@ -196,11 +196,11 @@ static Rect gInterfaceBarActionPointsBarRect;
 
 // 0x518FE8
 static IndicatorDescription gIndicatorDescriptions[INDICATOR_COUNT] = {
-	{102, true, NULL},  // ADDICT
-	{100, false, NULL}, // SNEAK
-	{101, false, NULL}, // LEVEL
-	{103, true, NULL},  // POISONED
-	{104, true, NULL},  // RADIATED
+	{102, true, nullptr},  // ADDICT
+	{100, false, nullptr}, // SNEAK
+	{101, false, nullptr}, // LEVEL
+	{103, true, nullptr},  // POISONED
+	{104, true, nullptr},  // RADIATED
 };
 
 // 0x519024
@@ -328,7 +328,7 @@ int interfaceInit() {
 	}
 
 	gInterfaceWindowBuffer = windowGetBuffer(gInterfaceBarWindow);
-	if (gInterfaceWindowBuffer == NULL) {
+	if (gInterfaceWindowBuffer == nullptr) {
 		// NOTE: Uninline.
 		return intface_fatal_error(-1);
 	}
@@ -358,14 +358,14 @@ int interfaceInit() {
 		return intface_fatal_error(-1);
 	}
 
-	gInventoryButton = buttonCreate(gInterfaceBarWindow, 211 + gInterfaceBarContentOffset, 40, 32, 21, -1, -1, -1, KEY_LOWERCASE_I, _inventoryButtonNormalFrmImage.getData(), _inventoryButtonPressedFrmImage.getData(), NULL, 0);
+	gInventoryButton = buttonCreate(gInterfaceBarWindow, 211 + gInterfaceBarContentOffset, 40, 32, 21, -1, -1, -1, KEY_LOWERCASE_I, _inventoryButtonNormalFrmImage.getData(), _inventoryButtonPressedFrmImage.getData(), nullptr, 0);
 	if (gInventoryButton == -1) {
 		// NOTE: Uninline.
 		return intface_fatal_error(-1);
 	}
 
 //	buttonSetCallbacks(gInventoryButton, _gsound_med_butt_press, _gsound_med_butt_release);  // TODO audio
-	buttonSetCallbacks(gInventoryButton, NULL, NULL);
+	buttonSetCallbacks(gInventoryButton, nullptr, nullptr);
 
 	fid = buildFid(OBJ_TYPE_INTERFACE, 18, 0, 0, 0);
 	if (!_optionsButtonNormalFrmImage.lock(fid)) {
@@ -379,14 +379,14 @@ int interfaceInit() {
 		return intface_fatal_error(-1);
 	}
 
-	gOptionsButton = buttonCreate(gInterfaceBarWindow, 210 + gInterfaceBarContentOffset, 61, 34, 34, -1, -1, -1, KEY_LOWERCASE_O, _optionsButtonNormalFrmImage.getData(), _optionsButtonPressedFrmImage.getData(), NULL, 0);
+	gOptionsButton = buttonCreate(gInterfaceBarWindow, 210 + gInterfaceBarContentOffset, 61, 34, 34, -1, -1, -1, KEY_LOWERCASE_O, _optionsButtonNormalFrmImage.getData(), _optionsButtonPressedFrmImage.getData(), nullptr, 0);
 	if (gOptionsButton == -1) {
 		// NOTE: Uninline.
 		return intface_fatal_error(-1);
 	}
 
 //	buttonSetCallbacks(gOptionsButton, _gsound_med_butt_press, _gsound_med_butt_release);  // TODO audio
-	buttonSetCallbacks(gOptionsButton, NULL, NULL);
+	buttonSetCallbacks(gOptionsButton, nullptr, nullptr);
 
 	fid = buildFid(OBJ_TYPE_INTERFACE, 6, 0, 0, 0);
 	if (!_skilldexButtonNormalFrmImage.lock(fid)) {
@@ -406,7 +406,7 @@ int interfaceInit() {
 		return intface_fatal_error(-1);
 	}
 
-	gSkilldexButton = buttonCreate(gInterfaceBarWindow, 523 + gInterfaceBarContentOffset, 6, 22, 21, -1, -1, -1, KEY_LOWERCASE_S, _skilldexButtonNormalFrmImage.getData(), _skilldexButtonPressedFrmImage.getData(), NULL, BUTTON_FLAG_TRANSPARENT);
+	gSkilldexButton = buttonCreate(gInterfaceBarWindow, 523 + gInterfaceBarContentOffset, 6, 22, 21, -1, -1, -1, KEY_LOWERCASE_S, _skilldexButtonNormalFrmImage.getData(), _skilldexButtonPressedFrmImage.getData(), nullptr, BUTTON_FLAG_TRANSPARENT);
 	if (gSkilldexButton == -1) {
 		// NOTE: Uninline.
 		return intface_fatal_error(-1);
@@ -414,7 +414,7 @@ int interfaceInit() {
 
 	buttonSetMask(gSkilldexButton, _skilldexButtonMaskFrmImage.getData());
 //	buttonSetCallbacks(gSkilldexButton, _gsound_med_butt_press, _gsound_med_butt_release); TODO audio
-	buttonSetCallbacks(gSkilldexButton, NULL, NULL);
+	buttonSetCallbacks(gSkilldexButton, nullptr, nullptr);
 
 	fid = buildFid(OBJ_TYPE_INTERFACE, 13, 0, 0, 0);
 	if (!_mapButtonNormalFrmImage.lock(fid)) {
@@ -434,7 +434,7 @@ int interfaceInit() {
 		return intface_fatal_error(-1);
 	}
 
-	gMapButton = buttonCreate(gInterfaceBarWindow, 526 + gInterfaceBarContentOffset, 39, 41, 19, -1, -1, -1, KEY_TAB, _mapButtonNormalFrmImage.getData(), _mapButtonPressedFrmImage.getData(), NULL, BUTTON_FLAG_TRANSPARENT);
+	gMapButton = buttonCreate(gInterfaceBarWindow, 526 + gInterfaceBarContentOffset, 39, 41, 19, -1, -1, -1, KEY_TAB, _mapButtonNormalFrmImage.getData(), _mapButtonPressedFrmImage.getData(), nullptr, BUTTON_FLAG_TRANSPARENT);
 	if (gMapButton == -1) {
 		// NOTE: Uninline.
 		return intface_fatal_error(-1);
@@ -442,7 +442,7 @@ int interfaceInit() {
 
 	buttonSetMask(gMapButton, _mapButtonMaskFrmImage.getData());
 //	buttonSetCallbacks(gMapButton, _gsound_med_butt_press, _gsound_med_butt_release);  TODO audio
-	buttonSetCallbacks(gMapButton, NULL, NULL);
+	buttonSetCallbacks(gMapButton, nullptr, nullptr);
 
 	fid = buildFid(OBJ_TYPE_INTERFACE, 59, 0, 0, 0);
 	if (!_pipboyButtonNormalFrmImage.lock(fid)) {
@@ -456,7 +456,7 @@ int interfaceInit() {
 		return intface_fatal_error(-1);
 	}
 
-	gPipboyButton = buttonCreate(gInterfaceBarWindow, 526 + gInterfaceBarContentOffset, 77, 41, 19, -1, -1, -1, KEY_LOWERCASE_P, _pipboyButtonNormalFrmImage.getData(), _pipboyButtonPressedFrmImage.getData(), NULL, 0);
+	gPipboyButton = buttonCreate(gInterfaceBarWindow, 526 + gInterfaceBarContentOffset, 77, 41, 19, -1, -1, -1, KEY_LOWERCASE_P, _pipboyButtonNormalFrmImage.getData(), _pipboyButtonPressedFrmImage.getData(), nullptr, 0);
 	if (gPipboyButton == -1) {
 		// NOTE: Uninline.
 		return intface_fatal_error(-1);
@@ -464,7 +464,7 @@ int interfaceInit() {
 
 	buttonSetMask(gPipboyButton, _mapButtonMaskFrmImage.getData());
 //	buttonSetCallbacks(gPipboyButton, _gsound_med_butt_press, _gsound_med_butt_release); TODO audio
-	buttonSetCallbacks(gPipboyButton, NULL, NULL);
+	buttonSetCallbacks(gPipboyButton, nullptr, nullptr);
 
 	fid = buildFid(OBJ_TYPE_INTERFACE, 57, 0, 0, 0);
 	if (!_characterButtonNormalFrmImage.lock(fid)) {
@@ -478,7 +478,7 @@ int interfaceInit() {
 		return intface_fatal_error(-1);
 	}
 
-	gCharacterButton = buttonCreate(gInterfaceBarWindow, 526 + gInterfaceBarContentOffset, 58, 41, 19, -1, -1, -1, KEY_LOWERCASE_C, _characterButtonNormalFrmImage.getData(), _characterButtonPressedFrmImage.getData(), NULL, 0);
+	gCharacterButton = buttonCreate(gInterfaceBarWindow, 526 + gInterfaceBarContentOffset, 58, 41, 19, -1, -1, -1, KEY_LOWERCASE_C, _characterButtonNormalFrmImage.getData(), _characterButtonPressedFrmImage.getData(), nullptr, 0);
 	if (gCharacterButton == -1) {
 		// NOTE: Uninline.
 		return intface_fatal_error(-1);
@@ -486,7 +486,7 @@ int interfaceInit() {
 
 	buttonSetMask(gCharacterButton, _mapButtonMaskFrmImage.getData());
 //	buttonSetCallbacks(gCharacterButton, _gsound_med_butt_press, _gsound_med_butt_release);  TODO audio
-	buttonSetCallbacks(gCharacterButton, NULL, NULL);
+	buttonSetCallbacks(gCharacterButton, nullptr, nullptr);
 
 	fid = buildFid(OBJ_TYPE_INTERFACE, 32, 0, 0, 0);
 	if (!_itemButtonNormalFrmImage.lock(fid)) {
@@ -509,15 +509,15 @@ int interfaceInit() {
 	memcpy(_itemButtonUp, _itemButtonNormalFrmImage.getData(), sizeof(_itemButtonUp));
 	memcpy(_itemButtonDown, _itemButtonPressedFrmImage.getData(), sizeof(_itemButtonDown));
 
-	gSingleAttackButton = buttonCreate(gInterfaceBarWindow, 267 + gInterfaceBarContentOffset, 26, 188, 67, -1, -1, -1, -20, _itemButtonUp, _itemButtonDown, NULL, BUTTON_FLAG_TRANSPARENT);
+	gSingleAttackButton = buttonCreate(gInterfaceBarWindow, 267 + gInterfaceBarContentOffset, 26, 188, 67, -1, -1, -1, -20, _itemButtonUp, _itemButtonDown, nullptr, BUTTON_FLAG_TRANSPARENT);
 	if (gSingleAttackButton == -1) {
 		// NOTE: Uninline.
 		return intface_fatal_error(-1);
 	}
 
-	buttonSetRightMouseCallbacks(gSingleAttackButton, -1, KEY_LOWERCASE_N, NULL, NULL);
+	buttonSetRightMouseCallbacks(gSingleAttackButton, -1, KEY_LOWERCASE_N, nullptr, nullptr);
 //	buttonSetCallbacks(gSingleAttackButton, _gsound_lrg_butt_press, _gsound_lrg_butt_release);  TODO audio
-	buttonSetCallbacks(gSingleAttackButton, NULL, NULL);
+	buttonSetCallbacks(gSingleAttackButton, nullptr, nullptr);
 
 	fid = buildFid(OBJ_TYPE_INTERFACE, 6, 0, 0, 0);
 	if (!_changeHandsButtonNormalFrmImage.lock(fid)) {
@@ -538,7 +538,7 @@ int interfaceInit() {
 	}
 
 	// Swap hands button
-	gChangeHandsButton = buttonCreate(gInterfaceBarWindow, 218 + gInterfaceBarContentOffset, 6, 22, 21, -1, -1, -1, KEY_LOWERCASE_B, _changeHandsButtonNormalFrmImage.getData(), _changeHandsButtonPressedFrmImage.getData(), NULL, BUTTON_FLAG_TRANSPARENT);
+	gChangeHandsButton = buttonCreate(gInterfaceBarWindow, 218 + gInterfaceBarContentOffset, 6, 22, 21, -1, -1, -1, KEY_LOWERCASE_B, _changeHandsButtonNormalFrmImage.getData(), _changeHandsButtonPressedFrmImage.getData(), nullptr, BUTTON_FLAG_TRANSPARENT);
 	if (gChangeHandsButton == -1) {
 		// NOTE: Uninline.
 		return intface_fatal_error(-1);
@@ -546,7 +546,7 @@ int interfaceInit() {
 
 	buttonSetMask(gChangeHandsButton, _changeHandsButtonMaskFrmImage.getData());
 //	buttonSetCallbacks(gChangeHandsButton, _gsound_med_butt_press, _gsound_med_butt_release); TODO audio
-	buttonSetCallbacks(gChangeHandsButton, NULL, NULL);
+	buttonSetCallbacks(gChangeHandsButton, nullptr, nullptr);
 
 	fid = buildFid(OBJ_TYPE_INTERFACE, 82, 0, 0, 0);
 	if (!_numbersFrmImage.lock(fid)) {
@@ -1072,8 +1072,8 @@ int interfaceUpdateItems(bool animated, int leftItemAction, int rightItemAction)
 
 	InterfaceItemState *leftItemState = &(gInterfaceItemStates[HAND_LEFT]);
 	Object *item1 = critterGetItem1(gDude);
-	if (item1 == leftItemState->item && leftItemState->item != NULL) {
-		if (leftItemState->item != NULL) {
+	if (item1 == leftItemState->item && leftItemState->item != nullptr) {
+		if (leftItemState->item != nullptr) {
 			leftItemState->isDisabled = dudeIsWeaponDisabled(item1);
 			leftItemState->itemFid = itemGetInventoryFid(item1);
 		}
@@ -1083,7 +1083,7 @@ int interfaceUpdateItems(bool animated, int leftItemAction, int rightItemAction)
 
 		leftItemState->item = item1;
 
-		if (item1 != NULL) {
+		if (item1 != nullptr) {
 			leftItemState->isDisabled = dudeIsWeaponDisabled(item1);
 			leftItemState->primaryHitMode = HIT_MODE_LEFT_WEAPON_PRIMARY;
 			leftItemState->secondaryHitMode = HIT_MODE_LEFT_WEAPON_SECONDARY;
@@ -1112,7 +1112,7 @@ int interfaceUpdateItems(bool animated, int leftItemAction, int rightItemAction)
 
 			// SFALL: Keep selected attack mode.
 			// CE: Implementation is different.
-			if (oldItem == NULL) {
+			if (oldItem == nullptr) {
 				leftItemState->action = oldAction;
 			}
 		}
@@ -1121,8 +1121,8 @@ int interfaceUpdateItems(bool animated, int leftItemAction, int rightItemAction)
 	InterfaceItemState *rightItemState = &(gInterfaceItemStates[HAND_RIGHT]);
 
 	Object *item2 = critterGetItem2(gDude);
-	if (item2 == rightItemState->item && rightItemState->item != NULL) {
-		if (rightItemState->item != NULL) {
+	if (item2 == rightItemState->item && rightItemState->item != nullptr) {
+		if (rightItemState->item != nullptr) {
 			rightItemState->isDisabled = dudeIsWeaponDisabled(rightItemState->item);
 			rightItemState->itemFid = itemGetInventoryFid(rightItemState->item);
 		}
@@ -1132,7 +1132,7 @@ int interfaceUpdateItems(bool animated, int leftItemAction, int rightItemAction)
 
 		rightItemState->item = item2;
 
-		if (item2 != NULL) {
+		if (item2 != nullptr) {
 			rightItemState->isDisabled = dudeIsWeaponDisabled(item2);
 			rightItemState->primaryHitMode = HIT_MODE_RIGHT_WEAPON_PRIMARY;
 			rightItemState->secondaryHitMode = HIT_MODE_RIGHT_WEAPON_SECONDARY;
@@ -1160,7 +1160,7 @@ int interfaceUpdateItems(bool animated, int leftItemAction, int rightItemAction)
 
 			// SFALL: Keep selected attack mode.
 			// CE: Implementation is different.
-			if (oldItem == NULL) {
+			if (oldItem == nullptr) {
 				rightItemState->action = oldAction;
 			}
 		}
@@ -1170,7 +1170,7 @@ int interfaceUpdateItems(bool animated, int leftItemAction, int rightItemAction)
 		Object *newCurrentItem = gInterfaceItemStates[gInterfaceCurrentHand].item;
 		if (newCurrentItem != oldCurrentItem) {
 			int animationCode = 0;
-			if (newCurrentItem != NULL) {
+			if (newCurrentItem != nullptr) {
 				if (itemGetType(newCurrentItem) == ITEM_TYPE_WEAPON) {
 					animationCode = weaponGetAnimationCode(newCurrentItem);
 				}
@@ -1198,7 +1198,7 @@ int interfaceBarSwapHands(bool animated) {
 	if (animated) {
 		Object *item = gInterfaceItemStates[gInterfaceCurrentHand].item;
 		int animationCode = 0;
-		if (item != NULL) {
+		if (item != nullptr) {
 			if (itemGetType(item) == ITEM_TYPE_WEAPON) {
 				animationCode = weaponGetAnimationCode(item);
 			}
@@ -1308,7 +1308,7 @@ void _intface_use_item() {
 			gameMouseSetCursor(MOUSE_CURSOR_CROSSHAIR);
 			gameMouseSetMode(GAME_MOUSE_MODE_CROSSHAIR);
 			if (!isInCombat()) {
-				_combat(NULL);
+				_combat(nullptr);
 			}
 		}
 	} else if (_proto_action_can_use_on(ptr->item->pid)) {
@@ -1395,7 +1395,7 @@ void interfaceBarEndButtonsShow(bool animated) {
 	int fid = buildFid(OBJ_TYPE_INTERFACE, 104, 0, 0, 0);
 	CacheEntry *handle;
 	Art *art = artLock(fid, &handle);
-	if (art == NULL) {
+	if (art == nullptr) {
 		return;
 	}
 
@@ -1411,7 +1411,7 @@ void interfaceBarEndButtonsShow(bool animated) {
 
 			if (getTicksSince(time) >= delay) {
 				unsigned char *src = artGetFrameData(art, frame, 0);
-				if (src != NULL) {
+				if (src != nullptr) {
 					blitBufferToBuffer(src, 57, 58, 57, gInterfaceWindowBuffer + gInterfaceBarWidth * 38 + 580 + gInterfaceBarContentOffset, gInterfaceBarWidth);
 					windowRefreshRect(gInterfaceBarWindow, &gInterfaceBarEndButtonsRect);
 				}
@@ -1451,7 +1451,7 @@ void interfaceBarEndButtonsHide(bool animated) {
 	int fid = buildFid(OBJ_TYPE_INTERFACE, 104, 0, 0, 0);
 	CacheEntry *handle;
 	Art *art = artLock(fid, &handle);
-	if (art == NULL) {
+	if (art == nullptr) {
 		return;
 	}
 
@@ -1470,7 +1470,7 @@ void interfaceBarEndButtonsHide(bool animated) {
 			if (getTicksSince(time) >= delay) {
 				unsigned char *src = artGetFrameData(art, frame - 1, 0);
 				unsigned char *dest = gInterfaceWindowBuffer + gInterfaceBarWidth * 38 + 580 + gInterfaceBarContentOffset;
-				if (src != NULL) {
+				if (src != nullptr) {
 					blitBufferToBuffer(src, 57, 58, 57, dest, gInterfaceBarWidth);
 					windowRefreshRect(gInterfaceBarWindow, &gInterfaceBarEndButtonsRect);
 				}
@@ -1825,10 +1825,10 @@ static void interfaceBarSwapHandsAnimatePutAwayTakeOutSequence(int previousWeapo
 	}
 
 	// TODO: Get rid of cast.
-	animationRegisterCallbackForced(NULL, NULL, (AnimationCallback *)_intface_redraw_items_callback, -1);
+	animationRegisterCallbackForced(nullptr, nullptr, (AnimationCallback *)_intface_redraw_items_callback, -1);
 
 	Object *item = gInterfaceItemStates[gInterfaceCurrentHand].item;
-	if (item != NULL && item->lightDistance > 4) {
+	if (item != nullptr && item->lightDistance > 4) {
 		animationRegisterSetLightDistance(gDude, item->lightDistance, 0);
 	}
 
@@ -1840,7 +1840,7 @@ static void interfaceBarSwapHandsAnimatePutAwayTakeOutSequence(int previousWeapo
 	}
 
 	// TODO: Get rid of cast.
-	animationRegisterCallbackForced(NULL, NULL, (AnimationCallback *)_intface_change_fid_callback, -1);
+	animationRegisterCallbackForced(nullptr, nullptr, (AnimationCallback *)_intface_change_fid_callback, -1);
 
 	if (reg_anim_end() == -1) {
 		return;
@@ -1897,14 +1897,14 @@ static int endTurnButtonInit() {
 		return -1;
 	}
 
-	gEndTurnButton = buttonCreate(gInterfaceBarWindow, 590 + gInterfaceBarContentOffset, 43, 38, 22, -1, -1, -1, 32, _endTurnButtonNormalFrmImage.getData(), _endTurnButtonPressedFrmImage.getData(), NULL, 0);
+	gEndTurnButton = buttonCreate(gInterfaceBarWindow, 590 + gInterfaceBarContentOffset, 43, 38, 22, -1, -1, -1, 32, _endTurnButtonNormalFrmImage.getData(), _endTurnButtonPressedFrmImage.getData(), nullptr, 0);
 	if (gEndTurnButton == -1) {
 		return -1;
 	}
 
 	_win_register_button_disable(gEndTurnButton, _endTurnButtonNormalFrmImage.getData(), _endTurnButtonNormalFrmImage.getData(), _endTurnButtonNormalFrmImage.getData());
 //	buttonSetCallbacks(gEndTurnButton, _gsound_med_butt_press, _gsound_med_butt_release); TODO audio
-	buttonSetCallbacks(gEndTurnButton, NULL, NULL);
+	buttonSetCallbacks(gEndTurnButton, nullptr, nullptr);
 
 	return 0;
 }
@@ -1948,14 +1948,14 @@ static int endCombatButtonInit() {
 		return -1;
 	}
 
-	gEndCombatButton = buttonCreate(gInterfaceBarWindow, 590 + gInterfaceBarContentOffset, 65, 38, 22, -1, -1, -1, 13, _endCombatButtonNormalFrmImage.getData(), _endCombatButtonPressedFrmImage.getData(), NULL, 0);
+	gEndCombatButton = buttonCreate(gInterfaceBarWindow, 590 + gInterfaceBarContentOffset, 65, 38, 22, -1, -1, -1, 13, _endCombatButtonNormalFrmImage.getData(), _endCombatButtonPressedFrmImage.getData(), nullptr, 0);
 	if (gEndCombatButton == -1) {
 		return -1;
 	}
 
 	_win_register_button_disable(gEndCombatButton, _endCombatButtonNormalFrmImage.getData(), _endCombatButtonNormalFrmImage.getData(), _endCombatButtonNormalFrmImage.getData());
 //	buttonSetCallbacks(gEndCombatButton, _gsound_med_butt_press, _gsound_med_butt_release); TODO audio
-	buttonSetCallbacks(gEndCombatButton, NULL, NULL);
+	buttonSetCallbacks(gEndCombatButton, nullptr, nullptr);
 
 	return 0;
 }
@@ -2028,7 +2028,7 @@ static int _intface_item_reload() {
 		return -1;
 	}
 
-//	const char *sfx = sfxBuildWeaponName(WEAPON_SOUND_EFFECT_READY, gInterfaceItemStates[gInterfaceCurrentHand].item, HIT_MODE_RIGHT_WEAPON_PRIMARY, NULL); TODO audio
+//	const char *sfx = sfxBuildWeaponName(WEAPON_SOUND_EFFECT_READY, gInterfaceItemStates[gInterfaceCurrentHand].item, HIT_MODE_RIGHT_WEAPON_PRIMARY, nullptr); TODO audio
 //	soundPlayFile(sfx); TODO audio
 
 	return 0;
@@ -2213,7 +2213,7 @@ static int indicatorBarInit() {
 		IndicatorDescription *indicatorDescription = &(gIndicatorDescriptions[index]);
 
 		indicatorDescription->data = (unsigned char *)internal_malloc(INDICATOR_BOX_WIDTH * INDICATOR_BOX_HEIGHT);
-		if (indicatorDescription->data == NULL) {
+		if (indicatorDescription->data == nullptr) {
 			debugPrint("\nINTRFACE: Error initializing indicator box graphics! **");
 
 			while (--index >= 0) {
@@ -2266,9 +2266,9 @@ static void interfaceBarFree() {
 
 	for (int index = 0; index < INDICATOR_COUNT; index++) {
 		IndicatorDescription *indicatorBoxDescription = &(gIndicatorDescriptions[index]);
-		if (indicatorBoxDescription->data != NULL) {
+		if (indicatorBoxDescription->data != nullptr) {
 			internal_free(indicatorBoxDescription->data);
-			indicatorBoxDescription->data = NULL;
+			indicatorBoxDescription->data = nullptr;
 		}
 	}
 }

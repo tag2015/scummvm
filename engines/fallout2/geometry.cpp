@@ -10,11 +10,11 @@
 namespace Fallout2 {
 
 // 0x51DEF4
-static RectListNode *_rectList = NULL;
+static RectListNode *_rectList = nullptr;
 
 // 0x4C6900
 void _GNW_rect_exit() {
-	while (_rectList != NULL) {
+	while (_rectList != nullptr) {
 		RectListNode *next = _rectList->next;
 		internal_free(_rectList);
 		_rectList = next;
@@ -27,7 +27,7 @@ void _rect_clip_list(RectListNode **rectListNodePtr, Rect *rect) {
 	rectCopy(&v1, rect);
 
 	// NOTE: Original code is slightly different.
-	while (*rectListNodePtr != NULL) {
+	while (*rectListNodePtr != nullptr) {
 		RectListNode *rectListNode = *rectListNodePtr;
 		if (v1.right >= rectListNode->rect.left && v1.bottom >= rectListNode->rect.top && v1.left <= rectListNode->rect.right && v1.top <= rectListNode->rect.bottom) {
 			Rect v2;
@@ -40,7 +40,7 @@ void _rect_clip_list(RectListNode **rectListNodePtr, Rect *rect) {
 
 			if (v2.top < v1.top) {
 				RectListNode *newRectListNode = _rect_malloc();
-				if (newRectListNode == NULL) {
+				if (newRectListNode == nullptr) {
 					return;
 				}
 
@@ -56,7 +56,7 @@ void _rect_clip_list(RectListNode **rectListNodePtr, Rect *rect) {
 
 			if (v2.bottom > v1.bottom) {
 				RectListNode *newRectListNode = _rect_malloc();
-				if (newRectListNode == NULL) {
+				if (newRectListNode == nullptr) {
 					return;
 				}
 
@@ -72,7 +72,7 @@ void _rect_clip_list(RectListNode **rectListNodePtr, Rect *rect) {
 
 			if (v2.left < v1.left) {
 				RectListNode *newRectListNode = _rect_malloc();
-				if (newRectListNode == NULL) {
+				if (newRectListNode == nullptr) {
 					return;
 				}
 
@@ -86,7 +86,7 @@ void _rect_clip_list(RectListNode **rectListNodePtr, Rect *rect) {
 
 			if (v2.right > v1.right) {
 				RectListNode *newRectListNode = _rect_malloc();
-				if (newRectListNode == NULL) {
+				if (newRectListNode == nullptr) {
 					return;
 				}
 
@@ -105,7 +105,7 @@ void _rect_clip_list(RectListNode **rectListNodePtr, Rect *rect) {
 
 // 0x4C6AAC
 RectListNode *rect_clip(Rect *b, Rect *t) {
-	RectListNode *list = NULL;
+	RectListNode *list = nullptr;
 	Rect clipped_t;
 
 	if (rectIntersection(t, b, &clipped_t) == 0) {
@@ -136,23 +136,23 @@ RectListNode *rect_clip(Rect *b, Rect *t) {
 		for (k = 0; k < 4; k++) {
 			if (clipped_b[k].left <= clipped_b[k].right && clipped_b[k].top <= clipped_b[k].bottom) {
 				*next = _rect_malloc();
-				if (*next == NULL) {
-					return NULL;
+				if (*next == nullptr) {
+					return nullptr;
 				}
 
 				(*next)->rect = clipped_b[k];
-				(*next)->next = NULL;
+				(*next)->next = nullptr;
 				next = &((*next)->next);
 			}
 		}
 	} else {
 		list = _rect_malloc();
-		if (list == NULL) {
-			return NULL;
+		if (list == nullptr) {
+			return nullptr;
 		}
 
 		list->rect = *b;
-		list->next = NULL;
+		list->next = nullptr;
 	}
 
 	return list;
@@ -160,10 +160,10 @@ RectListNode *rect_clip(Rect *b, Rect *t) {
 
 // 0x4C6BB8
 RectListNode *_rect_malloc() {
-	if (_rectList == NULL) {
+	if (_rectList == nullptr) {
 		for (int index = 0; index < 10; index++) {
 			RectListNode *rectListNode = (RectListNode *)internal_malloc(sizeof(*rectListNode));
-			if (rectListNode == NULL) {
+			if (rectListNode == nullptr) {
 				break;
 			}
 
@@ -172,8 +172,8 @@ RectListNode *_rect_malloc() {
 		}
 	}
 
-	if (_rectList == NULL) {
-		return NULL;
+	if (_rectList == nullptr) {
+		return nullptr;
 	}
 
 	RectListNode *rectListNode = _rectList;

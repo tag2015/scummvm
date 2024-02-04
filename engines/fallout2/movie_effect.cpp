@@ -41,7 +41,7 @@ static void movieEffectsClear();
 static bool gMovieEffectsInitialized = false;
 
 // 0x5195F4
-static MovieEffect* gMovieEffectHead = NULL;
+static MovieEffect* gMovieEffectHead = nullptr;
 
 // 0x638EC4
 static unsigned char _source_palette[768];
@@ -68,8 +68,8 @@ void movieEffectsReset() {
 		return;
 	}
 
-	movieSetPaletteProc(NULL);
-	_movieSetPaletteFunc(NULL);
+	movieSetPaletteProc(nullptr);
+	_movieSetPaletteFunc(nullptr);
 	movieEffectsClear();
 
 	_inside_fade = false;
@@ -83,8 +83,8 @@ void movieEffectsExit() {
 		return;
 	}
 
-	movieSetPaletteProc(NULL);
-	_movieSetPaletteFunc(NULL);
+	movieSetPaletteProc(nullptr);
+	_movieSetPaletteFunc(nullptr);
 	movieEffectsClear();
 
 	_inside_fade = false;
@@ -98,13 +98,13 @@ int movieEffectsLoad(const char* filePath) {
 		return -1;
 	}
 
-	movieSetPaletteProc(NULL);
-	_movieSetPaletteFunc(NULL);
+	movieSetPaletteProc(nullptr);
+	_movieSetPaletteFunc(nullptr);
 	movieEffectsClear();
 	_inside_fade = false;
 	memset(_source_palette, 0, sizeof(_source_palette));
 
-	if (filePath == NULL) {
+	if (filePath == nullptr) {
 		return -1;
 	}
 
@@ -119,7 +119,7 @@ int movieEffectsLoad(const char* filePath) {
 	strcpy(path, filePath);
 
 	char* pch = strrchr(path, '.');
-	if (pch != NULL) {
+	if (pch != nullptr) {
 		*pch = '\0';
 	}
 
@@ -137,7 +137,7 @@ int movieEffectsLoad(const char* filePath) {
 	}
 
 	movieEffectFrameList = (int*)internal_malloc(sizeof(*movieEffectFrameList) * movieEffectsLength);
-	if (movieEffectFrameList == NULL) {
+	if (movieEffectFrameList == nullptr) {
 		goto out;
 	}
 
@@ -181,7 +181,7 @@ int movieEffectsLoad(const char* filePath) {
 			}
 
 			MovieEffect* movieEffect = (MovieEffect*)internal_malloc(sizeof(*movieEffect));
-			if (movieEffect == NULL) {
+			if (movieEffect == nullptr) {
 				continue;
 			}
 
@@ -226,8 +226,8 @@ void _moviefx_stop() {
 		return;
 	}
 
-	movieSetPaletteProc(NULL);
-	_movieSetPaletteFunc(NULL);
+	movieSetPaletteProc(nullptr);
+	_movieSetPaletteFunc(nullptr);
 
 	movieEffectsClear();
 
@@ -238,14 +238,14 @@ void _moviefx_stop() {
 // 0x488144
 static void _moviefx_callback_func(int frame) {
 	MovieEffect* movieEffect = gMovieEffectHead;
-	while (movieEffect != NULL) {
+	while (movieEffect != nullptr) {
 		if (frame >= movieEffect->startFrame && frame <= movieEffect->endFrame) {
 			break;
 		}
 		movieEffect = movieEffect->next;
 	}
 
-	if (movieEffect != NULL) {
+	if (movieEffect != nullptr) {
 		unsigned char palette[768];
 		int step = frame - movieEffect->startFrame + 1;
 
@@ -266,7 +266,7 @@ static void _moviefx_callback_func(int frame) {
 		paletteSetEntries(palette);
 	}
 
-	_inside_fade = movieEffect != NULL;
+	_inside_fade = movieEffect != nullptr;
 }
 
 // 0x4882AC
@@ -281,13 +281,13 @@ static void _moviefx_palette_func(unsigned char* palette, int start, int end) {
 // 0x488310
 static void movieEffectsClear() {
 	MovieEffect* movieEffect = gMovieEffectHead;
-	while (movieEffect != NULL) {
+	while (movieEffect != nullptr) {
 		MovieEffect* next = movieEffect->next;
 		internal_free(movieEffect);
 		movieEffect = next;
 	}
 
-	gMovieEffectHead = NULL;
+	gMovieEffectHead = nullptr;
 }
 
 } // namespace fallout

@@ -30,11 +30,11 @@ static char gConfigLastSectionKey[CONFIG_FILE_MAX_LINE_LENGTH] = "unknown";
 
 // 0x42BD90
 bool configInit(Config *config) {
-	if (config == NULL) {
+	if (config == nullptr) {
 		return false;
 	}
 
-	if (dictionaryInit(config, CONFIG_INITIAL_CAPACITY, sizeof(ConfigSection), NULL) != 0) {
+	if (dictionaryInit(config, CONFIG_INITIAL_CAPACITY, sizeof(ConfigSection), nullptr) != 0) {
 		return false;
 	}
 
@@ -43,7 +43,7 @@ bool configInit(Config *config) {
 
 // 0x42BDBC
 void configFree(Config *config) {
-	if (config == NULL) {
+	if (config == nullptr) {
 		return;
 	}
 
@@ -56,7 +56,7 @@ void configFree(Config *config) {
 
 			char **value = (char **)keyValueEntry->value;
 			internal_free(*value);
-			*value = NULL;
+			*value = nullptr;
 		}
 
 		dictionaryFree(section);
@@ -75,7 +75,7 @@ void configFree(Config *config) {
 //
 // 0x42BE38
 bool configParseCommandLineArguments(Config *config, int argc, char **argv) {
-	if (config == NULL) {
+	if (config == nullptr) {
 		return false;
 	}
 
@@ -85,7 +85,7 @@ bool configParseCommandLineArguments(Config *config, int argc, char **argv) {
 
 		// Find opening bracket.
 		pch = strchr(string, '[');
-		if (pch == NULL) {
+		if (pch == nullptr) {
 			continue;
 		}
 
@@ -93,7 +93,7 @@ bool configParseCommandLineArguments(Config *config, int argc, char **argv) {
 
 		// Find closing bracket.
 		pch = strchr(sectionKey, ']');
-		if (pch == NULL) {
+		if (pch == nullptr) {
 			continue;
 		}
 
@@ -116,7 +116,7 @@ bool configParseCommandLineArguments(Config *config, int argc, char **argv) {
 
 // 0x42BF48
 bool configGetString(Config *config, const char *sectionKey, const char *key, char **valuePtr) {
-	if (config == NULL || sectionKey == NULL || key == NULL || valuePtr == NULL) {
+	if (config == nullptr || sectionKey == nullptr || key == nullptr || valuePtr == nullptr) {
 		return false;
 	}
 
@@ -141,7 +141,7 @@ bool configGetString(Config *config, const char *sectionKey, const char *key, ch
 
 // 0x42BF90
 bool configSetString(Config *config, const char *sectionKey, const char *key, const char *value) {
-	if (config == NULL || sectionKey == NULL || key == NULL || value == NULL) {
+	if (config == nullptr || sectionKey == nullptr || key == nullptr || value == nullptr) {
 		return false;
 	}
 
@@ -162,13 +162,13 @@ bool configSetString(Config *config, const char *sectionKey, const char *key, co
 
 		char **existingValue = (char **)keyValueEntry->value;
 		internal_free(*existingValue);
-		*existingValue = NULL;
+		*existingValue = nullptr;
 
 		dictionaryRemoveValue(section, key);
 	}
 
 	char *valueCopy = internal_strdup(value);
-	if (valueCopy == NULL) {
+	if (valueCopy == nullptr) {
 		return false;
 	}
 
@@ -182,7 +182,7 @@ bool configSetString(Config *config, const char *sectionKey, const char *key, co
 
 // 0x42C05C
 bool configGetInt(Config *config, const char *sectionKey, const char *key, int *valuePtr, unsigned char base /* = 0 */) {
-	if (valuePtr == NULL) {
+	if (valuePtr == nullptr) {
 		return false;
 	}
 
@@ -213,7 +213,7 @@ bool configGetInt(Config *config, const char *sectionKey, const char *key, int *
 
 // 0x42C090
 bool configGetIntList(Config *config, const char *sectionKey, const char *key, int *arr, int count) {
-	if (arr == NULL || count < 2) {
+	if (arr == nullptr || count < 2) {
 		return false;
 	}
 
@@ -227,7 +227,7 @@ bool configGetIntList(Config *config, const char *sectionKey, const char *key, i
 
 	while (1) {
 		char *pch = strchr(string, ',');
-		if (pch == NULL) {
+		if (pch == nullptr) {
 			break;
 		}
 
@@ -263,7 +263,7 @@ bool configSetInt(Config *config, const char *sectionKey, const char *key, int v
 //
 // 0x42C280
 bool configRead(Config *config, const char *filePath, bool isDb) {
-	if (config == NULL || filePath == NULL) {
+	if (config == nullptr || filePath == nullptr) {
 		return false;
 	}
 
@@ -273,11 +273,11 @@ bool configRead(Config *config, const char *filePath, bool isDb) {
 		File *stream = fileOpen(filePath, "rb");
 
 		// CE: Return `false` if file does not exists in database.
-		if (stream == NULL) {
+		if (stream == nullptr) {
 			return false;
 		}
 
-		while (fileReadString(string, sizeof(string), stream) != NULL) {
+		while (fileReadString(string, sizeof(string), stream) != nullptr) {
 			configParseLine(config, string);
 		}
 		fileClose(stream);
@@ -285,10 +285,10 @@ bool configRead(Config *config, const char *filePath, bool isDb) {
 		Common::File *stream = compat_fopen(filePath, "rt");
 
 		// CE: Return `false` if file does not exists on the file system.
-		if (stream == NULL) {
+		if (stream == nullptr) {
 			return false;
 		}
-		while (compat_fgets(string, sizeof(string), stream) != NULL) {
+		while (compat_fgets(string, sizeof(string), stream) != nullptr) {
 			configParseLine(config, string);
 		}
 		stream->close();
@@ -303,13 +303,13 @@ bool configRead(Config *config, const char *filePath, bool isDb) {
 // TODO: Write config
 bool configWrite(Config *config, const char *filePath, bool isDb) {
 #if 0
-	if (config == NULL || filePath == NULL) {
+	if (config == nullptr || filePath == nullptr) {
 		return false;
 	}
 
 	if (isDb) {
 		File *stream = fileOpen(filePath, "wt");
-		if (stream == NULL) {
+		if (stream == nullptr) {
 			return false;
 		}
 
@@ -329,7 +329,7 @@ bool configWrite(Config *config, const char *filePath, bool isDb) {
 		fileClose(stream);
 	} else {
 		FILE *stream = compat_fopen(filePath, "wt");
-		if (stream == NULL) {
+		if (stream == nullptr) {
 			return false;
 		}
 
@@ -371,7 +371,7 @@ static bool configParseLine(Config *config, char *string) {
 
 	// Find comment marker and truncate the string.
 	pch = strchr(string, ';');
-	if (pch != NULL) {
+	if (pch != nullptr) {
 		*pch = '\0';
 	}
 
@@ -397,7 +397,7 @@ static bool configParseLine(Config *config, char *string) {
 
 		// Find closing bracket.
 		pch = strchr(sectionKey, ']');
-		if (pch != NULL) {
+		if (pch != nullptr) {
 			*pch = '\0';
 			strncpy(gConfigLastSectionKey, sectionKey, sizeof(gConfigLastSectionKey) - 1);
 			return configTrimString(gConfigLastSectionKey);
@@ -420,13 +420,13 @@ static bool configParseLine(Config *config, char *string) {
 //
 // 0x42C594
 static bool configParseKeyValue(char *string, char *key, char *value) {
-	if (string == NULL || key == NULL || value == NULL) {
+	if (string == nullptr || key == nullptr || value == nullptr) {
 		return false;
 	}
 
 	// Find equals character.
 	char *pch = strchr(string, '=');
-	if (pch == NULL) {
+	if (pch == nullptr) {
 		return false;
 	}
 
@@ -450,7 +450,7 @@ static bool configParseKeyValue(char *string, char *key, char *value) {
 //
 // 0x42C638
 static bool configEnsureSectionExists(Config *config, const char *sectionKey) {
-	if (config == NULL || sectionKey == NULL) {
+	if (config == nullptr || sectionKey == nullptr) {
 		return false;
 	}
 
@@ -460,7 +460,7 @@ static bool configEnsureSectionExists(Config *config, const char *sectionKey) {
 	}
 
 	ConfigSection section;
-	if (dictionaryInit(&section, CONFIG_INITIAL_CAPACITY, sizeof(char **), NULL) == -1) {
+	if (dictionaryInit(&section, CONFIG_INITIAL_CAPACITY, sizeof(char **), nullptr) == -1) {
 		return false;
 	}
 
@@ -475,7 +475,7 @@ static bool configEnsureSectionExists(Config *config, const char *sectionKey) {
 //
 // 0x42C698
 static bool configTrimString(char *string) {
-	if (string == NULL) {
+	if (string == nullptr) {
 		return false;
 	}
 
@@ -511,7 +511,7 @@ static bool configTrimString(char *string) {
 
 // 0x42C718
 bool configGetDouble(Config *config, const char *sectionKey, const char *key, double *valuePtr) {
-	if (valuePtr == NULL) {
+	if (valuePtr == nullptr) {
 		return false;
 	}
 
@@ -520,7 +520,7 @@ bool configGetDouble(Config *config, const char *sectionKey, const char *key, do
 		return false;
 	}
 
-	*valuePtr = strtod(stringValue, NULL);
+	*valuePtr = strtod(stringValue, nullptr);
 
 	return true;
 }
@@ -535,7 +535,7 @@ bool configSetDouble(Config *config, const char *sectionKey, const char *key, do
 
 // NOTE: Boolean-typed variant of [configGetInt].
 bool configGetBool(Config *config, const char *sectionKey, const char *key, bool *valuePtr) {
-	if (valuePtr == NULL) {
+	if (valuePtr == nullptr) {
 		return false;
 	}
 

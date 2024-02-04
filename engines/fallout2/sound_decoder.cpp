@@ -104,7 +104,7 @@ static bool soundDecoderPrepare(SoundDecoder *soundDecoder, SoundDecoderReadProc
 	soundDecoder->data = data;
 
 	soundDecoder->bufferIn = (unsigned char *)malloc(SOUND_DECODER_IN_BUFFER_SIZE);
-	if (soundDecoder->bufferIn == NULL) {
+	if (soundDecoder->bufferIn == nullptr) {
 		return false;
 	}
 
@@ -1089,15 +1089,15 @@ size_t soundDecoderDecode(SoundDecoder *soundDecoder, void *buffer, size_t size)
 
 // 0x4D5048
 void soundDecoderFree(SoundDecoder *soundDecoder) {
-	if (soundDecoder->bufferIn != NULL) {
+	if (soundDecoder->bufferIn != nullptr) {
 		free(soundDecoder->bufferIn);
 	}
 
-	if (soundDecoder->prev_samples != NULL) {
+	if (soundDecoder->prev_samples != nullptr) {
 		free(soundDecoder->prev_samples);
 	}
 
-	if (soundDecoder->samples != NULL) {
+	if (soundDecoder->samples != nullptr) {
 		free(soundDecoder->samples);
 	}
 
@@ -1106,9 +1106,9 @@ void soundDecoderFree(SoundDecoder *soundDecoder) {
 	gSoundDecodersCount--;
 
 	if (gSoundDecodersCount == 0) {
-		if (_AudioDecoder_scale_tbl != NULL) {
+		if (_AudioDecoder_scale_tbl != nullptr) {
 			free(_AudioDecoder_scale_tbl);
-			_AudioDecoder_scale_tbl = NULL;
+			_AudioDecoder_scale_tbl = nullptr;
 		}
 	}
 }
@@ -1120,8 +1120,8 @@ SoundDecoder *soundDecoderInit(SoundDecoderReadProc *readProc, void *data, int *
 	int v73;
 
 	SoundDecoder *soundDecoder = (SoundDecoder *)malloc(sizeof(*soundDecoder));
-	if (soundDecoder == NULL) {
-		return NULL;
+	if (soundDecoder == nullptr) {
+		return nullptr;
 	}
 
 	memset(soundDecoder, 0, sizeof(*soundDecoder));
@@ -1192,7 +1192,7 @@ SoundDecoder *soundDecoderInit(SoundDecoderReadProc *readProc, void *data, int *
 
 	if (v73 != 0) {
 		soundDecoder->prev_samples = (unsigned char *)malloc(sizeof(unsigned char *) * v73);
-		if (soundDecoder->prev_samples == NULL) {
+		if (soundDecoder->prev_samples == nullptr) {
 			goto L66;
 		}
 
@@ -1200,7 +1200,7 @@ SoundDecoder *soundDecoderInit(SoundDecoderReadProc *readProc, void *data, int *
 	}
 
 	soundDecoder->samples = (unsigned char *)malloc(sizeof(unsigned char *) * soundDecoder->total_samples);
-	if (soundDecoder->samples == NULL) {
+	if (soundDecoder->samples == nullptr) {
 		goto L66;
 	}
 

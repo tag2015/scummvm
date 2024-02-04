@@ -44,7 +44,7 @@ static int explosionFailureEventProcess(Object *obj, void *data);
 // [queueFindNextEvent] calls.
 //
 // 0x51C690
-static QueueListNode *gLastFoundQueueListNode = NULL;
+static QueueListNode *gLastFoundQueueListNode = nullptr;
 
 // 0x6648C0
 static QueueListNode *gQueueListHead;
@@ -52,25 +52,25 @@ static QueueListNode *gQueueListHead;
 // 0x51C540
 static EventTypeDescription gEventTypeDescriptions[EVENT_TYPE_COUNT] = {
 	{drugEffectEventProcess, internal_free, drugEffectEventRead, drugEffectEventWrite, true, _item_d_clear},
-	{knockoutEventProcess, NULL, NULL, NULL, true, _critter_wake_clear},
+	{knockoutEventProcess, nullptr, nullptr, nullptr, true, _critter_wake_clear},
 	{withdrawalEventProcess, internal_free, withdrawalEventRead, withdrawalEventWrite, true, _item_wd_clear},
-	{scriptEventProcess, internal_free, scriptEventRead, scriptEventWrite, true, NULL},
-	{gameTimeEventProcess, NULL, NULL, NULL, true, NULL},
-	{poisonEventProcess, NULL, NULL, NULL, false, NULL},
-	{radiationEventProcess, internal_free, radiationEventRead, radiationEventWrite, false, NULL},
-	{flareEventProcess, NULL, NULL, NULL, true, flareEventProcess},
-	{explosionEventProcess, NULL, NULL, NULL, true, _queue_explode_exit},
-	{miscItemTrickleEventProcess, NULL, NULL, NULL, true, _item_m_turn_off_from_queue},
-	{sneakEventProcess, NULL, NULL, NULL, true, _critter_sneak_clear},
-	{explosionFailureEventProcess, NULL, NULL, NULL, true, _queue_explode_exit},
-	{mapUpdateEventProcess, NULL, NULL, NULL, true, NULL},
-	// {ambientSoundEffectEventProcess, internal_free, NULL, NULL, true, NULL}, TODO game_sound
-	{NULL, NULL, NULL, NULL, true, NULL},  // TODO remove
+	{scriptEventProcess, internal_free, scriptEventRead, scriptEventWrite, true, nullptr},
+	{gameTimeEventProcess, nullptr, nullptr, nullptr, true, nullptr},
+	{poisonEventProcess, nullptr, nullptr, nullptr, false, nullptr},
+	{radiationEventProcess, internal_free, radiationEventRead, radiationEventWrite, false, nullptr},
+	{flareEventProcess, nullptr, nullptr, nullptr, true, flareEventProcess},
+	{explosionEventProcess, nullptr, nullptr, nullptr, true, _queue_explode_exit},
+	{miscItemTrickleEventProcess, nullptr, nullptr, nullptr, true, _item_m_turn_off_from_queue},
+	{sneakEventProcess, nullptr, nullptr, nullptr, true, _critter_sneak_clear},
+	{explosionFailureEventProcess, nullptr, nullptr, nullptr, true, _queue_explode_exit},
+	{mapUpdateEventProcess, nullptr, nullptr, nullptr, true, nullptr},
+	// {ambientSoundEffectEventProcess, internal_free, nullptr, nullptr, true, nullptr}, TODO game_sound
+	{nullptr, nullptr, nullptr, nullptr, true, nullptr},  // TODO remove
 };
 
 // 0x4A2320
 void queueInit() {
-	gQueueListHead = NULL;
+	gQueueListHead = nullptr;
 }
 
 // 0x4A2330
@@ -90,14 +90,14 @@ int queueLoad(Common::InSaveFile *stream) {
 	}*/
 
 	QueueListNode *oldListHead = gQueueListHead;
-	gQueueListHead = NULL;
+	gQueueListHead = nullptr;
 
 	QueueListNode **nextPtr = &gQueueListHead;
 
 	int rc = 0;
 	for (int index = 0; index < count; index += 1) {
 		QueueListNode *queueListNode = (QueueListNode *)internal_malloc(sizeof(*queueListNode));
-		if (queueListNode == NULL) {
+		if (queueListNode == nullptr) {
 			rc = -1;
 			break;
 		}
@@ -127,12 +127,12 @@ int queueLoad(Common::InSaveFile *stream) {
 
 		Object *obj;
 		if (objectId == -2) {
-			obj = NULL;
+			obj = nullptr;
 		} else {
 			obj = objectFindFirst();
-			while (obj != NULL) {
+			while (obj != nullptr) {
 				obj = _inven_find_id(obj, objectId);
-				if (obj != NULL) {
+				if (obj != nullptr) {
 					break;
 				}
 				obj = objectFindNext();
@@ -142,28 +142,28 @@ int queueLoad(Common::InSaveFile *stream) {
 		queueListNode->owner = obj;
 
 		EventTypeDescription *eventTypeDescription = &(gEventTypeDescriptions[queueListNode->type]);
-		if (eventTypeDescription->readProc != NULL) {
+		if (eventTypeDescription->readProc != nullptr) {
 			if (eventTypeDescription->readProc(stream, &(queueListNode->data)) == -1) {
 				internal_free(queueListNode);
 				rc = -1;
 				break;
 			}
 		} else {
-			queueListNode->data = NULL;
+			queueListNode->data = nullptr;
 		}
 
-		queueListNode->next = NULL;
+		queueListNode->next = nullptr;
 
 		*nextPtr = queueListNode;
 		nextPtr = &(queueListNode->next);
 	}
 
 	if (rc == -1) {
-		while (gQueueListHead != NULL) {
+		while (gQueueListHead != nullptr) {
 			QueueListNode *next = gQueueListHead->next;
 
 			EventTypeDescription *eventTypeDescription = &(gEventTypeDescriptions[gQueueListHead->type]);
-			if (eventTypeDescription->freeProc != NULL) {
+			if (eventTypeDescription->freeProc != nullptr) {
 				eventTypeDescription->freeProc(gQueueListHead->data);
 			}
 
@@ -173,9 +173,9 @@ int queueLoad(Common::InSaveFile *stream) {
 		}
 	}
 
-	while (oldListHead != NULL) {
+	while (oldListHead != nullptr) {
 		QueueListNode **queueListNodePtr = &gQueueListHead;
-		while (*queueListNodePtr != NULL) {
+		while (*queueListNodePtr != nullptr) {
 			if ((*queueListNodePtr)->time > oldListHead->time) {
 				break;
 			}
@@ -199,7 +199,7 @@ int queueSave(Common::OutSaveFile *stream) {
 	int count = 0;
 
 	queueListNode = gQueueListHead;
-	while (queueListNode != NULL) {
+	while (queueListNode != nullptr) {
 		count += 1;
 		queueListNode = queueListNode->next;
 	}
@@ -210,9 +210,9 @@ int queueSave(Common::OutSaveFile *stream) {
 	}*/
 
 	queueListNode = gQueueListHead;
-	while (queueListNode != NULL) {
+	while (queueListNode != nullptr) {
 		Object *object = queueListNode->owner;
-		int objectId = object != NULL ? object->id : -2;
+		int objectId = object != nullptr ? object->id : -2;
 
 		stream->writeUint32BE(queueListNode->time);
 /*		if (fileWriteInt32(stream, queueListNode->time) == -1) {
@@ -230,7 +230,7 @@ int queueSave(Common::OutSaveFile *stream) {
 		}*/
 
 		EventTypeDescription *eventTypeDescription = &(gEventTypeDescriptions[queueListNode->type]);
-		if (eventTypeDescription->writeProc != NULL) {
+		if (eventTypeDescription->writeProc != nullptr) {
 			if (eventTypeDescription->writeProc(stream, queueListNode->data) == -1) {
 				return -1;
 			}
@@ -251,7 +251,7 @@ int queueSave(Common::OutSaveFile *stream) {
 // 0x4A258C
 int queueAddEvent(int delay, Object *obj, void *data, int eventType) {
 	QueueListNode *newQueueListNode = (QueueListNode *)internal_malloc(sizeof(QueueListNode));
-	if (newQueueListNode == NULL) {
+	if (newQueueListNode == nullptr) {
 		return -1;
 	}
 
@@ -260,13 +260,13 @@ int queueAddEvent(int delay, Object *obj, void *data, int eventType) {
 	newQueueListNode->owner = obj;
 	newQueueListNode->data = data;
 
-	if (obj != NULL) {
+	if (obj != nullptr) {
 		obj->flags |= OBJECT_QUEUED;
 	}
 
 	QueueListNode **queueListNodePtr = &gQueueListHead;
 
-	while (*queueListNodePtr != NULL) {
+	while (*queueListNodePtr != nullptr) {
 		if (newQueueListNode->time < (*queueListNodePtr)->time) {
 			break;
 		}
@@ -293,7 +293,7 @@ int queueRemoveEvents(Object *owner) {
 			*queueListNodePtr = queueListNode;
 
 			EventTypeDescription *eventTypeDescription = &(gEventTypeDescriptions[temp->type]);
-			if (eventTypeDescription->freeProc != NULL) {
+			if (eventTypeDescription->freeProc != nullptr) {
 				eventTypeDescription->freeProc(temp->data);
 			}
 
@@ -320,7 +320,7 @@ int queueRemoveEventsByType(Object *owner, int eventType) {
 			*queueListNodePtr = queueListNode;
 
 			EventTypeDescription *eventTypeDescription = &(gEventTypeDescriptions[temp->type]);
-			if (eventTypeDescription->freeProc != NULL) {
+			if (eventTypeDescription->freeProc != nullptr) {
 				eventTypeDescription->freeProc(temp->data);
 			}
 
@@ -339,7 +339,7 @@ int queueRemoveEventsByType(Object *owner, int eventType) {
 // 0x4A26A8
 bool queueHasEvent(Object *owner, int eventType) {
 	QueueListNode *queueListEvent = gQueueListHead;
-	while (queueListEvent != NULL) {
+	while (queueListEvent != nullptr) {
 		if (owner == queueListEvent->owner && eventType == queueListEvent->type) {
 			return true;
 		}
@@ -356,7 +356,7 @@ int queueProcessEvents() {
 	// TODO: this is 0 or 1, but in some cases -1. Probably needs to be bool.
 	int stopProcess = 0;
 
-	while (gQueueListHead != NULL) {
+	while (gQueueListHead != nullptr) {
 		QueueListNode *queueListNode = gQueueListHead;
 		if (time < queueListNode->time || stopProcess != 0) {
 			break;
@@ -367,7 +367,7 @@ int queueProcessEvents() {
 		EventTypeDescription *eventTypeDescription = &(gEventTypeDescriptions[queueListNode->type]);
 		stopProcess = eventTypeDescription->handlerProc(queueListNode->owner, queueListNode->data);
 
-		if (eventTypeDescription->freeProc != NULL) {
+		if (eventTypeDescription->freeProc != nullptr) {
 			eventTypeDescription->freeProc(queueListNode->data);
 		}
 
@@ -380,11 +380,11 @@ int queueProcessEvents() {
 // 0x4A2748
 void queueClear() {
 	QueueListNode *queueListNode = gQueueListHead;
-	while (queueListNode != NULL) {
+	while (queueListNode != nullptr) {
 		QueueListNode *next = queueListNode->next;
 
 		EventTypeDescription *eventTypeDescription = &(gEventTypeDescriptions[queueListNode->type]);
-		if (eventTypeDescription->freeProc != NULL) {
+		if (eventTypeDescription->freeProc != nullptr) {
 			eventTypeDescription->freeProc(queueListNode->data);
 		}
 
@@ -393,7 +393,7 @@ void queueClear() {
 		queueListNode = next;
 	}
 
-	gQueueListHead = NULL;
+	gQueueListHead = nullptr;
 }
 
 // 0x4A2790
@@ -401,19 +401,19 @@ void _queue_clear_type(int eventType, QueueEventHandler *fn) {
 	QueueListNode **ptr = &gQueueListHead;
 	QueueListNode *curr = *ptr;
 
-	while (curr != NULL) {
+	while (curr != nullptr) {
 		if (eventType == curr->type) {
 			QueueListNode *tmp = curr;
 
 			*ptr = curr->next;
 			curr = *ptr;
 
-			if (fn != NULL && fn(tmp->owner, tmp->data) != 1) {
+			if (fn != nullptr && fn(tmp->owner, tmp->data) != 1) {
 				*ptr = tmp;
 				ptr = &(tmp->next);
 			} else {
 				EventTypeDescription *eventTypeDescription = &(gEventTypeDescriptions[tmp->type]);
-				if (eventTypeDescription->freeProc != NULL) {
+				if (eventTypeDescription->freeProc != nullptr) {
 					eventTypeDescription->freeProc(tmp->data);
 				}
 
@@ -433,7 +433,7 @@ void _queue_clear_type(int eventType, QueueEventHandler *fn) {
 
 // 0x4A2808
 unsigned int queueGetNextEventTime() {
-	if (gQueueListHead == NULL) {
+	if (gQueueListHead == nullptr) {
 		return 0;
 	}
 
@@ -478,7 +478,7 @@ static int _queue_do_explosion_(Object *explosive, bool animate) {
 
 	// FIXME: I guess this is a little bit wrong, dude can never be null, I
 	// guess it needs to check if owner is dude.
-	if (gDude != NULL) {
+	if (gDude != nullptr) {
 		if (perkHasRank(gDude, PERK_DEMOLITION_EXPERT)) {
 			maxDamage += 10;
 			minDamage += 10;
@@ -486,7 +486,7 @@ static int _queue_do_explosion_(Object *explosive, bool animate) {
 	}
 
 	if (actionExplode(tile, elevation, minDamage, maxDamage, gDude, animate) == -2) {
-		queueAddEvent(50, explosive, NULL, EVENT_TYPE_EXPLOSION);
+		queueAddEvent(50, explosive, nullptr, EVENT_TYPE_EXPLOSION);
 	} else {
 		_obj_destroy(explosive);
 	}
@@ -519,13 +519,13 @@ void _queue_leaving_map() {
 
 // 0x4A294C
 bool queueIsEmpty() {
-	return gQueueListHead == NULL;
+	return gQueueListHead == nullptr;
 }
 
 // 0x4A295C
 void *queueFindFirstEvent(Object *owner, int eventType) {
 	QueueListNode *queueListNode = gQueueListHead;
-	while (queueListNode != NULL) {
+	while (queueListNode != nullptr) {
 		if (owner == queueListNode->owner && eventType == queueListNode->type) {
 			gLastFoundQueueListNode = queueListNode;
 			return queueListNode->data;
@@ -533,15 +533,15 @@ void *queueFindFirstEvent(Object *owner, int eventType) {
 		queueListNode = queueListNode->next;
 	}
 
-	gLastFoundQueueListNode = NULL;
-	return NULL;
+	gLastFoundQueueListNode = nullptr;
+	return nullptr;
 }
 
 // 0x4A2994
 void *queueFindNextEvent(Object *owner, int eventType) {
-	if (gLastFoundQueueListNode != NULL) {
+	if (gLastFoundQueueListNode != nullptr) {
 		QueueListNode *queueListNode = gLastFoundQueueListNode->next;
-		while (queueListNode != NULL) {
+		while (queueListNode != nullptr) {
 			if (owner == queueListNode->owner && eventType == queueListNode->type) {
 				gLastFoundQueueListNode = queueListNode;
 				return queueListNode->data;
@@ -550,9 +550,9 @@ void *queueFindNextEvent(Object *owner, int eventType) {
 		}
 	}
 
-	gLastFoundQueueListNode = NULL;
+	gLastFoundQueueListNode = nullptr;
 
-	return NULL;
+	return nullptr;
 }
 
 } // namespace Fallout2
