@@ -150,8 +150,7 @@ bool gameConfigInit(bool isMapper, int argc, char **argv) {
 	// Read contents of `fallout2.cfg` into config. The values from the file
 	// will override the defaults above.
 	// TODO: read config
-	// configRead(&gGameConfig, gGameConfigFilePath, false);
-
+	configRead(&gGameConfig, gGameConfigFilePath, false);
 	// Add key-values from command line, which overrides both defaults and
 	// whatever was loaded from `fallout2.cfg`.
 	// TODO? Commandline
