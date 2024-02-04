@@ -11,6 +11,7 @@ MODULE_OBJS = \
 	audio_engine.o \
 	audio_file.o \
 	automap.o \
+	autorun.o \
 	cache.o \
 	character_editor.o \
 	character_selector.o \
