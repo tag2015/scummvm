@@ -64,8 +64,8 @@ int dbOpen(const char *filePath1, int a2, const char *filePath2, int a4) {
 }
 
 // 0x4C5D58
-int _db_total() {
-	return 0;
+int db_total() {
+	return 1;
 }
 
 // 0x4C5D60
