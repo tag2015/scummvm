@@ -1,5 +1,7 @@
 #include "fallout2/platform_compat.h"
 
+#include "common/debug.h"
+
 /*
 #ifdef _WIN32
 #include <windows.h>
@@ -256,16 +258,18 @@ Common::File *compat_fopen(const char *path, const char *mode) {
 }*/
 
 char *compat_fgets(char *buffer, int maxCount, Common::File *stream) {
-	//	buffer = fgets(buffer, maxCount, stream);
-	// TODO check
-	Common::String buffer_str(stream->readString(0, maxCount));
-	Common::strcpy_s(buffer, strlen(buffer_str.c_str()) + 1, buffer_str.c_str());
+	Common::String buffer_str(stream->readLine());
+	if (!stream->eos())
+		Common::strcpy_s(buffer, maxCount, buffer_str.c_str());
+	else
+		buffer = nullptr;
 	if (buffer != nullptr) {
 		size_t len = strlen(buffer);
 		if (len >= 2 && buffer[len - 1] == '\n' && buffer[len - 2] == '\r') {
 			buffer[len - 2] = '\n';
 			buffer[len - 1] = '\0';
 		}
+		debug(6, "compat_fgets: %s", buffer);
 	}
 
 	return buffer;
