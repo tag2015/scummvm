@@ -1,11 +1,11 @@
-#ifndef AUTORUN_H
-#define AUTORUN_H
+#ifndef FALLOUT2_AUTORUN_H
+#define FALLOUT2_AUTORUN_H
 
-namespace fallout {
+namespace Fallout2 {
 
 bool autorunMutexCreate();
 void autorunMutexClose();
 
-} // namespace fallout
+} // namespace Fallout2
 
-#endif /* AUTORUN_H */
+#endif
