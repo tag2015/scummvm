@@ -32,7 +32,8 @@ void (*_scr_blit)(unsigned char *src, int src_pitch, int a3, int src_x, int src_
 // 0x6ACA1C
 void (*_zero_mem)() = nullptr;
 
-/*SDL_Window *gSdlWindow = nullptr;
+/*
+SDL_Window *gSdlWindow = nullptr;
 SDL_Surface *gSdlSurface = nullptr;
 SDL_Renderer *gSdlRenderer = nullptr;
 SDL_Texture *gSdlTexture = nullptr;
@@ -168,34 +169,40 @@ int _init_vesa_mode(int width, int height) {
 
 // 0x4CAEDC
 int _GNW95_init_window(int width, int height, bool fullscreen, int scale) {
-//	if (gSdlWindow == nullptr) {
-//		SDL_SetHint(SDL_HINT_RENDER_DRIVER, "opengl");
+#if 0
+	if (gSdlWindow == nullptr) {
+		SDL_SetHint(SDL_HINT_RENDER_DRIVER, "opengl");
 
-//		if (SDL_Init(SDL_INIT_VIDEO) != 0) {
-//			return -1;
-//		}
+		if (SDL_Init(SDL_INIT_VIDEO) != 0) {
+			return -1;
+		}
 
-//		Uint32 windowFlags = SDL_WINDOW_OPENGL | SDL_WINDOW_ALLOW_HIGHDPI;
+		Uint32 windowFlags = SDL_WINDOW_OPENGL | SDL_WINDOW_ALLOW_HIGHDPI;
 
-//		if (fullscreen) {
-//			windowFlags |= SDL_WINDOW_FULLSCREEN;
-//		}
+		if (fullscreen) {
+			windowFlags |= SDL_WINDOW_FULLSCREEN;
+		}
 
-//		gSdlWindow = SDL_CreateWindow(gProgramWindowTitle, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, width * scale, height * scale, windowFlags);
-//		if (gSdlWindow == nullptr) {
-//			return -1;
-//		}
+		gSdlWindow = SDL_CreateWindow(gProgramWindowTitle, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, width * scale, height * scale, windowFlags);
+		if (gSdlWindow == nullptr) {
+			return -1;
+		}
 
-//		if (!createRenderer(width, height)) {
-//			destroyRenderer();
+		if (!createRenderer(width, height)) {
+			destroyRenderer();
 
-//			SDL_DestroyWindow(gSdlWindow);
-//			gSdlWindow = nullptr;
+			SDL_DestroyWindow(gSdlWindow);
+			gSdlWindow = nullptr;
 
-//			return -1;
-//		}
-		createRenderer(width, height);
-//	}
+			return -1;
+		}
+	}
+#endif
+
+	if (!createRenderer(width, height)) {
+		destroyRenderer();
+		return -1;
+	}
 
 	return 0;
 }
@@ -216,9 +223,7 @@ int directDrawInit(int width, int height, int bpp) {
 	}
 	gSdlSurface = new Graphics::Surface();
 	gSdlSurface->create(width, height,Graphics::PixelFormat(Graphics::PixelFormat::createFormatCLUT8()));
-//	 = SDL_CreateRGBSurface(0, width, height, bpp, 0, 0, 0, 0);
 
-//	SDL_Color colors[256];
 	unsigned char new_palette[768];
 	for (int index = 0; index < 256; index++) {
 		new_palette[index * 3] = index;
@@ -226,9 +231,8 @@ int directDrawInit(int width, int height, int bpp) {
 		new_palette[index * 3 + 2] = index;
 	}
 
-//	SDL_SetPaletteColors(gSdlSurface->format->palette, colors, 0, 256);
 	g_system->getPaletteManager()->setPalette(new_palette, 0, 256);
-	g_system->updateScreen(); // TODO is this enough?
+	g_system->updateScreen();
 
 	return 0;
 }
@@ -236,7 +240,6 @@ int directDrawInit(int width, int height, int bpp) {
 // 0x4CB1B0
 void directDrawFree() {
 	if (gSdlSurface != nullptr) {
-//		SDL_FreeSurface(gSdlSurface);
 		gSdlSurface->free();
 		gSdlSurface = nullptr;
 	}
@@ -244,67 +247,86 @@ void directDrawFree() {
 
 // 0x4CB310
 void directDrawSetPaletteInRange(unsigned char *palette, int start, int count) {
-	//	if (gSdlSurface != nullptr && gSdlSurface->format->palette != nullptr) {
-	//		SDL_Color colors[256];
+
+#if 0
+	if (gSdlSurface != nullptr && gSdlSurface->format->palette != nullptr) {
+		SDL_Color colors[256];
+
+		if (count != 0) {
+			for (int index = 0; index < count; index++) {
+				colors[index].r = palette[index * 3] << 2;
+				colors[index].g = palette[index * 3 + 1] << 2;
+				colors[index].b = palette[index * 3 + 2] << 2;
+				colors[index].a = 255;
+			}
+		}
+
+		SDL_SetPaletteColors(gSdlSurface->format->palette, colors, start, count);
+		SDL_BlitSurface(gSdlSurface, nullptr, gSdlTextureSurface, nullptr);
+	}
+#endif
+
 	unsigned char new_palette[768];
-
-	/*		if (count != 0) {
-				for (int index = 0; index < count; index++) {
-					colors[index].r = palette[index * 3] << 2;
-					colors[index].g = palette[index * 3 + 1] << 2;
-					colors[index].b = palette[index * 3 + 2] << 2;
-					colors[index].a = 255;
-				}
-			}*/
-
 	if (count != 0)
 		for (int index = 0; index < 768; index++)
 			new_palette[count] = palette[index] << 2;
 
 	g_system->getPaletteManager()->setPalette(new_palette, start, count);
-	//		SDL_SetPaletteColors(gSdlSurface->format->palette, colors, start, count);
-	//		SDL_BlitSurface(gSdlSurface, nullptr, gSdlTextureSurface, nullptr);
-	g_system->updateScreen(); // TODO is this enough?
+	g_system->updateScreen();
 }
-//}
+
 
 // 0x4CB568
 void directDrawSetPalette(unsigned char *palette) {
-	//	if (gSdlSurface != nullptr && gSdlSurface->format->palette != nullptr) {
-	//		SDL_Color colors[256];
-	unsigned char new_palette[768];
 
+#if 0
+	if (gSdlSurface != nullptr && gSdlSurface->format->palette != nullptr) {
+		SDL_Color colors[256];
+
+		for (int index = 0; index < 256; index++) {
+			colors[index].r = palette[index * 3] << 2;
+			colors[index].g = palette[index * 3 + 1] << 2;
+			colors[index].b = palette[index * 3 + 2] << 2;
+			colors[index].a = 255;
+		}
+
+		SDL_SetPaletteColors(gSdlSurface->format->palette, colors, 0, 256);
+		SDL_BlitSurface(gSdlSurface, nullptr, gSdlTextureSurface, nullptr);
+	}
+#endif
+
+	unsigned char new_palette[768];
 	for (int index = 0; index < 768; index++)
 		new_palette[index] = palette[index] << 2;
 
 	g_system->getPaletteManager()->setPalette(new_palette, 0, 256);
-//	SDL_SetPaletteColors(gSdlSurface->format->palette, colors, 0, 256);
-//	SDL_BlitSurface(gSdlSurface, nullptr, gSdlTextureSurface, nullptr);
-	g_system->updateScreen();  // TODO is this enough?
+	g_system->updateScreen();
 }
 
 
 // 0x4CB68C
 unsigned char *directDrawGetPalette() {
+
 	// 0x6ACA24
 	static unsigned char palette[768];
 
-	// TODO use surface.grabpalette?
+#if 0
+	if (gSdlSurface != nullptr && gSdlSurface->format->palette != nullptr) {
+		SDL_Color *colors = gSdlSurface->format->palette->colors;
 
-	g_system->getPaletteManager()->grabPalette(palette, 0, 256);
-
-	//	if (gSdlSurface != nullptr && gSdlSurface->format->palette != nullptr) {
-	//		SDL_Color *colors = gSdlSurface->format->palette->colors;
-
-	/*		for (int index = 0; index < 256; index++) {
+		for (int index = 0; index < 256; index++) {
 				SDL_Color *color = &(colors[index]);
 				palette[index * 3] = color->r >> 2;
 				palette[index * 3 + 1] = color->g >> 2;
 				palette[index * 3 + 2] = color->b >> 2;
-			}*/
+			}
+	}
+#endif
+
+	// TODO check this (use surface.grabpalette?)
+	g_system->getPaletteManager()->grabPalette(palette, 0, 256);
 	for (int index = 0; index < 768; index++)
 		palette[index] = palette[index] >> 2;
-	//	}
 
 	return palette;
 }
@@ -344,7 +366,6 @@ void _GNW95_zero_vid_mem() {
 		surface += gSdlSurface->pitch;
 	}
 
-//	SDL_BlitSurface(gSdlSurface, nullptr, gSdlTextureSurface, nullptr);
 	gSdlTextureSurface->blitFrom(gSdlSurface);
 }
 
@@ -368,7 +389,8 @@ int screenGetVisibleHeight() {
 }
 
 static bool createRenderer(int width, int height) {
-/*	gSdlRenderer = SDL_CreateRenderer(gSdlWindow, -1, 0);
+#if 0
+	gSdlRenderer = SDL_CreateRenderer(gSdlWindow, -1, 0);
 	if (gSdlRenderer == nullptr) {
 		return false;
 	}
@@ -385,9 +407,10 @@ static bool createRenderer(int width, int height) {
 	Uint32 format;
 	if (SDL_QueryTexture(gSdlTexture, &format, nullptr, nullptr, nullptr) != 0) {
 		return false;
-	}*/
+	}
+	gSdlTextureSurface = SDL_CreateRGBSurfaceWithFormat(0, width, height, SDL_BITSPERPIXEL(format), format);
+#endif
 
-//	gSdlTextureSurface = SDL_CreateRGBSurfaceWithFormat(0, width, height, SDL_BITSPERPIXEL(format), format);
 	gSdlTextureSurface = new Graphics::ManagedSurface();
 	gSdlTextureSurface->create(width, height, Graphics::PixelFormat(Graphics::PixelFormat::createFormatCLUT8()));
 
@@ -399,35 +422,22 @@ static bool createRenderer(int width, int height) {
 }
 
 static void destroyRenderer() {
-/*	if (gSdlTextureSurface != nullptr) {  TODO
-		SDL_FreeSurface(gSdlTextureSurface);
-		gSdlTextureSurface = nullptr;
-	}
-
-	if (gSdlTexture != nullptr) {
-		SDL_DestroyTexture(gSdlTexture);
-		gSdlTexture = nullptr;
-	}
-
-	if (gSdlRenderer != nullptr) {
-		SDL_DestroyRenderer(gSdlRenderer);
-		gSdlRenderer = nullptr;
-	}*/
+	// no implementation
 }
 
 void handleWindowSizeChanged() {
-//	destroyRenderer();
-//	createRenderer(screenGetWidth(), screenGetHeight());
+	// no implementation
 }
 
 void renderPresent() {
-	//	SDL_UpdateTexture(gSdlTexture, nullptr, gSdlTextureSurface->pixels, gSdlTextureSurface->pitch);
-	//	SDL_RenderClear(gSdlRenderer);
-	//	SDL_RenderCopy(gSdlRenderer, gSdlTexture, nullptr, nullptr);
-	//	SDL_RenderPresent(gSdlRenderer);
+#if 0
+	SDL_UpdateTexture(gSdlTexture, nullptr, gSdlTextureSurface->pixels, gSdlTextureSurface->pitch);
+	SDL_RenderClear(gSdlRenderer);
+	SDL_RenderCopy(gSdlRenderer, gSdlTexture, nullptr, nullptr);
+	SDL_RenderPresent(gSdlRenderer);
+#endif
 
 	const Graphics::ManagedSurface &newScreen = *gSdlTextureSurface;
-
 	g_engine->_screen->copyFrom(newScreen);
 	g_engine->_screen->update();
 }
