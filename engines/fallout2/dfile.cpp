@@ -55,14 +55,14 @@ DBase *dbaseOpen(const char *filePath) {
 	assert(filePath); // "filename", "dfile.c", 74
 
 	Common::File *stream = compat_fopen(filePath, "rb");
-	if (stream == NULL) {
-		return NULL;
+	if (stream == nullptr) {
+		return nullptr;
 	}
 
 	DBase *dbase = (DBase *)malloc(sizeof(*dbase));
-	if (dbase == NULL) {
+	if (dbase == nullptr) {
 		stream->close();
-		return NULL;
+		return nullptr;
 	}
 
 	memset(dbase, 0, sizeof(*dbase));
@@ -104,7 +104,7 @@ DBase *dbaseOpen(const char *filePath) {
 	}
 
 	dbase->entries = (DBaseEntry *)malloc(sizeof(*dbase->entries) * dbase->entriesLength);
-	if (dbase->entries == NULL) {
+	if (dbase->entries == nullptr) {
 		goto err;
 	}
 
@@ -121,7 +121,7 @@ DBase *dbaseOpen(const char *filePath) {
 		}
 
 		entry->path = (char *)malloc(pathLength + 1);
-		if (entry->path == NULL) {
+		if (entry->path == nullptr) {
 			break;
 		}
 
@@ -171,7 +171,7 @@ err:
 
 	stream->close();
 
-	return NULL;
+	return nullptr;
 }
 
 // Closes [dbase], all open file handles, frees all associated resources,
@@ -182,24 +182,24 @@ bool dbaseClose(DBase *dbase) {
 	assert(dbase); // "dbase", "dfile.c", 173
 
 	DFile *curr = dbase->dfileHead;
-	while (curr != NULL) {
+	while (curr != nullptr) {
 		DFile *next = curr->next;
 		dfileClose(curr);
 		curr = next;
 	}
 
-	if (dbase->entries != NULL) {
+	if (dbase->entries != nullptr) {
 		for (int index = 0; index < dbase->entriesLength; index++) {
 			DBaseEntry *entry = &(dbase->entries[index]);
 			char *entryName = entry->path;
-			if (entryName != NULL) {
+			if (entryName != nullptr) {
 				free(entryName);
 			}
 		}
 		free(dbase->entries);
 	}
 
-	if (dbase->path != NULL) {
+	if (dbase->path != nullptr) {
 		free(dbase->path);
 	}
 
@@ -266,20 +266,20 @@ int dfileClose(DFile *stream) {
 		}
 	}*/
 
-	if (stream->decompressionStream != NULL) {
+	if (stream->decompressionStream != nullptr) {
 		free(stream->decompressionStream);
 	}
 
-	if (stream->decompressionBuffer != NULL) {
+	if (stream->decompressionBuffer != nullptr) {
 		free(stream->decompressionBuffer);
 	}
 
-	if (stream->decompressedData != NULL) {
+	if (stream->decompressedData != nullptr) {
 		free(stream->decompressedData);
 		stream->decompressed_position = 0;
 	}
 
-	if (stream->stream != NULL) {
+	if (stream->stream != nullptr) {
 		stream->stream->close();
 	}
 
@@ -288,8 +288,8 @@ int dfileClose(DFile *stream) {
 	//
 	// NOTE: Compiled code is slightly different.
 	DFile *curr = stream->dbase->dfileHead;
-	DFile *prev = NULL;
-	while (curr != NULL) {
+	DFile *prev = nullptr;
+	while (curr != nullptr) {
 		if (curr == stream) {
 			break;
 		}
@@ -298,8 +298,8 @@ int dfileClose(DFile *stream) {
 		curr = curr->next;
 	}
 
-	if (curr != NULL) {
-		if (prev == NULL) {
+	if (curr != nullptr) {
+		if (prev == nullptr) {
 			stream->dbase->dfileHead = stream->next;
 		} else {
 			prev->next = stream->next;
@@ -374,7 +374,7 @@ char *dfileReadString(char *string, int size, DFile *stream) {
 	assert(stream); // "stream", "dfile.c", 409
 
 	if ((stream->flags & DFILE_EOF) != 0 || (stream->flags & DFILE_ERROR) != 0) {
-		return NULL;
+		return nullptr;
 	}
 
 	char *pch = string;
@@ -403,7 +403,7 @@ char *dfileReadString(char *string, int size, DFile *stream) {
 
 	if (pch == string) {
 		// No character was set into the buffer.
-		return NULL;
+		return nullptr;
 	}
 
 	*pch = '\0';
@@ -579,9 +579,9 @@ int dfileSeek(DFile *stream, long offset, int origin) {
 			return 1;
 		}
 
-		stream->decompressionStream->zalloc = Z_NULL;
-		stream->decompressionStream->zfree = Z_NULL;
-		stream->decompressionStream->opaque = Z_NULL;
+		stream->decompressionStream->zalloc = Z_nullptr;
+		stream->decompressionStream->zfree = Z_nullptr;
+		stream->decompressionStream->opaque = Z_nullptr;
 		stream->decompressionStream->next_in = stream->decompressionBuffer;
 		stream->decompressionStream->avail_in = 0;
 
@@ -640,7 +640,7 @@ static int dbaseFindEntryByFilePath(const void *a1, const void *a2) {
 // 0x4E5D9C
 static DFile *dfileOpenInternal(DBase *dbase, const char *filePath, const char *mode, DFile *dfile) {
 	DBaseEntry *entry = (DBaseEntry *)bsearch(filePath, dbase->entries, dbase->entriesLength, sizeof(*dbase->entries), dbaseFindEntryByFilePath);
-	if (entry == NULL) {
+	if (entry == nullptr) {
 		goto err;
 	}
 
@@ -648,10 +648,10 @@ static DFile *dfileOpenInternal(DBase *dbase, const char *filePath, const char *
 		goto err;
 	}
 
-	if (dfile == NULL) {
+	if (dfile == nullptr) {
 		dfile = (DFile *)malloc(sizeof(*dfile));
-		if (dfile == NULL) {
-			return NULL;
+		if (dfile == nullptr) {
+			return nullptr;
 		}
 
 		memset(dfile, 0, sizeof(*dfile));
@@ -663,9 +663,9 @@ static DFile *dfileOpenInternal(DBase *dbase, const char *filePath, const char *
 			goto err;
 		}
 
-		if (dfile->stream != NULL) {
+		if (dfile->stream != nullptr) {
 			dfile->stream->close();
-			dfile->stream = NULL;
+			dfile->stream = nullptr;
 		}
 
 		dfile->compressedBytesRead = 0;
@@ -677,7 +677,7 @@ static DFile *dfileOpenInternal(DBase *dbase, const char *filePath, const char *
 
 	// Open stream to .DAT file.
 	dfile->stream = compat_fopen(dbase->path, "rb");
-	if (dfile->stream == NULL) {
+	if (dfile->stream == nullptr) {
 		goto err;
 	}
 
@@ -694,21 +694,21 @@ static DFile *dfileOpenInternal(DBase *dbase, const char *filePath, const char *
 		// buffer allocated.
 
 		// TODO
-		//		if (dfile->decompressionStream == NULL) {
+		//		if (dfile->decompressionStream == nullptr) {
 		/*dfile->decompressionStream = (z_streamp)malloc(sizeof(*dfile->decompressionStream));
-		if (dfile->decompressionStream == NULL) {
+		if (dfile->decompressionStream == nullptr) {
 			goto err;
 		} */
 
 		dfile->decompressionBuffer = (unsigned char *)malloc(DFILE_DECOMPRESSION_BUFFER_SIZE);
-		if (dfile->decompressionBuffer == NULL) {
+		if (dfile->decompressionBuffer == nullptr) {
 			goto err;
 		}
 		//		}
 
-		/*		dfile->decompressionStream->zalloc = Z_NULL;
-				dfile->decompressionStream->zfree = Z_NULL;
-				dfile->decompressionStream->opaque = Z_NULL;
+		/*		dfile->decompressionStream->zalloc = Z_nullptr;
+				dfile->decompressionStream->zfree = Z_nullptr;
+				dfile->decompressionStream->opaque = Z_nullptr;
 				dfile->decompressionStream->next_in = dfile->decompressionBuffer;
 				dfile->decompressionStream->avail_in = 0;
 
@@ -719,14 +719,14 @@ static DFile *dfileOpenInternal(DBase *dbase, const char *filePath, const char *
 		// Entry is not compressed, there is no need to keep decompression
 		// stream and decompression buffer (in case [dfile] was passed via
 		// parameter).
-		/*		if (dfile->decompressionStream != NULL) {
+		/*		if (dfile->decompressionStream != nullptr) {
 					free(dfile->decompressionStream);
-					dfile->decompressionStream = NULL;
+					dfile->decompressionStream = nullptr;
 				} */
 
-		if (dfile->decompressionBuffer != NULL) {
+		if (dfile->decompressionBuffer != nullptr) {
 			free(dfile->decompressionBuffer);
-			dfile->decompressionBuffer = NULL;
+			dfile->decompressionBuffer = nullptr;
 		}
 	}
 
@@ -738,11 +738,11 @@ static DFile *dfileOpenInternal(DBase *dbase, const char *filePath, const char *
 
 err:
 
-	if (dfile != NULL) {
+	if (dfile != nullptr) {
 		dfileClose(dfile);
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 // 0x4E5F9C
@@ -750,7 +750,7 @@ static int dfileReadCharInternal(DFile *stream) {
 	if (stream->entry->compressed == 1) {
 		char ch;
 
-		if (stream->decompressedData == NULL)
+		if (stream->decompressedData == nullptr)
 			if (!dfileReadCompressed(stream, &ch, sizeof(ch))) {
 				return -1;
 			}
@@ -828,7 +828,7 @@ static bool dfileReadCompressed(DFile *stream, void *ptr, size_t size) {
 		}
 	}
 
-	if (stream->decompressedData != NULL) {
+	if (stream->decompressedData != nullptr) {
 		debug(5, "Already decompressed, returning");
 		return true;
 	}

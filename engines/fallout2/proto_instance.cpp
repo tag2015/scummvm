@@ -228,7 +228,7 @@ int _obj_examine(Object *a1, Object *a2) {
 // Performs examine (reading description) action and passes resulting text
 // to given callback.
 //
-// [critter] is a critter who's performing an action. Can be NULL.
+// [critter] is a critter who's performing an action. Can be nullptr.
 // [fn] can be called up to three times when [a2] is an ammo.
 //
 // 0x49AD88
@@ -256,11 +256,11 @@ int _obj_examine_func(Object *critter, Object *target, void (*fn)(char *string))
 
 	if (!scriptOverrides) {
 		char *description = objectGetDescription(target);
-		if (description != NULL && strcmp(description, _proto_none_str) == 0) {
-			description = NULL;
+		if (description != nullptr && strcmp(description, _proto_none_str) == 0) {
+			description = nullptr;
 		}
 
-		if (description == NULL || *description == '\0') {
+		if (description == nullptr || *description == '\0') {
 			MessageListItem messageListItem;
 			messageListItem.num = 493;
 			if (!messageListGetItem(&gProtoMessageList, &messageListItem)) {
@@ -274,7 +274,7 @@ int _obj_examine_func(Object *critter, Object *target, void (*fn)(char *string))
 		}
 	}
 
-	if (critter == NULL || critter != gDude) {
+	if (critter == nullptr || critter != gDude) {
 		return 0;
 	}
 
@@ -295,8 +295,8 @@ int _obj_examine_func(Object *critter, Object *target, void (*fn)(char *string))
 			}
 
 			Object *item2 = critterGetItem2(target);
-			if (item2 != NULL && itemGetType(item2) != ITEM_TYPE_WEAPON) {
-				item2 = NULL;
+			if (item2 != nullptr && itemGetType(item2) != ITEM_TYPE_WEAPON) {
+				item2 = nullptr;
 			}
 
 			if (!messageListGetItem(&gProtoMessageList, &hpMessageListItem)) {
@@ -304,7 +304,7 @@ int _obj_examine_func(Object *critter, Object *target, void (*fn)(char *string))
 				error("Can't find msg num");
 			}
 
-			if (item2 != NULL) {
+			if (item2 != nullptr) {
 				MessageListItem weaponMessageListItem;
 
 				if (ammoGetCaliber(item2) != 0) {
@@ -657,13 +657,13 @@ static int _obj_remove_from_inven(Object *critter, Object *item) {
 
 // 0x49B8B0
 int _obj_drop(Object *a1, Object *a2) {
-	if (a2 == NULL) {
+	if (a2 == nullptr) {
 		return -1;
 	}
 
 	bool scriptOverrides = false;
 	if (a1->sid != -1) {
-		scriptSetObjects(a1->sid, a2, NULL);
+		scriptSetObjects(a1->sid, a2, nullptr);
 		scriptExecProc(a1->sid, SCRIPT_PROC_IS_DROPPING);
 
 		Script *scr;
@@ -696,7 +696,7 @@ int _obj_drop(Object *a1, Object *a2) {
 
 	if (_obj_remove_from_inven(a1, a2) == 0) {
 		Object *owner = objectGetOwner(a1);
-		if (owner == NULL) {
+		if (owner == nullptr) {
 			owner = a1;
 		}
 
@@ -710,13 +710,13 @@ int _obj_drop(Object *a1, Object *a2) {
 
 // 0x49B9A0
 int _obj_destroy(Object *obj) {
-	if (obj == NULL) {
+	if (obj == nullptr) {
 		return -1;
 	}
 
 	int elev;
 	Object *owner = obj->owner;
-	if (owner != NULL) {
+	if (owner != nullptr) {
 		_obj_remove_from_inven(owner, obj);
 	} else {
 		elev = obj->elevation;
@@ -727,7 +727,7 @@ int _obj_destroy(Object *obj) {
 	Rect rect;
 	objectDestroy(obj, &rect);
 
-	if (owner == NULL) {
+	if (owner == nullptr) {
 		tileWindowRefreshRect(&rect, elev);
 	}
 
@@ -823,8 +823,8 @@ static int _obj_use_flare(Object *critter_obj, Object *flare) {
 
 		flare->pid = PROTO_ID_LIT_FLARE;
 
-		objectSetLight(flare, 8, 0x10000, NULL);
-		queueAddEvent(72000, flare, NULL, EVENT_TYPE_FLARE);
+		objectSetLight(flare, 8, 0x10000, nullptr);
+		queueAddEvent(72000, flare, nullptr, EVENT_TYPE_FLARE);
 	}
 
 	return 0;
@@ -882,7 +882,7 @@ static int _obj_use_explosive(Object *explosive) {
 			if (perkHasRank(gDude, PERK_DEMOLITION_EXPERT)) {
 				roll = ROLL_SUCCESS;
 			} else {
-				roll = skillRoll(gDude, SKILL_TRAPS, 0, NULL);
+				roll = skillRoll(gDude, SKILL_TRAPS, 0, nullptr);
 			}
 
 			int eventType;
@@ -900,7 +900,7 @@ static int _obj_use_explosive(Object *explosive) {
 				break;
 			}
 
-			queueAddEvent(delay, explosive, NULL, eventType);
+			queueAddEvent(delay, explosive, nullptr, eventType);
 		}
 	}
 
@@ -966,7 +966,7 @@ static int _obj_use_power_on_car(Object *item) {
 // 0x49BE88
 static int _obj_use_misc_item(Object *item) {
 
-	if (item == NULL) {
+	if (item == nullptr) {
 		return -1;
 	}
 
@@ -1063,18 +1063,18 @@ static int _protinstTestDroppedExplosive(Object *a1) {
 		_compute_explosion_on_extras(&attack, 0, 0, 1);
 
 		int team = gDude->data.critter.combat.team;
-		Object *watcher = NULL;
+		Object *watcher = nullptr;
 		for (int index = 0; index < attack.extrasLength; index++) {
 			Object *v5 = attack.extras[index];
-			if (v5 != gDude && v5->data.critter.combat.team != team && statRoll(v5, STAT_PERCEPTION, 0, NULL) >= 2) {
+			if (v5 != gDude && v5->data.critter.combat.team != team && statRoll(v5, STAT_PERCEPTION, 0, nullptr) >= 2) {
 				_critter_set_who_hit_me(v5, gDude);
-				if (watcher == NULL) {
+				if (watcher == nullptr) {
 					watcher = v5;
 				}
 			}
 		}
 
-		if (watcher != NULL && !isInCombat()) {
+		if (watcher != nullptr && !isInCombat()) {
 			CombatStartData combat;
 			combat.attacker = watcher;
 			combat.defender = gDude;
@@ -1094,7 +1094,7 @@ int _obj_use_item(Object *a1, Object *a2) {
 	int rc = _protinst_use_item(a1, a2);
 	if (rc == 1 || rc == 2) {
 		Object *root = objectGetOwner(a2);
-		if (root != NULL) {
+		if (root != nullptr) {
 			int flags = a2->flags & OBJECT_IN_ANY_HAND;
 			itemRemove(root, a2, 1);
 			Object *v8 = itemReplace(root, a2, flags);
@@ -1102,7 +1102,7 @@ int _obj_use_item(Object *a1, Object *a2) {
 				int leftItemAction;
 				int rightItemAction;
 				interfaceGetItemActions(&leftItemAction, &rightItemAction);
-				if (v8 == NULL) {
+				if (v8 == nullptr) {
 					if ((flags & OBJECT_IN_LEFT_HAND) != 0) {
 						leftItemAction = INTERFACE_ITEM_ACTION_DEFAULT;
 					} else if ((flags & OBJECT_IN_RIGHT_HAND) != 0) {
@@ -1118,7 +1118,7 @@ int _obj_use_item(Object *a1, Object *a2) {
 
 		if (rc == 1) {
 			_obj_destroy(a2);
-		} else if (rc == 2 && root != NULL) {
+		} else if (rc == 2 && root != nullptr) {
 			Rect updatedRect;
 			_obj_connect(a2, root->tile, root->elevation, &updatedRect);
 			tileWindowRefreshRect(&updatedRect, root->elevation);
@@ -1332,7 +1332,7 @@ int _obj_use_item_on(Object *a1, Object *a2, Object *a3) {
 	int rc = _protinst_use_item_on(a1, a2, a3);
 
 	if (rc == 1) {
-		if (a1 != NULL) {
+		if (a1 != nullptr) {
 			int flags = a3->flags & OBJECT_IN_ANY_HAND;
 			itemRemove(a1, a3, 1);
 
@@ -1346,7 +1346,7 @@ int _obj_use_item_on(Object *a1, Object *a2, Object *a3) {
 				int rightItemAction;
 				interfaceGetItemActions(&leftItemAction, &rightItemAction);
 
-				if (replacedItem == NULL) {
+				if (replacedItem == nullptr) {
 					if ((flags & OBJECT_IN_LEFT_HAND) != 0) {
 						leftItemAction = INTERFACE_ITEM_ACTION_DEFAULT;
 					} else if ((flags & OBJECT_IN_RIGHT_HAND) != 0) {
@@ -1604,7 +1604,7 @@ static int _check_door_state(Object *a1, Object *a2) {
 
 		CacheEntry *artHandle;
 		Art *art = artLock(a1->fid, &artHandle);
-		if (art == NULL) {
+		if (art == nullptr) {
 			return -1;
 		}
 
@@ -1638,7 +1638,7 @@ static int _check_door_state(Object *a1, Object *a2) {
 
 		CacheEntry *artHandle;
 		Art *art = artLock(a1->fid, &artHandle);
-		if (art == NULL) {
+		if (art == nullptr) {
 			return -1;
 		}
 
@@ -1695,7 +1695,7 @@ int _obj_use_door(Object *a1, Object *a2, int a3) {
 		int end;
 		int step;
 		if (a2->frame != 0) {
-			if (_obj_blocking_at(NULL, a2->tile, a2->elevation) != 0) {
+			if (_obj_blocking_at(nullptr, a2->tile, a2->elevation) != 0) {
 				MessageListItem messageListItem;
 				char *text = getmsg(&gProtoMessageList, &messageListItem, 597);
 				displayMonitorAddMessage(text);
@@ -1869,7 +1869,7 @@ int _obj_use_skill_on(Object *source, Object *target, int skill) {
 
 // 0x49D140
 static bool _obj_is_portal(Object *obj) {
-	if (obj == NULL) {
+	if (obj == nullptr) {
 		return false;
 	}
 
@@ -1885,7 +1885,7 @@ static bool _obj_is_portal(Object *obj) {
 static bool _obj_is_lockable(Object *obj) {
 	Proto *proto;
 
-	if (obj == NULL) {
+	if (obj == nullptr) {
 		return false;
 	}
 
@@ -1911,7 +1911,7 @@ static bool _obj_is_lockable(Object *obj) {
 
 // 0x49D1C8
 bool objectIsLocked(Object *obj) {
-	if (obj == NULL) {
+	if (obj == nullptr) {
 		return false;
 	}
 
@@ -1928,7 +1928,7 @@ bool objectIsLocked(Object *obj) {
 
 // 0x49D20C
 int objectLock(Object *object) {
-	if (object == NULL) {
+	if (object == nullptr) {
 		return -1;
 	}
 
@@ -1948,7 +1948,7 @@ int objectLock(Object *object) {
 
 // 0x49D250
 int objectUnlock(Object *object) {
-	if (object == NULL) {
+	if (object == nullptr) {
 		return -1;
 	}
 
@@ -1968,7 +1968,7 @@ int objectUnlock(Object *object) {
 static bool _obj_is_openable(Object *obj) {
 	Proto *proto;
 
-	if (obj == NULL) {
+	if (obj == nullptr) {
 		return false;
 	}
 
@@ -1999,7 +1999,7 @@ int objectIsOpen(Object *object) {
 
 // 0x49D2F4
 static int objectOpenClose(Object *obj) {
-	if (obj == NULL) {
+	if (obj == nullptr) {
 		return -1;
 	}
 
@@ -2116,7 +2116,7 @@ int objectUnjamLock(Object *obj) {
 // 0x49D4B8
 int objectUnjamAll() {
 	Object *obj = objectFindFirst();
-	while (obj != NULL) {
+	while (obj != nullptr) {
 		objectUnjamLock(obj);
 		obj = objectFindNext();
 	}
@@ -2132,7 +2132,7 @@ int _obj_attempt_placement(Object *obj, int tile, int elevation, int a4) {
 	}
 
 	int newTile = tile;
-	if (_obj_blocking_at(NULL, tile, elevation) != NULL) {
+	if (_obj_blocking_at(nullptr, tile, elevation) != nullptr) {
 		int v6 = a4;
 		if (a4 < 1) {
 			v6 = 1;
@@ -2147,7 +2147,7 @@ int _obj_attempt_placement(Object *obj, int tile, int elevation, int a4) {
 
 			for (int rotation = 0; rotation < ROTATION_COUNT; rotation++) {
 				newTile = tileGetTileInDirection(tile, rotation, v6);
-				if (_obj_blocking_at(NULL, newTile, elevation) == NULL && v6 > 1 && _make_path(gDude, gDude->tile, newTile, NULL, 0) != 0) {
+				if (_obj_blocking_at(nullptr, newTile, elevation) == nullptr && v6 > 1 && _make_path(gDude, gDude->tile, newTile, nullptr, 0) != 0) {
 					break;
 				}
 			}
@@ -2158,7 +2158,7 @@ int _obj_attempt_placement(Object *obj, int tile, int elevation, int a4) {
 		if (a4 != 1 && v6 > a4 + 2) {
 			for (int rotation = 0; rotation < ROTATION_COUNT; rotation++) {
 				int candidate = tileGetTileInDirection(tile, rotation, 1);
-				if (_obj_blocking_at(NULL, candidate, elevation) == NULL) {
+				if (_obj_blocking_at(nullptr, candidate, elevation) == nullptr) {
 					newTile = candidate;
 					break;
 				}
@@ -2183,7 +2183,7 @@ int _obj_attempt_placement(Object *obj, int tile, int elevation, int a4) {
 
 // 0x49D628
 int _objPMAttemptPlacement(Object *obj, int tile, int elevation) {
-	if (obj == NULL) {
+	if (obj == nullptr) {
 		return -1;
 	}
 
@@ -2210,8 +2210,8 @@ int _objPMAttemptPlacement(Object *obj, int tile, int elevation) {
 		}
 	}
 
-	objectShow(obj, NULL);
-	objectSetLocation(obj, v9, elevation, NULL);
+	objectShow(obj, nullptr);
+	objectSetLocation(obj, v9, elevation, nullptr);
 
 	return 0;
 }

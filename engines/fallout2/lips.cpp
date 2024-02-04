@@ -36,7 +36,7 @@ LipsData gLipsData = {
 	2,
 	22528,
 	0,
-	NULL,
+	nullptr,
 	-1,
 	0,
 	0,
@@ -242,10 +242,10 @@ static int lipsReadV1(LipsData *lipsData, File *stream) {
 	// NOTE: Original code is different. For unknown reason it assigns values
 	// from file (integers) and treat them as pointers, which is obviously wrong
 	// is in this case.
-	lipsData->sound = NULL;
-	lipsData->field_14 = NULL;
-	lipsData->phonemes = NULL;
-	lipsData->markers = NULL;
+	lipsData->sound = nullptr;
+	lipsData->field_14 = nullptr;
+	lipsData->phonemes = nullptr;
+	lipsData->markers = nullptr;
 
 	return 0;
 }
@@ -270,14 +270,14 @@ int lipsLoad(const char *audioFileName, const char *headFileName) {
 	strcat_s(path, sizeof(path), "\\");
 
 	sep = strchr(path, '.');
-	if (sep != NULL) {
+	if (sep != nullptr) {
 		*sep = '\0';
 	}
 
 	strncpy(v60, audioFileName, sizeof(v60) - 1);
 
 	sep = strchr(v60, '.');
-	if (sep != NULL) {
+	if (sep != nullptr) {
 		*sep = '\0';
 	}
 
@@ -291,7 +291,7 @@ int lipsLoad(const char *audioFileName, const char *headFileName) {
 
 	// FIXME: stream is not closed if any error is encountered during reading.
 	File *stream = fileOpen(path, "rb");
-	if (stream != NULL) {
+	if (stream != nullptr) {
 		if (fileReadInt32(stream, &(gLipsData.version)) == -1) {
 			return -1;
 		}
@@ -333,12 +333,12 @@ int lipsLoad(const char *audioFileName, const char *headFileName) {
 	}
 
 	gLipsData.phonemes = (unsigned char *)internal_malloc(gLipsData.field_24);
-	if (gLipsData.phonemes == NULL) {
+	if (gLipsData.phonemes == nullptr) {
 		debugPrint("Out of memory in lips_load_file.'\n");
 		return -1;
 	}
 
-	if (stream != NULL) {
+	if (stream != nullptr) {
 		for (i = 0; i < gLipsData.field_24; i++) {
 			if (fileReadUInt8(stream, &(gLipsData.phonemes[i])) == -1) {
 				debugPrint("lips_load_file: Error reading phoneme type.\n");
@@ -355,12 +355,12 @@ int lipsLoad(const char *audioFileName, const char *headFileName) {
 	}
 
 	gLipsData.markers = (SpeechMarker *)internal_malloc(sizeof(*speech_marker) * gLipsData.field_2C);
-	if (gLipsData.markers == NULL) {
+	if (gLipsData.markers == nullptr) {
 		debugPrint("Out of memory in lips_load_file.'\n");
 		return -1;
 	}
 
-	if (stream != NULL) {
+	if (stream != nullptr) {
 		for (i = 0; i < gLipsData.field_2C; i++) {
 			speech_marker = &(gLipsData.markers[i]);
 
@@ -399,7 +399,7 @@ int lipsLoad(const char *audioFileName, const char *headFileName) {
 		}
 	}
 
-	if (stream != NULL) {
+	if (stream != nullptr) {
 		fileClose(stream);
 	}
 
@@ -429,34 +429,34 @@ int lipsLoad(const char *audioFileName, const char *headFileName) {
 // lips_make_speech
 // 0x47B5D0
 static int _lips_make_speech() {
-	if (gLipsData.field_14 != NULL) {
+	if (gLipsData.field_14 != nullptr) {
 		internal_free(gLipsData.field_14);
-		gLipsData.field_14 = NULL;
+		gLipsData.field_14 = nullptr;
 	}
 
 	char path[COMPAT_MAX_PATH];
 	char *v1 = _lips_fix_string(gLipsData.field_50, sizeof(gLipsData.field_50));
 	snprintf(path, sizeof(path), "%s%s\\%s.%s", "SOUND\\SPEECH\\", _lips_subdir_name, v1, "ACM");
 
-	if (gLipsData.sound != NULL) {
+	if (gLipsData.sound != nullptr) {
 //		soundDelete(gLipsData.sound); TODO audio
-		gLipsData.sound = NULL;
+		gLipsData.sound = nullptr;
 	}
 
-	gLipsData.sound = NULL; /*soundAllocate(SOUND_TYPE_MEMORY, SOUND_16BIT); TODO audio */
-	if (gLipsData.sound == NULL) {
+	gLipsData.sound = nullptr; /*soundAllocate(SOUND_TYPE_MEMORY, SOUND_16BIT); TODO audio */
+	if (gLipsData.sound == nullptr) {
 		debugPrint("\nsoundAllocate falied in lips_make_speech!");
 		return -1;
 	}
 
-/*	if (soundSetFileIO(gLipsData.sound, audioOpen, audioClose, audioRead, NULL, audioSeek, NULL, audioGetSize)) { TODO audio
+/*	if (soundSetFileIO(gLipsData.sound, audioOpen, audioClose, audioRead, nullptr, audioSeek, nullptr, audioGetSize)) { TODO audio
 		debugPrint("Ack!");
 		debugPrint("Error!");
 	}*/
 
 /*	if (soundLoad(gLipsData.sound, path)) { TODO audio
 		soundDelete(gLipsData.sound);
-		gLipsData.sound = NULL;
+		gLipsData.sound = nullptr;
 
 		debugPrint("lips_make_speech: soundLoad failed with path ");
 		debugPrint("%s -- file probably doesn't exist.\n", path);
@@ -470,12 +470,12 @@ static int _lips_make_speech() {
 
 // 0x47B730
 int lipsFree() {
-	if (gLipsData.field_14 != NULL) {
+	if (gLipsData.field_14 != nullptr) {
 		internal_free(gLipsData.field_14);
-		gLipsData.field_14 = NULL;
+		gLipsData.field_14 = nullptr;
 	}
 
-	if (gLipsData.sound != NULL) {
+	if (gLipsData.sound != nullptr) {
 		_head_marker_current = 0;
 
 //		soundStop(gLipsData.sound); TODO audio
@@ -484,17 +484,17 @@ int lipsFree() {
 
 //		soundDelete(gLipsData.sound); TODO audio
 
-		gLipsData.sound = NULL;
+		gLipsData.sound = nullptr;
 	}
 
-	if (gLipsData.phonemes != NULL) {
+	if (gLipsData.phonemes != nullptr) {
 		internal_free(gLipsData.phonemes);
-		gLipsData.phonemes = NULL;
+		gLipsData.phonemes = nullptr;
 	}
 
-	if (gLipsData.markers != NULL) {
+	if (gLipsData.markers != nullptr) {
 		internal_free(gLipsData.markers);
-		gLipsData.markers = NULL;
+		gLipsData.markers = nullptr;
 	}
 
 	return 0;
