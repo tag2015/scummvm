@@ -541,7 +541,7 @@ int mapper_edit_init(int argc, char **argv) {
 
 	max_art_buttons = (_scr_size.right - _scr_size.left - 136) / 50;
 	art_shape = (unsigned char *)internal_malloc(art_scale_height * art_scale_width);
-	if (art_shape == NULL) {
+	if (art_shape == nullptr) {
 		printf("Can't malloc memory!!\n");
 		exit(1);
 	}
@@ -644,7 +644,7 @@ int mapper_edit_init(int argc, char **argv) {
 				 -1,
 				 l_up,
 				 l_down,
-				 NULL,
+				 nullptr,
 				 0);
 
 	//
@@ -671,7 +671,7 @@ int mapper_edit_init(int argc, char **argv) {
 				 -1,
 				 r_up,
 				 r_down,
-				 NULL,
+				 nullptr,
 				 0);
 
 	//
@@ -698,7 +698,7 @@ int mapper_edit_init(int argc, char **argv) {
 				 -1,
 				 shift_l_up,
 				 shift_l_down,
-				 NULL,
+				 nullptr,
 				 0);
 
 	//
@@ -725,7 +725,7 @@ int mapper_edit_init(int argc, char **argv) {
 				 -1,
 				 shift_r_up,
 				 shift_r_down,
-				 NULL,
+				 nullptr,
 				 0);
 
 	//
@@ -739,11 +739,11 @@ int mapper_edit_init(int argc, char **argv) {
 							   58,
 							   160 + index,
 							   -1,
-							   NULL,
-							   NULL,
-							   NULL,
+							   nullptr,
+							   nullptr,
+							   nullptr,
 							   0);
-		buttonSetRightMouseCallbacks(btn, 160 + index, -1, NULL, NULL);
+		buttonSetRightMouseCallbacks(btn, 160 + index, -1, nullptr, nullptr);
 	}
 
 	// ELEVATION INC
@@ -770,7 +770,7 @@ int mapper_edit_init(int argc, char **argv) {
 				 -1,
 				 einc_up,
 				 einc_down,
-				 NULL,
+				 nullptr,
 				 0);
 
 	// ELEVATION DEC
@@ -797,7 +797,7 @@ int mapper_edit_init(int argc, char **argv) {
 				 -1,
 				 edec_up,
 				 edec_down,
-				 NULL,
+				 nullptr,
 				 0);
 
 	// ELEVATION
@@ -850,7 +850,7 @@ int mapper_edit_init(int argc, char **argv) {
 							'r',
 							roof_up,
 							roof_down,
-							NULL,
+							nullptr,
 							BUTTON_FLAG_0x01);
 
 	if (tileRoofIsVisible()) {
@@ -881,7 +881,7 @@ int mapper_edit_init(int argc, char **argv) {
 						   350,
 						   hex_up,
 						   hex_down,
-						   NULL,
+						   nullptr,
 						   BUTTON_FLAG_0x01);
 
 	// OBJ
@@ -908,7 +908,7 @@ int mapper_edit_init(int argc, char **argv) {
 						   350,
 						   obj_up,
 						   obj_down,
-						   NULL,
+						   nullptr,
 						   BUTTON_FLAG_0x01);
 
 	// CRIT
@@ -935,7 +935,7 @@ int mapper_edit_init(int argc, char **argv) {
 							351,
 							crit_up,
 							crit_down,
-							NULL,
+							nullptr,
 							BUTTON_FLAG_0x01);
 
 	// SCEN
@@ -962,7 +962,7 @@ int mapper_edit_init(int argc, char **argv) {
 							352,
 							scen_up,
 							scen_down,
-							NULL,
+							nullptr,
 							BUTTON_FLAG_0x01);
 
 	// WALL
@@ -989,7 +989,7 @@ int mapper_edit_init(int argc, char **argv) {
 							355,
 							wall_up,
 							wall_down,
-							NULL,
+							nullptr,
 							BUTTON_FLAG_0x01);
 
 	// MISC
@@ -1016,7 +1016,7 @@ int mapper_edit_init(int argc, char **argv) {
 							355,
 							misc_up,
 							misc_down,
-							NULL,
+							nullptr,
 							BUTTON_FLAG_0x01);
 
 	// HEIGHT INC
@@ -1043,7 +1043,7 @@ int mapper_edit_init(int argc, char **argv) {
 				 -1,
 				 height_dec_up,
 				 height_dec_down,
-				 NULL,
+				 nullptr,
 				 0);
 
 	// HEIGHT DEC
@@ -1070,7 +1070,7 @@ int mapper_edit_init(int argc, char **argv) {
 				 -1,
 				 height_dec_up,
 				 height_dec_down,
-				 NULL,
+				 nullptr,
 				 0);
 
 	// ARROWS
@@ -1158,7 +1158,7 @@ int mapper_edit_init(int argc, char **argv) {
 							 -1,
 							 paste_up,
 							 paste_down,
-							 NULL,
+							 nullptr,
 							 0);
 
 	// EDIT
@@ -1185,7 +1185,7 @@ int mapper_edit_init(int argc, char **argv) {
 							-1,
 							edit_up,
 							edit_down,
-							NULL,
+							nullptr,
 							0);
 
 	// DELETE
@@ -1212,7 +1212,7 @@ int mapper_edit_init(int argc, char **argv) {
 							  -1,
 							  delete_up,
 							  delete_down,
-							  NULL,
+							  nullptr,
 							  0);
 
 	draw_mode = false;
@@ -1303,7 +1303,7 @@ void mapper_edit_exit() {
 	categoryExit();
 
 	windowDestroy(tool_win);
-	tool = NULL;
+	tool = nullptr;
 
 	windowDestroy(menu_bar);
 
@@ -1547,19 +1547,19 @@ void mapper_destroy_highlight_obj(Object **a1, Object **a2) {
 	Rect rect;
 	int elevation;
 
-	if (a2 != NULL && *a2 != NULL) {
+	if (a2 != nullptr && *a2 != nullptr) {
 		elevation = (*a2)->elevation;
 		reg_anim_clear(*a2);
 		objectDestroy(*a2, &rect);
 		tileWindowRefreshRect(&rect, elevation);
-		*a2 = NULL;
+		*a2 = nullptr;
 	}
 
-	if (a1 != NULL && *a1 != NULL) {
+	if (a1 != nullptr && *a1 != nullptr) {
 		elevation = (*a1)->elevation;
 		objectDestroy(*a1, &rect);
 		tileWindowRefreshRect(&rect, elevation);
-		*a1 = NULL;
+		*a1 = nullptr;
 	}
 }
 
@@ -1576,7 +1576,7 @@ void mapper_refresh_rotation() {
 
 	sprintf(string, "%d", rotation);
 
-	if (tool != NULL) {
+	if (tool != nullptr) {
 		windowFill(tool_win,
 				   290,
 				   452 - (_scr_size.bottom - 99),
@@ -1658,7 +1658,7 @@ int mapper_inven_unwield(Object *obj, int right_hand) {
 		item = critterGetItem1(obj);
 	}
 
-	if (item != NULL) {
+	if (item != nullptr) {
 		item->flags &= ~OBJECT_IN_ANY_HAND;
 	}
 
@@ -1682,7 +1682,7 @@ int mapper_mark_exit_grid() {
 			tile = gGameMouseBouncingCursor->tile + y + x;
 
 			obj = objectFindFirstAtElevation(gElevation);
-			while (obj != NULL) {
+			while (obj != nullptr) {
 				if (isExitGridPid(obj->pid)) {
 					obj->data.misc.map = mapInfo.map;
 					obj->data.misc.tile = mapInfo.tile;
@@ -1702,7 +1702,7 @@ void mapper_mark_all_exit_grids() {
 	Object *obj;
 
 	obj = objectFindFirstAtElevation(gElevation);
-	while (obj != NULL) {
+	while (obj != nullptr) {
 		if (isExitGridPid(obj->pid)) {
 			obj->data.misc.map = mapInfo.map;
 			obj->data.misc.tile = mapInfo.tile;

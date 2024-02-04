@@ -156,7 +156,7 @@ int textObjectAdd(Object *object, char *string, int font, int color, int outline
 		return -1;
 	}
 
-	if (string == NULL) {
+	if (string == nullptr) {
 		return -1;
 	}
 
@@ -165,7 +165,7 @@ int textObjectAdd(Object *object, char *string, int font, int color, int outline
 	}
 
 	TextObject *textObject = (TextObject *)internal_malloc(sizeof(*textObject));
-	if (textObject == NULL) {
+	if (textObject == nullptr) {
 		return -1;
 	}
 
@@ -213,7 +213,7 @@ int textObjectAdd(Object *object, char *string, int font, int color, int outline
 
 	int size = textObject->width * textObject->height;
 	textObject->data = (unsigned char *)internal_malloc(size);
-	if (textObject->data == NULL) {
+	if (textObject->data == nullptr) {
 		fontSetCurrent(oldFont);
 		return -1;
 	}
@@ -249,7 +249,7 @@ int textObjectAdd(Object *object, char *string, int font, int color, int outline
 		bufferOutline(textObject->data, textObject->width, textObject->height, textObject->width, outlineColor);
 	}
 
-	if (object != NULL) {
+	if (object != nullptr) {
 		textObject->tile = object->tile;
 	} else {
 		textObject->flags |= TEXT_OBJECT_UNBOUNDED;
@@ -258,7 +258,7 @@ int textObjectAdd(Object *object, char *string, int font, int color, int outline
 
 	textObjectFindPlacement(textObject);
 
-	if (rect != NULL) {
+	if (rect != nullptr) {
 		rect->left = textObject->x;
 		rect->top = textObject->y;
 		rect->right = textObject->x + textObject->width - 1;

@@ -18,7 +18,7 @@ static void fileCopy(const char *existingFilePath, const char *newFilePath);
 // 0x452740
 int fileCopyDecompressed(const char *existingFilePath, const char *newFilePath) {
 	FILE *stream = compat_fopen(existingFilePath, "rb");
-	if (stream == NULL) {
+	if (stream == nullptr) {
 		return -1;
 	}
 
@@ -31,7 +31,7 @@ int fileCopyDecompressed(const char *existingFilePath, const char *newFilePath) 
 		gzFile inStream = compat_gzopen(existingFilePath, "rb");
 		FILE *outStream = compat_fopen(newFilePath, "wb");
 
-		if (inStream != NULL && outStream != NULL) {
+		if (inStream != nullptr && outStream != nullptr) {
 			for (;;) {
 				int ch = gzgetc(inStream);
 				if (ch == -1) {
@@ -44,11 +44,11 @@ int fileCopyDecompressed(const char *existingFilePath, const char *newFilePath) 
 			gzclose(inStream);
 			fclose(outStream);
 		} else {
-			if (inStream != NULL) {
+			if (inStream != nullptr) {
 				gzclose(inStream);
 			}
 
-			if (outStream != NULL) {
+			if (outStream != nullptr) {
 				fclose(outStream);
 			}
 
@@ -64,7 +64,7 @@ int fileCopyDecompressed(const char *existingFilePath, const char *newFilePath) 
 // 0x452804
 int fileCopyCompressed(const char *existingFilePath, const char *newFilePath) {
 	FILE *inStream = compat_fopen(existingFilePath, "rb");
-	if (inStream == NULL) {
+	if (inStream == nullptr) {
 		return -1;
 	}
 
@@ -80,7 +80,7 @@ int fileCopyCompressed(const char *existingFilePath, const char *newFilePath) {
 		fileCopy(existingFilePath, newFilePath);
 	} else {
 		gzFile outStream = compat_gzopen(newFilePath, "wb");
-		if (outStream == NULL) {
+		if (outStream == nullptr) {
 			fclose(inStream);
 			return -1;
 		}
@@ -105,7 +105,7 @@ int fileCopyCompressed(const char *existingFilePath, const char *newFilePath) {
 // TODO: Check, implementation looks odd.
 int _gzdecompress_file(const char *existingFilePath, const char *newFilePath) {
 	FILE *stream = compat_fopen(existingFilePath, "rb");
-	if (stream == NULL) {
+	if (stream == nullptr) {
 		return -1;
 	}
 
@@ -117,12 +117,12 @@ int _gzdecompress_file(const char *existingFilePath, const char *newFilePath) {
 	// TODO: Is it broken?
 	if (magic[0] != 0x1F || magic[1] != 0x8B) {
 		gzFile gzstream = compat_gzopen(existingFilePath, "rb");
-		if (gzstream == NULL) {
+		if (gzstream == nullptr) {
 			return -1;
 		}
 
 		stream = compat_fopen(newFilePath, "wb");
-		if (stream == NULL) {
+		if (stream == nullptr) {
 			gzclose(gzstream);
 			return -1;
 		}
@@ -148,7 +148,7 @@ int _gzdecompress_file(const char *existingFilePath, const char *newFilePath) {
 static void fileCopy(const char *existingFilePath, const char *newFilePath) {
 	FILE *in = compat_fopen(existingFilePath, "rb");
 	FILE *out = compat_fopen(newFilePath, "wb");
-	if (in != NULL && out != NULL) {
+	if (in != nullptr && out != nullptr) {
 		std::vector<unsigned char> buffer(0xFFFF);
 
 		size_t bytesRead;
@@ -167,11 +167,11 @@ static void fileCopy(const char *existingFilePath, const char *newFilePath) {
 		}
 	}
 
-	if (in != NULL) {
+	if (in != nullptr) {
 		fclose(in);
 	}
 
-	if (out != NULL) {
+	if (out != nullptr) {
 		fclose(out);
 	}
 }

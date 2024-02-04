@@ -26,7 +26,7 @@ namespace Fallout2 {
 bool gProgramIsActive = false;
 
 // GNW95MUTEX
-HANDLE _GNW95_mutex = NULL;
+HANDLE _GNW95_mutex = nullptr;
 
 // 0x4DE700
 int main(int argc, char* argv[]) {

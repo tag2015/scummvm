@@ -20,10 +20,10 @@ bool fileFindFirst(const char *path, DirectoryFileFindData *findData) {
 
 	char drive[COMPAT_MAX_DRIVE];
 	char dir[COMPAT_MAX_DIR];
-	compat_splitpath(path, drive, dir, NULL, NULL);
+	compat_splitpath(path, drive, dir, nullptr, nullptr);
 
 	char basePath[COMPAT_MAX_PATH];
-	compat_makepath(basePath, drive, dir, NULL, NULL);
+	compat_makepath(basePath, drive, dir, nullptr, nullptr);
 
 	findData->dir = Common::FSNode(basePath);
 	if (!findData->dir.exists())
@@ -35,7 +35,7 @@ bool fileFindFirst(const char *path, DirectoryFileFindData *findData) {
 	bool found = false;
 	for (Common::FSList::const_iterator file = fslist.begin(); !found && file != fslist.end(); ++file) {
 		char entryPath[COMPAT_MAX_PATH];
-		compat_makepath(entryPath, drive, dir, file->getName().c_str(), NULL);
+		compat_makepath(entryPath, drive, dir, file->getName().c_str(), nullptr);
 		if (fpattern_match(findData->path, entryPath)) {
 			found = true;
 			findData->entry = Common::FSNode(file->getPath());
@@ -48,23 +48,23 @@ bool fileFindFirst(const char *path, DirectoryFileFindData *findData) {
 	}
 
 	/*	findData->dir = opendir(basePath);
-		if (findData->dir == NULL) {
+		if (findData->dir == nullptr) {
 			return false;
 		}
 
 		findData->entry = readdir(findData->dir);
-		while (findData->entry != NULL) {
+		while (findData->entry != nullptr) {
 			char entryPath[COMPAT_MAX_PATH];
-			compat_makepath(entryPath, drive, dir, fileFindGetName(findData), NULL);
+			compat_makepath(entryPath, drive, dir, fileFindGetName(findData), nullptr);
 			if (fpattern_match(findData->path, entryPath)) {
 				break;
 			}
 			findData->entry = readdir(findData->dir);
 		}
 
-		if (findData->entry == NULL) {
+		if (findData->entry == nullptr) {
 			closedir(findData->dir);
-			findData->dir = NULL;
+			findData->dir = nullptr;
 			return false;
 		}
 		// #endif */
@@ -86,7 +86,7 @@ bool fileFindNext(DirectoryFileFindData *findData) {
 
 	char drive[COMPAT_MAX_DRIVE];
 	char dir[COMPAT_MAX_DIR];
-	compat_splitpath(findData->path, drive, dir, NULL, NULL);
+	compat_splitpath(findData->path, drive, dir, nullptr, nullptr);
 
 	Common::FSList fslist;
 	findData->dir.getChildren(fslist, Common::FSNode::kListFilesOnly);
@@ -94,7 +94,7 @@ bool fileFindNext(DirectoryFileFindData *findData) {
 	bool found = false;
 	for (Common::FSList::const_iterator file = fslist.begin(); !found && file != fslist.end(); ++file) {
 		char entryPath[COMPAT_MAX_PATH];
-		compat_makepath(entryPath, drive, dir, file->getName().c_str(), NULL);
+		compat_makepath(entryPath, drive, dir, file->getName().c_str(), nullptr);
 		if (fpattern_match(findData->path, entryPath)) {
 			found = true;
 			findData->entry = Common::FSNode(file->getPath());
@@ -107,18 +107,18 @@ bool fileFindNext(DirectoryFileFindData *findData) {
 	}
 
 	/*	findData->entry = readdir(findData->dir);
-		while (findData->entry != NULL) {
+		while (findData->entry != nullptr) {
 			char entryPath[COMPAT_MAX_PATH];
-			compat_makepath(entryPath, drive, dir, fileFindGetName(findData), NULL);
+			compat_makepath(entryPath, drive, dir, fileFindGetName(findData), nullptr);
 			if (fpattern_match(findData->path, entryPath)) {
 				break;
 			}
 			findData->entry = readdir(findData->dir);
 		}
 
-		if (findData->entry == NULL) {
+		if (findData->entry == nullptr) {
 			closedir(findData->dir);
-			findData->dir = NULL;
+			findData->dir = nullptr;
 			return false;
 		} */
 	// #endif
@@ -132,9 +132,9 @@ bool findFindClose(DirectoryFileFindData *findData) {
 	// #if defined(_MSC_VER)
 	//	FindClose(findData->hFind);
 	// #else
-	//	if (findData->dir != NULL) {
+	//	if (findData->dir != nullptr) {
 	// if (closedir(findData->dir) != 0) {
-	// findData->dir = NULL;
+	// findData->dir = nullptr;
 	//	return false;
 	//}
 	// #endif

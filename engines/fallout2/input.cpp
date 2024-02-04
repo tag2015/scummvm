@@ -51,10 +51,10 @@ static void _GNW95_process_key(KeyboardData *data);
 static void idleImpl();
 
 // 0x51E234
-static IdleFunc *_idle_func = NULL;
+static IdleFunc *_idle_func = nullptr;
 
 // 0x51E238
-static FocusFunc *_focus_func = NULL;
+static FocusFunc *_focus_func = nullptr;
 
 // 0x51E23C
 static int gKeyboardKeyRepeatRate = 80;
@@ -151,7 +151,7 @@ int inputInit(int a1) {
 	gPauseKeyCode = KEY_ALT_P;
 	gPauseHandler = pauseHandlerDefaultImpl;
 	gScreenshotHandler = screenshotHandlerDefaultImpl;
-	gTickerListHead = NULL;
+	gTickerListHead = nullptr;
 	gScreenshotKeyCode = KEY_ALT_C;
 
 	// SFALL: Set idle function.
@@ -169,7 +169,7 @@ void inputExit() {
 	directInputFree();
 
 	TickerListNode *curr = gTickerListHead;
-	while (curr != NULL) {
+	while (curr != nullptr) {
 		TickerListNode *next = curr->next;
 		internal_free(curr);
 		curr = next;
@@ -311,7 +311,7 @@ void tickersExecute() {
 	TickerListNode *curr = gTickerListHead;
 	TickerListNode **currPtr = &(gTickerListHead);
 
-	while (curr != NULL) {
+	while (curr != nullptr) {
 		TickerListNode *next = curr->next;
 		if (curr->flags & 1) {
 			*currPtr = next;
@@ -328,7 +328,7 @@ void tickersExecute() {
 // 0x4C8D74
 void tickersAdd(TickerProc *proc) {
 	TickerListNode *curr = gTickerListHead;
-	while (curr != NULL) {
+	while (curr != nullptr) {
 		if (curr->proc == proc) {
 			if ((curr->flags & 0x01) != 0) {
 				curr->flags &= ~0x01;
@@ -348,7 +348,7 @@ void tickersAdd(TickerProc *proc) {
 // 0x4C8DC4
 void tickersRemove(TickerProc *proc) {
 	TickerListNode *curr = gTickerListHead;
-	while (curr != NULL) {
+	while (curr != nullptr) {
 		if (curr->proc == proc) {
 			curr->flags |= 0x01;
 			return;
@@ -425,7 +425,7 @@ static int pauseHandlerDefaultImpl() {
 void pauseHandlerConfigure(int keyCode, PauseHandler *handler) {
 	gPauseKeyCode = keyCode;
 
-	if (handler == NULL) {
+	if (handler == nullptr) {
 		handler = pauseHandlerDefaultImpl;
 	}
 
@@ -437,7 +437,7 @@ void takeScreenshot() {
 /*	int width = _scr_size.right - _scr_size.left + 1;  TODO screenshot
 	int height = _scr_size.bottom - _scr_size.top + 1;
 	gScreenshotBuffer = (unsigned char *)internal_malloc(width * height);
-	if (gScreenshotBuffer == NULL) {
+	if (gScreenshotBuffer == nullptr) {
 		return;
 	}
 
@@ -448,7 +448,7 @@ void takeScreenshot() {
 	_mouse_blit = screenshotBlitter;
 
 	WindowDrawingProc2 *v1 = _mouse_blit_trans;
-	_mouse_blit_trans = NULL;
+	_mouse_blit_trans = nullptr;
 
 	windowRefreshAll(&_scr_size);
 
@@ -479,7 +479,7 @@ int screenshotHandlerDefaultImpl(int width, int height, unsigned char *data, uns
 		snprintf(fileName, sizeof(fileName), "scr%.5d.bmp", index);
 
 		stream = compat_fopen(fileName, "rb");
-		if (stream == NULL) {
+		if (stream == nullptr) {
 			break;
 		}
 
@@ -491,7 +491,7 @@ int screenshotHandlerDefaultImpl(int width, int height, unsigned char *data, uns
 	}
 
 	stream = compat_fopen(fileName, "wb");
-	if (stream == NULL) {
+	if (stream == nullptr) {
 		return -1;
 	}
 
@@ -589,7 +589,7 @@ int screenshotHandlerDefaultImpl(int width, int height, unsigned char *data, uns
 void screenshotHandlerConfigure(int keyCode, ScreenshotHandler *handler) {
 	gScreenshotKeyCode = keyCode;
 
-	if (handler == NULL) {
+	if (handler == nullptr) {
 		handler = screenshotHandlerDefaultImpl;
 	}
 
@@ -1171,19 +1171,19 @@ static void _GNW95_process_key(KeyboardData *data) {
 
 // 0x4C9EEC
 void _GNW95_lost_focus() {
-	if (_focus_func != NULL) {
+	if (_focus_func != nullptr) {
 		_focus_func(false);
 	}
 
 	while (!gProgramIsActive) {
 		_GNW95_process_message();
 
-		if (_idle_func != NULL) {
+		if (_idle_func != nullptr) {
 			_idle_func();
 		}
 	}
 
-	if (_focus_func != NULL) {
+	if (_focus_func != nullptr) {
 		_focus_func(true);
 	}
 }
