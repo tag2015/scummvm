@@ -92,8 +92,8 @@ namespace Fallout2 {
 /* Local constants */
 
 /*
-#ifndef NULL
- #define NULL		((void *) 0)
+#ifndef nullptr
+ #define nullptr		((void *) 0)
 #endif
 
 #ifndef false
@@ -162,7 +162,7 @@ int fpattern_isvalid(const char *pat) {
 	debug("fpattern_isvalid: pat=%p:\"%s\"", pat, pat ? pat : "");
 
 	/* Check args */
-	if (pat == NULL) {
+	if (pat == nullptr) {
 		debug("Null pattern");
 		return false;
 	}
@@ -449,10 +449,10 @@ int fpattern_match(const char *pat, const char *fname) {
 	      fname, fname ? fname : "", pat, pat ? pat : "");
 
 	/* Check args */
-	if (fname == NULL)
+	if (fname == nullptr)
 		return false;
 
-	if (pat == NULL)
+	if (pat == nullptr)
 		return false;
 
 	/* Verify that the pattern is valid, and get its length */
@@ -504,10 +504,10 @@ int fpattern_matchn(const char *pat, const char *fname) {
 	      fname, fname ? fname : "", pat, pat ? pat : "");
 
 	/* Check args */
-	if (fname == NULL)
+	if (fname == nullptr)
 		return false;
 
-	if (pat == NULL)
+	if (pat == nullptr)
 		return false;
 
 	/* Assume that pattern is well-formed */

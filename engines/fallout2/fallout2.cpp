@@ -140,7 +140,7 @@ void Fallout2Engine::showSplash() {
 		snprintf(filePath, sizeof(filePath), "%ssplash%d.rix", path, splash);
 		debug(5, "Splash screen path: %s", filePath);
 		stream = fileOpen(filePath, "rb");
-		if (stream != NULL) {
+		if (stream != nullptr) {
 			break;
 		}
 
@@ -151,12 +151,12 @@ void Fallout2Engine::showSplash() {
 		}
 	}
 
-	if (stream == NULL) {
+	if (stream == nullptr) {
 		return;
 	}
 
 	unsigned char *palette = reinterpret_cast<unsigned char *>(internal_malloc(768));
-	if (palette == NULL) {
+	if (palette == nullptr) {
 		fileClose(stream);
 		return;
 	}
@@ -177,7 +177,7 @@ void Fallout2Engine::showSplash() {
 	fileRead(&height, sizeof(height), 1, stream);
 
 	unsigned char *data = reinterpret_cast<unsigned char *>(internal_malloc(width * height));
-	if (data == NULL) {
+	if (data == nullptr) {
 		internal_free(palette);
 		fileClose(stream);
 		return;
@@ -225,7 +225,7 @@ void Fallout2Engine::showSplash() {
 		}
 
 		unsigned char *scaled = reinterpret_cast<unsigned char *>(internal_malloc(scaledWidth * scaledHeight));
-		if (scaled != NULL) {
+		if (scaled != nullptr) {
 			blitBufferToBufferStretch(data, width, height, width, scaled, scaledWidth, scaledHeight, scaledWidth);
 
 			int x = screenWidth > scaledWidth ? (screenWidth - scaledWidth) / 2 : 0;
@@ -271,7 +271,7 @@ static void showDeath() {
 	if (win != -1) {
 		do {
 			unsigned char *windowBuffer = windowGetBuffer(win);
-			if (windowBuffer == NULL) {
+			if (windowBuffer == nullptr) {
 				break;
 			}
 
@@ -350,7 +350,7 @@ static void showDeath() {
 				sharedFpsLimiter.throttle();
 			} while (keyCode == -1 && !_main_death_voiceover_done && getTicksSince(time) < delay);
 
-//			speechSetEndCallback(NULL); TODO audio
+//			speechSetEndCallback(nullptr); TODO audio
 
 //			speechDelete();
 
@@ -392,7 +392,7 @@ static void _main_death_voiceover_callback() {
 //
 static int _mainDeathGrabTextFile(const char *fileName, char *dest) {
 	const char *p = strrchr(fileName, '\\');
-	if (p == NULL) {
+	if (p == nullptr) {
 		return -1;
 	}
 
@@ -400,7 +400,7 @@ static int _mainDeathGrabTextFile(const char *fileName, char *dest) {
 	snprintf(path, sizeof(path), "text\\%s\\cuts\\%s%s", settings.system.language.c_str(), p + 1, ".TXT");
 
 	File *stream = fileOpen(path, "rt");
-	if (stream == NULL) {
+	if (stream == nullptr) {
 		return -1;
 	}
 
@@ -428,7 +428,7 @@ static int _mainDeathGrabTextFile(const char *fileName, char *dest) {
 static int _mainDeathWordWrap(char *text, int width, short *beginnings, short *count) {
 	while (true) {
 		char *sep = strchr(text, ':');
-		if (sep == NULL) {
+		if (sep == nullptr) {
 			break;
 		}
 
@@ -453,7 +453,7 @@ static int _mainDeathWordWrap(char *text, int width, short *beginnings, short *c
 			beginnings[index]--;
 		}
 
-		if (p != NULL) {
+		if (p != nullptr) {
 			*p = '\0';
 			beginnings[index]++;
 		}
@@ -736,11 +736,11 @@ Common::Error Fallout2Engine::run() {
 			mainMenuWindowFree();
 			if (characterSelectorOpen() == 2) {
 				randomSeedPrerandom(-1);
-				char *mapName = NULL;
-				char *mapNameCopy = compat_strdup(mapName != NULL ? mapName : _mainMap);
+				char *mapName = nullptr;
+				char *mapNameCopy = compat_strdup(mapName != nullptr ? mapName : _mainMap);
 
 				gDude->flags &= ~OBJECT_FLAT;
-				objectShow(gDude, NULL);
+				objectShow(gDude, nullptr);
 				mouseHideCursor();
 				int win = windowCreate(0, 0, screenGetWidth(), screenGetHeight(), _colorTable[0], WINDOW_MODAL | WINDOW_MOVE_ON_TOP);
 				windowRefresh(win);
@@ -802,7 +802,7 @@ Common::Error Fallout2Engine::run() {
 			}
 			paletteFadeTo(gPaletteWhite);
 
-			objectHide(gDude, NULL);
+			objectHide(gDude, nullptr);
 			_map_exit();
 
 			gameReset();
@@ -824,7 +824,7 @@ Common::Error Fallout2Engine::run() {
 
 			gDude->flags &= ~OBJECT_FLAT;
 
-			objectShow(gDude, NULL);
+			objectShow(gDude, nullptr);
 			mouseHideCursor();
 
 			_map_init();
@@ -848,7 +848,7 @@ Common::Error Fallout2Engine::run() {
 			}
 
 			// NOTE: Uninline.
-			objectHide(gDude, NULL);
+			objectHide(gDude, nullptr);
 			_map_exit();
 
 			// NOTE: Uninline.

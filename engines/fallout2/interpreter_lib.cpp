@@ -170,7 +170,7 @@ void opFillWin3x3(Program *program) {
 	int imageWidth;
 	int imageHeight;
 	unsigned char *imageData = datafileRead(mangledFileName, &imageWidth, &imageHeight);
-	if (imageData == NULL) {
+	if (imageData == nullptr) {
 		programFatalError("cannot load 3x3 file '%s'", mangledFileName);
 	}
 
@@ -246,11 +246,11 @@ void opSelectFileList(Program *program) {
 
 	int fileListLength;
 	char **fileList = _getFileList(_interpretMangleName(pattern), &fileListLength);
-	if (fileList != NULL && fileListLength != 0) {
+	if (fileList != nullptr && fileListLength != 0) {
 		int selectedIndex = _win_list_select(title,
 											 fileList,
 											 fileListLength,
-											 NULL,
+											 nullptr,
 											 320 - fontGetStringWidth(title) / 2,
 											 200,
 											 _colorTable[0x7FFF] | 0x10000);
@@ -276,7 +276,7 @@ void opTokenize(Program *program) {
 
 	ProgramValue prevValue = programStackPopValue(program);
 
-	char *prev = NULL;
+	char *prev = nullptr;
 	if ((prevValue.opcode & VALUE_TYPE_MASK) == VALUE_TYPE_INT) {
 		if (prevValue.integerValue != 0) {
 			programFatalError("Error, invalid arg 2 to tokenize. (only accept 0 for int value)");
@@ -288,11 +288,11 @@ void opTokenize(Program *program) {
 	}
 
 	char *string = programStackPopString(program);
-	char *temp = NULL;
+	char *temp = nullptr;
 
-	if (prev != NULL) {
+	if (prev != nullptr) {
 		char *start = strstr(string, prev);
-		if (start != NULL) {
+		if (start != nullptr) {
 			start += strlen(prev);
 			while (*start != ch && *start != '\0') {
 				start++;
@@ -321,7 +321,7 @@ void opTokenize(Program *program) {
 			length++;
 		}
 
-		if (string != NULL) {
+		if (string != nullptr) {
 			temp = (char *)internal_calloc_safe(1, length + 1, __FILE__, __LINE__); // "..\\int\\INTLIB.C", 248
 			strncpy(temp, string, length);
 			programStackPushString(program, temp);
@@ -330,7 +330,7 @@ void opTokenize(Program *program) {
 		}
 	}
 
-	if (temp != NULL) {
+	if (temp != nullptr) {
 		internal_free_safe(temp, __FILE__, __LINE__); // "..\\int\\INTLIB.C" , 260
 	}
 }
@@ -568,7 +568,7 @@ void opPlayMovie(Program *program) {
 
 	strncpy(gIntLibPlayMovieFileName, movieFileName, sizeof(gIntLibPlayMovieFileName) - 1);
 
-	if (strrchr(gIntLibPlayMovieFileName, '.') == NULL) {
+	if (strrchr(gIntLibPlayMovieFileName, '.') == nullptr) {
 		strcat_s(gIntLibPlayMovieFileName, sizeof(gIntLibPlayMovieFileName), ".mve");
 	}
 
@@ -594,7 +594,7 @@ void opPlayMovieRect(Program *program) {
 
 	strncpy(gIntLibPlayMovieRectFileName, movieFileName, sizeof(gIntLibPlayMovieRectFileName) - 1);
 
-	if (strrchr(gIntLibPlayMovieRectFileName, '.') == NULL) {
+	if (strrchr(gIntLibPlayMovieRectFileName, '.') == nullptr) {
 		strcat_s(gIntLibPlayMovieRectFileName, sizeof(gIntLibPlayMovieRectFileName), ".mve");
 	}
 
@@ -635,7 +635,7 @@ static void opDeleteRegion(Program *program) {
 
 	_selectWindowID(program->windowId);
 
-	const char *regionName = value.integerValue != -1 ? programGetString(program, value.opcode, value.integerValue) : NULL;
+	const char *regionName = value.integerValue != -1 ? programGetString(program, value.opcode, value.integerValue) : nullptr;
 	_windowDeleteRegion(regionName);
 }
 
@@ -822,7 +822,7 @@ static void opSayStartPos(Program *program) {
 static void opSayReplyTitle(Program *program) {
 	ProgramValue value = programStackPopValue(program);
 
-	char *string = NULL;
+	char *string = nullptr;
 	if ((value.opcode & VALUE_TYPE_MASK) == VALUE_TYPE_STRING) {
 		string = programGetString(program, value.opcode, value.integerValue);
 	}
@@ -837,7 +837,7 @@ static void opSayReplyTitle(Program *program) {
 static void opSayGoToReply(Program *program) {
 	ProgramValue value = programStackPopValue(program);
 
-	char *string = NULL;
+	char *string = nullptr;
 	if ((value.opcode & VALUE_TYPE_MASK) == VALUE_TYPE_STRING) {
 		string = programGetString(program, value.opcode, value.integerValue);
 	}
@@ -859,7 +859,7 @@ void opSayReply(Program *program) {
 	if ((v2.opcode & VALUE_TYPE_MASK) == VALUE_TYPE_STRING) {
 		v1 = programGetString(program, v2.opcode, v2.integerValue);
 	} else {
-		v1 = NULL;
+		v1 = nullptr;
 	}
 
 	if ((v3.opcode & VALUE_TYPE_MASK) == VALUE_TYPE_STRING) {
@@ -891,14 +891,14 @@ void opSayOption(Program *program) {
 	if ((v4.opcode & VALUE_TYPE_MASK) == VALUE_TYPE_STRING) {
 		v1 = programGetString(program, v4.opcode, v4.integerValue);
 	} else {
-		v1 = NULL;
+		v1 = nullptr;
 	}
 
 	const char *v2;
 	if ((v3.opcode & VALUE_TYPE_MASK) == VALUE_TYPE_STRING) {
 		v2 = programGetString(program, v3.opcode, v3.integerValue);
 	} else {
-		v2 = NULL;
+		v2 = nullptr;
 	}
 
 	if (_dialogReply(v1, v2) != 0) {
@@ -981,14 +981,14 @@ void opSayMessage(Program *program) {
 	if ((v4.opcode & VALUE_TYPE_MASK) == VALUE_TYPE_STRING) {
 		v1 = programGetString(program, v4.opcode, v4.integerValue);
 	} else {
-		v1 = NULL;
+		v1 = nullptr;
 	}
 
 	const char *v2;
 	if ((v3.opcode & VALUE_TYPE_MASK) == VALUE_TYPE_STRING) {
 		v2 = programGetString(program, v3.opcode, v3.integerValue);
 	} else {
-		v2 = NULL;
+		v2 = nullptr;
 	}
 
 	if (sub_430FD4(v1, v2, _TimeOut) != 0) {
@@ -1142,7 +1142,7 @@ static void opDeleteButton(Program *program) {
 	_selectWindowID(program->windowId);
 
 	if ((value.opcode & 0xF7FF) == VALUE_TYPE_INT) {
-		if (_windowDeleteButton(NULL)) {
+		if (_windowDeleteButton(nullptr)) {
 			return;
 		}
 	} else {
@@ -1351,13 +1351,13 @@ static void opDeleteKey(Program *program) {
 
 	if (key == -1) {
 		gIntLibGenericKeyHandlerProc = 0;
-		gIntLibGenericKeyHandlerProgram = NULL;
+		gIntLibGenericKeyHandlerProgram = nullptr;
 	} else {
 		if (key > INT_LIB_KEY_HANDLERS_CAPACITY - 1) {
 			programFatalError("Key out of range");
 		}
 
-		gIntLibKeyHandlerEntries[key].program = NULL;
+		gIntLibKeyHandlerEntries[key].program = nullptr;
 		gIntLibKeyHandlerEntries[key].proc = 0;
 	}
 }
@@ -1507,7 +1507,7 @@ void opSayReplyWindow(Program *program) {
 		v1 = _interpretMangleName(v1);
 		v1 = strdup_safe(v1, __FILE__, __LINE__); // "..\\int\\INTLIB.C", 1510
 	} else if ((v2.opcode & VALUE_TYPE_MASK) == VALUE_TYPE_INT && v2.integerValue == 0) {
-		v1 = NULL;
+		v1 = nullptr;
 	} else {
 		programFatalError("Invalid arg 5 given to sayreplywindow");
 	}
@@ -1552,7 +1552,7 @@ void opSayOptionWindow(Program *program) {
 		v1 = _interpretMangleName(v1);
 		v1 = strdup_safe(v1, __FILE__, __LINE__); // "..\\int\\INTLIB.C", 1556
 	} else if ((v2.opcode & VALUE_TYPE_MASK) == VALUE_TYPE_INT && v2.integerValue == 0) {
-		v1 = NULL;
+		v1 = nullptr;
 	} else {
 		programFatalError("Invalid arg 5 given to sayoptionwindow");
 	}
@@ -1583,10 +1583,10 @@ void opSayScrollUp(Program *program) {
 	int y = programStackPopInteger(program);
 	int x = programStackPopInteger(program);
 
-	char *v1 = NULL;
-	char *v2 = NULL;
-	char *v3 = NULL;
-	char *v4 = NULL;
+	char *v1 = nullptr;
+	char *v2 = nullptr;
+	char *v3 = nullptr;
+	char *v4 = nullptr;
 	int v5 = 0;
 
 	if ((v6.opcode & VALUE_TYPE_MASK) == VALUE_TYPE_INT) {
@@ -1654,10 +1654,10 @@ void opSayScrollDown(Program *program) {
 	int y = programStackPopInteger(program);
 	int x = programStackPopInteger(program);
 
-	char *v1 = NULL;
-	char *v2 = NULL;
-	char *v3 = NULL;
-	char *v4 = NULL;
+	char *v1 = nullptr;
+	char *v2 = nullptr;
+	char *v3 = nullptr;
+	char *v4 = nullptr;
 	int v5 = 0;
 
 	if ((v6.opcode & VALUE_TYPE_MASK) == VALUE_TYPE_INT) {
@@ -1739,7 +1739,7 @@ static void opSayRestart(Program *program) {
 static void intLibSoundCallback(void *userData, int a2) {
 	if (a2 == 1) {
 		Sound **sound = (Sound **)userData;
-		*sound = NULL;
+		*sound = nullptr;
 	}
 }
 
@@ -1755,7 +1755,7 @@ static int intLibSoundDelete(int value) {
 
 	int index = value & ~0xA0000000;
 	Sound *sound = gIntLibSounds[index];
-	if (sound == NULL) {
+	if (sound == nullptr) {
 		return 0;
 	}
 
@@ -1765,7 +1765,7 @@ static int intLibSoundDelete(int value) {
 
 	soundDelete(sound); */
 
-	gIntLibSounds[index] = NULL;
+	gIntLibSounds[index] = nullptr;
 
 	return 1;
 }
@@ -1799,7 +1799,7 @@ static int intLibSoundPlay(char *fileName, int mode) {
 
 	int index;
 	for (index = 0; index < INT_LIB_SOUNDS_CAPACITY; index++) {
-		if (gIntLibSounds[index] == NULL) {
+		if (gIntLibSounds[index] == nullptr) {
 			break;
 		}
 	}
@@ -1808,8 +1808,8 @@ static int intLibSoundPlay(char *fileName, int mode) {
 		return -1;
 	}
 
-	Sound *sound = gIntLibSounds[index] = NULL; // soundAllocate(type, soundFlags); TODO sound
-	if (sound == NULL) {
+	Sound *sound = gIntLibSounds[index] = nullptr; // soundAllocate(type, soundFlags); TODO sound
+	if (sound == nullptr) {
 		return -1;
 	}
 
@@ -1884,7 +1884,7 @@ static int intLibSoundPlay(char *fileName, int mode) {
 err:
 
 	soundDelete(sound);
-	gIntLibSounds[index] = NULL;
+	gIntLibSounds[index] = nullptr;
 	return -1;*/
 }
 
@@ -1900,7 +1900,7 @@ static int intLibSoundPause(int value) {
 
 	int index = value & ~0xA0000000;
 	Sound *sound = gIntLibSounds[index];
-	if (sound == NULL) {
+	if (sound == nullptr) {
 		return 0;
 	}
 /*  TODO sound
@@ -1925,7 +1925,7 @@ static int intLibSoundRewind(int value) {
 
 	int index = value & ~0xA0000000;
 	Sound *sound = gIntLibSounds[index];
-	if (sound == NULL) {
+	if (sound == nullptr) {
 		return 0;
 	}
 /* TODO sound
@@ -1950,7 +1950,7 @@ static int intLibSoundResume(int value) {
 
 	int index = value & ~0xA0000000;
 	Sound *sound = gIntLibSounds[index];
-	if (sound == NULL) {
+	if (sound == nullptr) {
 		return 0;
 	}
 
@@ -2040,16 +2040,16 @@ void intLibExit() {
 	_intExtraClose_();
 
 	for (int index = 0; index < INT_LIB_SOUNDS_CAPACITY; index++) {
-		if (gIntLibSounds[index] != NULL) {
+		if (gIntLibSounds[index] != nullptr) {
 			intLibSoundDelete(index | 0xA0000000);
 		}
 	}
 
 	_nevs_close();
 
-	if (gIntLibProgramDeleteCallbacks != NULL) {
+	if (gIntLibProgramDeleteCallbacks != nullptr) {
 		internal_free_safe(gIntLibProgramDeleteCallbacks, __FILE__, __LINE__); // "..\\int\\INTLIB.C", 1976
-		gIntLibProgramDeleteCallbacks = NULL;
+		gIntLibProgramDeleteCallbacks = nullptr;
 		gIntLibProgramDeleteCallbacksLength = 0;
 	}
 }
@@ -2060,7 +2060,7 @@ static bool intLibDoInput(int key) {
 		return false;
 	}
 
-	if (gIntLibGenericKeyHandlerProgram != NULL) {
+	if (gIntLibGenericKeyHandlerProgram != nullptr) {
 		if (gIntLibGenericKeyHandlerProc != 0) {
 			_executeProc(gIntLibGenericKeyHandlerProgram, gIntLibGenericKeyHandlerProc);
 		}
@@ -2068,7 +2068,7 @@ static bool intLibDoInput(int key) {
 	}
 
 	IntLibKeyHandlerEntry *entry = &(gIntLibKeyHandlerEntries[key]);
-	if (entry->program == NULL) {
+	if (entry->program == nullptr) {
 		return false;
 	}
 
@@ -2176,13 +2176,13 @@ void intLibInit() {
 void intLibRegisterProgramDeleteCallback(IntLibProgramDeleteCallback *callback) {
 	int index;
 	for (index = 0; index < gIntLibProgramDeleteCallbacksLength; index++) {
-		if (gIntLibProgramDeleteCallbacks[index] == NULL) {
+		if (gIntLibProgramDeleteCallbacks[index] == nullptr) {
 			break;
 		}
 	}
 
 	if (index == gIntLibProgramDeleteCallbacksLength) {
-		if (gIntLibProgramDeleteCallbacks != NULL) {
+		if (gIntLibProgramDeleteCallbacks != nullptr) {
 			gIntLibProgramDeleteCallbacks = (IntLibProgramDeleteCallback **)internal_realloc_safe(gIntLibProgramDeleteCallbacks, sizeof(*gIntLibProgramDeleteCallbacks) * (gIntLibProgramDeleteCallbacksLength + 1), __FILE__, __LINE__); // ..\\int\\INTLIB.C, 2110
 		} else {
 			gIntLibProgramDeleteCallbacks = (IntLibProgramDeleteCallback **)internal_malloc_safe(sizeof(*gIntLibProgramDeleteCallbacks), __FILE__, __LINE__); // ..\\int\\INTLIB.C, 2112
@@ -2197,7 +2197,7 @@ void intLibRegisterProgramDeleteCallback(IntLibProgramDeleteCallback *callback) 
 void intLibRemoveProgramReferences(Program *program) {
 	for (int index = 0; index < INT_LIB_KEY_HANDLERS_CAPACITY; index++) {
 		if (program == gIntLibKeyHandlerEntries[index].program) {
-			gIntLibKeyHandlerEntries[index].program = NULL;
+			gIntLibKeyHandlerEntries[index].program = nullptr;
 		}
 	}
 
@@ -2205,7 +2205,7 @@ void intLibRemoveProgramReferences(Program *program) {
 
 	for (int index = 0; index < gIntLibProgramDeleteCallbacksLength; index++) {
 		IntLibProgramDeleteCallback *callback = gIntLibProgramDeleteCallbacks[index];
-		if (callback != NULL) {
+		if (callback != nullptr) {
 			callback(program);
 		}
 	}
