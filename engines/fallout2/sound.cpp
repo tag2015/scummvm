@@ -18,9 +18,13 @@
 #include <SDL.h>
 */
 
+#include "fallout2/fallout2.h"
 #include "fallout2/audio_engine.h"
 #include "fallout2/debug.h"
 #include "fallout2/platform_compat.h"
+
+#include "common/debug.h"
+#include "common/timer.h"
 
 namespace Fallout2 {
 
@@ -63,8 +67,9 @@ static int _soundSetData(Sound *sound, unsigned char *buf, int size);
 static int soundContinue(Sound *sound);
 static int _soundGetVolume(Sound *sound);
 static void soundDeleteInternal(Sound *sound);
-static Uint32 _doTimerEvent(Uint32 interval, void *param);
-static void _removeTimedEvent(SDL_TimerID *timerId);
+static uint32 _doTimerEvent(uint32 interval, void *param);
+// static void _removeTimedEvent(SDL_TimerID *timerId);
+static void _removeTimedEvent(Common::TimerManager *timerId);
 static void _removeFadeSound(FadeSound *fadeSound);
 static void _fadeSounds();
 static int _internalSoundFade(Sound *sound, int duration, int targetVolume, bool pause);
@@ -165,7 +170,11 @@ static bool gSoundInitialized;
 // 0x668174
 static Sound *gSoundListHead;
 
-static SDL_TimerID gFadeSoundsTimerId = 0;
+//static SDL_TimerID gFadeSoundsTimerId = 0;
+static int gFadeSoundsTimerId = 0;
+
+// TODO timer
+// use Common::TimerManager
 
 // 0x4AC6F0
 void *soundMallocProcDefaultImpl(size_t size) {
@@ -191,34 +200,42 @@ void soundSetMemoryProcs(MallocProc *mallocProc, ReallocProc *reallocProc, FreeP
 
 // 0x4AC71C
 static long soundFileSize(int fileHandle) {
-	long pos;
+/*	long pos;    TODO
 	long size;
 
 	pos = compat_tell(fileHandle);
 	size = lseek(fileHandle, 0, SEEK_END);
 	lseek(fileHandle, pos, SEEK_SET);
 
-	return size;
+	return size;*/
+	warning("SOUND: SoundFileSize returning zero");
+	return 0;
 }
 
 // 0x4AC750
 static long soundTellData(int fileHandle) {
-	return compat_tell(fileHandle);
+	warning("SOUND: soundTellData returning zero");
+//	return compat_tell(fileHandle);
+	return 0;
 }
 
 // 0x4AC758
 static int soundWriteData(int fileHandle, const void *buf, unsigned int size) {
-	return write(fileHandle, buf, size);
+	warning("SOUND: soundWriteData doing nothing");
+	return 0;
+//	return write(fileHandle, buf, size);
 }
 
 // 0x4AC760
 static int soundReadData(int fileHandle, void *buf, unsigned int size) {
-	return read(fileHandle, buf, size);
+	warning("SOUND: soundReadData doing nothing");
+	return 0;
+//	return read(fileHandle, buf, size);
 }
 
 // 0x4AC768
 static int soundOpenData(const char *filePath, int *sampleRate) {
-	int flags;
+/*	int flags;
 
 #ifdef _WIN32
 	flags = _O_RDONLY | _O_BINARY;
@@ -226,17 +243,24 @@ static int soundOpenData(const char *filePath, int *sampleRate) {
 	flags = O_RDONLY;
 #endif
 
-	return open(filePath, flags);
+	return open(filePath, flags);*/
+	warning("SOUND: soundOpenData doing nothing");
+	return 0;
 }
 
 // 0x4AC774
 static long soundSeekData(int fileHandle, long offset, int origin) {
-	return lseek(fileHandle, offset, origin);
+//	return lseek(fileHandle, offset, origin);
+
+	warning("SOUND: soundSeekData doing nothing");
+	return 0;
 }
 
 // 0x4AC77C
 static int soundCloseData(int fileHandle) {
-	return close(fileHandle);
+//	return close(fileHandle);
+	warning("SOUND: soundCloseData doing nothing");
+	return 0;
 }
 
 // 0x4AC78C
@@ -458,7 +482,8 @@ void soundExit() {
 	}
 
 	if (gFadeSoundsTimerId != 0) {
-		_removeTimedEvent(&gFadeSoundsTimerId);
+		//  TODO  timer
+//		_removeTimedEvent(&gFadeSoundsTimerId);
 	}
 
 	while (_fadeFreeList != nullptr) {
@@ -1299,7 +1324,7 @@ int _soundSetMasterVolume(int volume) {
 }
 
 // 0x4AE5C8
-Uint32 _doTimerEvent(Uint32 interval, void *param) {
+uint32 _doTimerEvent(uint32 interval, void *param) {
 	void (*fn)();
 
 	if (param != nullptr) {
@@ -1311,11 +1336,13 @@ Uint32 _doTimerEvent(Uint32 interval, void *param) {
 }
 
 // 0x4AE614
-void _removeTimedEvent(SDL_TimerID *timerId) {
-	if (*timerId != 0) {
-		SDL_RemoveTimer(*timerId);
-		*timerId = 0;
-	}
+void _removeTimedEvent(Common::TimerManager *timerId) {
+	/*	if (*timerId != 0) {
+			SDL_RemoveTimer(*timerId);
+			*timerId = 0;
+		}*/
+	if (timerId != nullptr)
+		delete timerId;
 }
 
 // 0x4AE634
@@ -1469,7 +1496,8 @@ void _fadeSounds() {
 
 	if (_fadeHead == nullptr) {
 		// NOTE: Uninline.
-		_removeTimedEvent(&gFadeSoundsTimerId);
+		// TODO timer
+//		_removeTimedEvent(&gFadeSoundsTimerId);
 	}
 }
 
@@ -1555,7 +1583,8 @@ int _internalSoundFade(Sound *sound, int duration, int targetVolume, bool pause)
 		return gSoundLastError;
 	}
 
-	gFadeSoundsTimerId = SDL_AddTimer(40, _doTimerEvent, (void *)_fadeSounds);
+	// TODO timer
+//	gFadeSoundsTimerId = SDL_AddTimer(40, _doTimerEvent, (void *)_fadeSounds);
 	if (gFadeSoundsTimerId == 0) {
 		gSoundLastError = SOUND_UNKNOWN_ERROR;
 		return gSoundLastError;
