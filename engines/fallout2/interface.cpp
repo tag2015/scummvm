@@ -18,7 +18,7 @@
 // #include "fallout2/endgame.h" TODO endgame
 #include "fallout2/game.h"
 #include "fallout2/game_mouse.h"
-// #include "fallout2/game_sound.h" TODO audio
+#include "fallout2/game_sound.h"
 #include "fallout2/geometry.h"
 #include "fallout2/input.h"
 #include "fallout2/item.h"
@@ -364,7 +364,7 @@ int interfaceInit() {
 		return intface_fatal_error(-1);
 	}
 
-//	buttonSetCallbacks(gInventoryButton, _gsound_med_butt_press, _gsound_med_butt_release);  // TODO audio
+	buttonSetCallbacks(gInventoryButton, _gsound_med_butt_press, _gsound_med_butt_release);
 	buttonSetCallbacks(gInventoryButton, nullptr, nullptr);
 
 	fid = buildFid(OBJ_TYPE_INTERFACE, 18, 0, 0, 0);
@@ -385,7 +385,7 @@ int interfaceInit() {
 		return intface_fatal_error(-1);
 	}
 
-//	buttonSetCallbacks(gOptionsButton, _gsound_med_butt_press, _gsound_med_butt_release);  // TODO audio
+	buttonSetCallbacks(gOptionsButton, _gsound_med_butt_press, _gsound_med_butt_release);
 	buttonSetCallbacks(gOptionsButton, nullptr, nullptr);
 
 	fid = buildFid(OBJ_TYPE_INTERFACE, 6, 0, 0, 0);
@@ -413,7 +413,7 @@ int interfaceInit() {
 	}
 
 	buttonSetMask(gSkilldexButton, _skilldexButtonMaskFrmImage.getData());
-//	buttonSetCallbacks(gSkilldexButton, _gsound_med_butt_press, _gsound_med_butt_release); TODO audio
+	buttonSetCallbacks(gSkilldexButton, _gsound_med_butt_press, _gsound_med_butt_release);
 	buttonSetCallbacks(gSkilldexButton, nullptr, nullptr);
 
 	fid = buildFid(OBJ_TYPE_INTERFACE, 13, 0, 0, 0);
@@ -441,7 +441,7 @@ int interfaceInit() {
 	}
 
 	buttonSetMask(gMapButton, _mapButtonMaskFrmImage.getData());
-//	buttonSetCallbacks(gMapButton, _gsound_med_butt_press, _gsound_med_butt_release);  TODO audio
+	buttonSetCallbacks(gMapButton, _gsound_med_butt_press, _gsound_med_butt_release);
 	buttonSetCallbacks(gMapButton, nullptr, nullptr);
 
 	fid = buildFid(OBJ_TYPE_INTERFACE, 59, 0, 0, 0);
@@ -463,7 +463,7 @@ int interfaceInit() {
 	}
 
 	buttonSetMask(gPipboyButton, _mapButtonMaskFrmImage.getData());
-//	buttonSetCallbacks(gPipboyButton, _gsound_med_butt_press, _gsound_med_butt_release); TODO audio
+	buttonSetCallbacks(gPipboyButton, _gsound_med_butt_press, _gsound_med_butt_release);
 	buttonSetCallbacks(gPipboyButton, nullptr, nullptr);
 
 	fid = buildFid(OBJ_TYPE_INTERFACE, 57, 0, 0, 0);
@@ -485,7 +485,7 @@ int interfaceInit() {
 	}
 
 	buttonSetMask(gCharacterButton, _mapButtonMaskFrmImage.getData());
-//	buttonSetCallbacks(gCharacterButton, _gsound_med_butt_press, _gsound_med_butt_release);  TODO audio
+	buttonSetCallbacks(gCharacterButton, _gsound_med_butt_press, _gsound_med_butt_release);
 	buttonSetCallbacks(gCharacterButton, nullptr, nullptr);
 
 	fid = buildFid(OBJ_TYPE_INTERFACE, 32, 0, 0, 0);
@@ -516,7 +516,7 @@ int interfaceInit() {
 	}
 
 	buttonSetRightMouseCallbacks(gSingleAttackButton, -1, KEY_LOWERCASE_N, nullptr, nullptr);
-//	buttonSetCallbacks(gSingleAttackButton, _gsound_lrg_butt_press, _gsound_lrg_butt_release);  TODO audio
+	buttonSetCallbacks(gSingleAttackButton, _gsound_lrg_butt_press, _gsound_lrg_butt_release);
 	buttonSetCallbacks(gSingleAttackButton, nullptr, nullptr);
 
 	fid = buildFid(OBJ_TYPE_INTERFACE, 6, 0, 0, 0);
@@ -545,7 +545,7 @@ int interfaceInit() {
 	}
 
 	buttonSetMask(gChangeHandsButton, _changeHandsButtonMaskFrmImage.getData());
-//	buttonSetCallbacks(gChangeHandsButton, _gsound_med_butt_press, _gsound_med_butt_release); TODO audio
+	buttonSetCallbacks(gChangeHandsButton, _gsound_med_butt_press, _gsound_med_butt_release);
 	buttonSetCallbacks(gChangeHandsButton, nullptr, nullptr);
 
 	fid = buildFid(OBJ_TYPE_INTERFACE, 82, 0, 0, 0);
@@ -1400,7 +1400,7 @@ void interfaceBarEndButtonsShow(bool animated) {
 	}
 
 	int frameCount = artGetFrameCount(art);
-//	soundPlayFile("iciboxx1"); TODO audio
+	soundPlayFile("iciboxx1");
 
 	if (animated) {
 		unsigned int delay = 1000 / artGetFramesPerSecond(art);
@@ -1457,7 +1457,7 @@ void interfaceBarEndButtonsHide(bool animated) {
 
 	endTurnButtonFree();
 	endCombatButtonFree();
-//	soundPlayFile("icibcxx1"); TODO audio
+	soundPlayFile("icibcxx1");
 
 	if (animated) {
 		unsigned int delay = 1000 / artGetFramesPerSecond(art);
@@ -1507,7 +1507,7 @@ void interfaceBarEndButtonsRenderGreenLights() {
 			return;
 		}
 
-//		soundPlayFile("icombat2"); TODO audio
+		soundPlayFile("icombat2");
 		blitBufferToBufferTrans(lightsFrmImage.getData(), 57, 58, 57, gInterfaceWindowBuffer + 38 * gInterfaceBarWidth + 580 + gInterfaceBarContentOffset, gInterfaceBarWidth);
 		windowRefreshRect(gInterfaceBarWindow, &gInterfaceBarEndButtonsRect);
 	}
@@ -1526,7 +1526,7 @@ void interfaceBarEndButtonsRenderRedLights() {
 			return;
 		}
 
-//		soundPlayFile("icombat1"); TODO audio
+		soundPlayFile("icombat1");
 		blitBufferToBufferTrans(lightsFrmImage.getData(), 57, 58, 57, gInterfaceWindowBuffer + 38 * gInterfaceBarWidth + 580 + gInterfaceBarContentOffset, gInterfaceBarWidth);
 		windowRefreshRect(gInterfaceBarWindow, &gInterfaceBarEndButtonsRect);
 	}
@@ -1819,8 +1819,8 @@ static void interfaceBarSwapHandsAnimatePutAwayTakeOutSequence(int previousWeapo
 	animationRegisterSetLightDistance(gDude, 4, 0);
 
 	if (previousWeaponAnimationCode != 0) {
-//		const char *sfx = sfxBuildCharName(gDude, ANIM_PUT_AWAY, CHARACTER_SOUND_EFFECT_UNUSED); TODO audio
-//		animationRegisterPlaySoundEffect(gDude, sfx, 0);
+		const char *sfx = sfxBuildCharName(gDude, ANIM_PUT_AWAY, CHARACTER_SOUND_EFFECT_UNUSED);
+		animationRegisterPlaySoundEffect(gDude, sfx, 0);
 		animationRegisterAnimate(gDude, ANIM_PUT_AWAY, 0);
 	}
 
@@ -1903,7 +1903,7 @@ static int endTurnButtonInit() {
 	}
 
 	_win_register_button_disable(gEndTurnButton, _endTurnButtonNormalFrmImage.getData(), _endTurnButtonNormalFrmImage.getData(), _endTurnButtonNormalFrmImage.getData());
-//	buttonSetCallbacks(gEndTurnButton, _gsound_med_butt_press, _gsound_med_butt_release); TODO audio
+	buttonSetCallbacks(gEndTurnButton, _gsound_med_butt_press, _gsound_med_butt_release);
 	buttonSetCallbacks(gEndTurnButton, nullptr, nullptr);
 
 	return 0;
@@ -1954,7 +1954,7 @@ static int endCombatButtonInit() {
 	}
 
 	_win_register_button_disable(gEndCombatButton, _endCombatButtonNormalFrmImage.getData(), _endCombatButtonNormalFrmImage.getData(), _endCombatButtonNormalFrmImage.getData());
-//	buttonSetCallbacks(gEndCombatButton, _gsound_med_butt_press, _gsound_med_butt_release); TODO audio
+	buttonSetCallbacks(gEndCombatButton, _gsound_med_butt_press, _gsound_med_butt_release);
 	buttonSetCallbacks(gEndCombatButton, nullptr, nullptr);
 
 	return 0;
@@ -2028,8 +2028,8 @@ static int _intface_item_reload() {
 		return -1;
 	}
 
-//	const char *sfx = sfxBuildWeaponName(WEAPON_SOUND_EFFECT_READY, gInterfaceItemStates[gInterfaceCurrentHand].item, HIT_MODE_RIGHT_WEAPON_PRIMARY, nullptr); TODO audio
-//	soundPlayFile(sfx); TODO audio
+	const char *sfx = sfxBuildWeaponName(WEAPON_SOUND_EFFECT_READY, gInterfaceItemStates[gInterfaceCurrentHand].item, HIT_MODE_RIGHT_WEAPON_PRIMARY, nullptr);
+	soundPlayFile(sfx);
 
 	return 0;
 }

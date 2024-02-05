@@ -20,7 +20,7 @@
 #include "fallout2/game.h"
 #include "fallout2/game_mouse.h"
 // #include "fallout2/game_movie.h"  TODO movie
-// #include "fallout2/game_sound.h"  TODO audio
+#include "fallout2/game_sound.h"
 #include "fallout2/input.h"
 #include "fallout2/interface.h"
 #include "fallout2/item.h"
@@ -760,7 +760,7 @@ int mapLoadByName(char *fileName) {
 				// fileClose(stream);
 				delete stream;
 				rc = mapLoadSaved(fileName);
-				// wmMapMusicStart();  TODO audio
+				wmMapMusicStart();
 			}
 		}
 		strncpy(extension, ".MAP", 5);
@@ -816,7 +816,7 @@ int mapLoadById(int map) {
 // 0x482B74
 static int mapLoad(File *stream) {
 	_map_save_in_game(true);
-//	backgroundSoundLoad("wind2", 12, 13, 16); TODO audio
+	backgroundSoundLoad("wind2", 12, 13, 16);
 	isoDisable();
 	_partyMemberPrepLoad();
 	_gmouse_disable_scrolling();
@@ -1473,7 +1473,7 @@ int _map_save_in_game(bool a1) {
 
 		strncpy(gMapHeader.name, name, sizeof(gMapHeader.name) - 1);
 
-		//	automapSaveCurrent();  // TODO automap
+		automapSaveCurrent();
 
 		if (a1) {
 			gMapHeader.name[0] = '\0';
