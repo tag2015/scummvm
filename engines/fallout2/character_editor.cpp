@@ -23,7 +23,7 @@
 #include "fallout2/draw.h"
 #include "fallout2/game.h"
 #include "fallout2/game_mouse.h"
-// #include "fallout2/game_sound.h" TODO audio
+#include "fallout2/game_sound.h"
 #include "fallout2/geometry.h"
 #include "fallout2/graph_lib.h"
 #include "fallout2/input.h"
@@ -842,13 +842,13 @@ int characterEditorShow(bool isCreationMode) {
 
 		if (keyCode == KEY_RETURN || keyCode == KEY_UPPERCASE_D || keyCode == KEY_LOWERCASE_D) {
 			done = true;
-//			soundPlayFile("ib1p1xx1"); TODO audio
+			soundPlayFile("ib1p1xx1");
 		}
 
 		if (done) {
 			if (gCharacterEditorIsCreationMode) {
 				if (gCharacterEditorRemainingCharacterPoints != 0) {
-//					soundPlayFile("iisxxxx1"); TODO audio
+					soundPlayFile("iisxxxx1");
 
 					// You must use all character points
 					messageListItemText = getmsg(&gCharacterEditorMessageList, &gCharacterEditorMessageListItem, 118);
@@ -866,7 +866,7 @@ int characterEditorShow(bool isCreationMode) {
 				}
 
 				if (gCharacterEditorTaggedSkillCount > 0) {
-//					soundPlayFile("iisxxxx1"); TODO audio
+					soundPlayFile("iisxxxx1");
 
 					// You must select all tag skills
 					messageListItemText = getmsg(&gCharacterEditorMessageList, &gCharacterEditorMessageListItem, 142);
@@ -884,7 +884,7 @@ int characterEditorShow(bool isCreationMode) {
 				}
 
 				if (_is_supper_bonus()) {
-//					soundPlayFile("iisxxxx1"); TODO audio
+					soundPlayFile("iisxxxx1");
 
 					// All stats must be between 1 and 10
 					messageListItemText = getmsg(&gCharacterEditorMessageList, &gCharacterEditorMessageListItem, 157);
@@ -902,7 +902,7 @@ int characterEditorShow(bool isCreationMode) {
 				}
 
 				if (compat_stricmp(critterGetName(gDude), "None") == 0) {
-//					soundPlayFile("iisxxxx1");  TODO audio
+					soundPlayFile("iisxxxx1");
 
 					// Warning: You haven't changed your player
 					messageListItemText = getmsg(&gCharacterEditorMessageList, &gCharacterEditorMessageListItem, 160);
@@ -1305,7 +1305,7 @@ static int characterEditorWindowInit() {
 	// SFALL: Custom town reputation.
 	customTownReputationInit();
 
-//	soundContinueAll(); TODO audio
+	soundContinueAll();
 
 	for (i = 0; i < EDITOR_GRAPHIC_COUNT; i++) {
 		fid = buildFid(OBJ_TYPE_INTERFACE, gCharacterEditorFrmIds[i], 0, 0, 0);
@@ -1333,7 +1333,7 @@ static int characterEditorWindowInit() {
 		return -1;
 	}
 
-//	soundContinueAll(); TODO audio
+	soundContinueAll();
 
 	for (i = 0; i < EDITOR_GRAPHIC_COUNT; i++) {
 		if (gCharacterEditorFrmShouldCopy[i]) {
@@ -1557,13 +1557,13 @@ static int characterEditorWindowInit() {
 			_editorFrmImages[EDITOR_GRAPHIC_SLIDER_MINUS_ON].getData(),
 			0,
 			96);
-//		buttonSetCallbacks(gCharacterEditorSliderPlusBtn, _gsound_red_butt_press, nullptr); TODO audio
-//		buttonSetCallbacks(gCharacterEditorSliderMinusBtn, _gsound_red_butt_press, nullptr);
+		buttonSetCallbacks(gCharacterEditorSliderPlusBtn, _gsound_red_butt_press, nullptr);
+		buttonSetCallbacks(gCharacterEditorSliderMinusBtn, _gsound_red_butt_press, nullptr);
 	}
 
 	characterEditorDrawSkills(0);
 	characterEditorDrawCard();
-//	soundContinueAll(); TODO audio
+	soundContinueAll();
 	characterEditorDrawName();
 	characterEditorDrawAge();
 	characterEditorDrawGender();
@@ -1586,7 +1586,7 @@ static int characterEditorWindowInit() {
 			32);
 		if (btn != -1) {
 			buttonSetMask(btn, _editorFrmImages[EDITOR_GRAPHIC_NAME_MASK].getData());
-//			buttonSetCallbacks(btn, _gsound_lrg_butt_press, nullptr); TODO audio
+			buttonSetCallbacks(btn, _gsound_lrg_butt_press, nullptr);
 		}
 
 		x += _editorFrmImages[EDITOR_GRAPHIC_NAME_ON].getWidth();
@@ -1606,7 +1606,7 @@ static int characterEditorWindowInit() {
 			32);
 		if (btn != -1) {
 			buttonSetMask(btn, _editorFrmImages[EDITOR_GRAPHIC_AGE_MASK].getData());
-//			buttonSetCallbacks(btn, _gsound_lrg_butt_press, nullptr); TODO audio
+			buttonSetCallbacks(btn, _gsound_lrg_butt_press, nullptr);
 		}
 
 		x += _editorFrmImages[EDITOR_GRAPHIC_AGE_ON].getWidth();
@@ -1626,7 +1626,7 @@ static int characterEditorWindowInit() {
 			32);
 		if (btn != -1) {
 			buttonSetMask(btn, _editorFrmImages[EDITOR_GRAPHIC_SEX_MASK].getData());
-//			buttonSetCallbacks(btn, _gsound_lrg_butt_press, nullptr); TODO audio
+			buttonSetCallbacks(btn, _gsound_lrg_butt_press, nullptr);
 		}
 
 		y = TAG_SKILLS_BUTTON_Y;
@@ -1747,7 +1747,7 @@ static int characterEditorWindowInit() {
 																  nullptr,
 																  32);
 			if (gCharacterEditorPrimaryStatPlusBtns[i] != -1) {
-//				buttonSetCallbacks(gCharacterEditorPrimaryStatPlusBtns[i], _gsound_red_butt_press, nullptr); TODO audio
+				buttonSetCallbacks(gCharacterEditorPrimaryStatPlusBtns[i], _gsound_red_butt_press, nullptr);
 			}
 
 			gCharacterEditorPrimaryStatMinusBtns[i] = buttonCreate(gCharacterEditorWindow,
@@ -1764,13 +1764,13 @@ static int characterEditorWindowInit() {
 																   nullptr,
 																   32);
 			if (gCharacterEditorPrimaryStatMinusBtns[i] != -1) {
-//				buttonSetCallbacks(gCharacterEditorPrimaryStatMinusBtns[i], _gsound_red_butt_press, nullptr); TODO audio
+				buttonSetCallbacks(gCharacterEditorPrimaryStatMinusBtns[i], _gsound_red_butt_press, nullptr);
 			}
 		}
 	}
 
 	characterEditorRegisterInfoAreas();
-//	soundContinueAll(); TODO audio
+	soundContinueAll();
 
 	btn = buttonCreate(
 		gCharacterEditorWindow,
@@ -1787,7 +1787,7 @@ static int characterEditorWindowInit() {
 		nullptr,
 		BUTTON_FLAG_TRANSPARENT);
 	if (btn != -1) {
-//		buttonSetCallbacks(btn, _gsound_red_butt_press, _gsound_red_butt_release); TODO audio
+		buttonSetCallbacks(btn, _gsound_red_butt_press, _gsound_red_butt_release);
 	}
 
 	btn = buttonCreate(
@@ -1805,7 +1805,7 @@ static int characterEditorWindowInit() {
 		0,
 		BUTTON_FLAG_TRANSPARENT);
 	if (btn != -1) {
-//		buttonSetCallbacks(btn, _gsound_red_butt_press, _gsound_red_butt_release); TODO audio
+		buttonSetCallbacks(btn, _gsound_red_butt_press, _gsound_red_butt_release);
 	}
 
 	btn = buttonCreate(
@@ -1823,7 +1823,7 @@ static int characterEditorWindowInit() {
 		0,
 		BUTTON_FLAG_TRANSPARENT);
 	if (btn != -1) {
-//		buttonSetCallbacks(btn, _gsound_red_butt_press, _gsound_red_butt_release); TODO audio
+		buttonSetCallbacks(btn, _gsound_red_butt_press, _gsound_red_butt_release);
 	}
 
 	windowRefresh(gCharacterEditorWindow);
@@ -1950,7 +1950,7 @@ static int _get_input_str(int win, int cancelKeyCode, char *text, int maxLength,
 		if (keyCode == cancelKeyCode) {
 			rc = 0;
 		} else if (keyCode == KEY_RETURN) {
-//			soundPlayFile("ib1p1xx1"); TODO audio
+			soundPlayFile("ib1p1xx1");
 			rc = 0;
 		} else if (keyCode == KEY_ESCAPE || _game_user_wants_to_quit != 0) {
 			rc = -1;
@@ -3012,7 +3012,7 @@ static void characterEditorDrawSkills(int a1) {
 					_editorFrmImages[EDITOR_GRAPHIC_SLIDER_PLUS_ON].getData(),
 					nullptr,
 					96);
-//				buttonSetCallbacks(gCharacterEditorSliderPlusBtn, _gsound_red_butt_press, nullptr); TODO audio
+				buttonSetCallbacks(gCharacterEditorSliderPlusBtn, _gsound_red_butt_press, nullptr);
 			}
 
 			if (gCharacterEditorSliderMinusBtn == -1) {
@@ -3030,7 +3030,7 @@ static void characterEditorDrawSkills(int a1) {
 					_editorFrmImages[EDITOR_GRAPHIC_SLIDER_MINUS_ON].getData(),
 					nullptr,
 					96);
-//				buttonSetCallbacks(gCharacterEditorSliderMinusBtn, _gsound_red_butt_press, nullptr); TODO audio
+				buttonSetCallbacks(gCharacterEditorSliderMinusBtn, _gsound_red_butt_press, nullptr);
 			}
 		}
 	}
@@ -3232,7 +3232,7 @@ static int characterEditorEditName() {
 							   nullptr,
 							   BUTTON_FLAG_TRANSPARENT);
 	if (doneBtn != -1) {
-//		buttonSetCallbacks(doneBtn, _gsound_red_butt_press, _gsound_red_butt_release); TODO audio
+		buttonSetCallbacks(doneBtn, _gsound_red_butt_press, _gsound_red_butt_release);
 	}
 
 	windowRefresh(win);
@@ -3365,7 +3365,7 @@ static int characterEditorEditAge() {
 						   nullptr,
 						   BUTTON_FLAG_TRANSPARENT);
 	if (doneBtn != -1) {
-//		buttonSetCallbacks(doneBtn, _gsound_red_butt_press, _gsound_red_butt_release); TODO audio
+		buttonSetCallbacks(doneBtn, _gsound_red_butt_press, _gsound_red_butt_release);
 	}
 
 	nextBtn = buttonCreate(win,
@@ -3382,7 +3382,7 @@ static int characterEditorEditAge() {
 						   nullptr,
 						   BUTTON_FLAG_TRANSPARENT);
 	if (nextBtn != -1) {
-//		buttonSetCallbacks(nextBtn, _gsound_med_butt_press, nullptr); TODO audio
+		buttonSetCallbacks(nextBtn, _gsound_med_butt_press, nullptr);
 	}
 
 	prevBtn = buttonCreate(win,
@@ -3399,7 +3399,7 @@ static int characterEditorEditAge() {
 						   nullptr,
 						   BUTTON_FLAG_TRANSPARENT);
 	if (prevBtn != -1) {
-//		buttonSetCallbacks(prevBtn, _gsound_med_butt_press, nullptr); TODO audio
+		buttonSetCallbacks(prevBtn, _gsound_med_butt_press, nullptr);
 	}
 
 	while (true) {
@@ -3414,7 +3414,7 @@ static int characterEditorEditAge() {
 
 		if (keyCode == KEY_RETURN || keyCode == 500) {
 			if (keyCode != 500) {
-//				soundPlayFile("ib1p1xx1"); TODO audio
+				soundPlayFile("ib1p1xx1");
 			}
 
 			windowDestroy(win);
@@ -3591,7 +3591,7 @@ static void characterEditorEditGender() {
 							   nullptr,
 							   BUTTON_FLAG_TRANSPARENT);
 	if (doneBtn != -1) {
-//		buttonSetCallbacks(doneBtn, _gsound_red_butt_press, _gsound_red_butt_release); TODO audio
+		buttonSetCallbacks(doneBtn, _gsound_red_butt_press, _gsound_red_butt_release);
 	}
 
 	int btns[2];
@@ -3609,7 +3609,7 @@ static void characterEditorEditGender() {
 						   nullptr,
 						   BUTTON_FLAG_TRANSPARENT | BUTTON_FLAG_0x04 | BUTTON_FLAG_0x02 | BUTTON_FLAG_0x01);
 	if (btns[0] != -1) {
-//		buttonSetCallbacks(doneBtn, _gsound_red_butt_press, nullptr); TODO audio
+		buttonSetCallbacks(doneBtn, _gsound_red_butt_press, nullptr);
 	}
 
 	btns[1] = buttonCreate(win,
@@ -3627,7 +3627,7 @@ static void characterEditorEditGender() {
 						   BUTTON_FLAG_TRANSPARENT | BUTTON_FLAG_0x04 | BUTTON_FLAG_0x02 | BUTTON_FLAG_0x01);
 	if (btns[1] != -1) {
 		_win_group_radio_buttons(2, btns);
-//		buttonSetCallbacks(doneBtn, _gsound_red_butt_press, nullptr); TODO audio
+		buttonSetCallbacks(doneBtn, _gsound_red_butt_press, nullptr);
 	}
 
 	int savedGender = critterGetStat(gDude, STAT_GENDER);
@@ -3642,7 +3642,7 @@ static void characterEditorEditGender() {
 
 		if (eventCode == KEY_RETURN || eventCode == 500) {
 			if (eventCode == KEY_RETURN) {
-//				soundPlayFile("ib1p1xx1"); TODO audio
+				soundPlayFile("ib1p1xx1");
 			}
 			break;
 		}
@@ -3841,7 +3841,7 @@ static int characterEditorShowOptions() {
 
 				int btn = buttonCreate(win, 13, y, width, height, -1, -1, -1, 500 + index, up[index], down[index], nullptr, BUTTON_FLAG_TRANSPARENT);
 				if (btn != -1) {
-//					buttonSetCallbacks(btn, _gsound_lrg_butt_press, nullptr);  TODO audio
+					buttonSetCallbacks(btn, _gsound_lrg_butt_press, nullptr);
 				}
 			} while (0);
 
@@ -3876,7 +3876,7 @@ static int characterEditorShowOptions() {
 			} else if (keyCode == KEY_RETURN || keyCode == KEY_UPPERCASE_D || keyCode == KEY_LOWERCASE_D) {
 				// DONE
 				rc = 2;
-//				soundPlayFile("ib1p1xx1"); TODO audio
+				soundPlayFile("ib1p1xx1");
 			} else if (keyCode == KEY_ESCAPE) {
 				rc = 2;
 			} else if (keyCode == 503 || keyCode == KEY_UPPERCASE_E || keyCode == KEY_LOWERCASE_E) {
@@ -3975,7 +3975,7 @@ static int characterEditorShowOptions() {
 										 getmsg(&gCharacterEditorMessageList, &gCharacterEditorMessageListItem, 607));
 								showDialogBox(string4, nullptr, 0, 169, 126, _colorTable[992], nullptr, _colorTable[992], 0);
 							} else {
-//								soundPlayFile("iisxxxx1"); TODO audio
+								soundPlayFile("iisxxxx1");
 
 								snprintf(string4, sizeof(string4),
 										 "%s%s%s",
@@ -3989,7 +3989,7 @@ static int characterEditorShowOptions() {
 
 					fileNameListFree(&fileList, 0);
 				} else {
-//					soundPlayFile("iisxxxx1"); TODO audio
+					soundPlayFile("iisxxxx1");
 
 					strncpy(string4, getmsg(&gCharacterEditorMessageList, &gCharacterEditorMessageListItem, 615), sizeof(string4) - 1);
 					showDialogBox(string4, nullptr, 0, 169, 126, _colorTable[32328], nullptr, _colorTable[32328], 0);
@@ -4074,7 +4074,7 @@ static int characterEditorShowOptions() {
 							characterEditorRestorePlayer();
 							gCharacterEditorRemainingCharacterPoints = oldRemainingCharacterPoints;
 							critterAdjustHitPoints(gDude, 1000);
-//							soundPlayFile("iisxxxx1"); TODO audio
+							soundPlayFile("iisxxxx1");
 
 							strncpy(string4, getmsg(&gCharacterEditorMessageList, &gCharacterEditorMessageListItem, 612), sizeof(string4) - 1);
 							strcat_s(string4, sizeof(string4), string3);
@@ -4092,7 +4092,7 @@ static int characterEditorShowOptions() {
 
 					fileNameListFree(&fileNameList, 0);
 				} else {
-//					soundPlayFile("iisxxxx1"); TODO audio
+					soundPlayFile("iisxxxx1");
 
 					// Error reading file list!
 					strncpy(string4, getmsg(&gCharacterEditorMessageList, &gCharacterEditorMessageListItem, 615), sizeof(string4) - 1);
@@ -4150,7 +4150,7 @@ static int characterEditorShowOptions() {
 							strcat_s(string4, sizeof(string4), /*string1*/ const_cast<char *>(gcdFileName.c_str()));
 
 							if (gcdSave(string4) != 0) {
-//								soundPlayFile("iisxxxx1"); TODO audio
+								soundPlayFile("iisxxxx1");
 								snprintf(string4, sizeof(string4), "%s%s!",
 										 compat_strupr(/*string1*/ const_cast<char *>(gcdFileName.c_str())),
 										 getmsg(&gCharacterEditorMessageList, &gCharacterEditorMessageListItem, 611));
@@ -4168,7 +4168,7 @@ static int characterEditorShowOptions() {
 
 					fileNameListFree(&fileNameList, 0);
 				} else {
-//					soundPlayFile("iisxxxx1"); TODO audio
+					soundPlayFile("iisxxxx1");
 
 					// Error reading file list!
 					char *msg = getmsg(&gCharacterEditorMessageList, &gCharacterEditorMessageListItem, 615);
@@ -4203,7 +4203,7 @@ static int characterEditorShowOptions() {
 	char **fileNames;
 	int filesCount = 1; // fileNameListInit(pattern, &fileNames, 0, 0);
 	if (filesCount == -1) {
-//		soundPlayFile("iisxxxx1"); TODO audio
+		soundPlayFile("iisxxxx1");
 
 		// Error reading file list!
 		strncpy(pattern, getmsg(&gCharacterEditorMessageList, &gCharacterEditorMessageListItem, 615), sizeof(pattern) - 1);
@@ -4256,7 +4256,7 @@ static int characterEditorShowOptions() {
 			strncpy(title, /*fileName*/ const_cast<char *>(txtFileName.c_str()), sizeof(title) - 1);
 
 			if (characterPrintToFile(txtFileName.c_str()) != 0) {
-//				soundPlayFile("iisxxxx1"); TODO audio
+				soundPlayFile("iisxxxx1");
 
 				snprintf(title, sizeof(title),
 						 "%s%s%s",
@@ -5066,7 +5066,7 @@ static int characterEditorDrawCardWithOptions(int graphicId, const char *name, c
 
 	if (graphicId != gCharacterEditorCardFrmId || strcmp(name, gCharacterEditorCardTitle) != 0) {
 		if (gCharacterEditorCardDrawn) {
-//			soundPlayFile("isdxxxx1"); TODO audio
+			soundPlayFile("isdxxxx1");
 		}
 	}
 
@@ -5080,7 +5080,7 @@ static int characterEditorDrawCardWithOptions(int graphicId, const char *name, c
 // 0x43AE8
 static void characterEditorHandleFolderButtonPressed() {
 	mouseGetPositionInWindow(gCharacterEditorWindow, &gCharacterEditorMouseX, &gCharacterEditorMouseY);
-//	soundPlayFile("ib3p1xx1"); TODO audio
+	soundPlayFile("ib3p1xx1");
 
 	if (gCharacterEditorMouseX >= 208) {
 		characterEditorSelectedItem = 41;
@@ -5277,7 +5277,7 @@ static void characterEditorHandleAdjustSkillButtonPressed(int keyCode) {
 			if (keyCode == 521) {
 				if (pcGetStat(PC_STAT_UNSPENT_SKILL_POINTS) > 0) {
 					if (skillAdd(gDude, gCharacterEditorCurrentSkill) == -3) {
-//						soundPlayFile("iisxxxx1"); TODO audio
+						soundPlayFile("iisxxxx1");
 
 						snprintf(title, sizeof(title), "%s:", skillGetName(gCharacterEditorCurrentSkill));
 						// At maximum level.
@@ -5288,7 +5288,7 @@ static void characterEditorHandleAdjustSkillButtonPressed(int keyCode) {
 						rc = -1;
 					}
 				} else {
-//					soundPlayFile("iisxxxx1");  TODO audio
+					soundPlayFile("iisxxxx1");
 
 					// Not enough skill points available.
 					strncpy(title, getmsg(&gCharacterEditorMessageList, &gCharacterEditorMessageListItem, 136), sizeof(title) - 1);
@@ -5305,7 +5305,7 @@ static void characterEditorHandleAdjustSkillButtonPressed(int keyCode) {
 				}
 
 				if (rc == 0) {
-//					soundPlayFile("iisxxxx1"); TODO audio
+					soundPlayFile("iisxxxx1");
 
 					snprintf(title, sizeof(title), "%s:", skillGetName(gCharacterEditorCurrentSkill));
 					// At minimum level.
@@ -5392,7 +5392,7 @@ static void characterEditorToggleTaggedSkill(int skill) {
 			}
 			gCharacterEditorTempTaggedSkills[insertionIndex] = skill;
 		} else {
-//			soundPlayFile("iisxxxx1"); TODO audio
+			soundPlayFile("iisxxxx1");
 
 			char line1[128];
 			strncpy(line1, getmsg(&gCharacterEditorMessageList, &gCharacterEditorMessageListItem, 140), sizeof(line1) - 1);
@@ -5515,7 +5515,7 @@ static void characterEditorToggleOptionalTrait(int trait) {
 		}
 	} else {
 		if (gCharacterEditorTempTraitCount == 0) {
-//			soundPlayFile("iisxxxx1"); TODO audio
+			soundPlayFile("iisxxxx1");
 
 			char line1[128];
 			strncpy(line1, getmsg(&gCharacterEditorMessageList, &gCharacterEditorMessageListItem, 148), sizeof(line1) - 1);
@@ -5892,7 +5892,7 @@ static int perkDialogShow() {
 					   nullptr,
 					   BUTTON_FLAG_TRANSPARENT);
 	if (btn != -1) {
-//		buttonSetCallbacks(btn, _gsound_red_butt_press, _gsound_red_butt_release); TODO audio
+		buttonSetCallbacks(btn, _gsound_red_butt_press, _gsound_red_butt_release);
 	}
 
 	btn = buttonCreate(gPerkDialogWindow,
@@ -5909,7 +5909,7 @@ static int perkDialogShow() {
 					   nullptr,
 					   BUTTON_FLAG_TRANSPARENT);
 	if (btn != -1) {
-//		buttonSetCallbacks(btn, _gsound_red_butt_press, _gsound_red_butt_release); TODO audio
+		buttonSetCallbacks(btn, _gsound_red_butt_press, _gsound_red_butt_release);
 	}
 
 	btn = buttonCreate(gPerkDialogWindow,
@@ -5926,7 +5926,7 @@ static int perkDialogShow() {
 					   nullptr,
 					   BUTTON_FLAG_TRANSPARENT);
 	if (btn != -1) {
-//		buttonSetCallbacks(btn, _gsound_red_butt_press, nullptr); TODO audio
+		buttonSetCallbacks(btn, _gsound_red_butt_press, nullptr);
 	}
 
 	btn = buttonCreate(gPerkDialogWindow,
@@ -5943,7 +5943,7 @@ static int perkDialogShow() {
 					   nullptr,
 					   BUTTON_FLAG_TRANSPARENT);
 	if (btn != -1) {
-//		buttonSetCallbacks(btn, _gsound_red_butt_press, nullptr); TODO audio
+		buttonSetCallbacks(btn, _gsound_red_butt_press, nullptr);
 	}
 
 	buttonCreate(gPerkDialogWindow,
@@ -6064,7 +6064,7 @@ static int perkDialogHandleInput(int count, void (*refreshProc)()) {
 		if (keyCode == 500) {
 			rc = 1;
 		} else if (keyCode == KEY_RETURN) {
-//			soundPlayFile("ib1p1xx1"); TODO audio
+			soundPlayFile("ib1p1xx1");
 			rc = 1;
 		} else if (keyCode == 501) {
 			mouseGetPositionInWindow(gPerkDialogWindow, &gCharacterEditorMouseX, &gCharacterEditorMouseY);
@@ -6077,7 +6077,7 @@ static int perkDialogHandleInput(int count, void (*refreshProc)()) {
 			}
 
 			if (gPerkDialogCurrentLine == gPerkDialogPreviousCurrentLine) {
-//				soundPlayFile("ib1p1xx1"); TODO audio
+				soundPlayFile("ib1p1xx1");
 				rc = 1;
 			}
 			gPerkDialogPreviousCurrentLine = gPerkDialogCurrentLine;
@@ -6753,7 +6753,7 @@ static int perkDialogDrawCard(int frmId, const char *name, const char *rank, cha
 
 	if (frmId != gPerkDialogCardFrmId || strcmp(gPerkDialogCardTitle, name) != 0) {
 		if (gPerkDialogCardDrawn) {
-//			soundPlayFile("isdxxxx1"); TODO audio
+			soundPlayFile("isdxxxx1");
 		}
 	}
 
@@ -6818,7 +6818,7 @@ static int characterEditorFolderViewInit() {
 			return -1;
 		}
 
-//		buttonSetCallbacks(gCharacterEditorFolderViewScrollUpBtn, _gsound_red_butt_press, nullptr); TODO audio
+		buttonSetCallbacks(gCharacterEditorFolderViewScrollUpBtn, _gsound_red_butt_press, nullptr);
 	}
 
 	if (gCharacterEditorFolderViewScrollDownBtn == -1) {
@@ -6840,7 +6840,7 @@ static int characterEditorFolderViewInit() {
 			return -1;
 		}
 
-//		buttonSetCallbacks(gCharacterEditorFolderViewScrollDownBtn, _gsound_red_butt_press, nullptr); TODO audio
+		buttonSetCallbacks(gCharacterEditorFolderViewScrollDownBtn, _gsound_red_butt_press, nullptr);
 	}
 
 	return 0;
