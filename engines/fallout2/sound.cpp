@@ -1,5 +1,6 @@
-#include "sound.h"
+#include "fallout2/sound.h"
 
+/*
 #include <fcntl.h>
 #include <limits.h>
 #include <math.h>
@@ -15,12 +16,13 @@
 #include <algorithm>
 
 #include <SDL.h>
+*/
 
-#include "audio_engine.h"
-#include "debug.h"
-#include "platform_compat.h"
+#include "fallout2/audio_engine.h"
+#include "fallout2/debug.h"
+#include "fallout2/platform_compat.h"
 
-namespace fallout {
+namespace Fallout2 {
 
 typedef enum SoundStatusFlags {
 	SOUND_STATUS_DONE = 0x01,
@@ -29,58 +31,58 @@ typedef enum SoundStatusFlags {
 	SOUND_STATUS_IS_PAUSED = 0x08,
 } SoundStatusFlags;
 
-typedef char*(SoundFileNameMangler)(char*);
+typedef char *(SoundFileNameMangler)(char *);
 
 typedef struct FadeSound {
-	Sound* sound;
+	Sound *sound;
 	int deltaVolume;
 	int targetVolume;
 	int initialVolume;
 	int currentVolume;
 	int pause;
-	struct FadeSound* prev;
-	struct FadeSound* next;
+	struct FadeSound *prev;
+	struct FadeSound *next;
 } FadeSound;
 
-static void* soundMallocProcDefaultImpl(size_t size);
-static void* soundReallocProcDefaultImpl(void* ptr, size_t size);
-static void soundFreeProcDefaultImpl(void* ptr);
+static void *soundMallocProcDefaultImpl(size_t size);
+static void *soundReallocProcDefaultImpl(void *ptr, size_t size);
+static void soundFreeProcDefaultImpl(void *ptr);
 static long soundFileSize(int fileHandle);
 static long soundTellData(int fileHandle);
-static int soundWriteData(int fileHandle, const void* buf, unsigned int size);
-static int soundReadData(int fileHandle, void* buf, unsigned int size);
-static int soundOpenData(const char* filePath, int* sampleRate);
+static int soundWriteData(int fileHandle, const void *buf, unsigned int size);
+static int soundReadData(int fileHandle, void *buf, unsigned int size);
+static int soundOpenData(const char *filePath, int *sampleRate);
 static long soundSeekData(int fileHandle, long offset, int origin);
 static int soundCloseData(int fileHandle);
-static char* soundFileManglerDefaultImpl(char* fname);
-static void _refreshSoundBuffers(Sound* sound);
-static int _preloadBuffers(Sound* sound);
-static int _soundRewind(Sound* sound);
-static int _addSoundData(Sound* sound, unsigned char* buf, int size);
-static int _soundSetData(Sound* sound, unsigned char* buf, int size);
-static int soundContinue(Sound* sound);
-static int _soundGetVolume(Sound* sound);
-static void soundDeleteInternal(Sound* sound);
-static Uint32 _doTimerEvent(Uint32 interval, void* param);
-static void _removeTimedEvent(SDL_TimerID* timerId);
-static void _removeFadeSound(FadeSound* fadeSound);
+static char *soundFileManglerDefaultImpl(char *fname);
+static void _refreshSoundBuffers(Sound *sound);
+static int _preloadBuffers(Sound *sound);
+static int _soundRewind(Sound *sound);
+static int _addSoundData(Sound *sound, unsigned char *buf, int size);
+static int _soundSetData(Sound *sound, unsigned char *buf, int size);
+static int soundContinue(Sound *sound);
+static int _soundGetVolume(Sound *sound);
+static void soundDeleteInternal(Sound *sound);
+static Uint32 _doTimerEvent(Uint32 interval, void *param);
+static void _removeTimedEvent(SDL_TimerID *timerId);
+static void _removeFadeSound(FadeSound *fadeSound);
 static void _fadeSounds();
-static int _internalSoundFade(Sound* sound, int duration, int targetVolume, bool pause);
+static int _internalSoundFade(Sound *sound, int duration, int targetVolume, bool pause);
 
 // 0x51D478
-static FadeSound* _fadeHead = nullptr;
+static FadeSound *_fadeHead = nullptr;
 
 // 0x51D47C
-static FadeSound* _fadeFreeList = nullptr;
+static FadeSound *_fadeFreeList = nullptr;
 
 // 0x51D488
-static MallocProc* gSoundMallocProc = soundMallocProcDefaultImpl;
+static MallocProc *gSoundMallocProc = soundMallocProcDefaultImpl;
 
 // 0x51D48C
-static ReallocProc* gSoundReallocProc = soundReallocProcDefaultImpl;
+static ReallocProc *gSoundReallocProc = soundReallocProcDefaultImpl;
 
 // 0x51D490
-static FreeProc* gSoundFreeProc = soundFreeProcDefaultImpl;
+static FreeProc *gSoundFreeProc = soundFreeProcDefaultImpl;
 
 // 0x51D494
 static SoundFileIO gSoundDefaultFileIO = {
@@ -95,10 +97,10 @@ static SoundFileIO gSoundDefaultFileIO = {
 };
 
 // 0x51D4B4
-static SoundFileNameMangler* gSoundFileNameMangler = soundFileManglerDefaultImpl;
+static SoundFileNameMangler *gSoundFileNameMangler = soundFileManglerDefaultImpl;
 
 // 0x51D4B8
-static const char* gSoundErrorDescriptions[SOUND_ERR_COUNT] = {
+static const char *gSoundErrorDescriptions[SOUND_ERR_COUNT] = {
 	"sound.c: No error",
 	"sound.c: SOS driver not loaded",
 	"sound.c: SOS invalid pointer",
@@ -161,27 +163,27 @@ static int _numBuffers;
 static bool gSoundInitialized;
 
 // 0x668174
-static Sound* gSoundListHead;
+static Sound *gSoundListHead;
 
 static SDL_TimerID gFadeSoundsTimerId = 0;
 
 // 0x4AC6F0
-void* soundMallocProcDefaultImpl(size_t size) {
+void *soundMallocProcDefaultImpl(size_t size) {
 	return malloc(size);
 }
 
 // 0x4AC6F8
-void* soundReallocProcDefaultImpl(void* ptr, size_t size) {
+void *soundReallocProcDefaultImpl(void *ptr, size_t size) {
 	return realloc(ptr, size);
 }
 
 // 0x4AC700
-void soundFreeProcDefaultImpl(void* ptr) {
+void soundFreeProcDefaultImpl(void *ptr) {
 	free(ptr);
 }
 
 // 0x4AC708
-void soundSetMemoryProcs(MallocProc* mallocProc, ReallocProc* reallocProc, FreeProc* freeProc) {
+void soundSetMemoryProcs(MallocProc *mallocProc, ReallocProc *reallocProc, FreeProc *freeProc) {
 	gSoundMallocProc = mallocProc;
 	gSoundReallocProc = reallocProc;
 	gSoundFreeProc = freeProc;
@@ -205,17 +207,17 @@ static long soundTellData(int fileHandle) {
 }
 
 // 0x4AC758
-static int soundWriteData(int fileHandle, const void* buf, unsigned int size) {
+static int soundWriteData(int fileHandle, const void *buf, unsigned int size) {
 	return write(fileHandle, buf, size);
 }
 
 // 0x4AC760
-static int soundReadData(int fileHandle, void* buf, unsigned int size) {
+static int soundReadData(int fileHandle, void *buf, unsigned int size) {
 	return read(fileHandle, buf, size);
 }
 
 // 0x4AC768
-static int soundOpenData(const char* filePath, int* sampleRate) {
+static int soundOpenData(const char *filePath, int *sampleRate) {
 	int flags;
 
 #ifdef _WIN32
@@ -238,12 +240,12 @@ static int soundCloseData(int fileHandle) {
 }
 
 // 0x4AC78C
-char* soundFileManglerDefaultImpl(char* fname) {
+char *soundFileManglerDefaultImpl(char *fname) {
 	return fname;
 }
 
 // 0x4AC790
-const char* soundGetErrorDescription(int err) {
+const char *soundGetErrorDescription(int err) {
 	if (err == -1) {
 		err = gSoundLastError;
 	}
@@ -256,7 +258,7 @@ const char* soundGetErrorDescription(int err) {
 }
 
 // 0x4AC7B0
-void _refreshSoundBuffers(Sound* sound) {
+void _refreshSoundBuffers(Sound *sound) {
 	if ((sound->soundFlags & SOUND_FLAG_0x80) != 0) {
 		return;
 	}
@@ -315,8 +317,8 @@ void _refreshSoundBuffers(Sound* sound) {
 		return;
 	}
 
-	void* audioPtr1;
-	void* audioPtr2;
+	void *audioPtr1;
+	void *audioPtr2;
 	unsigned int audioBytes1;
 	unsigned int audioBytes2;
 	hr = audioEngineSoundBufferLock(sound->soundBuffer, sound->dataSize * sound->lastUpdate, sound->dataSize * v53, &audioPtr1, &audioBytes1, &audioPtr2, &audioBytes2, 0);
@@ -334,7 +336,7 @@ void _refreshSoundBuffers(Sound* sound) {
 			return;
 		}
 	}
-	unsigned char* audioPtr = (unsigned char*)audioPtr1;
+	unsigned char *audioPtr = (unsigned char *)audioPtr1;
 	int audioBytes = audioBytes1;
 	while (--v53 != -1) {
 		int bytesRead;
@@ -409,7 +411,7 @@ void _refreshSoundBuffers(Sound* sound) {
 
 			if (audioPtr2 != nullptr) {
 				memcpy(audioPtr2, sound->data + audioBytes, bytesRead - audioBytes);
-				audioPtr = (unsigned char*)audioPtr2 + bytesRead - audioBytes;
+				audioPtr = (unsigned char *)audioPtr2 + bytesRead - audioBytes;
 				audioBytes = audioBytes2 - bytesRead;
 			} else {
 				debugPrint("Hm, no second write pointer, but buffer not big enough, this shouldn't happen\n");
@@ -450,7 +452,7 @@ int soundInit(int a1, int numBuffers, int a3, int dataSize, int rate) {
 // 0x4AD04C
 void soundExit() {
 	while (gSoundListHead != nullptr) {
-		Sound* next = gSoundListHead->next;
+		Sound *next = gSoundListHead->next;
 		soundDelete(gSoundListHead);
 		gSoundListHead = next;
 	}
@@ -460,7 +462,7 @@ void soundExit() {
 	}
 
 	while (_fadeFreeList != nullptr) {
-		FadeSound* next = _fadeFreeList->next;
+		FadeSound *next = _fadeFreeList->next;
 		gSoundFreeProc(_fadeFreeList);
 		_fadeFreeList = next;
 	}
@@ -472,13 +474,13 @@ void soundExit() {
 }
 
 // 0x4AD0FC
-Sound* soundAllocate(int type, int soundFlags) {
+Sound *soundAllocate(int type, int soundFlags) {
 	if (!gSoundInitialized) {
 		gSoundLastError = SOUND_NOT_INITIALIZED;
 		return nullptr;
 	}
 
-	Sound* sound = (Sound*)gSoundMallocProc(sizeof(*sound));
+	Sound *sound = (Sound *)gSoundMallocProc(sizeof(*sound));
 	memset(sound, 0, sizeof(*sound));
 
 	memcpy(&(sound->io), &gSoundDefaultFileIO, sizeof(gSoundDefaultFileIO));
@@ -522,12 +524,12 @@ Sound* soundAllocate(int type, int soundFlags) {
 }
 
 // 0x4AD308
-int _preloadBuffers(Sound* sound) {
-	unsigned char* buf;
+int _preloadBuffers(Sound *sound) {
+	unsigned char *buf;
 	int bytes_read;
 	int result;
 	int v15;
-	unsigned char* v14;
+	unsigned char *v14;
 	int size;
 
 	size = sound->io.filelength(sound->io.fd);
@@ -550,7 +552,7 @@ int _preloadBuffers(Sound* sound) {
 		sound->type |= SOUND_TYPE_MEMORY;
 	}
 
-	buf = (unsigned char*)gSoundMallocProc(size);
+	buf = (unsigned char *)gSoundMallocProc(size);
 	bytes_read = sound->io.read(sound->io.fd, buf, size);
 	if (bytes_read != size) {
 		if ((sound->soundFlags & SOUND_LOOPING) == 0 || (sound->soundFlags & SOUND_FLAG_0x100) != 0) {
@@ -578,7 +580,7 @@ int _preloadBuffers(Sound* sound) {
 		sound->io.fd = -1;
 	} else {
 		if (sound->data == nullptr) {
-			sound->data = (unsigned char*)gSoundMallocProc(sound->dataSize);
+			sound->data = (unsigned char *)gSoundMallocProc(sound->dataSize);
 		}
 	}
 
@@ -586,7 +588,7 @@ int _preloadBuffers(Sound* sound) {
 }
 
 // 0x4AD498
-int soundLoad(Sound* sound, char* filePath) {
+int soundLoad(Sound *sound, char *filePath) {
 	if (!gSoundInitialized) {
 		gSoundLastError = SOUND_NOT_INITIALIZED;
 		return gSoundLastError;
@@ -607,7 +609,7 @@ int soundLoad(Sound* sound, char* filePath) {
 }
 
 // 0x4AD504
-int _soundRewind(Sound* sound) {
+int _soundRewind(Sound *sound) {
 	bool hr;
 
 	if (!gSoundInitialized) {
@@ -644,11 +646,11 @@ int _soundRewind(Sound* sound) {
 }
 
 // 0x4AD5C8
-int _addSoundData(Sound* sound, unsigned char* buf, int size) {
+int _addSoundData(Sound *sound, unsigned char *buf, int size) {
 	bool hr;
-	void* audioPtr1;
+	void *audioPtr1;
 	unsigned int audioBytes1;
-	void* audioPtr2;
+	void *audioPtr2;
 	unsigned int audioBytes2;
 
 	hr = audioEngineSoundBufferLock(sound->soundBuffer, 0, size, &audioPtr1, &audioBytes1, &audioPtr2, &audioBytes2, AUDIO_ENGINE_SOUND_BUFFER_LOCK_FROM_WRITE_POS);
@@ -674,7 +676,7 @@ int _addSoundData(Sound* sound, unsigned char* buf, int size) {
 }
 
 // 0x4AD6C0
-int _soundSetData(Sound* sound, unsigned char* buf, int size) {
+int _soundSetData(Sound *sound, unsigned char *buf, int size) {
 	if (!gSoundInitialized) {
 		gSoundLastError = SOUND_NOT_INITIALIZED;
 		return gSoundLastError;
@@ -697,7 +699,7 @@ int _soundSetData(Sound* sound, unsigned char* buf, int size) {
 }
 
 // 0x4AD73C
-int soundPlay(Sound* sound) {
+int soundPlay(Sound *sound) {
 	bool hr;
 	unsigned int readPos;
 	unsigned int writePos;
@@ -737,7 +739,7 @@ int soundPlay(Sound* sound) {
 }
 
 // 0x4AD828
-int soundStop(Sound* sound) {
+int soundStop(Sound *sound) {
 	bool hr;
 
 	if (!gSoundInitialized) {
@@ -769,7 +771,7 @@ int soundStop(Sound* sound) {
 }
 
 // 0x4AD8DC
-int soundDelete(Sound* sample) {
+int soundDelete(Sound *sample) {
 	if (!gSoundInitialized) {
 		gSoundLastError = SOUND_NOT_INITIALIZED;
 		return gSoundLastError;
@@ -792,7 +794,7 @@ int soundDelete(Sound* sample) {
 }
 
 // 0x4AD948
-int soundContinue(Sound* sound) {
+int soundContinue(Sound *sound) {
 	bool hr;
 	unsigned int status;
 
@@ -865,7 +867,7 @@ int soundContinue(Sound* sound) {
 }
 
 // 0x4ADA84
-bool soundIsPlaying(Sound* sound) {
+bool soundIsPlaying(Sound *sound) {
 	if (!gSoundInitialized) {
 		gSoundLastError = SOUND_NOT_INITIALIZED;
 		return false;
@@ -880,7 +882,7 @@ bool soundIsPlaying(Sound* sound) {
 }
 
 // 0x4ADAC4
-bool _soundDone(Sound* sound) {
+bool _soundDone(Sound *sound) {
 	if (!gSoundInitialized) {
 		gSoundLastError = SOUND_NOT_INITIALIZED;
 		return false;
@@ -895,7 +897,7 @@ bool _soundDone(Sound* sound) {
 }
 
 // 0x4ADB44
-bool soundIsPaused(Sound* sound) {
+bool soundIsPaused(Sound *sound) {
 	if (!gSoundInitialized) {
 		gSoundLastError = SOUND_NOT_INITIALIZED;
 		return false;
@@ -910,7 +912,7 @@ bool soundIsPaused(Sound* sound) {
 }
 
 // 0x4ADBC4
-int _soundType(Sound* sound, int type) {
+int _soundType(Sound *sound, int type) {
 	if (!gSoundInitialized) {
 		gSoundLastError = SOUND_NOT_INITIALIZED;
 		return 0;
@@ -925,7 +927,7 @@ int _soundType(Sound* sound, int type) {
 }
 
 // 0x4ADC04
-int soundGetDuration(Sound* sound) {
+int soundGetDuration(Sound *sound) {
 	if (!gSoundInitialized) {
 		gSoundLastError = SOUND_NOT_INITIALIZED;
 		return gSoundLastError;
@@ -948,7 +950,7 @@ int soundGetDuration(Sound* sound) {
 }
 
 // 0x4ADD00
-int soundSetLooping(Sound* sound, int loops) {
+int soundSetLooping(Sound *sound, int loops) {
 	if (!gSoundInitialized) {
 		gSoundLastError = SOUND_NOT_INITIALIZED;
 		return gSoundLastError;
@@ -988,7 +990,7 @@ int _soundVolumeHMItoDirectSound(int volume) {
 }
 
 // 0x4ADE0C
-int soundSetVolume(Sound* sound, int volume) {
+int soundSetVolume(Sound *sound, int volume) {
 	int normalizedVolume;
 	bool hr;
 
@@ -1022,7 +1024,7 @@ int soundSetVolume(Sound* sound, int volume) {
 }
 
 // 0x4ADE80
-int _soundGetVolume(Sound* sound) {
+int _soundGetVolume(Sound *sound) {
 	if (!_deviceInit) {
 		gSoundLastError = SOUND_NOT_INITIALIZED;
 		return gSoundLastError;
@@ -1037,7 +1039,7 @@ int _soundGetVolume(Sound* sound) {
 }
 
 // 0x4ADFF0
-int soundSetCallback(Sound* sound, SoundCallback* callback, void* userData) {
+int soundSetCallback(Sound *sound, SoundCallback *callback, void *userData) {
 	if (!gSoundInitialized) {
 		gSoundLastError = SOUND_NOT_INITIALIZED;
 		return gSoundLastError;
@@ -1056,7 +1058,7 @@ int soundSetCallback(Sound* sound, SoundCallback* callback, void* userData) {
 }
 
 // 0x4AE02C
-int soundSetChannels(Sound* sound, int channels) {
+int soundSetChannels(Sound *sound, int channels) {
 	if (!gSoundInitialized) {
 		gSoundLastError = SOUND_NOT_INITIALIZED;
 		return gSoundLastError;
@@ -1076,7 +1078,7 @@ int soundSetChannels(Sound* sound, int channels) {
 }
 
 // 0x4AE0B0
-int soundSetReadLimit(Sound* sound, int readLimit) {
+int soundSetReadLimit(Sound *sound, int readLimit) {
 	if (!gSoundInitialized) {
 		gSoundLastError = SOUND_NOT_INITIALIZED;
 		return gSoundLastError;
@@ -1096,7 +1098,7 @@ int soundSetReadLimit(Sound* sound, int readLimit) {
 // TODO: Check, looks like it uses couple of inlined functions.
 //
 // 0x4AE0E4
-int soundPause(Sound* sound) {
+int soundPause(Sound *sound) {
 	bool hr;
 	unsigned int readPos;
 	unsigned int writePos;
@@ -1141,7 +1143,7 @@ int soundPause(Sound* sound) {
 // TODO: Check, looks like it uses couple of inlined functions.
 //
 // 0x4AE1F0
-int soundResume(Sound* sound) {
+int soundResume(Sound *sound) {
 	bool hr;
 
 	if (!gSoundInitialized) {
@@ -1177,7 +1179,7 @@ int soundResume(Sound* sound) {
 }
 
 // 0x4AE2FC
-int soundSetFileIO(Sound* sound, SoundOpenProc* openProc, SoundCloseProc* closeProc, SoundReadProc* readProc, SoundWriteProc* writeProc, SoundSeekProc* seekProc, SoundTellProc* tellProc, SoundFileLengthProc* fileLengthProc) {
+int soundSetFileIO(Sound *sound, SoundOpenProc *openProc, SoundCloseProc *closeProc, SoundReadProc *readProc, SoundWriteProc *writeProc, SoundSeekProc *seekProc, SoundTellProc *tellProc, SoundFileLengthProc *fileLengthProc) {
 	if (!gSoundInitialized) {
 		gSoundLastError = SOUND_NOT_INITIALIZED;
 		return gSoundLastError;
@@ -1221,12 +1223,12 @@ int soundSetFileIO(Sound* sound, SoundOpenProc* openProc, SoundCloseProc* closeP
 }
 
 // 0x4AE378
-void soundDeleteInternal(Sound* sound) {
-	Sound* next;
-	Sound* prev;
+void soundDeleteInternal(Sound *sound) {
+	Sound *next;
+	Sound *prev;
 
 	if ((sound->statusFlags & SOUND_STATUS_IS_FADING) != 0) {
-		FadeSound* fadeSound = _fadeHead;
+		FadeSound *fadeSound = _fadeHead;
 
 		while (fadeSound != nullptr) {
 			if (sound == fadeSound->sound) {
@@ -1286,7 +1288,7 @@ int _soundSetMasterVolume(int volume) {
 
 	_masterVol = volume;
 
-	Sound* curr = gSoundListHead;
+	Sound *curr = gSoundListHead;
 	while (curr != nullptr) {
 		soundSetVolume(curr, curr->volume);
 		curr = curr->next;
@@ -1297,7 +1299,7 @@ int _soundSetMasterVolume(int volume) {
 }
 
 // 0x4AE5C8
-Uint32 _doTimerEvent(Uint32 interval, void* param) {
+Uint32 _doTimerEvent(Uint32 interval, void *param) {
 	void (*fn)();
 
 	if (param != nullptr) {
@@ -1309,7 +1311,7 @@ Uint32 _doTimerEvent(Uint32 interval, void* param) {
 }
 
 // 0x4AE614
-void _removeTimedEvent(SDL_TimerID* timerId) {
+void _removeTimedEvent(SDL_TimerID *timerId) {
 	if (*timerId != 0) {
 		SDL_RemoveTimer(*timerId);
 		*timerId = 0;
@@ -1317,7 +1319,7 @@ void _removeTimedEvent(SDL_TimerID* timerId) {
 }
 
 // 0x4AE634
-int _soundGetPosition(Sound* sound) {
+int _soundGetPosition(Sound *sound) {
 	if (!gSoundInitialized) {
 		gSoundLastError = SOUND_NOT_INITIALIZED;
 		return gSoundLastError;
@@ -1344,7 +1346,7 @@ int _soundGetPosition(Sound* sound) {
 }
 
 // 0x4AE6CC
-int _soundSetPosition(Sound* sound, int pos) {
+int _soundSetPosition(Sound *sound, int pos) {
 	if (!gSoundInitialized) {
 		gSoundLastError = SOUND_NOT_INITIALIZED;
 		return gSoundLastError;
@@ -1395,10 +1397,10 @@ int _soundSetPosition(Sound* sound, int pos) {
 }
 
 // 0x4AE830
-void _removeFadeSound(FadeSound* fadeSound) {
-	FadeSound* prev;
-	FadeSound* next;
-	FadeSound* tmp;
+void _removeFadeSound(FadeSound *fadeSound) {
+	FadeSound *prev;
+	FadeSound *next;
+	FadeSound *tmp;
 
 	if (fadeSound == nullptr) {
 		return;
@@ -1434,7 +1436,7 @@ void _removeFadeSound(FadeSound* fadeSound) {
 
 // 0x4AE8B0
 void _fadeSounds() {
-	FadeSound* fadeSound;
+	FadeSound *fadeSound;
 
 	fadeSound = _fadeHead;
 	while (fadeSound != nullptr) {
@@ -1472,8 +1474,8 @@ void _fadeSounds() {
 }
 
 // 0x4AE988
-int _internalSoundFade(Sound* sound, int duration, int targetVolume, bool pause) {
-	FadeSound* fadeSound;
+int _internalSoundFade(Sound *sound, int duration, int targetVolume, bool pause) {
+	FadeSound *fadeSound;
 
 	if (!_deviceInit) {
 		gSoundLastError = SOUND_NOT_INITIALIZED;
@@ -1502,7 +1504,7 @@ int _internalSoundFade(Sound* sound, int duration, int targetVolume, bool pause)
 			fadeSound = _fadeFreeList;
 			_fadeFreeList = _fadeFreeList->next;
 		} else {
-			fadeSound = (FadeSound*)gSoundMallocProc(sizeof(FadeSound));
+			fadeSound = (FadeSound *)gSoundMallocProc(sizeof(FadeSound));
 		}
 
 		if (fadeSound != nullptr) {
@@ -1553,7 +1555,7 @@ int _internalSoundFade(Sound* sound, int duration, int targetVolume, bool pause)
 		return gSoundLastError;
 	}
 
-	gFadeSoundsTimerId = SDL_AddTimer(40, _doTimerEvent, (void*)_fadeSounds);
+	gFadeSoundsTimerId = SDL_AddTimer(40, _doTimerEvent, (void *)_fadeSounds);
 	if (gFadeSoundsTimerId == 0) {
 		gSoundLastError = SOUND_UNKNOWN_ERROR;
 		return gSoundLastError;
@@ -1564,7 +1566,7 @@ int _internalSoundFade(Sound* sound, int duration, int targetVolume, bool pause)
 }
 
 // 0x4AEB0C
-int _soundFade(Sound* sound, int duration, int targetVolume) {
+int _soundFade(Sound *sound, int duration, int targetVolume) {
 	return _internalSoundFade(sound, duration, targetVolume, false);
 }
 
@@ -1577,17 +1579,17 @@ void soundDeleteAll() {
 
 // 0x4AEBE0
 void soundContinueAll() {
-	Sound* curr = gSoundListHead;
+	Sound *curr = gSoundListHead;
 	while (curr != nullptr) {
 		// Sound can be deallocated in `soundContinue`.
-		Sound* next = curr->next;
+		Sound *next = curr->next;
 		soundContinue(curr);
 		curr = next;
 	}
 }
 
 // 0x4AEC00
-int soundSetDefaultFileIO(SoundOpenProc* openProc, SoundCloseProc* closeProc, SoundReadProc* readProc, SoundWriteProc* writeProc, SoundSeekProc* seekProc, SoundTellProc* tellProc, SoundFileLengthProc* fileLengthProc) {
+int soundSetDefaultFileIO(SoundOpenProc *openProc, SoundCloseProc *closeProc, SoundReadProc *readProc, SoundWriteProc *writeProc, SoundSeekProc *seekProc, SoundTellProc *tellProc, SoundFileLengthProc *fileLengthProc) {
 	if (openProc != nullptr) {
 		gSoundDefaultFileIO.open = openProc;
 	}
@@ -1620,4 +1622,4 @@ int soundSetDefaultFileIO(SoundOpenProc* openProc, SoundCloseProc* closeProc, So
 	return gSoundLastError;
 }
 
-} // namespace fallout
+} // namespace Fallout2
