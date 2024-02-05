@@ -21,7 +21,7 @@
 #include "fallout2/game.h"
 #include "fallout2/game_dialog.h"
 #include "fallout2/game_mouse.h"
-// #include "fallout2/game_sound.h" TODO audio
+#include "fallout2/game_sound.h"
 #include "fallout2/input.h"
 #include "fallout2/interface.h"
 #include "fallout2/item.h"
@@ -1056,7 +1056,7 @@ static bool _setup_inventory(int inventoryWindowType) {
 		}
 
 		if (btn != -1) {
-//			buttonSetCallbacks(btn, _gsound_red_butt_press, _gsound_red_butt_release); TODO audio
+			buttonSetCallbacks(btn, _gsound_red_butt_press, _gsound_red_butt_release);
 		}
 	}
 
@@ -1085,7 +1085,7 @@ static bool _setup_inventory(int inventoryWindowType) {
 							   nullptr,
 							   0);
 			if (btn != -1) {
-				//	buttonSetCallbacks(btn, _gsound_red_butt_press, _gsound_red_butt_release); TODO audio
+				buttonSetCallbacks(btn, _gsound_red_butt_press, _gsound_red_butt_release);
 			}
 
 			// Right inventory up button.
@@ -1103,7 +1103,7 @@ static bool _setup_inventory(int inventoryWindowType) {
 							   nullptr,
 							   0);
 			if (btn != -1) {
-				//	buttonSetCallbacks(btn, _gsound_red_butt_press, _gsound_red_butt_release); TODO audio
+				buttonSetCallbacks(btn, _gsound_red_butt_press, _gsound_red_butt_release);
 			}
 		}
 	} else {
@@ -1137,7 +1137,7 @@ static bool _setup_inventory(int inventoryWindowType) {
 														0);
 				if (gInventoryScrollUpButton != -1) {
 					_win_register_button_disable(gInventoryScrollUpButton, _inventoryFrmImages[4].getData(), _inventoryFrmImages[4].getData(), _inventoryFrmImages[4].getData());
-					//	buttonSetCallbacks(gInventoryScrollUpButton, _gsound_red_butt_press, _gsound_red_butt_release);  TODO audio
+					buttonSetCallbacks(gInventoryScrollUpButton, _gsound_red_butt_press, _gsound_red_butt_release);
 					buttonDisable(gInventoryScrollUpButton);
 				}
 			}
@@ -1159,7 +1159,7 @@ static bool _setup_inventory(int inventoryWindowType) {
 																 0);
 				if (gSecondaryInventoryScrollUpButton != -1) {
 					_win_register_button_disable(gSecondaryInventoryScrollUpButton, _inventoryFrmImages[4].getData(), _inventoryFrmImages[4].getData(), _inventoryFrmImages[4].getData());
-					//	buttonSetCallbacks(gSecondaryInventoryScrollUpButton, _gsound_red_butt_press, _gsound_red_butt_release); TODO audio
+					buttonSetCallbacks(gSecondaryInventoryScrollUpButton, _gsound_red_butt_press, _gsound_red_butt_release);
 					buttonDisable(gSecondaryInventoryScrollUpButton);
 				}
 			}
@@ -1191,7 +1191,7 @@ static bool _setup_inventory(int inventoryWindowType) {
 							   nullptr,
 							   0);
 			if (btn != -1) {
-				//	buttonSetCallbacks(btn, _gsound_red_butt_press, _gsound_red_butt_release); TODO audio
+				buttonSetCallbacks(btn, _gsound_red_butt_press, _gsound_red_butt_release);
 			}
 
 			// Right inventory down button
@@ -1209,7 +1209,7 @@ static bool _setup_inventory(int inventoryWindowType) {
 							   nullptr,
 							   0);
 			if (btn != -1) {
-				//	buttonSetCallbacks(btn, _gsound_red_butt_press, _gsound_red_butt_release); TODO audio
+				buttonSetCallbacks(btn, _gsound_red_butt_press, _gsound_red_butt_release);
 			}
 
 			// Invisible button representing left character.
@@ -1270,7 +1270,7 @@ static bool _setup_inventory(int inventoryWindowType) {
 													  _inventoryFrmImages[6].getData(),
 													  nullptr,
 													  0);
-			//	buttonSetCallbacks(gInventoryScrollDownButton, _gsound_red_butt_press, _gsound_red_butt_release); TODO audio
+			buttonSetCallbacks(gInventoryScrollDownButton, _gsound_red_butt_press, _gsound_red_butt_release);
 			_win_register_button_disable(gInventoryScrollDownButton, _inventoryFrmImages[7].getData(), _inventoryFrmImages[7].getData(), _inventoryFrmImages[7].getData());
 			buttonDisable(gInventoryScrollDownButton);
 
@@ -1305,7 +1305,7 @@ static bool _setup_inventory(int inventoryWindowType) {
 																   nullptr,
 																   0);
 				if (gSecondaryInventoryScrollDownButton != -1) {
-					//			buttonSetCallbacks(gSecondaryInventoryScrollDownButton, _gsound_red_butt_press, _gsound_red_butt_release); TODO audio
+					buttonSetCallbacks(gSecondaryInventoryScrollDownButton, _gsound_red_butt_press, _gsound_red_butt_release);
 					_win_register_button_disable(gSecondaryInventoryScrollDownButton, _inventoryFrmImages[7].getData(), _inventoryFrmImages[7].getData(), _inventoryFrmImages[7].getData());
 					buttonDisable(gSecondaryInventoryScrollDownButton);
 				}
@@ -1370,7 +1370,7 @@ static bool _setup_inventory(int inventoryWindowType) {
 									   nullptr,
 									   0);
 					if (btn != -1) {
-						//	buttonSetCallbacks(btn, _gsound_red_butt_press, _gsound_red_butt_release); TODO audio
+						buttonSetCallbacks(btn, _gsound_red_butt_press, _gsound_red_butt_release);
 					}
 				}
 			}
@@ -1400,7 +1400,7 @@ static bool _setup_inventory(int inventoryWindowType) {
 							   nullptr,
 							   0);
 			if (btn != -1) {
-				//	buttonSetCallbacks(btn, _gsound_red_butt_press, _gsound_red_butt_release); TODO audio
+				buttonSetCallbacks(btn, _gsound_red_butt_press, _gsound_red_butt_release);
 			}
 
 			// Right offered inventory up button.
@@ -1418,7 +1418,7 @@ static bool _setup_inventory(int inventoryWindowType) {
 							   nullptr,
 							   0);
 			if (btn != -1) {
-				//	buttonSetCallbacks(btn, _gsound_red_butt_press, _gsound_red_butt_release); TODO audio
+				buttonSetCallbacks(btn, _gsound_red_butt_press, _gsound_red_butt_release);
 			}
 		}
 
@@ -1446,7 +1446,7 @@ static bool _setup_inventory(int inventoryWindowType) {
 							   nullptr,
 							   0);
 			if (btn != -1) {
-				//	buttonSetCallbacks(btn, _gsound_red_butt_press, _gsound_red_butt_release); TODO audio
+				buttonSetCallbacks(btn, _gsound_red_butt_press, _gsound_red_butt_release);
 			}
 
 			// Right offered inventory down button.
@@ -1464,7 +1464,7 @@ static bool _setup_inventory(int inventoryWindowType) {
 							   nullptr,
 							   0);
 			if (btn != -1) {
-				//	buttonSetCallbacks(btn, _gsound_red_butt_press, _gsound_red_butt_release); TODO audio
+				buttonSetCallbacks(btn, _gsound_red_butt_press, _gsound_red_butt_release);
 			}
 		}
 	}
@@ -2333,7 +2333,7 @@ static void _inven_pickup(int keyCode, int a2) {
 		int height = itemInventoryFrmImage.getHeight();
 		unsigned char *data = itemInventoryFrmImage.getData();
 		mouseSetFrame(data, width, height, width, width / 2, height / 2, 0);
-//		soundPlayFile("ipickup1"); TODO audio
+		soundPlayFile("ipickup1");
 	}
 
 	if (v39 != nullptr) {
@@ -2352,7 +2352,7 @@ static void _inven_pickup(int keyCode, int a2) {
 
 	if (itemInventoryFrmImage.isLocked()) {
 		itemInventoryFrmImage.unlock();
-//		soundPlayFile("iputdown"); TODO audio
+		soundPlayFile("iputdown");
 	}
 
 	if (mouseHitTestInWindow(gInventoryWindow, INVENTORY_SCROLLER_X, INVENTORY_SCROLLER_Y, INVENTORY_SCROLLER_MAX_X, INVENTORY_SLOT_HEIGHT * gInventorySlotsCount + INVENTORY_SCROLLER_Y)) {
@@ -3326,8 +3326,8 @@ int _invenWieldFunc(Object *critter, Object *item, int a3, bool a4) {
 			if ((critter->fid & 0xF000) >> 12 != 0) {
 				if (a4) {
 					if (!isoIsDisabled()) {
-//						const char *soundEffectName = sfxBuildCharName(critter, ANIM_PUT_AWAY, CHARACTER_SOUND_EFFECT_UNUSED); TODO audio
-//						animationRegisterPlaySoundEffect(critter, soundEffectName, 0);
+						const char *soundEffectName = sfxBuildCharName(critter, ANIM_PUT_AWAY, CHARACTER_SOUND_EFFECT_UNUSED);
+						animationRegisterPlaySoundEffect(critter, soundEffectName, 0);
 						animationRegisterAnimate(critter, ANIM_PUT_AWAY, 0);
 					}
 				}
@@ -3388,8 +3388,8 @@ int _invenUnwieldFunc(Object *obj, int a2, int a3) {
 		if (a3 && !isoIsDisabled()) {
 			reg_anim_begin(ANIMATION_REQUEST_RESERVED);
 
-//			const char *sfx = sfxBuildCharName(obj, ANIM_PUT_AWAY, CHARACTER_SOUND_EFFECT_UNUSED); TODO audio
-//			animationRegisterPlaySoundEffect(obj, sfx, 0);
+			const char *sfx = sfxBuildCharName(obj, ANIM_PUT_AWAY, CHARACTER_SOUND_EFFECT_UNUSED);
+			animationRegisterPlaySoundEffect(obj, sfx, 0);
 
 			animationRegisterAnimate(obj, ANIM_PUT_AWAY, 0);
 
@@ -4142,7 +4142,7 @@ int inventoryOpenLooting(Object *looter, Object *target) {
 									   nullptr,
 									   0);
 					if (btn != -1) {
-//						buttonSetCallbacks(btn, _gsound_red_butt_press, _gsound_red_butt_release); TODO audio
+						buttonSetCallbacks(btn, _gsound_red_butt_press, _gsound_red_butt_release);
 					}
 				}
 
@@ -4168,7 +4168,7 @@ int inventoryOpenLooting(Object *looter, Object *target) {
 									   nullptr,
 									   0);
 					if (btn != -1) {
-//						buttonSetCallbacks(btn, _gsound_red_butt_press, _gsound_red_butt_release); TODO audio
+						buttonSetCallbacks(btn, _gsound_red_butt_press, _gsound_red_butt_release);
 					}
 				}
 
@@ -4518,7 +4518,7 @@ static InventoryMoveResult _move_inventory(Object *item, int slotIndex, Object *
 		int height = itemInventoryFrmImage.getHeight();
 		unsigned char *data = itemInventoryFrmImage.getData();
 		mouseSetFrame(data, width, height, width, width / 2, height / 2, 0);
-//		soundPlayFile("ipickup1"); TODO audio
+		soundPlayFile("ipickup1");
 	}
 
 	do {
@@ -4532,7 +4532,7 @@ static InventoryMoveResult _move_inventory(Object *item, int slotIndex, Object *
 
 	if (itemInventoryFrmImage.isLocked()) {
 		itemInventoryFrmImage.unlock();
-//		soundPlayFile("iputdown"); TODO audio
+		soundPlayFile("iputdown");
 	}
 
 	InventoryMoveResult result = INVENTORY_MOVE_RESULT_FAILED;
@@ -4735,7 +4735,7 @@ static void _barter_move_inventory(Object *a1, int quantity, int a3, int a4, Obj
 		int height = itemInventoryFrmImage.getHeight();
 		unsigned char *data = itemInventoryFrmImage.getData();
 		mouseSetFrame(data, width, height, width, width / 2, height / 2, 0);
-//		soundPlayFile("ipickup1"); TODO audio
+		soundPlayFile("ipickup1");
 	}
 
 	do {
@@ -4749,7 +4749,7 @@ static void _barter_move_inventory(Object *a1, int quantity, int a3, int a4, Obj
 
 	if (itemInventoryFrmImage.isLocked()) {
 		itemInventoryFrmImage.unlock();
-//		soundPlayFile("iputdown"); TODO audio
+		soundPlayFile("iputdown");
 	}
 
 	MessageListItem messageListItem;
@@ -4821,7 +4821,7 @@ static void _barter_move_from_table_inventory(Object *a1, int quantity, int a3, 
 		int height = itemInventoryFrmImage.getHeight();
 		unsigned char *data = itemInventoryFrmImage.getData();
 		mouseSetFrame(data, width, height, width, width / 2, height / 2, 0);
-//		soundPlayFile("ipickup1"); TODO audio
+		soundPlayFile("ipickup1");
 	}
 
 	do {
@@ -4835,7 +4835,7 @@ static void _barter_move_from_table_inventory(Object *a1, int quantity, int a3, 
 
 	if (itemInventoryFrmImage.isLocked()) {
 		itemInventoryFrmImage.unlock();
-//		soundPlayFile("iputdown"); TODO audio
+		soundPlayFile("iputdown");
 	}
 
 	MessageListItem messageListItem;
@@ -5453,8 +5453,8 @@ static int _drop_ammo_into_weapon(Object *weapon, Object *ammo, Object **a3, int
 		return -1;
 	}
 
-//	const char *sfx = sfxBuildWeaponName(WEAPON_SOUND_EFFECT_READY, weapon, HIT_MODE_RIGHT_WEAPON_PRIMARY, nullptr); TODO audio
-//	soundPlayFile(sfx);
+	const char *sfx = sfxBuildWeaponName(WEAPON_SOUND_EFFECT_READY, weapon, HIT_MODE_RIGHT_WEAPON_PRIMARY, nullptr);
+	soundPlayFile(sfx);
 
 	return 0;
 }
@@ -5542,12 +5542,12 @@ static int inventoryQuantitySelect(int inventoryWindowType, Object *item, int ma
 		if (keyCode == KEY_RETURN) {
 			if (value >= min && value <= max) {
 				if (inventoryWindowType != INVENTORY_WINDOW_TYPE_SET_TIMER || value % 10 == 0) {
-//					soundPlayFile("ib1p1xx1"); TODO audio
+					soundPlayFile("ib1p1xx1");
 					break;
 				}
 			}
 
-//			soundPlayFile("iisxxxx1"); TODO audio
+			soundPlayFile("iisxxxx1");
 		} else if (keyCode == 5000) {
 			v5 = false;
 			value = max;
@@ -5761,7 +5761,7 @@ static int inventoryQuantityWindowInit(int inventoryWindowType, Object *item) {
 						   nullptr,
 						   BUTTON_FLAG_TRANSPARENT);
 		if (btn != -1) {
-//			buttonSetCallbacks(btn, _gsound_red_butt_press, _gsound_red_butt_release); TODO audio
+			buttonSetCallbacks(btn, _gsound_red_butt_press, _gsound_red_butt_release);
 		}
 	}
 
@@ -5787,7 +5787,7 @@ static int inventoryQuantityWindowInit(int inventoryWindowType, Object *item) {
 						   nullptr,
 						   BUTTON_FLAG_TRANSPARENT);
 		if (btn != -1) {
-//			buttonSetCallbacks(btn, _gsound_red_butt_press, _gsound_red_butt_release); TODO audio
+			buttonSetCallbacks(btn, _gsound_red_butt_press, _gsound_red_butt_release);
 		}
 	}
 
@@ -5813,7 +5813,7 @@ static int inventoryQuantityWindowInit(int inventoryWindowType, Object *item) {
 						   nullptr,
 						   BUTTON_FLAG_TRANSPARENT);
 		if (btn != -1) {
-//			buttonSetCallbacks(btn, _gsound_red_butt_press, _gsound_red_butt_release); TODO audio
+			buttonSetCallbacks(btn, _gsound_red_butt_press, _gsound_red_butt_release);
 		}
 
 		// Cancel
@@ -5831,7 +5831,7 @@ static int inventoryQuantityWindowInit(int inventoryWindowType, Object *item) {
 						   nullptr,
 						   BUTTON_FLAG_TRANSPARENT);
 		if (btn != -1) {
-//			buttonSetCallbacks(btn, _gsound_red_butt_press, _gsound_red_butt_release); TODO audio
+			buttonSetCallbacks(btn, _gsound_red_butt_press, _gsound_red_butt_release);
 		}
 	}
 
@@ -5866,7 +5866,7 @@ static int inventoryQuantityWindowInit(int inventoryWindowType, Object *item) {
 								   nullptr,
 								   BUTTON_FLAG_TRANSPARENT);
 				if (btn != -1) {
-//					buttonSetCallbacks(btn, _gsound_red_butt_press, _gsound_red_butt_release); TODO audio
+					buttonSetCallbacks(btn, _gsound_red_butt_press, _gsound_red_butt_release);
 				}
 			}
 		}
