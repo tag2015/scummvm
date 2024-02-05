@@ -17,7 +17,7 @@
 #include "fallout2/elevator.h"
 #include "fallout2/game.h"
 #include "fallout2/game_mouse.h"
-// #include "fallout2/game_sound.h" TODO audio
+#include "fallout2/game_sound.h"
 #include "fallout2/input.h"
 #include "fallout2/interface.h"
 #include "fallout2/item.h"
@@ -3283,7 +3283,7 @@ static int _combat_turn(Object *obj, bool a2) {
 			_combat_free_move = 2 * perkGetRank(gDude, PERK_BONUS_MOVE);
 			interfaceRenderActionPoints(gDude->data.critter.combat.ap, _combat_free_move);
 		} else {
-//			soundContinueAll();  TODO audio
+			soundContinueAll();
 		}
 
 		bool scriptOverrides = false;
@@ -5550,7 +5550,7 @@ static int calledShotSelectHitLocation(Object *critter, int *hitLocation, int hi
 								 nullptr,
 								 BUTTON_FLAG_TRANSPARENT);
 	if (cancelBtn != -1) {
-//		buttonSetCallbacks(cancelBtn, _gsound_red_butt_press, _gsound_red_butt_release); TODO audio
+		buttonSetCallbacks(cancelBtn, _gsound_red_butt_press, _gsound_red_butt_release);
 	}
 
 	int oldFont = fontGetCurrent();
@@ -5623,7 +5623,7 @@ static int calledShotSelectHitLocation(Object *critter, int *hitLocation, int hi
 
 	*hitLocation = eventCode < 4 ? _hit_loc_left[eventCode] : _hit_loc_right[eventCode - 4];
 
-//	soundPlayFile("icsxxxx1"); TODO audio
+	soundPlayFile("icsxxxx1");
 
 	return 0;
 }
@@ -5726,8 +5726,8 @@ void _combat_attack_this(Object *target) {
 			displayMonitorAddMessage(messageListItem.text);
 		}
 
-//		sfx = sfxBuildWeaponName(WEAPON_SOUND_EFFECT_OUT_OF_AMMO, item, hitMode, nullptr); TODO audio
-//		soundPlayFile(sfx);
+		sfx = sfxBuildWeaponName(WEAPON_SOUND_EFFECT_OUT_OF_AMMO, item, hitMode, nullptr);
+		soundPlayFile(sfx);
 		return;
 	case COMBAT_BAD_SHOT_OUT_OF_RANGE:
 		messageListItem.num = 102; // Target out of range.
