@@ -111,7 +111,7 @@ bool audioEngineInit() {
 	desiredSpec.samples = 1024;
 	desiredSpec.callback = audioEngineMixin; */
 
-	gAudioEngineDeviceId = 1; //SDL_OpenAudioDevice(nullptr, 0, &desiredSpec, &gAudioEngineSpec, SDL_AUDIO_ALLOW_ANY_CHANGE);
+	gAudioEngineDeviceId = -1; //SDL_OpenAudioDevice(nullptr, 0, &desiredSpec, &gAudioEngineSpec, SDL_AUDIO_ALLOW_ANY_CHANGE);
 	if (gAudioEngineDeviceId == -1) {
 		return false;
 	}
