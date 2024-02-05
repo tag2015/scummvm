@@ -14,7 +14,7 @@
 #include "fallout2/critter.h"
 #include "fallout2/draw.h"
 #include "fallout2/game.h"
-// #include "fallout2/game_sound.h" TODO audio
+#include "fallout2/game_sound.h"
 #include "fallout2/input.h"
 #include "fallout2/interface.h"
 #include "fallout2/item.h"
@@ -1797,10 +1797,10 @@ int gameMouseRenderActionMenuItems(int x, int y, const int *menuItems, int menuI
 	gGameMouseActionMenuItemsLength = menuItemsLength;
 	_gmouse_3d_menu_actions_start = v58;
 
-//	Sound *sound = soundEffectLoad("iaccuxx1", nullptr); TODO audio
-//	if (sound != nullptr) {
-//		soundEffectPlay(sound);
-//	}
+	Sound *sound = soundEffectLoad("iaccuxx1", nullptr);
+	if (sound != nullptr) {
+		soundEffectPlay(sound);
+	}
 
 	return 0;
 }

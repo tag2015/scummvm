@@ -19,7 +19,7 @@
 #include "fallout2/draw.h"
 #include "fallout2/game.h"
 #include "fallout2/game_mouse.h"
-// #include "fallout2/game_sound.h" TODO audio
+#include "fallout2/game_sound.h"
 #include "fallout2/input.h"
 #include "fallout2/interface.h"
 #include "fallout2/item.h"
@@ -797,9 +797,9 @@ void _gdialogSystemEnter() {
 
 	_gdDialogTurnMouseOff = true;
 
-//	soundContinueAll(); TODO audio
+	soundContinueAll();
 	gameDialogEnter(gGameDialogSpeaker, 0);
-//	soundContinueAll(); TODO audio
+	soundContinueAll();
 
 	if (gGameDialogOldDudeTile != gDude->tile) {
 		gGameDialogOldCenterTile = gDude->tile;
@@ -818,7 +818,7 @@ void _gdialogSystemEnter() {
 void gameDialogStartLips(const char *audioFileName) {
 	if (audioFileName == nullptr) {
 		debugPrint("\nGDialog: Bleep!");
-//		soundPlayFile("censor"); TODO audio
+		soundPlayFile("censor");
 		return;
 	}
 
@@ -906,13 +906,13 @@ int _gdialogInitFromScript(int headFid, int reaction) {
 	_gdialog_state = 1;
 	_gmouse_disable_scrolling();
 
-/*	if (headFid == -1) { TODO audio
+	if (headFid == -1) {
 		// SFALL: Fix the music volume when entering the dialog.
 		gGameDialogOldMusicVolume = _gsound_background_volume_get_set(gMusicVolume / 2);
 	} else {
 		gGameDialogOldMusicVolume = -1;
 		backgroundSoundDelete();
-	}*/
+	}
 
 	_gdDialogWentOff = true;
 
@@ -980,9 +980,9 @@ int _gdialogExitFromScript() {
 	}
 
 	if (gGameDialogOldMusicVolume == -1) {
-//		backgroundSoundRestart(11); TODO audio
+		backgroundSoundRestart(11);
 	} else {
-//		backgroundSoundSetVolume(gGameDialogOldMusicVolume); TODO audio
+		backgroundSoundSetVolume(gGameDialogOldMusicVolume);
 	}
 
 	if (_boxesWereDisabled) {
@@ -1267,7 +1267,7 @@ int gameDialogAddTextOption(int messageListId, const char *text, int reaction) {
 // 0x445938
 int gameDialogReviewWindowInit(int *win) {
 	if (gGameDialogLipSyncStarted) {
-		if (/*soundIsPlaying(gLipsData.sound)*/ 1) {  // TODO audio
+		if (soundIsPlaying(gLipsData.sound)) {
 			gameDialogEndLips();
 		}
 	}
@@ -1339,7 +1339,7 @@ int gameDialogReviewWindowInit(int *win) {
 		return -1;
 	}
 
-//	buttonSetCallbacks(upBtn, _gsound_med_butt_press, _gsound_med_butt_release); TODO audio
+	buttonSetCallbacks(upBtn, _gsound_med_butt_press, _gsound_med_butt_release);
 
 	int downBtn = buttonCreate(*win,
 							   475,
@@ -1359,7 +1359,7 @@ int gameDialogReviewWindowInit(int *win) {
 		return -1;
 	}
 
-//	buttonSetCallbacks(downBtn, _gsound_med_butt_press, _gsound_med_butt_release); TODO audio
+	buttonSetCallbacks(downBtn, _gsound_med_butt_press, _gsound_med_butt_release);
 
 	int doneBtn = buttonCreate(*win,
 							   499,
@@ -1379,7 +1379,7 @@ int gameDialogReviewWindowInit(int *win) {
 		return -1;
 	}
 
-//	buttonSetCallbacks(doneBtn, _gsound_red_butt_press, _gsound_red_butt_release); TODO audio
+	buttonSetCallbacks(doneBtn, _gsound_red_butt_press, _gsound_red_butt_release);
 
 	fontSetCurrent(101);
 
@@ -1705,7 +1705,7 @@ int _gdProcessInit() {
 		goto err_1;
 	}
 
-//	buttonSetCallbacks(upBtn, _gsound_red_butt_press, _gsound_red_butt_release); TODO audio
+	buttonSetCallbacks(upBtn, _gsound_red_butt_press, _gsound_red_butt_release);
 	buttonSetMouseCallbacks(upBtn, _reply_arrow_up, _reply_arrow_restore, 0, 0);
 
 	// Bottom part of the reply window - scroll down.
@@ -1714,7 +1714,7 @@ int _gdProcessInit() {
 		goto err_1;
 	}
 
-//	buttonSetCallbacks(downBtn, _gsound_red_butt_press, _gsound_red_butt_release); TODO audio
+	buttonSetCallbacks(downBtn, _gsound_red_butt_press, _gsound_red_butt_release);
 	buttonSetMouseCallbacks(downBtn, _reply_arrow_down, _reply_arrow_restore, 0, 0);
 
 	optionsWindowX = (screenGetWidth() - GAME_DIALOG_WINDOW_WIDTH) / 2 + GAME_DIALOG_OPTIONS_WINDOW_X;
@@ -2305,7 +2305,7 @@ void _gdProcessUpdate() {
 
 			dialogOptionEntry->btn = buttonCreate(gGameDialogOptionsWindow, 2, y, width, _optionRect.top - y - 4, 1200 + index, 1300 + index, -1, 49 + index, nullptr, nullptr, nullptr, 0);
 			if (dialogOptionEntry->btn != -1) {
-//				buttonSetCallbacks(dialogOptionEntry->btn, _gsound_red_butt_press, _gsound_red_butt_release); TODO audio
+				buttonSetCallbacks(dialogOptionEntry->btn, _gsound_red_butt_press, _gsound_red_butt_release);
 			} else {
 				debugPrint("\nError: Can't create button!");
 			}
@@ -2336,7 +2336,7 @@ int _gdCreateHeadWindow() {
 	unsigned char *buf = windowGetBuffer(gGameDialogBackgroundWindow);
 
 	for (int index = 0; index < 8; index++) {
-//		soundContinueAll(); TODO audio
+		soundContinueAll();
 
 		Rect *rect = &(_backgrndRects[index]);
 		int width = rect->right - rect->left;
@@ -2783,7 +2783,7 @@ void gameDialogTicker() {
 			gLipsPhonemeChanged = false;
 		}
 
-		if (/*!soundIsPlaying(gLipsData.sound)*/ 1) {  // TODO audio
+		if (!soundIsPlaying(gLipsData.sound)) {
 			gameDialogEndLips();
 			gameDialogRenderTalkingHead(_lipsFp, 0);
 			_can_start_new_fidget = true;
@@ -2896,7 +2896,7 @@ void _gdialog_scroll_subwin(int win, int a2, unsigned char *a3, unsigned char *a
 		for (; v18 >= 0; v18--) {
 			sharedFpsLimiter.mark();
 
-//			soundContinueAll(); TODO audio
+			soundContinueAll();
 			blitBufferToBuffer(a3,
 							   GAME_DIALOG_WINDOW_WIDTH,
 							   v7,
@@ -2922,7 +2922,7 @@ void _gdialog_scroll_subwin(int win, int a2, unsigned char *a3, unsigned char *a
 		for (int index = a6 / 10; index > 0; index--) {
 			sharedFpsLimiter.mark();
 
-//			soundContinueAll(); TODO audio
+			soundContinueAll();
 
 			blitBufferToBuffer(a5,
 							   GAME_DIALOG_WINDOW_WIDTH,
@@ -3165,12 +3165,12 @@ int _gdialog_barter_create_win() {
 	// TRADE
 	_gdialog_buttons[0] = buttonCreate(gGameDialogWindow, 41, 163, 14, 14, -1, -1, -1, KEY_LOWERCASE_M, _redButtonNormalFrmImage.getData(), _redButtonPressedFrmImage.getData(), 0, BUTTON_FLAG_TRANSPARENT);
 	if (_gdialog_buttons[0] != -1) {
-//		buttonSetCallbacks(_gdialog_buttons[0], _gsound_med_butt_press, _gsound_med_butt_release); TODO audio
+		buttonSetCallbacks(_gdialog_buttons[0], _gsound_med_butt_press, _gsound_med_butt_release);
 
 		// TALK
 		_gdialog_buttons[1] = buttonCreate(gGameDialogWindow, 584, 162, 14, 14, -1, -1, -1, KEY_LOWERCASE_T, _redButtonNormalFrmImage.getData(), _redButtonPressedFrmImage.getData(), 0, BUTTON_FLAG_TRANSPARENT);
 		if (_gdialog_buttons[1] != -1) {
-//			buttonSetCallbacks(_gdialog_buttons[1], _gsound_med_butt_press, _gsound_med_butt_release); TODO audio
+			buttonSetCallbacks(_gdialog_buttons[1], _gsound_med_butt_press, _gsound_med_butt_release);
 
 			if (objectCreateWithFidPid(&_peon_table_obj, -1, -1) != -1) {
 				_peon_table_obj->flags |= OBJECT_HIDDEN;
@@ -3316,7 +3316,7 @@ int partyMemberControlWindowInit() {
 		partyMemberControlWindowFree();
 		return -1;
 	}
-//	buttonSetCallbacks(_gdialog_buttons[0], _gsound_med_butt_press, _gsound_med_butt_release); TODO audio
+	buttonSetCallbacks(_gdialog_buttons[0], _gsound_med_butt_press, _gsound_med_butt_release);
 
 	// TRADE
 	_gdialog_buttons[1] = buttonCreate(gGameDialogWindow, 593, 97, 14, 14, -1, -1, -1, KEY_LOWERCASE_D, _redButtonNormalFrmImage.getData(), _redButtonPressedFrmImage.getData(), nullptr, BUTTON_FLAG_TRANSPARENT);
@@ -3324,7 +3324,7 @@ int partyMemberControlWindowInit() {
 		partyMemberControlWindowFree();
 		return -1;
 	}
-//	buttonSetCallbacks(_gdialog_buttons[1], _gsound_med_butt_press, _gsound_med_butt_release); TODO audio
+	buttonSetCallbacks(_gdialog_buttons[1], _gsound_med_butt_press, _gsound_med_butt_release);
 
 	// USE BEST WEAPON
 	_gdialog_buttons[2] = buttonCreate(gGameDialogWindow, 236, 15, 14, 14, -1, -1, -1, KEY_LOWERCASE_W, _redButtonNormalFrmImage.getData(), _redButtonPressedFrmImage.getData(), nullptr, BUTTON_FLAG_TRANSPARENT);
@@ -3332,7 +3332,7 @@ int partyMemberControlWindowInit() {
 		partyMemberControlWindowFree();
 		return -1;
 	}
-//	buttonSetCallbacks(_gdialog_buttons[1], _gsound_med_butt_press, _gsound_med_butt_release); TODO audio
+	buttonSetCallbacks(_gdialog_buttons[1], _gsound_med_butt_press, _gsound_med_butt_release);
 
 	// USE BEST ARMOR
 	_gdialog_buttons[3] = buttonCreate(gGameDialogWindow, 235, 46, 14, 14, -1, -1, -1, KEY_LOWERCASE_A, _redButtonNormalFrmImage.getData(), _redButtonPressedFrmImage.getData(), nullptr, BUTTON_FLAG_TRANSPARENT);
@@ -3340,7 +3340,7 @@ int partyMemberControlWindowInit() {
 		partyMemberControlWindowFree();
 		return -1;
 	}
-//	buttonSetCallbacks(_gdialog_buttons[2], _gsound_med_butt_press, _gsound_med_butt_release); TODO audio
+	buttonSetCallbacks(_gdialog_buttons[2], _gsound_med_butt_press, _gsound_med_butt_release);
 
 	_control_buttons_start = 4;
 
@@ -3400,7 +3400,7 @@ int partyMemberControlWindowInit() {
 		}
 
 		_win_register_button_disable(_gdialog_buttons[v21], disabledButtonFrmData, disabledButtonFrmData, disabledButtonFrmData);
-//		buttonSetCallbacks(_gdialog_buttons[v21], _gsound_med_butt_press, _gsound_med_butt_release); TODO audio
+		buttonSetCallbacks(_gdialog_buttons[v21], _gsound_med_butt_press, _gsound_med_butt_release);
 
 		if (!partyMemberSupportsDisposition(gGameDialogSpeaker, buttonData->value)) {
 			buttonDisable(_gdialog_buttons[v21]);
@@ -3755,7 +3755,7 @@ int partyMemberCustomizationWindowInit() {
 		return -1;
 	}
 
-//	buttonSetCallbacks(_gdialog_buttons[0], _gsound_med_butt_press, _gsound_med_butt_release); TODO audio
+	buttonSetCallbacks(_gdialog_buttons[0], _gsound_med_butt_press, _gsound_med_butt_release);
 
 	int optionButton = 0;
 	_custom_buttons_start = 1;
@@ -3802,7 +3802,7 @@ int partyMemberCustomizationWindowInit() {
 			return -1;
 		}
 
-//		buttonSetCallbacks(_gdialog_buttons[index], _gsound_med_butt_press, _gsound_med_butt_release); TODO audio
+		buttonSetCallbacks(_gdialog_buttons[index], _gsound_med_butt_press, _gsound_med_butt_release);
 	}
 
 	_custom_current_selected[PARTY_MEMBER_CUSTOMIZATION_OPTION_AREA_ATTACK_MODE] = aiGetAreaAttackMode(gGameDialogSpeaker);
@@ -4195,7 +4195,7 @@ void gameDialogBarterButtonUpMouseUp(int btn, int keyCode) {
 	protoGetProto(gGameDialogSpeaker->pid, &proto);
 	if (proto->critter.data.flags & CRITTER_BARTER) {
 		if (gGameDialogLipSyncStarted) {
-			if (/*soundIsPlaying(gLipsData.sound)*/ 1) {
+			if (soundIsPlaying(gLipsData.sound)) {
 				gameDialogEndLips();
 			}
 		}
@@ -4268,7 +4268,7 @@ int _gdialog_window_create() {
 			_gdialog_buttons[0] = buttonCreate(gGameDialogWindow, 593, 41, 14, 14, -1, -1, -1, -1, _redButtonNormalFrmImage.getData(), _redButtonPressedFrmImage.getData(), nullptr, BUTTON_FLAG_TRANSPARENT);
 			if (_gdialog_buttons[0] != -1) {
 				buttonSetMouseCallbacks(_gdialog_buttons[0], nullptr, nullptr, nullptr, gameDialogBarterButtonUpMouseUp);
-//				buttonSetCallbacks(_gdialog_buttons[0], _gsound_med_butt_press, _gsound_med_butt_release); TODO audio
+				buttonSetCallbacks(_gdialog_buttons[0], _gsound_med_butt_press, _gsound_med_butt_release);
 
 				// di_rest1.frm - dialog rest button up
 				int upFid = buildFid(OBJ_TYPE_INTERFACE, 97, 0, 0, 0);
@@ -4280,7 +4280,7 @@ int _gdialog_window_create() {
 						_gdialog_buttons[1] = buttonCreate(gGameDialogWindow, 13, 154, 51, 29, -1, -1, -1, -1, _reviewButtonNormalFrmImage.getData(), _reviewButtonPressedFrmImage.getData(), nullptr, 0);
 						if (_gdialog_buttons[1] != -1) {
 							buttonSetMouseCallbacks(_gdialog_buttons[1], nullptr, nullptr, nullptr, gameDialogReviewButtonOnMouseUp);
-//							buttonSetCallbacks(_gdialog_buttons[1], _gsound_red_butt_press, _gsound_red_butt_release); TODO audio
+							buttonSetCallbacks(_gdialog_buttons[1], _gsound_red_butt_press, _gsound_red_butt_release);
 
 							if (!gGameDialogSpeakerIsPartyMember) {
 								_gdialog_window_created = true;
@@ -4291,7 +4291,7 @@ int _gdialog_window_create() {
 							_gdialog_buttons[2] = buttonCreate(gGameDialogWindow, 593, 116, 14, 14, -1, -1, -1, -1, _redButtonNormalFrmImage.getData(), _redButtonPressedFrmImage.getData(), 0, BUTTON_FLAG_TRANSPARENT);
 							if (_gdialog_buttons[2] != -1) {
 								buttonSetMouseCallbacks(_gdialog_buttons[2], nullptr, nullptr, nullptr, gameDialogCombatControlButtonOnMouseUp);
-//								buttonSetCallbacks(_gdialog_buttons[2], _gsound_med_butt_press, _gsound_med_butt_release); TODO audio
+								buttonSetCallbacks(_gdialog_buttons[2], _gsound_med_butt_press, _gsound_med_butt_release);
 
 								_gdialog_window_created = true;
 								return 0;
