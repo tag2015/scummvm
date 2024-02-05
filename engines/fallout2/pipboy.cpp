@@ -18,7 +18,7 @@
 #include "fallout2/game.h"
 #include "fallout2/game_mouse.h"
 // #include "fallout2/game_movie.h" TODO movie
-// #include "fallout2/game_sound.h" TODO audio
+#include "fallout2/game_sound.h"
 #include "fallout2/geometry.h"
 #include "fallout2/input.h"
 #include "fallout2/interface.h"
@@ -573,7 +573,7 @@ static int pipboyWindowInit(int intent) {
 								   nullptr,
 								   BUTTON_FLAG_TRANSPARENT);
 	if (alarmButton != -1) {
-//		buttonSetCallbacks(alarmButton, _gsound_med_butt_press, _gsound_med_butt_release); TODO audio
+		buttonSetCallbacks(alarmButton, _gsound_med_butt_press, _gsound_med_butt_release);
 	}
 
 	int y = 341;
@@ -594,7 +594,7 @@ static int pipboyWindowInit(int intent) {
 								   nullptr,
 								   BUTTON_FLAG_TRANSPARENT);
 			if (btn != -1) {
-//				buttonSetCallbacks(btn, _gsound_red_butt_press, _gsound_red_butt_release); TODO audio
+				buttonSetCallbacks(btn, _gsound_red_butt_press, _gsound_red_butt_release);
 			}
 
 			eventCode += 1;
@@ -642,7 +642,7 @@ static int pipboyWindowInit(int intent) {
 
 			windowRefresh(gPipboyWindow);
 
-//			soundPlayFile("iisxxxx1"); TODO audio
+			soundPlayFile("iisxxxx1");
 
 			const char *text = getmsg(&gPipboyMessageList, &gPipboyMessageListItem, 215);
 			showDialogBox(text, nullptr, 0, 192, 135, _colorTable[32328], 0, _colorTable[32328], DIALOG_BOX_LARGE);
@@ -692,7 +692,7 @@ static int pipboyWindowInit(int intent) {
 		return -1;
 	}
 
-//	soundPlayFile("pipon"); TODO audio
+	soundPlayFile("pipon");
 	windowRefresh(gPipboyWindow);
 
 	return intent;
@@ -887,7 +887,7 @@ static void pipboyWindowHandleStatus(int a1) {
 
 	if (_stat_flag == 0 && _holo_flag == 0) {
 		if (gPipboyQuestLocationsCount != 0 && gPipboyMouseX < 429) {
-//			soundPlayFile("ib1p1xx1"); TODO audio
+			soundPlayFile("ib1p1xx1");
 			blitBufferToBuffer(_pipboyFrmImages[PIPBOY_FRM_BACKGROUND].getData() + PIPBOY_WINDOW_WIDTH * PIPBOY_WINDOW_CONTENT_VIEW_Y + PIPBOY_WINDOW_CONTENT_VIEW_X,
 							   PIPBOY_WINDOW_CONTENT_VIEW_WIDTH,
 							   PIPBOY_WINDOW_CONTENT_VIEW_HEIGHT,
@@ -901,7 +901,7 @@ static void pipboyWindowHandleStatus(int a1) {
 			_stat_flag = 1;
 		} else {
 			if (gPipboyWindowHolodisksCount != 0 && gPipboyWindowHolodisksCount >= a1 && gPipboyMouseX > 429) {
-//				soundPlayFile("ib1p1xx1"); TODO audio
+				soundPlayFile("ib1p1xx1");
 				_holodisk = 0;
 
 				int index = 0;
@@ -944,7 +944,7 @@ static void pipboyWindowHandleStatus(int a1) {
 		if ((gPipboyMouseX > 459 && a1 != 1027) || a1 == 1026) {
 			if (gPipboyHolodiskLastPage <= _view_page) {
 				if (a1 != 1026) {
-//					soundPlayFile("ib1p1xx1"); TODO audio
+					soundPlayFile("ib1p1xx1");
 					blitBufferToBuffer(_pipboyFrmImages[PIPBOY_FRM_BACKGROUND].getData() + PIPBOY_WINDOW_WIDTH * 436 + 254, 350, 20, PIPBOY_WINDOW_WIDTH, gPipboyWindowBuffer + PIPBOY_WINDOW_WIDTH * 436 + 254, PIPBOY_WINDOW_WIDTH);
 
 					if (gPipboyLinesCount >= 0) {
@@ -968,7 +968,7 @@ static void pipboyWindowHandleStatus(int a1) {
 					pipboyWindowHandleStatus(1024);
 				}
 			} else {
-//				soundPlayFile("ib1p1xx1"); TODO audio
+				soundPlayFile("ib1p1xx1");
 				blitBufferToBuffer(_pipboyFrmImages[PIPBOY_FRM_BACKGROUND].getData() + PIPBOY_WINDOW_WIDTH * 436 + 254, 350, 20, PIPBOY_WINDOW_WIDTH, gPipboyWindowBuffer + PIPBOY_WINDOW_WIDTH * 436 + 254, PIPBOY_WINDOW_WIDTH);
 
 				if (gPipboyLinesCount >= 0) {
@@ -998,7 +998,7 @@ static void pipboyWindowHandleStatus(int a1) {
 		}
 
 		if (a1 == 1027) {
-//			soundPlayFile("ib1p1xx1"); TODO audio
+			soundPlayFile("ib1p1xx1");
 			blitBufferToBuffer(_pipboyFrmImages[PIPBOY_FRM_BACKGROUND].getData() + PIPBOY_WINDOW_WIDTH * 436 + 254, 350, 20, PIPBOY_WINDOW_WIDTH, gPipboyWindowBuffer + PIPBOY_WINDOW_WIDTH * 436 + 254, PIPBOY_WINDOW_WIDTH);
 
 			if (gPipboyLinesCount >= 0) {
@@ -1031,7 +1031,7 @@ static void pipboyWindowHandleStatus(int a1) {
 				return;
 			}
 
-//			soundPlayFile("ib1p1xx1"); TODO audio
+			soundPlayFile("ib1p1xx1");
 			blitBufferToBuffer(_pipboyFrmImages[PIPBOY_FRM_BACKGROUND].getData() + PIPBOY_WINDOW_WIDTH * 436 + 254, 350, 20, PIPBOY_WINDOW_WIDTH, gPipboyWindowBuffer + PIPBOY_WINDOW_WIDTH * 436 + 254, PIPBOY_WINDOW_WIDTH);
 
 			if (gPipboyLinesCount >= 0) {
@@ -1066,7 +1066,7 @@ static void pipboyWindowHandleStatus(int a1) {
 	}
 
 	if (a1 == 1025) {
-//		soundPlayFile("ib1p1xx1"); TODO audio
+		soundPlayFile("ib1p1xx1");
 		pipboyDrawBackButton(_colorTable[32747]);
 		windowRefreshRect(gPipboyWindow, &gPipboyWindowContentRect);
 		inputPauseForTocks(200);
@@ -1074,7 +1074,7 @@ static void pipboyWindowHandleStatus(int a1) {
 	}
 
 	if (a1 <= gPipboyQuestLocationsCount) {
-//		soundPlayFile("ib1p1xx1"); TODO audio
+		soundPlayFile("ib1p1xx1");
 
 		int v13 = 0;
 		int index = 0;
@@ -1442,11 +1442,11 @@ static void pipboyWindowHandleAutomaps(int a1) {
 	if (_amlst_mode != 0) {
 		if (a1 == 1025 || a1 <= -1) {
 			pipboyWindowHandleAutomaps(1024);
-//			soundPlayFile("ib1p1xx1"); TODO audio
+			soundPlayFile("ib1p1xx1");
 		}
 
 		if (a1 >= 1 && a1 <= _actcnt + 3) {
-//			soundPlayFile("ib1p1xx1"); TODO audio
+			soundPlayFile("ib1p1xx1");
 			_PrintAMelevList(a1);
 			automapRenderInPipboyWindow(gPipboyWindow, _sortlist[a1 - 1].field_6, _sortlist[a1 - 1].field_4);
 			windowRefreshRect(gPipboyWindow, &gPipboyWindowContentRect);
@@ -1456,7 +1456,7 @@ static void pipboyWindowHandleAutomaps(int a1) {
 	}
 
 	if (a1 > 0 && a1 <= _actcnt) {
-//		soundPlayFile("ib1p1xx1"); TODO audio
+		soundPlayFile("ib1p1xx1");
 		pipboyWindowDestroyButtons();
 		_PrintAMList(a1);
 		windowRefreshRect(gPipboyWindow, &gPipboyWindowContentRect);
@@ -1640,7 +1640,7 @@ static void pipboyHandleVideoArchive(int a1) {
 		_view_page = pipboyRenderVideoArchive(-1);
 		pipboyWindowCreateButtons(2, _view_page, false);
 	} else if (a1 >= 0 && a1 <= _view_page) {
-//		soundPlayFile("ib1p1xx1"); TODO audio
+		soundPlayFile("ib1p1xx1");
 
 		pipboyRenderVideoArchive(a1);
 
@@ -1735,7 +1735,7 @@ static void pipboyHandleAlarmClock(int a1) {
 			pipboyWindowRenderRestOptions(0);
 			pipboyWindowCreateButtons(5, gPipboyRestOptionsCount, false);
 		} else {
-//			soundPlayFile("iisxxxx1"); TODO audio
+			soundPlayFile("iisxxxx1");
 
 			// You cannot rest at this location!
 			const char *text = getmsg(&gPipboyMessageList, &gPipboyMessageListItem, 215);
@@ -1746,7 +1746,7 @@ static void pipboyHandleAlarmClock(int a1) {
 			gPipboyTab = gPipboyPrevTab;
 		}
 	} else if (a1 >= 4 && a1 <= 17) {
-//		soundPlayFile("ib1p1xx1"); TODO audio
+		soundPlayFile("ib1p1xx1");
 
 		pipboyWindowRenderRestOptions(a1 - 3);
 
@@ -1795,7 +1795,7 @@ static void pipboyHandleAlarmClock(int a1) {
 			break;
 		}
 
-//		soundPlayFile("ib2lu1x1"); TODO audio
+		soundPlayFile("ib2lu1x1");
 
 		pipboyWindowRenderRestOptions(0);
 	}
