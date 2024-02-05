@@ -12,7 +12,7 @@
 #include "fallout2/display_monitor.h"
 #include "fallout2/game.h"
 #include "fallout2/game_mouse.h"
-// #include "fallout2/game_sound.h" TODO game_sound
+#include "fallout2/game_sound.h"
 #include "fallout2/geometry.h"
 #include "fallout2/input.h"
 #include "fallout2/interface.h"
@@ -522,9 +522,9 @@ static void _anim_cleanup() {
 			artUnlock(animationDescription->artCacheKey);
 		}
 
-//		if (animationDescription->kind == ANIM_KIND_CALLBACK && animationDescription->callback == (AnimationCallback *)_gsnd_anim_sound) {
-//			soundEffectDelete((Sound *)animationDescription->param1);  TODO audio
-//		}
+		if (animationDescription->kind == ANIM_KIND_CALLBACK && animationDescription->callback == (AnimationCallback *)_gsnd_anim_sound) {
+			soundEffectDelete((Sound *)animationDescription->param1);
+		}
 	}
 
 	gAnimationSequenceCurrentIndex = -1;
@@ -1148,10 +1148,10 @@ int animationRegisterSetFid(Object *owner, int fid, int delay) {
 
 // 0x415238
 int animationRegisterTakeOutWeapon(Object *owner, int weaponAnimationCode, int delay) {
-//	const char *sfx = sfxBuildCharName(owner, ANIM_TAKE_OUT, weaponAnimationCode); TODO audio
-//	if (animationRegisterPlaySoundEffect(owner, sfx, delay) == -1) {
-//		return -1;
-//	}
+	const char *sfx = sfxBuildCharName(owner, ANIM_TAKE_OUT, weaponAnimationCode);
+	if (animationRegisterPlaySoundEffect(owner, sfx, delay) == -1) {
+		return -1;
+	}
 
 	if (_check_registry(owner) == -1) {
 		_anim_cleanup();
@@ -1233,13 +1233,13 @@ int animationRegisterPlaySoundEffect(Object *owner, const char *soundEffectName,
 	animationDescription->kind = ANIM_KIND_CALLBACK;
 	animationDescription->owner = owner;
 	if (soundEffectName != nullptr) {
-/*		int volume = _gsound_compute_relative_volume(owner);  TODO audio
+		int volume = _gsound_compute_relative_volume(owner);
 		animationDescription->param1 = soundEffectLoadWithVolume(soundEffectName, owner, volume);
 		if (animationDescription->param1 != nullptr) {
 			animationDescription->callback = (AnimationCallback *)_gsnd_anim_sound;
 		} else {
 			animationDescription->kind = ANIM_KIND_CONTINUE;
-		}*/
+		}
 	} else {
 		animationDescription->kind = ANIM_KIND_CONTINUE;
 	}
@@ -1596,9 +1596,9 @@ static int _anim_set_end(int animationSequenceIndex) {
 			if (animationDescription->extendedFlags & ANIMATION_SEQUENCE_FORCED) {
 				animationDescription->callback(animationDescription->param1, animationDescription->param2);
 			} else {
-/*				if (animationDescription->kind == ANIM_KIND_CALLBACK && animationDescription->callback == (AnimationCallback *)_gsnd_anim_sound) { TODO audio
+				if (animationDescription->kind == ANIM_KIND_CALLBACK && animationDescription->callback == (AnimationCallback *)_gsnd_anim_sound) {
 					soundEffectDelete((Sound *)animationDescription->param1);
-				}*/
+				}
 			}
 		}
 	}
@@ -3024,8 +3024,8 @@ void _dude_fidget() {
 		}
 
 		if (shoudPlaySound) {
-//			const char *sfx = sfxBuildCharName(object, ANIM_STAND, CHARACTER_SOUND_EFFECT_UNUSED); TODO audio
-//			animationRegisterPlaySoundEffect(object, sfx, 0);
+			const char *sfx = sfxBuildCharName(object, ANIM_STAND, CHARACTER_SOUND_EFFECT_UNUSED);
+			animationRegisterPlaySoundEffect(object, sfx, 0);
 		}
 
 		animationRegisterAnimate(object, ANIM_STAND, 0);
