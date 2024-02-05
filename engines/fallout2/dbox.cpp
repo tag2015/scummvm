@@ -12,7 +12,7 @@
 #include "fallout2/delay.h"
 #include "fallout2/draw.h"
 #include "fallout2/game.h"
-// #include "fallout2/game_sound.h" TODO game_sound
+#include "fallout2/game_sound.h"
 #include "fallout2/input.h"
 #include "fallout2/kb.h"
 #include "fallout2/message.h"
@@ -300,7 +300,7 @@ int showDialogBox(const char *title, const char **body, int bodyLength, int x, i
 							   nullptr,
 							   BUTTON_FLAG_TRANSPARENT);
 		if (btn != -1) {
-//			buttonSetCallbacks(btn, _gsound_red_butt_press, _gsound_red_butt_release); TODO audio
+			buttonSetCallbacks(btn, _gsound_red_butt_press, _gsound_red_butt_release);
 		}
 
 		v86 = true;
@@ -341,7 +341,7 @@ int showDialogBox(const char *title, const char **body, int bodyLength, int x, i
 								   0,
 								   BUTTON_FLAG_TRANSPARENT);
 			if (btn != -1) {
-//				buttonSetCallbacks(btn, _gsound_red_butt_press, _gsound_red_butt_release); TODO audio
+				buttonSetCallbacks(btn, _gsound_red_butt_press, _gsound_red_butt_release);
 			}
 		} else {
 			int doneBoxFid = buildFid(OBJ_TYPE_INTERFACE, 209, 0, 0, 0);
@@ -406,7 +406,7 @@ int showDialogBox(const char *title, const char **body, int bodyLength, int x, i
 								   nullptr,
 								   BUTTON_FLAG_TRANSPARENT);
 			if (btn != -1) {
-//				buttonSetCallbacks(btn, _gsound_red_butt_press, _gsound_red_butt_release); TODO audio
+				buttonSetCallbacks(btn, _gsound_red_butt_press, _gsound_red_butt_release);
 			}
 
 			v86 = true;
@@ -531,7 +531,7 @@ int showDialogBox(const char *title, const char **body, int bodyLength, int x, i
 		if (keyCode == 500) {
 			rc = 1;
 		} else if (keyCode == KEY_RETURN) {
-//			soundPlayFile("ib1p1xx1");  TODO audio
+			soundPlayFile("ib1p1xx1");
 			rc = 1;
 		} else if (keyCode == KEY_ESCAPE || keyCode == 501) {
 			rc = 0;
@@ -645,7 +645,7 @@ int showLoadFileDialog(char *title, char **fileList, char *dest, int fileListLen
 							   nullptr,
 							   BUTTON_FLAG_TRANSPARENT);
 	if (doneBtn != -1) {
-//		buttonSetCallbacks(doneBtn, _gsound_red_butt_press, _gsound_red_butt_release); TODO audio
+		buttonSetCallbacks(doneBtn, _gsound_red_butt_press, _gsound_red_butt_release);
 	}
 
 	int cancelBtn = buttonCreate(win,
@@ -662,7 +662,7 @@ int showLoadFileDialog(char *title, char **fileList, char *dest, int fileListLen
 								 nullptr,
 								 BUTTON_FLAG_TRANSPARENT);
 	if (cancelBtn != -1) {
-//		buttonSetCallbacks(cancelBtn, _gsound_red_butt_press, _gsound_red_butt_release); TODO audio
+		buttonSetCallbacks(cancelBtn, _gsound_red_butt_press, _gsound_red_butt_release);
 	}
 
 	int scrollUpBtn = buttonCreate(win,
@@ -679,7 +679,7 @@ int showLoadFileDialog(char *title, char **fileList, char *dest, int fileListLen
 								   nullptr,
 								   BUTTON_FLAG_TRANSPARENT);
 	if (scrollUpBtn != -1) {
-//		buttonSetCallbacks(cancelBtn, _gsound_red_butt_press, _gsound_red_butt_release); TODO audio
+		buttonSetCallbacks(cancelBtn, _gsound_red_butt_press, _gsound_red_butt_release);
 	}
 
 	int scrollDownButton = buttonCreate(win,
@@ -696,7 +696,7 @@ int showLoadFileDialog(char *title, char **fileList, char *dest, int fileListLen
 										nullptr,
 										BUTTON_FLAG_TRANSPARENT);
 	if (scrollUpBtn != -1) {
-//		buttonSetCallbacks(cancelBtn, _gsound_red_butt_press, _gsound_red_butt_release); TODO audio
+		buttonSetCallbacks(cancelBtn, _gsound_red_butt_press, _gsound_red_butt_release);
 	}
 
 	buttonCreate(
@@ -767,7 +767,7 @@ int showLoadFileDialog(char *title, char **fileList, char *dest, int fileListLen
 
 			selectedFileIndex = selectedLine;
 			if (selectedFileIndex == doubleClickSelectedFileIndex) {
-//				soundPlayFile("ib1p1xx1"); TODO audio
+				soundPlayFile("ib1p1xx1");
 				strncpy(dest, fileList[selectedFileIndex + pageOffset], 16);
 				rc = 0;
 			}
@@ -1009,7 +1009,7 @@ int showSaveFileDialog(char *title, char **fileList, char *dest, int fileListLen
 							   nullptr,
 							   BUTTON_FLAG_TRANSPARENT);
 	if (doneBtn != -1) {
-//		buttonSetCallbacks(doneBtn, _gsound_red_butt_press, _gsound_red_butt_release); TODO audio
+		buttonSetCallbacks(doneBtn, _gsound_red_butt_press, _gsound_red_butt_release);
 	}
 
 	int cancelBtn = buttonCreate(win,
@@ -1026,7 +1026,7 @@ int showSaveFileDialog(char *title, char **fileList, char *dest, int fileListLen
 								 nullptr,
 								 BUTTON_FLAG_TRANSPARENT);
 	if (cancelBtn != -1) {
-//		buttonSetCallbacks(cancelBtn, _gsound_red_butt_press, _gsound_red_butt_release); TODO audio
+		buttonSetCallbacks(cancelBtn, _gsound_red_butt_press, _gsound_red_butt_release);
 	}
 
 	int scrollUpBtn = buttonCreate(win,
@@ -1043,7 +1043,7 @@ int showSaveFileDialog(char *title, char **fileList, char *dest, int fileListLen
 								   nullptr,
 								   BUTTON_FLAG_TRANSPARENT);
 	if (scrollUpBtn != -1) {
-//		buttonSetCallbacks(cancelBtn, _gsound_red_butt_press, _gsound_red_butt_release); TODO audio
+		buttonSetCallbacks(cancelBtn, _gsound_red_butt_press, _gsound_red_butt_release);
 	}
 
 	int scrollDownButton = buttonCreate(win,
@@ -1060,7 +1060,7 @@ int showSaveFileDialog(char *title, char **fileList, char *dest, int fileListLen
 										nullptr,
 										BUTTON_FLAG_TRANSPARENT);
 	if (scrollUpBtn != -1) {
-//		buttonSetCallbacks(cancelBtn, _gsound_red_butt_press, _gsound_red_butt_release); TODO audio
+		buttonSetCallbacks(cancelBtn, _gsound_red_butt_press, _gsound_red_butt_release);
 	}
 
 	buttonCreate(
@@ -1135,7 +1135,7 @@ int showSaveFileDialog(char *title, char **fileList, char *dest, int fileListLen
 		if (keyCode == 500) {
 			rc = 0;
 		} else if (keyCode == KEY_RETURN) {
-//			soundPlayFile("ib1p1xx1"); TODO audio
+			soundPlayFile("ib1p1xx1");
 			rc = 0;
 		} else if (keyCode == 501 || keyCode == KEY_ESCAPE) {
 			rc = 1;
@@ -1167,7 +1167,7 @@ int showSaveFileDialog(char *title, char **fileList, char *dest, int fileListLen
 
 				selectedFileIndex = selectedLine;
 				if (selectedFileIndex == doubleClickSelectedFileIndex) {
-//					soundPlayFile("ib1p1xx1"); TODO audio
+					soundPlayFile("ib1p1xx1");
 					strncpy(dest, fileList[selectedFileIndex + pageOffset], 16);
 
 					int index;
