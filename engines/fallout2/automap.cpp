@@ -13,7 +13,7 @@
 #include "fallout2/draw.h"
 #include "fallout2/game.h"
 #include "fallout2/game_mouse.h"
-// #include "fallout2/game_sound.h" TODO audio
+#include "fallout2/game_sound.h"
 #include "fallout2/graph_lib.h"
 #include "fallout2/input.h"
 #include "fallout2/item.h"
@@ -347,7 +347,7 @@ void automapShow(bool isInGame, bool isUsingScanner) {
 								  nullptr,
 								  BUTTON_FLAG_TRANSPARENT);
 	if (scannerBtn != -1) {
-//		buttonSetCallbacks(scannerBtn, _gsound_red_butt_press, _gsound_red_butt_release); TODO audio
+		buttonSetCallbacks(scannerBtn, _gsound_red_butt_press, _gsound_red_butt_release);
 	}
 
 	int cancelBtn = buttonCreate(window,
@@ -364,7 +364,7 @@ void automapShow(bool isInGame, bool isUsingScanner) {
 								 nullptr,
 								 BUTTON_FLAG_TRANSPARENT);
 	if (cancelBtn != -1) {
-//		buttonSetCallbacks(cancelBtn, _gsound_red_butt_press, _gsound_red_butt_release); TODO audio
+		buttonSetCallbacks(cancelBtn, _gsound_red_butt_press, _gsound_red_butt_release);
 	}
 
 	int switchBtn = buttonCreate(window,
@@ -381,7 +381,7 @@ void automapShow(bool isInGame, bool isUsingScanner) {
 								 nullptr,
 								 BUTTON_FLAG_TRANSPARENT | BUTTON_FLAG_0x01);
 	if (switchBtn != -1) {
-//		buttonSetCallbacks(switchBtn, _gsound_toggle_butt_press_, _gsound_toggle_butt_press_); TODO audio
+		buttonSetCallbacks(switchBtn, _gsound_toggle_butt_press_, _gsound_toggle_butt_press_);
 	}
 
 	if ((gAutomapFlags & AUTOMAP_WTH_HIGH_DETAILS) == 0) {
@@ -460,7 +460,7 @@ void automapShow(bool isInGame, bool isUsingScanner) {
 					gAutomapFlags |= AUTOMAP_WITH_SCANNER;
 					miscItemConsumeCharge(scanner);
 				} else {
-//					soundPlayFile("iisxxxx1"); TODO audio
+					soundPlayFile("iisxxxx1");
 
 					MessageListItem messageListItem;
 					// 17 - The motion sensor is not installed.

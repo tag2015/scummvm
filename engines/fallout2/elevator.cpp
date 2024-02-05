@@ -13,7 +13,7 @@
 #include "fallout2/delay.h"
 #include "fallout2/draw.h"
 #include "fallout2/game_mouse.h"
-// #include "fallout2/game_sound.h" TODO audio
+#include "fallout2/game_sound.h"
 #include "fallout2/geometry.h"
 #include "fallout2/input.h"
 #include "fallout2/interface.h"
@@ -436,7 +436,7 @@ int elevatorSelectLevel(int elevator, int *mapPtr, int *elevationPtr, int *tileP
 				numberOfLevelsTravelled = -numberOfLevelsTravelled;
 			}
 
-//			soundPlayFile(gElevatorSoundEffects[gElevatorLevels[elevator] - 2][numberOfLevelsTravelled]); TODO audio
+			soundPlayFile(gElevatorSoundEffects[gElevatorLevels[elevator] - 2][numberOfLevelsTravelled]);
 
 			float v41 = (float)keyCode * v42;
 			float v44 = (float)(*elevationPtr) * v42;
@@ -596,7 +596,7 @@ static int elevatorWindowInit(int elevator) {
 							   nullptr,
 							   BUTTON_FLAG_TRANSPARENT);
 		if (btn != -1) {
-//			buttonSetCallbacks(btn, _gsound_red_butt_press, nullptr); TODO audio
+			buttonSetCallbacks(btn, _gsound_red_butt_press, nullptr);
 		}
 		y += 60;
 	}

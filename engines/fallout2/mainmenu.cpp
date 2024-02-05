@@ -6,7 +6,7 @@
 #include "fallout2/color.h"
 #include "fallout2/draw.h"
 #include "fallout2/game.h"
-// #include "game_sound.h"  TODO audio
+#include "fallout2/game_sound.h"
 #include "fallout2/input.h"
 #include "fallout2/kb.h"
 #include "fallout2/mouse.h"
@@ -258,11 +258,11 @@ void mainMenuWindowHide(bool animate) {
 		return;
 	}
 
-//	soundContinueAll();  TODO audio
+	soundContinueAll();
 
 	if (animate) {
 		paletteFadeTo(gPaletteBlack);
-//		soundContinueAll();  TODO audio
+		soundContinueAll();
 	}
 
 	windowHide(gMainMenuWindow);
@@ -388,7 +388,7 @@ static int main_menu_fatal_error() {
 //
 // 0x481C94
 static void main_menu_play_sound(const char *fileName) {
-//	soundPlayFile(fileName);  TODO audio
+	soundPlayFile(fileName);
 }
 
 } // namespace Fallout2
