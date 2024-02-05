@@ -17,7 +17,7 @@
 #include "fallout2/debug.h"
 #include "fallout2/draw.h"
 #include "fallout2/game.h"
-// #include "fallout2/game_sound.h" TODO audio
+#include "fallout2/game_sound.h"
 #include "fallout2/input.h"
 #include "fallout2/kb.h"
 #include "fallout2/memory.h"
@@ -224,7 +224,7 @@ int characterSelectorOpen() {
 			break;
 
 		case KEY_ARROW_LEFT:
-			//  soundPlayFile("ib2p1xx1"); TODO audio
+			soundPlayFile("ib2p1xx1");
 			// FALLTHROUGH
 		case 500:
 			gCurrentPremadeCharacter -= 1;
@@ -235,7 +235,7 @@ int characterSelectorOpen() {
 			break;
 
 		case KEY_ARROW_RIGHT:
-			//  soundPlayFile("ib2p1xx1"); TODO audio
+			soundPlayFile("ib2p1xx1");
 			// FALLTHROUGH
 		case 501:
 			gCurrentPremadeCharacter += 1;
@@ -334,7 +334,7 @@ static bool characterSelectorWindowInit() {
 		return characterSelectorWindowFatalError(false);
 	}
 
-	//	buttonSetCallbacks(gCharacterSelectorWindowPreviousButton, _gsound_med_butt_press, _gsound_med_butt_release); TODO audio
+	buttonSetCallbacks(gCharacterSelectorWindowPreviousButton, _gsound_med_butt_press, _gsound_med_butt_release);
 
 	// Setup "Next" button.
 	fid = buildFid(OBJ_TYPE_INTERFACE, 124, 0, 0, 0);
@@ -364,7 +364,7 @@ static bool characterSelectorWindowInit() {
 		return characterSelectorWindowFatalError(false);
 	}
 
-	//	buttonSetCallbacks(gCharacterSelectorWindowNextButton, _gsound_med_butt_press, _gsound_med_butt_release); TODO audio
+	buttonSetCallbacks(gCharacterSelectorWindowNextButton, _gsound_med_butt_press, _gsound_med_butt_release);
 
 	// Setup "Take" button.
 	fid = buildFid(OBJ_TYPE_INTERFACE, 8, 0, 0, 0);
@@ -394,7 +394,7 @@ static bool characterSelectorWindowInit() {
 		return characterSelectorWindowFatalError(false);
 	}
 
-	//	buttonSetCallbacks(gCharacterSelectorWindowTakeButton, _gsound_red_butt_press, _gsound_red_butt_release); TODO audio
+	buttonSetCallbacks(gCharacterSelectorWindowTakeButton, _gsound_red_butt_press, _gsound_red_butt_release);
 
 	// Setup "Modify" button.
 	fid = buildFid(OBJ_TYPE_INTERFACE, 8, 0, 0, 0);
@@ -423,7 +423,7 @@ static bool characterSelectorWindowInit() {
 		return characterSelectorWindowFatalError(false);
 	}
 
-	//	buttonSetCallbacks(gCharacterSelectorWindowModifyButton, _gsound_red_butt_press, _gsound_red_butt_release); TODO audio
+	buttonSetCallbacks(gCharacterSelectorWindowModifyButton, _gsound_red_butt_press, _gsound_red_butt_release);
 
 	// Setup "Create" button.
 	fid = buildFid(OBJ_TYPE_INTERFACE, 8, 0, 0, 0);
@@ -453,7 +453,7 @@ static bool characterSelectorWindowInit() {
 		return characterSelectorWindowFatalError(false);
 	}
 
-	//	buttonSetCallbacks(gCharacterSelectorWindowCreateButton, _gsound_red_butt_press, _gsound_red_butt_release); TODO audio
+	buttonSetCallbacks(gCharacterSelectorWindowCreateButton, _gsound_red_butt_press, _gsound_red_butt_release);
 
 	// Setup "Back" button.
 	fid = buildFid(OBJ_TYPE_INTERFACE, 8, 0, 0, 0);
@@ -483,7 +483,7 @@ static bool characterSelectorWindowInit() {
 		return characterSelectorWindowFatalError(false);
 	}
 
-	//	buttonSetCallbacks(gCharacterSelectorWindowBackButton, _gsound_red_butt_press, _gsound_red_butt_release); TODO audio
+	buttonSetCallbacks(gCharacterSelectorWindowBackButton, _gsound_red_butt_press, _gsound_red_butt_release);
 
 	gCurrentPremadeCharacter = PREMADE_CHARACTER_NARG;
 
