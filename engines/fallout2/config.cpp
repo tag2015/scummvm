@@ -1,5 +1,6 @@
 #include "fallout2/config.h"
 
+#include "fallout2/fallout2.h"
 /*#include <ctype.h>
 #include <errno.h>
 #include <limits.h>
@@ -10,6 +11,8 @@
 #include "fallout2/db.h"
 #include "fallout2/memory.h"
 #include "fallout2/platform_compat.h"
+
+#include "common/savefile.h"
 
 namespace Fallout2 {
 
@@ -297,58 +300,64 @@ bool configRead(Config *config, const char *filePath, bool isDb) {
 	return true;
 }
 
-// Writes config into .INI file.
-//
-// 0x42C324
-// TODO: Write config
-bool configWrite(Config *config, const char *filePath, bool isDb) {
-#if 0
-	if (config == nullptr || filePath == nullptr) {
+// Reads .cfg from ScummVM save folder
+bool configReadScumm(Config *config) {
+	if (config == nullptr) {
 		return false;
 	}
 
-	if (isDb) {
-		File *stream = fileOpen(filePath, "wt");
-		if (stream == nullptr) {
-			return false;
-		}
+	Common::SaveFileManager *saveMan = g_system->getSavefileManager();
+	Common::String cfgFileName(g_engine->getTargetName());
+	cfgFileName += ".cfg";
+	Common::InSaveFile *stream = saveMan->openForLoading(Common::String(cfgFileName));
 
-		for (int sectionIndex = 0; sectionIndex < config->entriesLength; sectionIndex++) {
-			DictionaryEntry *sectionEntry = &(config->entries[sectionIndex]);
-			filePrintFormatted(stream, "[%s]\n", sectionEntry->key);
-
-			ConfigSection *section = (ConfigSection *)sectionEntry->value;
-			for (int index = 0; index < section->entriesLength; index++) {
-				DictionaryEntry *keyValueEntry = &(section->entries[index]);
-				filePrintFormatted(stream, "%s=%s\n", keyValueEntry->key, *(char **)keyValueEntry->value);
-			}
-
-			filePrintFormatted(stream, "\n");
-		}
-
-		fileClose(stream);
-	} else {
-		FILE *stream = compat_fopen(filePath, "wt");
-		if (stream == nullptr) {
-			return false;
-		}
-
-		for (int sectionIndex = 0; sectionIndex < config->entriesLength; sectionIndex++) {
-			DictionaryEntry *sectionEntry = &(config->entries[sectionIndex]);
-			fprintf(stream, "[%s]\n", sectionEntry->key);
-
-			ConfigSection *section = (ConfigSection *)sectionEntry->value;
-			for (int index = 0; index < section->entriesLength; index++) {
-				DictionaryEntry *keyValueEntry = &(section->entries[index]);
-				fprintf(stream, "%s=%s\n", keyValueEntry->key, *(char **)keyValueEntry->value);
-			}
-
-			fprintf(stream, "\n");
-		}
-
-		fclose(stream);
+	// CE: Return `false` if file does not exists on the file system.
+	if (stream == nullptr) {
+		return false;
 	}
-#endif
+	while (1) {
+		Common::String cfgString(stream->readLine());
+		if (stream->eos())
+			break;
+		configParseLine(config, const_cast<char *>(cfgString.c_str()));
+	}
+
+	delete stream;
+
+	return true;
+}
+
+// Writes config into .INI file.
+//
+// 0x42C324
+bool configWrite(Config *config, const char *filePath, bool isDb) {
+	if (config == nullptr)
+		return false;
+
+	Common::SaveFileManager *saveMan = g_system->getSavefileManager();
+	Common::String cfgFileName(g_engine->getTargetName());
+	cfgFileName += ".cfg";
+	Common::OutSaveFile *stream = saveMan->openForSaving(Common::String(cfgFileName), false);
+
+	if (stream == nullptr) {
+		return false;
+	}
+
+	for (int sectionIndex = 0; sectionIndex < config->entriesLength; sectionIndex++) {
+		DictionaryEntry *sectionEntry = &(config->entries[sectionIndex]);
+		stream->writeString(Common::String::format("[%s]\n", sectionEntry->key));
+
+		ConfigSection *section = (ConfigSection *)sectionEntry->value;
+		for (int index = 0; index < section->entriesLength; index++) {
+			DictionaryEntry *keyValueEntry = &(section->entries[index]);
+			stream->writeString(Common::String::format("%s=%s\n", keyValueEntry->key, *(char **)keyValueEntry->value));
+		}
+		stream->writeString("\n");
+	}
+
+	stream->finalize();
+	delete stream;
+
 	return true;
 }
 
