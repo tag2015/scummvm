@@ -51,6 +51,7 @@
 #include "fallout2/game_dialog.h"
 #include "fallout2/game_mouse.h"
 #include "fallout2/game_memory.h"
+#include "fallout2/game_sound.h"
 #include "fallout2/interface.h"
 #include "fallout2/input.h"
 #include "fallout2/inventory.h"
@@ -597,6 +598,12 @@ Common::Error Fallout2Engine::run() {
 
 	// init player inventory
 	_inven_reset_dude();
+
+	// init sound
+	if (gameSoundInit() != 0)
+		warning("Sound initialization failed");
+	else
+		debug("Initialized sound!");
 
 	// init main isometric view (tiles, objects, interface)
 	if (isoInit() != 0)
