@@ -43,6 +43,7 @@ MODULE_OBJS = \
 	game_config.o \
 	game_memory.o \
 	game_mouse.o \
+	game_sound.o \
 	geometry.o \
 	graph_lib.o \
 	heap.o \
