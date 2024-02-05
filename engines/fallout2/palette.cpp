@@ -6,7 +6,7 @@
 
 #include "fallout2/color.h"
 #include "fallout2/cycle.h"
-// #include "game_sound.h" TODO audio
+#include "fallout2/game_sound.h"
 #include "fallout2/input.h"
 #include "fallout2/svga.h"
 
@@ -33,10 +33,9 @@ void paletteInit() {
 	memcpy(gPalette, _cmap, 256 * 3);
 
 	unsigned int tick = getTicks();
-	// TODO audio
-	//	if (backgroundSoundIsEnabled() || speechIsEnabled()) {
-	//  colorPaletteSetTransitionCallback(soundContinueAll);
-	//	}
+	if (backgroundSoundIsEnabled() || speechIsEnabled()) {
+		colorPaletteSetTransitionCallback(soundContinueAll);
+	}
 
 	// This call is a benchmark
 	colorPaletteFadeBetween(gPalette, gPalette, 60);
@@ -74,10 +73,9 @@ void paletteFadeTo(unsigned char *palette) {
 	bool colorCycleWasEnabled = colorCycleEnabled();
 	colorCycleDisable();
 
-	// TODO audio
-	//	if (backgroundSoundIsEnabled() || speechIsEnabled()) {
-	//		colorPaletteSetTransitionCallback(soundContinueAll);
-	//	}
+	if (backgroundSoundIsEnabled() || speechIsEnabled()) {
+		colorPaletteSetTransitionCallback(soundContinueAll);
+	}
 
 	colorPaletteFadeBetween(gPalette, palette, gPaletteFadeSteps);
 	colorPaletteSetTransitionCallback(nullptr);

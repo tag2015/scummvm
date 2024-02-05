@@ -9,7 +9,7 @@
 #include "fallout2/combat.h"
 #include "fallout2/draw.h"
 #include "fallout2/game_mouse.h"
-// #include "fallout2/game_sound.h" TODO audio
+#include "fallout2/game_sound.h"
 #include "fallout2/geometry.h"
 #include "fallout2/input.h"
 #include "fallout2/interface.h"
@@ -250,7 +250,7 @@ void displayMonitorAddMessage(char *str) {
 		unsigned int now = _get_bk_time();
 		if (getTicksBetween(now, gDisplayMonitorLastBeepTimestamp) >= DISPLAY_MONITOR_BEEP_DELAY) {
 			gDisplayMonitorLastBeepTimestamp = now;
-//			soundPlayFile("monitor"); TODO audio
+			soundPlayFile("monitor");
 		}
 	}
 
