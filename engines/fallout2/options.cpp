@@ -7,7 +7,7 @@
 #include "fallout2/draw.h"
 #include "fallout2/game.h"
 #include "fallout2/game_mouse.h"
-// #include "fallout2/game_sound.h" TODO audio
+#include "fallout2/game_sound.h"
 #include "fallout2/graph_lib.h"
 #include "fallout2/input.h"
 #include "fallout2/kb.h"
@@ -109,7 +109,7 @@ int showOptions() {
 			case KEY_LOWERCASE_O:
 			case KEY_UPPERCASE_D:
 			case KEY_LOWERCASE_D:
-//				soundPlayFile("ib1p1xx1"); TODO audio
+				soundPlayFile("ib1p1xx1");
 				rc = 0;
 				break;
 			case KEY_UPPERCASE_S:
@@ -128,7 +128,7 @@ int showOptions() {
 				break;
 			case KEY_UPPERCASE_P:
 			case KEY_LOWERCASE_P:
-//				soundPlayFile("ib1p1xx1"); TODO audio
+				soundPlayFile("ib1p1xx1");
 			// FALLTHROUGH
 			case 502:
 				// PREFERENCES
@@ -282,7 +282,7 @@ static int optionsWindowInit() {
 							   nullptr,
 							   BUTTON_FLAG_TRANSPARENT);
 		if (btn != -1) {
-//			buttonSetCallbacks(btn, _gsound_lrg_butt_press, _gsound_lrg_butt_release); TODO audio
+			buttonSetCallbacks(btn, _gsound_lrg_butt_press, _gsound_lrg_butt_release);
 		}
 
 		buttonY += _optionsFrmImages[OPTIONS_WINDOW_FRM_BUTTON_ON].getHeight() + 3;
@@ -430,7 +430,7 @@ int showPause(bool a1) {
 							   nullptr,
 							   BUTTON_FLAG_TRANSPARENT);
 	if (doneBtn != -1) {
-//		buttonSetCallbacks(doneBtn, _gsound_red_butt_press, _gsound_red_butt_release); TODO audio
+		buttonSetCallbacks(doneBtn, _gsound_red_butt_press, _gsound_red_butt_release);
 	}
 
 	windowRefresh(window);
