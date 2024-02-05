@@ -13,7 +13,7 @@
 #include "fallout2/debug.h"
 #include "fallout2/display_monitor.h"
 #include "fallout2/game.h"
-// #include "fallout2/game_sound.h" TODO audio
+#include "fallout2/game_sound.h"
 #include "fallout2/input.h"
 #include "fallout2/interface.h"
 #include "fallout2/item.h"
@@ -2814,9 +2814,9 @@ static int _ai_try_attack(Object *attacker, Object *defender) {
 				}
 
 				if (remainingAmmoQuantity != -1) {
-/*					int volume = _gsound_compute_relative_volume(attacker); TODO audio
+					int volume = _gsound_compute_relative_volume(attacker);
 					const char *sfx = sfxBuildWeaponName(WEAPON_SOUND_EFFECT_READY, weapon, hitMode, nullptr);
-					_gsound_play_sfx_file_volume(sfx, volume);*/
+					_gsound_play_sfx_file_volume(sfx, volume);
 					_ai_magic_hands(attacker, weapon, 5002);
 
 					// SFALL: Fix incorrect AP cost when AI reloads a weapon.
@@ -2842,9 +2842,9 @@ static int _ai_try_attack(Object *attacker, Object *defender) {
 						}
 
 						if (remainingAmmoQuantity != -1) {
-/*							int volume = _gsound_compute_relative_volume(attacker);  TODO audio
+							int volume = _gsound_compute_relative_volume(attacker);
 							const char *sfx = sfxBuildWeaponName(WEAPON_SOUND_EFFECT_READY, weapon, hitMode, nullptr);
-							_gsound_play_sfx_file_volume(sfx, volume);*/
+							_gsound_play_sfx_file_volume(sfx, volume);
 							_ai_magic_hands(attacker, weapon, 5002);
 
 							// SFALL: Fix incorrect AP cost when AI reloads a
@@ -2861,9 +2861,9 @@ static int _ai_try_attack(Object *attacker, Object *defender) {
 						}
 					}
 				} else {
-/*					int volume = _gsound_compute_relative_volume(attacker); TODO audio
+					int volume = _gsound_compute_relative_volume(attacker);
 					const char *sfx = sfxBuildWeaponName(WEAPON_SOUND_EFFECT_OUT_OF_AMMO, weapon, hitMode, nullptr);
-					_gsound_play_sfx_file_volume(sfx, volume);*/
+					_gsound_play_sfx_file_volume(sfx, volume);
 					_ai_magic_hands(attacker, weapon, 5001);
 
 					if (_inven_unwield(attacker, 1) == 0) {
@@ -3002,9 +3002,9 @@ void aiAttemptWeaponReload(Object *critter, int animate) {
 			}
 
 			if (rc != -1 && objectIsPartyMember(critter)) {
-/*				int volume = _gsound_compute_relative_volume(critter);
+				int volume = _gsound_compute_relative_volume(critter);
 				const char *sfx = sfxBuildWeaponName(WEAPON_SOUND_EFFECT_READY, weapon, HIT_MODE_RIGHT_WEAPON_PRIMARY, nullptr);
-				_gsound_play_sfx_file_volume(sfx, volume);*/
+				_gsound_play_sfx_file_volume(sfx, volume);
 
 				if (animate) {
 					_ai_magic_hands(critter, weapon, 5002);

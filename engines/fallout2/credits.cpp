@@ -20,7 +20,7 @@
 #include "fallout2/mouse.h"
 #include "fallout2/palette.h"
 #include "fallout2/platform_compat.h"
-// #include "fallout2/sound.h" TODO audio
+#include "fallout2/sound.h"
 #include "fallout2/svga.h"
 #include "fallout2/text_font.h"
 #include "fallout2/window_manager.h"
@@ -64,13 +64,13 @@ void creditsOpen(const char *filePath, int backgroundFid, bool useReversedStyle)
 		gCreditsWindowNameColor = _colorTable[18917];
 	}
 
-//	soundContinueAll(); TODO audio
+	soundContinueAll();
 
 	char localizedPath[COMPAT_MAX_PATH];
 	if (_message_make_path(localizedPath, sizeof(localizedPath), filePath)) {
 		gCreditsFile = fileOpen(localizedPath, "rt");
 		if (gCreditsFile != nullptr) {
-//			soundContinueAll();  TODO audio
+			soundContinueAll();
 
 			colorCycleDisable();
 			gameMouseSetCursor(MOUSE_CURSOR_NONE);
@@ -83,13 +83,13 @@ void creditsOpen(const char *filePath, int backgroundFid, bool useReversedStyle)
 			int windowWidth = screenGetWidth();
 			int windowHeight = screenGetHeight();
 			int window = windowCreate(0, 0, windowWidth, windowHeight, _colorTable[0], 20);
-//			soundContinueAll();  TODO audio
+			soundContinueAll();
 			if (window != -1) {
 				unsigned char *windowBuffer = windowGetBuffer(window);
 				if (windowBuffer != nullptr) {
 					unsigned char *backgroundBuffer = (unsigned char *)internal_malloc(windowWidth * windowHeight);
 					if (backgroundBuffer) {
-//						soundContinueAll(); TODO audio
+						soundContinueAll();
 
 						memset(backgroundBuffer, _colorTable[0], windowWidth * windowHeight);
 
@@ -235,9 +235,9 @@ void creditsOpen(const char *filePath, int backgroundFid, bool useReversedStyle)
 					}
 				}
 
-//				soundContinueAll();  TODO audio
+				soundContinueAll();
 				paletteFadeTo(gPaletteBlack);
-//				soundContinueAll();  TODO audio
+				soundContinueAll();
 				windowDestroy(window);
 			}
 
