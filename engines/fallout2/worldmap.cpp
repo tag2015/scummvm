@@ -26,7 +26,7 @@
 #include "fallout2/game.h"
 #include "fallout2/game_mouse.h"
 // #include "fallout2/game_movie.h" TODO movie
-// #include "fallout2/game_sound.h" TODO audio
+#include "fallout2/game_sound.h"
 #include "fallout2/input.h"
 #include "fallout2/interface.h"
 #include "fallout2/item.h"
@@ -4526,8 +4526,8 @@ static int wmInterfaceInit() {
 
 	_map_save_in_game(true);
 
-//	const char *backgroundSoundFileName = wmGenData.isInCar ? "20car" : "23world"; TODO audio
-//	_gsound_background_play_level_music(backgroundSoundFileName, 12);
+	const char *backgroundSoundFileName = wmGenData.isInCar ? "20car" : "23world";
+	_gsound_background_play_level_music(backgroundSoundFileName, 12);
 
 	// CE: Hide entire interface, not just indicator bar, and disable tile
 	// engine.
@@ -4686,7 +4686,7 @@ static int wmInterfaceInit() {
 
 	// SFALL: Add missing button sounds.
 	if (switchBtn != -1) {
-//		buttonSetCallbacks(switchBtn, _gsound_red_butt_press, _gsound_red_butt_release); TODO audio
+		buttonSetCallbacks(switchBtn, _gsound_red_butt_press, _gsound_red_butt_release);
 	}
 
 	for (int index = 0; index < 7; index++) {
@@ -4706,7 +4706,7 @@ static int wmInterfaceInit() {
 
 		// SFALL: Add missing button sounds.
 		if (wmTownMapSubButtonIds[index] != -1) {
-//			buttonSetCallbacks(wmTownMapSubButtonIds[index], _gsound_red_butt_press, _gsound_red_butt_release); TODO audio
+			buttonSetCallbacks(wmTownMapSubButtonIds[index], _gsound_red_butt_press, _gsound_red_butt_release);
 		}
 	}
 
@@ -4747,7 +4747,7 @@ static int wmInterfaceInit() {
 
 	// SFALL: Add missing button sounds.
 	if (scrollUpBtn != -1) {
-//		buttonSetCallbacks(scrollUpBtn, _gsound_red_butt_press, _gsound_red_butt_release); TODO audio
+		buttonSetCallbacks(scrollUpBtn, _gsound_red_butt_press, _gsound_red_butt_release);
 	}
 
 	// Scroll down button.
@@ -4767,7 +4767,7 @@ static int wmInterfaceInit() {
 
 	// SFALL: Add missing button sounds.
 	if (scrollDownBtn != -1) {
-//		buttonSetCallbacks(scrollDownBtn, _gsound_red_butt_press, _gsound_red_butt_release); TODO audio
+		buttonSetCallbacks(scrollDownBtn, _gsound_red_butt_press, _gsound_red_butt_release);
 	}
 
 	if (wmGenData.isInCar) {
@@ -6502,9 +6502,9 @@ int wmMapMusicStart() {
 			break;
 		}
 
-/*		if (_gsound_background_play_level_music(map->music, 12) == -1) { TODO audio
+		if (_gsound_background_play_level_music(map->music, 12) == -1) {
 			break;
-		}*/
+		}
 
 		return 0;
 	} while (0);
@@ -6532,7 +6532,7 @@ int wmSetMapMusic(int mapIdx, const char *name) {
 	map->music[39] = '\0';
 
 	if (mapGetCurrentMap() == mapIdx) {
-//		backgroundSoundDelete(); TODO audio
+		backgroundSoundDelete();
 		wmMapMusicStart();
 	}
 

@@ -13,7 +13,7 @@
 #include "fallout2/draw.h"
 #include "fallout2/game.h"
 #include "fallout2/game_mouse.h"
-// #include "fallout2/game_sound.h" TODO audio
+#include "fallout2/game_sound.h"
 #include "fallout2/graph_lib.h"
 #include "fallout2/input.h"
 #include "fallout2/kb.h"
@@ -34,9 +34,6 @@ namespace Fallout2 {
 
 #define PRIMARY_OPTION_VALUE_COUNT 4
 #define SECONDARY_OPTION_VALUE_COUNT 2
-
-//TODO remove
-#define VOLUME_MAX (0x7FFF)
 
 typedef enum Preference {
 	PREF_GAME_DIFFICULTY,
@@ -550,10 +547,10 @@ static void _JustUpdate_() {
 	textObjectsSetLineDelay(textLineDelay);
 	aiMessageListReloadIfNeeded();
 	_scr_message_free();
-/*	gameSoundSetMasterVolume(gPreferencesMasterVolume1);  TODO audio
+	gameSoundSetMasterVolume(gPreferencesMasterVolume1);
 	backgroundSoundSetVolume(gPreferencesMusicVolume1);
 	soundEffectsSetVolume(gPreferencesSoundEffectsVolume1);
-	speechSetVolume(gPreferencesSpeechVolume1); */
+	speechSetVolume(gPreferencesSpeechVolume1);
 	mouseSetSensitivity(gPreferencesMouseSensitivity1);
 	colorSetBrightness(gPreferencesBrightness1);
 }
@@ -683,16 +680,16 @@ static void _UpdateThing(int index) {
 
 				switch (index) {
 				case PREF_MASTER_VOLUME:
-//					gameSoundSetMasterVolume(gPreferencesMasterVolume1); TODO audio
+					gameSoundSetMasterVolume(gPreferencesMasterVolume1);
 					break;
 				case PREF_MUSIC_VOLUME:
-//					backgroundSoundSetVolume(gPreferencesMusicVolume1); TODO audio
+					backgroundSoundSetVolume(gPreferencesMusicVolume1);
 					break;
 				case PREF_SFX_VOLUME:
-//					soundEffectsSetVolume(gPreferencesSoundEffectsVolume1); TODO audio
+					soundEffectsSetVolume(gPreferencesSoundEffectsVolume1);
 					break;
 				case PREF_SPEECH_VOLUME:
-//					speechSetVolume(gPreferencesSpeechVolume1); TODO audio
+					speechSetVolume(gPreferencesSpeechVolume1);
 					break;
 				}
 			}
@@ -1197,7 +1194,7 @@ static int preferencesWindowInit() {
 		_win_set_button_rest_state(_plyrspdbid, gPreferencesPlayerSpeedup1, 0);
 	}
 
-//	buttonSetCallbacks(_plyrspdbid, _gsound_med_butt_press, _gsound_med_butt_press); TODO audio
+	buttonSetCallbacks(_plyrspdbid, _gsound_med_butt_press, _gsound_med_butt_press);
 
 	// DEFAULT
 	btn = buttonCreate(gPreferencesWindow,
@@ -1214,7 +1211,7 @@ static int preferencesWindowInit() {
 					   nullptr,
 					   BUTTON_FLAG_TRANSPARENT);
 	if (btn != -1) {
-//		buttonSetCallbacks(btn, _gsound_red_butt_press, _gsound_red_butt_release); TODO audio
+		buttonSetCallbacks(btn, _gsound_red_butt_press, _gsound_red_butt_release);
 	}
 
 	// DONE
@@ -1232,7 +1229,7 @@ static int preferencesWindowInit() {
 					   nullptr,
 					   BUTTON_FLAG_TRANSPARENT);
 	if (btn != -1) {
-//		buttonSetCallbacks(btn, _gsound_red_butt_press, _gsound_red_butt_release); TODO audio
+		buttonSetCallbacks(btn, _gsound_red_butt_press, _gsound_red_butt_release);
 	}
 
 	// CANCEL
@@ -1250,7 +1247,7 @@ static int preferencesWindowInit() {
 					   nullptr,
 					   BUTTON_FLAG_TRANSPARENT);
 	if (btn != -1) {
-//		buttonSetCallbacks(btn, _gsound_red_butt_press, _gsound_red_butt_release); TODO audio
+		buttonSetCallbacks(btn, _gsound_red_butt_press, _gsound_red_butt_release);
 	}
 
 	fontSetCurrent(101);
@@ -1310,7 +1307,7 @@ int doPreferences(bool animated) {
 		case KEY_RETURN:
 		case KEY_UPPERCASE_P:
 		case KEY_LOWERCASE_P:
-//			soundPlayFile("ib1p1xx1"); TODO audio
+			soundPlayFile("ib1p1xx1");
 		// FALLTHROUGH
 		case 504:
 			rc = 1;
@@ -1437,9 +1434,9 @@ static void _DoThing(int eventCode) {
 		}
 
 		if (valueChanged) {
-//			soundPlayFile("ib3p1xx1"); TODO audio
+			soundPlayFile("ib3p1xx1");
 			inputBlockForTocks(70);
-//			soundPlayFile("ib3lu1x1"); TODO audio
+			soundPlayFile("ib3lu1x1");
 			_UpdateThing(preferenceIndex);
 			windowRefresh(gPreferencesWindow);
 			_changed = true;
@@ -1471,9 +1468,9 @@ static void _DoThing(int eventCode) {
 		}
 
 		if (valueChanged) {
-//			soundPlayFile("ib2p1xx1"); TODO audio
+			soundPlayFile("ib2p1xx1");
 			inputBlockForTocks(70);
-//			soundPlayFile("ib2lu1x1"); TODO audio
+			soundPlayFile("ib2lu1x1");
 			_UpdateThing(preferenceIndex);
 			windowRefresh(gPreferencesWindow);
 			_changed = true;
@@ -1483,7 +1480,7 @@ static void _DoThing(int eventCode) {
 		PreferenceDescription *meta = &(gPreferenceDescriptions[preferenceIndex]);
 		int *valuePtr = meta->valuePtr;
 
-//		soundPlayFile("ib1p1xx1"); TODO audio
+		soundPlayFile("ib1p1xx1");
 
 		double value;
 		switch (preferenceIndex) {
@@ -1520,7 +1517,7 @@ static void _DoThing(int eventCode) {
 			mouseGetPositionInWindow(gPreferencesWindow, &x, &y);
 
 			if (mouseGetEvent() & 0x10) {
-//				soundPlayFile("ib1lu1x1"); TODO audio
+				soundPlayFile("ib1lu1x1");
 				_UpdateThing(preferenceIndex);
 				windowRefresh(gPreferencesWindow);
 				renderPresent();
@@ -1555,20 +1552,20 @@ static void _DoThing(int eventCode) {
 				break;
 			case PREF_MASTER_VOLUME:
 				*meta->valuePtr = (int)newValue;
-//				gameSoundSetMasterVolume(gPreferencesMasterVolume1); TODO audio
+				gameSoundSetMasterVolume(gPreferencesMasterVolume1);
 				v52 = 1;
 				break;
 			case PREF_MUSIC_VOLUME:
 				*meta->valuePtr = (int)newValue;
-//				backgroundSoundSetVolume(gPreferencesMusicVolume1); TODO audio
+				backgroundSoundSetVolume(gPreferencesMusicVolume1);
 				v52 = 1;
 				break;
 			case PREF_SFX_VOLUME:
 				*meta->valuePtr = (int)newValue;
-//				soundEffectsSetVolume(gPreferencesSoundEffectsVolume1); TODO audio
+				soundEffectsSetVolume(gPreferencesSoundEffectsVolume1);
 				v52 = 1;
 				if (sfxVolumeExample == 0) {
-//					soundPlayFile("butin1"); TODO audio
+					soundPlayFile("butin1");
 					sfxVolumeExample = 7;
 				} else {
 					sfxVolumeExample--;
@@ -1576,10 +1573,10 @@ static void _DoThing(int eventCode) {
 				break;
 			case PREF_SPEECH_VOLUME:
 				*meta->valuePtr = (int)newValue;
-//				speechSetVolume(gPreferencesSpeechVolume1); TODO audio
+				speechSetVolume(gPreferencesSpeechVolume1);
 				v52 = 1;
 				if (speechVolumeExample == 0) {
-//					speechLoad("narrator\\options", 12, 13, 15); TODO audio
+					speechLoad("narrator\\options", 12, 13, 15);
 					speechVolumeExample = 40;
 				} else {
 					speechVolumeExample--;
