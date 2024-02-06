@@ -27,7 +27,7 @@
 #include "fallout2/game.h"
 #include "fallout2/game_mouse.h"
 //#include "fallout2/game_movie.h" TODO movie
-//#include "fallout2/game_sound.h" TODO audio
+#include "fallout2/game_sound.h"
 #include "fallout2/geometry.h"
 #include "fallout2/input.h"
 #include "fallout2/interface.h"
@@ -423,7 +423,7 @@ int lsgSaveGame(int mode) {
 			return -1;
 		}
 
-//		soundPlayFile("iisxxxx1"); TODO audio
+		soundPlayFile("iisxxxx1");
 
 		// Error saving game!
 		strncpy(_str0, getmsg(&gLoadSaveMessageList, &messageListItem, 132), sizeof(_str0) - 1);
@@ -453,7 +453,7 @@ int lsgSaveGame(int mode) {
 	if (_GetSlotList() == -1) {
 		windowRefresh(gLoadSaveWindow);
 
-//		soundPlayFile("iisxxxx1"); TODO audio
+		soundPlayFile("iisxxxx1");
 
 		// Error loading save game list!
 		strncpy(_str0, getmsg(&gLoadSaveMessageList, &messageListItem, 106), sizeof(_str0) - 1);
@@ -570,7 +570,7 @@ int lsgSaveGame(int mode) {
 
 					if (_slot_cursor == doubleClickSlot) {
 						keyCode = 500;
-//						soundPlayFile("ib1p1xx1"); TODO audio
+						soundPlayFile("ib1p1xx1");
 					}
 
 					doubleClickSlot = _slot_cursor;
@@ -730,7 +730,7 @@ int lsgSaveGame(int mode) {
 			int v50 = _GetComment(_slot_cursor);
 			if (v50 == -1) {
 				gameMouseSetCursor(MOUSE_CURSOR_ARROW);
-//				soundPlayFile("iisxxxx1"); TODO audio
+				soundPlayFile("iisxxxx1");
 				debugPrint("\nLOADSAVE: ** Error getting save file comment **\n");
 
 				// Error saving game!
@@ -750,7 +750,7 @@ int lsgSaveGame(int mode) {
 				debug("Starting lsgPerformSaveGame!");
 				if (lsgPerformSaveGame() == -1) {
 					gameMouseSetCursor(MOUSE_CURSOR_ARROW);
-//					soundPlayFile("iisxxxx1"); TODO audio
+					soundPlayFile("iisxxxx1");
 
 					// Error saving game!
 					strncpy(_str0, getmsg(&gLoadSaveMessageList, &gLoadSaveMessageListItem, 132), sizeof(_str0) - 1);
@@ -766,7 +766,7 @@ int lsgSaveGame(int mode) {
 
 					if (_GetSlotList() == -1) {
 						windowRefresh(gLoadSaveWindow);
-//						soundPlayFile("iisxxxx1"); TODO audio
+						soundPlayFile("iisxxxx1");
 
 						// Error loading save agme list!
 						strncpy(_str0, getmsg(&gLoadSaveMessageList, &gLoadSaveMessageListItem, 106), sizeof(_str0) - 1);
@@ -930,7 +930,7 @@ int lsgLoadGame(int mode) {
 		}
 
 		gameMouseSetCursor(MOUSE_CURSOR_ARROW);
-//		soundPlayFile("iisxxxx1"); TODO audio
+		soundPlayFile("iisxxxx1");
 		strncpy(_str0, getmsg(&gLoadSaveMessageList, &messageListItem, 134), sizeof(_str0) - 1);
 		strncpy(_str1, getmsg(&gLoadSaveMessageList, &messageListItem, 135), sizeof(_str1) - 1);
 		showDialogBox(_str0, body, 1, 169, 116, _colorTable[32328], 0, _colorTable[32328], DIALOG_BOX_LARGE);
@@ -968,7 +968,7 @@ int lsgLoadGame(int mode) {
 		gameMouseSetCursor(MOUSE_CURSOR_ARROW);
 		windowRefresh(gLoadSaveWindow);
 		renderPresent();
-//		soundPlayFile("iisxxxx1"); TODO audio
+		soundPlayFile("iisxxxx1");
 		strncpy(_str0, getmsg(&gLoadSaveMessageList, &gLoadSaveMessageListItem, 106), sizeof(_str0) - 1);
 		strncpy(_str1, getmsg(&gLoadSaveMessageList, &gLoadSaveMessageListItem, 107), sizeof(_str1) - 1);
 		snprintf(_str2, sizeof(_str2), "\"%s\\\"", "SAVEGAME");
@@ -1069,7 +1069,7 @@ int lsgLoadGame(int mode) {
 					_slot_cursor = clickedSlot;
 					if (clickedSlot == doubleClickSlot) {
 						keyCode = 500;
-//						soundPlayFile("ib1p1xx1"); TODO audio
+						soundPlayFile("ib1p1xx1");
 					}
 
 					selectionChanged = true;
@@ -1234,7 +1234,7 @@ int lsgLoadGame(int mode) {
 		if (rc == 1) {
 			switch (_LSstatus[_slot_cursor]) {
 			case SLOT_STATE_UNSUPPORTED_VERSION:
-//				soundPlayFile("iisxxxx1"); TODO audio
+				soundPlayFile("iisxxxx1");
 				strncpy(_str0, getmsg(&gLoadSaveMessageList, &gLoadSaveMessageListItem, 134), sizeof(_str0) - 1);
 				strncpy(_str1, getmsg(&gLoadSaveMessageList, &gLoadSaveMessageListItem, 136), sizeof(_str1) - 1);
 				strncpy(_str2, getmsg(&gLoadSaveMessageList, &gLoadSaveMessageListItem, 135), sizeof(_str2) - 1);
@@ -1242,7 +1242,7 @@ int lsgLoadGame(int mode) {
 				rc = -1;
 				break;
 			case SLOT_STATE_ERROR:
-//				soundPlayFile("iisxxxx1"); TODO audio
+				soundPlayFile("iisxxxx1");
 				strncpy(_str0, getmsg(&gLoadSaveMessageList, &gLoadSaveMessageListItem, 134), sizeof(_str0) - 1);
 				strncpy(_str1, getmsg(&gLoadSaveMessageList, &gLoadSaveMessageListItem, 136), sizeof(_str1) - 1);
 				showDialogBox(_str0, body, 1, 169, 116, _colorTable[32328], 0, _colorTable[32328], DIALOG_BOX_LARGE);
@@ -1251,7 +1251,7 @@ int lsgLoadGame(int mode) {
 			default:
 				if (lsgLoadGameInSlot(_slot_cursor) == -1) {
 					gameMouseSetCursor(MOUSE_CURSOR_ARROW);
-//					soundPlayFile("iisxxxx1"); TODO audio
+					soundPlayFile("iisxxxx1");
 					strncpy(_str0, getmsg(&gLoadSaveMessageList, &gLoadSaveMessageListItem, 134), sizeof(_str0) - 1);
 					strncpy(_str1, getmsg(&gLoadSaveMessageList, &gLoadSaveMessageListItem, 135), sizeof(_str1) - 1);
 					showDialogBox(_str0, body, 1, 169, 116, _colorTable[32328], 0, _colorTable[32328], DIALOG_BOX_LARGE);
@@ -1442,7 +1442,7 @@ static int lsgWindowInit(int windowType) {
 					   nullptr,
 					   BUTTON_FLAG_TRANSPARENT);
 	if (btn != -1) {
-//		buttonSetCallbacks(btn, _gsound_red_butt_press, _gsound_red_butt_release); TODO audio
+		buttonSetCallbacks(btn, _gsound_red_butt_press, _gsound_red_butt_release);
 	}
 
 	btn = buttonCreate(gLoadSaveWindow,
@@ -1459,7 +1459,7 @@ static int lsgWindowInit(int windowType) {
 					   nullptr,
 					   BUTTON_FLAG_TRANSPARENT);
 	if (btn != -1) {
-//		buttonSetCallbacks(btn, _gsound_red_butt_press, _gsound_red_butt_release); TODO audio
+		buttonSetCallbacks(btn, _gsound_red_butt_press, _gsound_red_butt_release);
 	}
 
 	btn = buttonCreate(gLoadSaveWindow,
@@ -1476,7 +1476,7 @@ static int lsgWindowInit(int windowType) {
 					   nullptr,
 					   BUTTON_FLAG_TRANSPARENT);
 	if (btn != -1) {
-//		buttonSetCallbacks(btn, _gsound_red_butt_press, _gsound_red_butt_release); TODO audio
+		buttonSetCallbacks(btn, _gsound_red_butt_press, _gsound_red_butt_release);
 	}
 
 	btn = buttonCreate(gLoadSaveWindow,
@@ -1493,7 +1493,7 @@ static int lsgWindowInit(int windowType) {
 					   nullptr,
 					   BUTTON_FLAG_TRANSPARENT);
 	if (btn != -1) {
-//		buttonSetCallbacks(btn, _gsound_red_butt_press, _gsound_red_butt_release); TODO audio
+		buttonSetCallbacks(btn, _gsound_red_butt_press, _gsound_red_butt_release);
 	}
 
 	buttonCreate(gLoadSaveWindow, 55, 87, 230, 353, -1, -1, -1, 502, nullptr, nullptr, nullptr, BUTTON_FLAG_TRANSPARENT);
@@ -1532,7 +1532,7 @@ static int lsgPerformSaveGame() {
 	_map_backup_count = -1;
 	gameMouseSetCursor(MOUSE_CURSOR_WAIT_PLANET);
 
-//	backgroundSoundPause(); TODO audio
+	backgroundSoundPause();
 
 	Common::SaveFileManager *saveMan = g_system->getSavefileManager();
 	Common::String newSaveName(g_engine->getTargetName());
@@ -1818,7 +1818,7 @@ static int lsgPerformSaveGame() {
 		debugPrint("\nError: Couldn't find LoadSave Message!");
 	}
 
-//	backgroundSoundResume(); TODO audio
+	backgroundSoundResume();
 
 	return 0;
 }
@@ -2681,7 +2681,7 @@ static int _GetComment(int slot) {
 					   nullptr,
 					   BUTTON_FLAG_TRANSPARENT);
 	if (btn == -1) {
-//		buttonSetCallbacks(btn, _gsound_red_butt_press, _gsound_red_butt_release); TODO audio
+		buttonSetCallbacks(btn, _gsound_red_butt_press, _gsound_red_butt_release);
 	}
 
 	// CANCEL
@@ -2699,7 +2699,7 @@ static int _GetComment(int slot) {
 					   nullptr,
 					   BUTTON_FLAG_TRANSPARENT);
 	if (btn == -1) {
-//		buttonSetCallbacks(btn, _gsound_red_butt_press, _gsound_red_butt_release); TODO audio
+		buttonSetCallbacks(btn, _gsound_red_butt_press, _gsound_red_butt_release);
 	}
 
 	windowRefresh(window);
@@ -2848,7 +2848,7 @@ static int _PrepLoad(Common::InSaveFile *stream) {
 
 // 0x47F4C8
 static int _EndLoad(Common::InSaveFile *stream) {
-//	wmMapMusicStart(); TODO audio
+	wmMapMusicStart();
 	dudeSetName(_LSData[_slot_cursor].characterName);
 	interfaceBarRefresh();
 	indicatorBarRefresh();
