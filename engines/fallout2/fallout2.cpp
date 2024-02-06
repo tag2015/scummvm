@@ -543,6 +543,8 @@ Common::Error Fallout2Engine::run() {
 	fontSetCurrent(0);  // this does nothing, font IDs are >100
 	debug("Initialized interface fonts!");
 
+	screenshotHandlerConfigure(KEY_F12, gameTakeScreenshot);
+
 	tileDisable();
 
 	badwordsInit();

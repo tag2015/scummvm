@@ -81,7 +81,7 @@ namespace Fallout2 {
 #define SPLASH_COUNT (10)
 
 // static int gameLoadGlobalVars();  TODO
-static int gameTakeScreenshot(int width, int height, unsigned char *buffer, unsigned char *palette);
+/*static*/ int gameTakeScreenshot(int width, int height, unsigned char *buffer, unsigned char *palette);  // TODO move init back here
 static void gameFreeGlobalVars();
 static void showHelp();
 // static int gameDbInit();  TODO: reenable
@@ -1148,10 +1148,8 @@ void gameUpdateState() {
 	}
 }
 
-// TODO screenshot
-#if 0
 // 0x443EF0
-static int gameTakeScreenshot(int width, int height, unsigned char *buffer, unsigned char *palette) {
+/*static*/ int gameTakeScreenshot(int width, int height, unsigned char *buffer, unsigned char *palette) {
 	MessageListItem messageListItem;
 
 	if (screenshotHandlerDefaultImpl(width, height, buffer, palette) != 0) {
@@ -1172,7 +1170,6 @@ static int gameTakeScreenshot(int width, int height, unsigned char *buffer, unsi
 
 	return 0;
 }
-#endif
 
 // NOTE: Inlined.
 //

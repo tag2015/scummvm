@@ -143,7 +143,7 @@ int showOptions() {
 				brightnessDecrease();
 				break;
 			case KEY_F12:
-//				takeScreenshot(); TODO game
+				takeScreenshot();
 				break;
 			case KEY_UPPERCASE_E:
 			case KEY_LOWERCASE_E:
