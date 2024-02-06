@@ -17,7 +17,7 @@
 #include "fallout2/game.h"
 #include "fallout2/game_mouse.h"
 // #include "fallout2/game_movie.h" TODO movie
-// #include "fallout2/game_sound.h" TODO audio
+#include "fallout2/game_sound.h"
 #include "fallout2/input.h"
 #include "fallout2/map.h"
 #include "fallout2/memory.h"
@@ -231,13 +231,13 @@ void endgamePlaySlideshow() {
 
 // 0x43F810
 void endgamePlayMovie() {
-//	backgroundSoundDelete(); TODO audio
+	backgroundSoundDelete();
 	isoDisable();
 	paletteFadeTo(gPaletteBlack);
 	_endgame_maybe_done = 0;
 	tickersAdd(_endgame_movie_bk_process);
-//	backgroundSoundSetEndCallback(_endgame_movie_callback);  TODO audio
-//	backgroundSoundLoad("akiss", 12, 14, 15);
+	backgroundSoundSetEndCallback(_endgame_movie_callback);
+	backgroundSoundLoad("akiss", 12, 14, 15);
 	inputPauseForTocks(3000);
 
 	// NOTE: Result is ignored. I guess there was some kind of switch for male
@@ -245,10 +245,10 @@ void endgamePlayMovie() {
 	critterGetStat(gDude, STAT_GENDER);
 
 	creditsOpen("credits.txt", -1, false);
-//	backgroundSoundDelete(); TODO audio
-//	backgroundSoundSetEndCallback(nullptr);
+	backgroundSoundDelete();
+	backgroundSoundSetEndCallback(nullptr);
 	tickersRemove(_endgame_movie_bk_process);
-//	backgroundSoundDelete();
+	backgroundSoundDelete();
 	colorPaletteLoad("color.pal");
 	paletteFadeTo(_cmap);
 	isoEnable();
@@ -336,7 +336,7 @@ static void endgameEndingRenderPanningScene(int direction, const char *narratorF
 		unsigned int v9_ = 16 * v8;
 
 		if (gEndgameEndingVoiceOverSpeechLoaded) {
-			unsigned int v10 = 0; // 1000 * speechGetDuration();  // TODO audio
+			unsigned int v10 = 1000 * speechGetDuration();
 			if (v10 > v9_ / 2) {
 				v9 = (v10 + v9 * (v8 / 2)) / v8;
 			}
@@ -410,7 +410,7 @@ static void endgameEndingRenderPanningScene(int direction, const char *narratorF
 				}
 			}
 
-//			soundContinueAll(); TODO audio
+			soundContinueAll();
 
 			if (inputGetInput() != -1) {
 				// NOTE: Uninline.
@@ -501,14 +501,14 @@ static void endgameEndingRenderStaticScene(int fid, const char *narratorFileName
 			blitBufferToBuffer(backgroundData, ENDGAME_ENDING_WINDOW_WIDTH, ENDGAME_ENDING_WINDOW_HEIGHT, ENDGAME_ENDING_WINDOW_WIDTH, gEndgameEndingSlideshowWindowBuffer, ENDGAME_ENDING_WINDOW_WIDTH);
 			endgameEndingRefreshSubtitles();
 			windowRefresh(gEndgameEndingSlideshowWindow);
-//			soundContinueAll(); TODO audio
+			soundContinueAll();
 
 			renderPresent();
 			sharedFpsLimiter.throttle();
 		}
 
 		tickersEnable();
-//		speechDelete(); TODO audio
+		speechDelete();
 		endgameEndingSubtitlesFree();
 
 		gEndgameEndingVoiceOverSpeechLoaded = false;
@@ -539,7 +539,7 @@ static int endgameEndingSlideshowWindowInit() {
 		return -1;
 	}
 
-//	backgroundSoundDelete(); TODO audio
+	backgroundSoundDelete();
 
 	_endgame_map_enabled = isoDisable();
 
@@ -584,7 +584,7 @@ static int endgameEndingSlideshowWindowInit() {
 
 	colorCycleDisable();
 
-//	speechSetEndCallback(_endgame_voiceover_callback); TODO audio
+	speechSetEndCallback(_endgame_voiceover_callback);
 
 	gEndgameEndingSubtitlesEnabled = settings.preferences.subtitles;
 	if (!gEndgameEndingSubtitlesEnabled) {
@@ -630,7 +630,7 @@ static void endgameEndingSlideshowWindowFree() {
 
 	fontSetCurrent(gEndgameEndingSlideshowOldFont);
 
-//	speechSetEndCallback(nullptr); TODO audio
+	speechSetEndCallback(nullptr);
 	windowDestroy(gEndgameEndingSlideshowWindow);
 	windowDestroy(gEndgameEndingOverlay);
 
@@ -663,9 +663,9 @@ static void endgameEndingVoiceOverInit(const char *fileBaseName) {
 	// Build speech file path.
 	snprintf(path, sizeof(path), "%s%s", "narrator\\", fileBaseName);
 
-//	if (speechLoad(path, 10, 14, 15) != -1) { TODO audio
-//		gEndgameEndingVoiceOverSpeechLoaded = true;
-//	}
+	if (speechLoad(path, 10, 14, 15) != -1) {
+		gEndgameEndingVoiceOverSpeechLoaded = true;
+	}
 
 	if (gEndgameEndingSubtitlesEnabled) {
 		// Build subtitles file path.
@@ -677,7 +677,7 @@ static void endgameEndingVoiceOverInit(const char *fileBaseName) {
 
 		double durationPerCharacter;
 		if (gEndgameEndingVoiceOverSpeechLoaded) {
-			durationPerCharacter = 0; // (double)speechGetDuration() / (double)gEndgameEndingSubtitlesCharactersCount; TODO audio
+			durationPerCharacter = (double)speechGetDuration() / (double)gEndgameEndingSubtitlesCharactersCount;
 		} else {
 			durationPerCharacter = 0.08;
 		}
@@ -703,7 +703,7 @@ static void endgameEndingVoiceOverReset() {
 	gEndgameEndingSpeechEnded = false;
 
 	if (gEndgameEndingVoiceOverSpeechLoaded) {
-//		_gsound_speech_play_preloaded(); TODO audio
+		_gsound_speech_play_preloaded();
 	}
 
 	if (gEndgameEndingVoiceOverSubtitlesLoaded) {
@@ -715,7 +715,7 @@ static void endgameEndingVoiceOverReset() {
 //
 // 0x44035C
 static void endgameEndingVoiceOverFree() {
-//	speechDelete(); TODO audio
+	speechDelete();
 	endgameEndingSubtitlesFree();
 	gEndgameEndingVoiceOverSpeechLoaded = false;
 	gEndgameEndingVoiceOverSubtitlesLoaded = false;
@@ -860,8 +860,8 @@ static void _endgame_movie_callback() {
 // 0x440734
 static void _endgame_movie_bk_process() {
 	if (_endgame_maybe_done) {
-//		backgroundSoundLoad("10labone", 11, 14, 16); TODO audio
-//		backgroundSoundSetEndCallback(nullptr);
+		backgroundSoundLoad("10labone", 11, 14, 16);
+		backgroundSoundSetEndCallback(nullptr);
 		tickersRemove(_endgame_movie_bk_process);
 	}
 }
