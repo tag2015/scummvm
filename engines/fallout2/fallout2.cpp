@@ -325,16 +325,16 @@ static void showDeath() {
 			paletteFadeTo(_cmap);
 
 			_main_death_voiceover_done = false;
-//			speechSetEndCallback(_main_death_voiceover_callback); TODO audio
+			speechSetEndCallback(_main_death_voiceover_callback);
 
 			unsigned int delay;
-//			if (speechLoad(deathFileName, 10, 14, 15) == -1) { TODO audio
-//				delay = 3000;
-//			} else {
+			if (speechLoad(deathFileName, 10, 14, 15) == -1) {
+				delay = 3000;
+			} else {
 				delay = UINT_MAX;
-//			}
+			}
 
-//			_gsound_speech_play_preloaded(); TODO audio
+			_gsound_speech_play_preloaded();
 
 			// SFALL: Fix the playback of the speech sound file for the death
 			// screen.
@@ -351,9 +351,9 @@ static void showDeath() {
 				sharedFpsLimiter.throttle();
 			} while (keyCode == -1 && !_main_death_voiceover_done && getTicksSince(time) < delay);
 
-//			speechSetEndCallback(nullptr); TODO audio
+			speechSetEndCallback(nullptr);
 
-//			speechDelete();
+			speechDelete();
 
 			while (mouseGetEvent() != 0) {
 				sharedFpsLimiter.mark();
@@ -893,7 +893,7 @@ Common::Error Fallout2Engine::run() {
 			done = true;
 			mainMenuWindowHide(true);
 			mainMenuWindowFree();
-//			backgroundSoundDelete(); TODO audio
+			backgroundSoundDelete();
 			break;
 		}
 	}
