@@ -2,7 +2,6 @@
 
 // #include <SDL.h>
 
-// #include "audio_engine.h"  TODO audio_engine
 #include "fallout2/fallout2.h"
 #include "fallout2/color.h"
 #include "fallout2/delay.h"
@@ -66,7 +65,7 @@ static int gKeyboardKeyRepeatDelay = 500;
 // A map of SDL_SCANCODE_* constants normalized for QWERTY keyboard.
 //
 // 0x6ABC70
-static int gNormalizedQwertyKeys[SDL_NUM_SCANCODES];
+// static int gNormalizedQwertyKeys[SDL_NUM_SCANCODES];  TODO
 
 // Ring buffer of input events.
 //
@@ -139,7 +138,7 @@ int inputInit(int a1) {
 		return -1;
 	}
 
-//	buildNormalizedQwertyKeys();  TODO
+	buildNormalizedQwertyKeys();  // TODO
 	_GNW95_clear_time_stamps();
 
 	_using_msec_timer = a1;
@@ -307,7 +306,7 @@ void tickersExecute() {
 		return;
 	}
 
-	gTickerLastTimestamp = /*SDL_GetTicks();*/  g_system->getMillis();
+	gTickerLastTimestamp = g_system->getMillis();
 
 	TickerListNode *curr = gTickerListHead;
 	TickerListNode **currPtr = &(gTickerListHead);
@@ -559,7 +558,7 @@ int screenshotHandlerDefaultImpl(int width, int height, unsigned char *data, uns
 	intValue = 0;
 	stream->write(&intValue, sizeof(intValue));
 
-	for (int index = 0; index < 256; index++) {
+	for (index = 0; index < 256; index++) {
 		unsigned char rgbReserved = 0;
 		unsigned char rgbRed = palette[index * 3] << 2;
 		unsigned char rgbGreen = palette[index * 3 + 1] << 2;
@@ -600,7 +599,7 @@ void screenshotHandlerConfigure(int keyCode, ScreenshotHandler *handler) {
 
 // 0x4C9370
 unsigned int getTicks() {
-	return /*SDL_GetTicks();*/  g_system->getMillis();
+	return g_system->getMillis();
 }
 
 // 0x4C937C
@@ -628,7 +627,7 @@ void inputBlockForTocks(unsigned int ms) {
 
 // 0x4C93E0
 unsigned int getTicksSince(unsigned int start) {
-	unsigned int end = /*SDL_GetTicks();*/ g_system->getMillis();
+	unsigned int end = g_system->getMillis();
 
 	// NOTE: Uninline.
 	return getTicksBetween(end, start);
@@ -1046,19 +1045,26 @@ void _GNW95_process_message() {
 
 	KeyboardData keyboardData;
 
-//	SDL_Event e;
 	Common::Event e;
-//	while (SDL_PollEvent(&e)) {
 	while (g_system->getEventManager()->pollEvent(e)) {
-		switch (e.type) {
-		case /*SDL_MOUSEMOTION:*/ Common::EVENT_MOUSEMOVE:
-		case /*SDL_MOUSEBUTTONDOWN:*/ Common::EVENT_MBUTTONDOWN:
-		case /*SDL_MOUSEBUTTONUP:*/ Common::EVENT_MBUTTONUP:
-		case /*SDL_MOUSEWHEEL:*/ Common::EVENT_WHEELDOWN:
-		case /*SDL_MOUSEWHEEL:*/ Common::EVENT_WHEELUP:
+		if ((e.type == Common::EVENT_MOUSEMOVE) ||
+			(e.type == Common::EVENT_MBUTTONDOWN) || (e.type == Common::EVENT_MBUTTONUP) ||
+			(e.type == Common::EVENT_WHEELDOWN) || (e.type == Common::EVENT_WHEELUP)) {
 			handleMouseEvent(&e);
-			break;
-/*		case SDL_FINGERDOWN:  TODO SDL touch
+
+		} else if (((e.type == Common::EVENT_KEYDOWN) || (e.type == Common::EVENT_KEYUP)) && !keyboardIsDisabled()) {
+			keyboardData.key = e.kbd.keycode;
+			keyboardData.ascii = e.kbd.ascii;
+			keyboardData.down = (e.type == Common::EVENT_KEYDOWN) ? 1 : 0;
+			if (e.type == Common::EVENT_KEYDOWN)
+				debug(5, "EVENT: Keydown: %d", e.kbd.keycode);
+			else
+				debug(5, "EVENT: Keyup: %d", e.kbd.keycode);
+			_GNW95_process_key(&keyboardData);
+		}
+	}
+
+/*		case SDL_FINGERDOWN:  TODO touch
 			touch_handle_start(&(e.tfinger));
 			break;
 		case SDL_FINGERMOTION:
@@ -1066,24 +1072,8 @@ void _GNW95_process_message() {
 			break;
 		case SDL_FINGERUP:
 			touch_handle_end(&(e.tfinger));
-			break;*/
-		case /*SDL_KEYDOWN:*/ Common::EVENT_KEYDOWN:
-		case /*SDL_KEYUP:*/  Common::EVENT_KEYUP:
-			if (!keyboardIsDisabled()) {
-				if (e.type == Common::EVENT_KEYDOWN)
-					debug(5, "EVENT: Keydown: %d", e.kbd.keycode);
-				else
-					debug(5, "EVENT: Keyup: %d", e.kbd.keycode);
-				keyboardData.key = e.kbd.keycode;
-				keyboardData.ascii = e.kbd.ascii;
-				keyboardData.down = (e.type == Common::EVENT_KEYDOWN) ? 1 : 0;
-
-//				keyboardData.key = e.key.keysym.scancode;
-//				keyboardData.down = (e.key.state & SDL_PRESSED) != 0;
-				_GNW95_process_key(&keyboardData);
-			}
 			break;
-/*		case SDL_WINDOWEVENT:
+		case SDL_WINDOWEVENT:  TODO
 			switch (e.window.event) {
 			case SDL_WINDOWEVENT_EXPOSED:
 				windowRefreshAll(&_scr_size);
@@ -1091,22 +1081,13 @@ void _GNW95_process_message() {
 			case SDL_WINDOWEVENT_SIZE_CHANGED:
 				handleWindowSizeChanged();
 				break;
-			case SDL_WINDOWEVENT_FOCUS_GAINED:
-				gProgramIsActive = true;
-				windowRefreshAll(&_scr_size);
-				audioEngineResume();
-				break;
-			case SDL_WINDOWEVENT_FOCUS_LOST:
-				gProgramIsActive = false;
-				audioEnginePause();
-				break;
 			}
 			break;
 		case SDL_QUIT:
 			exit(EXIT_SUCCESS);
-			break;*/
+			break;
 		}
-	}
+	}*/
 
 	// touch_process_gesture();  TODO touch
 
