@@ -14,7 +14,7 @@
 #include "fallout2/display_monitor.h"
 #include "fallout2/game.h"
 #include "fallout2/game_dialog.h"
-// #include "fallout2/game_sound.h" TODO audio
+#include "fallout2/game_sound.h"
 #include "fallout2/geometry.h"
 #include "fallout2/interface.h"
 #include "fallout2/item.h"
@@ -1673,8 +1673,8 @@ static int _check_door_state(Object *a1, Object *a2) {
 // 0x49CCB8
 int _obj_use_door(Object *a1, Object *a2, int a3) {
 	if (objectIsLocked(a2)) {
-//		const char *sfx = sfxBuildOpenName(a2, SCENERY_SOUND_EFFECT_LOCKED); TODO audio
-//		soundPlayFile(sfx);
+		const char *sfx = sfxBuildOpenName(a2, SCENERY_SOUND_EFFECT_LOCKED);
+		soundPlayFile(sfx);
 	}
 
 	bool scriptOverrides = false;
@@ -1722,8 +1722,8 @@ int _obj_use_door(Object *a1, Object *a2, int a3) {
 					animationRegisterCallback(a2, a2, (AnimationCallback *)_set_door_state_closed, -1);
 				}
 
-//				const char *sfx = sfxBuildOpenName(a2, SCENERY_SOUND_EFFECT_CLOSED);  TODO audio
-//				animationRegisterPlaySoundEffect(a2, sfx, -1);
+				const char *sfx = sfxBuildOpenName(a2, SCENERY_SOUND_EFFECT_CLOSED);
+				animationRegisterPlaySoundEffect(a2, sfx, -1);
 
 				animationRegisterAnimateReversed(a2, ANIM_STAND, 0);
 			} else {
@@ -1731,8 +1731,8 @@ int _obj_use_door(Object *a1, Object *a2, int a3) {
 					animationRegisterCallback(a2, a2, (AnimationCallback *)_set_door_state_open, -1);
 				}
 
-//				const char *sfx = sfxBuildOpenName(a2, SCENERY_SOUND_EFFECT_OPEN); TODO audio
-//				animationRegisterPlaySoundEffect(a2, sfx, -1);
+				const char *sfx = sfxBuildOpenName(a2, SCENERY_SOUND_EFFECT_OPEN);
+				animationRegisterPlaySoundEffect(a2, sfx, -1);
 
 				animationRegisterAnimate(a2, ANIM_STAND, 0);
 			}
@@ -1762,8 +1762,8 @@ int _obj_use_container(Object *critter, Object *item) {
 	}
 
 	if (objectIsLocked(item)) {
-//		const char *sfx = sfxBuildOpenName(item, SCENERY_SOUND_EFFECT_LOCKED); TODO audio
-//		soundPlayFile(sfx);
+		const char *sfx = sfxBuildOpenName(item, SCENERY_SOUND_EFFECT_LOCKED);
+		soundPlayFile(sfx);
 
 		if (critter == gDude) {
 			MessageListItem messageListItem;
@@ -1799,12 +1799,12 @@ int _obj_use_container(Object *critter, Object *item) {
 	reg_anim_begin(ANIMATION_REQUEST_RESERVED);
 
 	if (item->frame == 0) {
-//		const char *sfx = sfxBuildOpenName(item, SCENERY_SOUND_EFFECT_OPEN);  TODO audio
-//		animationRegisterPlaySoundEffect(item, sfx, 0);
+		const char *sfx = sfxBuildOpenName(item, SCENERY_SOUND_EFFECT_OPEN);
+		animationRegisterPlaySoundEffect(item, sfx, 0);
 		animationRegisterAnimate(item, ANIM_STAND, 0);
 	} else {
-//		const char *sfx = sfxBuildOpenName(item, SCENERY_SOUND_EFFECT_CLOSED);
-//		animationRegisterPlaySoundEffect(item, sfx, 0);
+		const char *sfx = sfxBuildOpenName(item, SCENERY_SOUND_EFFECT_CLOSED);
+		animationRegisterPlaySoundEffect(item, sfx, 0);
 		animationRegisterAnimateReversed(item, ANIM_STAND, 0);
 	}
 
@@ -2018,15 +2018,15 @@ static int objectOpenClose(Object *obj) {
 	if (obj->frame != 0) {
 		animationRegisterCallbackForced(obj, obj, (AnimationCallback *)_set_door_state_closed, -1);
 
-//		const char *sfx = sfxBuildOpenName(obj, SCENERY_SOUND_EFFECT_CLOSED);
-//		animationRegisterPlaySoundEffect(obj, sfx, -1);
+		const char *sfx = sfxBuildOpenName(obj, SCENERY_SOUND_EFFECT_CLOSED);
+		animationRegisterPlaySoundEffect(obj, sfx, -1);
 
 		animationRegisterAnimateReversed(obj, ANIM_STAND, 0);
 	} else {
 		animationRegisterCallbackForced(obj, obj, (AnimationCallback *)_set_door_state_open, -1);
 
-//		const char *sfx = sfxBuildOpenName(obj, SCENERY_SOUND_EFFECT_OPEN);
-//		animationRegisterPlaySoundEffect(obj, sfx, -1);
+		const char *sfx = sfxBuildOpenName(obj, SCENERY_SOUND_EFFECT_OPEN);
+		animationRegisterPlaySoundEffect(obj, sfx, -1);
 		animationRegisterAnimate(obj, ANIM_STAND, 0);
 	}
 
