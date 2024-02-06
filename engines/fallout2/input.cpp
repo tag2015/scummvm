@@ -3,6 +3,7 @@
 // #include <SDL.h>
 
 // #include "audio_engine.h"  TODO audio_engine
+#include "fallout2/fallout2.h"
 #include "fallout2/color.h"
 #include "fallout2/delay.h"
 #include "fallout2/dinput.h"
@@ -434,7 +435,8 @@ void pauseHandlerConfigure(int keyCode, PauseHandler *handler) {
 
 // 0x4C8F4C
 void takeScreenshot() {
-/*	int width = _scr_size.right - _scr_size.left + 1;  TODO screenshot
+
+	int width = _scr_size.right - _scr_size.left + 1;
 	int height = _scr_size.bottom - _scr_size.top + 1;
 	gScreenshotBuffer = (unsigned char *)internal_malloc(width * height);
 	if (gScreenshotBuffer == nullptr) {
@@ -458,7 +460,7 @@ void takeScreenshot() {
 
 	unsigned char *palette = _getSystemPalette();
 	gScreenshotHandler(width, height, gScreenshotBuffer, palette);
-	internal_free(gScreenshotBuffer); */
+	internal_free(gScreenshotBuffer);
 }
 
 // 0x4C8FF0
@@ -469,98 +471,93 @@ static void screenshotBlitter(unsigned char *src, int srcPitch, int a3, int srcX
 
 // 0x4C9048
 int screenshotHandlerDefaultImpl(int width, int height, unsigned char *data, unsigned char *palette) {
-/*	char fileName[16]; TODO screenshot
-	FILE *stream;
+	Common::SaveFileManager *saveMan = g_system->getSavefileManager();
+	Common::String fileName;
 	int index;
 	unsigned int intValue;
 	unsigned short shortValue;
 
 	for (index = 0; index < 100000; index++) {
-		snprintf(fileName, sizeof(fileName), "scr%.5d.bmp", index);
-
-		stream = compat_fopen(fileName, "rb");
-		if (stream == nullptr) {
+		fileName = Common::String::format("%s_scr%.5d.bmp", g_engine->getTargetName().c_str(), index);
+		if (!saveMan->exists(fileName))
 			break;
-		}
-
-		fclose(stream);
 	}
 
 	if (index == 100000) {
 		return -1;
 	}
 
-	stream = compat_fopen(fileName, "wb");
+	Common::OutSaveFile *stream = saveMan->openForSaving(Common::String(fileName), false);
 	if (stream == nullptr) {
 		return -1;
 	}
 
 	// bfType
 	shortValue = 0x4D42;
-	fwrite(&shortValue, sizeof(shortValue), 1, stream);
+	stream->write(&shortValue, sizeof(shortValue));
 
 	// bfSize
 	// 14 - sizeof(BITMAPFILEHEADER)
 	// 40 - sizeof(BITMAPINFOHEADER)
 	// 1024 - sizeof(RGBQUAD) * 256
 	intValue = width * height + 14 + 40 + 1024;
-	fwrite(&intValue, sizeof(intValue), 1, stream);
+	stream->write(&intValue, sizeof(intValue));
 
 	// bfReserved1
 	shortValue = 0;
-	fwrite(&shortValue, sizeof(shortValue), 1, stream);
+	stream->write(&shortValue, sizeof(shortValue));
 
 	// bfReserved2
 	shortValue = 0;
-	fwrite(&shortValue, sizeof(shortValue), 1, stream);
+	stream->write(&shortValue, sizeof(shortValue));
 
 	// bfOffBits
 	intValue = 14 + 40 + 1024;
-	fwrite(&intValue, sizeof(intValue), 1, stream);
+	stream->write(&intValue, sizeof(intValue));
 
 	// biSize
 	intValue = 40;
-	fwrite(&intValue, sizeof(intValue), 1, stream);
+	stream->write(&intValue, sizeof(intValue));
 
 	// biWidth
 	intValue = width;
-	fwrite(&intValue, sizeof(intValue), 1, stream);
+	stream->write(&intValue, sizeof(intValue));
 
 	// biHeight
 	intValue = height;
-	fwrite(&intValue, sizeof(intValue), 1, stream);
+	stream->write(&intValue, sizeof(intValue));
 
 	// biPlanes
 	shortValue = 1;
-	fwrite(&shortValue, sizeof(shortValue), 1, stream);
+	stream->write(&shortValue, sizeof(shortValue));
 
 	// biBitCount
 	shortValue = 8;
-	fwrite(&shortValue, sizeof(shortValue), 1, stream);
+	stream->write(&shortValue, sizeof(shortValue));
 
 	// biCompression
 	intValue = 0;
-	fwrite(&intValue, sizeof(intValue), 1, stream);
+	stream->write(&intValue, sizeof(intValue));
 
 	// biSizeImage
 	intValue = 0;
-	fwrite(&intValue, sizeof(intValue), 1, stream);
+	stream->write(&intValue, sizeof(intValue));
 
 	// biXPelsPerMeter
 	intValue = 0;
-	fwrite(&intValue, sizeof(intValue), 1, stream);
+	stream->write(&intValue, sizeof(intValue));
 
 	// biYPelsPerMeter
 	intValue = 0;
-	fwrite(&intValue, sizeof(intValue), 1, stream);
+	stream->write(&intValue, sizeof(intValue));
 
 	// biClrUsed
 	intValue = 0;
-	fwrite(&intValue, sizeof(intValue), 1, stream);
+	stream->write(&intValue, sizeof(intValue));
 
 	// biClrImportant
 	intValue = 0;
-	fwrite(&intValue, sizeof(intValue), 1, stream);
+	stream->write(&intValue, sizeof(intValue));
 
 	for (int index = 0; index < 256; index++) {
 		unsigned char rgbReserved = 0;
@@ -568,20 +565,25 @@ int screenshotHandlerDefaultImpl(int width, int height, unsigned char *data, uns
 		unsigned char rgbGreen = palette[index * 3 + 1] << 2;
 		unsigned char rgbBlue = palette[index * 3 + 2] << 2;
 
-		fwrite(&rgbBlue, sizeof(rgbBlue), 1, stream);
-		fwrite(&rgbGreen, sizeof(rgbGreen), 1, stream);
-		fwrite(&rgbRed, sizeof(rgbRed), 1, stream);
-		fwrite(&rgbReserved, sizeof(rgbReserved), 1, stream);
+		stream->write(&rgbBlue, sizeof(rgbBlue));
+		stream->write(&rgbGreen, sizeof(rgbGreen));
+		stream->write(&rgbRed, sizeof(rgbRed));
+		stream->write(&rgbReserved, sizeof(rgbReserved));
 	}
 
 	for (int y = height - 1; y >= 0; y--) {
 		unsigned char *dataPtr = data + y * width;
-		fwrite(dataPtr, 1, width, stream);
+		stream->write(dataPtr, width);
 	}
 
-	fflush(stream);
-	fclose(stream);
-*/
+	stream->finalize();
+	if (stream->err()) {
+		warning("Error saving screenshot");
+		delete stream;
+		return -1;
+	}
+
+	delete stream;
 	return 0;
 }
 
