@@ -46,6 +46,8 @@ int gameShowDeathDialog(const char *message);
 void *gameGetGlobalPointer(int var);
 int gameSetGlobalPointer(int var, void *value);
 
+int gameTakeScreenshot(int width, int height, unsigned char *buffer, unsigned char *palette);  // TODO make static
+
 class GameMode {
 public:
 	enum Flags {
