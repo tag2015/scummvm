@@ -477,7 +477,7 @@ void automapShow(bool isInGame, bool isUsingScanner) {
 			showQuitConfirmationDialog();
 			break;
 		case KEY_F12:
-//			takeScreenshot(); TODO game
+			takeScreenshot();
 			break;
 		}
 
