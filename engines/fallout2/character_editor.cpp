@@ -1161,7 +1161,7 @@ int characterEditorShow(bool isCreationMode) {
 					characterEditorToggleOptionalTrait(keyCode - 555);
 					windowRefresh(gCharacterEditorWindow);
 				} else {
-					if (keyCode == 390) {
+					if (keyCode == KEY_F12) {
 						takeScreenshot();
 					}
 
