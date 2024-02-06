@@ -18,7 +18,7 @@
 #include "fallout2/game.h"
 #include "fallout2/game_dialog.h"
 // #include "fallout2/game_movie.h" TODO game_movie
-// #include "fallout2/game_sound.h" TODO game_sound
+#include "fallout2/game_sound.h"
 #include "fallout2/geometry.h"
 #include "fallout2/interface.h"
 #include "fallout2/item.h"
@@ -485,7 +485,7 @@ static void opScrReturn(Program *program) {
 static void opPlaySfx(Program *program) {
 	char *name = programStackPopString(program);
 
-//	soundPlayFile(name); TODO audio
+	soundPlayFile(name);
 }
 
 // set_map_start
@@ -4179,8 +4179,8 @@ static void opSfxBuildCharName(Program *program) {
 
 	if (obj != nullptr) {
 		char soundEffectName[16];
-//		strcpy(soundEffectName, sfxBuildCharName(obj, anim, extra)); TODO audio
-//		programStackPushString(program, soundEffectName);
+		strncpy(soundEffectName, sfxBuildCharName(obj, anim, extra), 15);
+		programStackPushString(program, soundEffectName);
 	} else {
 		scriptPredefinedError(program, "sfx_build_char_name", SCRIPT_ERROR_OBJECT_IS_nullptr);
 		programStackPushString(program, nullptr);
@@ -4193,8 +4193,8 @@ static void opSfxBuildAmbientName(Program *program) {
 	char *baseName = programStackPopString(program);
 
 	char soundEffectName[16];
-//	strcpy(soundEffectName, gameSoundBuildAmbientSoundEffectName(baseName));  TODO audio
-//	programStackPushString(program, soundEffectName);
+	strncpy(soundEffectName, gameSoundBuildAmbientSoundEffectName(baseName), 15);
+	programStackPushString(program, soundEffectName);
 }
 
 // sfx_build_interface_name
@@ -4203,8 +4203,8 @@ static void opSfxBuildInterfaceName(Program *program) {
 	char *baseName = programStackPopString(program);
 
 	char soundEffectName[16];
-//	strcpy(soundEffectName, gameSoundBuildInterfaceName(baseName)); TODO audio
-//	programStackPushString(program, soundEffectName);
+	strncpy(soundEffectName, gameSoundBuildInterfaceName(baseName), 15);
+	programStackPushString(program, soundEffectName);
 }
 
 // sfx_build_item_name
@@ -4213,8 +4213,8 @@ static void opSfxBuildItemName(Program *program) {
 	const char *baseName = programStackPopString(program);
 
 	char soundEffectName[16];
-//	strcpy(soundEffectName, gameSoundBuildInterfaceName(baseName)); TODO audio
-//	programStackPushString(program, soundEffectName);
+	strncpy(soundEffectName, gameSoundBuildInterfaceName(baseName), 15);
+	programStackPushString(program, soundEffectName);
 }
 
 // sfx_build_weapon_name
@@ -4226,8 +4226,8 @@ static void opSfxBuildWeaponName(Program *program) {
 	int weaponSfxType = programStackPopInteger(program);
 
 	char soundEffectName[16];
-//	strcpy(soundEffectName, sfxBuildWeaponName(weaponSfxType, weapon, hitMode, target)); TODO audio
-//	programStackPushString(program, soundEffectName);
+	strncpy(soundEffectName, sfxBuildWeaponName(weaponSfxType, weapon, hitMode, target), 15);
+	programStackPushString(program, soundEffectName);
 }
 
 // sfx_build_scenery_name
@@ -4238,8 +4238,8 @@ static void opSfxBuildSceneryName(Program *program) {
 	char *baseName = programStackPopString(program);
 
 	char soundEffectName[16];
-//	strcpy(soundEffectName, sfxBuildSceneryName(actionType, action, baseName)); TODO audio
-//	programStackPushString(program, soundEffectName);
+	strncpy(soundEffectName, sfxBuildSceneryName(actionType, action, baseName), 15);
+	programStackPushString(program, soundEffectName);
 }
 
 // sfx_build_open_name
@@ -4250,8 +4250,8 @@ static void opSfxBuildOpenName(Program *program) {
 
 	if (object != nullptr) {
 		char soundEffectName[16];
-//		strcpy(soundEffectName, sfxBuildOpenName(object, action));  TODO audio
-//		programStackPushString(program, soundEffectName);
+		strncpy(soundEffectName, sfxBuildOpenName(object, action), 15);
+		programStackPushString(program, soundEffectName);
 	} else {
 		scriptPredefinedError(program, "sfx_build_open_name", SCRIPT_ERROR_OBJECT_IS_nullptr);
 		programStackPushString(program, nullptr);
