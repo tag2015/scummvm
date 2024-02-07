@@ -15,7 +15,7 @@
 #include "fallout2/debug.h"
 #include "fallout2/display_monitor.h"
 #include "fallout2/draw.h"
-// #include "fallout2/endgame.h" TODO endgame
+#include "fallout2/endgame.h"
 #include "fallout2/game.h"
 #include "fallout2/game_mouse.h"
 #include "fallout2/game_sound.h"
@@ -587,7 +587,7 @@ int interfaceInit() {
 	displayMonitorInit();
 
 	// SFALL
-//	sidePanelsInit(); TODO sfall
+	sidePanelsInit();
 
 	gInterfaceBarEnabled = true;
 	gInterfaceBarInitialized = false;

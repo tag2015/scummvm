@@ -1464,8 +1464,8 @@ int showQuitConfirmationDialog() {
 		configFree(&config);
 	}
 
-	int screenWidth = 640; // screenGetWidth(); TODO svga
-	int screenHeight = 480; // screenGetHeight();
+	int screenWidth = screenGetWidth();
+	int screenHeight = screenGetHeight();
 
 	if (size != 0 || screenWidth < width || screenHeight < height) {
 		int scaledWidth;
@@ -1509,9 +1509,7 @@ int showQuitConfirmationDialog() {
 }
 #endif
 
-// TODO death screen
-#if 0
-int gameShowDeathDialog(const char* message) {
+int gameShowDeathDialog(const char *message) {
 	bool isoWasEnabled = isoDisable();
 
 	bool gameMouseWasVisible;
@@ -1556,7 +1554,6 @@ int gameShowDeathDialog(const char* message) {
 
 	return rc;
 }
-#endif
 
 void *gameGetGlobalPointer(int var) {
 	if (var < 0 || var >= gGameGlobalVarsLength) {
