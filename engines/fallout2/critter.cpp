@@ -9,7 +9,7 @@
 #include "fallout2/combat.h"
 #include "fallout2/debug.h"
 #include "fallout2/display_monitor.h"
-// #include "fallout2/endgame.h"  TODO endgame
+#include "fallout2/endgame.h"
 #include "fallout2/game.h"
 #include "fallout2/geometry.h"
 #include "fallout2/interface.h"
@@ -617,7 +617,7 @@ void _process_rads(Object *obj, int radiationLevel, bool isHealing) {
 			messageListItem.num = 1006;
 			if (messageListGetItem(&gMiscMessageList, &messageListItem)) {
 				// SFALL: Display a pop-up message box about death from radiation.
-//				gameShowDeathDialog(messageListItem.text);  TODO game.cpp
+				gameShowDeathDialog(messageListItem.text);
 			}
 		}
 	}
@@ -922,8 +922,8 @@ void critterKill(Object *critter, int anim, bool a3) {
 	}
 
 	if (critter == gDude) {
-//		endgameSetupDeathEnding(ENDGAME_DEATH_ENDING_REASON_DEATH); TODO game.cpp
-//		_game_user_wants_to_quit = 2;
+		endgameSetupDeathEnding(ENDGAME_DEATH_ENDING_REASON_DEATH);
+		_game_user_wants_to_quit = 2;
 	}
 }
 
