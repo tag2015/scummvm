@@ -1759,11 +1759,11 @@ static int intLibSoundDelete(int value) {
 		return 0;
 	}
 
-/*	if (soundIsPlaying(sound)) { TODO sound
+	if (soundIsPlaying(sound)) {
 		soundStop(sound);
 	}
 
-	soundDelete(sound); */
+	soundDelete(sound);
 
 	gIntLibSounds[index] = nullptr;
 
@@ -1808,14 +1808,14 @@ static int intLibSoundPlay(char *fileName, int mode) {
 		return -1;
 	}
 
-	Sound *sound = gIntLibSounds[index] = nullptr; // soundAllocate(type, soundFlags); TODO sound
+	Sound *sound = gIntLibSounds[index] = soundAllocate(type, soundFlags);
 	if (sound == nullptr) {
 		return -1;
 	}
 
-/*	soundSetCallback(sound, intLibSoundCallback, &(gIntLibSounds[index]));
+	soundSetCallback(sound, intLibSoundCallback, &(gIntLibSounds[index]));
 
-	if (mode & 0x01) {  TODO sound
+	if (mode & 0x01) {
 		soundSetLooping(sound, 0xFFFF);
 	}
 
@@ -1885,7 +1885,7 @@ err:
 
 	soundDelete(sound);
 	gIntLibSounds[index] = nullptr;
-	return -1;*/
+	return -1;
 }
 
 // 0x46655C
@@ -1903,14 +1903,14 @@ static int intLibSoundPause(int value) {
 	if (sound == nullptr) {
 		return 0;
 	}
-/*  TODO sound
+
 	int rc;
 	if (_soundType(sound, SOUND_TYPE_MEMORY)) {
 		rc = soundStop(sound);
 	} else {
 		rc = soundPause(sound);
 	}
-	return rc == SOUND_NO_ERROR; */
+	return rc == SOUND_NO_ERROR;
 }
 
 // 0x4665C8
@@ -1928,14 +1928,14 @@ static int intLibSoundRewind(int value) {
 	if (sound == nullptr) {
 		return 0;
 	}
-/* TODO sound
+
 	if (!soundIsPlaying(sound)) {
 		return 1;
 	}
 
 	soundStop(sound);
 
-	return soundPlay(sound) == SOUND_NO_ERROR;*/
+	return soundPlay(sound) == SOUND_NO_ERROR;
 }
 
 // 0x46662C
@@ -1954,13 +1954,13 @@ static int intLibSoundResume(int value) {
 		return 0;
 	}
 
-/*	int rc;
+	int rc;
 	if (_soundType(sound, SOUND_TYPE_MEMORY)) {
 		rc = soundPlay(sound);
 	} else {
 		rc = soundResume(sound);
 	}
-	return rc == SOUND_NO_ERROR;  TODo sound */
+	return rc == SOUND_NO_ERROR;
 }
 
 // soundplay
