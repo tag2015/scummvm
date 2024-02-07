@@ -64,8 +64,7 @@ static EventTypeDescription gEventTypeDescriptions[EVENT_TYPE_COUNT] = {
 	{sneakEventProcess, nullptr, nullptr, nullptr, true, _critter_sneak_clear},
 	{explosionFailureEventProcess, nullptr, nullptr, nullptr, true, _queue_explode_exit},
 	{mapUpdateEventProcess, nullptr, nullptr, nullptr, true, nullptr},
-	// {ambientSoundEffectEventProcess, internal_free, nullptr, nullptr, true, nullptr}, TODO game_sound
-	{nullptr, nullptr, nullptr, nullptr, true, nullptr},  // TODO remove
+	{ambientSoundEffectEventProcess, internal_free, nullptr, nullptr, true, nullptr},
 };
 
 // 0x4A2320
