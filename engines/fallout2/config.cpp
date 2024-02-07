@@ -301,14 +301,15 @@ bool configRead(Config *config, const char *filePath, bool isDb) {
 }
 
 // Reads .cfg from ScummVM save folder
-bool configReadScumm(Config *config) {
+bool configReadScumm(Config *config, const char *filePath) {
 	if (config == nullptr) {
 		return false;
 	}
 
 	Common::SaveFileManager *saveMan = g_system->getSavefileManager();
 	Common::String cfgFileName(g_engine->getTargetName());
-	cfgFileName += ".cfg";
+	cfgFileName += "_";
+	cfgFileName += filePath;
 	Common::InSaveFile *stream = saveMan->openForLoading(Common::String(cfgFileName));
 
 	// CE: Return `false` if file does not exists on the file system.
@@ -336,7 +337,8 @@ bool configWrite(Config *config, const char *filePath, bool isDb) {
 
 	Common::SaveFileManager *saveMan = g_system->getSavefileManager();
 	Common::String cfgFileName(g_engine->getTargetName());
-	cfgFileName += ".cfg";
+	cfgFileName += "_";
+	cfgFileName += filePath;
 	Common::OutSaveFile *stream = saveMan->openForSaving(Common::String(cfgFileName), false);
 
 	if (stream == nullptr) {

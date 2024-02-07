@@ -5,6 +5,8 @@
 
 #include "fallout2/platform_compat.h"
 
+#include "common/debug.h"
+
 namespace Fallout2 {
 
 #define SFALL_CONFIG_FILE_NAME "ddraw.ini"
@@ -75,10 +77,12 @@ bool sfallConfigInit(int argc, char **argv) {
 		strncpy(path, SFALL_CONFIG_FILE_NAME, sizeof(path) - 1);
 	}
 
-//  TODO read sfall configuration
-//	configRead(&gSfallConfig, path, false);
+	if (configReadScumm(&gSfallConfig, SFALL_CONFIG_FILE_NAME))
+		debug("Loaded SFALL config (%s) from save dir!", SFALL_CONFIG_FILE_NAME);
+	else if (configRead(&gSfallConfig, path, false))
+		debug("Loaded SFALL config (%s) from game dir!", path);
 
-//	configParseCommandLineArguments(&gSfallConfig, argc, argv);
+	//	configParseCommandLineArguments(&gSfallConfig, argc, argv); TODO commandline
 
 	gSfallConfigInitialized = true;
 
