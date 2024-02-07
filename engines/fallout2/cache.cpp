@@ -8,7 +8,7 @@
 */
 
 #include "fallout2/memory.h"
-// #include "fallout2/sound.h" TODO
+#include "fallout2/sound.h"
 
 #include "common/debug.h"
 
@@ -117,8 +117,7 @@ bool cacheLock(Cache *cache, int key, void **data, CacheEntry **cacheEntryPtr) {
 
 		_lock_sound_ticker %= 4;
 		if (_lock_sound_ticker == 0) {
-			// TODO: Sound
-			// soundContinueAll();
+			soundContinueAll();
 		}
 	} else {
 		return false;
