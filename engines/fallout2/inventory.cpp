@@ -612,7 +612,7 @@ void inventoryOpen() {
 		}
 
 		if (keyCode == KEY_CTRL_Q || keyCode == KEY_CTRL_X) {
-			// showQuitConfirmationDialog(); TODO game
+			showQuitConfirmationDialog();
 		} else if (keyCode == KEY_HOME) {
 			_stack_offset[_curr_stack] = 0;
 			_display_inventory(0, -1, INVENTORY_WINDOW_TYPE_NORMAL);
@@ -4203,7 +4203,7 @@ int inventoryOpenLooting(Object *looter, Object *target) {
 		int keyCode = inputGetInput();
 
 		if (keyCode == KEY_CTRL_Q || keyCode == KEY_CTRL_X || keyCode == KEY_F10) {
-//			showQuitConfirmationDialog(); TODO game
+			showQuitConfirmationDialog();
 		}
 
 		if (_game_user_wants_to_quit != 0) {
@@ -5048,7 +5048,7 @@ void inventoryOpenTrade(int win, Object *barterer, Object *playerTable, Object *
 
 		keyCode = inputGetInput();
 		if (keyCode == KEY_CTRL_Q || keyCode == KEY_CTRL_X || keyCode == KEY_F10) {
-//			showQuitConfirmationDialog(); TODO game
+			showQuitConfirmationDialog();
 		}
 
 		if (_game_user_wants_to_quit != 0) {
