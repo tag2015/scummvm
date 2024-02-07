@@ -5,7 +5,7 @@
 #include "fallout2/debug.h"
 #include "fallout2/platform_compat.h"
 #include "fallout2/scripts.h"
-// #include "sfall_config.h" TODO: sfall criticals time override
+#include "fallout2/sfall_config.h"
 
 
 /*#include <limits.h>
@@ -21,7 +21,7 @@ static int randomTranslateRoll(int delta, int criticalSuccessModifier);
 static int getRandom(int max);
 static int randomInt32();
 static void randomSeedPrerandomInternal(int seed);
-static unsigned int randomGetSeed();
+// static unsigned int randomGetSeed();
 static void randomValidatePrerandom();
 
 // 0x50D4BA
@@ -99,11 +99,8 @@ static int randomTranslateRoll(int delta, int criticalSuccessModifier) {
 	unsigned int gameTime = gameTimeGetTime();
 
 	// SFALL: Remove criticals time limits.
-	// TODO: Time limits are already disabled
-	// TODO: load sfall option
-	//	bool criticalsTimeLimitsRemoved = false;
-	bool criticalsTimeLimitsRemoved = true;
-	// configGetBool(&gSfallConfig, SFALL_CONFIG_MISC_KEY, SFALL_CONFIG_REMOVE_CRITICALS_TIME_LIMITS_KEY, &criticalsTimeLimitsRemoved);
+	bool criticalsTimeLimitsRemoved = false;
+	configGetBool(&gSfallConfig, SFALL_CONFIG_MISC_KEY, SFALL_CONFIG_REMOVE_CRITICALS_TIME_LIMITS_KEY, &criticalsTimeLimitsRemoved);
 
 	int roll;
 	if (delta < 0) {
@@ -209,9 +206,9 @@ static void randomSeedPrerandomInternal(int seed) {
 // Provides seed for random number generator.
 //
 // 0x4A3258
-static unsigned int randomGetSeed() {
-	return compat_timeGetTime();
-}
+// static unsigned int randomGetSeed() {
+//	   return compat_timeGetTime();
+// }
 
 // 0x4A3264
 static void randomValidatePrerandom() {
