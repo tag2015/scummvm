@@ -359,8 +359,8 @@ void gameTimeAddTicks(int ticks) {
 
 	unsigned int year = gGameTime / GAME_TIME_TICKS_PER_YEAR;
 	if (year >= 13) {
-//		endgameSetupDeathEnding(ENDGAME_DEATH_ENDING_REASON_TIMEOUT); TODO endgame
-//		_game_user_wants_to_quit = 2;
+		endgameSetupDeathEnding(ENDGAME_DEATH_ENDING_REASON_TIMEOUT);
+		_game_user_wants_to_quit = 2;
 	}
 
 	// FIXME: This condition will never be true.
@@ -987,8 +987,8 @@ int scriptsHandleRequests() {
 
 	if ((gScriptsRequests & SCRIPT_REQUEST_ENDGAME) != 0) {
 		gScriptsRequests &= ~SCRIPT_REQUEST_ENDGAME;
-//		endgamePlaySlideshow(); TODO endgame
-//		endgamePlayMovie();
+		endgamePlaySlideshow();
+		endgamePlayMovie();
 	}
 
 	if ((gScriptsRequests & SCRIPT_REQUEST_LOOTING) != 0) {

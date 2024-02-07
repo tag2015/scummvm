@@ -14,7 +14,7 @@
 #include "fallout2/debug.h"
 #include "fallout2/dialog.h"
 #include "fallout2/display_monitor.h"
-// #include "fallout2/endgame.h" TODO endgame
+#include "fallout2/endgame.h"
 #include "fallout2/game.h"
 #include "fallout2/game_dialog.h"
 // #include "fallout2/game_movie.h" TODO game_movie
@@ -4471,7 +4471,7 @@ static void opMoveObjectInventoryToObject(Program *program) {
 // 0x45C54C
 static void opEndgameMovie(Program *program) {
 	program->flags |= PROGRAM_FLAG_0x20;
-//	endgamePlayMovie(); TODO endgame
+	endgamePlayMovie();
 	program->flags &= ~PROGRAM_FLAG_0x20;
 }
 
