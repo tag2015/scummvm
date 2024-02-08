@@ -1,12 +1,12 @@
-#ifndef FALLOUT_SFALL_METARULES_H_
-#define FALLOUT_SFALL_METARULES_H_
+#ifndef FALLOUT2_SFALL_METARULES_H
+#define FALLOUT2_SFALL_METARULES_H
 
-#include "interpreter.h"
+#include "fallout2/interpreter.h"
 
-namespace fallout {
+namespace Fallout2 {
 
 void sfall_metarule(Program *program, int args);
 
-} // namespace fallout
+} // namespace Fallout2
 
-#endif /* FALLOUT_SFALL_METARULES_H_ */
+#endif

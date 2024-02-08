@@ -1,12 +1,13 @@
-#include "sfall_ini.h"
+#include "fallout2/sfall_ini.h"
 
-#include <algorithm>
+/* #include <algorithm>
 #include <cstring>
+*/
 
-#include "config.h"
-#include "platform_compat.h"
+#include "fallout2/config.h"
+#include "fallout2/platform_compat.h"
 
-namespace fallout {
+namespace Fallout2 {
 
 /// The max length of `fileName` chunk in the triplet.
 static constexpr size_t kFileNameMaxSize = 63;
@@ -68,7 +69,7 @@ static bool is_system_file_name(const char *fileName) {
 
 void sfall_ini_set_base_path(const char *path) {
 	if (path != nullptr) {
-		strcpy(basePath, path);
+		strncpy(basePath, path, COMPAT_MAX_PATH - 1);
 
 		size_t length = strlen(basePath);
 		if (length > 0) {
@@ -119,7 +120,7 @@ bool sfall_ini_get_string(const char *triplet, char *value, size_t size) {
 		// There was no base path set, requested file is a system config, or
 		// non-system config file was not found the base path - attempt to load
 		// from current working directory.
-		strcpy(path, fileName);
+		strncpy(path, fileName, COMPAT_MAX_PATH - 1);
 		loaded = configRead(&config, path, false);
 	}
 
@@ -174,7 +175,7 @@ bool sfall_ini_set_string(const char *triplet, const char *value) {
 		// There was no base path set, requested file is a system config, or
 		// non-system config file was not found the base path - attempt to load
 		// from current working directory.
-		strcpy(path, fileName);
+		strncpy(path, fileName, COMPAT_MAX_PATH - 1);
 		loaded = configRead(&config, path, false);
 	}
 
@@ -187,4 +188,4 @@ bool sfall_ini_set_string(const char *triplet, const char *value) {
 	return saved;
 }
 
-} // namespace fallout
+} // namespace Fallout2
