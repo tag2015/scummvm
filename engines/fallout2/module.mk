@@ -89,6 +89,7 @@ MODULE_OBJS = \
 	sfall_global_scripts.o \
 	sfall_global_vars.o \
 	sfall_ini.o \
+	sfall_kb_helpers.o \
 	sfall_lists.o \
 	sfall_metarules.o \
 	skill.o \
