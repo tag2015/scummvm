@@ -1,9 +1,15 @@
-#ifndef FALLOUT_SFALL_GLOBAL_VARS_H_
-#define FALLOUT_SFALL_GLOBAL_VARS_H_
+#ifndef FALLOUT2_SFALL_GLOBAL_VARS_H
+#define FALLOUT2_SFALL_GLOBAL_VARS_H
 
-#include "db.h"
+#include "fallout2/db.h"
 
-namespace fallout {
+#include "common/scummsys.h"
+
+namespace Fallout2 {
+
+typedef int32 int32_t;
+typedef uint32 uint32_t;
+typedef uint64 uint64_t;
 
 bool sfall_gl_vars_init();
 void sfall_gl_vars_reset();
@@ -15,6 +21,6 @@ bool sfall_gl_vars_store(int key, int value);
 bool sfall_gl_vars_fetch(const char *key, int &value);
 bool sfall_gl_vars_fetch(int key, int &value);
 
-} // namespace fallout
+} // namespace Fallout2
 
-#endif /* FALLOUT_SFALL_GLOBAL_VARS_H_ */
+#endif
