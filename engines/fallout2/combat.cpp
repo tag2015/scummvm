@@ -37,7 +37,7 @@
 #include "fallout2/scripts.h"
 #include "fallout2/settings.h"
 #include "fallout2/sfall_config.h"
-// #include "fallout2/sfall_global_scripts.h" TODO sfall
+#include "fallout2/sfall_global_scripts.h"
 #include "fallout2/skill.h"
 #include "fallout2/stat.h"
 #include "fallout2/svga.h"
@@ -3205,7 +3205,7 @@ static int _combat_input() {
 		int keyCode = inputGetInput();
 
 		// SFALL: CombatLoopHook.
-//		sfall_gl_scr_process_main(); TODO sfall
+		sfall_gl_scr_process_main();
 
 		if (_action_explode_running()) {
 			// NOTE: Uninline.

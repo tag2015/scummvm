@@ -36,7 +36,7 @@
 #include "fallout2/reaction.h"
 #include "fallout2/scripts.h"
 #include "fallout2/settings.h"
-// #include "fallout2/sfall_opcodes.h" TODo sfall_opcodes
+#include "fallout2/sfall_opcodes.h"
 #include "fallout2/skill.h"
 #include "fallout2/stat.h"
 #include "fallout2/svga.h"
@@ -4685,7 +4685,7 @@ static void opGetPcStat(Program *program) {
 
 // 0x45CDD4
 void _intExtraClose_() {
-//	sfallOpcodesExit(); TODO sfall_opcodes
+	sfallOpcodesExit();
 }
 
 // 0x45CDD8
@@ -4872,7 +4872,7 @@ void _initIntExtra() {
 	interpreterRegisterOpcode(0x8154, opDebugMessage);                // op_debug_msg
 	interpreterRegisterOpcode(0x8155, opCritterStopAttacking);        // op_critter_stop_attacking
 
-//	sfallOpcodesInit(); TODO sfall_opcodes
+	sfallOpcodesInit();
 }
 
 // NOTE: Uncollapsed 0x45D878.

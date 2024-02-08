@@ -19,7 +19,7 @@
 #include "fallout2/interpreter_lib.h"
 #include "fallout2/memory_manager.h"
 #include "fallout2/platform_compat.h"
-// #include "fallout2/sfall_global_scripts.h" TODO sfall
+#include "fallout2/sfall_global_scripts.h"
 #include "fallout2/svga.h"
 
 
@@ -2917,7 +2917,7 @@ void _updatePrograms() {
 	// note is that global scripts in CE cannot handle conditional/timed procs
 	// (which are not used anyway).
 
-	// sfall_gl_scr_update(_cpuBurstSize); TODO sfall
+	sfall_gl_scr_update(_cpuBurstSize);
 
 	ProgramListNode *curr = gInterpreterProgramListHead;
 	while (curr != nullptr) {
