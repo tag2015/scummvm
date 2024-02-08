@@ -1,17 +1,19 @@
-#include "sfall_global_scripts.h"
+#include "fallout2/sfall_global_scripts.h"
 
+/*
 #include <algorithm>
 #include <cstring>
 #include <string>
 #include <vector>
+*/
 
-#include "db.h"
-#include "input.h"
-#include "platform_compat.h"
-#include "scripts.h"
-#include "sfall_config.h"
+#include "fallout2/db.h"
+#include "fallout2/input.h"
+#include "fallout2/platform_compat.h"
+#include "fallout2/scripts.h"
+#include "fallout2/sfall_config.h"
 
-namespace fallout {
+namespace Fallout2 {
 
 struct GlobalScript {
 	Program *program = nullptr;
@@ -23,14 +25,14 @@ struct GlobalScript {
 };
 
 struct GlobalScriptsState {
-	std::vector<std::string> paths;
-	std::vector<GlobalScript> globalScripts;
+	Common::Array<Common::String> paths; // originally std::vector
+	Common::Array<GlobalScript> globalScripts;
 };
 
 static GlobalScriptsState *state = nullptr;
 
 bool sfall_gl_scr_init() {
-	state = new (std::nothrow) GlobalScriptsState();
+	state = new /*(std::nothrow)*/ GlobalScriptsState();
 	if (state == nullptr) {
 		return false;
 	}
@@ -56,7 +58,7 @@ bool sfall_gl_scr_init() {
 				char path[COMPAT_MAX_PATH];
 				compat_makepath(path, drive, dir, files[index], nullptr);
 
-				state->paths.push_back(std::string{path});
+				state->paths.push_back(Common::String(path));
 			}
 
 			fileNameListFree(&files, 0);
@@ -70,7 +72,7 @@ bool sfall_gl_scr_init() {
 		}
 	}
 
-	std::sort(state->paths.begin(), state->paths.end());
+	Common::sort(state->paths.begin(), state->paths.end());
 
 	return true;
 }
@@ -101,7 +103,8 @@ void sfall_gl_scr_exec_start_proc() {
 				scr.procs[action] = programFindProcedure(program, gScriptProcNames[action]);
 			}
 
-			state->globalScripts.push_back(std::move(scr));
+			// state->globalScripts.push_back(std::move(scr));
+			state->globalScripts.push_back(scr);
 
 			_interpret(program, -1);
 		}
@@ -155,11 +158,11 @@ void sfall_gl_scr_process_worldmap() {
 }
 
 static GlobalScript *sfall_gl_scr_map_program_to_scr(Program *program) {
-	auto it = std::find_if(state->globalScripts.begin(),
-						   state->globalScripts.end(),
-						   [&program](const GlobalScript &scr) {
-							   return scr.program == program;
-						   });
+	auto it = Common::find_if(state->globalScripts.begin(),
+							  state->globalScripts.end(),
+							  [&program](const GlobalScript &scr) {
+								  return scr.program == program;
+							  });
 	return it != state->globalScripts.end() ? &(*it) : nullptr;
 }
 
@@ -202,4 +205,4 @@ void sfall_gl_scr_update(int burstSize) {
 	}
 }
 
-} // namespace fallout
+} // namespace Fallout2
