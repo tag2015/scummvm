@@ -31,7 +31,7 @@
 #include "fallout2/queue.h"
 // #include "fallout2/sfall_arrays.h"  TODO sfall
 #include "fallout2/sfall_config.h"
-// #include "fallout2/sfall_global_scripts.h"  TODO sfall
+#include "fallout2/sfall_global_scripts.h"
 #include "fallout2/stat.h"
 #include "fallout2/svga.h"
 #include "fallout2/tile.h"
@@ -2605,7 +2605,7 @@ void scriptsExecMapUpdateProc() {
 // 0x4A67EC
 void scriptsExecMapUpdateScripts(int proc) {
 	// SFALL: Run global scripts.
-	// sfall_gl_scr_exec_map_update_scripts(proc); TODO sfall
+	sfall_gl_scr_exec_map_update_scripts(proc);
 
 	_scr_SpatialsEnabled = false;
 

@@ -1,5 +1,5 @@
-#ifndef FALLOUT_SFALL_ARRAYS_H_
-#define FALLOUT_SFALL_ARRAYS_H_
+#ifndef FALLOUT2_SFALL_ARRAYS_H
+#define FALLOUT2_SFALL_ARRAYS_H
 
 #include "fallout2/interpreter.h"
 
@@ -32,4 +32,4 @@ ArrayId StringSplit(const char *str, const char *split);
 
 } // namespace Fallout2
 
-#endif /* FALLOUT_SFALL_ARRAYS_H_ */
+#endif
