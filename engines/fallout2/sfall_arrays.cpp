@@ -1,5 +1,6 @@
-#include "sfall_arrays.h"
+#include "fallout2/sfall_arrays.h"
 
+/*
 #include <assert.h>
 #include <string.h>
 
@@ -9,11 +10,16 @@
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
+*/
 
-#include "interpreter.h"
-#include "sfall_lists.h"
+#include "fallout2/interpreter.h"
+#include "fallout2/sfall_lists.h"
 
-namespace fallout {
+#include "fallout2/lib/std/map.h"
+
+#include "common/ptr.h"
+
+namespace Fallout2 {
 
 static constexpr ArrayId kInitialArrayId = 1;
 
@@ -27,21 +33,27 @@ static constexpr ArrayId kInitialArrayId = 1;
 #define ARRAY_ACTION_SHUFFLE (-5)
 
 template<class T, typename Compare>
-static void ListSort(std::vector<T> &arr, int type, Compare cmp) {
+static void ListSort(Common::Array<T> &arr, int type, Compare cmp) { // std::vector
 	switch (type) {
 	case ARRAY_ACTION_SORT: // sort ascending
-		std::sort(arr.begin(), arr.end(), cmp);
+		Common::sort(arr.begin(), arr.end(), cmp);
 		break;
 	case ARRAY_ACTION_RSORT: // sort descending
-		std::sort(arr.rbegin(), arr.rend(), cmp);
+		// TODO
+		// Common::sort(arr.end(), arr.rend(), cmp);
+		warning("SFALL Array: reverse sort not implemented");
 		break;
 	case ARRAY_ACTION_REVERSE: // reverse elements
-		std::reverse(arr.rbegin(), arr.rend());
+		// TODO
+		// Common::reverse(arr.rbegin(), arr.rend());
+		warning("SFALL Array: reversing not implemented");
 		break;
 	case ARRAY_ACTION_SHUFFLE: // shuffle elements
-		std::random_device rd;
-		std::mt19937 g(rd());
-		std::shuffle(arr.begin(), arr.end(), g);
+		// TODO
+		// std::random_device rd;
+		// std::mt19937 g(rd());
+		// std::shuffle(arr.begin(), arr.end(), g);
+		warning("SFALL Array: shuffling not implemented");
 		break;
 	}
 }
@@ -77,13 +89,13 @@ public:
 	ArrayElement(ArrayElement &&other) noexcept
 		: type(ArrayElementType::INT),
 		  value({0}) {
-		std::swap(type, other.type);
-		std::swap(value, other.value);
+		SWAP(type, other.type);
+		SWAP(value, other.value);
 	}
 
 	ArrayElement &operator=(ArrayElement &&other) noexcept {
-		std::swap(type, other.type);
-		std::swap(value, other.value);
+		SWAP(type, other.type);
+		SWAP(value, other.value);
 		return *this;
 	}
 
@@ -277,7 +289,7 @@ public:
 		if (key.isInt()) {
 			auto index = key.asInt();
 			if (index >= 0 && index < size()) {
-				std::swap(values[index], val);
+				SWAP(values[index], val);
 			}
 		}
 	}
@@ -296,7 +308,7 @@ public:
 
 			values.resize(newLen);
 		} else if (newLen >= ARRAY_ACTION_SHUFFLE) {
-			ListSort(values, newLen, std::less<ArrayElement>());
+			ListSort(values, newLen, Common::Less<ArrayElement>());
 		}
 	}
 
@@ -311,7 +323,7 @@ public:
 	}
 
 private:
-	std::vector<ArrayElement> values;
+	Common::Array<ArrayElement> values; // std::vector
 };
 
 class SFallArrayAssoc : public SFallArray {
@@ -340,7 +352,7 @@ public:
 
 	ProgramValue GetArray(const ProgramValue &key, Program *program) {
 		auto keyEl = ArrayElement{key, program};
-		auto it = std::find_if(pairs.begin(), pairs.end(), [&keyEl](const KeyValuePair &pair) -> bool {
+		auto it = Common::find_if(pairs.begin(), pairs.end(), [&keyEl](const KeyValuePair &pair) -> bool {
 			return pair.key == keyEl;
 		});
 
@@ -353,8 +365,9 @@ public:
 	}
 
 	void SetArray(const ProgramValue &key, const ProgramValue &val, bool allowUnset, Program *program) {
-		auto keyEl = ArrayElement{key, program};
-		auto it = std::find_if(pairs.begin(), pairs.end(), [&keyEl](const KeyValuePair &pair) -> bool {
+		/*auto*/
+		Fallout2::ArrayElement keyEl = ArrayElement{key, program};
+		auto it = Common::find_if(pairs.begin(), pairs.end(), [&keyEl](const KeyValuePair &pair) -> bool {
 			return pair.key == keyEl;
 		});
 
@@ -375,7 +388,7 @@ public:
 					return;
 				}
 
-				pairs.push_back(KeyValuePair{std::move(keyEl), ArrayElement{val, program}});
+				pairs.push_back(KeyValuePair{keyEl, ArrayElement{val, program}});
 			} else {
 				auto index = it - pairs.begin();
 				pairs[index].value = ArrayElement{val, program};
@@ -404,7 +417,7 @@ public:
 
 	ProgramValue ScanArray(const ProgramValue &value, Program *program) {
 		auto valueEl = ArrayElement{value, program};
-		auto it = std::find_if(pairs.begin(), pairs.end(), [&valueEl](const KeyValuePair &pair) {
+		auto it = Common::find_if(pairs.begin(), pairs.end(), [&valueEl](const KeyValuePair &pair) {
 			return pair.value == valueEl;
 		});
 
@@ -439,19 +452,21 @@ private:
 		}
 	}
 
-	std::vector<KeyValuePair> pairs;
+	Common::Array<KeyValuePair> pairs;
 };
 
 struct SfallArraysState {
-	std::unordered_map<ArrayId, std::unique_ptr<SFallArray> > arrays;
-	std::unordered_set<ArrayId> temporaryArrayIds;
+	// TODO should be unique_ptr
+	std::unordered_map<ArrayId, Common::ScopedPtr<SFallArray> > arrays;
+	// std::unordered_set<ArrayId> temporaryArrayIds;
+	std::unordered_map<ArrayId, int> temporaryArrayIds;
 	int nextArrayId = kInitialArrayId;
 };
 
 static SfallArraysState *_state = nullptr;
 
 bool sfallArraysInit() {
-	_state = new (std::nothrow) SfallArraysState();
+	_state = new /*(std::nothrow)*/ SfallArraysState();
 	if (_state == nullptr) {
 		return false;
 	}
@@ -485,9 +500,12 @@ ArrayId CreateArray(int len, unsigned int flags) {
 	ArrayId arrayId = _state->nextArrayId++;
 
 	if (flags & SFALL_ARRAYFLAG_ASSOC) {
-		_state->arrays.emplace(std::make_pair(arrayId, std::make_unique<SFallArrayAssoc>(flags)));
+		// TODO
+		_state->arrays.insert(Common::Pair(arrayId, Common::ScopedPtr<SFallArrayAssoc>(flags)));
+		//		_state->arrays.emplace(std::make_pair(arrayId, std::make_unique<SFallArrayAssoc>(flags)));
 	} else {
-		_state->arrays.emplace(std::make_pair(arrayId, std::make_unique<SFallArrayList>(len, flags)));
+		_state->arrays.insert(Common::Pair(arrayId, Common::ScopedPtr<SFallArrayList>(len, flags)));
+		//		_state->arrays.emplace(std::make_pair(arrayId, std::make_unique<SFallArrayList>(len, flags)));
 	}
 
 	return arrayId;
@@ -602,7 +620,7 @@ ProgramValue ScanArray(ArrayId arrayId, const ProgramValue &val, Program *progra
 }
 
 ArrayId ListAsArray(int type) {
-	std::vector<Object *> objects;
+	Common::Array<Object *> objects;
 	sfall_lists_fill(type, objects);
 
 	int count = static_cast<int>(objects.size());
@@ -665,4 +683,4 @@ ArrayId StringSplit(const char *str, const char *split) {
 	return arrayId;
 }
 
-} // namespace fallout
+} // namespace Fallout2
