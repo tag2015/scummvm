@@ -1,38 +1,38 @@
-#include "sfall_opcodes.h"
+#include "fallout2/sfall_opcodes.h"
 
-#include <string.h>
+// #include <string.h>
 
-#include "animation.h"
-#include "art.h"
-#include "color.h"
-#include "combat.h"
-#include "dbox.h"
-#include "debug.h"
-#include "game.h"
-#include "input.h"
-#include "interface.h"
-#include "interpreter.h"
-#include "item.h"
-#include "memory.h"
-#include "message.h"
-#include "mouse.h"
-#include "object.h"
-#include "party_member.h"
-#include "proto.h"
-#include "scripts.h"
-#include "sfall_arrays.h"
-#include "sfall_global_scripts.h"
-#include "sfall_global_vars.h"
-#include "sfall_ini.h"
-#include "sfall_kb_helpers.h"
-#include "sfall_lists.h"
-#include "sfall_metarules.h"
-#include "stat.h"
-#include "svga.h"
-#include "tile.h"
-#include "worldmap.h"
+#include "fallout2/animation.h"
+#include "fallout2/art.h"
+#include "fallout2/color.h"
+#include "fallout2/combat.h"
+#include "fallout2/dbox.h"
+#include "fallout2/debug.h"
+#include "fallout2/game.h"
+#include "fallout2/input.h"
+#include "fallout2/interface.h"
+#include "fallout2/interpreter.h"
+#include "fallout2/item.h"
+#include "fallout2/memory.h"
+#include "fallout2/message.h"
+#include "fallout2/mouse.h"
+#include "fallout2/object.h"
+#include "fallout2/party_member.h"
+#include "fallout2/proto.h"
+#include "fallout2/scripts.h"
+#include "fallout2/sfall_arrays.h"
+#include "fallout2/sfall_global_scripts.h"
+#include "fallout2/sfall_global_vars.h"
+#include "fallout2/sfall_ini.h"
+#include "fallout2/sfall_kb_helpers.h"
+#include "fallout2/sfall_lists.h"
+#include "fallout2/sfall_metarules.h"
+#include "fallout2/stat.h"
+#include "fallout2/svga.h"
+#include "fallout2/tile.h"
+#include "fallout2/worldmap.h"
 
-namespace fallout {
+namespace Fallout2 {
 
 typedef enum ExplosionMetarule {
 	EXPL_FORCE_EXPLOSION_PATTERN = 1,
@@ -51,7 +51,7 @@ static constexpr int kVersionMinor = 3;
 static constexpr int kVersionPatch = 4;
 
 // read_byte
-static void opReadByte(Program* program) {
+static void opReadByte(Program *program) {
 	int addr = programStackPopInteger(program);
 
 	int value = 0;
@@ -68,7 +68,7 @@ static void opReadByte(Program* program) {
 }
 
 // set_pc_base_stat
-static void op_set_pc_base_stat(Program* program) {
+static void op_set_pc_base_stat(Program *program) {
 	// CE: Implementation is different. Sfall changes value directly on the
 	// dude's proto, without calling |critterSetBaseStat|. This function has
 	// important call to update derived stats, which is not present in Sfall.
@@ -78,7 +78,7 @@ static void op_set_pc_base_stat(Program* program) {
 }
 
 // set_pc_extra_stat
-static void opSetPcBonusStat(Program* program) {
+static void opSetPcBonusStat(Program *program) {
 	// CE: Implementation is different. Sfall changes value directly on the
 	// dude's proto, without calling |critterSetBonusStat|. This function has
 	// important call to update derived stats, which is not present in Sfall.
@@ -88,7 +88,7 @@ static void opSetPcBonusStat(Program* program) {
 }
 
 // get_pc_base_stat
-static void op_get_pc_base_stat(Program* program) {
+static void op_get_pc_base_stat(Program *program) {
 	// CE: Implementation is different. Sfall obtains value directly from
 	// dude's proto. This can have unforeseen consequences when dealing with
 	// current stats.
@@ -97,7 +97,7 @@ static void op_get_pc_base_stat(Program* program) {
 }
 
 // get_pc_extra_stat
-static void opGetPcBonusStat(Program* program) {
+static void opGetPcBonusStat(Program *program) {
 	int stat = programStackPopInteger(program);
 	int value = critterGetBonusStat(gDude, stat);
 	programStackPushInteger(program, value);
@@ -110,7 +110,7 @@ static void op_tap_key(Program *program) {
 }
 
 // get_year
-static void op_get_year(Program* program) {
+static void op_get_year(Program *program) {
 	int year;
 	gameTimeGetDate(nullptr, nullptr, &year);
 	programStackPushInteger(program, year);
@@ -136,7 +136,7 @@ static void op_key_pressed(Program *program) {
 }
 
 // in_world_map
-static void op_in_world_map(Program* program) {
+static void op_in_world_map(Program *program) {
 	programStackPushInteger(program, GameMode::isInGameMode(GameMode::kWorldmap) ? 1 : 0);
 }
 
@@ -147,14 +147,14 @@ static void op_force_encounter(Program *program) {
 }
 
 // set_world_map_pos
-static void op_set_world_map_pos(Program* program) {
+static void op_set_world_map_pos(Program *program) {
 	int y = programStackPopInteger(program);
 	int x = programStackPopInteger(program);
 	wmSetPartyWorldPos(x, y);
 }
 
 // active_hand
-static void opGetCurrentHand(Program* program) {
+static void opGetCurrentHand(Program *program) {
 	programStackPushInteger(program, interfaceGetCurrentHand());
 }
 
@@ -165,12 +165,12 @@ static void op_set_global_script_type(Program *program) {
 }
 
 // set_sfall_global
-static void opSetGlobalVar(Program* program) {
+static void opSetGlobalVar(Program *program) {
 	ProgramValue value = programStackPopValue(program);
 	ProgramValue variable = programStackPopValue(program);
 
 	if ((variable.opcode & VALUE_TYPE_MASK) == VALUE_TYPE_STRING) {
-		const char* key = programGetString(program, variable.opcode, variable.integerValue);
+		const char *key = programGetString(program, variable.opcode, variable.integerValue);
 		sfall_gl_vars_store(key, value.integerValue);
 	} else if (variable.opcode == VALUE_TYPE_INT) {
 		sfall_gl_vars_store(variable.integerValue, value.integerValue);
@@ -178,12 +178,12 @@ static void opSetGlobalVar(Program* program) {
 }
 
 // get_sfall_global_int
-static void opGetGlobalInt(Program* program) {
+static void opGetGlobalInt(Program *program) {
 	ProgramValue variable = programStackPopValue(program);
 
 	int value = 0;
 	if ((variable.opcode & VALUE_TYPE_MASK) == VALUE_TYPE_STRING) {
-		const char* key = programGetString(program, variable.opcode, variable.integerValue);
+		const char *key = programGetString(program, variable.opcode, variable.integerValue);
 		sfall_gl_vars_fetch(key, value);
 	} else if (variable.opcode == VALUE_TYPE_INT) {
 		sfall_gl_vars_fetch(variable.integerValue, value);
@@ -205,29 +205,29 @@ static void op_get_ini_setting(Program *program) {
 }
 
 // get_game_mode
-static void opGetGameMode(Program* program) {
+static void opGetGameMode(Program *program) {
 	programStackPushInteger(program, GameMode::getCurrentGameMode());
 }
 
 // get_uptime
-static void op_get_uptime(Program* program) {
+static void op_get_uptime(Program *program) {
 	programStackPushInteger(program, getTicks());
 }
 
 // set_car_current_town
-static void op_set_car_current_town(Program* program) {
+static void op_set_car_current_town(Program *program) {
 	int area = programStackPopInteger(program);
 	wmCarSetCurrentArea(area);
 }
 
 // get_bodypart_hit_modifier
-static void op_get_bodypart_hit_modifier(Program* program) {
+static void op_get_bodypart_hit_modifier(Program *program) {
 	int hit_location = programStackPopInteger(program);
 	programStackPushInteger(program, combat_get_hit_location_penalty(hit_location));
 }
 
 // set_bodypart_hit_modifier
-static void op_set_bodypart_hit_modifier(Program* program) {
+static void op_set_bodypart_hit_modifier(Program *program) {
 	int penalty = programStackPopInteger(program);
 	int hit_location = programStackPopInteger(program);
 	combat_set_hit_location_penalty(hit_location, penalty);
@@ -246,19 +246,19 @@ static void op_get_ini_string(Program *program) {
 }
 
 // sqrt
-static void op_sqrt(Program* program) {
+static void op_sqrt(Program *program) {
 	ProgramValue programValue = programStackPopValue(program);
 	programStackPushFloat(program, sqrtf(programValue.asFloat()));
 }
 
 // abs
-static void op_abs(Program* program) {
+static void op_abs(Program *program) {
 	ProgramValue programValue = programStackPopValue(program);
 
 	if (programValue.isInt()) {
-		programStackPushInteger(program, abs(programValue.integerValue));
+		programStackPushInteger(program, ABS(programValue.integerValue));
 	} else {
-		programStackPushFloat(program, abs(programValue.asFloat()));
+		programStackPushFloat(program, ABS(programValue.asFloat()));
 	}
 }
 
@@ -269,11 +269,11 @@ static void op_get_script(Program *program) {
 }
 
 // get_proto_data
-static void op_get_proto_data(Program* program) {
+static void op_get_proto_data(Program *program) {
 	size_t offset = static_cast<size_t>(programStackPopInteger(program));
 	int pid = programStackPopInteger(program);
 
-	Proto* proto;
+	Proto *proto;
 	if (protoGetProto(pid, &proto) != 0) {
 		debugPrint("op_get_proto_data: bad proto %d", pid);
 		programStackPushInteger(program, -1);
@@ -288,17 +288,17 @@ static void op_get_proto_data(Program* program) {
 		return;
 	}
 
-	int value = *reinterpret_cast<int*>(reinterpret_cast<unsigned char*>(proto) + offset);
+	int value = *reinterpret_cast<int *>(reinterpret_cast<unsigned char *>(proto) + offset);
 	programStackPushInteger(program, value);
 }
 
 // set_proto_data
-static void op_set_proto_data(Program* program) {
+static void op_set_proto_data(Program *program) {
 	int value = programStackPopInteger(program);
 	size_t offset = static_cast<size_t>(programStackPopInteger(program));
 	int pid = programStackPopInteger(program);
 
-	Proto* proto;
+	Proto *proto;
 	if (protoGetProto(pid, &proto) != 0) {
 		debugPrint("op_set_proto_data: bad proto %d", pid);
 		programStackPushInteger(program, -1);
@@ -313,7 +313,7 @@ static void op_set_proto_data(Program* program) {
 		return;
 	}
 
-	*reinterpret_cast<int*>(reinterpret_cast<unsigned char*>(proto) + offset) = value;
+	*reinterpret_cast<int *>(reinterpret_cast<unsigned char *>(proto) + offset) = value;
 }
 
 // set_self
@@ -329,43 +329,43 @@ static void op_set_self(Program *program) {
 }
 
 // list_begin
-static void opListBegin(Program* program) {
+static void opListBegin(Program *program) {
 	int listType = programStackPopInteger(program);
 	int listId = sfallListsCreate(listType);
 	programStackPushInteger(program, listId);
 }
 
 // list_next
-static void opListNext(Program* program) {
+static void opListNext(Program *program) {
 	int listId = programStackPopInteger(program);
-	Object* obj = sfallListsGetNext(listId);
+	Object *obj = sfallListsGetNext(listId);
 	programStackPushPointer(program, obj);
 }
 
 // list_end
-static void opListEnd(Program* program) {
+static void opListEnd(Program *program) {
 	int listId = programStackPopInteger(program);
 	sfallListsDestroy(listId);
 }
 
 // sfall_ver_major
-static void opGetVersionMajor(Program* program) {
+static void opGetVersionMajor(Program *program) {
 	programStackPushInteger(program, kVersionMajor);
 }
 
 // sfall_ver_minor
-static void opGetVersionMinor(Program* program) {
+static void opGetVersionMinor(Program *program) {
 	programStackPushInteger(program, kVersionMinor);
 }
 
 // sfall_ver_build
-static void opGetVersionPatch(Program* program) {
+static void opGetVersionPatch(Program *program) {
 	programStackPushInteger(program, kVersionPatch);
 }
 
 // get_weapon_ammo_pid
-static void opGetWeaponAmmoPid(Program* program) {
-	Object* obj = static_cast<Object*>(programStackPopPointer(program));
+static void opGetWeaponAmmoPid(Program *program) {
+	Object *obj = static_cast<Object *>(programStackPopPointer(program));
 
 	int pid = -1;
 	if (obj != nullptr) {
@@ -392,9 +392,9 @@ static void opGetWeaponAmmoPid(Program* program) {
 // quantity/capacity which can probably lead to bad things.
 //
 // set_weapon_ammo_pid
-static void opSetWeaponAmmoPid(Program* program) {
+static void opSetWeaponAmmoPid(Program *program) {
 	int ammoTypePid = programStackPopInteger(program);
-	Object* obj = static_cast<Object*>(programStackPopPointer(program));
+	Object *obj = static_cast<Object *>(programStackPopPointer(program));
 
 	if (obj != nullptr) {
 		if (PID_TYPE(obj->pid) == OBJ_TYPE_ITEM) {
@@ -408,8 +408,8 @@ static void opSetWeaponAmmoPid(Program* program) {
 }
 
 // get_weapon_ammo_count
-static void opGetWeaponAmmoCount(Program* program) {
-	Object* obj = static_cast<Object*>(programStackPopPointer(program));
+static void opGetWeaponAmmoCount(Program *program) {
+	Object *obj = static_cast<Object *>(programStackPopPointer(program));
 
 	// CE: Implementation is different.
 	int ammoQuantityOrCharges = 0;
@@ -431,9 +431,9 @@ static void opGetWeaponAmmoCount(Program* program) {
 }
 
 // set_weapon_ammo_count
-static void opSetWeaponAmmoCount(Program* program) {
+static void opSetWeaponAmmoCount(Program *program) {
 	int ammoQuantityOrCharges = programStackPopInteger(program);
-	Object* obj = static_cast<Object*>(programStackPopPointer(program));
+	Object *obj = static_cast<Object *>(programStackPopPointer(program));
 
 	// CE: Implementation is different.
 	if (obj != nullptr) {
@@ -452,7 +452,7 @@ static void opSetWeaponAmmoCount(Program* program) {
 }
 
 // get_mouse_x
-static void opGetMouseX(Program* program) {
+static void opGetMouseX(Program *program) {
 	int x;
 	int y;
 	mouseGetPosition(&x, &y);
@@ -460,7 +460,7 @@ static void opGetMouseX(Program* program) {
 }
 
 // get_mouse_y
-static void opGetMouseY(Program* program) {
+static void opGetMouseY(Program *program) {
 	int x;
 	int y;
 	mouseGetPosition(&x, &y);
@@ -468,19 +468,19 @@ static void opGetMouseY(Program* program) {
 }
 
 // get_mouse_buttons
-static void op_get_mouse_buttons(Program* program) {
+static void op_get_mouse_buttons(Program *program) {
 	// CE: Implementation is slightly different - it does not handle middle
 	// mouse button.
 	programStackPushInteger(program, mouse_get_last_buttons());
 }
 
 // get_screen_width
-static void opGetScreenWidth(Program* program) {
+static void opGetScreenWidth(Program *program) {
 	programStackPushInteger(program, screenGetWidth());
 }
 
 // get_screen_height
-static void opGetScreenHeight(Program* program) {
+static void opGetScreenHeight(Program *program) {
 	programStackPushInteger(program, screenGetHeight());
 }
 
@@ -517,7 +517,7 @@ static void op_create_message_window(Program *program) {
 }
 
 // get_attack_type
-static void op_get_attack_type(Program* program) {
+static void op_get_attack_type(Program *program) {
 	int hit_mode;
 	if (interface_get_current_attack_mode(&hit_mode)) {
 		programStackPushInteger(program, hit_mode);
@@ -534,26 +534,28 @@ static void op_force_encounter_with_flags(Program *program) {
 }
 
 // list_as_array
+// TODO array
 static void op_list_as_array(Program *program) {
-	int type = programStackPopInteger(program);
-	int arrayId = ListAsArray(type);
-	programStackPushInteger(program, arrayId);
+//	int type = programStackPopInteger(program);
+//	int arrayId = ListAsArray(type);
+//	programStackPushInteger(program, arrayId);
+	warning("SFALL: op_list_as_array not implemented");
 }
 
 // atoi
-static void opParseInt(Program* program) {
-	const char* string = programStackPopString(program);
+static void opParseInt(Program *program) {
+	const char *string = programStackPopString(program);
 	programStackPushInteger(program, static_cast<int>(strtol(string, nullptr, 0)));
 }
 
 // atof
-static void op_atof(Program* program) {
-	const char* string = programStackPopString(program);
+static void op_atof(Program *program) {
+	const char *string = programStackPopString(program);
 	programStackPushFloat(program, static_cast<float>(atof(string)));
 }
 
 // tile_under_cursor
-static void op_tile_under_cursor(Program* program) {
+static void op_tile_under_cursor(Program *program) {
 	int x;
 	int y;
 	mouseGetPosition(&x, &y);
@@ -585,7 +587,7 @@ static void opSubstr(Program *program) {
 			programStackPushString(program, buf);
 			return;
 		}
-		length = abs(length); // length can't be negative
+		length = ABS(length); // length can't be negative
 	}
 
 	// check position
@@ -609,8 +611,8 @@ static void opSubstr(Program *program) {
 }
 
 // strlen
-static void opGetStringLength(Program* program) {
-	const char* string = programStackPopString(program);
+static void opGetStringLength(Program *program) {
+	const char *string = programStackPopString(program);
 	programStackPushInteger(program, static_cast<int>(strlen(string)));
 }
 
@@ -652,11 +654,14 @@ static void op_explosions_metarule(Program *program) {
 			int maxDamage;
 			explosiveGetDamage(param1, &minDamage, &maxDamage);
 
-			ArrayId arrayId = CreateTempArray(2, 0);
-			SetArray(arrayId, ProgramValue{0}, ProgramValue{minDamage}, false, program);
-			SetArray(arrayId, ProgramValue{1}, ProgramValue{maxDamage}, false, program);
+			// TODO array
+//			ArrayId arrayId = CreateTempArray(2, 0);
+//			SetArray(arrayId, ProgramValue{0}, ProgramValue{minDamage}, false, program);
+//			SetArray(arrayId, ProgramValue{1}, ProgramValue{maxDamage}, false, program);
 
-			programStackPushInteger(program, arrayId);
+//			programStackPushInteger(program, arrayId);
+			programStackPushInteger(program, minDamage);
+			programStackPushInteger(program, maxDamage);
 		}
 		break;
 	case EXPL_SET_DYNAMITE_EXPLOSION_DAMAGE:
@@ -672,7 +677,7 @@ static void op_explosions_metarule(Program *program) {
 }
 
 // pow (^)
-static void op_power(Program* program) {
+static void op_power(Program *program) {
 	ProgramValue expValue = programStackPopValue(program);
 	ProgramValue baseValue = programStackPopValue(program);
 
@@ -687,78 +692,86 @@ static void op_power(Program* program) {
 }
 
 // message_str_game
-static void opGetMessage(Program* program) {
+static void opGetMessage(Program *program) {
 	int messageId = programStackPopInteger(program);
 	int messageListId = programStackPopInteger(program);
-	char* text = messageListRepositoryGetMsg(messageListId, messageId);
+	char *text = messageListRepositoryGetMsg(messageListId, messageId);
 	programStackPushString(program, text);
 }
 
 // array_key
 static void opGetArrayKey(Program *program) {
-	auto index = programStackPopInteger(program);
+/*	auto index = programStackPopInteger(program);
 	auto arrayId = programStackPopInteger(program);
 	auto value = GetArrayKey(arrayId, index, program);
-	programStackPushValue(program, value);
+	programStackPushValue(program, value);*/
+	warning("SFALL: opGetArrayKey not implemented");
 }
 
 // create_array
 static void opCreateArray(Program *program) {
-	auto flags = programStackPopInteger(program);
+/*	auto flags = programStackPopInteger(program);
 	auto len = programStackPopInteger(program);
 	auto arrayId = CreateArray(len, flags);
-	programStackPushInteger(program, arrayId);
+	programStackPushInteger(program, arrayId);*/
+	warning("SFALL: opCreateArray not implemented");
 }
 
 // temp_array
 static void opTempArray(Program *program) {
-	auto flags = programStackPopInteger(program);
+/*	auto flags = programStackPopInteger(program);
 	auto len = programStackPopInteger(program);
 	auto arrayId = CreateTempArray(len, flags);
-	programStackPushInteger(program, arrayId);
+	programStackPushInteger(program, arrayId);*/
+	warning("SFALL: opTempArray not implemented");
 }
 
 // fix_array
 static void opFixArray(Program *program) {
-	auto arrayId = programStackPopInteger(program);
-	FixArray(arrayId);
+/*	auto arrayId = programStackPopInteger(program);
+	FixArray(arrayId);*/
+	warning("SFALL: opFixArray not implemented");
 }
 
 // string_split
 static void opStringSplit(Program *program) {
-	auto split = programStackPopString(program);
+/*	auto split = programStackPopString(program);
 	auto str = programStackPopString(program);
 	auto arrayId = StringSplit(str, split);
-	programStackPushInteger(program, arrayId);
+	programStackPushInteger(program, arrayId);*/
+	warning("SFALL: opStringSplit not implemented");
 }
 
 // set_array
 static void opSetArray(Program *program) {
-	auto value = programStackPopValue(program);
+/*	auto value = programStackPopValue(program);
 	auto key = programStackPopValue(program);
 	auto arrayId = programStackPopInteger(program);
-	SetArray(arrayId, key, value, true, program);
+	SetArray(arrayId, key, value, true, program);*/
+	warning("SFALL: opSetArray not implemented");
 }
 
 // arrayexpr
 static void opStackArray(Program *program) {
-	auto value = programStackPopValue(program);
+/*	auto value = programStackPopValue(program);
 	auto key = programStackPopValue(program);
 	auto returnValue = StackArray(key, value, program);
-	programStackPushInteger(program, returnValue);
+	programStackPushInteger(program, returnValue);*/
+	warning("SFALL: opStackArray not implemented");
 }
 
 // scan_array
 static void opScanArray(Program *program) {
-	auto value = programStackPopValue(program);
+/*	auto value = programStackPopValue(program);
 	auto arrayId = programStackPopInteger(program);
 	auto returnValue = ScanArray(arrayId, value, program);
-	programStackPushValue(program, returnValue);
+	programStackPushValue(program, returnValue);*/
+	warning("SFALL: opScanArray not implemented");
 }
 
 // get_array
 static void opGetArray(Program *program) {
-	auto key = programStackPopValue(program);
+/*	auto key = programStackPopValue(program);
 	auto arrayId = programStackPopValue(program);
 
 	if (arrayId.isInt()) {
@@ -775,37 +788,42 @@ static void opGetArray(Program *program) {
 		} else {
 			programStackPushString(program, buf);
 		}
-	}
+	}*/
+	warning("SFALL: opGetArray not implemented");
 }
 
 // free_array
 static void opFreeArray(Program *program) {
-	auto arrayId = programStackPopInteger(program);
-	FreeArray(arrayId);
+/*	auto arrayId = programStackPopInteger(program);
+	FreeArray(arrayId);*/
+	warning("SFALL: opFreeArray not implemented");
 }
 
 // len_array
 static void opLenArray(Program *program) {
-	auto arrayId = programStackPopInteger(program);
-	programStackPushInteger(program, LenArray(arrayId));
+/*	auto arrayId = programStackPopInteger(program);
+	programStackPushInteger(program, LenArray(arrayId));*/
+	warning("SFALL: opLenArray not implemented");
 }
 
 // resize_array
 static void opResizeArray(Program *program) {
-	auto newLen = programStackPopInteger(program);
+/*	auto newLen = programStackPopInteger(program);
 	auto arrayId = programStackPopInteger(program);
-	ResizeArray(arrayId, newLen);
+	ResizeArray(arrayId, newLen);*/
+	warning("SFALL: opResizeArray not implemented");
 }
 
 // party_member_list
 static void opPartyMemberList(Program *program) {
-	auto includeHidden = programStackPopInteger(program);
+/*	auto includeHidden = programStackPopInteger(program);
 	auto objects = get_all_party_members_objects(includeHidden);
 	auto arrayId = CreateTempArray(objects.size(), SFALL_ARRAYFLAG_RESERVED);
 	for (int i = 0; i < LenArray(arrayId); i++) {
 		SetArray(arrayId, ProgramValue{i}, ProgramValue{objects[i]}, false, program);
 	}
-	programStackPushInteger(program, arrayId);
+	programStackPushInteger(program, arrayId);*/
+	warning("SFALL: opPartyMemberList not implemented");
 }
 
 // type_of
@@ -821,11 +839,11 @@ static void opTypeOf(Program *program) {
 }
 
 // round
-static void opRound(Program* program) {
+static void opRound(Program *program) {
 	float floatValue = programStackPopFloat(program);
 	int integerValue = static_cast<int>(floatValue);
 	float mod = floatValue - static_cast<float>(integerValue);
-	if (abs(mod) >= 0.5) {
+	if (ABS(mod) >= 0.5) {
 		integerValue += mod > 0.0 ? 1 : -1;
 	}
 	programStackPushInteger(program, integerValue);
@@ -839,7 +857,7 @@ enum BlockType {
 	BLOCKING_TYPE_SCROLL,
 };
 
-PathBuilderCallback* get_blocking_func(int type) {
+PathBuilderCallback *get_blocking_func(int type) {
 	switch (type) {
 	case BLOCKING_TYPE_SHOOT:
 		return _obj_shoot_blocking_at;
@@ -853,26 +871,26 @@ PathBuilderCallback* get_blocking_func(int type) {
 }
 
 // obj_blocking_line
-static void op_make_straight_path(Program* program) {
+static void op_make_straight_path(Program *program) {
 	int type = programStackPopInteger(program);
 	int dest = programStackPopInteger(program);
-	Object* object = static_cast<Object*>(programStackPopPointer(program));
+	Object *object = static_cast<Object *>(programStackPopPointer(program));
 
 	int flags = type == BLOCKING_TYPE_SHOOT ? 32 : 0;
 
-	Object* obstacle = nullptr;
+	Object *obstacle = nullptr;
 	_make_straight_path_func(object, object->tile, dest, nullptr, &obstacle, flags, get_blocking_func(type));
 	programStackPushPointer(program, obstacle);
 }
 
 // obj_blocking_tile
-static void op_obj_blocking_at(Program* program) {
+static void op_obj_blocking_at(Program *program) {
 	int type = programStackPopInteger(program);
 	int elevation = programStackPopInteger(program);
 	int tile = programStackPopInteger(program);
 
-	PathBuilderCallback* func = get_blocking_func(type);
-	Object* obstacle = func(nullptr, tile, elevation);
+	PathBuilderCallback *func = get_blocking_func(type);
+	Object *obstacle = func(nullptr, tile, elevation);
 	if (obstacle != nullptr) {
 		if (type == BLOCKING_TYPE_SHOOT) {
 			if ((obstacle->flags & OBJECT_SHOOT_THRU) != 0) {
@@ -884,7 +902,7 @@ static void op_obj_blocking_at(Program* program) {
 }
 
 // art_exists
-static void opArtExists(Program* program) {
+static void opArtExists(Program *program) {
 	int fid = programStackPopInteger(program);
 	programStackPushInteger(program, artExists(fid));
 }
@@ -925,7 +943,7 @@ static void op_sfall_func6(Program *program) {
 }
 
 // div (/)
-static void op_div(Program* program) {
+static void op_div(Program *program) {
 	ProgramValue divisorValue = programStackPopValue(program);
 	ProgramValue dividendValue = programStackPopValue(program);
 
@@ -1034,4 +1052,4 @@ void sfallOpcodesInit() {
 void sfallOpcodesExit() {
 }
 
-} // namespace fallout
+} // namespace Fallout2
