@@ -92,6 +92,7 @@ MODULE_OBJS = \
 	sfall_kb_helpers.o \
 	sfall_lists.o \
 	sfall_metarules.o \
+	sfall_opcodes.o \
 	skill.o \
 	skilldex.o \
 	stat.o \
