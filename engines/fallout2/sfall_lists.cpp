@@ -1,11 +1,13 @@
-#include "sfall_lists.h"
+#include "fallout2/sfall_lists.h"
 
-#include <unordered_map>
+// #include <unordered_map>
 
-#include "object.h"
-#include "scripts.h"
+#include "fallout2/object.h"
+#include "fallout2/scripts.h"
 
-namespace fallout {
+#include "fallout2/lib/std/map.h"
+
+namespace Fallout2 {
 
 // Due to bad design of |ListType| it's |LIST_ITEMS| and |LIST_CRITTERS| do not
 // match |OBJ_TYPE_CRITTER| and |OBJ_TYPE_ITEM|.
@@ -25,7 +27,7 @@ static constexpr int kInitialListId = 0xCCCCCC;
 
 // Loosely based on [sList] from Sfall.
 struct List {
-	std::vector<Object*> objects;
+	Common::Array<Object *> objects; // std::vector
 	size_t pos = 0;
 };
 
@@ -34,10 +36,10 @@ struct SfallListsState {
 	int nextListId = kInitialListId;
 };
 
-static SfallListsState* _state = nullptr;
+static SfallListsState *_state = nullptr;
 
 bool sfallListsInit() {
-	_state = new (std::nothrow) SfallListsState();
+	_state = new /*(std::nothrow)*/ SfallListsState();
 	if (_state == nullptr) {
 		return false;
 	}
@@ -59,7 +61,7 @@ void sfallListsExit() {
 
 int sfallListsCreate(int listType) {
 	int listId = _state->nextListId++;
-	List& list = _state->lists[listId];
+	List &list = _state->lists[listId];
 
 	sfall_lists_fill(listType, list.objects);
 
@@ -69,7 +71,7 @@ int sfallListsCreate(int listType) {
 Object *sfallListsGetNext(int listId) {
 	auto it = _state->lists.find(listId);
 	if (it != _state->lists.end()) {
-		List &list = it->second;
+		List &list = it->_value;
 		if (list.pos < list.objects.size()) {
 			return list.objects[list.pos++];
 		}
@@ -85,7 +87,7 @@ void sfallListsDestroy(int listId) {
 	}
 }
 
-void sfall_lists_fill(int type, std::vector<Object *> &objects) {
+void sfall_lists_fill(int type, Common::Array<Object *> &objects) {
 	if (type == LIST_TILES) {
 		// For unknown reason this list type is not implemented in Sfall.
 		return;
@@ -133,4 +135,4 @@ void sfall_lists_fill(int type, std::vector<Object *> &objects) {
 	}
 }
 
-} // namespace fallout
+} // namespace Fallout2
