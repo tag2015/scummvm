@@ -1,7 +1,9 @@
-#ifndef FALLOUT_SFALL_INI_H_
-#define FALLOUT_SFALL_INI_H_
+#ifndef FALLOUT2_SFALL_INI_H
+#define FALLOUT2_SFALL_INI_H
 
 // #include <cstddef>
+
+#include "common/system.h"
 
 namespace Fallout2 {
 
@@ -22,4 +24,4 @@ bool sfall_ini_set_string(const char *triplet, const char *value);
 
 } // namespace Fallout2
 
-#endif /* FALLOUT_SFALL_INI_H_ */
+#endif
