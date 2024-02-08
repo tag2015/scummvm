@@ -1,20 +1,20 @@
-#include "sfall_metarules.h"
+#include "fallout2/sfall_metarules.h"
 
-#include "combat.h"
-#include "debug.h"
-#include "game.h"
-#include "game_dialog.h"
-#include "game_mouse.h"
-#include "interface.h"
-#include "inventory.h"
-#include "object.h"
-#include "sfall_ini.h"
-#include "text_font.h"
-#include "tile.h"
-#include "window.h"
-#include "worldmap.h"
+#include "fallout2/combat.h"
+#include "fallout2/debug.h"
+#include "fallout2/game.h"
+#include "fallout2/game_dialog.h"
+#include "fallout2/game_mouse.h"
+#include "fallout2/interface.h"
+#include "fallout2/inventory.h"
+#include "fallout2/object.h"
+#include "fallout2/sfall_ini.h"
+#include "fallout2/text_font.h"
+#include "fallout2/tile.h"
+#include "fallout2/window.h"
+#include "fallout2/worldmap.h"
 
-namespace fallout {
+namespace Fallout2 {
 
 typedef void(MetaruleHandler)(Program *program, int args);
 
@@ -267,4 +267,4 @@ void sfall_metarule(Program *program, int args) {
 	kMetarules[metaruleIndex].handler(program, args);
 }
 
-} // namespace fallout
+} // namespace Fallout2
