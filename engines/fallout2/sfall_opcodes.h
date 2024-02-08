@@ -1,11 +1,11 @@
-#ifndef FALLOUT_SFALL_OPCODES_H_
-#define FALLOUT_SFALL_OPCODES_H_
+#ifndef FALLOUT2_SFALL_OPCODES_H
+#define FALLOUT2_SFALL_OPCODES_H
 
-namespace fallout {
+namespace Fallout2 {
 
 void sfallOpcodesInit();
 void sfallOpcodesExit();
 
-} // namespace fallout
+} // namespace Fallout2
 
-#endif /* FALLOUT_SFALL_OPCODES_H_ */
+#endif
