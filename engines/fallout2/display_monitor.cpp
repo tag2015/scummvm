@@ -4,6 +4,8 @@
 
 // #include <fstream>
 
+#include "fallout2/fallout2.h"
+
 #include "fallout2/art.h"
 #include "fallout2/color.h"
 #include "fallout2/combat.h"
@@ -19,7 +21,7 @@
 #include "fallout2/text_font.h"
 #include "fallout2/window_manager.h"
 
-#include "common/stream.h"
+#include "common/savefile.h"
 
 namespace Fallout2 {
 
@@ -96,7 +98,7 @@ static int _disp_start;
 // 0x56FB58
 static unsigned int gDisplayMonitorLastBeepTimestamp;
 
-// static std::ofstream gConsoleFileStream;  TODO sfall
+static Common::OutSaveFile *gConsoleFileStream;
 static int gConsoleFilePrintCount = 0;
 
 // 0x431610
@@ -431,39 +433,45 @@ static void consoleFileInit() {
 	}
 
 	if (consoleFilePath != nullptr) {
-//		gConsoleFileStream.open(consoleFilePath); TODO sfall
+		Common::SaveFileManager *saveMan = g_system->getSavefileManager();
+		Common::Path ScummPath(g_engine->getTargetName());
+		ScummPath.appendInPlace("_");
+		ScummPath.appendInPlace(consoleFilePath);
+		gConsoleFileStream = new Common::OutSaveFile(saveMan->openForSaving(ScummPath.toConfig(), false));
+		if (!gConsoleFileStream)
+			warning("Couldn't open SFALL console output");
 	}
 }
 
 static void consoleFileReset() {
-/*	if (gConsoleFileStream.is_open()) { TODO sfall
+	if (gConsoleFileStream) {
 		gConsoleFilePrintCount = 0;
-		gConsoleFileStream.flush();
-	}*/
+		gConsoleFileStream->flush();
+	}
 }
 
 static void consoleFileExit() {
-/*	if (gConsoleFileStream.is_open()) { TODO sfall
-		gConsoleFileStream.close();
-	}*/
+	if (gConsoleFileStream) {
+		gConsoleFileStream->finalize();
+		delete gConsoleFileStream;
+	}
 }
 
 static void consoleFileAddMessage(const char *message) {
-/*	if (gConsoleFileStream.is_open()) { TODO sfall
-		gConsoleFileStream << message << '\n';
-
+	if (gConsoleFileStream) {
+		gConsoleFileStream->writeString(Common::String(message) + "\n");
 		gConsoleFilePrintCount++;
 		if (gConsoleFilePrintCount >= 20) {
 			consoleFileFlush();
 		}
-	}*/
+	}
 }
 
 static void consoleFileFlush() {
-/*	if (gConsoleFileStream.is_open()) { TODO sfall
+	if (gConsoleFileStream) {
 		gConsoleFilePrintCount = 0;
-		gConsoleFileStream.flush();
-	}*/
+		gConsoleFileStream->flush();
+	}
 }
 
 } // namespace Fallout2
