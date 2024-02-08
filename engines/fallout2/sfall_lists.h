@@ -1,11 +1,13 @@
-#ifndef FALLOUT_SFALL_LISTS_H_
-#define FALLOUT_SFALL_LISTS_H_
+#ifndef FALLOUT2_SFALL_LISTS_H
+#define FALLOUT2_SFALL_LISTS_H
 
-#include <vector>
+// #include <vector>
 
-#include "obj_types.h"
+#include "fallout2/obj_types.h"
 
-namespace fallout {
+#include "common/array.h"
+
+namespace Fallout2 {
 
 enum ListType {
 	LIST_CRITTERS = 0,
@@ -24,8 +26,8 @@ void sfallListsExit();
 int sfallListsCreate(int listType);
 Object *sfallListsGetNext(int listId);
 void sfallListsDestroy(int listId);
-void sfall_lists_fill(int type, std::vector<Object *> &objects);
+void sfall_lists_fill(int type, Common::Array<Object *> &objects); // std::vector
 
-} // namespace fallout
+} // namespace Fallout2
 
-#endif /* FALLOUT_SFALL_LISTS_H_ */
+#endif
