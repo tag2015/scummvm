@@ -1,9 +1,9 @@
-#ifndef FALLOUT_SFALL_GLOBAL_SCRIPTS_H_
-#define FALLOUT_SFALL_GLOBAL_SCRIPTS_H_
+#ifndef FALLOUT2_SFALL_GLOBAL_SCRIPTS_H
+#define FALLOUT2_SFALL_GLOBAL_SCRIPTS_H
 
-#include "interpreter.h"
+#include "fallout2/interpreter.h"
 
-namespace fallout {
+namespace Fallout2 {
 
 bool sfall_gl_scr_init();
 void sfall_gl_scr_reset();
@@ -19,6 +19,6 @@ void sfall_gl_scr_set_type(Program *program, int type);
 bool sfall_gl_scr_is_loaded(Program *program);
 void sfall_gl_scr_update(int burstSize);
 
-} // namespace fallout
+} // namespace Fallout2
 
-#endif /* FALLOUT_SFALL_GLOBAL_SCRIPTS_H_ */
+#endif
