@@ -52,10 +52,10 @@
 #include "fallout2/settings.h"
 // #include "fallout2/sfall_arrays.h"
 #include "fallout2/sfall_config.h"
-// #include "sfall_global_scripts.h"
-// #include "sfall_global_vars.h"
-// #include "sfall_ini.h"
-// #include "sfall_lists.h"
+#include "fallout2/sfall_global_scripts.h"
+#include "fallout2/sfall_global_vars.h"
+#include "fallout2/sfall_ini.h"
+#include "fallout2/sfall_lists.h"
 #include "fallout2/skill.h"
 #include "fallout2/skilldex.h"
 #include "fallout2/stat.h"
@@ -429,11 +429,11 @@ void gameReset() {
 	_init_options_menu();
 
 	// SFALL
-//	sfall_gl_vars_resets();
-//	sfallListsReset();
+	sfall_gl_vars_reset();
+	sfallListsReset();
 	messageListRepositoryReset();
 //	sfallArraysReset();
-//	sfall_gl_scr_reset();
+	sfall_gl_scr_reset();
 }
 
 
@@ -443,11 +443,11 @@ void gameExit() {
 	debugPrint("\nGame Exit\n");
 
 	// SFALL
-//	sfall_gl_scr_exit();
+	sfall_gl_scr_exit();
 //	sfallArraysExit();
-//	sfallListsExit();
-//	sfall_gl_vars_exit();
-//	premadeCharactersExit();
+	sfallListsExit();
+	sfall_gl_vars_exit();
+	premadeCharactersExit();
 
 	tileDisable();
 	messageListRepositorySetStandardMessageList(STANDARD_MESSAGE_LIST_MISC, nullptr);
@@ -1020,7 +1020,7 @@ int gameSetGlobalVar(int var, int value) {
 				} else {
 					snprintf(formattedMessage, sizeof(formattedMessage), "You lost %d karma.", -diff);
 				}
-				//				displayMonitorAddMessage(formattedMessage);  TODO display_monitor.cpp
+				displayMonitorAddMessage(formattedMessage);
 			}
 		}
 	}
@@ -1342,8 +1342,7 @@ int showQuitConfirmationDialog() {
 
 	int master_db_handle = dbOpen(main_file_name, 0, patch_file_name, 1);
 	if (master_db_handle == -1) {
-		//		showMesageBox("Could not find the master datafile. Please make sure the FALLOUT CD is in the drive and that you are running FALLOUT from the directory you installed it to.");
-		warning("Could not find the master datafile. Please make sure the FALLOUT CD is in the drive and that you are running FALLOUT from the directory you installed it to.");
+		showMesageBox("Could not find the master datafile. Please make sure the FALLOUT CD is in the drive and that you are running FALLOUT from the directory you installed it to.");
 		return -1;
 	}
 
@@ -1359,8 +1358,7 @@ int showQuitConfirmationDialog() {
 
 	int critter_db_handle = dbOpen(main_file_name, 0, patch_file_name, 1);
 	if (critter_db_handle == -1) {
-		//		showMesageBox("Could not find the critter datafile. Please make sure the FALLOUT CD is in the drive and that you are running FALLOUT from the directory you installed it to.");
-		warning("Could not find the critter datafile. Please make sure the FALLOUT CD is in the drive and that you are running FALLOUT from the directory you installed it to.");
+		showMesageBox("Could not find the critter datafile. Please make sure the FALLOUT CD is in the drive and that you are running FALLOUT from the directory you installed it to.");
 		return -1;
 	}
 
