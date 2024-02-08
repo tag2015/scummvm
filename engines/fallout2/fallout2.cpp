@@ -77,6 +77,10 @@
 #include "fallout2/scripts.h"
 #include "fallout2/settings.h"
 #include "fallout2/sfall_config.h"
+#include "fallout2/sfall_global_scripts.h"
+#include "fallout2/sfall_global_vars.h"
+#include "fallout2/sfall_ini.h"
+#include "fallout2/sfall_lists.h"
 #include "fallout2/skill.h"
 #include "fallout2/stat.h"
 #include "fallout2/svga.h"
@@ -528,6 +532,17 @@ Common::Error Fallout2Engine::run() {
 	// init game palette
 	paletteInit();
 
+	const char *language = settings.system.language.c_str();
+	if (compat_stricmp(language, FRENCH) == 0) {
+		keyboardSetLayout(KEYBOARD_LAYOUT_FRENCH);
+	} else if (compat_stricmp(language, GERMAN) == 0) {
+		keyboardSetLayout(KEYBOARD_LAYOUT_GERMAN);
+	} else if (compat_stricmp(language, ITALIAN) == 0) {
+		keyboardSetLayout(KEYBOARD_LAYOUT_ITALIAN);
+	} else if (compat_stricmp(language, SPANISH) == 0) {
+		keyboardSetLayout(KEYBOARD_LAYOUT_SPANISH);
+	}
+
 	// Init game-specific RNG
 	randomInit();
 	debug("Initialized RNG!");
@@ -716,7 +731,34 @@ Common::Error Fallout2Engine::run() {
 	// SFALL
 	premadeCharactersInit();
 
+	if (!sfall_gl_vars_init())
+		warning("Failed on sfall_gl_vars_init");
+
+	if (!sfallListsInit())
+		warning("Failed on sfallListsInit");
+
+//	if (!sfallArraysInit())
+//		warning("Failed on sfallArraysInit"); TODO array
+
+	if (!sfall_gl_scr_init())
+		warning("Failed on sfall_gl_scr_init");
+
+	debug("Initialized SFALL");
+
+	char *customConfigBasePath;
+	configGetString(&gSfallConfig, SFALL_CONFIG_SCRIPTS_KEY, SFALL_CONFIG_INI_CONFIG_FOLDER, &customConfigBasePath);
+	sfall_ini_set_base_path(customConfigBasePath);
+
 	messageListRepositorySetStandardMessageList(STANDARD_MESSAGE_LIST_MISC, &gMiscMessageList);
+
+	// SFALL: Allow to skip intro movies
+	int skipOpeningMovies;
+	configGetInt(&gSfallConfig, SFALL_CONFIG_MISC_KEY, SFALL_CONFIG_SKIP_OPENING_MOVIES_KEY, &skipOpeningMovies);
+	if (skipOpeningMovies < 1) {
+//		gameMoviePlay(MOVIE_IPLOGO, GAME_MOVIE_FADE_IN); TODO movie
+//		gameMoviePlay(MOVIE_INTRO, 0);
+//		gameMoviePlay(MOVIE_CREDITS, 0);
+	}
 
 	// load main menu
 	if (mainMenuWindowInit() == 0)
@@ -730,6 +772,8 @@ Common::Error Fallout2Engine::run() {
 	bool done = false;
 
 	while (!shouldQuit() && !done) {
+		keyboardReset();
+		_gsound_background_play_level_music("07desert", 11);
 		mainMenuWindowUnhide(1);
 
 		mouseShowCursor();
@@ -744,13 +788,25 @@ Common::Error Fallout2Engine::run() {
 			mainMenuWindowHide(true);
 			mainMenuWindowFree();
 			if (characterSelectorOpen() == 2) {
+//				gameMoviePlay(MOVIE_ELDER, GAME_MOVIE_STOP_MUSIC);  TODO movie
 				randomSeedPrerandom(-1);
+
+				// SFALL: Override starting map.
 				char *mapName = nullptr;
+				if (configGetString(&gSfallConfig, SFALL_CONFIG_MISC_KEY, SFALL_CONFIG_STARTING_MAP_KEY, &mapName)) {
+					if (*mapName == '\0') {
+						mapName = nullptr;
+					}
+				}
+
 				char *mapNameCopy = compat_strdup(mapName != nullptr ? mapName : _mainMap);
 
+				_game_user_wants_to_quit = 0;
+				_main_show_death_scene = 0;
 				gDude->flags &= ~OBJECT_FLAT;
 				objectShow(gDude, nullptr);
 				mouseHideCursor();
+
 				int win = windowCreate(0, 0, screenGetWidth(), screenGetHeight(), _colorTable[0], WINDOW_MODAL | WINDOW_MOVE_ON_TOP);
 				windowRefresh(win);
 
@@ -767,7 +823,7 @@ Common::Error Fallout2Engine::run() {
 				free(mapNameCopy);
 
 				// SFALL: AfterNewGameStartHook.
-				// sfall_gl_scr_exec_start_proc(); TODO sfall
+				sfall_gl_scr_exec_start_proc();
 
 				bool cursorWasHidden = cursorIsHidden();
 				if (cursorWasHidden) {
@@ -783,7 +839,7 @@ Common::Error Fallout2Engine::run() {
 					int keyCode = inputGetInput();
 
 					// SFALL: MainLoopHook.
-					// sfall_gl_scr_process_main(); TODO sfall
+					sfall_gl_scr_process_main();
 
 					gameHandleKey(keyCode, false);
 
@@ -897,6 +953,7 @@ Common::Error Fallout2Engine::run() {
 			break;
 		}
 	}
+	backgroundSoundDelete();
 	gameExit();
 	return Common::kNoError;
 }
