@@ -1,10 +1,14 @@
-#include "sfall_global_vars.h"
+#include "fallout2/sfall_global_vars.h"
 
+#include "fallout2/lib/std/map.h"
+
+/*
 #include <cstdint>
 #include <cstring>
 #include <unordered_map>
+*/
 
-namespace fallout {
+namespace Fallout2 {
 
 struct SfallGlobalVarsState {
 	std::unordered_map<uint64_t, int> vars;
@@ -28,7 +32,7 @@ static bool sfall_gl_vars_fetch(uint64_t key, int &value);
 static SfallGlobalVarsState *sfall_gl_vars_state = nullptr;
 
 bool sfall_gl_vars_init() {
-	sfall_gl_vars_state = new (std::nothrow) SfallGlobalVarsState();
+	sfall_gl_vars_state = new /*(std::nothrow)*/ SfallGlobalVarsState();
 	if (sfall_gl_vars_state == nullptr) {
 		return false;
 	}
@@ -48,15 +52,17 @@ void sfall_gl_vars_exit() {
 }
 
 bool sfall_gl_vars_save(File *stream) {
+	// TODO loadsave
+	warning("SFALL: Saving global vars not implemented");
 	int count = static_cast<int>(sfall_gl_vars_state->vars.size());
 	if (fileWrite(&count, sizeof(count), 1, stream) != 1) {
 		return false;
 	}
 
-	GlobalVarEntry entry = {0};
+	GlobalVarEntry entry = {0, 0, 0};
 	for (auto &pair : sfall_gl_vars_state->vars) {
-		entry.key = pair.first;
-		entry.value = pair.second;
+		entry.key = pair._key;
+		entry.value = pair._value;
 
 		if (fileWrite(&entry, sizeof(entry), 1, stream) != 1) {
 			return false;
@@ -117,12 +123,13 @@ bool sfall_gl_vars_fetch(int key, int &value) {
 static bool sfall_gl_vars_store(uint64_t key, int value) {
 	auto it = sfall_gl_vars_state->vars.find(key);
 	if (it == sfall_gl_vars_state->vars.end()) {
-		sfall_gl_vars_state->vars.emplace(key, value);
+		Fallout2::std::pair<Fallout2::uint64_t, int> newpair(key, value);
+		sfall_gl_vars_state->vars.insert(newpair);
 	} else {
 		if (value == 0) {
 			sfall_gl_vars_state->vars.erase(it);
 		} else {
-			it->second = value;
+			it->_value = value;
 		}
 	}
 	return true;
@@ -134,8 +141,8 @@ static bool sfall_gl_vars_fetch(uint64_t key, int &value) {
 		return false;
 	}
 
-	value = it->second;
+	value = it->_value;
 	return true;
 }
 
-} // namespace fallout
+} // namespace Fallout2
