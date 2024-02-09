@@ -28,6 +28,7 @@ MODULE_OBJS = \
 	delay.o \
 	dfile.o \
 	dialog.o \
+	dialogs_gmm.o \
 	dictionary.o \
 	dinput.o \
 	display_monitor.o \
