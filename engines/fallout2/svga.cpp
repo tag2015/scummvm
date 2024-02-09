@@ -16,6 +16,7 @@
 #include "fallout2/window_manager_private.h"
 
 #include "common/rect.h"
+#include "engines/util.h"
 #include "graphics/palette.h"
 
 namespace Fallout2 {
@@ -105,8 +106,8 @@ int _GNW95_init_mode_ex(int width, int height, int bpp) {
 
 	Config resolutionConfig;
 	if (configInit(&resolutionConfig)) {
-		if (configRead(&resolutionConfig, "f2_res.ini", false)) {  // TODO move to engine screen init
-/*			int screenWidth;
+		if (configRead(&resolutionConfig, "f2_res.ini", false)) {
+			int screenWidth;
 			if (configGetInt(&resolutionConfig, "MAIN", "SCR_WIDTH", &screenWidth)) {
 				width = screenWidth;
 			}
@@ -116,6 +117,7 @@ int _GNW95_init_mode_ex(int width, int height, int bpp) {
 				height = screenHeight;
 			}
 
+#if 0
 			bool windowed;
 			if (configGetBool(&resolutionConfig, "MAIN", "WINDOWED", &windowed)) {
 				fullscreen = !windowed;
@@ -131,7 +133,12 @@ int _GNW95_init_mode_ex(int width, int height, int bpp) {
 					width /= scale;
 					height /= scale;
 				}
-			}*/
+			}
+#endif
+
+			// Initialize ScummVM screen with requested graphics mode
+			initGraphics(width, height);
+			g_engine->_screen = new Graphics::Screen();
 
 			configGetBool(&resolutionConfig, "IFACE", "IFACE_BAR_MODE", &gInterfaceBarMode);
 			configGetInt(&resolutionConfig, "IFACE", "IFACE_BAR_WIDTH", &gInterfaceBarWidth);
