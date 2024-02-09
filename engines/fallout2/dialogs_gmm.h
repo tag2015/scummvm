@@ -19,27 +19,39 @@
  *
  */
 
-#ifndef FALLOUT2_METAENGINE_H
-#define FALLOUT2_METAENGINE_H
+#ifndef FALLOUT2_DIALOGS_GMM_H
+#define FALLOUT2_DIALOGS_GMM_H
 
-#include "engines/advancedDetector.h"
+#include "fallout2/fallout2.h"
 
-class Fallout2MetaEngine : public AdvancedMetaEngine {
+#include "common/events.h"
+#include "common/str.h"
+#include "common/ustr.h"
+
+#include "engines/dialogs.h"
+
+#include "gui/dialog.h"
+#include "gui/widget.h"
+
+namespace Fallout2 {
+
+class OptionsWidget : public GUI::OptionsContainerWidget {
 public:
-	const char *getName() const override;
+	OptionsWidget(GuiObject *boss, const Common::String &name, const Common::String &domain);
 
-	Common::Error createInstance(OSystem *syst, Engine **engine, const ADGameDescription *desc) const override;
+	// OptionsContainerWidget API
+	void load() override;
+	bool save() override;
 
-	GUI::OptionsContainerWidget *buildEngineOptionsWidget(GUI::GuiObject *boss, const Common::String &name, const Common::String &target) const override;
+private:
+	// OptionsContainerWidget API
+	void defineLayout(GUI::ThemeEval &layouts, const Common::String &layoutName, const Common::String &overlayedLayout) const override;
 
-	/**
-	 * Determine whether the engine supports the specified MetaEngine feature.
-	 *
-	 * Used by e.g. the launcher to determine whether to enable the Load button.
-	 */
-	bool hasFeature(MetaEngineFeature f) const override;
+	GUI::CheckboxWidget *_loadHiResCheckbox;
+	GUI::CheckboxWidget *_loadSfallCheckbox;
 
-	const ADExtraGuiOptionsMap *getAdvancedExtraGuiOptions() const override;
 };
 
-#endif // FALLOUT2_METAENGINE_H
+} // namespace Fallout2
+
+#endif

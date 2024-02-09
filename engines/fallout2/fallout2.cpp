@@ -737,7 +737,7 @@ Common::Error Fallout2Engine::run() {
 	if (!sfall_gl_scr_init())
 		warning("Failed on sfall_gl_scr_init");
 
-	debug("Initialized SFALL");
+	debug("Initialized SFALL!");
 
 	char *customConfigBasePath;
 	configGetString(&gSfallConfig, SFALL_CONFIG_SCRIPTS_KEY, SFALL_CONFIG_INI_CONFIG_FOLDER, &customConfigBasePath);
