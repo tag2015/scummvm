@@ -15,6 +15,7 @@
 #include "fallout2/window_manager.h"
 #include "fallout2/window_manager_private.h"
 
+#include "common/config-manager.h"
 #include "common/rect.h"
 #include "engines/util.h"
 #include "graphics/palette.h"
@@ -103,10 +104,15 @@ void _zero_vid_mem() {
 int _GNW95_init_mode_ex(int width, int height, int bpp) {
 	bool fullscreen = true;
 	int scale = 1;
+	bool hires = false;
+
+	if (ConfMan.hasKey("load_hires"))
+		hires = ConfMan.getBool("load_hires");
 
 	Config resolutionConfig;
-	if (configInit(&resolutionConfig)) {
+	if (hires && configInit(&resolutionConfig)) {
 		if (configRead(&resolutionConfig, "f2_res.ini", false)) {
+			debug("Loaded f2_res.ini!");
 			int screenWidth;
 			if (configGetInt(&resolutionConfig, "MAIN", "SCR_WIDTH", &screenWidth)) {
 				width = screenWidth;
@@ -135,11 +141,6 @@ int _GNW95_init_mode_ex(int width, int height, int bpp) {
 				}
 			}
 #endif
-
-			// Initialize ScummVM screen with requested graphics mode
-			initGraphics(width, height);
-			g_engine->_screen = new Graphics::Screen();
-
 			configGetBool(&resolutionConfig, "IFACE", "IFACE_BAR_MODE", &gInterfaceBarMode);
 			configGetInt(&resolutionConfig, "IFACE", "IFACE_BAR_WIDTH", &gInterfaceBarWidth);
 			configGetInt(&resolutionConfig, "IFACE", "IFACE_BAR_SIDE_ART", &gInterfaceSidePanelsImageId);
@@ -147,6 +148,11 @@ int _GNW95_init_mode_ex(int width, int height, int bpp) {
 		}
 		configFree(&resolutionConfig);
 	}
+
+	// Initialize ScummVM screen with requested graphics mode
+	debug("Requested screen resolution: %dx%d", width, height);
+	initGraphics(width, height);
+	g_engine->_screen = new Graphics::Screen();
 
 	if (_GNW95_init_window(width, height, fullscreen, scale) == -1) {
 		return -1;
