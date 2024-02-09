@@ -6,6 +6,7 @@
 #include "fallout2/platform_compat.h"
 
 #include "common/debug.h"
+#include "common/config-manager.h"
 
 namespace Fallout2 {
 
@@ -65,6 +66,10 @@ bool sfallConfigInit(int argc, char **argv) {
 
 	configSetString(&gSfallConfig, SFALL_CONFIG_SCRIPTS_KEY, SFALL_CONFIG_INI_CONFIG_FOLDER, "");
 	configSetString(&gSfallConfig, SFALL_CONFIG_SCRIPTS_KEY, SFALL_CONFIG_GLOBAL_SCRIPT_PATHS, "");
+
+	if (ConfMan.hasKey("load_sfall"))
+		if (ConfMan.getBool("load_sfall") == false)
+			return false;
 
 	char path[COMPAT_MAX_PATH];
 	char *executable = "fallout2.exe" /*argv[0]*/;
