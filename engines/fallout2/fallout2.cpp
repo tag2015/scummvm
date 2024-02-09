@@ -243,7 +243,6 @@ void Fallout2Engine::showSplash() {
 	} else {
 		int x = (screenWidth - width) / 2;
 		int y = (screenHeight - height) / 2;
-		int i = 0;
 
 		_scr_blit(data, width, height, 0, 0, width, height, x, y);
 		paletteFadeTo(palette);
@@ -468,9 +467,6 @@ static int _mainDeathWordWrap(char *text, int width, short *beginnings, short *c
 }
 
 Common::Error Fallout2Engine::run() {
-	// Initialize 640x480 paletted graphics mode
-	initGraphics(640, 480);
-	_screen = new Graphics::Screen();
 
 	// Set the engine's debugger console
 	setDebugger(new Console());
@@ -483,8 +479,6 @@ Common::Error Fallout2Engine::run() {
 	// Set empty palette
 	byte pal[256 * 3] = { 0 };
 	g_system->getPaletteManager()->setPalette(pal, 0, 256);
-
-	int offset = 0;
 
 	Common::Event e;
 
@@ -766,8 +760,9 @@ Common::Error Fallout2Engine::run() {
 	else
 		warning("Couldn't load main menu");
 
-	g_system->delayMillis(1000);
 	paletteFadeTo(gPaletteBlack);
+	colorCycleDisable();
+	windowRefreshAll(&_scr_size);  // TODO remove after movie is implemented
 
 	bool done = false;
 
