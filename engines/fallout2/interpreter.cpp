@@ -1,7 +1,3 @@
-#define FORBIDDEN_SYMBOL_EXCEPTION_setjmp
-#define FORBIDDEN_SYMBOL_EXCEPTION_longjmp
-#include <setjmp.h>
-
 #include "fallout2/interpreter.h"
 
 /*#include <assert.h>
@@ -263,9 +259,10 @@ static char *programGetCurrentProcedureName(Program *program) {
 		debugPrint("Current script: %s, procedure %s", gInterpreterCurrentProgram->name, procedureName);
 	}
 
-	if (gInterpreterCurrentProgram) {
+/*	if (gInterpreterCurrentProgram) {
 		longjmp(gInterpreterCurrentProgram->env, 1);
-	}
+	}*/
+	error("Engine fatal error!");
 }
 
 // 0x467290
@@ -2535,11 +2532,11 @@ void _interpret(Program *program, int a2) {
 
 	gInterpreterCurrentProgram = program;
 
-	if (setjmp(program->env)) {
+/*	if (setjmp(program->env)) {
 		gInterpreterCurrentProgram = oldCurrentProgram;
 		program->flags |= PROGRAM_FLAG_EXITED | PROGRAM_FLAG_0x04;
 		return;
-	}
+	}*/
 
 	if ((program->flags & PROGRAM_FLAG_CRITICAL_SECTION) != 0 && a2 < 3) {
 		a2 = 3;
