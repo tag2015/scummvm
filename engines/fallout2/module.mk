@@ -66,6 +66,7 @@ MODULE_OBJS = \
 	message.o \
 	mouse.o \
 	mouse_manager.o \
+	movie_lib.o \
 	nevs.o \
 	object.o \
 	options.o \
