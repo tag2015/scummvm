@@ -2,20 +2,22 @@
 // dependencies and uses __cdecl calling convention, which probably means it
 // was implemented as a separate library and linked statically.
 
-#include "movie_lib.h"
+#include "fallout2/movie_lib.h"
 
+/*
 #include <assert.h>
 #include <stdio.h>
 #include <string.h>
+*/
 
-#include "audio_engine.h"
-#include "delay.h"
-#include "platform_compat.h"
+#include "fallout2/audio_engine.h"
+#include "fallout2/delay.h"
+#include "fallout2/platform_compat.h"
 
-namespace fallout {
+namespace Fallout2 {
 
 typedef struct STRUCT_6B3690 {
-	void* field_0;
+	void *field_0;
 	unsigned int field_4;
 	int field_8;
 } STRUCT_6B3690;
@@ -32,15 +34,15 @@ typedef struct Mve {
 
 typedef struct STRUCT_4F6930 {
 	int field_0;
-	MovieReadProc* readProc;
+	MovieReadProc *readProc;
 	STRUCT_6B3690 field_8;
 	int fileHandle;
 	int field_18;
-	SDL_Surface* field_24;
-	SDL_Surface* field_28;
+	Graphics::Surface *field_24;
+	Graphics::Surface *field_28;
 	int field_2C;
-	unsigned char* field_30;
-	unsigned char* field_34;
+	unsigned char *field_30;
+	unsigned char *field_34;
 	unsigned char field_38;
 	unsigned char field_39;
 	unsigned char field_3A;
@@ -53,14 +55,14 @@ typedef struct STRUCT_4F6930 {
 	int field_50;
 } STRUCT_4F6930;
 
-static void _MVE_MemInit(STRUCT_6B3690* a1, int a2, void* a3);
-static void _MVE_MemFree(STRUCT_6B3690* a1);
-static void _do_nothing_2(SDL_Surface* a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9);
+static void _MVE_MemInit(STRUCT_6B3690 *a1, int a2, void *a3);
+static void _MVE_MemFree(STRUCT_6B3690 *a1);
+static void _do_nothing_2(Graphics::Surface *a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9);
 static int _sub_4F4B5();
 static int _ioReset(int fileHandle);
-static void* _ioRead(int size);
-static void* _MVE_MemAlloc(STRUCT_6B3690* a1, unsigned int a2);
-static unsigned char* _ioNextRecord();
+static void *_ioRead(int size);
+static void *_MVE_MemAlloc(STRUCT_6B3690 *a1, unsigned int a2);
+static unsigned char *_ioNextRecord();
 static void _sub_4F4DD();
 static int _MVE_rmHoldMovie();
 static int _syncWait();
@@ -72,30 +74,30 @@ static void _MVE_syncSync();
 static void _MVE_sndReset();
 static void _MVE_sndSync();
 static int _syncWaitLevel(int a1);
-static void _CallsSndBuff_Loc(unsigned char* a1, int a2);
-static int _MVE_sndAdd(unsigned char* dest, unsigned char** src_ptr, int a3, int a4, int a5);
+static void _CallsSndBuff_Loc(unsigned char *a1, int a2);
+static int _MVE_sndAdd(unsigned char *dest, unsigned char **src_ptr, int a3, int a4, int a5);
 static void _MVE_sndResume();
 static int _nfConfig(int a1, int a2, int a3, int a4);
 static bool movieLockSurfaces();
 static void movieUnlockSurfaces();
 static void movieSwapSurfaces();
 static void _sfShowFrame(int a1, int a2, int a3);
-static void _do_nothing_(int a1, int a2, unsigned short* a3);
+static void _do_nothing_(int a1, int a2, unsigned short *a3);
 static void _SetPalette_1(int a1, int a2);
 static void _SetPalette_(int a1, int a2);
 static void _palMakeSynthPalette(int a1, int a2, int a3, int a4, int a5, int a6);
-static void _palLoadPalette(unsigned char* palette, int a2, int a3);
+static void _palLoadPalette(unsigned char *palette, int a2, int a3);
 static void _syncRelease();
 static void _ioRelease();
 static void _MVE_sndRelease();
 static void _nfRelease();
-static void _frLoad(STRUCT_4F6930* a1);
-static void _frSave(STRUCT_4F6930* a1);
-static void _MVE_frClose(STRUCT_4F6930* a1);
-static int _MVE_sndDecompM16(unsigned short* a1, unsigned char* a2, int a3, int a4);
-static int _MVE_sndDecompS16(unsigned short* a1, unsigned char* a2, int a3, int a4);
+static void _frLoad(STRUCT_4F6930 *a1);
+static void _frSave(STRUCT_4F6930 *a1);
+static void _MVE_frClose(STRUCT_4F6930 *a1);
+static int _MVE_sndDecompM16(unsigned short *a1, unsigned char *a2, int a3, int a4);
+static int _MVE_sndDecompS16(unsigned short *a1, unsigned char *a2, int a3, int a4);
 static void _nfPkConfig();
-static void _nfPkDecomp(unsigned char* buf, unsigned char* a2, int a3, int a4, int a5, int a6);
+static void _nfPkDecomp(unsigned char *buf, unsigned char *a2, int a3, int a4, int a5, int a6);
 
 // 0x51EBD8
 static int dword_51EBD8 = 0;
@@ -157,7 +159,7 @@ static int gMovieLibVolume = 0;
 static int gMovieLibPan = 0;
 
 // 0x51EE08
-static MovieShowFrameProc* _sf_ShowFrame = _do_nothing_2;
+static MovieShowFrameProc *_sf_ShowFrame = _do_nothing_2;
 
 // 0x51EE0C
 static int dword_51EE0C = 1;
@@ -165,7 +167,7 @@ static int dword_51EE0C = 1;
 // TODO: There is a default function (not yet implemented).
 //
 // 0x51EE14
-static void (*_pal_SetPalette)(unsigned char*, int, int) = nullptr;
+static void (*_pal_SetPalette)(unsigned char *, int, int) = nullptr;
 
 // 0x51EE18
 static int _rm_hold = 0;
@@ -379,7 +381,7 @@ static int dword_6B36B0;
 static unsigned char _palette_entries1[768];
 
 // 0x6B39B8
-static MallocProc* gMovieLibMallocProc;
+static MallocProc *gMovieLibMallocProc;
 
 // 0x6B39BC
 static int (*_rm_ctl)();
@@ -400,13 +402,13 @@ static int _io_handle;
 static int _rm_len;
 
 // 0x6B39D4
-static FreeProc* gMovieLibFreeProc;
+static FreeProc *gMovieLibFreeProc;
 
 // 0x6B39D8
 static int _snd_comp;
 
 // 0x6B39DC
-static unsigned char* _rm_p;
+static unsigned char *_rm_p;
 
 // 0x6B39E0
 static int dword_6B39E0[60];
@@ -424,7 +426,7 @@ static int _rm_track_bit;
 static int _sync_time;
 
 // 0x6B3AE0
-static MovieReadProc* gMovieLibReadProc;
+static MovieReadProc *gMovieLibReadProc;
 
 // 0x6B3AE4
 static int dword_6B3AE4;
@@ -496,10 +498,10 @@ static int dword_6B402B;
 static int _mveBH;
 
 // 0x6B4033
-static unsigned char* gMovieDirectDrawSurfaceBuffer1;
+static unsigned char *gMovieDirectDrawSurfaceBuffer1;
 
 // 0x6B4037
-static unsigned char* gMovieDirectDrawSurfaceBuffer2;
+static unsigned char *gMovieDirectDrawSurfaceBuffer2;
 
 // 0x6B403B
 static int dword_6B403B;
@@ -507,24 +509,24 @@ static int dword_6B403B;
 // 0x6B403F
 static int dword_6B403F;
 
-static SDL_Surface* gMovieSdlSurface1;
-static SDL_Surface* gMovieSdlSurface2;
+static Graphics::Surface *gMovieSdlSurface1;
+static Graphics::Surface *gMovieSdlSurface2;
 static int gMveSoundBuffer = -1;
 static unsigned int gMveBufferBytes;
 
 // 0x4F4800
-void movieLibSetMemoryProcs(MallocProc* mallocProc, FreeProc* freeProc) {
+void movieLibSetMemoryProcs(MallocProc *mallocProc, FreeProc *freeProc) {
 	gMovieLibMallocProc = mallocProc;
 	gMovieLibFreeProc = freeProc;
 }
 
 // 0x4F4860
-void movieLibSetReadProc(MovieReadProc* readProc) {
+void movieLibSetReadProc(MovieReadProc *readProc) {
 	gMovieLibReadProc = readProc;
 }
 
 // 0x4F4890
-static void _MVE_MemInit(STRUCT_6B3690* a1, int a2, void* a3) {
+static void _MVE_MemInit(STRUCT_6B3690 *a1, int a2, void *a3) {
 	if (a3 == nullptr) {
 		return;
 	}
@@ -537,7 +539,7 @@ static void _MVE_MemInit(STRUCT_6B3690* a1, int a2, void* a3) {
 }
 
 // 0x4F48C0
-static void _MVE_MemFree(STRUCT_6B3690* a1) {
+static void _MVE_MemFree(STRUCT_6B3690 *a1) {
 	if (a1->field_8 && gMovieLibFreeProc != nullptr) {
 		gMovieLibFreeProc(a1->field_0);
 		a1->field_8 = 0;
@@ -587,16 +589,16 @@ void _MVE_sfSVGA(int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8,
 }
 
 // 0x4F49F0
-void _MVE_sfCallbacks(MovieShowFrameProc* proc) {
+void _MVE_sfCallbacks(MovieShowFrameProc *proc) {
 	_sf_ShowFrame = proc;
 }
 
 // 0x4F4A00
-static void _do_nothing_2(SDL_Surface* a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9) {
+static void _do_nothing_2(Graphics::Surface *a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9) {
 }
 
 // 0x4F4A10
-void movieLibSetPaletteEntriesProc(void (*fn)(unsigned char*, int, int)) {
+void movieLibSetPaletteEntriesProc(void (*fn)(unsigned char *, int, int)) {
 	_pal_SetPalette = fn;
 }
 
@@ -620,7 +622,7 @@ void _sub_4F4BB(int a1) {
 }
 
 // 0x4F4BD0
-void _MVE_rmFrameCounts(int* a1, int* a2) {
+void _MVE_rmFrameCounts(int *a1, int *a2) {
 	*a1 = _rm_FrameCount;
 	*a2 = _rm_FrameDropCount;
 }
@@ -660,11 +662,11 @@ int _MVE_rmPrepMovie(int fileHandle, int a2, int a3, char a4) {
 
 // 0x4F4C90
 static int _ioReset(int stream) {
-	Mve* mve;
+	Mve *mve;
 
 	_io_handle = stream;
 
-	mve = (Mve*)_ioRead(sizeof(Mve));
+	mve = (Mve *)_ioRead(sizeof(Mve));
 	if (mve == nullptr) {
 		return 0;
 	}
@@ -693,8 +695,8 @@ static int _ioReset(int stream) {
 // Reads data from movie file.
 //
 // 0x4F4D00
-static void* _ioRead(int size) {
-	void* buf;
+static void *_ioRead(int size) {
+	void *buf;
 
 	buf = _MVE_MemAlloc(&_io_mem_buf, size);
 	if (buf == nullptr) {
@@ -705,8 +707,8 @@ static void* _ioRead(int size) {
 }
 
 // 0x4F4D40
-static void* _MVE_MemAlloc(STRUCT_6B3690* a1, unsigned int a2) {
-	void* ptr;
+static void *_MVE_MemAlloc(STRUCT_6B3690 *a1, unsigned int a2) {
+	void *ptr;
 
 	if (a1->field_4 >= a2) {
 		return a1->field_0;
@@ -731,15 +733,15 @@ static void* _MVE_MemAlloc(STRUCT_6B3690* a1, unsigned int a2) {
 }
 
 // 0x4F4DA0
-static unsigned char* _ioNextRecord() {
-	unsigned char* buf;
+static unsigned char *_ioNextRecord() {
+	unsigned char *buf;
 
-	buf = (unsigned char*)_ioRead((_io_next_hdr & 0xFFFF) + 4);
+	buf = (unsigned char *)_ioRead((_io_next_hdr & 0xFFFF) + 4);
 	if (buf == nullptr) {
 		return nullptr;
 	}
 
-	_io_next_hdr = *(int*)(buf + (_io_next_hdr & 0xFFFF));
+	_io_next_hdr = *(int *)(buf + (_io_next_hdr & 0xFFFF));
 
 	return buf;
 }
@@ -794,7 +796,7 @@ static void _MVE_sndPause() {
 // 0x4F4EC0
 int _MVE_rmStepMovie() {
 	int v0;
-	unsigned short* v1;
+	unsigned short *v1;
 	unsigned int v5;
 	int v6;
 	int v7;
@@ -804,15 +806,15 @@ int _MVE_rmStepMovie() {
 	int v11;
 	int v12;
 	int v13;
-	unsigned short* v3;
-	unsigned short* v21;
+	unsigned short *v3;
+	unsigned short *v21;
 	int v18;
 	int v19;
 	int v20;
-	unsigned char* v14;
+	unsigned char *v14;
 
 	v0 = _rm_len;
-	v1 = (unsigned short*)_rm_p;
+	v1 = (unsigned short *)_rm_p;
 
 	if (!_rm_active) {
 		return -10;
@@ -833,8 +835,8 @@ LABEL_5:
 	}
 
 	while (1) {
-		v5 = *(unsigned int*)((unsigned char*)v1 + v0);
-		v1 = (unsigned short*)((unsigned char*)v1 + v0 + 4);
+		v5 = *(unsigned int *)((unsigned char *)v1 + v0);
+		v1 = (unsigned short *)((unsigned char *)v1 + v0 + 4);
 		v0 = v5 & 0xFFFF;
 
 		switch ((v5 >> 16) & 0xFF) {
@@ -842,7 +844,7 @@ LABEL_5:
 			return -1;
 		case 1:
 			v0 = 0;
-			v1 = (unsigned short*)_ioNextRecord();
+			v1 = (unsigned short *)_ioNextRecord();
 			goto LABEL_5;
 		case 2:
 			if (!_syncInit(v1[0], v1[2])) {
@@ -856,7 +858,7 @@ LABEL_5:
 			} else {
 				v7 = (v1[1] & 0x04) >> 2;
 			}
-			v8 = *(unsigned int*)((unsigned char*)v1 + 6);
+			v8 = *(unsigned int *)((unsigned char *)v1 + 6);
 			if ((v5 >> 24) == 0) {
 				v8 &= 0xFFFF;
 			}
@@ -947,7 +949,7 @@ LABEL_5:
 				_SetPalette_1(v1[0], v20);
 			}
 
-			_rm_p = (unsigned char*)v1;
+			_rm_p = (unsigned char *)v1;
 			_rm_len = v0;
 
 			return 0;
@@ -955,7 +957,7 @@ LABEL_5:
 		case 9:
 			// push data to audio buffers?
 			if (v1[1] & _rm_track_bit) {
-				v14 = (unsigned char*)v1 + 6;
+				v14 = (unsigned char *)v1 + 6;
 				if ((v5 >> 16) != 8) {
 					v14 = nullptr;
 				}
@@ -976,7 +978,7 @@ LABEL_5:
 			continue;
 		case 12:
 			// palette
-			_palLoadPalette((unsigned char*)v1 + 4, v1[0], v1[1]);
+			_palLoadPalette((unsigned char *)v1 + 4, v1[0], v1[1]);
 			continue;
 		case 14:
 			// save current position
@@ -1057,7 +1059,7 @@ LABEL_5:
 				break;
 			}
 
-			_nfPkDecomp((unsigned char*)v3, (unsigned char*)&v1[7], v1[2], v1[3], v1[4], v1[5]);
+			_nfPkDecomp((unsigned char *)v3, (unsigned char *)&v1[7], v1[2], v1[3], v1[4], v1[5]);
 
 			// unlock
 			movieUnlockSurfaces();
@@ -1178,8 +1180,7 @@ static void _MVE_sndSync() {
 
 		dwCurrentWriteCursor = dword_6B36A4;
 
-		v1 = (gMveBufferBytes + dword_6B39E0[dword_6B3660] - _gSoundTimeBase)
-		     % gMveBufferBytes;
+		v1 = (gMveBufferBytes + dword_6B39E0[dword_6B3660] - _gSoundTimeBase) % gMveBufferBytes;
 
 		if (dwCurrentPlayCursor <= dword_6B36A4) {
 			if (v1 < dwCurrentPlayCursor || v1 >= dword_6B36A4) {
@@ -1307,15 +1308,15 @@ static int _syncWaitLevel(int a1) {
 }
 
 // 0x4F5A00
-static void _CallsSndBuff_Loc(unsigned char* a1, int a2) {
+static void _CallsSndBuff_Loc(unsigned char *a1, int a2) {
 	int v2;
 	int v3;
 	int v5;
 	unsigned int dwCurrentPlayCursor;
 	unsigned int dwCurrentWriteCursor;
-	void* lpvAudioPtr1;
+	void *lpvAudioPtr1;
 	unsigned int dwAudioBytes1;
-	void* lpvAudioPtr2;
+	void *lpvAudioPtr2;
 	unsigned int dwAudioBytes2;
 
 	_gSoundTimeBase = a2;
@@ -1346,13 +1347,13 @@ static void _CallsSndBuff_Loc(unsigned char* a1, int a2) {
 	v2 = 0;
 	v3 = 1;
 	if (dwAudioBytes1 != 0) {
-		v2 = _MVE_sndAdd((unsigned char*)lpvAudioPtr1, &a1, dwAudioBytes1, 0, 1);
+		v2 = _MVE_sndAdd((unsigned char *)lpvAudioPtr1, &a1, dwAudioBytes1, 0, 1);
 		v3 = 0;
 		dword_6B36A4 += dwAudioBytes1;
 	}
 
 	if (dwAudioBytes2 != 0) {
-		_MVE_sndAdd((unsigned char*)lpvAudioPtr2, &a1, dwAudioBytes2, v2, v3);
+		_MVE_sndAdd((unsigned char *)lpvAudioPtr2, &a1, dwAudioBytes2, v2, v3);
 		dword_6B36A4 = dwAudioBytes2;
 	}
 
@@ -1372,15 +1373,15 @@ static void _CallsSndBuff_Loc(unsigned char* a1, int a2) {
 }
 
 // 0x4F5B70
-static int _MVE_sndAdd(unsigned char* dest, unsigned char** src_ptr, int a3, int a4, int a5) {
-	unsigned char* src;
+static int _MVE_sndAdd(unsigned char *dest, unsigned char **src_ptr, int a3, int a4, int a5) {
+	unsigned char *src;
 	int v9;
-	unsigned short* v10;
+	unsigned short *v10;
 	int v11;
 	int result;
 
 	int v12;
-	unsigned short* v13;
+	unsigned short *v13;
 	int v14;
 
 	src = *src_ptr;
@@ -1399,15 +1400,15 @@ static int _MVE_sndAdd(unsigned char* dest, unsigned char** src_ptr, int a3, int
 
 	if (!_snd_comp) {
 		if (a5) {
-			v9 = *(unsigned short*)src;
+			v9 = *(unsigned short *)src;
 			src += 2;
 
-			*(unsigned short*)dest = v9;
-			v10 = (unsigned short*)(dest + 2);
+			*(unsigned short *)dest = v9;
+			v10 = (unsigned short *)(dest + 2);
 			v11 = a3 - 2;
 		} else {
 			v9 = a4;
-			v10 = (unsigned short*)dest;
+			v10 = (unsigned short *)dest;
 			v11 = a3;
 		}
 
@@ -1417,14 +1418,14 @@ static int _MVE_sndAdd(unsigned char* dest, unsigned char** src_ptr, int a3, int
 	}
 
 	if (a5) {
-		v12 = *(unsigned int*)src;
+		v12 = *(unsigned int *)src;
 		src += 4;
 
-		*(unsigned int*)dest = v12;
-		v13 = (unsigned short*)(dest + 4);
+		*(unsigned int *)dest = v12;
+		v13 = (unsigned short *)(dest + 4);
 		v14 = a3 - 4;
 	} else {
-		v13 = (unsigned short*)dest;
+		v13 = (unsigned short *)dest;
 		v14 = a3;
 		v12 = a4;
 	}
@@ -1442,12 +1443,14 @@ static void _MVE_sndResume() {
 // 0x4F5CB0
 static int _nfConfig(int a1, int a2, int a3, int a4) {
 	if (gMovieSdlSurface1 != nullptr) {
-		SDL_FreeSurface(gMovieSdlSurface1);
+		//  SDL_FreeSurface(gMovieSdlSurface1);
+		gMovieSdlSurface1->free();
 		gMovieSdlSurface1 = nullptr;
 	}
 
 	if (gMovieSdlSurface2 != nullptr) {
-		SDL_FreeSurface(gMovieSdlSurface2);
+		//  SDL_FreeSurface(gMovieSdlSurface2);
+		gMovieSdlSurface2->free();
 		gMovieSdlSurface2 = nullptr;
 	}
 
@@ -1461,28 +1464,35 @@ static int _nfConfig(int a1, int a2, int a3, int a4) {
 		_mveBH >>= 1;
 	}
 
-	int depth;
+/*	int depth;
 	int rmask;
 	int gmask;
-	int bmask;
+	int bmask;*/
+	Graphics::PixelFormat pixelformat;
 	if (a4) {
-		depth = 16;
+/*		depth = 16;
 		rmask = 0x7C00;
 		gmask = 0x3E0;
-		bmask = 0x1F;
+		bmask = 0x1F;*/
+		pixelformat = Graphics::PixelFormat(2, 5, 5, 5, 0, 10, 5, 0, 0);
 	} else {
-		depth = 8;
+/*		depth = 8;
 		rmask = 0;
 		gmask = 0;
-		bmask = 0;
+		bmask = 0;*/
+		pixelformat = Graphics::PixelFormat::createFormatCLUT8();
 	}
 
-	gMovieSdlSurface1 = SDL_CreateRGBSurface(0, _mveBW, _mveBH, depth, rmask, gmask, bmask, 0);
+	//	gMovieSdlSurface1 = SDL_CreateRGBSurface(0, _mveBW, _mveBH, depth, rmask, gmask, bmask, 0);
+	gMovieSdlSurface1->create(_mveBW, _mveBH, pixelformat);
+
 	if (gMovieSdlSurface1 == nullptr) {
 		return 0;
 	}
 
-	gMovieSdlSurface2 = SDL_CreateRGBSurface(0, _mveBW, _mveBH, depth, rmask, gmask, bmask, 0);
+	//	gMovieSdlSurface2 = SDL_CreateRGBSurface(0, _mveBW, _mveBH, depth, rmask, gmask, bmask, 0);
+	gMovieSdlSurface2->create(_mveBW, _mveBH, pixelformat);
+
 	if (gMovieSdlSurface2 == nullptr) {
 		return 0;
 	}
@@ -1506,17 +1516,17 @@ static int _nfConfig(int a1, int a2, int a3, int a4) {
 // 0x4F5E60
 static bool movieLockSurfaces() {
 	if (gMovieSdlSurface1 != nullptr && gMovieSdlSurface2 != nullptr) {
-		if (SDL_LockSurface(gMovieSdlSurface1) != 0) {
-			return false;
-		}
+//		if (SDL_LockSurface(gMovieSdlSurface1) != 0) {
+//			return false;
+//		}
 
-		gMovieDirectDrawSurfaceBuffer1 = (unsigned char*)gMovieSdlSurface1->pixels;
+		gMovieDirectDrawSurfaceBuffer1 = (unsigned char *)gMovieSdlSurface1->getPixels();
 
-		if (SDL_LockSurface(gMovieSdlSurface2) != 0) {
-			return false;
-		}
+//		if (SDL_LockSurface(gMovieSdlSurface2) != 0) {
+//			return false;
+//		}
 
-		gMovieDirectDrawSurfaceBuffer2 = (unsigned char*)gMovieSdlSurface2->pixels;
+		gMovieDirectDrawSurfaceBuffer2 = (unsigned char *)gMovieSdlSurface2->getPixels();
 	}
 
 	return true;
@@ -1524,13 +1534,13 @@ static bool movieLockSurfaces() {
 
 // 0x4F5EF0
 static void movieUnlockSurfaces() {
-	SDL_UnlockSurface(gMovieSdlSurface1);
-	SDL_UnlockSurface(gMovieSdlSurface2);
+//	SDL_UnlockSurface(gMovieSdlSurface1);
+//	SDL_UnlockSurface(gMovieSdlSurface2);
 }
 
 // 0x4F5F20
 static void movieSwapSurfaces() {
-	SDL_Surface* tmp = gMovieSdlSurface2;
+	Graphics::Surface *tmp = gMovieSdlSurface2;
 	gMovieSdlSurface2 = gMovieSdlSurface1;
 	gMovieSdlSurface1 = tmp;
 }
@@ -1588,7 +1598,7 @@ static void _sfShowFrame(int a1, int a2, int a3) {
 }
 
 // 0x4F6080
-static void _do_nothing_(int a1, int a2, unsigned short* a3) {
+static void _do_nothing_(int a1, int a2, unsigned short *a3) {
 }
 
 // 0x4F6090
@@ -1628,7 +1638,7 @@ static void _palMakeSynthPalette(int a1, int a2, int a3, int a4, int a5, int a6)
 }
 
 // 0x4F6210
-static void _palLoadPalette(unsigned char* palette, int a2, int a3) {
+static void _palLoadPalette(unsigned char *palette, int a2, int a3) {
 	memcpy(_pal_tbl + 3 * a2, palette, 3 * a3);
 }
 
@@ -1667,18 +1677,20 @@ static void _MVE_sndRelease() {
 // 0x4F6390
 static void _nfRelease() {
 	if (gMovieSdlSurface1 != nullptr) {
-		SDL_FreeSurface(gMovieSdlSurface1);
+//		SDL_FreeSurface(gMovieSdlSurface1);
+		gMovieSdlSurface1->free();
 		gMovieSdlSurface1 = nullptr;
 	}
 
 	if (gMovieSdlSurface2 != nullptr) {
-		SDL_FreeSurface(gMovieSdlSurface2);
+//		SDL_FreeSurface(gMovieSdlSurface2);
+		gMovieSdlSurface2->free();
 		gMovieSdlSurface2 = nullptr;
 	}
 }
 
 // 0x4F6550
-static void _frLoad(STRUCT_4F6930* a1) {
+static void _frLoad(STRUCT_4F6930 *a1) {
 	gMovieLibReadProc = a1->readProc;
 	_io_mem_buf.field_0 = a1->field_8.field_0;
 	_io_mem_buf.field_4 = a1->field_8.field_4;
@@ -1702,8 +1714,8 @@ static void _frLoad(STRUCT_4F6930* a1) {
 }
 
 // 0x4F6610
-static void _frSave(STRUCT_4F6930* a1) {
-	STRUCT_6B3690* ptr;
+static void _frSave(STRUCT_4F6930 *a1) {
+	STRUCT_6B3690 *ptr;
 
 	ptr = &(a1->field_8);
 	a1->readProc = gMovieLibReadProc;
@@ -1729,7 +1741,7 @@ static void _frSave(STRUCT_4F6930* a1) {
 }
 
 // 0x4F6930
-static void _MVE_frClose(STRUCT_4F6930* a1) {
+static void _MVE_frClose(STRUCT_4F6930 *a1) {
 	STRUCT_4F6930 v1;
 
 	_frSave(&v1);
@@ -1744,7 +1756,7 @@ static void _MVE_frClose(STRUCT_4F6930* a1) {
 }
 
 // 0x4F697C
-static int _MVE_sndDecompM16(unsigned short* a1, unsigned char* a2, int a3, int a4) {
+static int _MVE_sndDecompM16(unsigned short *a1, unsigned char *a2, int a3, int a4) {
 	int i;
 	int v8;
 	unsigned short result;
@@ -1762,7 +1774,7 @@ static int _MVE_sndDecompM16(unsigned short* a1, unsigned char* a2, int a3, int 
 }
 
 // 0x4F69AD
-static int _MVE_sndDecompS16(unsigned short* a1, unsigned char* a2, int a3, int a4) {
+static int _MVE_sndDecompS16(unsigned short *a1, unsigned char *a2, int a3, int a4) {
 	int i;
 	unsigned short v4;
 	unsigned short v5;
@@ -1787,7 +1799,7 @@ static int _MVE_sndDecompS16(unsigned short* a1, unsigned char* a2, int a3, int 
 
 // 0x4F731D
 static void _nfPkConfig() {
-	int* ptr;
+	int *ptr;
 	int v1;
 	int v2;
 	int v3;
@@ -1815,9 +1827,9 @@ static void _nfPkConfig() {
 }
 
 // 0x4F7359
-static void _nfPkDecomp(unsigned char* a1, unsigned char* a2, int a3, int a4, int a5, int a6) {
+static void _nfPkDecomp(unsigned char *a1, unsigned char *a2, int a3, int a4, int a5, int a6) {
 	int v49;
-	unsigned char* dest;
+	unsigned char *dest;
 	int v8;
 	int v7;
 	int i;
@@ -1832,8 +1844,8 @@ static void _nfPkDecomp(unsigned char* a1, unsigned char* a2, int a3, int a4, in
 	unsigned char map1[512];
 	unsigned int map2[256];
 	int var_8;
-	unsigned int* src_ptr;
-	unsigned int* dest_ptr;
+	unsigned int *src_ptr;
+	unsigned int *dest_ptr;
 	unsigned int nibbles[2];
 
 	dword_6B401B = 8 * a3;
@@ -1889,7 +1901,7 @@ static void _nfPkDecomp(unsigned char* a1, unsigned char* a2, int a3, int a4, in
 							byte = *a2++;
 							v13 = word_51F418[byte];
 						} else {
-							v13 = *(unsigned short*)a2;
+							v13 = *(unsigned short *)a2;
 							a2 += 2;
 						}
 
@@ -1900,8 +1912,8 @@ static void _nfPkDecomp(unsigned char* a1, unsigned char* a2, int a3, int a4, in
 					value2 = _mveBW;
 
 					for (i = 0; i < 8; i++) {
-						src_ptr = (unsigned int*)(dest + v10);
-						dest_ptr = (unsigned int*)dest;
+						src_ptr = (unsigned int *)(dest + v10);
+						dest_ptr = (unsigned int *)dest;
 
 						dest_ptr[0] = src_ptr[0];
 						dest_ptr[1] = src_ptr[1];
@@ -1952,16 +1964,16 @@ static void _nfPkDecomp(unsigned char* a1, unsigned char* a2, int a3, int a4, in
 						value2 = _mveBW;
 
 						for (i = 0; i < 4; i++) {
-							dest_ptr = (unsigned int*)dest;
+							dest_ptr = (unsigned int *)dest;
 							dest_ptr[0] = (map2[map1[i * 4]] << 16) | (map2[map1[i * 4 + 1]]);
 
-							dest_ptr = (unsigned int*)(dest + value2);
+							dest_ptr = (unsigned int *)(dest + value2);
 							dest_ptr[0] = (map2[map1[i * 4]] << 16) | (map2[map1[i * 4 + 1]]);
 
-							dest_ptr = (unsigned int*)dest;
+							dest_ptr = (unsigned int *)dest;
 							dest_ptr[1] = (map2[map1[i * 4 + 2]] << 16) | (map2[map1[i * 4 + 3]]);
 
-							dest_ptr = (unsigned int*)(dest + value2);
+							dest_ptr = (unsigned int *)(dest + value2);
 							dest_ptr[1] = (map2[map1[i * 4 + 2]] << 16) | (map2[map1[i * 4 + 3]]);
 
 							dest += value2 * 2;
@@ -1990,7 +2002,7 @@ static void _nfPkDecomp(unsigned char* a1, unsigned char* a2, int a3, int a4, in
 						value2 = _mveBW;
 
 						for (i = 0; i < 8; i++) {
-							dest_ptr = (unsigned int*)dest;
+							dest_ptr = (unsigned int *)dest;
 							dest_ptr[0] = (map2[map1[i * 4]] << 16) | map2[map1[i * 4 + 1]];
 							dest_ptr[1] = (map2[map1[i * 4 + 2]] << 16) | map2[map1[i * 4 + 3]];
 
@@ -2032,7 +2044,7 @@ static void _nfPkDecomp(unsigned char* a1, unsigned char* a2, int a3, int a4, in
 							map2[0xC5] = (a2[1] << 8) | a2[1]; // bp
 
 							for (i = 0; i < 4; i++) {
-								dest_ptr = (unsigned int*)dest;
+								dest_ptr = (unsigned int *)dest;
 								dest_ptr[0] = (map2[map1[i * 4]] << 16) | map2[map1[i * 4 + 1]];
 								dest_ptr[1] = (map2[map1[i * 4 + 2]] << 16) | map2[map1[i * 4 + 3]];
 
@@ -2045,7 +2057,7 @@ static void _nfPkDecomp(unsigned char* a1, unsigned char* a2, int a3, int a4, in
 							map2[0xC5] = (a2[6 + 1] << 8) | a2[6 + 1]; // bp
 
 							for (i = 0; i < 4; i++) {
-								dest_ptr = (unsigned int*)dest;
+								dest_ptr = (unsigned int *)dest;
 								dest_ptr[0] = (map2[map1[16 + i * 4]] << 16) | map2[map1[16 + i * 4 + 1]];
 								dest_ptr[1] = (map2[map1[16 + i * 4 + 2]] << 16) | map2[map1[16 + i * 4 + 3]];
 
@@ -2082,11 +2094,11 @@ static void _nfPkDecomp(unsigned char* a1, unsigned char* a2, int a3, int a4, in
 							map2[0xC5] = (a2[1] << 8) | a2[1]; // bp
 
 							for (i = 0; i < 4; i++) {
-								dest_ptr = (unsigned int*)dest;
+								dest_ptr = (unsigned int *)dest;
 								dest_ptr[0] = (map2[map1[i * 4]] << 16) | map2[map1[i * 4 + 1]];
 								dest += value2;
 
-								dest_ptr = (unsigned int*)dest;
+								dest_ptr = (unsigned int *)dest;
 								dest_ptr[0] = (map2[map1[i * 4 + 2]] << 16) | map2[map1[i * 4 + 3]];
 								dest += value2;
 							}
@@ -2099,11 +2111,11 @@ static void _nfPkDecomp(unsigned char* a1, unsigned char* a2, int a3, int a4, in
 							map2[0xC5] = (a2[6 + 1] << 8) | a2[6 + 1]; // bp
 
 							for (i = 0; i < 4; i++) {
-								dest_ptr = (unsigned int*)dest;
+								dest_ptr = (unsigned int *)dest;
 								dest_ptr[0] = (map2[map1[16 + i * 4]] << 16) | map2[map1[16 + i * 4 + 1]];
 								dest += value2;
 
-								dest_ptr = (unsigned int*)dest;
+								dest_ptr = (unsigned int *)dest;
 								dest_ptr[0] = (map2[map1[16 + i * 4 + 2]] << 16) | map2[map1[16 + i * 4 + 3]];
 								dest += value2;
 							}
@@ -2157,11 +2169,11 @@ static void _nfPkDecomp(unsigned char* a1, unsigned char* a2, int a3, int a4, in
 						map2[0xC5] = (a2[1] << 8) | a2[1]; // bp
 
 						for (i = 0; i < 2; i++) {
-							dest_ptr = (unsigned int*)dest;
+							dest_ptr = (unsigned int *)dest;
 							dest_ptr[0] = (map2[map1[i * 4]] << 16) | map2[map1[i * 4 + 1]];
 							dest += value2;
 
-							dest_ptr = (unsigned int*)dest;
+							dest_ptr = (unsigned int *)dest;
 							dest_ptr[0] = (map2[map1[i * 4 + 2]] << 16) | map2[map1[i * 4 + 3]];
 							dest += value2;
 						}
@@ -2172,11 +2184,11 @@ static void _nfPkDecomp(unsigned char* a1, unsigned char* a2, int a3, int a4, in
 						map2[0xC5] = (a2[4 + 1] << 8) | a2[4 + 1]; // bp
 
 						for (i = 0; i < 2; i++) {
-							dest_ptr = (unsigned int*)dest;
+							dest_ptr = (unsigned int *)dest;
 							dest_ptr[0] = (map2[map1[8 + i * 4]] << 16) | map2[map1[8 + i * 4 + 1]];
 							dest += value2;
 
-							dest_ptr = (unsigned int*)dest;
+							dest_ptr = (unsigned int *)dest;
 							dest_ptr[0] = (map2[map1[8 + i * 4 + 2]] << 16) | map2[map1[8 + i * 4 + 3]];
 							dest += value2;
 						}
@@ -2189,11 +2201,11 @@ static void _nfPkDecomp(unsigned char* a1, unsigned char* a2, int a3, int a4, in
 						map2[0xC5] = (a2[8 + 1] << 8) | a2[8 + 1]; // bp
 
 						for (i = 0; i < 2; i++) {
-							dest_ptr = (unsigned int*)dest;
+							dest_ptr = (unsigned int *)dest;
 							dest_ptr[0] = (map2[map1[16 + i * 4]] << 16) | map2[map1[16 + i * 4 + 1]];
 							dest += value2;
 
-							dest_ptr = (unsigned int*)dest;
+							dest_ptr = (unsigned int *)dest;
 							dest_ptr[0] = (map2[map1[16 + i * 4 + 2]] << 16) | map2[map1[16 + i * 4 + 3]];
 							dest += value2;
 						}
@@ -2204,11 +2216,11 @@ static void _nfPkDecomp(unsigned char* a1, unsigned char* a2, int a3, int a4, in
 						map2[0xC5] = (a2[12 + 1] << 8) | a2[12 + 1]; // bp
 
 						for (i = 0; i < 2; i++) {
-							dest_ptr = (unsigned int*)dest;
+							dest_ptr = (unsigned int *)dest;
 							dest_ptr[0] = (map2[map1[24 + i * 4]] << 16) | map2[map1[24 + i * 4 + 1]];
 							dest += value2;
 
-							dest_ptr = (unsigned int*)dest;
+							dest_ptr = (unsigned int *)dest;
 							dest_ptr[0] = (map2[map1[24 + i * 4 + 2]] << 16) | map2[map1[24 + i * 4 + 3]];
 							dest += value2;
 						}
@@ -2246,11 +2258,11 @@ static void _nfPkDecomp(unsigned char* a1, unsigned char* a2, int a3, int a4, in
 							value2 = _mveBW;
 
 							for (i = 0; i < 4; i++) {
-								dest_ptr = (unsigned int*)dest;
+								dest_ptr = (unsigned int *)dest;
 								dest_ptr[0] = (map2[map1[i * 8]] << 16) | (map2[map1[i * 8 + 1]] << 24) | (map2[map1[i * 8 + 2]]) | (map2[map1[i * 8 + 3]] << 8);
 								dest_ptr[1] = (map2[map1[i * 8 + 4]] << 16) | (map2[map1[i * 8 + 5]] << 24) | (map2[map1[i * 8 + 6]]) | (map2[map1[i * 8 + 7]] << 8);
 
-								dest_ptr = (unsigned int*)(dest + value2);
+								dest_ptr = (unsigned int *)(dest + value2);
 								dest_ptr[0] = (map2[map1[i * 8]] << 16) | (map2[map1[i * 8 + 1]] << 24) | (map2[map1[i * 8 + 2]]) | (map2[map1[i * 8 + 3]] << 8);
 								dest_ptr[1] = (map2[map1[i * 8 + 4]] << 16) | (map2[map1[i * 8 + 5]] << 24) | (map2[map1[i * 8 + 6]]) | (map2[map1[i * 8 + 7]] << 8);
 
@@ -2284,7 +2296,7 @@ static void _nfPkDecomp(unsigned char* a1, unsigned char* a2, int a3, int a4, in
 							value2 = _mveBW;
 
 							for (i = 0; i < 8; i++) {
-								dest_ptr = (unsigned int*)dest;
+								dest_ptr = (unsigned int *)dest;
 								dest_ptr[0] = (map2[map1[i * 4]] << 24) | (map2[map1[i * 4 + 0]] << 16) | (map2[map1[i * 4 + 1]] << 8) | (map2[map1[i * 4 + 1]]);
 								dest_ptr[1] = (map2[map1[i * 4 + 2]] << 24) | (map2[map1[i * 4 + 2]] << 16) | (map2[map1[i * 4 + 3]] << 8) | (map2[map1[i * 4 + 3]]);
 
@@ -2320,13 +2332,13 @@ static void _nfPkDecomp(unsigned char* a1, unsigned char* a2, int a3, int a4, in
 							value2 = _mveBW;
 
 							for (i = 0; i < 4; i++) {
-								dest_ptr = (unsigned int*)dest;
+								dest_ptr = (unsigned int *)dest;
 								dest_ptr[0] = (map2[map1[i * 4 + 0]] << 24) | (map2[map1[i * 4 + 0]] << 16) | (map2[map1[i * 4 + 1]] << 8) | (map2[map1[i * 4 + 1]]);
 								dest_ptr[1] = (map2[map1[i * 4 + 2]] << 24) | (map2[map1[i * 4 + 2]] << 16) | (map2[map1[i * 4 + 3]] << 8) | (map2[map1[i * 4 + 3]]);
 
 								dest += value2;
 
-								dest_ptr = (unsigned int*)dest;
+								dest_ptr = (unsigned int *)dest;
 								dest_ptr[0] = (map2[map1[i * 4 + 0]] << 24) | (map2[map1[i * 4 + 0]] << 16) | (map2[map1[i * 4 + 1]] << 8) | (map2[map1[i * 4 + 1]]);
 								dest_ptr[1] = (map2[map1[i * 4 + 2]] << 24) | (map2[map1[i * 4 + 2]] << 16) | (map2[map1[i * 4 + 3]] << 8) | (map2[map1[i * 4 + 3]]);
 
@@ -2360,7 +2372,7 @@ static void _nfPkDecomp(unsigned char* a1, unsigned char* a2, int a3, int a4, in
 							value2 = _mveBW;
 
 							for (i = 0; i < 8; i++) {
-								dest_ptr = (unsigned int*)dest;
+								dest_ptr = (unsigned int *)dest;
 								dest_ptr[0] = (map2[map1[i * 8 + 0]] << 16) | (map2[map1[i * 8 + 1]] << 24) | (map2[map1[i * 8 + 2]]) | (map2[map1[i * 8 + 3]] << 8);
 								dest_ptr[1] = (map2[map1[i * 8 + 4]] << 16) | (map2[map1[i * 8 + 5]] << 24) | (map2[map1[i * 8 + 6]]) | (map2[map1[i * 8 + 7]] << 8);
 								dest += value2;
@@ -2406,7 +2418,7 @@ static void _nfPkDecomp(unsigned char* a1, unsigned char* a2, int a3, int a4, in
 							map2[0xE7] = a2[1]; // mov ah, bh
 
 							for (i = 0; i < 4; i++) {
-								dest_ptr = (unsigned int*)dest;
+								dest_ptr = (unsigned int *)dest;
 								dest_ptr[0] = (map2[map1[i * 8 + 0]] << 16) | (map2[map1[i * 8 + 1]] << 24) | (map2[map1[i * 8 + 2]]) | (map2[map1[i * 8 + 3]] << 8);
 								dest_ptr[1] = (map2[map1[i * 8 + 4]] << 16) | (map2[map1[i * 8 + 5]] << 24) | (map2[map1[i * 8 + 6]]) | (map2[map1[i * 8 + 7]] << 8);
 								dest += value2;
@@ -2422,7 +2434,7 @@ static void _nfPkDecomp(unsigned char* a1, unsigned char* a2, int a3, int a4, in
 							map2[0xE7] = a2[0x0C + 1]; // mov ah, bh
 
 							for (i = 0; i < 4; i++) {
-								dest_ptr = (unsigned int*)dest;
+								dest_ptr = (unsigned int *)dest;
 								dest_ptr[0] = (map2[map1[32 + i * 8 + 0]] << 16) | (map2[map1[32 + i * 8 + 1]] << 24) | (map2[map1[32 + i * 8 + 2]]) | (map2[map1[32 + i * 8 + 3]] << 8);
 								dest_ptr[1] = (map2[map1[32 + i * 8 + 4]] << 16) | (map2[map1[32 + i * 8 + 5]] << 24) | (map2[map1[32 + i * 8 + 6]]) | (map2[map1[32 + i * 8 + 7]] << 8);
 								dest += value2;
@@ -2463,11 +2475,11 @@ static void _nfPkDecomp(unsigned char* a1, unsigned char* a2, int a3, int a4, in
 							map2[0xE7] = a2[1]; // mov ah, bh
 
 							for (i = 0; i < 4; i++) {
-								dest_ptr = (unsigned int*)dest;
+								dest_ptr = (unsigned int *)dest;
 								dest_ptr[0] = (map2[map1[i * 8 + 0]] << 16) | (map2[map1[i * 8 + 1]] << 24) | (map2[map1[i * 8 + 2]]) | (map2[map1[i * 8 + 3]] << 8);
 								dest += value2;
 
-								dest_ptr = (unsigned int*)dest;
+								dest_ptr = (unsigned int *)dest;
 								dest_ptr[0] = (map2[map1[i * 8 + 4]] << 16) | (map2[map1[i * 8 + 5]] << 24) | (map2[map1[i * 8 + 6]]) | (map2[map1[i * 8 + 7]] << 8);
 								dest += value2;
 							}
@@ -2484,11 +2496,11 @@ static void _nfPkDecomp(unsigned char* a1, unsigned char* a2, int a3, int a4, in
 							map2[0xE7] = a2[0x0C + 1]; // mov ah, bh
 
 							for (i = 0; i < 4; i++) {
-								dest_ptr = (unsigned int*)dest;
+								dest_ptr = (unsigned int *)dest;
 								dest_ptr[0] = (map2[map1[32 + i * 8 + 0]] << 16) | (map2[map1[32 + i * 8 + 1]] << 24) | (map2[map1[32 + i * 8 + 2]]) | (map2[map1[32 + i * 8 + 3]] << 8);
 								dest += value2;
 
-								dest_ptr = (unsigned int*)dest;
+								dest_ptr = (unsigned int *)dest;
 								dest_ptr[0] = (map2[map1[32 + i * 8 + 4]] << 16) | (map2[map1[32 + i * 8 + 5]] << 24) | (map2[map1[32 + i * 8 + 6]]) | (map2[map1[32 + i * 8 + 7]] << 8);
 								dest += value2;
 							}
@@ -2546,11 +2558,11 @@ static void _nfPkDecomp(unsigned char* a1, unsigned char* a2, int a3, int a4, in
 						map2[0xE7] = a2[1]; // mov ah, bh
 
 						for (i = 0; i < 2; i++) {
-							dest_ptr = (unsigned int*)dest;
+							dest_ptr = (unsigned int *)dest;
 							dest_ptr[0] = (map2[map1[i * 8 + 0]] << 16) | (map2[map1[i * 8 + 1]] << 24) | (map2[map1[i * 8 + 2]]) | (map2[map1[i * 8 + 3]] << 8);
 							dest += value2;
 
-							dest_ptr = (unsigned int*)dest;
+							dest_ptr = (unsigned int *)dest;
 							dest_ptr[0] = (map2[map1[i * 8 + 4]] << 16) | (map2[map1[i * 8 + 5]] << 24) | (map2[map1[i * 8 + 6]]) | (map2[map1[i * 8 + 7]] << 8);
 							dest += value2;
 						}
@@ -2565,11 +2577,11 @@ static void _nfPkDecomp(unsigned char* a1, unsigned char* a2, int a3, int a4, in
 						map2[0xE7] = a2[0x08 + 1]; // mov ah, bh
 
 						for (i = 0; i < 2; i++) {
-							dest_ptr = (unsigned int*)dest;
+							dest_ptr = (unsigned int *)dest;
 							dest_ptr[0] = (map2[map1[16 + i * 8 + 0]] << 16) | (map2[map1[16 + i * 8 + 1]] << 24) | (map2[map1[16 + i * 8 + 2]]) | (map2[map1[16 + i * 8 + 3]] << 8);
 							dest += value2;
 
-							dest_ptr = (unsigned int*)dest;
+							dest_ptr = (unsigned int *)dest;
 							dest_ptr[0] = (map2[map1[16 + i * 8 + 4]] << 16) | (map2[map1[16 + i * 8 + 5]] << 24) | (map2[map1[16 + i * 8 + 6]]) | (map2[map1[16 + i * 8 + 7]] << 8);
 							dest += value2;
 						}
@@ -2586,11 +2598,11 @@ static void _nfPkDecomp(unsigned char* a1, unsigned char* a2, int a3, int a4, in
 						map2[0xE7] = a2[0x10 + 1]; // mov ah, bh
 
 						for (i = 0; i < 2; i++) {
-							dest_ptr = (unsigned int*)dest;
+							dest_ptr = (unsigned int *)dest;
 							dest_ptr[0] = (map2[map1[32 + i * 8 + 0]] << 16) | (map2[map1[32 + i * 8 + 1]] << 24) | (map2[map1[32 + i * 8 + 2]]) | (map2[map1[32 + i * 8 + 3]] << 8);
 							dest += value2;
 
-							dest_ptr = (unsigned int*)dest;
+							dest_ptr = (unsigned int *)dest;
 							dest_ptr[0] = (map2[map1[32 + i * 8 + 4]] << 16) | (map2[map1[32 + i * 8 + 5]] << 24) | (map2[map1[32 + i * 8 + 6]]) | (map2[map1[32 + i * 8 + 7]] << 8);
 							dest += value2;
 						}
@@ -2605,11 +2617,11 @@ static void _nfPkDecomp(unsigned char* a1, unsigned char* a2, int a3, int a4, in
 						map2[0xE7] = a2[0x18 + 1]; // mov ah, bh
 
 						for (i = 0; i < 2; i++) {
-							dest_ptr = (unsigned int*)dest;
+							dest_ptr = (unsigned int *)dest;
 							dest_ptr[0] = (map2[map1[48 + i * 8 + 0]] << 16) | (map2[map1[48 + i * 8 + 1]] << 24) | (map2[map1[48 + i * 8 + 2]]) | (map2[map1[48 + i * 8 + 3]] << 8);
 							dest += value2;
 
-							dest_ptr = (unsigned int*)dest;
+							dest_ptr = (unsigned int *)dest;
 							dest_ptr[0] = (map2[map1[48 + i * 8 + 4]] << 16) | (map2[map1[48 + i * 8 + 5]] << 24) | (map2[map1[48 + i * 8 + 6]]) | (map2[map1[48 + i * 8 + 7]] << 8);
 							dest += value2;
 						}
@@ -2624,9 +2636,9 @@ static void _nfPkDecomp(unsigned char* a1, unsigned char* a2, int a3, int a4, in
 				case 11:
 					value2 = _mveBW;
 
-					src_ptr = (unsigned int*)a2;
+					src_ptr = (unsigned int *)a2;
 					for (i = 0; i < 8; i++) {
-						dest_ptr = (unsigned int*)dest;
+						dest_ptr = (unsigned int *)dest;
 						dest_ptr[0] = src_ptr[i * 2];
 						dest_ptr[1] = src_ptr[i * 2 + 1];
 						dest += value2;
@@ -2653,11 +2665,11 @@ static void _nfPkDecomp(unsigned char* a1, unsigned char* a2, int a3, int a4, in
 						byte = a2[i * 4 + 3];
 						value2 |= (byte << 16) | (byte << 24);
 
-						dest_ptr = (unsigned int*)dest;
+						dest_ptr = (unsigned int *)dest;
 						dest_ptr[0] = value1;
 						dest_ptr[1] = value2;
 
-						dest_ptr = (unsigned int*)(dest + _mveBW);
+						dest_ptr = (unsigned int *)(dest + _mveBW);
 						dest_ptr[0] = value1;
 						dest_ptr[1] = value2;
 
@@ -2677,11 +2689,11 @@ static void _nfPkDecomp(unsigned char* a1, unsigned char* a2, int a3, int a4, in
 					value2 = byte | (byte << 8) | (byte << 16) | (byte << 24);
 
 					for (i = 0; i < 2; i++) {
-						dest_ptr = (unsigned int*)dest;
+						dest_ptr = (unsigned int *)dest;
 						dest_ptr[0] = value1;
 						dest_ptr[1] = value2;
 
-						dest_ptr = (unsigned int*)(dest + _mveBW);
+						dest_ptr = (unsigned int *)(dest + _mveBW);
 						dest_ptr[0] = value1;
 						dest_ptr[1] = value2;
 
@@ -2695,11 +2707,11 @@ static void _nfPkDecomp(unsigned char* a1, unsigned char* a2, int a3, int a4, in
 					value2 = byte | (byte << 8) | (byte << 16) | (byte << 24);
 
 					for (i = 0; i < 2; i++) {
-						dest_ptr = (unsigned int*)dest;
+						dest_ptr = (unsigned int *)dest;
 						dest_ptr[0] = value1;
 						dest_ptr[1] = value2;
 
-						dest_ptr = (unsigned int*)(dest + _mveBW);
+						dest_ptr = (unsigned int *)(dest + _mveBW);
 						dest_ptr[0] = value1;
 						dest_ptr[1] = value2;
 
@@ -2718,7 +2730,7 @@ static void _nfPkDecomp(unsigned char* a1, unsigned char* a2, int a3, int a4, in
 						value1 = byte | (byte << 8) | (byte << 16) | (byte << 24);
 						value2 = value1;
 					} else {
-						byte = *(unsigned short*)a2;
+						byte = *(unsigned short *)a2;
 						a2 += 2;
 						value1 = byte | (byte << 16);
 						value2 = value1;
@@ -2726,12 +2738,12 @@ static void _nfPkDecomp(unsigned char* a1, unsigned char* a2, int a3, int a4, in
 					}
 
 					for (i = 0; i < 4; i++) {
-						dest_ptr = (unsigned int*)dest;
+						dest_ptr = (unsigned int *)dest;
 						dest_ptr[0] = value1;
 						dest_ptr[1] = value1;
 						dest += _mveBW;
 
-						dest_ptr = (unsigned int*)dest;
+						dest_ptr = (unsigned int *)dest;
 						dest_ptr[0] = value2;
 						dest_ptr[1] = value2;
 						dest += _mveBW;
@@ -2749,4 +2761,4 @@ static void _nfPkDecomp(unsigned char* a1, unsigned char* a2, int a3, int a4, in
 	}
 }
 
-} // namespace fallout
+} // namespace Fallout2
