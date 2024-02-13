@@ -24,7 +24,7 @@
 #include "fallout2/game_dialog.h"
 // #include "game_memory.h"
 #include "fallout2/game_mouse.h"
-// #include "game_movie.h"
+#include "fallout2/game_movie.h"
 #include "fallout2/game_sound.h"
 #include "fallout2/input.h"
 #include "fallout2/interface.h"
@@ -35,8 +35,8 @@
 #include "fallout2/map.h"
 #include "fallout2/memory.h"
 #include "fallout2/mouse.h"
-// #include "movie.h"
-// #include "movie_effect.h"
+#include "fallout2/movie.h"
+#include "fallout2/movie_effect.h"
 #include "fallout2/object.h"
 #include "fallout2/options.h"
 #include "fallout2/palette.h"
@@ -407,10 +407,10 @@ void gameReset() {
 	critterReset();
 	aiReset();
 	_inven_reset_dude();
-//	gameSoundReset();
-//	_movieStop();
-//	movieEffectsReset();
-//	gameMoviesReset();
+	gameSoundReset();
+	_movieStop();
+	movieEffectsReset();
+	gameMoviesReset();
 	isoReset();
 	gameMouseReset();
 	protoReset();
@@ -464,9 +464,9 @@ void gameExit() {
 	protoExit();
 	gameMouseExit();
 	isoExit();
-//	movieEffectsExit();
-//	movieExit();
-//	gameSoundExit();
+	movieEffectsExit();
+	movieExit();
+	gameSoundExit();
 	aiExit();
 	critterExit();
 	itemsExit();
