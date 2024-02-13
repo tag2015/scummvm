@@ -277,11 +277,11 @@ static void movieDirectImpl(Graphics::Surface *surface, int srcWidth, int srcHei
 		destRect.bottom = destRect.top + destHeight;
 	} else {
 		if ((gMovieFlags & MOVIE_EXTENDED_FLAG_0x08) != 0) {
-			destRect.left = (gMovieWindowRect.bottom - gMovieWindowRect.top + 1 - destHeight) / 2;
-			destRect.top = (v15 - destWidth) / 2;
+			destRect.top = (gMovieWindowRect.bottom - gMovieWindowRect.top + 1 - destHeight) / 2;
+			destRect.left = (v15 - destWidth) / 2;
 		} else {
-			destRect.left = _movieY + gMovieWindowRect.top;
-			destRect.top = gMovieWindowRect.left + _movieX;
+			destRect.top = _movieY + gMovieWindowRect.top;
+			destRect.left = gMovieWindowRect.left + _movieX;
 		}
 		destRect.right = destRect.left + destWidth;
 		destRect.bottom = destRect.top + destHeight;
@@ -326,16 +326,14 @@ static void movieDirectImpl(Graphics::Surface *surface, int srcWidth, int srcHei
 	byte palette[256 * 3];
 	g_system->getPaletteManager()->grabPalette(palette, 0, 256);
 
-	const Graphics::Surface &tmp_surface = *surface;
+	Graphics::ManagedSurface *managed_surface = new Graphics::ManagedSurface();
+	managed_surface->create(_scr_size.right + 1, _scr_size.bottom + 1, Graphics::PixelFormat(Graphics::PixelFormat::createFormatCLUT8()));
 
-	Graphics::ManagedSurface *managed_gSdlSurface = new Graphics::ManagedSurface(gSdlSurface);
-	managed_gSdlSurface->blitFrom(tmp_surface, srcRect, destRect, palette);
-
-	//	tmp_managed->create(surface->w, surface->h, Graphics::PixelFormat(Graphics::PixelFormat::createFormatCLUT8());
+	const Graphics::Surface &const_surface = *surface;
+	managed_surface->blitFrom(const_surface, srcRect, destRect, palette);
 
 	// SDL_BlitSurface(gSdlSurface, nullptr, gSdlTextureSurface, nullptr);
-
-	const Graphics::ManagedSurface &final_surface = *managed_gSdlSurface;
+	const Graphics::ManagedSurface &final_surface = *managed_surface;
 	gSdlTextureSurface->blitFrom(final_surface);
 	renderPresent();
 }
@@ -535,7 +533,8 @@ static void _cleanupMovie(int a1) {
 			debugPrint("Couldn't lock movie surface\n");
 		}
 
-		gMovieSdlSurface = nullptr;
+//		gMovieSdlSurface = nullptr;
+		gMovieSdlSurface->free();
 	}
 
 	if (a1) {
@@ -653,7 +652,9 @@ static void _cleanupLast() {
 		_lastMovieBuffer = nullptr;
 	}
 
-	gMovieSdlSurface = nullptr;
+	//	gMovieSdlSurface = nullptr;
+	if (gMovieSdlSurface)
+		gMovieSdlSurface->free();
 }
 
 // 0x48731C
