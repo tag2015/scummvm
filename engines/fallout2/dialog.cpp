@@ -4,7 +4,7 @@
 
 #include "fallout2/memory_manager.h"
 #include "fallout2/mouse.h"
-// #include "fallout2/movie.h" TODO movie
+#include "fallout2/movie.h"
 #include "fallout2/platform_compat.h"
 #include "fallout2/svga.h"
 #include "fallout2/text_font.h"
@@ -337,7 +337,7 @@ int _abortReply(int a1) {
 	int x;
 
 	if (_replyPlaying == 2) {
-		return 1; //_moviePlaying() == 0;  TODO movie
+		return _moviePlaying() == 0;
 	} else if (_replyPlaying == 3) {
 		return 1;
 	}
