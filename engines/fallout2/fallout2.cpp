@@ -50,6 +50,7 @@
 #include "fallout2/game.h"
 #include "fallout2/game_dialog.h"
 #include "fallout2/game_mouse.h"
+#include "fallout2/game_movie.h"
 #include "fallout2/game_memory.h"
 #include "fallout2/game_sound.h"
 #include "fallout2/interface.h"
@@ -63,6 +64,8 @@
 #include "fallout2/memory.h"
 #include "fallout2/message.h"
 #include "fallout2/mouse.h"
+#include "fallout2/movie.h"
+#include "fallout2/movie_effect.h"
 #include "fallout2/object.h"
 #include "fallout2/options.h"
 #include "fallout2/palette.h"
@@ -615,6 +618,20 @@ Common::Error Fallout2Engine::run() {
 		warning("Sound initialization failed");
 	else
 		debug("Initialized sound!");
+
+	// init movie
+	movieInit();
+	debug("MOVIE - Initialized subsystem!");
+
+	if (gameMoviesInit() != 0)
+		warning("MOVIE - Failed on gameMoviesInit");
+	else
+		debug("MOVIE - Initialized game movies!");
+
+	if (movieEffectsInit() != 0)
+		warning("MOVIE - Failed on moviefx_init");
+	else
+		debug("MOVIE - Initialized movie fx!");
 
 	// init main isometric view (tiles, objects, interface)
 	if (isoInit() != 0)
