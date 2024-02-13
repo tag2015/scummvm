@@ -15,7 +15,7 @@
 #include "fallout2/memory_manager.h"
 #include "fallout2/mouse.h"
 #include "fallout2/mouse_manager.h"
-// #include "fallout2/movie.h" TODO movie.cpp
+#include "fallout2/movie.h"
 #include "fallout2/platform_compat.h"
 #include "fallout2/svga.h"
 #include "fallout2/text_font.h"
@@ -2202,7 +2202,7 @@ bool _windowDeleteRegion(const char *regionName) {
 
 // 0x4BB220
 void _updateWindows() {
-//	_movieUpdate(); TODO movie
+	_movieUpdate();
 	mouseManagerUpdate();
 	_checkAllRegions();
 	_update_widgets();
@@ -2210,39 +2210,39 @@ void _updateWindows() {
 
 // 0x4BB234
 int _windowMoviePlaying() {
-//	return _moviePlaying(); TODO movie
+	return _moviePlaying();
 }
 
 // 0x4BB23C
 bool _windowSetMovieFlags(int flags) {
-/*	if (movieSetFlags(flags) != 0) {  TODO movie
+	if (movieSetFlags(flags) != 0) {
 		return false;
 	}
-*/
+
 	return true;
 }
 
 // 0x4BB24C
 bool _windowPlayMovie(char *filePath) {
-/*	if (_movieRun(gManagedWindows[gCurrentManagedWindowIndex].window, filePath) != 0) {  // TODO movie
+	if (_movieRun(gManagedWindows[gCurrentManagedWindowIndex].window, filePath) != 0) {
 		return false;
 	}
-*/
+
 	return true;
 }
 
 // 0x4BB280
 bool _windowPlayMovieRect(char *filePath, int a2, int a3, int a4, int a5) {
-/*	if (_movieRunRect(gManagedWindows[gCurrentManagedWindowIndex].window, filePath, a2, a3, a4, a5) != 0) {  TODO movie
+	if (_movieRunRect(gManagedWindows[gCurrentManagedWindowIndex].window, filePath, a2, a3, a4, a5) != 0) {
 		return false;
 	}
-*/
+
 	return true;
 }
 
 // 0x4BB2C4
 void _windowStopMovie() {
-//	_movieStop(); TODO movie
+	_movieStop();
 }
 
 // 0x4BB3A8
