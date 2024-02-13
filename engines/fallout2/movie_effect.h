@@ -1,14 +1,14 @@
-#ifndef MOVIE_EFFECT_H
-#define MOVIE_EFFECT_H
+#ifndef FALLOUT2_MOVIE_EFFECT_H
+#define FALLOUT2_MOVIE_EFFECT_H
 
-namespace fallout {
+namespace Fallout2 {
 
 int movieEffectsInit();
 void movieEffectsReset();
 void movieEffectsExit();
-int movieEffectsLoad(const char* fileName);
+int movieEffectsLoad(const char *fileName);
 void _moviefx_stop();
 
-} // namespace fallout
+} // namespace Fallout2
 
-#endif /* MOVIE_EFFECT_H */
+#endif

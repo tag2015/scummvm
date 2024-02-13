@@ -1,17 +1,19 @@
-#include "movie_effect.h"
+#include "fallout2/movie_effect.h"
 
+/*
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+*/
 
-#include "config.h"
-#include "debug.h"
-#include "memory.h"
-#include "movie.h"
-#include "palette.h"
-#include "platform_compat.h"
+#include "fallout2/config.h"
+#include "fallout2/debug.h"
+#include "fallout2/memory.h"
+#include "fallout2/movie.h"
+#include "fallout2/palette.h"
+#include "fallout2/platform_compat.h"
 
-namespace fallout {
+namespace Fallout2 {
 
 typedef enum MovieEffectType {
 	MOVIE_EFFECT_TYPE_NONE = 0,
@@ -30,18 +32,18 @@ typedef struct MovieEffect {
 	unsigned char g;
 	// range 0-63
 	unsigned char b;
-	struct MovieEffect* next;
+	struct MovieEffect *next;
 } MovieEffect;
 
 static void _moviefx_callback_func(int frame);
-static void _moviefx_palette_func(unsigned char* palette, int start, int end);
+static void _moviefx_palette_func(unsigned char *palette, int start, int end);
 static void movieEffectsClear();
 
 // 0x5195F0
 static bool gMovieEffectsInitialized = false;
 
 // 0x5195F4
-static MovieEffect* gMovieEffectHead = nullptr;
+static MovieEffect *gMovieEffectHead = nullptr;
 
 // 0x638EC4
 static unsigned char _source_palette[768];
@@ -93,7 +95,7 @@ void movieEffectsExit() {
 }
 
 // 0x487D7C
-int movieEffectsLoad(const char* filePath) {
+int movieEffectsLoad(const char *filePath) {
 	if (!gMovieEffectsInitialized) {
 		return -1;
 	}
@@ -116,16 +118,16 @@ int movieEffectsLoad(const char* filePath) {
 	int rc = -1;
 
 	char path[COMPAT_MAX_PATH];
-	strcpy(path, filePath);
+	strncpy(path, filePath, COMPAT_MAX_PATH - 1);
 
-	char* pch = strrchr(path, '.');
+	char *pch = strrchr(path, '.');
 	if (pch != nullptr) {
 		*pch = '\0';
 	}
 
-	strcpy(path + strlen(path), ".cfg");
+	strncpy(path + strlen(path), ".cfg", COMPAT_MAX_PATH - 1 - strlen(path));
 
-	int* movieEffectFrameList;
+	int *movieEffectFrameList;
 
 	if (!configRead(&config, path, true)) {
 		goto out;
@@ -136,7 +138,7 @@ int movieEffectsLoad(const char* filePath) {
 		goto out;
 	}
 
-	movieEffectFrameList = (int*)internal_malloc(sizeof(*movieEffectFrameList) * movieEffectsLength);
+	movieEffectFrameList = (int *)internal_malloc(sizeof(*movieEffectFrameList) * movieEffectsLength);
 	if (movieEffectFrameList == nullptr) {
 		goto out;
 	}
@@ -154,7 +156,7 @@ int movieEffectsLoad(const char* filePath) {
 			char section[20];
 			compat_itoa(movieEffectFrameList[index], section, 10);
 
-			char* fadeTypeString;
+			char *fadeTypeString;
 			if (!configGetString(&config, section, "fade_type", &fadeTypeString)) {
 				continue;
 			}
@@ -180,7 +182,7 @@ int movieEffectsLoad(const char* filePath) {
 				continue;
 			}
 
-			MovieEffect* movieEffect = (MovieEffect*)internal_malloc(sizeof(*movieEffect));
+			MovieEffect *movieEffect = (MovieEffect *)internal_malloc(sizeof(*movieEffect));
 			if (movieEffect == nullptr) {
 				continue;
 			}
@@ -237,7 +239,7 @@ void _moviefx_stop() {
 
 // 0x488144
 static void _moviefx_callback_func(int frame) {
-	MovieEffect* movieEffect = gMovieEffectHead;
+	MovieEffect *movieEffect = gMovieEffectHead;
 	while (movieEffect != nullptr) {
 		if (frame >= movieEffect->startFrame && frame <= movieEffect->endFrame) {
 			break;
@@ -270,7 +272,7 @@ static void _moviefx_callback_func(int frame) {
 }
 
 // 0x4882AC
-static void _moviefx_palette_func(unsigned char* palette, int start, int end) {
+static void _moviefx_palette_func(unsigned char *palette, int start, int end) {
 	memcpy(_source_palette + 3 * start, palette, 3 * (end - start + 1));
 
 	if (!_inside_fade) {
@@ -280,9 +282,9 @@ static void _moviefx_palette_func(unsigned char* palette, int start, int end) {
 
 // 0x488310
 static void movieEffectsClear() {
-	MovieEffect* movieEffect = gMovieEffectHead;
+	MovieEffect *movieEffect = gMovieEffectHead;
 	while (movieEffect != nullptr) {
-		MovieEffect* next = movieEffect->next;
+		MovieEffect *next = movieEffect->next;
 		internal_free(movieEffect);
 		movieEffect = next;
 	}
@@ -290,4 +292,4 @@ static void movieEffectsClear() {
 	gMovieEffectHead = nullptr;
 }
 
-} // namespace fallout
+} // namespace Fallout2
