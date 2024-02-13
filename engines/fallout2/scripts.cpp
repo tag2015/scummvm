@@ -19,7 +19,7 @@
 #include "fallout2/game.h"
 #include "fallout2/game_dialog.h"
 #include "fallout2/game_mouse.h"
-// #include "fallout2/game_movie.h" TODO game_movie
+#include "fallout2/game_movie.h"
 #include "fallout2/input.h"
 #include "fallout2/memory.h"
 #include "fallout2/message.h"
@@ -400,9 +400,9 @@ int gameTimeEventProcess(Object *obj, void *data) {
 
 	debugPrint("\nQUEUE PROCESS: Midnight!");
 
-//	if (gameMovieIsPlaying()) { TODO game_movie
-//		return 0;
-//	}
+	if (gameMovieIsPlaying()) {
+		return 0;
+	}
 
 	objectUnjamAll();
 
@@ -426,17 +426,17 @@ int gameTimeEventProcess(Object *obj, void *data) {
 // 0x4A3690
 int _scriptsCheckGameEvents(int *moviePtr, int window) {
 	int movie = -1;
-//	int movieFlags = GAME_MOVIE_FADE_IN | GAME_MOVIE_FADE_OUT | GAME_MOVIE_PAUSE_MUSIC; TODO game_movie
+	int movieFlags = GAME_MOVIE_FADE_IN | GAME_MOVIE_FADE_OUT | GAME_MOVIE_PAUSE_MUSIC;
 	bool endgame = false;
 	bool adjustRep = false;
 
 	int day = gGameTime / GAME_TIME_TICKS_PER_DAY;
 
-/*	if (gameGetGlobalVar(GVAR_ENEMY_ARROYO)) {
+	if (gameGetGlobalVar(GVAR_ENEMY_ARROYO)) {
 		movie = MOVIE_AFAILED;
 		movieFlags = GAME_MOVIE_FADE_IN | GAME_MOVIE_STOP_MUSIC;
 		endgame = true;
-	}  else {  TODO world_map game_movie
+	} else {
 		if (day >= gMovieTimerArtimer4 || gameGetGlobalVar(GVAR_FALLOUT_2) >= 3) {
 			movie = MOVIE_ARTIMER4;
 			if (!gameMovieIsSeen(MOVIE_ARTIMER4)) {
@@ -455,9 +455,9 @@ int _scriptsCheckGameEvents(int *moviePtr, int window) {
 			adjustRep = true;
 			movie = MOVIE_ARTIMER1;
 		}
-	}*/
+	}
 
-/*	if (movie != -1) { TODO game_movie
+	if (movie != -1) {
 		if (gameMovieIsSeen(movie)) {
 			movie = -1;
 		} else {
@@ -465,7 +465,7 @@ int _scriptsCheckGameEvents(int *moviePtr, int window) {
 				windowHide(window);
 			}
 
-			gameMoviePlay(movie, movieFlags);
+//			gameMoviePlay(movie, movieFlags); TODO movie
 
 			if (window != -1) {
 				windowShow(window);
@@ -476,7 +476,7 @@ int _scriptsCheckGameEvents(int *moviePtr, int window) {
 				gameSetGlobalVar(GVAR_TOWN_REP_ARROYO, rep - 15);
 			}
 		}
-	}*/
+	}
 
 	if (endgame) {
 		_game_user_wants_to_quit = 2;
@@ -673,10 +673,10 @@ static void _doBkProcesses() {
 	if (gScriptsEnabled && _script_engine_run_critters) {
 		// SFALL: Fix to prevent the execution of critter_p_proc and game events
 		// when playing movies.
-//		if (!_gdialogActive() && !gameMovieIsPlaying()) {  TODO game_movie
+		if (!_gdialogActive() && !gameMovieIsPlaying()) {
 			_script_chk_critters();
 			_script_chk_timed_events();
-//		}
+		}
 	}
 }
 
