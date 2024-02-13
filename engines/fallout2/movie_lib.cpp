@@ -1444,14 +1444,14 @@ static void _MVE_sndResume() {
 static int _nfConfig(int a1, int a2, int a3, int a4) {
 	if (gMovieSdlSurface1 != nullptr) {
 		//  SDL_FreeSurface(gMovieSdlSurface1);
+		//  gMovieSdlSurface1 = nullptr;
 		gMovieSdlSurface1->free();
-		gMovieSdlSurface1 = nullptr;
 	}
 
 	if (gMovieSdlSurface2 != nullptr) {
 		//  SDL_FreeSurface(gMovieSdlSurface2);
+		//  gMovieSdlSurface2 = nullptr;
 		gMovieSdlSurface2->free();
-		gMovieSdlSurface2 = nullptr;
 	}
 
 	byte_6B400D = a1;
@@ -1484,14 +1484,18 @@ static int _nfConfig(int a1, int a2, int a3, int a4) {
 	}
 
 	//	gMovieSdlSurface1 = SDL_CreateRGBSurface(0, _mveBW, _mveBH, depth, rmask, gmask, bmask, 0);
-	gMovieSdlSurface1->create(_mveBW, _mveBH, pixelformat);
+	gMovieSdlSurface1 = new Graphics::Surface();
+	if (gMovieSdlSurface1)
+		gMovieSdlSurface1->create(_mveBW, _mveBH, pixelformat);
 
 	if (gMovieSdlSurface1 == nullptr) {
 		return 0;
 	}
 
 	//	gMovieSdlSurface2 = SDL_CreateRGBSurface(0, _mveBW, _mveBH, depth, rmask, gmask, bmask, 0);
-	gMovieSdlSurface2->create(_mveBW, _mveBH, pixelformat);
+	gMovieSdlSurface2 = new Graphics::Surface();
+	if (gMovieSdlSurface2)
+		gMovieSdlSurface2->create(_mveBW, _mveBH, pixelformat);
 
 	if (gMovieSdlSurface2 == nullptr) {
 		return 0;
@@ -1677,15 +1681,15 @@ static void _MVE_sndRelease() {
 // 0x4F6390
 static void _nfRelease() {
 	if (gMovieSdlSurface1 != nullptr) {
-//		SDL_FreeSurface(gMovieSdlSurface1);
+		//  SDL_FreeSurface(gMovieSdlSurface1);
+		//  gMovieSdlSurface1 = nullptr;
 		gMovieSdlSurface1->free();
-		gMovieSdlSurface1 = nullptr;
 	}
 
 	if (gMovieSdlSurface2 != nullptr) {
-//		SDL_FreeSurface(gMovieSdlSurface2);
+		//	SDL_FreeSurface(gMovieSdlSurface2);
+		//	gMovieSdlSurface2 = nullptr;
 		gMovieSdlSurface2->free();
-		gMovieSdlSurface2 = nullptr;
 	}
 }
 
