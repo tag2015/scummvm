@@ -44,6 +44,7 @@ MODULE_OBJS = \
 	game_config.o \
 	game_memory.o \
 	game_mouse.o \
+	game_movie.o \
 	game_sound.o \
 	geometry.o \
 	graph_lib.o \
@@ -66,6 +67,8 @@ MODULE_OBJS = \
 	message.o \
 	mouse.o \
 	mouse_manager.o \
+	movie.o \
+	movie_effect.o \
 	movie_lib.o \
 	nevs.o \
 	object.o \
