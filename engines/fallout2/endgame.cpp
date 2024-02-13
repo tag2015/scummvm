@@ -16,7 +16,7 @@
 #include "fallout2/draw.h"
 #include "fallout2/game.h"
 #include "fallout2/game_mouse.h"
-// #include "fallout2/game_movie.h" TODO movie
+#include "fallout2/game_movie.h"
 #include "fallout2/game_sound.h"
 #include "fallout2/input.h"
 #include "fallout2/map.h"
@@ -1117,7 +1117,7 @@ void endgameSetupDeathEnding(int reason) {
 		}
 		break;
 	case ENDGAME_DEATH_ENDING_REASON_TIMEOUT:
-//		gameMoviePlay(MOVIE_TIMEOUT, GAME_MOVIE_FADE_IN | GAME_MOVIE_FADE_OUT | GAME_MOVIE_PAUSE_MUSIC); TODO movie
+		gameMoviePlay(MOVIE_TIMEOUT, GAME_MOVIE_FADE_IN | GAME_MOVIE_FADE_OUT | GAME_MOVIE_PAUSE_MUSIC);
 		break;
 	}
 
