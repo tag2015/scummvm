@@ -1150,9 +1150,9 @@ int _proto_dude_update_gender() {
 	}
 
 	int nativeLook = DUDE_NATIVE_LOOK_TRIBAL;
-//	if (gameMovieIsSeen(MOVIE_VSUIT)) {  TODO game_movie.cpp
-//		nativeLook = DUDE_NATIVE_LOOK_JUMPSUIT;
-//	}
+	if (gameMovieIsSeen(MOVIE_VSUIT)) {
+		nativeLook = DUDE_NATIVE_LOOK_JUMPSUIT;
+	}
 
 	int frmId;
 	if (critterGetStat(gDude, STAT_GENDER) == GENDER_MALE) {

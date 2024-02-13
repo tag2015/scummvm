@@ -19,7 +19,7 @@
 #include "fallout2/elevator.h"
 #include "fallout2/game.h"
 #include "fallout2/game_mouse.h"
-// #include "fallout2/game_movie.h"  TODO movie
+#include "fallout2/game_movie.h"
 #include "fallout2/game_sound.h"
 #include "fallout2/input.h"
 #include "fallout2/interface.h"
@@ -1043,7 +1043,7 @@ err:
 	// NOTE: Uninline.
 	mapSetEnteringLocation(-1, -1, -1);
 
-//	gameMovieFadeOut(); TODO game_movie
+//	gameMovieFadeOut(); TODO movie
 
 	gMapHeader.version = 20;
 
