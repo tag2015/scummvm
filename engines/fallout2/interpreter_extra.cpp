@@ -17,7 +17,7 @@
 #include "fallout2/endgame.h"
 #include "fallout2/game.h"
 #include "fallout2/game_dialog.h"
-// #include "fallout2/game_movie.h" TODO game_movie
+#include "fallout2/game_movie.h"
 #include "fallout2/game_sound.h"
 #include "fallout2/geometry.h"
 #include "fallout2/interface.h"
@@ -3470,7 +3470,7 @@ static void opRegAnimObjectRunToTile(Program *program) {
 // 0x45A14C
 static void opPlayGameMovie(Program *program) {
 	// 0x453F9C
-/*	static const unsigned short flags[MOVIE_COUNT] = { TODO movie
+	static const unsigned short flags[MOVIE_COUNT] = {
 		GAME_MOVIE_FADE_IN | GAME_MOVIE_FADE_OUT | GAME_MOVIE_PAUSE_MUSIC,
 		GAME_MOVIE_FADE_IN | GAME_MOVIE_FADE_OUT | GAME_MOVIE_PAUSE_MUSIC,
 		GAME_MOVIE_FADE_IN | GAME_MOVIE_FADE_OUT | GAME_MOVIE_PAUSE_MUSIC,
@@ -3488,7 +3488,7 @@ static void opPlayGameMovie(Program *program) {
 		GAME_MOVIE_FADE_IN | GAME_MOVIE_FADE_OUT | GAME_MOVIE_PAUSE_MUSIC,
 		GAME_MOVIE_FADE_IN | GAME_MOVIE_FADE_OUT | GAME_MOVIE_PAUSE_MUSIC,
 		GAME_MOVIE_FADE_IN | GAME_MOVIE_FADE_OUT | GAME_MOVIE_PAUSE_MUSIC,
-	};*/
+	};
 
 	program->flags |= PROGRAM_FLAG_0x20;
 
@@ -3501,7 +3501,7 @@ static void opPlayGameMovie(Program *program) {
 
 	gameDialogDisable();
 
-/*	if (gameMoviePlay(movie, flags[movie]) == -1) { TODO game_movie
+/*	if (gameMoviePlay(movie, flags[movie]) == -1) { TODO movie
 		debugPrint("\nError playing movie %d!", movie);
 	}*/
 
