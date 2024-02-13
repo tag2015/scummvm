@@ -1,38 +1,40 @@
-#include "game_movie.h"
+#include "fallout2/game_movie.h"
 
+/*
 #include <stdio.h>
 #include <string.h>
+*/
 
-#include "color.h"
-#include "cycle.h"
-#include "debug.h"
-#include "game.h"
-#include "game_mouse.h"
-#include "game_sound.h"
-#include "input.h"
-#include "mouse.h"
-#include "movie.h"
-#include "movie_effect.h"
-#include "palette.h"
-#include "platform_compat.h"
-#include "settings.h"
-#include "svga.h"
-#include "text_font.h"
-#include "touch.h"
-#include "window_manager.h"
+#include "fallout2/color.h"
+#include "fallout2/cycle.h"
+#include "fallout2/debug.h"
+#include "fallout2/game.h"
+#include "fallout2/game_mouse.h"
+#include "fallout2/game_sound.h"
+#include "fallout2/input.h"
+#include "fallout2/mouse.h"
+#include "fallout2/movie.h"
+#include "fallout2/movie_effect.h"
+#include "fallout2/palette.h"
+#include "fallout2/platform_compat.h"
+#include "fallout2/settings.h"
+#include "fallout2/svga.h"
+#include "fallout2/text_font.h"
+// #include "fallout2/touch.h" TODO touch
+#include "fallout2/window_manager.h"
 
-namespace fallout {
+namespace Fallout2 {
 
 #define GAME_MOVIE_WINDOW_WIDTH 640
 #define GAME_MOVIE_WINDOW_HEIGHT 480
 
-static char* gameMovieBuildSubtitlesFilePath(char* movieFilePath);
+static char *gameMovieBuildSubtitlesFilePath(char *movieFilePath);
 
 // 0x50352A
 static const float flt_50352A = 0.032258064f;
 
 // 0x518DA0
-static const char* gMovieFileNames[MOVIE_COUNT] = {
+static const char *gMovieFileNames[MOVIE_COUNT] = {
 	"iplogo.mve",
 	"intro.mve",
 	"elder.mve",
@@ -53,7 +55,7 @@ static const char* gMovieFileNames[MOVIE_COUNT] = {
 };
 
 // 0x518DE4
-static const char* gMoviePaletteFilePaths[MOVIE_COUNT] = {
+static const char *gMoviePaletteFilePaths[MOVIE_COUNT] = {
 	nullptr,
 	"art\\cuts\\introsub.pal",
 	"art\\cuts\\eldersub.pal",
@@ -114,7 +116,7 @@ void gameMoviesReset() {
 }
 
 // 0x44E638
-int gameMoviesLoad(File* stream) {
+int gameMoviesLoad(File *stream) {
 	if (fileRead(gGameMoviesSeen, sizeof(*gGameMoviesSeen), MOVIE_COUNT, stream) != MOVIE_COUNT) {
 		return -1;
 	}
@@ -123,7 +125,7 @@ int gameMoviesLoad(File* stream) {
 }
 
 // 0x44E664
-int gameMoviesSave(File* stream) {
+int gameMoviesSave(File *stream) {
 	if (fileWrite(gGameMoviesSeen, sizeof(*gGameMoviesSeen), MOVIE_COUNT, stream) != MOVIE_COUNT) {
 		return -1;
 	}
@@ -136,10 +138,10 @@ int gameMoviesSave(File* stream) {
 int gameMoviePlay(int movie, int flags) {
 	gGameMovieIsPlaying = true;
 
-	const char* movieFileName = gMovieFileNames[movie];
+	const char *movieFileName = gMovieFileNames[movie];
 	debugPrint("\nPlaying movie: %s\n", movieFileName);
 
-	const char* language = settings.system.language.c_str();
+	const char *language = settings.system.language.c_str();
 	char movieFilePath[COMPAT_MAX_PATH];
 	int movieFileSize;
 	bool movieFound = false;
@@ -168,11 +170,11 @@ int gameMoviePlay(int movie, int flags) {
 	int gameMovieWindowX = (screenGetWidth() - GAME_MOVIE_WINDOW_WIDTH) / 2;
 	int gameMovieWindowY = (screenGetHeight() - GAME_MOVIE_WINDOW_HEIGHT) / 2;
 	int win = windowCreate(gameMovieWindowX,
-	                       gameMovieWindowY,
-	                       GAME_MOVIE_WINDOW_WIDTH,
-	                       GAME_MOVIE_WINDOW_HEIGHT,
-	                       0,
-	                       WINDOW_MODAL);
+						   gameMovieWindowY,
+						   GAME_MOVIE_WINDOW_WIDTH,
+						   GAME_MOVIE_WINDOW_HEIGHT,
+						   0,
+						   WINDOW_MODAL);
 	if (win == -1) {
 		gGameMovieIsPlaying = false;
 		return -1;
@@ -189,7 +191,7 @@ int gameMoviePlay(int movie, int flags) {
 	bool subtitlesEnabled = settings.preferences.subtitles;
 	int v1 = 4;
 	if (subtitlesEnabled) {
-		char* subtitlesFilePath = gameMovieBuildSubtitlesFilePath(movieFilePath);
+		char *subtitlesFilePath = gameMovieBuildSubtitlesFilePath(movieFilePath);
 
 		int subtitlesFileSize;
 		if (dbGetFileSize(subtitlesFilePath, &subtitlesFileSize) == 0) {
@@ -204,7 +206,7 @@ int gameMoviePlay(int movie, int flags) {
 	int oldTextColor;
 	int oldFont;
 	if (subtitlesEnabled) {
-		const char* subtitlesPaletteFilePath;
+		const char *subtitlesPaletteFilePath;
 		if (gMoviePaletteFilePaths[movie] != nullptr) {
 			subtitlesPaletteFilePath = gMoviePaletteFilePaths[movie];
 		} else {
@@ -245,10 +247,10 @@ int gameMoviePlay(int movie, int flags) {
 			break;
 		}
 
-		Gesture gesture;
+/*		Gesture gesture; TODO touch
 		if (touch_get_gesture(&gesture) && gesture.state == kEnded) {
 			break;
-		}
+		}*/
 
 		int x;
 		int y;
@@ -325,24 +327,24 @@ bool gameMovieIsPlaying() {
 }
 
 // 0x44EB1C
-static char* gameMovieBuildSubtitlesFilePath(char* movieFilePath) {
-	char* path = movieFilePath;
+static char *gameMovieBuildSubtitlesFilePath(char *movieFilePath) {
+	char *path = movieFilePath;
 
-	char* separator = strrchr(path, '\\');
+	char *separator = strrchr(path, '\\');
 	if (separator != nullptr) {
 		path = separator + 1;
 	}
 
 	snprintf(gGameMovieSubtitlesFilePath, sizeof(gGameMovieSubtitlesFilePath), "text\\%s\\cuts\\%s", settings.system.language.c_str(), path);
 
-	char* pch = strrchr(gGameMovieSubtitlesFilePath, '.');
+	char *pch = strrchr(gGameMovieSubtitlesFilePath, '.');
 	if (*pch != '\0') {
 		*pch = '\0';
 	}
 
-	strcpy(gGameMovieSubtitlesFilePath + strlen(gGameMovieSubtitlesFilePath), ".SVE");
+	strncpy(gGameMovieSubtitlesFilePath + strlen(gGameMovieSubtitlesFilePath), ".SVE", COMPAT_MAX_PATH - 1 - strlen(gGameMovieSubtitlesFilePath));
 
 	return gGameMovieSubtitlesFilePath;
 }
 
-} // namespace fallout
+} // namespace Fallout2
