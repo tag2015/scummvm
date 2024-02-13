@@ -25,7 +25,7 @@
 #include "fallout2/draw.h"
 #include "fallout2/game.h"
 #include "fallout2/game_mouse.h"
-// #include "fallout2/game_movie.h" TODO movie
+#include "fallout2/game_movie.h"
 #include "fallout2/game_sound.h"
 #include "fallout2/input.h"
 #include "fallout2/interface.h"
@@ -2955,7 +2955,7 @@ bool wmMapCanRestHere(int elevation) {
 
 // 0x4BFAFC
 bool wmMapPipboyActive() {
-	return true /*gameMovieIsSeen(MOVIE_VSUIT)*/;  // TODO movie
+	return gameMovieIsSeen(MOVIE_VSUIT);
 }
 
 // 0x4BFB08

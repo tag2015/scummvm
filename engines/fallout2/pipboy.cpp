@@ -17,7 +17,7 @@
 #include "fallout2/draw.h"
 #include "fallout2/game.h"
 #include "fallout2/game_mouse.h"
-// #include "fallout2/game_movie.h" TODO movie
+#include "fallout2/game_movie.h"
 #include "fallout2/game_sound.h"
 #include "fallout2/geometry.h"
 #include "fallout2/input.h"
@@ -1644,7 +1644,7 @@ static void pipboyHandleVideoArchive(int a1) {
 
 		pipboyRenderVideoArchive(a1);
 
-/*		int movie; TODO movie
+		int movie;
 		for (movie = 2; movie < 16; movie++) {
 			if (gameMovieIsSeen(movie)) {
 				a1--;
@@ -1658,7 +1658,7 @@ static void pipboyHandleVideoArchive(int a1) {
 			gameMoviePlay(movie, GAME_MOVIE_FADE_IN | GAME_MOVIE_FADE_OUT | GAME_MOVIE_PAUSE_MUSIC);
 		} else {
 			debugPrint("\n ** Selected movie not found in list! **\n");
-		}*/
+		}
 
 		fontSetCurrent(101);
 
@@ -1705,7 +1705,7 @@ static int pipboyRenderVideoArchive(int a1) {
 	msg_num = 502;
 
 	for (i = 2; i < 16; i++) {
-/*		if (gameMovieIsSeen(i)) {  // TODO movie
+		if (gameMovieIsSeen(i)) {
 			v8 = v5++;
 			if (v8 == v12) {
 				v9 = _colorTable[32747];
@@ -1717,7 +1717,7 @@ static int pipboyRenderVideoArchive(int a1) {
 			pipboyDrawText(text, 0, v9);
 
 			gPipboyCurrentLine++;
-		}*/
+		}
 
 		msg_num++;
 	}
