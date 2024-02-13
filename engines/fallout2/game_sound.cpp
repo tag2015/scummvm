@@ -14,7 +14,7 @@
 #include "fallout2/item.h"
 #include "fallout2/map.h"
 #include "fallout2/memory.h"
-#include "fallout2/movie.h" //  TODO movie
+#include "fallout2/movie.h"
 #include "fallout2/object.h"
 #include "fallout2/pointer_registry.h"
 #include "fallout2/proto.h"
@@ -483,7 +483,7 @@ void backgroundSoundDisable() {
 	if (gGameSoundInitialized) {
 		if (gMusicEnabled) {
 			backgroundSoundDelete();
-			//			movieSetVolume(0);  TODO  movie
+			movieSetVolume(0);
 			gMusicEnabled = false;
 		}
 	}
@@ -495,7 +495,7 @@ void backgroundSoundDisable() {
 void backgroundSoundEnable() {
 	if (gGameSoundInitialized) {
 		if (!gMusicEnabled) {
-			//			movieSetVolume((int)(gMusicVolume * 0.94));  TODO movie
+			movieSetVolume((int)(gMusicVolume * 0.94));
 			gMusicEnabled = true;
 			backgroundSoundRestart(12);
 		}
@@ -529,7 +529,7 @@ void backgroundSoundSetVolume(int volume) {
 	}
 
 	if (gMusicEnabled) {
-		//		movieSetVolume((int)(volume * 0.94));  TODO  movie
+		movieSetVolume((int)(volume * 0.94));
 	}
 
 	if (gMusicEnabled) {
