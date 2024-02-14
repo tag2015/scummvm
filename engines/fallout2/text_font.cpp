@@ -188,7 +188,7 @@ int textFontLoad(int font) {
 		goto out;
 	}
 
-	if (fileRead(textFontDescriptor->glyphs, sizeof(TextFontGlyph), textFontDescriptor->glyphCount, stream) != textFontDescriptor->glyphCount) {
+	if ((int)fileRead(textFontDescriptor->glyphs, sizeof(TextFontGlyph), textFontDescriptor->glyphCount, stream) != textFontDescriptor->glyphCount) {
 		goto out;
 	}
 
@@ -198,7 +198,7 @@ int textFontLoad(int font) {
 		goto out;
 	}
 
-	if (fileRead(textFontDescriptor->data, 1, dataSize, stream) != dataSize) {
+	if ((int)fileRead(textFontDescriptor->data, 1, dataSize, stream) != dataSize) {
 		goto out;
 	}
 
@@ -358,9 +358,9 @@ static void textFontDrawImpl(unsigned char *buf, const char *string, int length,
 
 	if ((color & FONT_UNDERLINE) != 0) {
 		// TODO: Probably additional -1 present, check.
-		int length = ptr - buf;
+		int len = ptr - buf;
 		unsigned char *underlinePtr = buf + pitch * (gCurrentTextFontDescriptor->lineHeight - 1);
-		for (int pix = 0; pix < length; pix++) {
+		for (int pix = 0; pix < len; pix++) {
 			*underlinePtr++ = color & 0xFF;
 		}
 	}
