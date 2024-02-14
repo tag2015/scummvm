@@ -33,7 +33,7 @@
 #include "fallout2/text_object.h"
 #include "fallout2/tile.h"
 #include "fallout2/trait.h"
-// #include "fallout2/vcr.h" TODO vc
+// #include "fallout2/vcr.h" TODO vcr
 
 namespace Fallout2 {
 
