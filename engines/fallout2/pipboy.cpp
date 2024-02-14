@@ -34,6 +34,7 @@
 #include "fallout2/random.h"
 #include "fallout2/scripts.h"
 #include "fallout2/settings.h"
+#include "fallout2/sfall_config.h"
 #include "fallout2/stat.h"
 #include "fallout2/svga.h"
 #include "fallout2/text_font.h"
@@ -397,9 +398,12 @@ static int gPipboyPrevTab;
 
 static FrmImage _pipboyFrmImages[PIPBOY_FRM_COUNT];
 
+// SFALL
+bool PipBoyAvailableAtGameStart = false;
+
 // 0x497004
 int pipboyOpen(int intent) {
-	if (!wmMapPipboyActive()) {
+	if (!wmMapPipboyActive() && !PipBoyAvailableAtGameStart) {
 		// You aren't wearing the pipboy!
 		const char *text = getmsg(&gMiscMessageList, &gPipboyMessageListItem, 7000);
 		showDialogBox(text, nullptr, 0, 192, 135, _colorTable[32328], nullptr, _colorTable[32328], 1);
@@ -738,6 +742,9 @@ static void pipboyWindowFree() {
 //
 // 0x497918
 static void _pip_init_() {
+	int configValue = 0;
+	configGetInt(&gSfallConfig, SFALL_CONFIG_MISC_KEY, SFALL_CONFIG_PIPBOY_AVAILABLE_AT_GAMESTART, &configValue);
+	PipBoyAvailableAtGameStart = (configValue == 1);
 }
 
 // NOTE: Uncollapsed 0x497918.

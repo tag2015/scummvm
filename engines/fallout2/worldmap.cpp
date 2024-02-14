@@ -2955,7 +2955,9 @@ bool wmMapCanRestHere(int elevation) {
 
 // 0x4BFAFC
 bool wmMapPipboyActive() {
-	return gameMovieIsSeen(MOVIE_VSUIT);
+	int configValue = 0;
+	configGetInt(&gSfallConfig, SFALL_CONFIG_MISC_KEY, SFALL_CONFIG_PIPBOY_AVAILABLE_AT_GAMESTART, &configValue);
+	return gameMovieIsSeen(MOVIE_VSUIT) || (configValue == 2);
 }
 
 // 0x4BFB08
