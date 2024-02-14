@@ -561,8 +561,11 @@ static bool cacheSetCapacity(Cache *cache, int newCapacity) {
 
 // 0x420A74
 static int cacheEntriesCompareByUsage(const void *a1, const void *a2) {
-	CacheEntry *v1 = *(CacheEntry **)a1;
-	CacheEntry *v2 = *(CacheEntry **)a2;
+	void *a1_tmp = const_cast<void *>(a1);
+	CacheEntry *v1 = *(static_cast<CacheEntry **>(a1_tmp));
+
+	void *a2_tmp = const_cast<void *>(a2);
+	CacheEntry *v2 = *(static_cast<CacheEntry **>(a2_tmp));
 
 	if (v1->referenceCount != 0 && v2->referenceCount == 0) {
 		return 1;
@@ -589,8 +592,11 @@ static int cacheEntriesCompareByUsage(const void *a1, const void *a2) {
 
 // 0x420AE8
 static int cacheEntriesCompareByMostRecentHit(const void *a1, const void *a2) {
-	CacheEntry *v1 = *(CacheEntry **)a1;
-	CacheEntry *v2 = *(CacheEntry **)a2;
+	void *a1_tmp = const_cast<void *>(a1);
+	CacheEntry *v1 = *(static_cast<CacheEntry **>(a1_tmp));
+
+	void *a2_tmp = const_cast<void *>(a2);
+	CacheEntry *v2 = *(static_cast<CacheEntry **>(a2_tmp));
 
 	if (v1->mru < v2->mru) {
 		return 1;
