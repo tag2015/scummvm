@@ -892,8 +892,8 @@ int showLoadFileDialog(char *title, char **fileList, char *dest, int fileListLen
 					break;
 				}
 
-				int keyCode = inputGetInput();
-				if (keyCode == 505 || keyCode == 503) {
+				int key = inputGetInput();
+				if (key == 505 || key == 503) {
 					break;
 				}
 
@@ -1099,7 +1099,7 @@ int showSaveFileDialog(char *title, char **fileList, char *dest, int fileListLen
 	dest[fileNameLength] = '\0';
 
 	char fileNameCopy[32];
-	strncpy(fileNameCopy, dest, 32);
+	strncpy(fileNameCopy, dest, 31);
 
 	size_t fileNameCopyLength = strlen(fileNameCopy);
 	fileNameCopy[fileNameCopyLength + 1] = '\0';

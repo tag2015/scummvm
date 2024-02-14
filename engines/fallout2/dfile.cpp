@@ -115,7 +115,7 @@ DBase *dbaseOpen(const char *filePath) {
 	for (entryIndex = 0; entryIndex < dbase->entriesLength; entryIndex++) {
 		DBaseEntry *entry = &(dbase->entries[entryIndex]);
 
-		int pathLength = stream->readUint32LE();
+		uint pathLength = stream->readUint32LE();
 		if (stream->err()) {
 			break;
 		}
@@ -632,7 +632,7 @@ int dfileEof(DFile *stream) {
 // 0x4E5D70
 static int dbaseFindEntryByFilePath(const void *a1, const void *a2) {
 	const char *filePath = (const char *)a1;
-	DBaseEntry *entry = (DBaseEntry *)a2;
+	DBaseEntry *entry = const_cast<DBaseEntry *>(static_cast<const DBaseEntry *>(a2));
 
 	return compat_stricmp(filePath, entry->path);
 }
