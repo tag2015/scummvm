@@ -12,6 +12,9 @@
 
 namespace Fallout2 {
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpedantic"
+
 typedef enum CombatState {
 	COMBAT_STATE_0x01 = 0x01,
 	COMBAT_STATE_0x02 = 0x02,
@@ -170,6 +173,8 @@ typedef enum CombatBadShot {
 	COMBAT_BAD_SHOT_ARM_CRIPPLED = 6,
 	COMBAT_BAD_SHOT_BOTH_ARMS_CRIPPLED = 7,
 } CombatBadShot;
+
+#pragma GCC diagnostic pop
 
 } // namespace Fallout2
 
