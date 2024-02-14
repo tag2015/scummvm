@@ -1093,7 +1093,7 @@ int _win_input_str(int win, char *dest, int maxLength, int x, int y, int textCol
 	Window *window = windowGetWindow(win);
 	unsigned char *buffer = window->buffer + window->width * y + x;
 
-	size_t cursorPos = strlen(dest);
+	int cursorPos = (int)strlen(dest);
 	dest[cursorPos] = '_';
 	dest[cursorPos + 1] = '\0';
 
@@ -1171,7 +1171,7 @@ int _win_input_str(int win, char *dest, int maxLength, int x, int y, int textCol
 						dest[cursorPos + 1] = '_';
 						dest[cursorPos + 2] = '\0';
 
-						int stringWidth = fontGetStringWidth(dest);
+						stringWidth = fontGetStringWidth(dest);
 						bufferFill(buffer, stringWidth, lineHeight, window->width, backgroundColor);
 						fontDrawText(buffer, dest, stringWidth, window->width, textColor);
 
@@ -1491,8 +1491,8 @@ int process_pull_down(int win, Rect *rect, char **items, int itemsLength, int fo
 
 		int x = pulldown->rect.left;
 		int y = pulldown->rect.top;
-		int width = pulldown->rect.right - x + 1;
-		int height = pulldown->rect.bottom - y + 1;
+		width = pulldown->rect.right - x + 1;
+		height = pulldown->rect.bottom - y + 1;
 
 		int color1 = menuBar->foregroundColor;
 		if ((color1 & 0xFF00) != 0) {
