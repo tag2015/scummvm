@@ -3,6 +3,9 @@
 
 namespace Fallout2 {
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpedantic"
+
 // Rotation
 typedef enum Rotation {
 	ROTATION_NE, // 0
@@ -315,6 +318,8 @@ static inline int builtTileGetRotation(int builtTile) {
 static inline int builtTileCreate(int tile, int elevation) {
 	return tile | ((elevation << BUILT_TILE_ELEVATION_SHIFT) & BUILT_TILE_ELEVATION_MASK);
 }
+
+#pragma GCC diagnostic pop
 
 } // namespace Fallout2
 
