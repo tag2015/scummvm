@@ -4586,6 +4586,7 @@ static void attackComputeDamage(Attack *attack, int ammoQuantity, int bonusDamag
 	context.damageBonus = damageBonus;
 	context.bonusDamageMultiplier = bonusDamageMultiplier;
 	context.combatDifficultyDamageModifier = combatDifficultyDamageModifier;
+	context.ammoQuantity = ammoQuantity;
 
 	if (gDamageCalculationType == DAMAGE_CALCULATION_TYPE_GLOVZ || gDamageCalculationType == DAMAGE_CALCULATION_TYPE_GLOVZ_WITH_DAMAGE_MULTIPLIER_TWEAK) {
 		damageModCalculateGlovz(&context);
@@ -4937,7 +4938,7 @@ void _combat_display(Attack *attack) {
 		strncpy(you, messageListItem.text, sizeof(you) - 1);
 	}
 
-	int baseMessageId;
+	int baseMessageId = 0;
 	if (mainCritter == gDude) {
 		mainCritterName = you;
 		if (critterGetStat(gDude, STAT_GENDER) == GENDER_MALE) {
@@ -5789,7 +5790,7 @@ void _combat_attack_this(Object *target) {
 		debugPrint("Bad called shot value %d\n", aiming);
 	}
 
-	int hitLocation;
+	int hitLocation = 0;
 	if (calledShotSelectHitLocation(target, &hitLocation, hitMode) != -1) {
 		_combat_attack(gDude, target, hitMode, hitLocation);
 	}
