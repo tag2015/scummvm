@@ -77,7 +77,7 @@ int dictionaryInit(Dictionary *dictionary, int initialCapacity, size_t valueSize
 
 // 0x4D9C0C
 int dictionarySetCapacity(Dictionary *dictionary, int newCapacity) {
-	if (dictionary->marker != DICTIONARY_MARKER) {
+	if ((uint)dictionary->marker != DICTIONARY_MARKER) {
 		return -1;
 	}
 
@@ -98,7 +98,7 @@ int dictionarySetCapacity(Dictionary *dictionary, int newCapacity) {
 
 // 0x4D9C48
 int dictionaryFree(Dictionary *dictionary) {
-	if (dictionary->marker != DICTIONARY_MARKER) {
+	if ((uint)dictionary->marker != DICTIONARY_MARKER) {
 		return -1;
 	}
 
@@ -129,7 +129,7 @@ int dictionaryFree(Dictionary *dictionary) {
 //
 // 0x4D9CC4
 static int dictionaryFindIndexForKey(Dictionary *dictionary, const char *key, int *indexPtr) {
-	if (dictionary->marker != DICTIONARY_MARKER) {
+	if ((uint)dictionary->marker != DICTIONARY_MARKER) {
 		return -1;
 	}
 
@@ -176,7 +176,7 @@ static int dictionaryFindIndexForKey(Dictionary *dictionary, const char *key, in
 //
 // 0x4D9D5C
 int dictionaryGetIndexByKey(Dictionary *dictionary, const char *key) {
-	if (dictionary->marker != DICTIONARY_MARKER) {
+	if ((uint)dictionary->marker != DICTIONARY_MARKER) {
 		return -1;
 	}
 
@@ -196,7 +196,7 @@ int dictionaryGetIndexByKey(Dictionary *dictionary, const char *key) {
 //
 // 0x4D9D88
 int dictionaryAddValue(Dictionary *dictionary, const char *key, const void *value) {
-	if (dictionary->marker != DICTIONARY_MARKER) {
+	if ((uint)dictionary->marker != DICTIONARY_MARKER) {
 		return -1;
 	}
 
@@ -219,7 +219,7 @@ int dictionaryAddValue(Dictionary *dictionary, const char *key, const void *valu
 		return -1;
 	}
 
-	strncpy(keyCopy, key, strlen(key) + 1);
+	memcpy(keyCopy, key, strlen(key) + 1);
 
 	// Make a copy of the value.
 	void *valueCopy = nullptr;
@@ -259,7 +259,7 @@ int dictionaryAddValue(Dictionary *dictionary, const char *key, const void *valu
 //
 // 0x4D9EE8
 int dictionaryRemoveValue(Dictionary *dictionary, const char *key) {
-	if (dictionary->marker != DICTIONARY_MARKER) {
+	if ((uint)dictionary->marker != DICTIONARY_MARKER) {
 		return -1;
 	}
 
@@ -293,7 +293,7 @@ int dictionaryRemoveValue(Dictionary *dictionary, const char *key) {
 //
 // 0x4D9F84
 int dictionaryCopy(Dictionary *dest, Dictionary *src) {
-	if (src->marker != DICTIONARY_MARKER) {
+	if ((uint)src->marker != DICTIONARY_MARKER) {
 		return -1;
 	}
 
@@ -381,7 +381,7 @@ int dictionaryReadHeader(Common::File *stream, Dictionary *dictionary) {
 //
 // 0x4DA158
 int dictionaryLoad(Common::File *stream, Dictionary *dictionary, int a3) {
-	if (dictionary->marker != DICTIONARY_MARKER) {
+	if ((uint)dictionary->marker != DICTIONARY_MARKER) {
 		return -1;
 	}
 
