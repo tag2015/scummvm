@@ -140,7 +140,7 @@ int audioRead(int handle, void *buffer, unsigned int size) {
 
 // 0x41A5E0
 long audioSeek(int handle, long offset, int origin) {
-	int pos;
+	int pos = 0;
 	unsigned char *buf;
 	int v10;
 

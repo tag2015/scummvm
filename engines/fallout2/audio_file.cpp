@@ -147,7 +147,7 @@ int audioFileRead(int handle, void *buffer, unsigned int size) {
 long audioFileSeek(int handle, long offset, int origin) {
 	void *buf;
 	int remaining;
-	int a4;
+	int a4 = 0;
 
 	AudioFile *audioFile = &(gAudioFileList[handle - 1]);
 
