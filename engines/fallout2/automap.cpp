@@ -855,10 +855,10 @@ int automapSaveCurrent() {
 		}
 
 		int diff = gAutomapEntry.dataSize - nextEntryDataSize;
-		for (int map = 0; map < AUTOMAP_MAP_COUNT; map++) {
-			for (int elevation = 0; elevation < ELEVATION_COUNT; elevation++) {
-				if (gAutomapHeader.offsets[map][elevation] > entryOffset) {
-					gAutomapHeader.offsets[map][elevation] += diff;
+		for (int i = 0; i < AUTOMAP_MAP_COUNT; i++) {
+			for (int j = 0; j < ELEVATION_COUNT; j++) {
+				if (gAutomapHeader.offsets[i][j] > entryOffset) {
+					gAutomapHeader.offsets[i][j] += diff;
 				}
 			}
 		}
@@ -1163,6 +1163,9 @@ static int automapSaveHeader(Common::SeekableWriteStream *stream) {
 		stream->writeSint32BE(value);
 	}
 
+	if (stream->err())
+		goto err;
+
 /*	if (fileWriteUInt8(stream, gAutomapHeader.version) == -1) {
 		goto err;
 	}
@@ -1308,13 +1311,13 @@ static int _copy_file_data(Common::ReadStream *stream1, Common::WriteStream *str
 		int chunkLength = MIN(length, 0xFFFF);
 
 		// TODO check this
-		if (stream1->read(buffer, chunkLength) < chunkLength)
+		if (stream1->read(buffer, chunkLength) < (uint) chunkLength)
 			break;
 		//		if (fileRead(buffer, chunkLength, 1, stream1) != 1) {
 		//			break;
 		//		}
 
-		if(stream2->write(buffer, chunkLength) < chunkLength)
+		if(stream2->write(buffer, chunkLength) < (uint) chunkLength)
 			break;
 		//		if (fileWrite(buffer, chunkLength, 1, stream2) != 1) {
 		//			break;
