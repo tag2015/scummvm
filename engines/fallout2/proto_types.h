@@ -3,6 +3,9 @@
 
 namespace Fallout2 {
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpedantic"
+
 // Number of prototypes in prototype extent.
 #define PROTO_LIST_EXTENT_SIZE 16
 
@@ -476,6 +479,8 @@ typedef struct ProtoList {
 	// Number of lines in proto/{type}/{type}.lst.
 	int max_entries_num;
 } ProtoList;
+
+#pragma GCC diagnostic pop
 
 } // namespace Fallout2
 
