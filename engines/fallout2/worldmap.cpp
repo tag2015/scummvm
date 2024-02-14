@@ -703,10 +703,10 @@ static const char *wmConditionalOpStrs[ENCOUNTER_CONDITIONAL_OPERATOR_COUNT] = {
 };
 
 // 0x51DE64
-static const char *wmConditionalQualifierStrs[2] = {
-	"and",
-	"or",
-};
+// static const char *wmConditionalQualifierStrs[2] = {
+// 	"and",
+// 	"or",
+// };
 
 // 0x51DE6C
 static const char *wmFormationStrs[ENCOUNTER_FORMATION_TYPE_COUNT] = {
@@ -1301,8 +1301,9 @@ int wmWorldMap_load(Common::InSaveFile *stream) {
 /*	if (fileReadInt32(stream, &numTiles) == -1)
 		return -1;*/
 
-	int numHorizontalTiles;
-	numHorizontalTiles = stream->readSint32BE();
+/*	int numHorizontalTiles;
+	numHorizontalTiles =*/
+	stream->readSint32BE();
 	if (stream->err())
 		return -1;
 
@@ -1548,7 +1549,6 @@ static int wmReadEncounterType(Config *config, char *lookupName, char *sectionKe
 		char key[40];
 		snprintf(key, sizeof(key), "enc_%02d", encounterTable->entriesLength);
 
-		char *str;
 		if (!configGetString(config, sectionKey, key, &str)) {
 			break;
 		}
@@ -3526,7 +3526,7 @@ static int wmRndEncounterOccurred() {
 		wmAreaSetWorldPos(areaIdx, worldmapX, worldmapY);
 
 		if (areaIdx >= 0 && areaIdx < wmMaxAreaNum) {
-			CityInfo *city = &(wmAreaInfoList[areaIdx]);
+			city = &(wmAreaInfoList[areaIdx]);
 			if (city->lockState != LOCK_STATE_LOCKED) {
 				city->state = CITY_STATE_KNOWN;
 			}
@@ -5323,7 +5323,7 @@ static int wmInterfaceRefresh() {
 				v32 = WM_VIEW_Y - v18;
 			}
 
-			int v13 = 0;
+//			int v13 = 0;
 			int v34 = v30 + v32;
 
 			for (int row = 0; row < SUBTILE_GRID_HEIGHT; row++) {
@@ -5838,7 +5838,7 @@ static int wmTownMapFunc(int *mapIdxPtr) {
 				int quickDestinationIndex = wmGenData.tabsOffsetY / 27 + keyCode - KEY_CTRL_F1;
 				if (quickDestinationIndex < wmLabelCount) {
 					int areaIdx = wmLabelList[quickDestinationIndex];
-					CityInfo *city = &(wmAreaInfoList[areaIdx]);
+					city = &(wmAreaInfoList[areaIdx]);
 					if (!wmAreaIsKnown(city->areaId)) {
 						break;
 					}
