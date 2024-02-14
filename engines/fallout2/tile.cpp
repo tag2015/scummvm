@@ -290,6 +290,9 @@ static int gTileWindowWidth;
 // 0x66BE34
 int gCenterTile;
 
+static bool tileIsValid(int tile) {
+	return tile >= 0 && tile < gHexGridSize;
+}
 
 // 0x4B0C40
 int tileInit(TileData **a1, int squareGridWidth, int squareGridHeight, int hexGridWidth, int hexGridHeight, unsigned char *buf, int windowWidth, int windowHeight, int windowPitch, TileWindowRefreshProc *windowRefreshProc) {
@@ -1466,7 +1469,7 @@ bool _square_roof_intersect(int x, int y, int elevation) {
 	int fid = buildFid(OBJ_TYPE_TILE, upper & 0xFFF, 0, 0, 0);
 	if (fid != buildFid(OBJ_TYPE_TILE, 1, 0, 0, 0)) {
 		if ((((upper & 0xF000) >> 12) & 1) == 0) {
-			int fid = buildFid(OBJ_TYPE_TILE, upper & 0xFFF, 0, 0, 0);
+			fid = buildFid(OBJ_TYPE_TILE, upper & 0xFFF, 0, 0, 0);
 			CacheEntry *handle;
 			Art *art = artLock(fid, &handle);
 			if (art != nullptr) {
@@ -1660,8 +1663,8 @@ static void tileRenderFloor(int fid, int x, int y, Rect *rect) {
 			goto out;
 		}
 
-		for (int i = 0; i < 5; i++) {
-			RightsideUpTriangle *triangle = &(_rightside_up_triangles[i]);
+		for (int k = 0; k < 5; k++) {
+			RightsideUpTriangle *triangle = &(_rightside_up_triangles[k]);
 			int v32 = _verticies[triangle->field_8].intensity;
 			int v33 = _verticies[triangle->field_8].field_0;
 			int v34 = _verticies[triangle->field_4].intensity - _verticies[triangle->field_0].intensity;
@@ -1714,8 +1717,8 @@ static void tileRenderFloor(int fid, int x, int y, Rect *rect) {
 			}
 		}
 
-		for (int i = 0; i < 5; i++) {
-			UpsideDownTriangle *triangle = &(_upside_down_triangles[i]);
+		for (int k = 0; k < 5; k++) {
+			UpsideDownTriangle *triangle = &(_upside_down_triangles[k]);
 			int v50 = _verticies[triangle->field_0].intensity;
 			int v51 = _verticies[triangle->field_0].field_0;
 			int v52 = _verticies[triangle->field_8].intensity - v50;
