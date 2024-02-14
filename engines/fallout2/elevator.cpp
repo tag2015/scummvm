@@ -529,8 +529,8 @@ static int elevatorWindowInit(int elevator) {
 		_elevatorBackgroundFrmImage.unlock();
 		_elevatorPanelFrmImage.unlock();
 
-		for (int index = 0; index < ELEVATOR_FRM_COUNT; index++) {
-			_elevatorFrmImages[index].unlock();
+		for (int i = 0; i < ELEVATOR_FRM_COUNT; i++) {
+			_elevatorFrmImages[i].unlock();
 		}
 
 		if (gElevatorWindowIsoWasEnabled) {
@@ -555,8 +555,8 @@ static int elevatorWindowInit(int elevator) {
 		_elevatorBackgroundFrmImage.unlock();
 		_elevatorPanelFrmImage.unlock();
 
-		for (int index = 0; index < ELEVATOR_FRM_COUNT; index++) {
-			_elevatorFrmImages[index].unlock();
+		for (int i = 0; i < ELEVATOR_FRM_COUNT; i++) {
+			_elevatorFrmImages[i].unlock();
 		}
 
 		if (gElevatorWindowIsoWasEnabled) {
@@ -629,7 +629,7 @@ static void elevatorWindowFree() {
 // 0x43F73C
 static int elevatorGetLevelFromKeyCode(int elevator, int keyCode) {
 	// TODO: Check if result is really unused?
-	toupper(keyCode);
+	// toupper(keyCode);
 
 	for (int index = 0; index < ELEVATOR_LEVEL_MAX; index++) {
 		char c = gElevatorLevelLabels[elevator][index];
