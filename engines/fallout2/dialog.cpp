@@ -195,7 +195,7 @@ void _replyAddOption(const char *a1, const char *a2, int a3) {
 
 	if (a1 != nullptr) {
 		v14 = (char *)internal_malloc_safe(strlen(a1) + 1, __FILE__, __LINE__); // "..\\int\\DIALOG.C", 805
-		strncpy(v14, a1, strlen(a1) + 1);
+		memcpy(v14, a1, strlen(a1) + 1);
 		v18->field_C[v17].field_0 = v14;
 	} else {
 		v18->field_C[v17].field_0 = nullptr;
@@ -203,7 +203,7 @@ void _replyAddOption(const char *a1, const char *a2, int a3) {
 
 	if (a2 != nullptr) {
 		v15 = (char *)internal_malloc_safe(strlen(a2) + 1, __FILE__, __LINE__); // "..\\int\\DIALOG.C", 810
-		strncpy(v15, a2, strlen(a2) + 1);
+		memcpy(v15, a2, strlen(a2) + 1);
 		v18->field_C[v17].string = v15;
 	} else {
 		v18->field_C[v17].string = nullptr;
@@ -227,7 +227,7 @@ void _replyAddOptionProc(const char *a1, int a2, int a3) {
 
 	if (a1 != nullptr) {
 		v11 = (char *)internal_malloc_safe(strlen(a1) + 1, __FILE__, __LINE__); // "..\\int\\DIALOG.C", 830
-		strncpy(v11, a1, strlen(a1) + 1);
+		memcpy(v11, a1, strlen(a1) + 1);
 		v5->field_C[v13].field_0 = v11;
 	} else {
 		v5->field_C[v13].field_0 = nullptr;
@@ -461,7 +461,7 @@ int dialogSetReplyTitle(const char *a1) {
 
 	if (a1 != nullptr) {
 		gDialogReplyTitle = (char *)internal_malloc_safe(strlen(a1) + 1, __FILE__, __LINE__); // "..\\int\\DIALOG.C", 2564
-		strncpy(gDialogReplyTitle, a1, strlen(a1) + 1);
+		memcpy(gDialogReplyTitle, a1, strlen(a1) + 1);
 	} else {
 		gDialogReplyTitle = nullptr;
 	}
