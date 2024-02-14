@@ -315,7 +315,7 @@ static void endgameEndingRenderPanningScene(int direction, const char *narratorF
 	Art *background = artLock(fid, &backgroundHandle);
 	if (background != nullptr) {
 		int width = artGetWidth(background, 0, 0);
-		int height = artGetHeight(background, 0, 0);
+		// int height = artGetHeight(background, 0, 0);
 		unsigned char *backgroundData = artGetFrameData(background, 0, 0);
 		bufferFill(gEndgameEndingSlideshowWindowBuffer, ENDGAME_ENDING_WINDOW_WIDTH, ENDGAME_ENDING_WINDOW_HEIGHT, ENDGAME_ENDING_WINDOW_WIDTH, _colorTable[0]);
 		endgameEndingLoadPalette(6, 327);
@@ -1050,7 +1050,7 @@ int endgameDeathEndingInit() {
 
 		// this code is slightly different from the original, but does the same thing
 		narratorFileNameLength = strlen(tok);
-		strncpy(entry.voiceOverBaseName, tok, narratorFileNameLength);
+		strncpy(entry.voiceOverBaseName, tok, 15);
 
 		entry.enabled = false;
 

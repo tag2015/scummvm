@@ -374,7 +374,7 @@ static void interfaceFontDrawImpl(unsigned char *buf, const char *string, int le
 	}
 
 	if ((color & FONT_UNDERLINE) != 0) {
-		int length = ptr - buf;
+		length = ptr - buf;
 		unsigned char *underlinePtr = buf + pitch * (gCurrentInterfaceFontDescriptor->maxHeight - 1);
 		for (int index = 0; index < length; index++) {
 			*underlinePtr++ = color & 0xFF;
