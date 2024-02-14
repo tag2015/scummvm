@@ -1437,8 +1437,11 @@ static bool _ai_find_friend(Object *a1, int a2, int a3) {
 //
 // 0x428B1C
 static int _compare_nearer(const void *a1, const void *a2) {
-	Object *object1 = *(Object **)a1;
-	Object *object2 = *(Object **)a2;
+	void *a1_tmp = const_cast<void *>(a1);
+	Object *object1 = *(static_cast<Object **>(a1_tmp));
+
+	void *a2_tmp = const_cast<void *>(a2);
+	Object *object2 = *(static_cast<Object **>(a2_tmp));
 
 	if (object1 == nullptr && object2 == nullptr) {
 		return 0;
@@ -1472,8 +1475,11 @@ static void _ai_sort_list_distance(Object **critterList, int length, Object *ori
 //
 // 0x428B8C
 static int _compare_strength(const void *a1, const void *a2) {
-	Object *object1 = *(Object **)a1;
-	Object *object2 = *(Object **)a2;
+	void *a1_tmp = const_cast<void *>(a1);
+	Object *object1 = *(static_cast<Object **>(a1_tmp));
+
+	void *a2_tmp = const_cast<void *>(a2);
+	Object *object2 = *(static_cast<Object **>(a2_tmp));
 
 	if (object1 == nullptr && object2 == nullptr) {
 		return 0;
@@ -1506,8 +1512,11 @@ static void _ai_sort_list_strength(Object **critterList, int length) {
 //
 // 0x428BE4
 static int _compare_weakness(const void *a1, const void *a2) {
-	Object *object1 = *(Object **)a1;
-	Object *object2 = *(Object **)a2;
+	void *a1_tmp = const_cast<void *>(a1);
+	Object *object1 = *(static_cast<Object **>(a1_tmp));
+
+	void *a2_tmp = const_cast<void *>(a2);
+	Object *object2 = *(static_cast<Object **>(a2_tmp));
 
 	if (object1 == nullptr && object2 == nullptr) {
 		return 0;
@@ -2720,7 +2729,7 @@ static int _ai_called_shot(Object *attacker, Object *defender, int hitMode) {
 		if (critterCanAim(attacker, hitMode)) {
 			AiPacket *ai = aiGetPacket(attacker);
 			if (randomBetween(1, ai->called_freq) == 1) {
-				int intelligenceRequired;
+				int intelligenceRequired = 5;
 				switch (settings.preferences.combat_difficulty) {
 				case COMBAT_DIFFICULTY_EASY:
 					intelligenceRequired = 7;
@@ -3054,7 +3063,7 @@ int _cai_perform_distance_prefs(Object *a1, Object *a2) {
 	switch (distance) {
 	case DISTANCE_STAY_CLOSE:
 		if (a1->data.critter.combat.whoHitMe != gDude) {
-			int distance = objectGetDistanceBetween(a1, gDude);
+			distance = objectGetDistanceBetween(a1, gDude);
 			if (distance > 5) {
 				_ai_move_steps_closer(a1, gDude, distance - 5, false);
 			}
@@ -3069,7 +3078,7 @@ int _cai_perform_distance_prefs(Object *a1, Object *a2) {
 	case DISTANCE_SNIPE:
 		if (a2 != nullptr) {
 			// SFALL: Fix AI behavior for "Snipe" distance preference.
-			int distance = objectGetDistanceBetween(a1, a2);
+			distance = objectGetDistanceBetween(a1, a2);
 			if (distance < 10) {
 				int attackCost = weaponGetActionPointCost(a1, HIT_MODE_RIGHT_WEAPON_PRIMARY, false);
 				int movementPoints = a1->data.critter.combat.ap - attackCost;
