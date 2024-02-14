@@ -49,7 +49,7 @@ typedef enum ScienceRepairTargetType {
 static bool _action_in_explode = false;
 
 // 0x5106D4
-int rotation;
+// int rotation;
 
 // 0x5106E0
 static const int gNormalDeathAnimations[DAMAGE_TYPE_COUNT] = {
@@ -781,7 +781,7 @@ int _action_ranged(Attack *attack, int anim) {
 
 				animationRegisterUnsetFlag(projectile, OBJECT_HIDDEN, delay);
 
-				const char *sfx = sfxBuildWeaponName(WEAPON_SOUND_EFFECT_AMMO_FLYING, weapon, attack->hitMode, attack->defender);
+				sfx = sfxBuildWeaponName(WEAPON_SOUND_EFFECT_AMMO_FLYING, weapon, attack->hitMode, attack->defender);
 				animationRegisterPlaySoundEffect(projectile, sfx, 0);
 
 				int explosionCenterTile;
@@ -828,7 +828,7 @@ int _action_ranged(Attack *attack, int anim) {
 						int explosionFid = buildFid(OBJ_TYPE_MISC, explosionFrmId, 0, 0, 0);
 						animationRegisterSetFid(projectile, explosionFid, -1);
 
-						const char *sfx = sfxBuildWeaponName(WEAPON_SOUND_EFFECT_HIT, weapon, attack->hitMode, attack->defender);
+						sfx = sfxBuildWeaponName(WEAPON_SOUND_EFFECT_HIT, weapon, attack->hitMode, attack->defender);
 						animationRegisterPlaySoundEffect(projectile, sfx, 0);
 
 						// SFALL
@@ -879,7 +879,7 @@ int _action_ranged(Attack *attack, int anim) {
 				}
 
 				if (!l56) {
-					const char *sfx = sfxBuildWeaponName(WEAPON_SOUND_EFFECT_HIT, weapon, attack->hitMode, attack->defender);
+					sfx = sfxBuildWeaponName(WEAPON_SOUND_EFFECT_HIT, weapon, attack->hitMode, attack->defender);
 					animationRegisterPlaySoundEffect(weapon, sfx, delay);
 				}
 
@@ -940,7 +940,7 @@ int _action_ranged(Attack *attack, int anim) {
 			}
 
 			if (!takeOutAnimationRegistered) {
-				int fid = buildFid(OBJ_TYPE_CRITTER, attack->attacker->fid & 0xFFF, ANIM_STAND, 0, attack->attacker->rotation + 1);
+				fid = buildFid(OBJ_TYPE_CRITTER, attack->attacker->fid & 0xFFF, ANIM_STAND, 0, attack->attacker->rotation + 1);
 				animationRegisterSetFid(attack->attacker, fid, -1);
 			}
 		} else {
@@ -1573,7 +1573,6 @@ int actionExplode(int tile, int elevation, int minDamage, int maxDamage, Object 
 
 	Object *adjacentExplosions[ROTATION_COUNT];
 	for (int rotation = 0; rotation < ROTATION_COUNT; rotation++) {
-		int fid = buildFid(OBJ_TYPE_MISC, 10, 0, 0, 0);
 		if (objectCreateWithFidPid(&(adjacentExplosions[rotation]), fid, -1) == -1) {
 			while (--rotation >= 0) {
 				objectDestroy(adjacentExplosions[rotation], nullptr);
@@ -1615,12 +1614,12 @@ int actionExplode(int tile, int elevation, int minDamage, int maxDamage, Object 
 	_compute_explosion_on_extras(attack, 0, 0, 1);
 
 	for (int index = 0; index < attack->extrasLength; index++) {
-		Object *critter = attack->extras[index];
-		if (reg_anim_clear(critter) == -2) {
+		Object *critterExtra = attack->extras[index];
+		if (reg_anim_clear(critterExtra) == -2) {
 			debugPrint("Cannot clear extra's animation for action_explode!\n");
 		}
 
-		attack->extrasDamage[index] = _compute_explosion_damage(minDamage, maxDamage, critter, &(attack->extrasKnockback[index]));
+		attack->extrasDamage[index] = _compute_explosion_damage(minDamage, maxDamage, critterExtra, &(attack->extrasKnockback[index]));
 	}
 
 	attackComputeDeathFlags(attack);
