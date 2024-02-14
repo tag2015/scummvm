@@ -144,11 +144,11 @@ int artInit() {
 
 	const char *language = settings.system.language.c_str();
 	if (compat_stricmp(language, ENGLISH) != 0) {
-		strncpy(gArtLanguage, language, sizeof(gArtLanguage));
+		strncpy(gArtLanguage, language, sizeof(gArtLanguage) - 1);
 		gArtLanguageInitialized = true;
 	}
 
-	bool critterDbSelected = false;
+	// bool critterDbSelected = false;
 	for (int objectType = 0; objectType < OBJ_TYPE_COUNT; objectType++) {
 		gArtListDescriptions[objectType].flags = 0;
 		snprintf(path, sizeof(path), "%s%s%s\\%s.lst", _cd_path_base, "art\\", gArtListDescriptions[objectType].name, gArtListDescriptions[objectType].name);
@@ -684,7 +684,7 @@ static int artReadList(const char *path, char **artListPtr, int *artListSizePtr)
 			*brk = '\0';
 		}
 
-		strncpy(artList, string, 12);
+		(strncpy(artList, string, 12));
 		artList[12] = '\0';
 
 		artList += 13;
@@ -894,7 +894,7 @@ static int artCacheGetFileSizeImpl(int fid, int *sizePtr) {
 
 	char *artFilePath = artBuildFilePath(fid);
 	if (artFilePath != nullptr) {
-		bool loaded = false;
+		// bool loaded = false;
 		File *stream = nullptr;
 
 		if (gArtLanguageInitialized) {
