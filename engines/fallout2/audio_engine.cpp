@@ -406,7 +406,7 @@ bool audioEngineSoundBufferLock(int soundBufferIndex, unsigned int writePos, uns
 			*audioBytes2 = 0;
 		}
 	} else {
-		unsigned int remainder = writePos + writeBytes - soundBuffer->size;
+		// unsigned int remainder = writePos + writeBytes - soundBuffer->size;
 		*(unsigned char **)audioPtr1 = (unsigned char *)soundBuffer->data + writePos;
 		*audioBytes1 = soundBuffer->size - writePos;
 
