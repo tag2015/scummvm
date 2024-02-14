@@ -157,7 +157,7 @@ int strParseStrFromFunc(char **stringPtr, int *valuePtr, StringParserCallback *c
 // 0x4AFF7C
 int strParseIntWithKey(char **stringPtr, const char *key, int *valuePtr, const char *delimeter) {
 	char *str;
-	size_t v1, v2, v3, v4, v5;
+	size_t v1, v2, v3, v4 /*, v5*/;
 	char tmp1, tmp2;
 	int result;
 
@@ -190,7 +190,7 @@ int strParseIntWithKey(char **stringPtr, const char *key, int *valuePtr, const c
 	*(str + v2) = '\0';
 
 	v4 = strcspn(str, delimeter);
-	v5 = v1 + v4;
+	// v5 = v1 + v4;
 
 	tmp2 = *(str + v4);
 	*(str + v4) = '\0';
@@ -214,7 +214,7 @@ int strParseIntWithKey(char **stringPtr, const char *key, int *valuePtr, const c
 // 0x4B005C
 int strParseKeyValue(char **stringPtr, char *key, int *valuePtr, const char *delimiter) {
 	char *str;
-	size_t v1, v2, v3, v4, v5;
+	size_t v1, v2, v3, v4 /*, v5*/;
 	char tmp1, tmp2;
 
 	if (*stringPtr == nullptr) {
@@ -244,12 +244,12 @@ int strParseKeyValue(char **stringPtr, char *key, int *valuePtr, const char *del
 	*(str + v2) = '\0';
 
 	v4 = strcspn(str, delimiter);
-	v5 = v1 + v4;
+	// v5 = v1 + v4;
 
 	tmp2 = *(str + v4);
 	*(str + v4) = '\0';
 
-	strncpy(key, str, strlen(str) + 1);
+	strncpy(key, str, 39);
 
 	*stringPtr = *stringPtr + v3;
 	*valuePtr = atoi(str + v4 + 1);

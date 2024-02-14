@@ -9,8 +9,10 @@ namespace Fallout2 {
 
 // 0x4AA250
 int _compare(const void *a1, const void *a2) {
-	const char *v1 = *(const char **)a1;
-	const char *v2 = *(const char **)a2;
+	void *a1_tmp = const_cast<void *>(a1);
+	const char *v1 = *(static_cast<const char **>(a1_tmp));
+	void *a2_tmp = const_cast<void *>(a2);
+	const char *v2 = *(static_cast<const char **>(a2_tmp));
 	return strcmp(v1, v2);
 }
 
