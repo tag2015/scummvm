@@ -33,7 +33,7 @@
 #include "fallout2/text_object.h"
 #include "fallout2/tile.h"
 #include "fallout2/trait.h"
-// #include "fallout2/vcr.h" TODO vcr
+// #include "fallout2/vcr.h" TODO vc
 
 namespace Fallout2 {
 
@@ -1843,7 +1843,7 @@ int pathfinderFindPath(Object *object, int from, int to, unsigned char *rotation
 			unsigned char *beginning = rotations;
 			unsigned char *ending = rotations + index - 1;
 			int middle = index / 2;
-			for (int index = 0; index < middle; index++) {
+			for (int i = 0; i < middle; i++) {
 				unsigned char rotation = *ending;
 				*ending = *beginning;
 				*beginning = rotation;
@@ -2715,8 +2715,8 @@ void _object_animate() {
 		}
 
 		if (sad->field_20 == 0) {
-			for (int index = 0; index < gAnimationCurrentSad; index++) {
-				AnimationSad *otherSad = &(gAnimationSads[index]);
+			for (int i = 0; i < gAnimationCurrentSad; i++) {
+				AnimationSad *otherSad = &(gAnimationSads[i]);
 				if (object == otherSad->obj && otherSad->field_20 == -2000) {
 					otherSad->field_20 = -1000;
 					_anim_set_continue(otherSad->animationSequenceIndex, 1);
@@ -2822,9 +2822,9 @@ void _object_animate() {
 				int frameY;
 				artGetFrameOffsets(art, object->frame, object->rotation, &frameX, &frameY);
 
-				Rect tempRect;
-				_obj_offset(object, x + frameX, y + frameY, &tempRect);
-				rectUnion(&dirtyRect, &tempRect, &dirtyRect);
+				Rect tempRect2;
+				_obj_offset(object, x + frameX, y + frameY, &tempRect2);
+				rectUnion(&dirtyRect, &tempRect2, &dirtyRect);
 
 				artUnlock(cacheHandle);
 			} else {
@@ -3005,7 +3005,7 @@ void _dude_fidget() {
 	int delayInSeconds;
 	if (candidatesLength != 0) {
 		int index = randomBetween(0, candidatesLength - 1);
-		Object *object = candidates[index];
+		object = candidates[index];
 
 		reg_anim_begin(ANIMATION_REQUEST_UNRESERVED | ANIMATION_REQUEST_INSIGNIFICANT);
 
