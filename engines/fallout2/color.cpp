@@ -456,9 +456,9 @@ static void _buildBlendTable(unsigned char *ptr, unsigned char ch) {
 	int r, g, b;
 	int i, j;
 	int v12, v14, v16;
-	unsigned char *beg;
+	// unsigned char *beg;
 
-	beg = ptr;
+	// beg = ptr;
 
 	r = (Color2RGB(ch) & 0x7C00) >> 10;
 	g = (Color2RGB(ch) & 0x3E0) >> 5;
@@ -563,7 +563,7 @@ void colorSetBrightness(double value) {
 	gBrightness = value;
 
 	for (int i = 0; i < 64; i++) {
-		double value = pow(i, gBrightness);
+		value = pow(i, gBrightness);
 		_currentGammaTable[i] = (unsigned char)clamp(value, 0.0, 63.0);
 	}
 
