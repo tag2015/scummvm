@@ -73,7 +73,7 @@ typedef int (*INITVIDEOFN)();
 static void redrawButton(ManagedButton *managedButton);
 
 // 0x51DCAC
-static int _holdTime = 250;
+// static int _holdTime = 250;
 
 // 0x51DCB0
 static int _checkRegionEnable = 1;
@@ -349,30 +349,30 @@ bool _checkAllRegions() {
 		ManagedWindow *managedWindow = &(gManagedWindows[windowIndex]);
 		if (managedWindow->window != -1 && managedWindow->window == win) {
 			if (_lastWin != -1 && _lastWin != windowIndex && gManagedWindows[_lastWin].window != -1) {
-				ManagedWindow *managedWindow = &(gManagedWindows[_lastWin]);
-				int v1 = managedWindow->field_38;
+				ManagedWindow *managedWin = &(gManagedWindows[_lastWin]);
+				int v1 = managedWin->field_38;
 
-				for (int regionIndex = 0; regionIndex < managedWindow->regionsLength; regionIndex++) {
-					Region *region = managedWindow->regions[regionIndex];
+				for (int regionIndex = 0; regionIndex < managedWin->regionsLength; regionIndex++) {
+					Region *region = managedWin->regions[regionIndex];
 					if (region != nullptr && region->rightProcs[3] != 0) {
 						region->rightProcs[3] = 0;
 						if (region->mouseEventCallback != nullptr) {
 							region->mouseEventCallback(region, region->mouseEventCallbackUserData, 3);
-							if (v1 != managedWindow->field_38) {
+							if (v1 != managedWin->field_38) {
 								return true;
 							}
 						}
 
 						if (region->rightMouseEventCallback != nullptr) {
 							region->rightMouseEventCallback(region, region->rightMouseEventCallbackUserData, 3);
-							if (v1 != managedWindow->field_38) {
+							if (v1 != managedWin->field_38) {
 								return true;
 							}
 						}
 
 						if (region->program != nullptr && region->procs[3] != 0) {
 							_executeProc(region->program, region->procs[3]);
-							if (v1 != managedWindow->field_38) {
+							if (v1 != managedWin->field_38) {
 								return 1;
 							}
 						}
@@ -714,7 +714,7 @@ bool _deleteWindow(const char *windowName) {
 	managedWindow->name[0] = '\0';
 
 	if (managedWindow->buttons != nullptr) {
-		for (int index = 0; index < managedWindow->buttonsLength; index++) {
+		for (index = 0; index < managedWindow->buttonsLength; index++) {
 			ManagedButton *button = &(managedWindow->buttons[index]);
 			if (button->hover != nullptr) {
 				internal_free_safe(button->hover, __FILE__, __LINE__); // "..\\int\\WINDOW.C", 802
@@ -737,7 +737,7 @@ bool _deleteWindow(const char *windowName) {
 	}
 
 	if (managedWindow->regions != nullptr) {
-		for (int index = 0; index < managedWindow->regionsLength; index++) {
+		for (index = 0; index < managedWindow->regionsLength; index++) {
 			Region *region = managedWindow->regions[index];
 			if (region != nullptr) {
 				regionDelete(region);
@@ -1261,8 +1261,8 @@ void _removeProgramReferences_3(Program *program) {
 	for (int index = 0; index < MANAGED_WINDOW_COUNT; index++) {
 		ManagedWindow *managedWindow = &(gManagedWindows[index]);
 		if (managedWindow->window != -1) {
-			for (int index = 0; index < managedWindow->buttonsLength; index++) {
-				ManagedButton *managedButton = &(managedWindow->buttons[index]);
+			for (int i = 0; i < managedWindow->buttonsLength; i++) {
+				ManagedButton *managedButton = &(managedWindow->buttons[i]);
 				if (program == managedButton->program) {
 					managedButton->program = nullptr;
 					managedButton->procs[MANAGED_BUTTON_MOUSE_EVENT_ENTER] = 0;
@@ -1272,8 +1272,8 @@ void _removeProgramReferences_3(Program *program) {
 				}
 			}
 
-			for (int index = 0; index < managedWindow->regionsLength; index++) {
-				Region *region = managedWindow->regions[index];
+			for (int i = 0; i < managedWindow->regionsLength; i++) {
+				Region *region = managedWindow->regions[i];
 				if (region != nullptr) {
 					if (program == region->program) {
 						region->program = nullptr;
@@ -1307,7 +1307,7 @@ void _initWindow(int resolution, int a2) {
 	_currentHighlightColorB = 0;
 	_xres = _sizes_x[resolution].width; // screen width
 
-	for (int i = 0; i < MANAGED_WINDOW_COUNT; i++) {
+	for (i = 0; i < MANAGED_WINDOW_COUNT; i++) {
 		gManagedWindows[i].window = -1;
 	}
 
