@@ -965,9 +965,9 @@ void premadeCharactersInit() {
 		gCustomPremadeCharacterDescriptions.resize(PREMADE_CHARACTER_COUNT);
 
 		for (int index = 0; index < PREMADE_CHARACTER_COUNT; index++) {
-			strncpy(gCustomPremadeCharacterDescriptions[index].fileName, gPremadeCharacterDescriptions[index].fileName, 19);
+			(strncpy(gCustomPremadeCharacterDescriptions[index].fileName, gPremadeCharacterDescriptions[index].fileName, 20));
 			gCustomPremadeCharacterDescriptions[index].face = gPremadeCharacterDescriptions[index].face;
-			strncpy(gCustomPremadeCharacterDescriptions[index].field_18, gPremadeCharacterDescriptions[index].field_18, 19);
+			(strncpy(gCustomPremadeCharacterDescriptions[index].field_18, gPremadeCharacterDescriptions[index].field_18, 20));
 		}
 	}
 
@@ -990,12 +990,13 @@ static void premadeCharactersLocalizePath(char *path) {
 
 	char localizedPath[COMPAT_MAX_PATH];
 	strncpy(localizedPath, path, 8);
-	strncpy(localizedPath + 8, language, sizeof(localizedPath) - 1);
-	strncpy(localizedPath + 8 + strlen(language), path + 7, sizeof(localizedPath) - 1);
+	strncpy(localizedPath + 8, language, COMPAT_MAX_PATH - 9);
+	strncpy(localizedPath + 8 + strlen(language), path + 7, COMPAT_MAX_PATH - 9 - strlen(language));
+	localizedPath[COMPAT_MAX_PATH - 1] = '\0';
 
 	int fileSize;
 	if (dbGetFileSize(localizedPath, &fileSize) == 0) {
-		strncpy(path, localizedPath, COMPAT_MAX_PATH - 1);
+		strncpy(path, localizedPath, COMPAT_MAX_PATH);
 	}
 }
 
