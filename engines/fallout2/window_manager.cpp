@@ -33,7 +33,7 @@ namespace Fallout2 {
 #define BUTTON_GROUP_LIST_CAPACITY (64)
 
 static void windowFree(int win);
-static void _win_buffering(bool a1);
+// static void _win_buffering(bool a1);
 static void _win_move(int win_index, int x, int y);
 static void _win_clip(Window *window, RectListNode **rect, unsigned char *a3);
 static void win_drag(int win);
@@ -474,11 +474,13 @@ void windowFree(int win) {
 }
 
 // 0x4D6558
+/*
 void _win_buffering(bool a1) {
 	if (_screen_buffer != nullptr) {
 		_buffering = a1;
 	}
 }
+*/
 
 // 0x4D6568
 void windowDrawBorder(int win) {
@@ -964,14 +966,14 @@ void _win_clip(Window *window, RectListNode **rectListNodePtr, unsigned char *a3
 			break;
 		}
 
-		Window *window = gWindows[index];
-		if (!(window->flags & WINDOW_HIDDEN)) {
-			if (!_buffering || !(window->flags & WINDOW_TRANSPARENT)) {
-				_rect_clip_list(rectListNodePtr, &(window->rect));
+		Window *win = gWindows[index];
+		if (!(win->flags & WINDOW_HIDDEN)) {
+			if (!_buffering || !(win->flags & WINDOW_TRANSPARENT)) {
+				_rect_clip_list(rectListNodePtr, &(win->rect));
 			} else {
 				if (!_doing_refresh_all) {
-					_GNW_win_refresh(window, &(window->rect), nullptr);
-					_rect_clip_list(rectListNodePtr, &(window->rect));
+					_GNW_win_refresh(win, &(win->rect), nullptr);
+					_rect_clip_list(rectListNodePtr, &(win->rect));
 				}
 			}
 		}
@@ -2387,7 +2389,7 @@ int _button_check_group(Button *button) {
 				if ((v1->flags & BUTTON_FLAG_CHECKED) != 0) {
 					v1->flags &= ~BUTTON_FLAG_CHECKED;
 
-					Window *window;
+					Window *window = nullptr;
 					buttonGetButton(v1->id, &window);
 					_button_draw(v1, window, v1->normalImage, true, nullptr, true);
 
