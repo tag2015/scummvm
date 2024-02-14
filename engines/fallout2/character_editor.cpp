@@ -250,7 +250,7 @@ static int characterEditorEditAge();
 static void characterEditorEditGender();
 static void characterEditorAdjustPrimaryStat(int eventCode);
 static int characterEditorShowOptions();
-static bool characterFileExists(const char *fname);
+// static bool characterFileExists(const char *fname);
 static int characterPrintToFile(const char *fileName);
 static char *_AddSpaces(char *string, int length);
 static char *_AddDots(char *string, int length);
@@ -1954,7 +1954,7 @@ static int _get_input_str(int win, int cancelKeyCode, char *text, int maxLength,
 				nameLength--;
 
 				windowRefresh(win);
-			} else if ((keyCode >= KEY_FIRST_INPUT_CHARACTER && keyCode <= KEY_LAST_INPUT_CHARACTER) && nameLength < maxLength) {
+			} else if ((keyCode >= KEY_FIRST_INPUT_CHARACTER && keyCode <= KEY_LAST_INPUT_CHARACTER) && (int)nameLength < maxLength) {
 				if ((flags & 0x01) != 0) {
 					if (!_isdoschar(keyCode)) {
 						break;
@@ -1995,7 +1995,8 @@ static int _get_input_str(int win, int cancelKeyCode, char *text, int maxLength,
 
 	if (rc == 0 || nameLength > 0) {
 		copy[nameLength] = '\0';
-		strncpy(text, copy, 63);
+		(strncpy(text, copy, 63));
+		text[63] = '\0';
 	}
 
 	return rc;
@@ -3240,7 +3241,7 @@ static int characterEditorEditName() {
 	// NOTE: I don't understand the nameCopy, not sure what it is used for. It's
 	// definitely there, but I just don' get it.
 	char nameCopy[64];
-	strncpy(nameCopy, name, sizeof(nameCopy) - 1);
+	strncpy(nameCopy, name, sizeof(nameCopy));
 
 	if (_get_input_str(win, 500, nameCopy, 11, 23, 19, _colorTable[992], 100, 0) != -1) {
 		if (nameCopy[0] != '\0') {
@@ -3263,7 +3264,7 @@ static int characterEditorEditName() {
 
 	_PrintName(windowBuf, _editorFrmImages[EDITOR_GRAPHIC_CHARWIN].getWidth());
 
-	strncpy(nameCopy, name, sizeof(nameCopy) - 1);
+	strncpy(nameCopy, name, 64);
 
 	windowDestroy(win);
 
@@ -3880,8 +3881,8 @@ static int characterEditorShowOptions() {
 					skillsGetTagged(gCharacterEditorTempTaggedSkills, NUM_TAGGED_SKILLS);
 
 					int taggedSkillCount = 0;
-					for (int index = 3; index >= 0; index--) {
-						if (gCharacterEditorTempTaggedSkills[index] != -1) {
+					for (int i = 3; i >= 0; i--) {
+						if (gCharacterEditorTempTaggedSkills[i] != -1) {
 							break;
 						}
 						taggedSkillCount++;
@@ -3896,8 +3897,8 @@ static int characterEditorShowOptions() {
 					traitsGetSelected(&gCharacterEditorTempTraits[0], &gCharacterEditorTempTraits[1]);
 
 					int traitCount = 0;
-					for (int index = 1; index >= 0; index--) {
-						if (gCharacterEditorTempTraits[index] != -1) {
+					for (int i = 1; i >= 0; i--) {
+						if (gCharacterEditorTempTraits[i] != -1) {
 							break;
 						}
 						traitCount++;
@@ -4004,7 +4005,7 @@ static int characterEditorShowOptions() {
 				int fileNameListLength = 1; //fileNameListInit(string4, &fileNameList, 0, 0);
 				if (fileNameListLength != -1) {
 					// NOTE: This value is not copied as in save dialog.
-					char *title = getmsg(&gCharacterEditorMessageList, &gCharacterEditorMessageListItem, 601);
+					/* char *title = getmsg(&gCharacterEditorMessageList, &gCharacterEditorMessageListItem, 601); */
 					int loadFileDialogRc = 0; /*showLoadFileDialog(title, fileNameList, string3, fileNameListLength, 168, 80, 0);*/
 					if (loadFileDialogRc == -1) {
 						fileNameListFree(&fileNameList, 0);
@@ -4031,8 +4032,8 @@ static int characterEditorShowOptions() {
 							skillsGetTagged(gCharacterEditorTempTaggedSkills, 4);
 
 							int taggedSkillCount = 0;
-							for (int index = 3; index >= 0; index--) {
-								if (gCharacterEditorTempTaggedSkills[index] != -1) {
+							for (int i = 3; i >= 0; i--) {
+								if (gCharacterEditorTempTaggedSkills[i] != -1) {
 									break;
 								}
 								taggedSkillCount++;
@@ -4047,8 +4048,8 @@ static int characterEditorShowOptions() {
 							traitsGetSelected(&(gCharacterEditorTempTraits[0]), &(gCharacterEditorTempTraits[1]));
 
 							int traitCount = 0;
-							for (int index = 1; index >= 0; index--) {
-								if (gCharacterEditorTempTraits[index] != -1) {
+							for (int i = 1; i >= 0; i--) {
+								if (gCharacterEditorTempTraits[i] != -1) {
 									break;
 								}
 								traitCount++;
@@ -4265,6 +4266,7 @@ static int characterEditorShowOptions() {
 }
 
 // 0x4390B4
+/*
 static bool characterFileExists(const char *fname) {
 	File *stream = fileOpen(fname, "rb");
 	if (stream == nullptr) {
@@ -4274,6 +4276,7 @@ static bool characterFileExists(const char *fname) {
 	fileClose(stream);
 	return true;
 }
+*/
 
 // 0x4390D0
 static int characterPrintToFile(const char *fileName) {
@@ -4566,7 +4569,7 @@ static int characterPrintToFile(const char *fileName) {
 
 	bool hasTownReputationHeading = false;
 	// SFALL
-	for (int index = 0; index < gCustomTownReputationEntries.size(); index++) {
+	for (uint index = 0; index < gCustomTownReputationEntries.size(); index++) {
 		const TownReputationEntry *pair = &(gCustomTownReputationEntries[index]);
 		if (wmAreaIsKnown(pair->city)) {
 			if (!hasTownReputationHeading) {
@@ -4814,7 +4817,7 @@ static void characterEditorSavePlayer() {
 
 	gCharacterEditorHitPointsBackup = critterGetHitPoints(gDude);
 
-	strncpy(gCharacterEditorNameBackup, critterGetName(gDude), 32);
+	strncpy(gCharacterEditorNameBackup, critterGetName(gDude), 31);
 
 	gCharacterEditorLastLevelBackup = gCharacterEditorLastLevel;
 	for (int perk = 0; perk < PERK_COUNT; perk++) {
@@ -5272,8 +5275,8 @@ static void characterEditorHandleAdjustSkillButtonPressed(int keyCode) {
 				delay_ms(1000 / 24 - (getTicks() - _frame_time));
 			}
 
-			int keyCode = inputGetInput();
-			if (keyCode != 522 && keyCode != 524 && rc != -1) {
+			int key = inputGetInput();
+			if (key != 522 && key != 524 && rc != -1) {
 				renderPresent();
 				sharedFpsLimiter.throttle();
 				continue;
@@ -5541,7 +5544,7 @@ static void characterEditorDrawKarmaFolder() {
 
 	bool hasTownReputationHeading = false;
 	// SFALL
-	for (int index = 0; index < gCustomTownReputationEntries.size(); index++) {
+	for (uint index = 0; index < gCustomTownReputationEntries.size(); index++) {
 		const TownReputationEntry *pair = &(gCustomTownReputationEntries[index]);
 		if (wmAreaIsKnown(pair->city)) {
 			if (!hasTownReputationHeading) {
@@ -5975,13 +5978,13 @@ static int perkDialogShow() {
 static int perkDialogHandleInput(int count, void (*refreshProc)()) {
 	fontSetCurrent(101);
 
-	int v3 = count - 11;
+	// int v3 = count - 11;
 
 	int height = fontGetLineHeight();
 	gPerkDialogPreviousCurrentLine = -2;
 	int v16 = height + 2;
 
-	int v7 = 0;
+	// int v7 = 0;
 
 	int rc = 0;
 	while (rc == 0) {
@@ -6599,8 +6602,8 @@ static int perkDialogDrawTraits(int a1) {
 
 // 0x43DB48
 static int perkDialogOptionCompare(const void *a1, const void *a2) {
-	PerkDialogOption *v1 = (PerkDialogOption *)a1;
-	PerkDialogOption *v2 = (PerkDialogOption *)a2;
+	PerkDialogOption *v1 = const_cast<PerkDialogOption *>(static_cast<const PerkDialogOption *>(a1));
+	PerkDialogOption *v2 = const_cast<PerkDialogOption *>(static_cast<const PerkDialogOption *>(a2));
 	return strcmp(v1->name, v2->name);
 }
 
@@ -7045,8 +7048,8 @@ static void karmaFree() {
 
 // 0x43E78C
 static int karmaEntryCompare(const void *a1, const void *a2) {
-	KarmaEntry *v1 = (KarmaEntry *)a1;
-	KarmaEntry *v2 = (KarmaEntry *)a2;
+	KarmaEntry *v1 = const_cast<KarmaEntry *>(static_cast<const KarmaEntry *>(a1));
+	KarmaEntry *v2 = const_cast<KarmaEntry *>(static_cast<const KarmaEntry *>(a2));
 	return v1->gvar - v2->gvar;
 }
 
@@ -7127,8 +7130,8 @@ static void genericReputationFree() {
 
 // 0x43E93C
 static int genericReputationCompare(const void *a1, const void *a2) {
-	GenericReputationEntry *v1 = (GenericReputationEntry *)a1;
-	GenericReputationEntry *v2 = (GenericReputationEntry *)a2;
+	GenericReputationEntry *v1 = const_cast<GenericReputationEntry *>(static_cast<const GenericReputationEntry *>(a1));
+	GenericReputationEntry *v2 = const_cast<GenericReputationEntry *>(static_cast<const GenericReputationEntry *>(a2));
 
 	if (v2->threshold > v1->threshold) {
 		return 1;
