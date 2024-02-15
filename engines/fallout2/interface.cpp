@@ -1630,7 +1630,7 @@ static int interfaceBarRefreshMainAction() {
 			if (hitMode != -1) {
 				actionPoints = weaponGetActionPointCost(gDude, hitMode, bullseyeFid != -1);
 
-				int id;
+				int id = 0;
 				int anim = critterGetAnimationForHitMode(gDude, hitMode);
 				switch (anim) {
 				case ANIM_THROW_PUNCH:
@@ -1743,18 +1743,18 @@ static int interfaceBarRefreshMainAction() {
 			// movement point numbers - ten numbers 0 to 9, each 10 pixels wide.
 			int apNumbersFid = buildFid(OBJ_TYPE_INTERFACE, 290, 0, 0, 0);
 			if (apNumbersFrmImage.lock(apNumbersFid)) {
-				int width = apNumbersFrmImage.getWidth();
-				int height = apNumbersFrmImage.getHeight();
-				unsigned char *data = apNumbersFrmImage.getData();
+				width = apNumbersFrmImage.getWidth();
+				height = apNumbersFrmImage.getHeight();
+				unsigned char *data2 = apNumbersFrmImage.getData();
 
-				blitBufferToBufferTrans(data + actionPoints * 10, 10, height, width, _itemButtonUp + 188 * (60 - height) + 7 + offset, 188);
+				blitBufferToBufferTrans(data2 + actionPoints * 10, 10, height, width, _itemButtonUp + 188 * (60 - height) + 7 + offset, 188);
 
 				int v40 = 60 - height - 2;
 				if (v40 < 0) {
 					v40 = 0;
 					height -= 2;
 				}
-				_dark_trans_buf_to_buf(data + actionPoints * 10, 10, height, width, _itemButtonDown, offset + 7 + 1, v40, 188, 59641);
+				_dark_trans_buf_to_buf(data2 + actionPoints * 10, 10, height, width, _itemButtonDown, offset + 7 + 1, v40, 188, 59641);
 			}
 		}
 	} else {
@@ -2362,8 +2362,8 @@ int indicatorBarRefresh() {
 
 // 0x461624
 static int indicatorBoxCompareByPosition(const void *a, const void *b) {
-	int indicatorBox1 = *(int *)a;
-	int indicatorBox2 = *(int *)b;
+	int indicatorBox1 = *(const_cast<int *>(static_cast<const int *>(a)));
+	int indicatorBox2 = *(const_cast<int *>(static_cast<const int *>(b)));
 
 	if (indicatorBox1 == indicatorBox2) {
 		return 0;
