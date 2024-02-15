@@ -1310,7 +1310,7 @@ int gameDialogReviewWindowInit(int *win) {
 
 	int index;
 	for (index = 0; index < GAME_DIALOG_REVIEW_WINDOW_BUTTON_FRM_COUNT; index++) {
-		int fid = buildFid(OBJ_TYPE_INTERFACE, gGameDialogReviewWindowButtonFrmIds[index], 0, 0, 0);
+		fid = buildFid(OBJ_TYPE_INTERFACE, gGameDialogReviewWindowButtonFrmIds[index], 0, 0, 0);
 		if (!_reviewFrmImages[index].lock(fid)) {
 			break;
 		}
@@ -1635,7 +1635,7 @@ int gameDialogAddReviewText(const char *string) {
 	}
 
 	entry->replyText = (char *)internal_malloc(strlen(string) + 1);
-	strncpy(entry->replyText, string, strlen(string));
+	memcpy(entry->replyText, string, strlen(string) + 1);
 
 	entry->optionMessageListId = -3;
 	entry->optionMessageId = -3;
@@ -1673,7 +1673,7 @@ int gameDialogSetReviewOptionText(const char *string) {
 	entry->optionMessageId = -4;
 
 	entry->optionText = (char *)internal_malloc(strlen(string) + 1);
-	strncpy(entry->optionText, string, strlen(string));
+	memcpy(entry->optionText, string, strlen(string) + 1);
 
 	return 0;
 }
@@ -3868,7 +3868,7 @@ void partyMemberCustomizationWindowHandleEvents() {
 	while (!done) {
 		sharedFpsLimiter.mark();
 
-		unsigned int keyCode = inputGetInput();
+		int keyCode = inputGetInput();
 		if (keyCode != -1) {
 			if (keyCode == KEY_CTRL_Q || keyCode == KEY_CTRL_X || keyCode == KEY_F10) {
 				showQuitConfirmationDialog();
