@@ -35,16 +35,16 @@ static int _checkWait(Program *program);
 static char *programGetCurrentProcedureName(Program *s);
 static opcode_t stackReadInt16(unsigned char *data, int pos);
 static int stackReadInt32(unsigned char *data, int pos);
-static void stackWriteInt16(int value, unsigned char *data, int pos);
+// static void stackWriteInt16(int value, unsigned char *data, int pos);
 static void stackWriteInt32(int value, unsigned char *data, int pos);
-static void stackPushInt16(unsigned char *data, int *pointer, int value);
-static void stackPushInt32(unsigned char *data, int *pointer, int value);
-static int stackPopInt32(unsigned char *data, int *pointer);
-static opcode_t stackPopInt16(unsigned char *data, int *pointer);
+// static void stackPushInt16(unsigned char *data, int *pointer, int value);
+// static void stackPushInt32(unsigned char *data, int *pointer, int value);
+// static int stackPopInt32(unsigned char *data, int *pointer);
+// static opcode_t stackPopInt16(unsigned char *data, int *pointer);
 static void _interpretIncStringRef(Program *program, opcode_t opcode, int value);
-static void programReturnStackPushInt16(Program *program, int value);
-static opcode_t programReturnStackPopInt16(Program *program);
-static int programReturnStackPopInt32(Program *program);
+// static void programReturnStackPushInt16(Program *program, int value);
+// static opcode_t programReturnStackPopInt16(Program *program);
+// static int programReturnStackPopInt32(Program *program);
 static void _detachProgram(Program *program);
 static void _purgeProgram(Program *program);
 static opcode_t _getOp(Program *program);
@@ -130,7 +130,7 @@ static void _setupExternalCallWithReturnVal(Program *program1, Program *program2
 static void _setupExternalCall(Program *program1, Program *program2, int address, int a4);
 static void _doEvents();
 static void programListNodeFree(ProgramListNode *programListNode);
-static void interpreterPrintStats();
+// static void interpreterPrintStats();
 
 // 0x50942C
 static char _aCouldnTFindPro[] = "<couldn't find proc>";
@@ -285,11 +285,13 @@ static int stackReadInt32(unsigned char *data, int pos) {
 	return value;
 }
 
+#if 0
 // 0x4672D4
 static void stackWriteInt16(int value, unsigned char *stack, int pos) {
 	stack[pos++] = (value >> 8) & 0xFF;
 	stack[pos] = value & 0xFF;
 }
+#endif
 
 // NOTE: Inlined.
 //
@@ -301,6 +303,7 @@ static void stackWriteInt32(int value, unsigned char *stack, int pos) {
 	stack[pos] = value & 0xFF;
 }
 
+#if 0
 // pushShortStack
 // 0x467324
 static void stackPushInt16(unsigned char *data, int *pointer, int value) {
@@ -353,6 +356,7 @@ static opcode_t stackPopInt16(unsigned char *data, int *pointer) {
 	// NOTE: uninline
 	return stackReadInt16(data, *pointer);
 }
+#endif
 
 // NOTE: Inlined.
 //
@@ -677,7 +681,7 @@ static void opPopBase(Program *program) {
 
 // 0x467D94
 static void opPopToBase(Program *program) {
-	while (program->stackValues->size() != program->framePointer) {
+	while ((int)program->stackValues->size() != program->framePointer) {
 		programStackPopValue(program);
 	}
 }
@@ -2952,6 +2956,7 @@ void interpreterRegisterOpcode(int opcode, OpcodeHandler *handler) {
 	gInterpreterOpcodeHandlers[index] = handler;
 }
 
+#if 0
 // 0x46E5EC
 static void interpreterPrintStats() {
 	ProgramListNode *programListNode = gInterpreterProgramListHead;
@@ -2987,6 +2992,7 @@ static void interpreterPrintStats() {
 		programListNode = programListNode->next;
 	}
 }
+#endif
 
 void programStackPushValue(Program *program, ProgramValue &programValue) {
 	if (program->stackValues->size() > 0x1000) {
