@@ -242,7 +242,7 @@ typedef enum InventoryMoveResult {
 	INVENTORY_MOVE_RESULT_FAILED,
 	INVENTORY_MOVE_RESULT_CAUGHT_STEALING,
 	INVENTORY_MOVE_RESULT_SUCCESS,
-};
+} InventoryMoveResult;
 
 static int inventoryMessageListInit();
 static int inventoryMessageListFree();
@@ -1751,7 +1751,7 @@ static void _display_inventory(int a1, int a2, int inventoryWindowType) {
 		int backgroundFid = buildFid(OBJ_TYPE_INTERFACE, 114, 0, 0, 0);
 		if (backgroundFrm.lock(backgroundFid)) {
 			int x = INVENTORY_LOOT_LEFT_SCROLLER_X;
-			int y = INVENTORY_LOOT_LEFT_SCROLLER_Y + gInventorySlotsCount * INVENTORY_SLOT_HEIGHT + 2;
+			y = INVENTORY_LOOT_LEFT_SCROLLER_Y + gInventorySlotsCount * INVENTORY_SLOT_HEIGHT + 2;
 			blitBufferToBuffer(backgroundFrm.getData() + pitch * y + x, INVENTORY_SLOT_WIDTH, fontGetLineHeight(), pitch, windowBuffer + pitch * y + x, pitch);
 		}
 
@@ -1773,7 +1773,7 @@ static void _display_inventory(int a1, int a2, int inventoryWindowType) {
 
 		int width = fontGetStringWidth(formattedText);
 		int x = INVENTORY_LOOT_LEFT_SCROLLER_X + INVENTORY_SLOT_WIDTH / 2 - width / 2;
-		int y = INVENTORY_LOOT_LEFT_SCROLLER_Y + INVENTORY_SLOT_HEIGHT * gInventorySlotsCount + 2;
+		y = INVENTORY_LOOT_LEFT_SCROLLER_Y + INVENTORY_SLOT_HEIGHT * gInventorySlotsCount + 2;
 		fontDrawText(windowBuffer + pitch * y + x, formattedText, width, pitch, color);
 
 		fontSetCurrent(oldFont);
@@ -1821,7 +1821,7 @@ static void _display_target_inventory(int a1, int a2, Inventory *inventory, int 
 			break;
 		}
 
-		int offset;
+		int offset = 0;
 		if (inventoryWindowType == INVENTORY_WINDOW_TYPE_LOOT) {
 			offset = pitch * (y + INVENTORY_LOOT_RIGHT_SCROLLER_Y_PAD) + INVENTORY_LOOT_RIGHT_SCROLLER_X_PAD;
 		} else if (inventoryWindowType == INVENTORY_WINDOW_TYPE_TRADE) {
@@ -1868,7 +1868,7 @@ static void _display_target_inventory(int a1, int a2, Inventory *inventory, int 
 		int backgroundFid = buildFid(OBJ_TYPE_INTERFACE, 114, 0, 0, 0);
 		if (backgroundFrmImage.lock(backgroundFid)) {
 			int x = INVENTORY_LOOT_RIGHT_SCROLLER_X;
-			int y = INVENTORY_LOOT_RIGHT_SCROLLER_Y + INVENTORY_SLOT_HEIGHT * gInventorySlotsCount + 2;
+			y = INVENTORY_LOOT_RIGHT_SCROLLER_Y + INVENTORY_SLOT_HEIGHT * gInventorySlotsCount + 2;
 			blitBufferToBuffer(backgroundFrmImage.getData() + pitch * y + x,
 							   INVENTORY_SLOT_WIDTH,
 							   fontGetLineHeight(),
@@ -1901,7 +1901,7 @@ static void _display_target_inventory(int a1, int a2, Inventory *inventory, int 
 
 		int width = fontGetStringWidth(formattedText);
 		int x = INVENTORY_LOOT_RIGHT_SCROLLER_X + INVENTORY_SLOT_WIDTH / 2 - width / 2;
-		int y = INVENTORY_LOOT_RIGHT_SCROLLER_Y + INVENTORY_SLOT_HEIGHT * gInventorySlotsCount + 2;
+		y = INVENTORY_LOOT_RIGHT_SCROLLER_Y + INVENTORY_SLOT_HEIGHT * gInventorySlotsCount + 2;
 		fontDrawText(windowBuffer + pitch * y + x, formattedText, width, pitch, color);
 
 		fontSetCurrent(oldFont);
@@ -1985,7 +1985,7 @@ static void _display_body(int fid, int inventoryWindowType) {
 	};
 
 	for (int index = 0; index < 2; index += 1) {
-		int fid = fids[index];
+		fid = fids[index];
 		if (fid == -1) {
 			continue;
 		}
@@ -3337,11 +3337,11 @@ int _invenWieldFunc(Object *critter, Object *item, int a3, bool a4) {
 				if (weaponAnimationCode != 0) {
 					animationRegisterTakeOutWeapon(critter, weaponAnimationCode, -1);
 				} else {
-					int fid = buildFid(OBJ_TYPE_CRITTER, critter->fid & 0xFFF, 0, 0, critter->rotation + 1);
+					fid = buildFid(OBJ_TYPE_CRITTER, critter->fid & 0xFFF, 0, 0, critter->rotation + 1);
 					animationRegisterSetFid(critter, fid, -1);
 				}
 			} else {
-				int fid = buildFid(OBJ_TYPE_CRITTER, critter->fid & 0xFFF, 0, weaponAnimationCode, critter->rotation + 1);
+				fid = buildFid(OBJ_TYPE_CRITTER, critter->fid & 0xFFF, 0, weaponAnimationCode, critter->rotation + 1);
 				_dude_stand(critter, critter->rotation, fid);
 			}
 		}
@@ -3801,12 +3801,12 @@ static void inventoryWindowOpenContextMenu(int keyCode, int inventoryWindowType)
 			_display_body(-1, INVENTORY_WINDOW_TYPE_NORMAL);
 		}
 
-		int x;
-		int y;
-		mouseGetPosition(&x, &y);
-		if (y - previousMouseY > 10 || previousMouseY - y > 10) {
-			if (y >= previousMouseY || menuItemIndex <= 0) {
-				if (previousMouseY < y && menuItemIndex < actionMenuItemsLength - 1) {
+		int currentMouseX;
+		int currentMouseY;
+		mouseGetPosition(&currentMouseX, &currentMouseY);
+		if (currentMouseY - previousMouseY > 10 || previousMouseY - currentMouseY > 10) {
+			if (currentMouseY >= previousMouseY || menuItemIndex <= 0) {
+				if (previousMouseY < currentMouseY && menuItemIndex < actionMenuItemsLength - 1) {
 					menuItemIndex++;
 				}
 			} else {
@@ -3814,7 +3814,7 @@ static void inventoryWindowOpenContextMenu(int keyCode, int inventoryWindowType)
 			}
 			gameMouseHighlightActionMenuItemAtIndex(menuItemIndex);
 			windowRefreshRect(gInventoryWindow, &rect);
-			previousMouseY = y;
+			previousMouseY = currentMouseY;
 		}
 
 		renderPresent();
@@ -3964,8 +3964,8 @@ static void inventoryWindowOpenContextMenu(int keyCode, int inventoryWindowType)
 				break;
 			}
 
-			Rect rect;
-			_obj_disconnect(ammo, &rect);
+			Rect rect2;
+			_obj_disconnect(ammo, &rect2);
 			itemAdd(v41, ammo, 1);
 		}
 
@@ -5021,7 +5021,7 @@ void inventoryOpenTrade(int win, Object *barterer, Object *playerTable, Object *
 
 	inventorySetCursor(INVENTORY_WINDOW_CURSOR_HAND);
 
-	int modifier;
+	int modifier = 0;
 	int npcReactionValue = reactionGetValue(barterer);
 	int npcReactionType = reactionTranslateValue(npcReactionValue);
 	switch (npcReactionType) {
