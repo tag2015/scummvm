@@ -610,10 +610,11 @@ static void opRollVsSkill(Program *program) {
 // skill_contest
 // 0x4547D4
 static void opSkillContest(Program *program) {
-	int data[3];
+	// int data[3];
 
 	for (int arg = 0; arg < 3; arg++) {
-		data[arg] = programStackPopInteger(program);
+		/* data[arg] = */
+		programStackPopInteger(program);
 	}
 
 	scriptPredefinedError(program, "skill_contest", SCRIPT_ERROR_NOT_IMPLEMENTED);
@@ -700,7 +701,8 @@ static void opCritical(Program *program) {
 // how_much
 // 0x454AD0
 static void opHowMuch(Program *program) {
-	int data = programStackPopInteger(program);
+	/* int data = */
+	programStackPopInteger(program);
 
 	int result = 0;
 
@@ -741,10 +743,11 @@ static void opMarkAreaKnown(Program *program) {
 // reaction_influence
 // 0x454C34
 static void opReactionInfluence(Program *program) {
-	int data[3];
+	// int data[3];
 
 	for (int arg = 0; arg < 3; arg++) {
-		data[arg] = programStackPopInteger(program);
+		/* data[arg] = */
+		programStackPopInteger(program);
 	}
 
 	int result = _reaction_influence_();
@@ -773,10 +776,11 @@ static void opRandom(Program *program) {
 // roll_dice
 // 0x454D88
 static void opRollDice(Program *program) {
-	int data[2];
+	// int data[2];
 
 	for (int arg = 0; arg < 2; arg++) {
-		data[arg] = programStackPopInteger(program);
+		/* data[arg] = */
+		programStackPopInteger(program);
 	}
 
 	scriptPredefinedError(program, "roll_dice", SCRIPT_ERROR_NOT_IMPLEMENTED);
@@ -2115,7 +2119,8 @@ static void opWorldmapCitySetPos(Program *program) {
 // set_exit_grids
 // 0x457730
 static void opSetExitGrids(Program *program) {
-	int destinationRotation = programStackPopInteger(program);
+	/* int destinationRotation = */
+	programStackPopInteger(program);
 	int destinationTile = programStackPopInteger(program);
 	int destinationElevation = programStackPopInteger(program);
 	int destinationMap = programStackPopInteger(program);
@@ -2178,20 +2183,18 @@ static void opSetLightLevel(Program *program) {
 		LIGHT_INTENSITY_MAX,
 	};
 
-	int data = programStackPopInteger(program);
+	int lightLevel = programStackPopInteger(program);
 
-	int lightLevel = data;
-
-	if (data == 50) {
+	if (lightLevel == 50) {
 		lightSetAmbientIntensity(intensities[1], true);
 		return;
 	}
 
 	int lightIntensity;
-	if (data > 50) {
-		lightIntensity = intensities[1] + data * (intensities[2] - intensities[1]) / 100;
+	if (lightLevel > 50) {
+		lightIntensity = intensities[1] + lightLevel * (intensities[2] - intensities[1]) / 100;
 	} else {
-		lightIntensity = intensities[0] + data * (intensities[1] - intensities[0]) / 100;
+		lightIntensity = intensities[0] + lightLevel * (intensities[1] - intensities[0]) / 100;
 	}
 
 	lightSetAmbientIntensity(lightIntensity, true);
@@ -2358,7 +2361,7 @@ static void opKillCritterType(Program *program) {
 						critterKill(obj, anim, true);
 
 						ftIndex += 1;
-						if (ftIndex >= (sizeof(ftList) / sizeof(ftList[0]))) {
+						if (ftIndex >= (int)((sizeof(ftList) / sizeof(ftList[0])))) {
 							ftIndex = 0;
 						}
 					} else if (deathFrame >= FIRST_SF_DEATH_ANIM && deathFrame <= LAST_SF_DEATH_ANIM) {
@@ -2835,7 +2838,8 @@ static void opCritterAddTrait(Program *program) {
 // critter_rm_trait
 // 0x458C2C
 static void opCritterRemoveTrait(Program *program) {
-	int value = programStackPopInteger(program);
+	/* int value = */
+	programStackPopInteger(program);
 	int param = programStackPopInteger(program);
 	int kind = programStackPopInteger(program);
 	Object *object = static_cast<Object *>(programStackPopPointer(program));
@@ -3709,7 +3713,8 @@ static void _op_gsay_option(Program *program) {
 static void _op_gsay_message(Program *program) {
 	program->flags |= PROGRAM_FLAG_0x20;
 
-	int reaction = programStackPopInteger(program);
+	/*int reaction = */
+	programStackPopInteger(program);
 	ProgramValue msg = programStackPopValue(program);
 	int messageListId = programStackPopInteger(program);
 
