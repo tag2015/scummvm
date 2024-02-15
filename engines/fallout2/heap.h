@@ -4,7 +4,7 @@
 namespace Fallout2 {
 
 typedef struct HeapHandle {
-	unsigned int state;
+	int state;
 	unsigned char *data;
 } HeapHandle;
 
