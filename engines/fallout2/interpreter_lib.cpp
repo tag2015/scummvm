@@ -37,12 +37,12 @@ static void opSelect(Program *program);
 static void opDisplay(Program *program);
 static void opDisplayRaw(Program *program);
 static void _interpretFadePaletteBK(unsigned char *oldPalette, unsigned char *newPalette, int a3, float duration, bool shouldProcessBk);
-static void interpretFadePalette(unsigned char *oldPalette, unsigned char *newPalette, int a3, float duration);
-static int intlibGetFadeIn();
+// static void interpretFadePalette(unsigned char *oldPalette, unsigned char *newPalette, int a3, float duration);
+// static int intlibGetFadeIn();
 static void interpretFadeOut(float duration);
 static void interpretFadeIn(float duration);
-static void interpretFadeOutNoBK(float duration);
-static void interpretFadeInNoBK(float duration);
+// static void interpretFadeOutNoBK(float duration);
+// static void interpretFadeInNoBK(float duration);
 static void opFadeIn(Program *program);
 static void opFadeOut(Program *program);
 static int intLibCheckMovie(Program *program);
@@ -69,8 +69,8 @@ static int intLibCheckDialog(Program *program);
 static void opSayEnd(Program *program);
 static void opSayGetLastPos(Program *program);
 static void opSayQuit(Program *program);
-static int getTimeOut();
-static void setTimeOut(int value);
+// static int getTimeOut();
+// static void setTimeOut(int value);
 static void opSayMessageTimeout(Program *program);
 static void opSayMessage(Program *program);
 static void opGotoXY(Program *program);
@@ -402,7 +402,7 @@ void opDisplayRaw(Program *program) {
 }
 
 // 0x46222C
-static void _interpretFadePaletteBK(unsigned char *oldPalette, unsigned char *newPalette, int a3, float duration, int shouldProcessBk) {
+static void _interpretFadePaletteBK(unsigned char *oldPalette, unsigned char *newPalette, int a3, float duration, bool shouldProcessBk) {
 	unsigned int time;
 	unsigned int previousTime;
 	unsigned int delta;
@@ -445,6 +445,7 @@ static void _interpretFadePaletteBK(unsigned char *oldPalette, unsigned char *ne
 	renderPresent();
 }
 
+#if 0
 // NOTE: Unused.
 //
 // 0x462330
@@ -456,6 +457,7 @@ static void interpretFadePalette(unsigned char *oldPalette, unsigned char *newPa
 static int intlibGetFadeIn() {
 	return gIntLibIsPaletteFaded;
 }
+#endif
 
 // NOTE: Inlined.
 //
@@ -480,6 +482,7 @@ static void interpretFadeIn(float duration) {
 	_interpretFadePaletteBK(gIntLibFadePalette, _cmap, 64, duration, 1);
 }
 
+#if 0
 // NOTE: Unused.
 //
 // 0x4623A4
@@ -502,6 +505,7 @@ static void interpretFadeOutNoBK(float duration) {
 static void interpretFadeInNoBK(float duration) {
 	_interpretFadePaletteBK(gIntLibFadePalette, _cmap, 64, duration, 0);
 }
+#endif
 
 // fadein
 // 0x462400
@@ -863,8 +867,8 @@ void opSayReply(Program *program) {
 	}
 
 	if ((v3.opcode & VALUE_TYPE_MASK) == VALUE_TYPE_STRING) {
-		const char *v2 = programGetString(program, v3.opcode, v3.integerValue);
-		if (_dialogOption(v1, v2) != 0) {
+		const char *v2_ = programGetString(program, v3.opcode, v3.integerValue);
+		if (_dialogOption(v1, v2_) != 0) {
 			program->flags &= ~PROGRAM_FLAG_0x20;
 			programFatalError("Error setting option.");
 		}
@@ -942,6 +946,7 @@ static void opSayQuit(Program *program) {
 	}
 }
 
+#if 0
 // NOTE: Unused.
 //
 // 0x463828
@@ -955,6 +960,7 @@ static int getTimeOut() {
 static void setTimeOut(int value) {
 	_TimeOut = value;
 }
+#endif
 
 // saymessagetimeout
 // 0x463838
@@ -1269,7 +1275,7 @@ void opMouseShape(Program *program) {
 
 // setglobalmousefunc
 // 0x4649C4
-static void opSetGlobalMouseFunc(Program *Program) {
+static void opSetGlobalMouseFunc(Program *program) {
 	programFatalError("setglobalmousefunc not defined");
 }
 
