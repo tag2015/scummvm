@@ -466,7 +466,7 @@ Program *programCreateByPath(const char *path) {
 	memset(program, 0, sizeof(Program));
 
 	program->name = (char *)internal_malloc_safe(strlen(path) + 1, __FILE__, __LINE__); // ..\\int\\INTRPRET.C, 466
-	strncpy(program->name, path, strlen(path) + 1);
+	memcpy(program->name, path, strlen(path) + 1);
 
 	program->child = nullptr;
 	program->parent = nullptr;
@@ -607,7 +607,7 @@ int programPushString(Program *program, char *string) {
 					}
 
 					*(short *)(heap + 2) = 0;
-					strncpy((char *)(heap + 4), string, strlen(string) + 1); // TODO check
+					memcpy((char *)(heap + 4), string, strlen(string) + 1); // TODO check
 
 					*(heap + v27 + 3) = '\0';
 					return (heap + 4) - (program->dynamicStrings + 4);
@@ -634,7 +634,7 @@ int programPushString(Program *program, char *string) {
 	*(short *)(v20) = v27;
 	*(short *)(v20 + 2) = 0;
 
-	strncpy((char *)(v20 + 4), string, strlen(string) + 1);
+	memcpy((char *)(v20 + 4), string, strlen(string) + 1);
 
 	v23 = v20 + v27;
 	*(v23 + 3) = '\0';
@@ -830,7 +830,7 @@ static void opConditionalOperatorNotEqual(Program *program) {
 	ProgramValue value[2];
 	char stringBuffers[2][80];
 	char *strings[2];
-	int result;
+	int result = 0;
 
 	for (int arg = 0; arg < 2; arg++) {
 		value[arg] = programStackPopValue(program);
@@ -855,6 +855,8 @@ static void opConditionalOperatorNotEqual(Program *program) {
 			strings[0] = stringBuffers[0];
 			break;
 		default:
+			strings[0] = nullptr;
+			strings[1] = nullptr;
 			assert(false && "Should be unreachable");
 		}
 
@@ -925,7 +927,7 @@ static void opConditionalOperatorEqual(Program *program) {
 	ProgramValue value[2];
 	char stringBuffers[2][80];
 	char *strings[2];
-	int result;
+	int result = 0;
 
 	for (int arg = 0; arg < 2; arg++) {
 		value[arg] = programStackPopValue(program);
@@ -950,6 +952,8 @@ static void opConditionalOperatorEqual(Program *program) {
 			strings[0] = stringBuffers[0];
 			break;
 		default:
+			strings[0] = nullptr;
+			strings[1] = nullptr;
 			assert(false && "Should be unreachable");
 		}
 
@@ -1020,7 +1024,7 @@ static void opConditionalOperatorLessThanEquals(Program *program) {
 	ProgramValue value[2];
 	char stringBuffers[2][80];
 	char *strings[2];
-	int result;
+	int result = 0;
 
 	for (int arg = 0; arg < 2; arg++) {
 		value[arg] = programStackPopValue(program);
@@ -1045,6 +1049,8 @@ static void opConditionalOperatorLessThanEquals(Program *program) {
 			strings[0] = stringBuffers[0];
 			break;
 		default:
+			strings[0] = nullptr;
+			strings[1] = nullptr;
 			assert(false && "Should be unreachable");
 		}
 
@@ -1115,7 +1121,7 @@ static void opConditionalOperatorGreaterThanEquals(Program *program) {
 	ProgramValue value[2];
 	char stringBuffers[2][80];
 	char *strings[2];
-	int result;
+	int result = 0;
 
 	// NOTE: original code does not use loop
 	for (int arg = 0; arg < 2; arg++) {
@@ -1141,6 +1147,8 @@ static void opConditionalOperatorGreaterThanEquals(Program *program) {
 			strings[0] = stringBuffers[0];
 			break;
 		default:
+			strings[0] = nullptr;
+			strings[1] = nullptr;
 			assert(false && "Should be unreachable");
 		}
 
@@ -1196,7 +1204,7 @@ static void opConditionalOperatorLessThan(Program *program) {
 	ProgramValue value[2];
 	char text[2][80];
 	char *str_ptr[2];
-	int result;
+	int result = 0;
 
 	for (int arg = 0; arg < 2; arg++) {
 		value[arg] = programStackPopValue(program);
@@ -1221,6 +1229,8 @@ static void opConditionalOperatorLessThan(Program *program) {
 			str_ptr[0] = text[0];
 			break;
 		default:
+			str_ptr[0] = nullptr;
+			str_ptr[1] = nullptr;
 			assert(false && "Should be unreachable");
 		}
 
@@ -1275,8 +1285,8 @@ static void opConditionalOperatorLessThan(Program *program) {
 static void opConditionalOperatorGreaterThan(Program *program) {
 	ProgramValue value[2];
 	char stringBuffers[2][80];
-	char *strings[2];
-	int result;
+	char *strings[2] = {nullptr, nullptr};
+	int result = 0;
 
 	for (int arg = 0; arg < 2; arg++) {
 		value[arg] = programStackPopValue(program);
@@ -1386,7 +1396,7 @@ static void opAdd(Program *program) {
 		case VALUE_TYPE_DYNAMIC_STRING:
 			tempString = programGetString(program, value[0].opcode, value[0].integerValue);
 			strings[0] = (char *)internal_malloc_safe(strlen(tempString) + 1, __FILE__, __LINE__); // "..\\int\\INTRPRET.C", 1002
-			strncpy(strings[0], tempString, strlen(tempString) + 1);
+			memcpy(strings[0], tempString, strlen(tempString) + 1);
 			break;
 		case VALUE_TYPE_FLOAT:
 			strings[0] = (char *)internal_malloc_safe(80, __FILE__, __LINE__); // "..\\int\\INTRPRET.C", 1011
@@ -1400,11 +1410,13 @@ static void opAdd(Program *program) {
 			strings[0] = (char *)internal_malloc_safe(80, __FILE__, __LINE__);
 			snprintf(strings[0], 80, "%p", value[0].pointerValue);
 			break;
+		default:
+			strings[0] = nullptr;
 		}
 
 		tempString = (char *)internal_malloc_safe(strlen(strings[1]) + strlen(strings[0]) + 1, __FILE__, __LINE__); // "..\\int\\INTRPRET.C", 1015
-		strncpy(tempString, strings[1], strlen(strings[1]) + 1);
-		strcat_s(tempString, strlen(tempString) + strlen(strings[0]), strings[0]);
+		memcpy(tempString, strings[1], strlen(strings[1]) + 1);
+		strcat_s(tempString, strlen(tempString) + strlen(strings[0]) + 1, strings[0]);
 
 		programStackPushString(program, tempString);
 
@@ -1616,7 +1628,7 @@ static void opModulo(Program *program) {
 // 0x46A6B4
 static void opLogicalOperatorAnd(Program *program) {
 	ProgramValue value[2];
-	int result;
+	int result = 0;
 
 	for (int arg = 0; arg < 2; arg++) {
 		value[arg] = programStackPopValue(program);
@@ -1710,7 +1722,7 @@ static void opLogicalOperatorAnd(Program *program) {
 // 0x46A8D8
 static void opLogicalOperatorOr(Program *program) {
 	ProgramValue value[2];
-	int result;
+	int result = 0;
 
 	for (int arg = 0; arg < 2; arg++) {
 		value[arg] = programStackPopValue(program);
