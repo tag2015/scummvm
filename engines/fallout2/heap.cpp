@@ -342,7 +342,7 @@ bool heapBlockAllocate(Heap *heap, int *handleIndexPtr, int size, int a4) {
 
 	if (state == HEAP_BLOCK_STATE_FREE) {
 		int remainingSize = blockSize - size;
-		if (remainingSize > HEAP_BLOCK_MIN_SIZE) {
+		if ((uint)remainingSize > HEAP_BLOCK_MIN_SIZE) {
 			// The block we've just found is big enough for splitting, first
 			// resize it to take just what was requested.
 			blockHeader->size = size;
@@ -421,12 +421,12 @@ bool heapBlockDeallocate(Heap *heap, int *handleIndexPtr) {
 	HeapHandle *handle = &(heap->handles[handleIndex]);
 
 	HeapBlockHeader *blockHeader = (HeapBlockHeader *)handle->data;
-	if (blockHeader->guard != HEAP_BLOCK_HEADER_GUARD) {
+	if ((uint)blockHeader->guard != HEAP_BLOCK_HEADER_GUARD) {
 		debug("Heap Error: Bad guard begin detected during deallocate.");
 	}
 
 	HeapBlockFooter *blockFooter = (HeapBlockFooter *)(handle->data + blockHeader->size + HEAP_BLOCK_HEADER_SIZE);
-	if (blockFooter->guard != HEAP_BLOCK_FOOTER_GUARD) {
+	if ((uint)blockFooter->guard != HEAP_BLOCK_FOOTER_GUARD) {
 		debug("Heap Error: Bad guard end detected during deallocate.");
 	}
 
@@ -489,13 +489,13 @@ bool heapLock(Heap *heap, int handleIndex, unsigned char **bufferPtr) {
 	HeapHandle *handle = &(heap->handles[handleIndex]);
 
 	HeapBlockHeader *blockHeader = (HeapBlockHeader *)handle->data;
-	if (blockHeader->guard != HEAP_BLOCK_HEADER_GUARD) {
+	if ((uint)blockHeader->guard != HEAP_BLOCK_HEADER_GUARD) {
 		debug("Heap Error: Bad guard begin detected during lock.");
 		return false;
 	}
 
 	HeapBlockFooter *blockFooter = (HeapBlockFooter *)(handle->data + blockHeader->size + HEAP_BLOCK_HEADER_SIZE);
-	if (blockFooter->guard != HEAP_BLOCK_FOOTER_GUARD) {
+	if ((uint)blockFooter->guard != HEAP_BLOCK_FOOTER_GUARD) {
 		debug("Heap Error: Bad guard end detected during lock.");
 		return false;
 	}
@@ -549,12 +549,12 @@ bool heapUnlock(Heap *heap, int handleIndex) {
 	HeapHandle *handle = &(heap->handles[handleIndex]);
 
 	HeapBlockHeader *blockHeader = (HeapBlockHeader *)handle->data;
-	if (blockHeader->guard != HEAP_BLOCK_HEADER_GUARD) {
+	if ((uint)blockHeader->guard != HEAP_BLOCK_HEADER_GUARD) {
 		debug("Heap Error: Bad guard begin detected during unlock.");
 	}
 
 	HeapBlockFooter *blockFooter = (HeapBlockFooter *)(handle->data + blockHeader->size + HEAP_BLOCK_HEADER_SIZE);
-	if (blockFooter->guard != HEAP_BLOCK_FOOTER_GUARD) {
+	if ((uint)blockFooter->guard != HEAP_BLOCK_FOOTER_GUARD) {
 		debug("Heap Error: Bad guard end detected during unlock.");
 	}
 
@@ -689,8 +689,8 @@ static bool heapFindFreeBlock(Heap *heap, int size, void **blockPtr, int a4) {
 		int index;
 		for (index = 0; index < heap->freeBlocks; index++) {
 			unsigned char *block = gHeapFreeBlocks[index];
-			HeapBlockHeader *blockHeader = (HeapBlockHeader *)block;
-			if (blockHeader->size >= size) {
+			HeapBlockHeader *bh = (HeapBlockHeader *)block;
+			if (bh->size >= size) {
 				break;
 			}
 		}
@@ -727,11 +727,11 @@ static bool heapFindFreeBlock(Heap *heap, int size, void **blockPtr, int a4) {
 	// block and for which we can move every block somewhere.
 	int extentIndex;
 	for (extentIndex = 0; extentIndex < moveableExtentsCount; extentIndex++) {
-		HeapMoveableExtent *extent = &(gHeapMoveableExtents[extentIndex]);
+		HeapMoveableExtent *ext = &(gHeapMoveableExtents[extentIndex]);
 
 		// Calculate extent size including the size of the overhead. Exclude the
 		// size of one overhead for current block.
-		int extentSize = extent->size + HEAP_BLOCK_OVERHEAD_SIZE * extent->blocksLength - HEAP_BLOCK_OVERHEAD_SIZE;
+		int extentSize = ext->size + HEAP_BLOCK_OVERHEAD_SIZE * ext->blocksLength - HEAP_BLOCK_OVERHEAD_SIZE;
 
 		// Make sure current extent is worth moving which means there will be
 		// enough size for new block of given size after moving current extent.
@@ -744,12 +744,12 @@ static bool heapFindFreeBlock(Heap *heap, int size, void **blockPtr, int a4) {
 		}
 
 		// Sort moveable blocks by size (smallest -> largest)
-		qsort(gHeapMoveableBlocks, extent->moveableBlocksLength, sizeof(*gHeapMoveableBlocks), heapBlockCompareBySize);
+		qsort(gHeapMoveableBlocks, ext->moveableBlocksLength, sizeof(*gHeapMoveableBlocks), heapBlockCompareBySize);
 
 		int reservedBlocksLength = 0;
 
 		// Loop thru sorted moveable blocks and build array of reservations.
-		for (int moveableBlockIndex = 0; moveableBlockIndex < extent->moveableBlocksLength; moveableBlockIndex++) {
+		for (int moveableBlockIndex = 0; moveableBlockIndex < ext->moveableBlocksLength; moveableBlockIndex++) {
 			// Grab current moveable block.
 			unsigned char *moveableBlock = gHeapMoveableBlocks[moveableBlockIndex];
 			HeapBlockHeader *moveableBlockHeader = (HeapBlockHeader *)moveableBlock;
@@ -777,7 +777,7 @@ static bool heapFindFreeBlock(Heap *heap, int size, void **blockPtr, int a4) {
 				// Make sure it's outside of the current extent, because free
 				// blocks inside it is already taken into account in
 				// `extentSize`.
-				if (freeBlock >= extent->data && freeBlock < extent->data + extentSize + HEAP_BLOCK_OVERHEAD_SIZE) {
+				if (freeBlock >= ext->data && freeBlock < ext->data + extentSize + HEAP_BLOCK_OVERHEAD_SIZE) {
 					continue;
 				}
 
@@ -814,7 +814,7 @@ static bool heapFindFreeBlock(Heap *heap, int size, void **blockPtr, int a4) {
 			gHeapReservedFreeBlockIndexes[reservedBlocksLength++] = freeBlockIndex;
 		}
 
-		if (reservedBlocksLength == extent->moveableBlocksLength) {
+		if (reservedBlocksLength == ext->moveableBlocksLength) {
 			// We've reserved free block for every movable block in current
 			// extent.
 			break;
@@ -847,7 +847,7 @@ static bool heapFindFreeBlock(Heap *heap, int size, void **blockPtr, int a4) {
 		// Calculate remaining size of the free block after moving.
 		int remainingSize = freeBlockSize - moveableBlockSize;
 		if (remainingSize != 0) {
-			if (remainingSize < HEAP_BLOCK_MIN_SIZE) {
+			if ((uint)remainingSize < HEAP_BLOCK_MIN_SIZE) {
 				// The remaining size of the former free block is too small to
 				// become a new free block, merge it into the current one.
 				freeBlockHeader->size += remainingSize;
@@ -910,14 +910,14 @@ system:
 				return false;
 			}
 
-			HeapBlockHeader *blockHeader = (HeapBlockHeader *)block;
-			blockHeader->guard = HEAP_BLOCK_HEADER_GUARD;
-			blockHeader->size = size;
-			blockHeader->state = HEAP_BLOCK_STATE_SYSTEM;
-			blockHeader->handle_index = -1;
+			HeapBlockHeader *bh = (HeapBlockHeader *)block;
+			bh->guard = HEAP_BLOCK_HEADER_GUARD;
+			bh->size = size;
+			bh->state = HEAP_BLOCK_STATE_SYSTEM;
+			bh->handle_index = -1;
 
-			HeapBlockFooter *blockFooter = (HeapBlockFooter *)(block + blockHeader->size + HEAP_BLOCK_HEADER_SIZE);
-			blockFooter->guard = HEAP_BLOCK_FOOTER_GUARD;
+			HeapBlockFooter *bf = (HeapBlockFooter *)(block + bh->size + HEAP_BLOCK_HEADER_SIZE);
+			bf->guard = HEAP_BLOCK_FOOTER_GUARD;
 
 			*blockPtr = block;
 
@@ -958,8 +958,8 @@ static bool heapBuildMoveableBlocksList(int extentIndex) {
 
 // 0x453E74
 static int heapMoveableExtentsCompareBySize(const void *a1, const void *a2) {
-	HeapMoveableExtent *v1 = (HeapMoveableExtent *)a1;
-	HeapMoveableExtent *v2 = (HeapMoveableExtent *)a2;
+	HeapMoveableExtent *v1 = const_cast<HeapMoveableExtent *>(static_cast<const HeapMoveableExtent *>(a1));
+	HeapMoveableExtent *v2 = const_cast<HeapMoveableExtent *>(static_cast<const HeapMoveableExtent *>(a2));
 	return v1->size - v2->size;
 }
 
@@ -1025,8 +1025,11 @@ static bool heapBuildFreeBlocksList(Heap *heap) {
 
 // 0x453CC4
 static int heapBlockCompareBySize(const void *a1, const void *a2) {
-	HeapBlockHeader *header1 = *(HeapBlockHeader **)a1;
-	HeapBlockHeader *header2 = *(HeapBlockHeader **)a2;
+	void *a1_tmp = const_cast<void *>(a1);
+	HeapBlockHeader *header1 = *(static_cast<HeapBlockHeader **>(a1_tmp));
+	void *a2_tmp = const_cast<void *>(a2);
+	HeapBlockHeader *header2 = *(static_cast<HeapBlockHeader **>(a2_tmp));
+
 	return header1->size - header2->size;
 }
 
@@ -1060,15 +1063,15 @@ static bool heapBuildMoveableExtentsList(Heap *heap, int *moveableExtentsLengthP
 			break;
 		}
 
-		HeapBlockHeader *blockHeader = (HeapBlockHeader *)ptr;
-		if (blockHeader->state == HEAP_BLOCK_STATE_FREE || blockHeader->state == HEAP_BLOCK_STATE_MOVABLE) {
+		HeapBlockHeader *bh = (HeapBlockHeader *)ptr;
+		if (bh->state == HEAP_BLOCK_STATE_FREE || bh->state == HEAP_BLOCK_STATE_MOVABLE) {
 			HeapMoveableExtent *extent = &(gHeapMoveableExtents[extentIndex++]);
 			extent->data = ptr;
 			extent->blocksLength = 1;
 			extent->moveableBlocksLength = 0;
-			extent->size = blockHeader->size;
+			extent->size = bh->size;
 
-			if (blockHeader->state == HEAP_BLOCK_STATE_MOVABLE) {
+			if (bh->state == HEAP_BLOCK_STATE_MOVABLE) {
 				extent->moveableBlocksLength = 1;
 			}
 
@@ -1101,8 +1104,8 @@ static bool heapBuildMoveableExtentsList(Heap *heap, int *moveableExtentsLengthP
 		}
 
 		// ptr might have been advanced during the loop above.
-		blockHeader = (HeapBlockHeader *)ptr;
-		ptr += blockHeader->size + HEAP_BLOCK_OVERHEAD_SIZE;
+		bh = (HeapBlockHeader *)ptr;
+		ptr += bh->size + HEAP_BLOCK_OVERHEAD_SIZE;
 
 		blocksLength--;
 	};
@@ -1129,13 +1132,13 @@ bool heapValidate(Heap *heap) {
 
 	for (int index = 0; index < blocksCount; index++) {
 		HeapBlockHeader *blockHeader = (HeapBlockHeader *)ptr;
-		if (blockHeader->guard != HEAP_BLOCK_HEADER_GUARD) {
+		if ((uint)blockHeader->guard != HEAP_BLOCK_HEADER_GUARD) {
 			debug("Bad guard begin detected during validate.");
 			return false;
 		}
 
 		HeapBlockFooter *blockFooter = (HeapBlockFooter *)(ptr + blockHeader->size + HEAP_BLOCK_HEADER_SIZE);
-		if (blockFooter->guard != HEAP_BLOCK_FOOTER_GUARD) {
+		if ((uint)blockFooter->guard != HEAP_BLOCK_FOOTER_GUARD) {
 			debug("Bad guard end detected during validate.");
 			return false;
 		}
@@ -1199,13 +1202,13 @@ bool heapValidate(Heap *heap) {
 		HeapHandle *handle = &(heap->handles[handleIndex]);
 		if (handle->state != HEAP_HANDLE_STATE_INVALID && (handle->state & HEAP_BLOCK_STATE_SYSTEM) != 0) {
 			HeapBlockHeader *blockHeader = (HeapBlockHeader *)handle->data;
-			if (blockHeader->guard != HEAP_BLOCK_HEADER_GUARD) {
+			if ((uint)blockHeader->guard != HEAP_BLOCK_HEADER_GUARD) {
 				debug("Bad guard begin detected in system block during validate.");
 				return false;
 			}
 
 			HeapBlockFooter *blockFooter = (HeapBlockFooter *)(handle->data + blockHeader->size + HEAP_BLOCK_HEADER_SIZE);
-			if (blockFooter->guard != HEAP_BLOCK_FOOTER_GUARD) {
+			if ((uint)blockFooter->guard != HEAP_BLOCK_FOOTER_GUARD) {
 				debug("Bad guard end detected in system block during validate.");
 				return false;
 			}
