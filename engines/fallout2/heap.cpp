@@ -430,7 +430,7 @@ bool heapBlockDeallocate(Heap *heap, int *handleIndexPtr) {
 		debug("Heap Error: Bad guard end detected during deallocate.");
 	}
 
-	if (handle->state != blockHeader->state) {
+	if (handle->state != (int)blockHeader->state) {
 		debug("Heap Error: Mismatched block states detected during deallocate.");
 	}
 
@@ -500,7 +500,7 @@ bool heapLock(Heap *heap, int handleIndex, unsigned char **bufferPtr) {
 		return false;
 	}
 
-	if (handle->state != blockHeader->state) {
+	if (handle->state != (int)blockHeader->state) {
 		debug("Heap Error: Mismatched block states detected during lock.");
 		return false;
 	}
@@ -558,7 +558,7 @@ bool heapUnlock(Heap *heap, int handleIndex) {
 		debug("Heap Error: Bad guard end detected during unlock.");
 	}
 
-	if (handle->state != blockHeader->state) {
+	if (handle->state != (int)blockHeader->state) {
 		debug("Heap Error: Mismatched block states detected during unlock.");
 	}
 
