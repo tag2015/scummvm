@@ -203,8 +203,8 @@ int gameMoviePlay(int movie, int flags) {
 
 	movieSetFlags(v1);
 
-	int oldTextColor;
-	int oldFont;
+	int oldTextColor = 0;
+	int oldFont = 0;
 	if (subtitlesEnabled) {
 		const char *subtitlesPaletteFilePath;
 		if (gMoviePaletteFilePaths[movie] != nullptr) {
