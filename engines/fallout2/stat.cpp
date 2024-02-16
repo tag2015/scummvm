@@ -552,7 +552,7 @@ void critterUpdateDerivedStats(Object *critter) {
 	int strength = critterGetStat(critter, STAT_STRENGTH);
 	int perception = critterGetStat(critter, STAT_PERCEPTION);
 	int endurance = critterGetStat(critter, STAT_ENDURANCE);
-	int intelligence = critterGetStat(critter, STAT_INTELLIGENCE);
+	// int intelligence = critterGetStat(critter, STAT_INTELLIGENCE);
 	int agility = critterGetStat(critter, STAT_AGILITY);
 	int luck = critterGetStat(critter, STAT_LUCK);
 
