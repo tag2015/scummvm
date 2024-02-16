@@ -350,7 +350,7 @@ void _refreshSoundBuffers(Sound *sound) {
 		return;
 	}
 
-	if (audioBytes1 + audioBytes2 != sound->dataSize * v53) {
+	if (audioBytes1 + audioBytes2 != (uint)sound->dataSize * v53) {
 		debugPrint("locked memory region not big enough, wanted %d (%d * %d), got %d (%d + %d)\n", sound->dataSize * v53, v53, sound->dataSize, audioBytes1 + audioBytes2, audioBytes1, audioBytes2);
 		debugPrint("Resetting readBuffers from %d to %d\n", v53, (audioBytes1 + audioBytes2) / sound->dataSize);
 

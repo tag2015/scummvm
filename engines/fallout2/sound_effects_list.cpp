@@ -143,7 +143,7 @@ int soundEffectsListInit(const char *soundEffectsPath, int a2, int debugLevel) {
 		// NOTE: Uninline.
 		soundEffectsListSort();
 
-		File *stream = fileOpen(path, "wt");  // TODO
+		stream = fileOpen(path, "wt");  // TODO
 		if (stream != nullptr) {
 			filePrintFormatted(stream, "%d\n", gSoundEffectsListEntriesLength);
 
@@ -217,7 +217,7 @@ int soundEffectsListGetFilePath(int tag, char **pathPtr) {
 		return SFXL_ERR;
 	}
 	int path_len = strlen(gSoundEffectsListPath) + strlen(name) + 1;
-	strncpy(path, gSoundEffectsListPath, path_len);
+	memcpy(path, gSoundEffectsListPath, path_len);
 	strcat_s(path, path_len, name);
 
 	*pathPtr = path;
@@ -319,7 +319,7 @@ static int soundEffectsListPopulateFileNames() {
 		return SFXL_ERR;
 	}
 	int pattern_length = strlen(gSoundEffectsListPath) + strlen(extension) + 1;
-	strncpy(pattern, gSoundEffectsListPath, pattern_length);
+	memcpy(pattern, gSoundEffectsListPath, pattern_length);
 	strcat_s(pattern, pattern_length, extension);
 
 	char **fileNameList;
@@ -443,8 +443,8 @@ static int soundEffectsListSort() {
 
 // 0x4AA228
 static int soundEffectsListCompareByName(const void *a1, const void *a2) {
-	SoundEffectsListEntry *v1 = (SoundEffectsListEntry *)a1;
-	SoundEffectsListEntry *v2 = (SoundEffectsListEntry *)a2;
+	SoundEffectsListEntry *v1 = const_cast<SoundEffectsListEntry *>(static_cast<const SoundEffectsListEntry *>(a1));
+	SoundEffectsListEntry *v2 = const_cast<SoundEffectsListEntry *>(static_cast<const SoundEffectsListEntry *>(a2));
 
 	return compat_stricmp(v1->name, v2->name);
 }
