@@ -719,7 +719,7 @@ static void _UpdateThing(int index) {
 		for (int optionIndex = 0; optionIndex < meta->valuesCount; optionIndex++) {
 			const char *str = getmsg(&gPreferencesMessageList, &gPreferencesMessageListItem, meta->labelIds[optionIndex]);
 
-			int x;
+			int x = 0;
 			switch (optionIndex) {
 			case 0:
 				// 0x4926AA
@@ -840,9 +840,13 @@ int preferencesSave(Common::OutSaveFile *stream) {
 	stream->writeSint32BE((int)brightness);
 	stream->writeSint32BE((int)mouseSensitivity);
 
-	if(stream->err()) {
-		stream->finalize();
+	stream->finalize();
+	if (!stream->err()) {
 		delete stream;
+		return 0;
+	} else {
+		delete stream;
+		debugPrint("\nOPTION MENU: Error save option data!\n");
 		return -1;
 	}
 
@@ -886,14 +890,6 @@ int preferencesSave(Common::OutSaveFile *stream) {
 		goto err;
 	if (fileWriteFloat(stream, mouseSensitivity) == -1)
 		goto err;*/
-
-	return 0;
-
-err:
-
-	debugPrint("\nOPTION MENU: Error save option data!\n");
-
-	return -1;
 }
 
 // 0x49340C
@@ -1445,7 +1441,7 @@ static void _DoThing(int eventCode) {
 	} else if (preferenceIndex >= FIRST_SECONDARY_PREF && preferenceIndex <= LAST_SECONDARY_PREF) {
 		PreferenceDescription *meta = &(gPreferenceDescriptions[preferenceIndex]);
 		int *valuePtr = meta->valuePtr;
-		int value = *valuePtr;
+		// int value = *valuePtr;
 		bool valueChanged = false;
 
 		int v1 = meta->knobX + 11;
@@ -1498,7 +1494,7 @@ static void _DoThing(int eventCode) {
 			break;
 		}
 
-		int knobX = (int)(219.0 / (meta->maxValue - meta->minValue));
+		// int knobX = (int)(219.0 / (meta->maxValue - meta->minValue));
 		int v31 = (int)((value - meta->minValue) * (219.0 / (meta->maxValue - meta->minValue)) + 384.0);
 		blitBufferToBuffer(_preferencesFrmImages[PREFERENCES_WINDOW_FRM_BACKGROUND].getData() + PREFERENCES_WINDOW_WIDTH * meta->knobY + 384, 240, 12, PREFERENCES_WINDOW_WIDTH, gPreferencesWindowBuffer + PREFERENCES_WINDOW_WIDTH * meta->knobY + 384, PREFERENCES_WINDOW_WIDTH);
 		blitBufferToBufferTrans(_preferencesFrmImages[PREFERENCES_WINDOW_FRM_KNOB_ON].getData(), 21, 12, 21, gPreferencesWindowBuffer + PREFERENCES_WINDOW_WIDTH * meta->knobY + v31, PREFERENCES_WINDOW_WIDTH);
@@ -1598,7 +1594,6 @@ static void _DoThing(int eventCode) {
 				for (int optionIndex = 0; optionIndex < meta->valuesCount; optionIndex++) {
 					const char *str = getmsg(&gPreferencesMessageList, &gPreferencesMessageListItem, meta->labelIds[optionIndex]);
 
-					int x;
 					switch (optionIndex) {
 					case 0:
 						// 0x4926AA
