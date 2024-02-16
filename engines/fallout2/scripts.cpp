@@ -642,7 +642,7 @@ int scriptSetActionBeingUsed(int sid, int value) {
 static Program *scriptsCreateProgramByName(const char *name) {
 	char path[COMPAT_MAX_PATH];
 
-	strncpy(path, _cd_path_base, COMPAT_MAX_PATH - 1);
+	strncpy(path, _cd_path_base, COMPAT_MAX_PATH);
 	strcat_s(path, sizeof(path), gScriptsBasePath);
 	strcat_s(path, sizeof(path), name);
 	strcat_s(path, sizeof(path), ".int");
@@ -1214,7 +1214,7 @@ int scriptsRequestStealing(Object *a1, Object *a2) {
 
 // NOTE: Inlined.
 void _script_make_path(char *path) {
-	strncpy(path, _cd_path_base, COMPAT_MAX_PATH - 1);
+	strncpy(path, _cd_path_base, COMPAT_MAX_PATH);
 	strcat_s(path, COMPAT_MAX_PATH, gScriptsBasePath);
 }
 
@@ -1924,12 +1924,12 @@ int scriptSaveAll(Common::OutSaveFile *stream) {
 		}*/
 
 		if (scriptCount > 0) {
-			ScriptListExtent *scriptExtent = scriptList->head;
-			while (scriptExtent != lastScriptExtent) {
-				if (scriptListExtentWrite(scriptExtent, stream) == -1) {
+			ScriptListExtent *scriptExt = scriptList->head;
+			while (scriptExt != lastScriptExtent) {
+				if (scriptListExtentWrite(scriptExt, stream) == -1) {
 					return -1;
 				}
-				scriptExtent = scriptExtent->next;
+				scriptExt = scriptExt->next;
 			}
 
 			if (lastScriptExtent != nullptr) {
@@ -2087,17 +2087,17 @@ int scriptLoadAll(File *stream) {
 
 			ScriptListExtent *prevExtent = extent;
 			for (int extentIndex = 1; extentIndex < scriptList->length; extentIndex++) {
-				ScriptListExtent *extent = (ScriptListExtent *)internal_malloc(sizeof(*extent));
-				if (extent == nullptr) {
+				ScriptListExtent *scriptExt = (ScriptListExtent *)internal_malloc(sizeof(*scriptExt));
+				if (scriptExt == nullptr) {
 					return -1;
 				}
 
-				if (scriptListExtentRead(extent, stream) != 0) {
+				if (scriptListExtentRead(scriptExt, stream) != 0) {
 					return -1;
 				}
 
-				for (int scriptIndex = 0; scriptIndex < extent->length; scriptIndex++) {
-					Script *script = &(extent->scripts[scriptIndex]);
+				for (int scriptIndex = 0; scriptIndex < scriptExt->length; scriptIndex++) {
+					Script *script = &(scriptExt->scripts[scriptIndex]);
 					script->owner = nullptr;
 					script->source = nullptr;
 					script->target = nullptr;
@@ -2105,10 +2105,10 @@ int scriptLoadAll(File *stream) {
 					script->flags &= ~SCRIPT_FLAG_0x01;
 				}
 
-				prevExtent->next = extent;
+				prevExtent->next = scriptExt;
 
-				extent->next = nullptr;
-				prevExtent = extent;
+				scriptExt->next = nullptr;
+				prevExtent = scriptExt;
 			}
 
 			scriptList->tail = prevExtent;
@@ -2266,8 +2266,8 @@ static int scriptsRemoveLocalVars(Script *script) {
 					ScriptList *scriptList = &(gScriptLists[index]);
 					ScriptListExtent *extent = scriptList->head;
 					while (extent != nullptr) {
-						for (int index = 0; index < extent->length; index++) {
-							Script *other = &(extent->scripts[index]);
+						for (int i = 0; i < extent->length; i++) {
+							Script *other = &(extent->scripts[i]);
 							if (other->localVarsOffset > script->localVarsOffset) {
 								other->localVarsOffset -= script->localVarsCount;
 							}
