@@ -551,8 +551,8 @@ static int pipboyWindowInit(int intent) {
 	gPipboyWindow = windowCreate(pipboyWindowX, pipboyWindowY, PIPBOY_WINDOW_WIDTH, PIPBOY_WINDOW_HEIGHT, _colorTable[0], WINDOW_MODAL);
 	if (gPipboyWindow == -1) {
 		debugPrint("\n** Error opening pipboy window! **\n");
-		for (int index = 0; index < PIPBOY_FRM_COUNT; index++) {
-			_pipboyFrmImages[index].unlock();
+		for (int i = 0; i < PIPBOY_FRM_COUNT; i++) {
+			_pipboyFrmImages[i].unlock();
 		}
 		return -1;
 	}
@@ -582,8 +582,8 @@ static int pipboyWindowInit(int intent) {
 
 	int y = 341;
 	int eventCode = 500;
-	for (int index = 0; index < 5; index += 1) {
-		if (index != 1) {
+	for (int i = 0; i < 5; i += 1) {
+		if (i != 1) {
 			int btn = buttonCreate(gPipboyWindow,
 								   53,
 								   y,
@@ -1138,25 +1138,25 @@ static void pipboyWindowHandleStatus(int a1) {
 
 		int number = 1;
 		for (; index < gQuestsCount; index++) {
-			QuestDescription *questDescription = &(gQuestDescriptions[index]);
-			if (gGameGlobalVars[questDescription->gvar] >= questDescription->displayThreshold) {
-				const char *text = getmsg(&gQuestsMessageList, &gPipboyMessageListItem, questDescription->description);
-				char formattedText[1024];
-				snprintf(formattedText, sizeof(formattedText), "%d. %s", number, text);
+			QuestDescription *questDescr = &(gQuestDescriptions[index]);
+			if (gGameGlobalVars[questDescr->gvar] >= questDescr->displayThreshold) {
+				const char *text = getmsg(&gQuestsMessageList, &gPipboyMessageListItem, questDescr->description);
+				char formattedTxt[1024];
+				snprintf(formattedTxt, sizeof(formattedTxt), "%d. %s", number, text);
 				number += 1;
 
 				short beginnings[WORD_WRAP_MAX_COUNT];
 				short count;
-				if (wordWrap(formattedText, 350, beginnings, &count) == 0) {
+				if (wordWrap(formattedTxt, 350, beginnings, &count) == 0) {
 					for (int line = 0; line < count - 1; line += 1) {
-						char *beginning = formattedText + beginnings[line];
-						char *ending = formattedText + beginnings[line + 1];
+						char *beginning = formattedTxt + beginnings[line];
+						char *ending = formattedTxt + beginnings[line + 1];
 						char c = *ending;
 						*ending = '\0';
 
 						int flags;
 						int color;
-						if (gGameGlobalVars[questDescription->gvar] < questDescription->completedThreshold) {
+						if (gGameGlobalVars[questDescr->gvar] < questDescr->completedThreshold) {
 							flags = 0;
 							color = _colorTable[992];
 						} else {
@@ -1176,7 +1176,7 @@ static void pipboyWindowHandleStatus(int a1) {
 
 			if (index != gQuestsCount - 1) {
 				QuestDescription *nextQuestDescription = &(gQuestDescriptions[index + 1]);
-				if (questDescription->location != nextQuestDescription->location) {
+				if (questDescr->location != nextQuestDescription->location) {
 					break;
 				}
 			}
@@ -1413,8 +1413,8 @@ static int pipboyWindowRenderHolodiskList(int a1) {
 
 // 0x498D34
 static int _qscmp(const void *a1, const void *a2) {
-	STRUCT_664350 *v1 = (STRUCT_664350 *)a1;
-	STRUCT_664350 *v2 = (STRUCT_664350 *)a2;
+	STRUCT_664350 *v1 = const_cast<STRUCT_664350 *>(static_cast<const STRUCT_664350 *>(a1));
+	STRUCT_664350 *v2 = const_cast<STRUCT_664350 *>(static_cast<const STRUCT_664350 *>(a2));
 
 	return strcmp(v1->name, v2->name);
 }
@@ -1565,7 +1565,7 @@ static int _PrintAMList(int a1) {
 	}
 
 	int count = 0;
-	int index = 0;
+	// int index = 0;
 
 	int mapCount = wmMapMaxCount();
 	for (int map = 0; map < mapCount; map++) {
@@ -1760,7 +1760,7 @@ static void pipboyHandleAlarmClock(int a1) {
 		int duration = a1 - 4;
 		int minutes = 0;
 		int hours = 0;
-		int v10 = 0;
+		// int v10 = 0;
 
 		switch (duration) {
 		case PIPBOY_REST_DURATION_TEN_MINUTES:
@@ -1944,7 +1944,7 @@ static bool pipboyRest(int hours, int minutes, int duration) {
 			unsigned int gameTime = gameTimeGetTime();
 
 			double v4 = v3 * 20.0;
-			int v5 = 0;
+			// int v5 = 0;
 			for (int v5 = 0; v5 < (int)v4; v5++) {
 				sharedFpsLimiter.mark();
 
@@ -2472,8 +2472,8 @@ static void questFree() {
 
 // 0x49A818
 static int questDescriptionCompare(const void *a1, const void *a2) {
-	QuestDescription *v1 = (QuestDescription *)a1;
-	QuestDescription *v2 = (QuestDescription *)a2;
+	QuestDescription *v1 = const_cast<QuestDescription *>(static_cast<const QuestDescription *>(a1));
+	QuestDescription *v2 = const_cast<QuestDescription *>(static_cast<const QuestDescription *>(a2));
 	return v1->location - v2->location;
 }
 
