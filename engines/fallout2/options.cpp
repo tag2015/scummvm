@@ -200,8 +200,8 @@ static int optionsWindowInit() {
 				internal_free(_opbtns[index]);
 			}
 
-			for (int index = 0; index < OPTIONS_WINDOW_FRM_COUNT; index++) {
-				_optionsFrmImages[index].unlock();
+			for (int i = 0; i < OPTIONS_WINDOW_FRM_COUNT; i++) {
+				_optionsFrmImages[i].unlock();
 			}
 
 			messageListFree(&gPreferencesMessageList);
@@ -322,7 +322,7 @@ static int optionsWindowFree() {
 
 // 0x4902B0
 int showPause(bool a1) {
-	bool gameMouseWasVisible;
+	bool gameMouseWasVisible = true;
 	if (!a1) {
 		gOptionsWindowIsoWasEnabled = isoDisable();
 		colorCycleDisable();
