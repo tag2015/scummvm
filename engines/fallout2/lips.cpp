@@ -3,10 +3,10 @@
 /*#include <stdio.h>
 #include <string.h>*/
 
-// #include "fallout2/audio.h" TODO audio
+#include "fallout2/audio.h"
 #include "fallout2/db.h"
 #include "fallout2/debug.h"
-// #include "fallout2/game_sound.h" TODO audio
+#include "fallout2/game_sound.h"
 #include "fallout2/input.h"
 #include "fallout2/memory.h"
 #include "fallout2/platform_compat.h"
@@ -57,6 +57,7 @@ LipsData gLipsData = {
 	"VOC",
 	"TXT",
 	"LIP",
+	"",
 };
 
 // 0x5193B4
@@ -76,7 +77,7 @@ static char *_lips_fix_string(const char *fileName, size_t length) {
 
 // 0x47AAD8
 void lipsTicker() {
-/*	int v0; TODO audio
+	int v0;
 	SpeechMarker *speech_marker;
 	int v5;
 
@@ -139,12 +140,12 @@ void lipsTicker() {
 
 	_head_marker_current = v0;
 
-	soundContinueAll();*/
+	soundContinueAll();
 }
 
 // 0x47AC2C
 int lipsStart() {
-/*	gLipsData.flags |= LIPS_FLAG_0x02; TODO audio
+	gLipsData.flags |= LIPS_FLAG_0x02;
 	_head_marker_current = 0;
 
 	if (_soundSetPosition(gLipsData.sound, gLipsData.field_20) != 0) {
@@ -176,7 +177,7 @@ int lipsStart() {
 
 		soundStop(gLipsData.sound);
 		gLipsData.flags |= ~(LIPS_FLAG_0x01 | LIPS_FLAG_0x02);
-	}*/
+	}
 
 	return 0;
 }
@@ -281,7 +282,8 @@ int lipsLoad(const char *audioFileName, const char *headFileName) {
 		*sep = '\0';
 	}
 
-	strncpy(gLipsData.field_50, v60, sizeof(gLipsData.field_50) - 1);
+	(strncpy(gLipsData.field_50, v60, sizeof(gLipsData.field_50) - 1));
+	gLipsData.field_50[sizeof(gLipsData.field_50) - 1] = '\0';
 
 	strcat_s(path, sizeof(path), _lips_fix_string(gLipsData.field_50, sizeof(gLipsData.field_50)));
 	strcat_s(path, sizeof(path), ".");
@@ -439,29 +441,29 @@ static int _lips_make_speech() {
 	snprintf(path, sizeof(path), "%s%s\\%s.%s", "SOUND\\SPEECH\\", _lips_subdir_name, v1, "ACM");
 
 	if (gLipsData.sound != nullptr) {
-//		soundDelete(gLipsData.sound); TODO audio
+		soundDelete(gLipsData.sound);
 		gLipsData.sound = nullptr;
 	}
 
-	gLipsData.sound = nullptr; /*soundAllocate(SOUND_TYPE_MEMORY, SOUND_16BIT); TODO audio */
+	gLipsData.sound = soundAllocate(SOUND_TYPE_MEMORY, SOUND_16BIT);
 	if (gLipsData.sound == nullptr) {
 		debugPrint("\nsoundAllocate falied in lips_make_speech!");
 		return -1;
 	}
 
-/*	if (soundSetFileIO(gLipsData.sound, audioOpen, audioClose, audioRead, nullptr, audioSeek, nullptr, audioGetSize)) { TODO audio
+	if (soundSetFileIO(gLipsData.sound, audioOpen, audioClose, audioRead, nullptr, audioSeek, nullptr, audioGetSize)) {
 		debugPrint("Ack!");
 		debugPrint("Error!");
-	}*/
+	}
 
-/*	if (soundLoad(gLipsData.sound, path)) { TODO audio
+	if (soundLoad(gLipsData.sound, path)) {
 		soundDelete(gLipsData.sound);
 		gLipsData.sound = nullptr;
 
 		debugPrint("lips_make_speech: soundLoad failed with path ");
 		debugPrint("%s -- file probably doesn't exist.\n", path);
 		return -1;
-	} */
+	}
 
 	gLipsData.field_34 = 8 * (gLipsData.field_1C / gLipsData.field_2C);
 
@@ -478,11 +480,11 @@ int lipsFree() {
 	if (gLipsData.sound != nullptr) {
 		_head_marker_current = 0;
 
-//		soundStop(gLipsData.sound); TODO audio
+		soundStop(gLipsData.sound);
 
 		gLipsData.flags &= ~0x03;
 
-//		soundDelete(gLipsData.sound); TODO audio
+		soundDelete(gLipsData.sound);
 
 		gLipsData.sound = nullptr;
 	}
