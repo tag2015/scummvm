@@ -244,7 +244,7 @@ int _proto_list_str(int pid, char *proto_path) {
 		*pch = '\0';
 	}
 
-	strncpy(proto_path, string, strlen(string) + 1);
+	strncpy(proto_path, string, COMPAT_MAX_PATH - 1);
 
 	return 0;
 }
@@ -721,13 +721,14 @@ int objectDataRead(Object *obj, File *stream) {
 
 int objectDataReadScumm(Object *obj, Common::InSaveFile *stream) {
 	Proto *proto;
-	int temp;
+	// int temp;
 
 	debug(6, "Attempt to load object proto PID: %d (aka %d) from savefile", PID_TYPE(obj->pid), obj->pid);
 	Inventory *inventory = &(obj->data.inventory);
 	inventory->length = stream->readSint32BE();
 	inventory->capacity = stream->readSint32BE();
-	temp = stream->readSint32BE();
+	// temp =
+	stream->readSint32BE();
 	if (stream->err())
 		return -1;
 /*	if (fileReadInt32(stream, &(inventory->length)) == -1)
@@ -2467,6 +2468,8 @@ static int protoWrite(Proto *proto, Common::WriteStream *stream) {
 					return -1;*/
 		if (protoSceneryDataWrite(&(proto->scenery.data), proto->scenery.type, stream) == -1)
 			return -1;
+
+		return 0;
 	case OBJ_TYPE_WALL:
 		stream->writeSint32BE(proto->wall.lightDistance);
 		stream->writeSint32BE(proto->wall.lightIntensity);
