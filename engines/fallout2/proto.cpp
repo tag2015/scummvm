@@ -189,6 +189,11 @@ static char **_perk_code_strs;
 // 0x6648BC
 static char **_critter_stats_list;
 
+
+bool isExitGridPid(int pid) {
+	return pid >= FIRST_EXIT_GRID_PID && pid <= LAST_EXIT_GRID_PID;
+}
+
 // 0x49E270
 void proto_make_path(char *path, int pid) {
 	strncpy(path, _cd_path_base, COMPAT_MAX_PATH);
