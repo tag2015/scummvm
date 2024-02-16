@@ -73,15 +73,15 @@ bool sfallConfigInit(int argc, char **argv) {
 			return false;
 
 	char path[COMPAT_MAX_PATH];
-	char *executable = "fallout2.exe" /*argv[0]*/;
-	char *ch = strrchr(executable, '\\');
-	if (ch != nullptr) {
-		*ch = '\0';
-		snprintf(path, sizeof(path), "%s\\%s", executable, SFALL_CONFIG_FILE_NAME);
-		*ch = '\\';
-	} else {
-		strncpy(path, SFALL_CONFIG_FILE_NAME, sizeof(path) - 1);
-	}
+	// char *executable = "fallout2.exe" /*argv[0]*/;
+	// char *ch = strrchr(executable, '\\');
+	// if (ch != nullptr) {
+	// 	*ch = '\0';
+	// 	snprintf(path, sizeof(path), "%s\\%s", executable, SFALL_CONFIG_FILE_NAME);
+	// 	*ch = '\\';
+	// } else {
+	strncpy(path, SFALL_CONFIG_FILE_NAME, sizeof(path) - 1);
+	// }
 
 	if (configReadScumm(&gSfallConfig, SFALL_CONFIG_FILE_NAME))
 		debug("Loaded SFALL config (%s) from save dir!", SFALL_CONFIG_FILE_NAME);
