@@ -122,11 +122,11 @@ int mouseManagerInsertCacheEntry(void **data, int type, unsigned char *palette, 
 	if (index == MOUSE_MGR_CACHE_CAPACITY) {
 		int v2 = -1;
 		int v1 = gMouseManagerCurrentRef;
-		for (int index = 0; index < MOUSE_MGR_CACHE_CAPACITY; index++) {
-			MouseManagerCacheEntry *cacheEntry = &(gMouseManagerCache[index]);
+		for (int i = 0; i < MOUSE_MGR_CACHE_CAPACITY; i++) {
+			MouseManagerCacheEntry *cacheEntry = &(gMouseManagerCache[i]);
 			if (v1 > cacheEntry->ref) {
 				v1 = cacheEntry->ref;
-				v2 = index;
+				v2 = i;
 			}
 		}
 
@@ -371,7 +371,7 @@ int mouseManagerSetFrame(char *fileName, int a2) {
 		}
 
 		// NOTE: Uninline.
-		char *sep = strchr(string, ' ');
+		sep = strchr(string, ' ');
 		if (sep == nullptr) {
 			debugPrint("Bad line %s in %s\n", string, fileName);
 			// FIXME: Leaking stream.
