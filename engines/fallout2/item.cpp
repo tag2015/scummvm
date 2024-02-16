@@ -440,7 +440,7 @@ int itemRemove(Object *owner, Object *itemToRemove, int quantity) {
 
 	if (itemToRemove->pid == PROTO_ID_STEALTH_BOY_I || itemToRemove->pid == PROTO_ID_STEALTH_BOY_II) {
 		if (itemToRemove == item1 || itemToRemove == item2) {
-			Object *owner = objectGetOwner(itemToRemove);
+			owner = objectGetOwner(itemToRemove);
 			if (owner != nullptr) {
 				stealthBoyTurnOff(owner, itemToRemove);
 			}
@@ -658,7 +658,7 @@ static bool _item_identical(Object *item1, Object *item2) {
 		return false;
 	}
 
-	int v1;
+	int v1 = 0;
 	if (proto->item.type == ITEM_TYPE_AMMO || item1->pid == PROTO_ID_MONEY) {
 		v1 = item2->data.item.ammo.quantity;
 		item2->data.item.ammo.quantity = item1->data.item.ammo.quantity;
@@ -2559,7 +2559,7 @@ static void _perform_drug_effect(Object *critter, int *stats, int *mods, bool is
 
 		v10 = critterGetBonusStat(critter, stat);
 
-		int before;
+		int before = 0;
 		if (critter == gDude) {
 			before = critterGetStat(gDude, stat);
 		}
