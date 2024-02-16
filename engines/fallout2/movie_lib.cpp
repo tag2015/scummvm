@@ -58,19 +58,19 @@ typedef struct STRUCT_4F6930 {
 static void _MVE_MemInit(STRUCT_6B3690 *a1, int a2, void *a3);
 static void _MVE_MemFree(STRUCT_6B3690 *a1);
 static void _do_nothing_2(Graphics::Surface *a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9);
-static int _sub_4F4B5();
+// static int _sub_4F4B5();
 static int _ioReset(int fileHandle);
 static void *_ioRead(int size);
 static void *_MVE_MemAlloc(STRUCT_6B3690 *a1, unsigned int a2);
 static unsigned char *_ioNextRecord();
 static void _sub_4F4DD();
-static int _MVE_rmHoldMovie();
+// static int _MVE_rmHoldMovie();
 static int _syncWait();
-static void _MVE_sndPause();
+// static void _MVE_sndPause();
 static int _syncInit(int a1, int a2);
 static void _syncReset(int a1);
 static int _MVE_sndConfigure(int a1, int a2, int a3, int a4, int a5, int a6);
-static void _MVE_syncSync();
+// static void _MVE_syncSync();
 static void _MVE_sndReset();
 static void _MVE_sndSync();
 static int _syncWaitLevel(int a1);
@@ -91,9 +91,9 @@ static void _syncRelease();
 static void _ioRelease();
 static void _MVE_sndRelease();
 static void _nfRelease();
-static void _frLoad(STRUCT_4F6930 *a1);
-static void _frSave(STRUCT_4F6930 *a1);
-static void _MVE_frClose(STRUCT_4F6930 *a1);
+// static void _frLoad(STRUCT_4F6930 *a1);
+// static void _frSave(STRUCT_4F6930 *a1);
+// static void _MVE_frClose(STRUCT_4F6930 *a1);
 static int _MVE_sndDecompM16(unsigned short *a1, unsigned char *a2, int a3, int a4);
 static int _MVE_sndDecompS16(unsigned short *a1, unsigned char *a2, int a3, int a4);
 static void _nfPkConfig();
@@ -432,7 +432,7 @@ static MovieReadProc *gMovieLibReadProc;
 static int dword_6B3AE4;
 
 // 0x6B3AE8
-static int dword_6B3AE8;
+// static int dword_6B3AE8;
 
 // 0x6B3CEC
 static int dword_6B3CEC;
@@ -603,9 +603,9 @@ void movieLibSetPaletteEntriesProc(void (*fn)(unsigned char *, int, int)) {
 }
 
 // 0x4F4B50
-static int _sub_4F4B5() {
-	return 0;
-}
+// static int _sub_4F4B5() {
+//   return 0;
+// }
 
 // 0x4F4B90
 void _MVE_rmCallbacks(int (*fn)()) {
@@ -757,6 +757,7 @@ static void _sub_4F4DD() {
 	dword_51EE20 = true;
 }
 
+#if 0
 // 0x4F4E20
 static int _MVE_rmHoldMovie() {
 	if (!_rm_hold) {
@@ -766,6 +767,7 @@ static int _MVE_rmHoldMovie() {
 	_syncWait();
 	return 0;
 }
+#endif
 
 // 0x4F4E40
 static int _syncWait() {
@@ -786,12 +788,14 @@ static int _syncWait() {
 	return result;
 }
 
+#if 0
 // 0x4F4EA0
 static void _MVE_sndPause() {
 	if (gMveSoundBuffer != -1) {
 		audioEngineSoundBufferStop(gMveSoundBuffer);
 	}
 }
+#endif
 
 // 0x4F4EC0
 int _MVE_rmStepMovie() {
@@ -1125,6 +1129,7 @@ static int _MVE_sndConfigure(int a1, int a2, int a3, int a4, int a5, int a6) {
 	return 1;
 }
 
+#if 0
 // 0x4F56C0
 // Looks like this function is not used
 static void _MVE_syncSync() {
@@ -1133,6 +1138,7 @@ static void _MVE_syncSync() {
 		}
 	}
 }
+#endif
 
 // 0x4F56F0
 static void _MVE_sndReset() {
@@ -1693,6 +1699,7 @@ static void _nfRelease() {
 	}
 }
 
+#if 0
 // 0x4F6550
 static void _frLoad(STRUCT_4F6930 *a1) {
 	gMovieLibReadProc = a1->readProc;
@@ -1758,6 +1765,7 @@ static void _MVE_frClose(STRUCT_4F6930 *a1) {
 		gMovieLibFreeProc(a1);
 	}
 }
+#endif
 
 // 0x4F697C
 static int _MVE_sndDecompM16(unsigned short *a1, unsigned char *a2, int a3, int a4) {

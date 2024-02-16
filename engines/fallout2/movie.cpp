@@ -52,7 +52,7 @@ static File *movieOpen(char *filePath);
 static void movieLoadSubtitles(char *filePath);
 static void movieRenderSubtitles();
 static int _movieStart(int win, char *filePath, int (*a3)());
-static bool _localMovieCallback();
+// static bool _localMovieCallback();
 static int _stepMovie();
 
 // 0x5195B8
@@ -104,7 +104,7 @@ static Rect gMovieWindowRect;
 static Rect _movieRect;
 
 // 0x638E30
-static void (*_movieCallback)();
+// static void (*_movieCallback)();
 
 // 0x638E34
 MovieEndFunc *_endMovieFunc;
@@ -245,12 +245,12 @@ static void movieFreeImpl(void *ptr) {
 
 // 0x48662C
 static bool movieReadImpl(int fileHandle, void *buf, int count) {
-	return fileRead(buf, 1, count, (File *)intToPtr(fileHandle)) == count;
+	return ((int)fileRead(buf, 1, count, (File *)intToPtr(fileHandle)) == count);
 }
 
 // 0x486654
 static void movieDirectImpl(Graphics::Surface *surface, int srcWidth, int srcHeight, int srcX, int srcY, int destWidth, int destHeight, int a8, int a9) {
-	int v14;
+	// int v14;
 	int v15;
 
 	Common::Rect srcRect;
@@ -259,7 +259,7 @@ static void movieDirectImpl(Graphics::Surface *surface, int srcWidth, int srcHei
 	srcRect.right = srcRect.left + srcWidth;
 	srcRect.bottom = srcRect.top + srcHeight;
 
-	v14 = gMovieWindowRect.right - gMovieWindowRect.left;
+	// v14 = gMovieWindowRect.right - gMovieWindowRect.left;
 	v15 = gMovieWindowRect.right - gMovieWindowRect.left + 1;
 
 	Common::Rect destRect;
@@ -886,6 +886,7 @@ static int _movieStart(int win, char *filePath, int (*a3)()) {
 	return 0;
 }
 
+#if 0
 // 0x487964
 static bool _localMovieCallback() {
 	movieRenderSubtitles();
@@ -896,6 +897,7 @@ static bool _localMovieCallback() {
 
 	return inputGetInput() != -1;
 }
+#endif
 
 // 0x487AC8
 int _movieRun(int win, char *filePath) {
