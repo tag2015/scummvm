@@ -77,7 +77,7 @@ int _obj_new_sid(Object *object, int *sidPtr) {
 		return -1;
 	}
 
-	int sid;
+	int sid = -1;
 	int objectType = PID_TYPE(object->pid);
 	if (objectType < OBJ_TYPE_TILE) {
 		sid = proto->sid;
@@ -470,7 +470,7 @@ int _obj_examine_func(Object *critter, Object *target, void (*fn)(char *string))
 			if (car != 0) {
 				snprintf(formattedText, sizeof(formattedText), carMessageListItem.text, 100 * wmCarGasAmount() / 80000);
 			} else {
-				strncpy(formattedText, carMessageListItem.text, sizeof(formattedText));
+				strncpy(formattedText, carMessageListItem.text, sizeof(formattedText) - 1);
 			}
 
 			fn(formattedText);
@@ -1282,12 +1282,12 @@ int _protinst_use_item_on(Object *a1, Object *a2, Object *item) {
 				scriptSetObjects(a2->sid, a1, item);
 				scriptExecProc(a2->sid, SCRIPT_PROC_USE_OBJ_ON);
 
-				Script *script;
-				if (scriptGetScript(a2->sid, &script) == -1) {
+				Script *scr;
+				if (scriptGetScript(a2->sid, &scr) == -1) {
 					return -1;
 				}
 
-				if (!script->scriptOverrides) {
+				if (!scr->scriptOverrides) {
 					return _protinst_default_use_item(a1, a2, item);
 				}
 			}
