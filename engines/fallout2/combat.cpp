@@ -2992,8 +2992,12 @@ static void _combat_add_noncoms() {
 //
 // 0x4223C8
 static int _compare_faster(const void *critter1Ptr, const void *critter2Ptr) {
-	Object *critter1 = *(Object **)critter1Ptr;
-	Object *critter2 = *(Object **)critter2Ptr;
+
+	void *critter1_tmp = const_cast<void *>(critter1Ptr);
+	Object *critter1 = *(static_cast<Object **>(critter1_tmp));
+
+	void *critter2_tmp = const_cast<void *>(critter2Ptr);
+	Object *critter2 = *(static_cast<Object **>(critter2_tmp));
 
 	int sequence1 = critterGetStat(critter1, STAT_SEQUENCE);
 	int sequence2 = critterGetStat(critter2, STAT_SEQUENCE);
