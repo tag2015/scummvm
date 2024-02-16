@@ -168,8 +168,8 @@ static void memoryBlockFreeImpl(void *ptr) {
 // 0x4C5C5C
 void mem_check() {
 	if (gMallocProc == memoryBlockMallocImpl) {
-		debug("Current memory allocated: %6d blocks, %9u bytes total", gMemoryBlocksCurrentCount, gMemoryBlocksCurrentSize);
-		debug("Max memory allocated:     %6d blocks, %9u bytes total", gMemoryBlockMaximumCount, gMemoryBlocksMaximumSize);
+		debug("Current memory allocated: %6d blocks, %9llu bytes total", gMemoryBlocksCurrentCount, gMemoryBlocksCurrentSize);
+		debug("Max memory allocated:     %6d blocks, %9llu bytes total", gMemoryBlockMaximumCount, gMemoryBlocksMaximumSize);
 	}
 }
 
@@ -197,12 +197,12 @@ static void *mem_prep_block(void *block, size_t size) {
 // 0x4C5CE4
 static void memoryBlockValidate(void *block) {
 	MemoryBlockHeader *header = (MemoryBlockHeader *)block;
-	if (header->guard != MEMORY_BLOCK_HEADER_GUARD) {
+	if ((uint)header->guard != MEMORY_BLOCK_HEADER_GUARD) {
 		debug("Memory header stomped.");
 	}
 
 	MemoryBlockFooter *footer = (MemoryBlockFooter *)((unsigned char *)block + header->size - sizeof(MemoryBlockFooter));
-	if (footer->guard != MEMORY_BLOCK_FOOTER_GUARD) {
+	if ((uint)footer->guard != MEMORY_BLOCK_FOOTER_GUARD) {
 		debug("Memory footer stomped.");
 	}
 }
