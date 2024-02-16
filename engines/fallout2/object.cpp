@@ -208,7 +208,7 @@ static unsigned char *_redBlendTable = nullptr;
 Object *_moveBlockObj = nullptr;
 
 // 0x519798
-static int _objItemOutlineState = 0;
+// static int _objItemOutlineState = 0;
 
 // 0x51979C
 static int _cd_order[9] = {
@@ -471,7 +471,7 @@ int objectRead(Object *obj, File *stream) {
 }
 
 int objectReadScumm(Object *obj, Common::InSaveFile *stream) {
-	int field_74;
+	// int field_74;
 
 	obj->id = stream->readSint32BE();
 	if (stream->err())
@@ -493,7 +493,8 @@ int objectReadScumm(Object *obj, Common::InSaveFile *stream) {
 	obj->cid = stream->readSint32BE();
 	obj->lightDistance = stream->readSint32BE();
 	obj->lightIntensity = stream->readSint32BE();
-	field_74 = stream->readSint32BE();
+	/*field_74 = */
+	stream->readSint32BE();
 	obj->sid = stream->readSint32BE();
 	obj->field_80 = stream->readSint32BE();
 	if (stream->err())
@@ -1408,11 +1409,11 @@ int _obj_move(Object *a1, int a2, int a3, int elevation, Rect *a5) {
 		if (previousNode != nullptr) {
 			previousNode->next = node->next;
 		} else {
-			int tile = node->obj->tile;
-			if (tile == -1) {
+			int t = node->obj->tile;
+			if (t == -1) {
 				gObjectListHead = gObjectListHead->next;
 			} else {
-				gObjectListHeadByTile[tile] = gObjectListHeadByTile[tile]->next;
+				gObjectListHeadByTile[t] = gObjectListHeadByTile[t]->next;
 			}
 		}
 
@@ -1436,9 +1437,9 @@ int _obj_move(Object *a1, int a2, int a3, int elevation, Rect *a5) {
 			if (previousNode != nullptr) {
 				previousNode->next = node->next;
 			} else {
-				int tile = node->obj->tile;
-				if (tile != -1) {
-					gObjectListHeadByTile[tile] = gObjectListHeadByTile[tile]->next;
+				int t = node->obj->tile;
+				if (t != -1) {
+					gObjectListHeadByTile[t] = gObjectListHeadByTile[t]->next;
 				} else {
 					gObjectListHead = gObjectListHead->next;
 				}
@@ -1543,16 +1544,16 @@ int objectSetLocation(Object *obj, int tile, int elevation, Rect *rect) {
 	if (obj == gDude) {
 		ObjectListNode *objectListNode = gObjectListHeadByTile[tile];
 		while (objectListNode != nullptr) {
-			Object *obj = objectListNode->obj;
-			int elev = obj->elevation;
+			Object *object = objectListNode->obj;
+			int elev = object->elevation;
 			if (elevation < elev) {
 				break;
 			}
 
 			if (elevation == elev) {
-				if (FID_TYPE(obj->fid) == OBJ_TYPE_MISC) {
-					if (isExitGridPid(obj->pid)) {
-						ObjectData *data = &(obj->data);
+				if (FID_TYPE(object->fid) == OBJ_TYPE_MISC) {
+					if (isExitGridPid(object->pid)) {
+						ObjectData *data = &(object->data);
 
 						MapTransition transition;
 						memset(&transition, 0, sizeof(transition));
@@ -2553,9 +2554,9 @@ Object *_obj_shoot_blocking_at(Object *obj, int tile, int elev) {
 			continue;
 		}
 
-		ObjectListNode *objectListItem = gObjectListHeadByTile[adjacentTile];
-		while (objectListItem != nullptr) {
-			Object *candidate = objectListItem->obj;
+		ObjectListNode *objListItem = gObjectListHeadByTile[adjacentTile];
+		while (objListItem != nullptr) {
+			Object *candidate = objListItem->obj;
 			unsigned int flags = candidate->flags;
 			if ((flags & OBJECT_MULTIHEX) != 0) {
 				if (candidate->elevation == elev) {
@@ -2569,7 +2570,7 @@ Object *_obj_shoot_blocking_at(Object *obj, int tile, int elev) {
 					}
 				}
 			}
-			objectListItem = objectListItem->next;
+			objListItem = objListItem->next;
 		}
 	}
 
@@ -3405,15 +3406,15 @@ err:
 
 // 0x48CF20
 static int _obj_order_comp_func_even(const void *a1, const void *a2) {
-	int v1 = *(int *)a1;
-	int v2 = *(int *)a2;
+	int v1 = *(const_cast<int *>(static_cast<const int *>(a1)));
+	int v2 = *(const_cast<int *>(static_cast<const int *>(a2)));
 	return _offsetTable[0][v1] - _offsetTable[0][v2];
 }
 
 // 0x48CF38
 static int _obj_order_comp_func_odd(const void *a1, const void *a2) {
-	int v1 = *(int *)a1;
-	int v2 = *(int *)a2;
+	int v1 = *(const_cast<int *>(static_cast<const int *>(a1)));
+	int v2 = *(const_cast<int *>(static_cast<const int *>(a2)));
 	return _offsetTable[1][v1] - _offsetTable[1][v2];
 }
 
@@ -3757,7 +3758,7 @@ int _obj_load_dude(Common::InSaveFile *stream) {
 	gDude->elevation = savedElevation;
 
 	int newRotation = gDude->rotation;
-	gDude->rotation = newRotation;
+	gDude->rotation = savedRotation;
 
 	scriptsSetDudeScript();
 
@@ -4788,7 +4789,7 @@ static void objectDrawOutline(Object *object, Rect *rect) {
 		unsigned char *v48 = nullptr;
 		int v53 = object->outline & OUTLINE_PALETTED;
 		int outlineType = object->outline & OUTLINE_TYPE_MASK;
-		int v43;
+		int v43 = 0;
 		int v44;
 
 		switch (outlineType) {
@@ -5013,7 +5014,7 @@ static void _obj_render_object(Object *object, Rect *rect, int light) {
 	}
 
 	unsigned char *src = artGetFrameData(art, object->frame, object->rotation);
-	unsigned char *src2 = src;
+	// unsigned char *src2 = src;
 	int v50 = objectRect.left - object->sx;
 	int v49 = objectRect.top - object->sy;
 	src += frameWidth * v49 + v50;
@@ -5216,8 +5217,8 @@ void _obj_fix_violence_settings(int *fid) {
 
 // 0x48FB08
 static int _obj_preload_sort(const void *a1, const void *a2) {
-	int v1 = *(int *)a1;
-	int v2 = *(int *)a2;
+	int v1 = *(const_cast<int *>(static_cast<const int *>(a1)));
+	int v2 = *(const_cast<int *>(static_cast<const int *>(a2)));
 
 	int v3 = _cd_order[FID_TYPE(v1)];
 	int v4 = _cd_order[FID_TYPE(v2)];
