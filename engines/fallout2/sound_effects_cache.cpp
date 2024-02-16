@@ -273,6 +273,7 @@ long soundEffectsCacheFileSeek(int handle, long offset, int origin) {
 		position = soundEffect->dataSize;
 		break;
 	default:
+		position = 0;
 		assert(false && "Should be unreachable");
 	}
 
@@ -469,7 +470,7 @@ static int soundEffectsCacheFileReadCompressed(int handle, void *buf, unsigned i
 		size_t bytesRead = soundDecoderDecode(soundDecoder, temp, soundEffect->position);
 		internal_free(temp);
 
-		if (bytesRead != soundEffect->position) {
+		if (bytesRead != (size_t)soundEffect->position) {
 			soundDecoderFree(soundDecoder);
 			return -1;
 		}
