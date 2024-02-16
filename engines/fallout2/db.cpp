@@ -328,8 +328,8 @@ int fileReadUInt16(File *stream, unsigned short *valuePtr) {
 int fileReadInt32(File *stream, int *valuePtr) {
 	int value;
 
-	if (xfileRead(&value, 4, 1, stream) == -1) {
-		debug(5, "DB: Error reading int32");
+	if (xfileRead(&value, 4, 1, stream) == 0) {
+		warning("DB: Error reading int32");
 		return -1;
 	} else {
 		if (stream->type == XFILE_TYPE_DFILE && stream->dfile->entry->compressed) { // FIXME idk why compressed entries lose the pointer, for now just do it here
