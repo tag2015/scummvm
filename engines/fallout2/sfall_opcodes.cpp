@@ -601,8 +601,8 @@ static void opSubstr(Program *program) {
 		length = len - startPos; // set the correct length, the length of characters goes beyond the end of the string
 	}
 
-	if (length > sizeof(buf) - 1) {
-		length = sizeof(buf) - 1;
+	if (length > (int)sizeof(buf) - 1) {
+		length = (int)sizeof(buf) - 1;
 	}
 
 	memcpy(buf, &str[startPos], length);
