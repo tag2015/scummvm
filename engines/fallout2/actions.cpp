@@ -854,18 +854,18 @@ int _action_ranged(Attack *attack, int anim) {
 								int adjacentTile = tileGetTileInDirection(explosionCenterTile, rotation, 1);
 								objectSetLocation(adjacentObjects[rotation], adjacentTile, projectile->elevation, nullptr);
 
-								int delay;
+								int delayExpl;
 								if (rotation != ROTATION_NE) {
-									delay = 0;
+									delayExpl = 0;
 								} else {
 									if (damageType == DAMAGE_TYPE_PLASMA) {
-										delay = 4;
+										delayExpl = 4;
 									} else {
-										delay = 2;
+										delayExpl = 2;
 									}
 								}
 
-								animationRegisterUnsetFlag(adjacentObjects[rotation], OBJECT_HIDDEN, delay);
+								animationRegisterUnsetFlag(adjacentObjects[rotation], OBJECT_HIDDEN, delayExpl);
 								animationRegisterAnimateAndHide(adjacentObjects[rotation], ANIM_STAND, 0);
 							}
 						}
