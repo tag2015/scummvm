@@ -625,7 +625,7 @@ int objectDataRead(Object *obj, File *stream) {
 		if (fileReadInt32(stream, &(obj->data.flags)) == -1)
 			return -1;
 
-		if (obj->data.flags == 0xCCCCCCCC) {
+		if (obj->data.flags == (int)0xCCCCCCCC) {
 			debugPrint("\nNote: Reading pud: updated_flags was un-Set!");
 			obj->data.flags = 0;
 		}
@@ -766,7 +766,7 @@ int objectDataReadScumm(Object *obj, Common::InSaveFile *stream) {
 /*		if (fileReadInt32(stream, &(obj->data.flags)) == -1)
 			return -1;*/
 
-		if (obj->data.flags == 0xCCCCCCCC) {
+		if (obj->data.flags == (int)0xCCCCCCCC) {
 			debugPrint("\nNote: Reading pud: updated_flags was un-Set!");
 			obj->data.flags = 0;
 		}
