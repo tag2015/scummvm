@@ -168,7 +168,7 @@ static void _DrawInfoBox(int slot);
 static int _LoadTumbSlot(int slot);
 static int _GetComment(int slot);
 static int _get_input_str2(int win, int doneKeyCode, int cancelKeyCode, char *description, int maxLength, int x, int y, int textColor, int backgroundColor, int flags);
-static int _DummyFunc(File *stream);
+// static int _DummyFunc(File *stream);
 static int _PrepLoad(Common::InSaveFile *stream);
 static int _EndLoad(Common::InSaveFile *stream);
 static int _GameMap2Slot(Common::OutSaveFile *stream);
@@ -213,8 +213,8 @@ static bool _automap_db_flag = false;
 static const char *_patches = nullptr;
 
 // 0x5193EC
-static SaveGameHandler *_master_save_list[LOAD_SAVE_HANDLER_COUNT] = {
-	_DummyFunc,
+// static SaveGameHandler *_master_save_list[LOAD_SAVE_HANDLER_COUNT] = {
+//	_DummyFunc,
 //	_SaveObjDudeCid, DONE
 //	scriptsSaveGameGlobalVars, DONE
 //	_GameMap2Slot, TODO map
@@ -240,11 +240,11 @@ static SaveGameHandler *_master_save_list[LOAD_SAVE_HANDLER_COUNT] = {
 //	partyMembersSave, DONE
 //	queueSave, DONE
 //	interfaceSave, DONE
-	_DummyFunc,
-};
+//	_DummyFunc,
+//};
 
 // 0x519458
-static LoadGameHandler *_master_load_list[LOAD_SAVE_HANDLER_COUNT] = {
+// static LoadGameHandler *_master_load_list[LOAD_SAVE_HANDLER_COUNT] = {
 //	_PrepLoad, DONE
 //	_LoadObjDudeCid, DONE
 //	scriptsLoadGameGlobalVars, DONE
@@ -272,7 +272,7 @@ static LoadGameHandler *_master_load_list[LOAD_SAVE_HANDLER_COUNT] = {
 //	queueLoad, DONE
 //	interfaceLoad, DONE
 //	_EndLoad, DONE
-};
+// };
 
 // 0x5194C4
 static bool _loadingGame = false;
@@ -779,11 +779,11 @@ int lsgSaveGame(int mode) {
 						// Doesn't exist or is corrupted.
 						strncpy(text, getmsg(&gLoadSaveMessageList, &gLoadSaveMessageListItem, 107), sizeof(text) - 1);
 
-						const char *body[2] = {
+						const char *txtBody[2] = {
 							_str1,
 							_str2,
 						};
-						showDialogBox(_str0, body, 2, 169, 116, _colorTable[32328], nullptr, _colorTable[32328], DIALOG_BOX_LARGE);
+						showDialogBox(_str0, txtBody, 2, 169, 116, _colorTable[32328], nullptr, _colorTable[32328], DIALOG_BOX_LARGE);
 
 						lsgWindowFree(0);
 
@@ -944,7 +944,7 @@ int lsgLoadGame(int mode) {
 
 	_quick_done = false;
 
-	int windowType;
+	int windowType = 0;
 	switch (mode) {
 	case LOAD_SAVE_MODE_FROM_MAIN_MENU:
 		windowType = LOAD_SAVE_WINDOW_TYPE_LOAD_GAME_FROM_MAIN_MENU;
@@ -1563,9 +1563,9 @@ static int lsgPerformSaveGame() {
 //	strncpy(protoBasePath, "\\" ITEMS_DIR_NAME, sizeof(protoBasePath) - 1);
 //	compat_mkdir(_gmpath);
 
-//	if (_SaveBackup() == -1) {
-//		debugPrint("\nLOADSAVE: Warning, can't backup save file!\n");
-//	}
+	if (_SaveBackup() == -1) {
+		debugPrint("\nLOADSAVE: Warning, can't backup save file!\n");
+	}
 
 //	snprintf(_gmpath, sizeof(_gmpath), "%s\\%s%.2d\\", "SAVEGAME", "SLOT", _slot_cursor + 1);
 //	strcat_s(_gmpath, sizeof(_gmpath), "SAVE.DAT");
@@ -1719,6 +1719,8 @@ static int lsgPerformSaveGame() {
 		warning("Error saving interface status");
 	else
 		debug("Saved interface status");
+
+	_RestoreSave();  // TODO remove, this is to recover the backup if save fails
 
 //	for (int index = 0; index < LOAD_SAVE_HANDLER_COUNT; index++) {
 //		long pos = fileTell(_flptr);
@@ -2408,7 +2410,7 @@ static int _GetSlotList() {
 
 		debug("Looking for file %s", index_tmp);
 
-		int fileSize;
+		// int fileSize;
 		if (/*dbGetFileSize(_str, &fileSize) != 0*/ filename == filenames.end()) {
 			debug("slot is empty!");
 			_LSstatus[index] = SLOT_STATE_EMPTY;
@@ -2518,7 +2520,7 @@ static void _DrawInfoBox(int slot) {
 				for (int index = 0; index < count - 1; index += 1) {
 					char *beginning = _str + beginnings[index];
 					char *ending = _str + beginnings[index + 1];
-					char c = *ending;
+					// char c = *ending;
 					*ending = '\0';
 					fontDrawText(gLoadSaveWindowBuffer + LS_WINDOW_WIDTH * y + 399, beginning, 164, LS_WINDOW_WIDTH, color);
 					y += v2 + 2;
@@ -2544,6 +2546,9 @@ static void _DrawInfoBox(int slot) {
 		color = _colorTable[32328];
 		break;
 	default:
+		// Error!
+		text = getmsg(&gLoadSaveMessageList, &gLoadSaveMessageListItem, 115);
+		dest = gLoadSaveWindowBuffer + LS_WINDOW_WIDTH * 262 + 404;
 		assert(false && "Should be unreachable");
 	}
 
@@ -2557,7 +2562,7 @@ static int _LoadTumbSlot(int slot) {
 		_LSstatus[_slot_cursor] != SLOT_STATE_UNSUPPORTED_VERSION) {
 
 		Common::SaveFileManager *saveMan = g_system->getSavefileManager();
-		Common::InSaveFile *stream;
+		Common::InSaveFile *stream = nullptr;
 		Common::String saveName = g_engine->getTargetName();
 
 		char slotname[30];
@@ -2571,6 +2576,7 @@ static int _LoadTumbSlot(int slot) {
 		if(saveMan->exists(saveName))
 			stream = saveMan->openForLoading(saveName);
 //			File *stream = fileOpen(_str, "rb");
+
 		if (stream == nullptr) {
 			debugPrint("\nLOADSAVE: ** (A) Error reading thumbnail #%d! **\n", slot);
 			return -1;
@@ -2706,7 +2712,7 @@ static int _GetComment(int slot) {
 
 	char description[LOAD_SAVE_DESCRIPTION_LENGTH];
 	if (_LSstatus[_slot_cursor] == SLOT_STATE_OCCUPIED) {
-		strncpy(description, _LSData[slot].description, LOAD_SAVE_DESCRIPTION_LENGTH);
+		memcpy(description, _LSData[slot].description, LOAD_SAVE_DESCRIPTION_LENGTH);
 	} else {
 		memset(description, '\0', LOAD_SAVE_DESCRIPTION_LENGTH);
 	}
@@ -2787,7 +2793,7 @@ static int _get_input_str2(int win, int doneKeyCode, int cancelKeyCode, char *de
 				text[textLength] = '\0';
 				fontDrawText(windowBuffer + windowWidth * y + x, text, windowWidth, windowWidth, textColor);
 				textLength--;
-			} else if ((keyCode >= KEY_FIRST_INPUT_CHARACTER && keyCode <= KEY_LAST_INPUT_CHARACTER) && textLength < maxLength) {
+			} else if ((keyCode >= KEY_FIRST_INPUT_CHARACTER && keyCode <= KEY_LAST_INPUT_CHARACTER) && (int)textLength < maxLength) {
 				if ((flags & 0x01) != 0) {
 					if (!_isdoschar(keyCode)) {
 						break;
@@ -2826,16 +2832,16 @@ static int _get_input_str2(int win, int doneKeyCode, int cancelKeyCode, char *de
 
 	if (rc == 0) {
 		text[textLength] = '\0';
-		strncpy(description, text, LOAD_SAVE_DESCRIPTION_LENGTH - 1);
+		(strncpy(description, text, LOAD_SAVE_DESCRIPTION_LENGTH));
 	}
 
 	return rc;
 }
 
 // 0x47F48C
-static int _DummyFunc(File *stream) {
-	return 0;
-}
+// static int _DummyFunc(File *stream) {
+//   return 0;
+// }
 
 // 0x47F490
 static int _PrepLoad(Common::InSaveFile *stream) {
@@ -3103,8 +3109,9 @@ static int _mygets(char *dest, Common::InSaveFile *stream) {
 }
 
 // 0x47FE58
+// TODO copy - this is used only to backup the automap DB
 static int _copy_file(const char *existingFileName, const char *newFileName) {
-/*	File *stream1; TODO copy
+/*	File *stream1;
 	File *stream2;
 	int length;
 	int chunk_length;
@@ -3171,6 +3178,7 @@ out:
 	}
 
 	return result;*/
+	return -1;
 }
 
 // InitLoadSave
@@ -3178,7 +3186,7 @@ out:
 void lsgInit() {
 	char path[COMPAT_MAX_PATH];
 	snprintf(path, sizeof(path), "%s\\", "MAPS");
-//	MapDirErase(path, "SAV"); TODO delete maps
+	MapDirErase(path, "SAV");
 }
 
 // 0x480040
@@ -3193,8 +3201,9 @@ int MapDirErase(const char *relativePath, const char *extension) {
 		compat_remove(path);
 	}
 	fileNameListFree(&fileList, 0);
-
-	return 0;*/
+*/
+	warning("MapDirErase not implemented");
+	return 0;
 }
 
 // 0x4800C8
@@ -3204,9 +3213,10 @@ int _MapDirEraseFile_(const char *a1, const char *a2) {
 	snprintf(path, sizeof(path), "%s\\%s%s", _patches, a1, a2);
 	if (compat_remove(path) != 0) {
 		return -1;
-	}
+	} */
 
-	return 0;*/
+	warning("MapDirEraseFile not implemented");
+	return 0;
 }
 
 // 0x480104
@@ -3275,16 +3285,17 @@ static int _SaveBackup() {
 
 		_automap_db_flag = true;
 	}
-
-	return 0;*/
+*/
+	warning("SaveBackup not implemented");
+	return 0;
 }
 
 // 0x4803D8
 static int _RestoreSave() {
-/*	debugPrint("\nLOADSAVE: Restoring save file backup...\n");
+	debugPrint("\nLOADSAVE: Restoring save file backup...\n");
 
 	_EraseSave();
-
+/*
 	snprintf(_gmpath, sizeof(_gmpath), "%s\\%s\\%s%.2d\\", _patches, "SAVEGAME", "SLOT", _slot_cursor + 1);
 	strcpy(_str0, _gmpath);
 	strcat(_str0, "SAVE.DAT");
@@ -3344,8 +3355,9 @@ static int _RestoreSave() {
 		_EraseSave();
 		return -1;
 	}
-
-	return 0;*/
+*/
+	warning("RestoreSave (backup) not implemented");
+	return 0;
 }
 
 // 0x480710
@@ -3407,6 +3419,8 @@ static int _EraseSave() {
 	compat_remove(_str0);
 
 	return 0;*/
+	warning("EraseSave not implemented");
+	return 0;
 }
 
 } // namespace Fallout2
