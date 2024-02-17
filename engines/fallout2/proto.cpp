@@ -249,7 +249,7 @@ int _proto_list_str(int pid, char *proto_path) {
 		*pch = '\0';
 	}
 
-	strncpy(proto_path, string, COMPAT_MAX_PATH - 1);
+	memcpy(proto_path, string, strlen(string) + 1);
 
 	return 0;
 }
@@ -2474,7 +2474,7 @@ static int protoWrite(Proto *proto, Common::WriteStream *stream) {
 		if (protoSceneryDataWrite(&(proto->scenery.data), proto->scenery.type, stream) == -1)
 			return -1;
 
-		return 0;
+		// FALLTHROUGH
 	case OBJ_TYPE_WALL:
 		stream->writeSint32BE(proto->wall.lightDistance);
 		stream->writeSint32BE(proto->wall.lightIntensity);
