@@ -3505,9 +3505,9 @@ static void opPlayGameMovie(Program *program) {
 
 	gameDialogDisable();
 
-/*	if (gameMoviePlay(movie, flags[movie]) == -1) { TODO movie
+	if (gameMoviePlay(movie, flags[movie]) == -1) {
 		debugPrint("\nError playing movie %d!", movie);
-	}*/
+	}
 
 	gameDialogEnable();
 
