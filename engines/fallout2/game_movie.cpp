@@ -136,6 +136,13 @@ int gameMoviesSave(File *stream) {
 // gmovie_play
 // 0x44E690
 int gameMoviePlay(int movie, int flags) {
+	// TODO movie
+	// Currently the game crashes after playback, so for now let's just set the movie as played,
+	// for scripting reasons and return
+	warning("Movie playback not implemented");
+	gGameMoviesSeen[movie] = 1;  // TODO remove
+	return -1;  // TODO remove
+
 	gGameMovieIsPlaying = true;
 
 	const char *movieFileName = gMovieFileNames[movie];

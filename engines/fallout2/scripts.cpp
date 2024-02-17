@@ -465,7 +465,7 @@ int _scriptsCheckGameEvents(int *moviePtr, int window) {
 				windowHide(window);
 			}
 
-//			gameMoviePlay(movie, movieFlags); TODO movie
+			gameMoviePlay(movie, movieFlags);
 
 			if (window != -1) {
 				windowShow(window);
