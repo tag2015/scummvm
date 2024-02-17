@@ -138,7 +138,7 @@ void compat_makepath(char *path, const char *drive, const char *dir, const char 
 
 	if (drive != nullptr) {
 		if (*drive != '\0') {
-			strncpy(path, drive, strlen(drive) + 1);
+			memcpy(path, drive, strlen(drive) + 1);
 			path = strchr(path, '\0');
 
 			if (path[-1] == '/') {
@@ -155,7 +155,7 @@ void compat_makepath(char *path, const char *drive, const char *dir, const char 
 				path++;
 			}
 
-			strncpy(path, dir, strlen(dir) + 1);
+			memcpy(path, dir, strlen(dir) + 1);
 			path = strchr(path, '\0');
 
 			if (path[-1] == '/') {
@@ -171,7 +171,7 @@ void compat_makepath(char *path, const char *drive, const char *dir, const char 
 			path++;
 		}
 
-		strncpy(path, fname, strlen(fname) + 1);
+		memcpy(path, fname, strlen(fname) + 1);
 		path = strchr(path, '\0');
 	} else {
 		if (*path == '/') {
@@ -185,7 +185,7 @@ void compat_makepath(char *path, const char *drive, const char *dir, const char 
 				*path++ = '.';
 			}
 
-			strncpy(path, ext, strlen(ext) + 1);
+			memcpy(path, ext, strlen(ext) + 1);
 			path = strchr(path, '\0');
 		}
 	}
