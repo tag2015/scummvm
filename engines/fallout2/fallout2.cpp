@@ -766,9 +766,9 @@ Common::Error Fallout2Engine::run() {
 	int skipOpeningMovies;
 	configGetInt(&gSfallConfig, SFALL_CONFIG_MISC_KEY, SFALL_CONFIG_SKIP_OPENING_MOVIES_KEY, &skipOpeningMovies);
 	if (skipOpeningMovies < 1) {
-//		gameMoviePlay(MOVIE_IPLOGO, GAME_MOVIE_FADE_IN); TODO movie
-//		gameMoviePlay(MOVIE_INTRO, 0);
-//		gameMoviePlay(MOVIE_CREDITS, 0);
+		gameMoviePlay(MOVIE_IPLOGO, GAME_MOVIE_FADE_IN);
+		gameMoviePlay(MOVIE_INTRO, 0);
+		gameMoviePlay(MOVIE_CREDITS, 0);
 	}
 
 	// load main menu
@@ -794,13 +794,16 @@ Common::Error Fallout2Engine::run() {
 
 		switch (mainMenuRc) {
 		case MAIN_MENU_INTRO:
+			mainMenuWindowHide(true);
+			gameMoviePlay(MOVIE_INTRO, GAME_MOVIE_PAUSE_MUSIC);
+			gameMoviePlay(MOVIE_CREDITS, 0);
 			break;
 
 		case MAIN_MENU_NEW_GAME:
 			mainMenuWindowHide(true);
 			mainMenuWindowFree();
 			if (characterSelectorOpen() == 2) {
-//				gameMoviePlay(MOVIE_ELDER, GAME_MOVIE_STOP_MUSIC);  TODO movie
+				gameMoviePlay(MOVIE_ELDER, GAME_MOVIE_STOP_MUSIC);
 				randomSeedPrerandom(-1);
 
 				// SFALL: Override starting map.
