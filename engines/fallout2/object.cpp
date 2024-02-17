@@ -709,22 +709,22 @@ static void _object_fix_weapon_ammo(Object *obj) {
 	int charges;
 	if (itemGetType(obj) == ITEM_TYPE_WEAPON) {
 		int ammoTypePid = obj->data.item.weapon.ammoTypePid;
-		if (ammoTypePid == 0xCCCCCCCC || ammoTypePid == -1) {
+		if (ammoTypePid == (int)0xCCCCCCCC || ammoTypePid == -1) {
 			obj->data.item.weapon.ammoTypePid = proto->item.data.weapon.ammoTypePid;
 		}
 
 		charges = obj->data.item.weapon.ammoQuantity;
-		if (charges == 0xCCCCCCCC || charges == -1 || charges != proto->item.data.weapon.ammoCapacity) {
+		if (charges == (int)0xCCCCCCCC || charges == -1 || charges != proto->item.data.weapon.ammoCapacity) {
 			obj->data.item.weapon.ammoQuantity = proto->item.data.weapon.ammoCapacity;
 		}
 	} else {
 		if (PID_TYPE(obj->pid) == OBJ_TYPE_MISC) {
 			// FIXME: looks like this code in unreachable
 			charges = obj->data.item.misc.charges;
-			if (charges == 0xCCCCCCCC) {
+			if (charges == (int)0xCCCCCCCC) {
 				charges = proto->item.data.misc.charges;
 				obj->data.item.misc.charges = charges;
-				if (charges == 0xCCCCCCCC) {
+				if (charges == (int)0xCCCCCCCC) {
 					debugPrint("\nError: Misc Item Prototype %s: charges incorrect!", protoGetName(obj->pid));
 					obj->data.item.misc.charges = 0;
 				}

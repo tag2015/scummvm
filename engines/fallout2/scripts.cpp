@@ -2131,7 +2131,7 @@ int scriptGetScript(int sid, Script **scriptPtr) {
 		return -1;
 	}
 
-	if (sid == 0xCCCCCCCC) {
+	if (sid == (int)0xCCCCCCCC) {
 		debugPrint("\nERROR: scr_ptr called with UN-SET id #!!!!");
 		return -1;
 	}
