@@ -769,8 +769,8 @@ int mapLoadByName(char *fileName) {
 	if (rc == -1) {
 		Common::String newPath;
 		const char *filePath = mapBuildPath(fileName);
-		char *extension = strstr(fileName, ".SAV");
-		if (extension != nullptr) {
+		char *ext = strstr(fileName, ".SAV");
+		if (ext != nullptr) {
 			// newPath = ConfMan.get("savepath").c_str();
 			// newPath += Common::String("/");
 			newPath += Common::String(filePath);
@@ -1155,7 +1155,7 @@ static int _map_age_dead_critters() {
 
 	int rc = 0;
 	for (int index = 0; index < count; index++) {
-		Object *obj = objects[index];
+		obj = objects[index];
 		if (PID_TYPE(obj->pid) == OBJ_TYPE_CRITTER) {
 			if (!_critter_flag_check(obj->pid, CRITTER_NO_DROP)) {
 				itemDropAll(obj, obj->tile);
@@ -1458,20 +1458,20 @@ int _map_save_in_game(bool a1) {
 	if (a1 && !wmMapIsSaveable()) {
 		debugPrint("\nNot saving RANDOM encounter map.");
 
-		strncpy(name, gMapHeader.name, sizeof(name) - 1);
+		strncpy(name, gMapHeader.name, sizeof(name));
 		_strmfe(gMapHeader.name, name, "SAV");
 		_MapDirEraseFile_("MAPS\\", gMapHeader.name);
-		strncpy(gMapHeader.name, name, sizeof(gMapHeader.name) - 1);
+		strncpy(gMapHeader.name, name, sizeof(gMapHeader.name));
 	} else {
 		debugPrint("\n Saving \".SAV\" map.");
 
-		strncpy(name, gMapHeader.name, sizeof(name) - 1);
+		strncpy(name, gMapHeader.name, sizeof(name));
 		_strmfe(gMapHeader.name, name, "SAV");
 		if (_map_save() == -1) {
 			return -1;
 		}
 
-		strncpy(gMapHeader.name, name, sizeof(gMapHeader.name) - 1);
+		strncpy(gMapHeader.name, name, sizeof(gMapHeader.name));
 
 		automapSaveCurrent();
 
