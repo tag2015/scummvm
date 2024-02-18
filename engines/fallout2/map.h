@@ -74,7 +74,6 @@ extern int gMapLocalVarsLength;
 extern int gMapGlobalVarsLength;
 extern int gElevation;
 
-extern MessageList gMapMessageList;
 extern MapHeader gMapHeader;
 extern TileData *_square[ELEVATION_COUNT];
 extern int gIsoWindow;
@@ -110,6 +109,8 @@ int _map_target_load_area();
 int mapSetTransition(MapTransition *transition);
 int mapHandleTransition();
 int _map_save_in_game(bool a1);
+
+char *mapNameLookup(MessageListItem *messageListItem, int map);
 
 } // namespace Fallout2
 
