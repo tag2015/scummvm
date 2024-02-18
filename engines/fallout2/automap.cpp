@@ -5,6 +5,7 @@
 
 #include <algorithm>*/
 
+#include "fallout2/fallout2.h"
 #include "fallout2/art.h"
 #include "fallout2/color.h"
 #include "fallout2/config.h"
@@ -272,9 +273,17 @@ int automapReset() {
 
 // 0x41B81C
 void automapExit() {
-	char path[COMPAT_MAX_PATH];
-	snprintf(path, sizeof(path), "%s\\%s\\%s", settings.system.master_patches_path.c_str(), "MAPS", AUTOMAP_DB);
-	compat_remove(path);
+	Common::SaveFileManager *saveMan = g_system->getSavefileManager();
+	Common::Path automapPath(g_engine->getTargetName());
+
+	automapPath.appendInPlace("_");
+	automapPath.appendInPlace(AUTOMAP_DB);
+	if (saveMan->exists(automapPath.toConfig()))
+		saveMan->removeSavefile(automapPath.toConfig());
+
+	//	char path[COMPAT_MAX_PATH];
+	//	snprintf(path, sizeof(path), "%s\\%s\\%s", settings.system.master_patches_path.c_str(), "MAPS", AUTOMAP_DB);
+	//	compat_remove(path);
 }
 
 // 0x41B87C
@@ -686,6 +695,7 @@ int automapSaveCurrent() {
 	int elevation = gElevation;
 
 	int entryOffset = gAutomapHeader.offsets[map][elevation];
+	debug("automapSaveCurrent - map %d elev %d entryoffset %d ", map, elevation, entryOffset);
 	if (entryOffset < 0) {
 		return 0;
 	}
@@ -711,31 +721,46 @@ int automapSaveCurrent() {
 //	char path[256];
 //	snprintf(path, sizeof(path), "%s\\%s", "MAPS", AUTOMAP_DB);
 
-	const Common::Path &path = ConfMan.getPath("path");
-	Common::FSNode gameNode(path);
-	if (!gameNode.exists())
-		warning("AUTOMAP: Can't open gamedir");
+	Common::SaveFileManager *saveMan = g_system->getSavefileManager();
+	Common::Path automapPath(g_engine->getTargetName());
 
-	Common::FSNode dataNode = gameNode.getChild("DATA");
-	if (!dataNode.exists())
-		dataNode.createDirectory();
-
-	Common::FSNode mapsNode = dataNode.getChild("MAPS");
-	if (!mapsNode.exists())
-		mapsNode.createDirectory();
-
-	Common::FSNode automapNode = mapsNode.getChild(AUTOMAP_DB);
-
-	Common::SeekableReadStream *stream1 = automapNode.createReadStream();
-
-//	File *stream1 = fileOpen(path, "r+b");
-	if (stream1 == nullptr) {
+	automapPath.appendInPlace("_");
+	automapPath.appendInPlace(AUTOMAP_DB);
+	Common::InSaveFile *stream1 = saveMan->openForLoading(automapPath.toConfig());
+	if (!stream1) {
 		debugPrint("\nAUTOMAP: Error opening automap database file!\n");
-		debugPrint("Error continued: automap_pip_save: path: %s", path);
 		internal_free(gAutomapEntry.data);
 		internal_free(gAutomapEntry.compressedData);
 		return -1;
+
 	}
+
+
+	// const Common::Path &path = ConfMan.getPath("path");
+	// Common::FSNode gameNode(path);
+	// if (!gameNode.exists())
+	// 	warning("AUTOMAP: Can't open gamedir");
+
+	// Common::FSNode dataNode = gameNode.getChild("DATA");
+	// if (!dataNode.exists())
+	// 	dataNode.createDirectory();
+
+	// Common::FSNode mapsNode = dataNode.getChild("MAPS");
+	// if (!mapsNode.exists())
+	// 	mapsNode.createDirectory();
+
+	// Common::FSNode automapNode = mapsNode.getChild(AUTOMAP_DB);
+
+//	Common::SeekableReadStream *stream1 = automapNode.createReadStream();
+
+//	File *stream1 = fileOpen(path, "r+b");
+	// if (stream1 == nullptr) {
+	// 	debugPrint("\nAUTOMAP: Error opening automap database file!\n");
+	// 	debugPrint("Error continued: automap_pip_save: path: %s", path);
+	// 	internal_free(gAutomapEntry.data);
+	// 	internal_free(gAutomapEntry.compressedData);
+	// 	return -1;
+	// }
 
 	if (automapLoadHeader(stream1) == -1) {
 		debugPrint("\nAUTOMAP: Error reading automap database file header!\n");
@@ -760,9 +785,13 @@ int automapSaveCurrent() {
 	if (entryOffset != 0) {
 //		snprintf(path, sizeof(path), "%s\\%s", "MAPS", AUTOMAP_TMP);
 
-	// TODO Temp files should be removed, do this in save folder
-	Common::FSNode tmpmapNode = mapsNode.getChild(AUTOMAP_TMP);
-	Common::SeekableWriteStream *stream2 = tmpmapNode.createWriteStream();
+		Common::Path automapTmpPath(g_engine->getTargetName());
+		automapTmpPath.appendInPlace("_");
+		automapTmpPath.appendInPlace(AUTOMAP_TMP);
+		Common::OutSaveFile *stream2 = (saveMan->openForSaving(automapTmpPath.toConfig(), false));
+
+//		Common::FSNode tmpmapNode = mapsNode.getChild(AUTOMAP_TMP);
+//		Common::SeekableWriteStream *stream2 = tmpmapNode.createWriteStream();
 
 
 //		File *stream2 = fileOpen(path, "wb");
@@ -886,16 +915,16 @@ int automapSaveCurrent() {
 
 		// scummvm can't delete files outside the save dir
 
-		Common::ReadStream *tmp_stream = tmpmapNode.createReadStream();
-		Common::WriteStream *map_stream = automapNode.createWriteStream();
+		// Common::ReadStream *tmp_stream = tmpmapNode.createReadStream();
+		// Common::WriteStream *map_stream = automapNode.createWriteStream();
 
-		while (!tmp_stream->eos()) {
+		/*while (!tmp_stream->eos()) {
 			byte buf;
 			buf = tmp_stream->readByte();
 			if (tmp_stream->err())
 				break;
 			map_stream->writeByte(buf);
-		}
+		}*/
 /*
 		// NOTE: Not sure about the size.
 		char automapDbPath[512];
@@ -905,6 +934,7 @@ int automapSaveCurrent() {
 			return -1;
 		}
 
+
 		// NOTE: Not sure about the size.
 		char automapTmpPath[512];
 		snprintf(automapTmpPath, sizeof(automapTmpPath), "%s\\%s\\%s", settings.system.master_patches_path.c_str(), "MAPS", AUTOMAP_TMP);
@@ -912,6 +942,15 @@ int automapSaveCurrent() {
 			debugPrint("\nAUTOMAP: Error renaming database!\n");
 			return -1;
 		}*/
+
+		if (!saveMan->removeSavefile(automapPath.toConfig())) {
+			debugPrint("\nAUTOMAP: Error removing database!\n");
+			return -1;
+		}
+		if (!saveMan->renameSavefile(automapTmpPath.toConfig(), automapPath.toConfig(), false)) {
+			debugPrint("\nAUTOMAP: Error renaming database!\n");
+			return -1;
+		}
 
 	} else {
 		bool proceed = true;
@@ -940,12 +979,11 @@ int automapSaveCurrent() {
 			return -1;
 		}
 
-		// TODO this is probably wrong
+		// Reopen for output
 		delete stream1;
-		Common::SeekableWriteStream *stream1 = automapNode.createWriteStream();
-		stream1->seek(0, SEEK_END);
+		Common::OutSaveFile *stream3 = (saveMan->openForSaving(automapPath.toConfig(), false));
 
-		if (automapSaveEntry(stream1) == -1) {
+		if (automapSaveEntry(stream3) == -1) {
 			internal_free(gAutomapEntry.data);
 			internal_free(gAutomapEntry.compressedData);
 			return -1;
@@ -954,7 +992,7 @@ int automapSaveCurrent() {
 		gAutomapHeader.offsets[map][elevation] = gAutomapHeader.dataSize;
 		gAutomapHeader.dataSize += gAutomapEntry.dataSize + 5;
 
-		if (automapSaveHeader(stream1) == -1) {
+		if (automapSaveHeader(stream3) == -1) {
 			internal_free(gAutomapEntry.data);
 			internal_free(gAutomapEntry.compressedData);
 			return -1;
@@ -962,7 +1000,8 @@ int automapSaveCurrent() {
 
 //		fileSeek(stream1, 0, SEEK_END);
 //		fileClose(stream1);
-		delete stream1;
+		stream3->finalize();
+		delete stream3;
 		internal_free(gAutomapEntry.data);
 		internal_free(gAutomapEntry.compressedData);
 	}
@@ -1022,28 +1061,35 @@ static int automapLoadEntry(int map, int elevation) {
 
 //	char path[COMPAT_MAX_PATH];
 //	snprintf(path, sizeof(path), "%s\\%s", "MAPS", AUTOMAP_DB);
-	const Common::Path &path = ConfMan.getPath("path");
-	Common::FSNode gameNode(path);
-	if (!gameNode.exists())
-		warning("AUTOMAP: Can't open gamedir");
+	// const Common::Path &path = ConfMan.getPath("path");
+	// Common::FSNode gameNode(path);
+	// if (!gameNode.exists())
+	// 	warning("AUTOMAP: Can't open gamedir");
 
-	Common::FSNode dataNode = gameNode.getChild("DATA");
-	if(!dataNode.exists())
-		dataNode.createDirectory();
+	// Common::FSNode dataNode = gameNode.getChild("DATA");
+	// if(!dataNode.exists())
+	// 	dataNode.createDirectory();
 
-	Common::FSNode mapsNode = dataNode.getChild("MAPS");
-	if(!mapsNode.exists())
-		mapsNode.createDirectory();
-	Common::FSNode automapNode = mapsNode.getChild(AUTOMAP_DB);
+	// Common::FSNode mapsNode = dataNode.getChild("MAPS");
+	// if(!mapsNode.exists())
+	// 	mapsNode.createDirectory();
+	// Common::FSNode automapNode = mapsNode.getChild(AUTOMAP_DB);
 
-	Common::SeekableReadStream *stream = automapNode.createReadStream();
+	// Common::SeekableReadStream *stream = automapNode.createReadStream();
+
+	Common::SaveFileManager *saveMan = g_system->getSavefileManager();
+	Common::Path automapPath(g_engine->getTargetName());
+
+	automapPath.appendInPlace("_");
+	automapPath.appendInPlace(AUTOMAP_DB);
 
 	bool success = true;
 
 //	File *stream = fileOpen(path, "r+b");
+	Common::InSaveFile *stream = saveMan->openForLoading(automapPath.toConfig());
 	if (stream == nullptr) {
 		debugPrint("\nAUTOMAP: Error opening automap database file!\n");
-		debugPrint("Error continued: AM_ReadEntry: path: %s", path);
+//		debugPrint("Error continued: AM_ReadEntry: path: %s", path);
 		return -1;
 	}
 
@@ -1261,24 +1307,35 @@ static int automapCreate() {
 //	char path[COMPAT_MAX_PATH];
 //	snprintf(path, sizeof(path), "%s\\%s", "MAPS", AUTOMAP_DB);
 
-	const Common::Path &path = ConfMan.getPath("path");
-	Common::FSNode gameNode(path);
-	if (!gameNode.exists())
-		warning("AUTOMAP: Can't open gamedir");
+	Common::SaveFileManager *saveMan = g_system->getSavefileManager();
+	Common::Path automapPath(g_engine->getTargetName());
 
-	Common::FSNode dataNode = gameNode.getChild("DATA");
-	if(!dataNode.exists())
-		dataNode.createDirectory();
+	automapPath.appendInPlace("_");
+	automapPath.appendInPlace(AUTOMAP_DB);
+	Common::OutSaveFile *stream = (saveMan->openForSaving(automapPath.toConfig(), false));
+	if (!stream) {
+		debugPrint("\nAUTOMAP: Error creating automap database file!\n");
+		return -1;
+	}
 
-	Common::FSNode mapsNode = dataNode.getChild("MAPS");
-	if(!mapsNode.exists())
-		mapsNode.createDirectory();
+//	const Common::Path &path = ConfMan.getPath("path");
+//	Common::FSNode gameNode(path);
+//	if (!gameNode.exists())
+//		warning("AUTOMAP: Can't open gamedir");
 
-	Common::FSNode automapNode = mapsNode.getChild(AUTOMAP_DB);
+	// Common::FSNode dataNode = gameNode.getChild("DATA");
+	// if(!dataNode.exists())
+	// 	dataNode.createDirectory();
 
-	Common::SeekableWriteStream *stream = automapNode.createWriteStream();
-	if(!stream)
-		warning("AUTOMAP: Couldn't create automap.db");
+	// Common::FSNode mapsNode = dataNode.getChild("MAPS");
+	// if(!mapsNode.exists())
+	// 	mapsNode.createDirectory();
+
+	// Common::FSNode automapNode = mapsNode.getChild(AUTOMAP_DB);
+
+	// Common::SeekableWriteStream *stream = automapNode.createWriteStream();
+	// if(!stream)
+	// 	warning("AUTOMAP: Couldn't create automap.db");
 
 //	File *stream = fileOpen(path, "wb");
 //	if (stream == nullptr) {
@@ -1340,26 +1397,34 @@ int automapGetHeader(AutomapHeader **automapHeaderPtr) {
 //	char path[COMPAT_MAX_PATH];
 //	snprintf(path, sizeof(path), "%s\\%s", "MAPS", AUTOMAP_DB);
 
-	const Common::Path &path = ConfMan.getPath("path");
-	Common::FSNode gameNode(path);
-	if (!gameNode.exists())
-		warning("AUTOMAP: Can't open gamedir");
+	// const Common::Path &path = ConfMan.getPath("path");
+	// Common::FSNode gameNode(path);
+	// if (!gameNode.exists())
+	// 	warning("AUTOMAP: Can't open gamedir");
 
-	Common::FSNode dataNode = gameNode.getChild("DATA");
-	if (!dataNode.exists())
-		dataNode.createDirectory();
+	// Common::FSNode dataNode = gameNode.getChild("DATA");
+	// if (!dataNode.exists())
+	// 	dataNode.createDirectory();
 
-	Common::FSNode mapsNode = dataNode.getChild("MAPS");
-	if (!mapsNode.exists())
-		mapsNode.createDirectory();
+	// Common::FSNode mapsNode = dataNode.getChild("MAPS");
+	// if (!mapsNode.exists())
+	// 	mapsNode.createDirectory();
 
-	Common::FSNode automapNode = mapsNode.getChild(AUTOMAP_DB);
+	// Common::FSNode automapNode = mapsNode.getChild(AUTOMAP_DB);
 
 	// File *stream = fileOpen(path, "rb");
-	Common::ReadStream *stream = automapNode.createReadStream();
+//	Common::ReadStream *stream = automapNode.createReadStream();
+
+	Common::SaveFileManager *saveMan = g_system->getSavefileManager();
+	Common::Path automapPath(g_engine->getTargetName());
+
+	automapPath.appendInPlace("_");
+	automapPath.appendInPlace(AUTOMAP_DB);
+	Common::InSaveFile *stream = saveMan->openForLoading(automapPath.toConfig());
+
 	if (stream == nullptr) {
 		debugPrint("\nAUTOMAP: Error opening database file for reading!\n");
-		debugPrint("Error continued: ReadAMList: path: %s", path);
+//		debugPrint("Error continued: ReadAMList: path: %s", path);
 		return -1;
 	}
 
