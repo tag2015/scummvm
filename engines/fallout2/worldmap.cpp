@@ -5598,7 +5598,7 @@ static bool wmCursorIsVisible() {
 static int wmGetAreaName(CityInfo *city, char *name) {
 	MessageListItem messageListItem;
 
-	getmsg(&gMapMessageList, &messageListItem, city->areaId + 1500);
+	mapNameLookup(&messageListItem, city->areaId + 1500);
 	strncpy(name, messageListItem.text, 39);
 
 	return 0;
@@ -5610,8 +5610,8 @@ static int wmGetAreaName(CityInfo *city, char *name) {
 int wmGetAreaIdxName(int areaIdx, char *name) {
 	MessageListItem messageListItem;
 
-	getmsg(&gMapMessageList, &messageListItem, 1500 + areaIdx);
-	strncpy(name, messageListItem.text, 40);
+	mapNameLookup(&messageListItem, 1500 + areaIdx);
+	strncpy(name, messageListItem.text, 39);
 
 	return 0;
 }
