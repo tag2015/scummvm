@@ -1127,7 +1127,7 @@ static void pipboyWindowHandleStatus(int a1) {
 		QuestDescription *questDescription = &(gQuestDescriptions[index]);
 
 		const char *text1 = getmsg(&gPipboyMessageList, &gPipboyMessageListItem, 210);
-		const char *text2 = getmsg(&gMapMessageList, &gPipboyMessageListItem, questDescription->location);
+		const char *text2 = mapNameLookup(&gPipboyMessageListItem, questDescription->location);
 		char formattedText[1024];
 		snprintf(formattedText, sizeof(formattedText), "%s %s", text2, text1);
 		pipboyDrawText(formattedText, PIPBOY_TEXT_STYLE_UNDERLINE, _colorTable[992]);
@@ -1218,7 +1218,7 @@ static void pipboyWindowRenderQuestLocationList(int a1) {
 		int color = (gPipboyCurrentLine - 1) / 2 == (a1 - 1) ? _colorTable[32747] : _colorTable[992];
 
 		// Render location.
-		const char *questLocation = getmsg(&gMapMessageList, &gPipboyMessageListItem, quest->location);
+		const char *questLocation = mapNameLookup(&gPipboyMessageListItem, quest->location);
 		pipboyDrawText(questLocation, 0, color);
 
 		gPipboyCurrentLine += 1;
