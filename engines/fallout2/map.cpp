@@ -147,7 +147,7 @@ static Rect gIsoWindowRect;
 //
 // map_msg_file
 // 0x631D48
-MessageList gMapMessageList;
+static MessageList gMapMessageList;
 
 // 0x631D50
 static unsigned char *gIsoWindowBuffer;
@@ -1817,6 +1817,12 @@ static int mapHeaderRead(MapHeader *ptr, File *stream) {
 		return -1;
 
 	return 0;
+}
+
+char *mapNameLookup(MessageListItem *messageListItem, int map) {
+
+	char *name = getmsg(&gMapMessageList, messageListItem, map);
+	return name;
 }
 
 } // namespace Fallout2
