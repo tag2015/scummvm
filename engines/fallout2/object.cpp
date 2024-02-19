@@ -31,6 +31,7 @@
 namespace Fallout2 {
 
 static int objectLoadAllInternal(File *stream);
+static int objectLoadAllInternalScumm(Common::InSaveFile *stream);
 static void _object_fix_weapon_ammo(Object *obj);
 static int objectWrite(Object *obj, Common::OutSaveFile *stream);
 static int _obj_offset_table_init();
@@ -566,6 +567,14 @@ int objectLoadAll(File *stream) {
 	return rc;
 }
 
+int objectLoadAllScumm(Common::InSaveFile *stream) {
+	int rc = objectLoadAllInternalScumm(stream);
+
+	gViolenceLevel = -1;
+
+	return rc;
+}
+
 // 0x488CF8
 static int objectLoadAllInternal(File *stream) {
 	debug(6, "Loading all map objects (objectLoadAllInternal)");
@@ -675,6 +684,140 @@ static int objectLoadAllInternal(File *stream) {
 						}
 					} else {
 						if (_obj_load_obj(stream, &(inventoryItem->item), elevation, objectListNode->obj) == -1) {
+							return -1;
+						}
+					}
+				}
+			} else {
+				inventory->capacity = 0;
+				inventory->items = nullptr;
+			}
+		}
+	}
+
+	_obj_rebuild_all_light();
+
+	debug(6, "Loaded all map objects");
+	return 0;
+}
+
+static int objectLoadAllInternalScumm(Common::InSaveFile *stream) {
+	debug(6, "Loading all map objects (objectLoadAllInternal)");
+	if (stream == nullptr) {
+		return -1;
+	}
+
+	bool fixMapInventory = settings.mapper.fix_map_inventory;
+
+	gViolenceLevel = settings.preferences.violence_level;
+
+	int objectCount;
+	objectCount = stream->readSint32BE();
+	if (stream->err())
+		return -1;
+	//	if (fileReadInt32(stream, &objectCount) == -1) {
+	//		return -1;
+	//	}*/
+
+	if (gObjectFids != nullptr) {
+		internal_free(gObjectFids);
+	}
+
+	if (objectCount != 0) {
+		gObjectFids = (int *)internal_malloc(sizeof(*gObjectFids) * objectCount);
+		memset(gObjectFids, 0, sizeof(*gObjectFids) * objectCount);
+		if (gObjectFids == nullptr) {
+			return -1;
+		}
+		gObjectFidsLength = 0;
+	}
+
+	for (int elevation = 0; elevation < ELEVATION_COUNT; elevation++) {
+		int objectCountAtElevation;
+
+		objectCountAtElevation = stream->readSint32BE();
+		if (stream->err())
+			return -1;
+		//		if (fileReadInt32(stream, &objectCountAtElevation) == -1) {
+		//			return -1;
+		//		}
+
+		for (int objectIndex = 0; objectIndex < objectCountAtElevation; objectIndex++) {
+			ObjectListNode *objectListNode;
+
+			// NOTE: Uninline.
+			if (objectListNodeCreate(&objectListNode) == -1) {
+				return -1;
+			}
+
+			if (objectAllocate(&(objectListNode->obj)) == -1) {
+				// NOTE: Uninline.
+				objectListNodeDestroy(&objectListNode);
+				return -1;
+			}
+
+			if (objectReadScumm(objectListNode->obj, stream) != 0) {
+				// NOTE: Uninline.
+				objectDeallocate(&(objectListNode->obj));
+
+				// NOTE: Uninline.
+				objectListNodeDestroy(&objectListNode);
+
+				return -1;
+			}
+
+			objectListNode->obj->outline = 0;
+			gObjectFids[gObjectFidsLength++] = objectListNode->obj->fid;
+
+			if (objectListNode->obj->sid != -1) {
+				Script *script;
+				if (scriptGetScript(objectListNode->obj->sid, &script) == -1) {
+					objectListNode->obj->sid = -1;
+					debugPrint("\nError connecting object to script!");
+				} else {
+					script->owner = objectListNode->obj;
+					objectListNode->obj->field_80 = script->field_14;
+				}
+			}
+
+			_obj_fix_violence_settings(&(objectListNode->obj->fid));
+			objectListNode->obj->elevation = elevation;
+
+			_obj_insert(objectListNode);
+
+			if ((objectListNode->obj->flags & OBJECT_NO_REMOVE) && PID_TYPE(objectListNode->obj->pid) == OBJ_TYPE_CRITTER && objectListNode->obj->pid != 18000) {
+				objectListNode->obj->flags &= ~OBJECT_NO_REMOVE;
+			}
+
+			Inventory *inventory = &(objectListNode->obj->data.inventory);
+			if (inventory->length != 0) {
+				inventory->items = (InventoryItem *)internal_malloc(sizeof(InventoryItem) * inventory->capacity);
+				if (inventory->items == nullptr) {
+					return -1;
+				}
+
+				for (int inventoryItemIndex = 0; inventoryItemIndex < inventory->length; inventoryItemIndex++) {
+					InventoryItem *inventoryItem = &(inventory->items[inventoryItemIndex]);
+					inventoryItem->quantity = stream->readSint32BE();
+					//	if (fileReadInt32(stream, &(inventoryItem->quantity)) != 0) {
+					if (stream->err()) {
+						debugPrint("Error loading inventory\n");
+						return -1;
+					}
+
+					if (fixMapInventory) {
+						inventoryItem->item = (Object *)internal_malloc(sizeof(Object));
+						if (inventoryItem->item == nullptr) {
+							debugPrint("Error loading inventory\n");
+							return -1;
+						}
+
+						if (objectReadScumm(inventoryItem->item, stream) != 0) {
+							debugPrint("Error loading inventory\n");
+							return -1;
+						}
+					} else {
+						if (_obj_load_obj_scumm(stream, &(inventoryItem->item), elevation, objectListNode->obj) == -1) {
 							return -1;
 						}
 					}
