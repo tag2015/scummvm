@@ -29,6 +29,7 @@ void objectsExit();
 int objectRead(Object *obj, File *stream);
 int objectReadScumm(Object *obj, Common::InSaveFile *stream);
 int objectLoadAll(File *stream);
+int objectLoadAllScumm(Common::InSaveFile *stream);
 int objectSaveAll(Common::OutSaveFile *stream);
 void _obj_render_pre_roof(Rect *rect, int elevation);
 void _obj_render_post_roof(Rect *rect, int elevation);
