@@ -81,7 +81,9 @@ static int _scr_header_load();
 static int scriptWrite(Script *scr, Common::OutSaveFile *stream);
 static int scriptListExtentWrite(ScriptListExtent *a1, Common::OutSaveFile *stream);
 static int scriptRead(Script *scr, File *stream);
+static int scriptReadScumm(Script *scr, Common::InSaveFile *stream);
 static int scriptListExtentRead(ScriptListExtent *a1, File *stream);
+static int scriptListExtentReadScumm(ScriptListExtent *a1, Common::InSaveFile *stream);
 static int scriptGetNewId(int scriptType);
 static int scriptsRemoveLocalVars(Script *script);
 static int scriptsGetMessageList(int a1, MessageList **out_message_list);
@@ -2025,6 +2027,96 @@ static int scriptRead(Script *scr, File *stream) {
 	return 0;
 }
 
+static int scriptReadScumm(Script *scr, Common::InSaveFile *stream) {
+	int prg;
+
+	scr->sid = stream->readSint32BE();
+	scr->field_4 = stream->readSint32BE();
+	//	if (fileReadInt32(stream, &(scr->sid)) == -1)
+	//		return -1;
+	//	if (fileReadInt32(stream, &(scr->field_4)) == -1)
+	//		return -1;
+
+	switch (SID_TYPE(scr->sid)) {
+	case SCRIPT_TYPE_SPATIAL:
+		scr->sp.built_tile = stream->readSint32BE();
+		scr->sp.radius = stream->readSint32BE();
+		// if (fileReadInt32(stream, &(scr->sp.built_tile)) == -1)
+		// 	return -1;
+		// if (fileReadInt32(stream, &(scr->sp.radius)) == -1)
+		// 	return -1;
+		break;
+	case SCRIPT_TYPE_TIMED:
+		scr->tm.time = stream->readSint32BE();
+		//	if (fileReadInt32(stream, &(scr->tm.time)) == -1)
+		//	return -1;
+		break;
+	}
+
+	scr->flags = stream->readSint32BE();
+	scr->field_14 = stream->readSint32BE();
+	prg = stream->readSint32BE();
+	scr->field_1C = stream->readSint32BE();
+	scr->localVarsOffset = stream->readSint32BE();
+	scr->localVarsCount = stream->readSint32BE();
+	scr->field_28 = stream->readSint32BE();
+	scr->action = stream->readSint32BE();
+	scr->fixedParam = stream->readSint32BE();
+	scr->actionBeingUsed = stream->readSint32BE();
+	scr->scriptOverrides = stream->readSint32BE();
+	scr->field_48 = stream->readSint32BE();
+	scr->howMuch = stream->readSint32BE();
+	scr->field_50 = stream->readSint32BE();
+
+	/*	if (fileReadInt32(stream, &(scr->flags)) == -1)
+			return -1;
+		if (fileReadInt32(stream, &(scr->field_14)) == -1)
+			return -1;
+		if (fileReadInt32(stream, &(prg)) == -1)
+			return -1;
+		if (fileReadInt32(stream, &(scr->field_1C)) == -1)
+			return -1;
+		if (fileReadInt32(stream, &(scr->localVarsOffset)) == -1)
+			return -1;
+		if (fileReadInt32(stream, &(scr->localVarsCount)) == -1)
+			return -1;
+		if (fileReadInt32(stream, &(scr->field_28)) == -1)
+			return -1;
+		if (fileReadInt32(stream, &(scr->action)) == -1)
+			return -1;
+		if (fileReadInt32(stream, &(scr->fixedParam)) == -1)
+			return -1;
+		if (fileReadInt32(stream, &(scr->actionBeingUsed)) == -1)
+			return -1;
+		if (fileReadInt32(stream, &(scr->scriptOverrides)) == -1)
+			return -1;
+		if (fileReadInt32(stream, &(scr->field_48)) == -1)
+			return -1;
+		if (fileReadInt32(stream, &(scr->howMuch)) == -1)
+			return -1;
+		if (fileReadInt32(stream, &(scr->field_50)) == -1)
+			return -1;*/
+	if (stream->err())
+		return -1;
+
+	scr->program = nullptr;
+	scr->owner = nullptr;
+	scr->source = nullptr;
+	scr->target = nullptr;
+
+	for (int index = 0; index < SCRIPT_PROC_COUNT; index++) {
+		scr->procs[index] = 0;
+	}
+
+	if (!(gMapHeader.flags & 1)) {
+		scr->localVarsCount = 0;
+	}
+
+	scr->overriddenSelf = nullptr;
+
+	return 0;
+}
+
 // 0x4A5BE8
 static int scriptListExtentRead(ScriptListExtent *scriptExtent, File *stream) {
 	for (int index = 0; index < SCRIPT_LIST_EXTENT_SIZE; index++) {
@@ -2042,6 +2134,31 @@ static int scriptListExtentRead(ScriptListExtent *scriptExtent, File *stream) {
 	if (fileReadInt32(stream, &(next)) != 0) {
 		return -1;
 	}
+
+	return 0;
+}
+
+static int scriptListExtentReadScumm(ScriptListExtent *scriptExtent, Common::InSaveFile *stream) {
+	for (int index = 0; index < SCRIPT_LIST_EXTENT_SIZE; index++) {
+		Script *scr = &(scriptExtent->scripts[index]);
+		if (scriptReadScumm(scr, stream) != 0) {
+			return -1;
+		}
+	}
+
+	scriptExtent->length = stream->readSint32BE();
+	//	if (fileReadInt32(stream, &(scriptExtent->length)) != 0) {
+	//		return -1;
+	//	}
+
+	int next;
+	next = stream->readSint32BE();
+	//	if (fileReadInt32(stream, &(next)) != 0) {
+	//		return -1;
+	//	}
+
+	if (stream->err())
+		return -1;
 
 	return 0;
 }
@@ -2093,6 +2210,84 @@ int scriptLoadAll(File *stream) {
 				}
 
 				if (scriptListExtentRead(scriptExt, stream) != 0) {
+					return -1;
+				}
+
+				for (int scriptIndex = 0; scriptIndex < scriptExt->length; scriptIndex++) {
+					Script *script = &(scriptExt->scripts[scriptIndex]);
+					script->owner = nullptr;
+					script->source = nullptr;
+					script->target = nullptr;
+					script->program = nullptr;
+					script->flags &= ~SCRIPT_FLAG_0x01;
+				}
+
+				prevExtent->next = scriptExt;
+
+				scriptExt->next = nullptr;
+				prevExtent = scriptExt;
+			}
+
+			scriptList->tail = prevExtent;
+		} else {
+			scriptList->head = nullptr;
+			scriptList->tail = nullptr;
+			scriptList->length = 0;
+		}
+	}
+
+	return 0;
+}
+
+int scriptLoadAllScumm(Common::InSaveFile *stream) {
+	for (int index = 0; index < SCRIPT_TYPE_COUNT; index++) {
+		ScriptList *scriptList = &(gScriptLists[index]);
+
+		int scriptsCount = 0;
+		scriptsCount = stream->readSint32BE();
+		if (stream->err())
+			return -1;
+		//if (fileReadInt32(stream, &scriptsCount) == -1) {
+		//	return -1;
+		//}
+
+		if (scriptsCount != 0) {
+			scriptList->length = scriptsCount / 16;
+
+			if (scriptsCount % 16 != 0) {
+				scriptList->length++;
+			}
+
+			ScriptListExtent *extent = (ScriptListExtent *)internal_malloc(sizeof(*extent));
+			scriptList->head = extent;
+			scriptList->tail = extent;
+			if (extent == nullptr) {
+				return -1;
+			}
+
+			if (scriptListExtentReadScumm(extent, stream) != 0) {
+				return -1;
+			}
+
+			for (int scriptIndex = 0; scriptIndex < extent->length; scriptIndex++) {
+				Script *script = &(extent->scripts[scriptIndex]);
+				script->owner = nullptr;
+				script->source = nullptr;
+				script->target = nullptr;
+				script->program = nullptr;
+				script->flags &= ~SCRIPT_FLAG_0x01;
+			}
+
+			extent->next = nullptr;
+
+			ScriptListExtent *prevExtent = extent;
+			for (int extentIndex = 1; extentIndex < scriptList->length; extentIndex++) {
+				ScriptListExtent *scriptExt = (ScriptListExtent *)internal_malloc(sizeof(*scriptExt));
+				if (scriptExt == nullptr) {
+					return -1;
+				}
+
+				if (scriptListExtentReadScumm(scriptExt, stream) != 0) {
 					return -1;
 				}
 

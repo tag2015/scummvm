@@ -209,6 +209,7 @@ int scriptsLoadGameGlobalVars(Common::InSaveFile *stream);
 int scriptsSkipGameGlobalVars(Common::InSaveFile *stream);
 int scriptSaveAll(Common::OutSaveFile *stream);
 int scriptLoadAll(File *stream);
+int scriptLoadAllScumm(Common::InSaveFile *stream);
 int scriptGetScript(int sid, Script **script);
 int scriptAdd(int *sidPtr, int scriptType);
 int scriptRemove(int index);
