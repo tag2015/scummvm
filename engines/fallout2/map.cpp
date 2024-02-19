@@ -52,6 +52,7 @@ namespace Fallout2 {
 
 static char *mapBuildPath(char *name);
 static int mapLoad(File *stream);
+static int mapLoadScumm(Common::InSaveFile *stream);
 static int _map_age_dead_critters();
 static void _map_fix_critter_combat_data();
 static int _map_save();
@@ -63,15 +64,19 @@ static void isoWindowRefreshRectMapper(Rect *rect);
 static int mapGlobalVariablesInit(int count);
 static void mapGlobalVariablesFree();
 static int mapGlobalVariablesLoad(File *stream);
+static int mapGlobalVariablesLoadScumm(Common::InSaveFile *stream);
 static int mapLocalVariablesInit(int count);
 static void mapLocalVariablesFree();
 static int mapLocalVariablesLoad(File *stream);
+static int mapLocalVariablesLoadScumm(Common::InSaveFile *stream);
 static void _map_place_dude_and_mouse();
 static void square_init();
 static void _square_reset();
 static int _square_load(File *stream, int a2);
+static int _square_load_scumm(Common::InSaveFile *stream, int a2);
 static int mapHeaderWrite(MapHeader *ptr, Common::OutSaveFile *stream);
 static int mapHeaderRead(MapHeader *ptr, File *stream);
+static int mapHeaderReadScumm(MapHeader *ptr, Common::InSaveFile *stream);
 
 // 0x50B058
 static char byte_50B058[] = "";
@@ -774,21 +779,24 @@ int mapLoadByName(char *fileName) {
 			// newPath = ConfMan.get("savepath").c_str();
 			// newPath += Common::String("/");
 			newPath += Common::String(filePath);
+			debug("MapLoadByName (.sav) map path: %s", newPath.c_str());
+			Common::SaveFileManager *saveMan = g_system->getSavefileManager();
+			Common::InSaveFile *stream = saveMan->openForLoading(Common::String(filePath));
+			rc = mapLoadScumm(stream);
 		} else {
 			newPath = "MAPS\\";
 			newPath += Common::String(fileName);
-		}
-		debug("MapLoadByName map path: %s", newPath.c_str());
+			debug("MapLoadByName (.map) map path: %s", newPath.c_str());
+			File *stream = fileOpen(newPath.c_str(), "rb");
+			if (stream != nullptr) {
+				rc = mapLoad(stream);
+				fileClose(stream);
+			}
 
-		File *stream = fileOpen(newPath.c_str(), "rb");
-		if (stream != nullptr) {
-			rc = mapLoad(stream);
-			fileClose(stream);
-		}
-
-		if (rc == 0) {
-			strncpy(gMapHeader.name, fileName, 15);
-			gDude->data.critter.combat.whoHitMe = nullptr;
+			if (rc == 0) {
+				strncpy(gMapHeader.name, fileName, 15);
+				gDude->data.critter.combat.whoHitMe = nullptr;
+			}
 		}
 	}
 
@@ -809,6 +817,242 @@ int mapLoadById(int map) {
 	int rc = mapLoadByName(name);
 
 	wmMapMusicStart();
+
+	return rc;
+}
+
+static int mapLoadScumm(Common::InSaveFile *stream) {
+	_map_save_in_game(true);
+	backgroundSoundLoad("wind2", 12, 13, 16);
+	isoDisable();
+	_partyMemberPrepLoad();
+	_gmouse_disable_scrolling();
+
+	int savedMouseCursorId = gameMouseGetCursor();
+	gameMouseSetCursor(MOUSE_CURSOR_WAIT_PLANET);
+	fileSetReadProgressHandler(gameMouseRefreshImmediately, 32768);
+	tileDisable();
+
+	int rc = 0;
+
+	windowFill(gIsoWindow,
+			   0,
+			   0,
+			   windowGetWidth(gIsoWindow),
+			   windowGetHeight(gIsoWindow),
+			   _colorTable[0]);
+	windowRefresh(gIsoWindow);
+	animationStop();
+	scriptsDisable();
+
+	gMapSid = -1;
+
+	const char *error = nullptr;
+
+	error = "Invalid file handle";
+	if (stream == nullptr) {
+		goto err;
+	}
+
+	error = "Error reading header";
+	if (mapHeaderReadScumm(&gMapHeader, stream) != 0) {
+		goto err;
+	}
+
+	error = "Invalid map version";
+	if (gMapHeader.version != 19 && gMapHeader.version != 20) {
+		goto err;
+	}
+
+	if (gEnteringElevation == -1) {
+		// NOTE: Uninline.
+		mapSetEnteringLocation(gMapHeader.enteringElevation, gMapHeader.enteringTile, gMapHeader.enteringRotation);
+	}
+
+	_obj_remove_all();
+
+	if (gMapHeader.globalVariablesCount < 0) {
+		gMapHeader.globalVariablesCount = 0;
+	}
+
+	if (gMapHeader.localVariablesCount < 0) {
+		gMapHeader.localVariablesCount = 0;
+	}
+
+	error = "Error allocating global vars";
+	// NOTE: Uninline.
+	if (mapGlobalVariablesInit(gMapHeader.globalVariablesCount) != 0) {
+		goto err;
+	}
+
+	error = "Error loading global vars";
+	// NOTE: Uninline.
+	if (mapGlobalVariablesLoadScumm(stream) != 0) {
+		goto err;
+	}
+
+	error = "Error allocating local vars";
+	// NOTE: Uninline.
+	if (mapLocalVariablesInit(gMapHeader.localVariablesCount) != 0) {
+		goto err;
+	}
+
+	error = "Error loading local vars";
+	// NOTE: Uninline.
+	if (mapLocalVariablesLoadScumm(stream) != 0) {
+		goto err;
+	}
+
+	if (_square_load_scumm(stream, gMapHeader.flags) != 0) {
+		goto err;
+	}
+
+	error = "Error reading scripts";
+	if (scriptLoadAllScumm(stream) != 0) {
+		goto err;
+	}
+
+	error = "Error reading objects";
+	if (objectLoadAllScumm(stream) != 0) {
+		goto err;
+	}
+
+	if ((gMapHeader.flags & 1) == 0) {
+		_map_fix_critter_combat_data();
+	}
+
+	error = "Error setting map elevation";
+	if (mapSetElevation(gEnteringElevation) != 0) {
+		goto err;
+	}
+
+	error = "Error setting tile center";
+	if (tileSetCenter(gEnteringTile, TILE_SET_CENTER_FLAG_IGNORE_SCROLL_RESTRICTIONS) != 0) {
+		goto err;
+	}
+
+	lightSetAmbientIntensity(LIGHT_INTENSITY_MAX, false);
+	objectSetLocation(gDude, gCenterTile, gElevation, nullptr);
+	objectSetRotation(gDude, gEnteringRotation, nullptr);
+	gMapHeader.field_34 = wmMapMatchNameToIdx(gMapHeader.name);
+
+	if ((gMapHeader.flags & 1) == 0) {
+		char path[COMPAT_MAX_PATH];
+		snprintf(path, sizeof(path), "maps\\%s", gMapHeader.name);
+
+		char *extension = strstr(path, ".MAP");
+		if (extension == nullptr) {
+			extension = strstr(path, ".map");
+		}
+
+		if (extension != nullptr) {
+			*extension = '\0';
+		}
+
+		strcat_s(path, sizeof(path), ".GAM");
+		globalVarsRead(path, "MAP_GLOBAL_VARS:", &gMapGlobalVarsLength, &gMapGlobalVars);
+		gMapHeader.globalVariablesCount = gMapGlobalVarsLength;
+	}
+
+	scriptsEnable();
+
+	if (gMapHeader.scriptIndex > 0) {
+		error = "Error creating new map script";
+		if (scriptAdd(&gMapSid, SCRIPT_TYPE_SYSTEM) == -1) {
+			goto err;
+		}
+
+		Object *object;
+		int fid = buildFid(OBJ_TYPE_MISC, 12, 0, 0, 0);
+		objectCreateWithFidPid(&object, fid, -1);
+		object->flags |= (OBJECT_LIGHT_THRU | OBJECT_NO_SAVE | OBJECT_HIDDEN);
+		objectSetLocation(object, 1, 0, nullptr);
+		object->sid = gMapSid;
+		scriptSetFixedParam(gMapSid, (gMapHeader.flags & 1) == 0);
+
+		Script *script;
+		scriptGetScript(gMapSid, &script);
+		script->field_14 = gMapHeader.scriptIndex - 1;
+		script->flags |= SCRIPT_FLAG_0x08;
+		object->id = scriptsNewObjectId();
+		script->field_1C = object->id;
+		script->owner = object;
+		_scr_spatials_disable();
+		scriptExecProc(gMapSid, SCRIPT_PROC_MAP_ENTER);
+		_scr_spatials_enable();
+
+		error = "Error Setting up random encounter";
+		if (wmSetupRandomEncounter() == -1) {
+			goto err;
+		}
+	}
+
+	error = nullptr;
+
+err:
+
+	if (error != nullptr) {
+		char message[100]; // TODO: Size is probably wrong.
+		snprintf(message, sizeof(message), "%s while loading map.", error);
+		debugPrint(message);
+		mapNewMap();
+		rc = -1;
+	} else {
+		_obj_preload_art_cache(gMapHeader.flags);
+	}
+
+	_partyMemberRecoverLoad();
+	interfaceBarShow();
+	_proto_dude_update_gender();
+	_map_place_dude_and_mouse();
+	fileSetReadProgressHandler(nullptr, 0);
+	isoEnable();
+	_gmouse_disable_scrolling();
+	gameMouseSetCursor(MOUSE_CURSOR_WAIT_PLANET);
+
+	if (scriptsExecStartProc() == -1) {
+		debugPrint("\n   Error: scr_load_all_scripts failed!");
+	}
+
+	scriptsExecMapEnterProc();
+	scriptsExecMapUpdateProc();
+	tileEnable();
+
+	if (gMapTransition.map > 0) {
+		if (gMapTransition.rotation >= 0) {
+			objectSetRotation(gDude, gMapTransition.rotation, nullptr);
+		}
+	} else {
+		tileWindowRefresh();
+	}
+
+	gameTimeScheduleUpdateEvent();
+
+//	if (_gsound_sfx_q_start() == -1) { TODO audio
+//		rc = -1;
+//	}
+
+	wmMapMarkVisited(gMapHeader.field_34);
+	wmMapMarkMapEntranceState(gMapHeader.field_34, gElevation, 1);
+
+	if (wmCheckGameAreaEvents() != 0) {
+		rc = -1;
+	}
+
+	fileSetReadProgressHandler(nullptr, 0);
+
+	if (gameUiIsDisabled() == 0) {
+		_gmouse_enable_scrolling();
+	}
+
+	gameMouseSetCursor(savedMouseCursorId);
+
+	// NOTE: Uninline.
+	mapSetEnteringLocation(-1, -1, -1);
+
+//	gameMovieFadeOut(); TODO movie
+
+	gMapHeader.version = 20;
 
 	return rc;
 }
@@ -1586,6 +1830,19 @@ static int mapGlobalVariablesLoad(File *stream) {
 	return 0;
 }
 
+static int mapGlobalVariablesLoadScumm(Common::InSaveFile *stream) {
+	for (int i = 0; i < gMapGlobalVarsLength; i++)
+		gMapGlobalVars[i] = stream->readSint32BE();
+	//	if (fileReadInt32List(stream, gMapGlobalVars, gMapGlobalVarsLength) != 0) {
+	//		return -1;
+	//	}
+
+	if (stream->err())
+		return -1;
+
+	return 0;
+}
+
 // NOTE: Inlined.
 //
 // 0x484080
@@ -1624,6 +1881,19 @@ static int mapLocalVariablesLoad(File *stream) {
 	if (fileReadInt32List(stream, gMapLocalVars, gMapLocalVarsLength) != 0) {
 		return -1;
 	}
+
+	return 0;
+}
+
+static int mapLocalVariablesLoadScumm(Common::InSaveFile *stream) {
+	//	if (fileReadInt32List(stream, gMapLocalVars, gMapLocalVarsLength) != 0) {
+	//		return -1;
+	//	}
+	for (int i = 0; i < gMapLocalVarsLength; i++)
+		gMapLocalVars[i] = stream->readSint32BE();
+
+	if (stream->err())
+		return -1;
 
 	return 0;
 }
@@ -1705,6 +1975,46 @@ static int _square_load(File *stream, int flags) {
 			if (_db_freadIntCount(stream, arr, SQUARE_GRID_SIZE) != 0) {
 				return -1;
 			}
+
+			for (int tile = 0; tile < SQUARE_GRID_SIZE; tile++) {
+				v6 = arr[tile];
+				v6 &= ~(0xFFFF);
+				v6 >>= 16;
+
+				v7 = (v6 & 0xF000) >> 12;
+				v7 &= ~(0x01);
+
+				v8 = v6 & 0xFFF;
+				v9 = arr[tile] & 0xFFFF;
+				arr[tile] = ((v8 | (v7 << 12)) << 16) | v9;
+				debug(6, "Map tile %d: %d", tile, arr[tile]);
+			}
+		}
+	}
+
+	return 0;
+}
+
+static int _square_load_scumm(Common::InSaveFile *stream, int flags) {
+	int v6;
+	int v7;
+	int v8;
+	int v9;
+
+	_square_reset();
+
+	for (int elevation = 0; elevation < ELEVATION_COUNT; elevation++) {
+		debug(6, "Map level (elevation): %d", elevation);
+		if ((flags & _map_data_elev_flags[elevation]) == 0) {
+			int *arr = _square[elevation]->field_0;
+			for (int i = 0; i < SQUARE_GRID_SIZE; i++)
+				arr[i] = stream->readSint32BE();
+			if (stream->err())
+				return -1;
+
+			//  if (_db_freadIntCount(stream, arr, SQUARE_GRID_SIZE) != 0) {
+			//    return -1;
+			//	}
 
 			for (int tile = 0; tile < SQUARE_GRID_SIZE; tile++) {
 				v6 = arr[tile];
@@ -1814,6 +2124,79 @@ static int mapHeaderRead(MapHeader *ptr, File *stream) {
 		return -1;
 	debug(5, "Map Header - lastVisitTime: %d", ptr->lastVisitTime);
 	if (fileReadInt32List(stream, ptr->field_3C, 44) == -1)
+		return -1;
+
+	return 0;
+}
+
+static int mapHeaderReadScumm(MapHeader *ptr, Common::InSaveFile *stream) {
+	ptr->version = stream->readSint32BE();
+//	if (fileReadInt32(stream, &(ptr->version)) == -1)
+//		return -1;
+	debug(5, "Map Header - version %d", ptr->version);
+
+	for (int i = 0; i < 16; i++)
+		ptr->name[i] = stream->readByte();
+//	if (fileReadFixedLengthString(stream, ptr->name, 16) == -1)
+//		return -1;
+	debug(5, "Map Header - name: %s", ptr->name);
+
+	ptr->enteringTile = stream->readSint32BE();
+//	if (fileReadInt32(stream, &(ptr->enteringTile)) == -1)
+//		return -1;
+	debug(5, "Map Header - enteringTile: %d", ptr->enteringTile);
+
+	ptr->enteringElevation = stream->readSint32BE();
+//	if (fileReadInt32(stream, &(ptr->enteringElevation)) == -1)
+//		return -1;
+	debug(5, "Map Header - enteringElevation: %d", ptr->enteringElevation);
+
+	ptr->enteringRotation = stream->readSint32BE();
+//	if (fileReadInt32(stream, &(ptr->enteringRotation)) == -1)
+//		return -1;
+	debug(5, "Map Header - enteringRotation: %d", ptr->enteringRotation);
+
+	ptr->localVariablesCount = stream->readSint32BE();
+//	if (fileReadInt32(stream, &(ptr->localVariablesCount)) == -1)
+//		return -1;
+	debug(5, "Map Header - localVariablesCount: %d", ptr->localVariablesCount);
+
+	ptr->scriptIndex = stream->readSint32BE();
+//	if (fileReadInt32(stream, &(ptr->scriptIndex)) == -1)
+//		return -1;
+	debug(5, "Map Header - scriptIndex: %d", ptr->scriptIndex);
+
+	ptr->flags = stream->readSint32BE();
+//	if (fileReadInt32(stream, &(ptr->flags)) == -1)
+//		return -1;
+	debug(5, "Map Header - flags: %d", ptr->flags);
+
+	ptr->darkness = stream->readSint32BE();
+//	if (fileReadInt32(stream, &(ptr->darkness)) == -1)
+//		return -1;
+	debug(5, "Map Header - darkness: %d", ptr->darkness);
+
+	ptr->globalVariablesCount = stream->readSint32BE();
+//	if (fileReadInt32(stream, &(ptr->globalVariablesCount)) == -1)
+//		return -1;
+	debug(5, "Map Header - globalVariablesCount: %d", ptr->globalVariablesCount);
+
+	ptr->field_34 = stream->readSint32BE();
+//	if (fileReadInt32(stream, &(ptr->field_34)) == -1)
+//		return -1;
+	debug(5, "Map Header - field_34: %d", ptr->field_34);
+
+	ptr->lastVisitTime = stream->readUint32BE();
+//	if (fileReadUInt32(stream, &(ptr->lastVisitTime)) == -1)
+//		return -1;
+	debug(5, "Map Header - lastVisitTime: %d", ptr->lastVisitTime);
+
+	for (int i = 0; i < 44; i++)
+		ptr->field_3C[i] = stream->readSint32BE();
+//	if (fileReadInt32List(stream, ptr->field_3C, 44) == -1)
+//		return -1;
+
+	if (stream->err())
 		return -1;
 
 	return 0;
