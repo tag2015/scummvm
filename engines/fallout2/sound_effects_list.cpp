@@ -218,7 +218,7 @@ int soundEffectsListGetFilePath(int tag, char **pathPtr) {
 	}
 	int path_len = strlen(gSoundEffectsListPath) + strlen(name) + 1;
 	memcpy(path, gSoundEffectsListPath, path_len);
-	strcat_s(path, path_len, name);
+	Common::strcat_s(path, path_len, name);
 
 	*pathPtr = path;
 
@@ -320,7 +320,7 @@ static int soundEffectsListPopulateFileNames() {
 	}
 	int pattern_length = strlen(gSoundEffectsListPath) + strlen(extension) + 1;
 	memcpy(pattern, gSoundEffectsListPath, pattern_length);
-	strcat_s(pattern, pattern_length, extension);
+	Common::strcat_s(pattern, pattern_length, extension);
 
 	char **fileNameList;
 	gSoundEffectsListEntriesLength = fileNameListInit(pattern, &fileNameList, 0, 0);

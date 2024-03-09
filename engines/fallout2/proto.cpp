@@ -197,9 +197,9 @@ bool isExitGridPid(int pid) {
 // 0x49E270
 void proto_make_path(char *path, int pid) {
 	strncpy(path, _cd_path_base, COMPAT_MAX_PATH);
-	strcat_s(path, COMPAT_MAX_PATH, _proto_path_base);
+	Common::strcat_s(path, COMPAT_MAX_PATH, _proto_path_base);
 	if (pid != -1) {
-		strcat_s(path, COMPAT_MAX_PATH, artGetObjectTypeName(PID_TYPE(pid)));
+		Common::strcat_s(path, COMPAT_MAX_PATH, artGetObjectTypeName(PID_TYPE(pid)));
 	}
 }
 
@@ -217,9 +217,9 @@ int _proto_list_str(int pid, char *proto_path) {
 
 	char path[COMPAT_MAX_PATH];
 	proto_make_path(path, pid);
-	strcat_s(path, sizeof(path), "\\");
-	strcat_s(path, sizeof(path), artGetObjectTypeName(PID_TYPE(pid)));
-	strcat_s(path, sizeof(path), ".lst");
+	Common::strcat_s(path, sizeof(path), "\\");
+	Common::strcat_s(path, sizeof(path), artGetObjectTypeName(PID_TYPE(pid)));
+	Common::strcat_s(path, sizeof(path), ".lst");
 
 	File *stream = fileOpen(path, "rt");
 
@@ -1809,9 +1809,9 @@ static int _proto_header_load() {
 
 		char path[COMPAT_MAX_PATH];
 		proto_make_path(path, index << 24);
-		strcat_s(path, sizeof(path), "\\");
-		strcat_s(path, sizeof(path), artGetObjectTypeName(index));
-		strcat_s(path, sizeof(path), ".lst");
+		Common::strcat_s(path, sizeof(path), "\\");
+		Common::strcat_s(path, sizeof(path), artGetObjectTypeName(index));
+		Common::strcat_s(path, sizeof(path), ".lst");
 
 		File *stream = fileOpen(path, "rt");
 		if (stream == nullptr) {
@@ -2542,7 +2542,7 @@ int _proto_save_pid(int pid) {
 
 	char path[260];
 	proto_make_path(path, pid);
-	strcat_s(path, sizeof(path), "\\");
+	Common::strcat_s(path, sizeof(path), "\\");
 
 	_proto_list_str(pid, path + strlen(path));
 
@@ -2601,7 +2601,7 @@ int _proto_save_pid(int pid) {
 static int _proto_load_pid(int pid, Proto **protoPtr) {
 	char path[COMPAT_MAX_PATH];
 	proto_make_path(path, pid);
-	strcat_s(path, sizeof(path), "\\");
+	Common::strcat_s(path, sizeof(path), "\\");
 
 	if (_proto_list_str(pid, path + strlen(path)) == -1) {
 		return -1;

@@ -949,7 +949,7 @@ static int mapLoadScumm(Common::InSaveFile *stream) {
 			*extension = '\0';
 		}
 
-		strcat_s(path, sizeof(path), ".GAM");
+		Common::strcat_s(path, sizeof(path), ".GAM");
 		globalVarsRead(path, "MAP_GLOBAL_VARS:", &gMapGlobalVarsLength, &gMapGlobalVars);
 		gMapHeader.globalVariablesCount = gMapGlobalVarsLength;
 	}
@@ -1186,7 +1186,7 @@ static int mapLoad(File *stream) {
 			*extension = '\0';
 		}
 
-		strcat_s(path, sizeof(path), ".GAM");
+		Common::strcat_s(path, sizeof(path), ".GAM");
 		globalVarsRead(path, "MAP_GLOBAL_VARS:", &gMapGlobalVarsLength, &gMapGlobalVars);
 		gMapHeader.globalVariablesCount = gMapGlobalVarsLength;
 	}
@@ -1541,10 +1541,10 @@ static int _map_save() {
 	char temp[80];
 	temp[0] = '\0';
 
-	strcat_s(temp, sizeof(temp), settings.system.master_patches_path.c_str());
+	Common::strcat_s(temp, sizeof(temp), settings.system.master_patches_path.c_str());
 	compat_mkdir(temp);
 
-	strcat_s(temp, sizeof(temp), "\\MAPS");
+	Common::strcat_s(temp, sizeof(temp), "\\MAPS");
 	compat_mkdir(temp);
 
 	int rc = -1;
@@ -1738,7 +1738,7 @@ static void mapMakeMapsDirectory() {
 	strncpy(path, settings.system.master_patches_path.c_str(), sizeof(path) - 1);
 	compat_mkdir(path);
 
-	strcat_s(path, sizeof(path), "\\MAPS");
+	Common::strcat_s(path, sizeof(path), "\\MAPS");
 	compat_mkdir(path);
 }
 

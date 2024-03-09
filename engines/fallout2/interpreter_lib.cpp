@@ -573,7 +573,7 @@ void opPlayMovie(Program *program) {
 	strncpy(gIntLibPlayMovieFileName, movieFileName, sizeof(gIntLibPlayMovieFileName) - 1);
 
 	if (strrchr(gIntLibPlayMovieFileName, '.') == nullptr) {
-		strcat_s(gIntLibPlayMovieFileName, sizeof(gIntLibPlayMovieFileName), ".mve");
+		Common::strcat_s(gIntLibPlayMovieFileName, sizeof(gIntLibPlayMovieFileName), ".mve");
 	}
 
 	_selectWindowID(program->windowId);
@@ -599,7 +599,7 @@ void opPlayMovieRect(Program *program) {
 	strncpy(gIntLibPlayMovieRectFileName, movieFileName, sizeof(gIntLibPlayMovieRectFileName) - 1);
 
 	if (strrchr(gIntLibPlayMovieRectFileName, '.') == nullptr) {
-		strcat_s(gIntLibPlayMovieRectFileName, sizeof(gIntLibPlayMovieRectFileName), ".mve");
+		Common::strcat_s(gIntLibPlayMovieRectFileName, sizeof(gIntLibPlayMovieRectFileName), ".mve");
 	}
 
 	_selectWindowID(program->windowId);
