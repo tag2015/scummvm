@@ -309,7 +309,7 @@ static void textFontDrawImpl(unsigned char *buf, const char *string, int length,
 		fontDrawText(buf + pitch + 1, string, length, pitch, _colorTable[0]);
 	}
 
-	int monospacedCharacterWidth;
+	int monospacedCharacterWidth = 0;
 	if ((color & FONT_MONO) != 0) {
 		monospacedCharacterWidth = fontGetMonospacedCharacterWidth();
 	}

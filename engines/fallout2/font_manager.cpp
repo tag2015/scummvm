@@ -325,7 +325,7 @@ static void interfaceFontDrawImpl(unsigned char *buf, const char *string, int le
 
 	unsigned char *palette = _getColorBlendTable(color & 0xFF);
 
-	int monospacedCharacterWidth;
+	int monospacedCharacterWidth = 0;
 	if ((color & FONT_MONO) != 0) {
 		// NOTE: Uninline.
 		monospacedCharacterWidth = interfaceFontGetMonospacedCharacterWidthImpl();
