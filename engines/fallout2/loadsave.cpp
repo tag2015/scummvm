@@ -386,7 +386,7 @@ int lsgSaveGame(int mode) {
 			}
 		}
 		snprintf(_gmpath, sizeof(_gmpath), "%s\\%s%.2d\\", "SAVEGAME", "SLOT", _slot_cursor + 1);
-		strcat_s(_gmpath, sizeof(_gmpath), "SAVE.DAT");
+		Common::strcat_s(_gmpath, sizeof(_gmpath), "SAVE.DAT");
 
 		_flptr = fileOpen(_gmpath, "rb");
 		if (_flptr != nullptr) {

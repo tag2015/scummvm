@@ -645,9 +645,9 @@ static Program *scriptsCreateProgramByName(const char *name) {
 	char path[COMPAT_MAX_PATH];
 
 	strncpy(path, _cd_path_base, COMPAT_MAX_PATH);
-	strcat_s(path, sizeof(path), gScriptsBasePath);
-	strcat_s(path, sizeof(path), name);
-	strcat_s(path, sizeof(path), ".int");
+	Common::strcat_s(path, sizeof(path), gScriptsBasePath);
+	Common::strcat_s(path, sizeof(path), name);
+	Common::strcat_s(path, sizeof(path), ".int");
 
 	return programCreateByPath(path);
 }
@@ -1217,7 +1217,7 @@ int scriptsRequestStealing(Object *a1, Object *a2) {
 // NOTE: Inlined.
 void _script_make_path(char *path) {
 	strncpy(path, _cd_path_base, COMPAT_MAX_PATH);
-	strcat_s(path, COMPAT_MAX_PATH, gScriptsBasePath);
+	Common::strcat_s(path, COMPAT_MAX_PATH, gScriptsBasePath);
 }
 
 // exec_script_proc
@@ -1335,7 +1335,7 @@ bool scriptHasProc(int sid, int proc) {
 static int scriptsLoadScriptsList() {
 	char path[COMPAT_MAX_PATH];
 	_script_make_path(path);
-	strcat_s(path, sizeof(path), "scripts.lst");
+	Common::strcat_s(path, sizeof(path), "scripts.lst");
 
 	File *stream = fileOpen(path, "rt");
 	if (stream == nullptr) {
@@ -1717,7 +1717,7 @@ static int _scr_header_load() {
 
 	char path[COMPAT_MAX_PATH];
 	_script_make_path(path);
-	strcat_s(path, sizeof(path), "scripts.lst");
+	Common::strcat_s(path, sizeof(path), "scripts.lst");
 
 	File *stream = fileOpen(path, "rt");
 	if (stream == nullptr) {
