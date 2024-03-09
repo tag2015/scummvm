@@ -1,7 +1,7 @@
 #ifndef FALLOUT2_INTERPRETER_H
 #define FALLOUT2_INTERPRETER_H
 
-#include <setjmp.h>
+// #include <setjmp.h>
 
 #include "fallout2/object.h"
 
@@ -14,6 +14,8 @@ namespace Fallout2 {
 //
 // SFALL: Increase number of opcodes.
 #define OPCODE_MAX_COUNT 768
+
+typedef byte jmp_buf[256];
 
 typedef enum Opcode {
 	OPCODE_NOOP = 0x8000,
