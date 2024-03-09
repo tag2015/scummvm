@@ -13,7 +13,7 @@ namespace Fallout2 {
 int strParseInt(char **stringPtr, int *valuePtr) {
 	char *str, *remaining_str;
 	size_t v1, v2, v3;
-	char tmp;
+	char tmp = '\0';
 
 	if (*stringPtr == nullptr) {
 		return 0;
@@ -56,7 +56,7 @@ int strParseStrFromList(char **stringPtr, int *valuePtr, const char **stringList
 	int i;
 	char *str, *remaining_str;
 	size_t v1, v2, v3;
-	char tmp;
+	char tmp = '\0';
 
 	if (*stringPtr == nullptr) {
 		return 0;
@@ -110,7 +110,7 @@ int strParseStrFromList(char **stringPtr, int *valuePtr, const char **stringList
 int strParseStrFromFunc(char **stringPtr, int *valuePtr, StringParserCallback *callback) {
 	char *str, *remaining_str;
 	size_t v1, v2, v3;
-	char tmp;
+	char tmp = '\0';
 	int result;
 
 	if (*stringPtr == nullptr) {
