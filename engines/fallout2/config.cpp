@@ -195,7 +195,7 @@ bool configGetInt(Config *config, const char *sectionKey, const char *key, int *
 	}
 
 	char *end;
-	errno = 0;
+	// errno = 0;
 	long l = strtol(stringValue, &end, base); // see https://stackoverflow.com/a/6154614
 
 	// The link above says right things about converting strings to numbers,
