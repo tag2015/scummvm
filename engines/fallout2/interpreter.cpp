@@ -1416,7 +1416,7 @@ static void opAdd(Program *program) {
 
 		tempString = (char *)internal_malloc_safe(strlen(strings[1]) + strlen(strings[0]) + 1, __FILE__, __LINE__); // "..\\int\\INTRPRET.C", 1015
 		memcpy(tempString, strings[1], strlen(strings[1]) + 1);
-		strcat_s(tempString, strlen(tempString) + strlen(strings[0]) + 1, strings[0]);
+		Common::strcat_s(tempString, strlen(tempString) + strlen(strings[0]) + 1, strings[0]);
 
 		programStackPushString(program, tempString);
 
@@ -1430,7 +1430,7 @@ static void opAdd(Program *program) {
 			strings[0] = programGetString(program, value[0].opcode, value[0].integerValue);
 			tempString = (char *)internal_malloc_safe(strlen(strings[0]) + 80, __FILE__, __LINE__); // "..\\int\\INTRPRET.C", 1039
 			snprintf(tempString, strlen(strings[0]) + 80, "%.5f", value[1].floatValue);
-			strcat_s(tempString, strlen(tempString) + strlen(strings[0]), strings[0]);
+			Common::strcat_s(tempString, strlen(tempString) + strlen(strings[0]), strings[0]);
 
 			programStackPushString(program, tempString);
 
@@ -1451,7 +1451,7 @@ static void opAdd(Program *program) {
 			strings[0] = programGetString(program, value[0].opcode, value[0].integerValue);
 			tempString = (char *)internal_malloc_safe(strlen(strings[0]) + 80, __FILE__, __LINE__); // "..\\int\\INTRPRET.C", 1070
 			snprintf(tempString, strlen(strings[0]) + 80, "%d", value[1].integerValue);
-			strcat_s(tempString, strlen(tempString) + strlen(strings[0]), strings[0]);
+			Common::strcat_s(tempString, strlen(tempString) + strlen(strings[0]), strings[0]);
 
 			programStackPushString(program, tempString);
 
@@ -1477,7 +1477,7 @@ static void opAdd(Program *program) {
 			strings[0] = programGetString(program, value[0].opcode, value[0].integerValue);
 			tempString = (char *)internal_malloc_safe(strlen(strings[0]) + 80, __FILE__, __LINE__);
 			snprintf(tempString, strlen(strings[0]) + 80, "%p", value[1].pointerValue);
-			strcat_s(tempString, strlen(tempString) + strlen(strings[0]), strings[0]);
+			Common::strcat_s(tempString, strlen(tempString) + strlen(strings[0]), strings[0]);
 
 			programStackPushString(program, tempString);
 

@@ -5007,7 +5007,7 @@ void _combat_display(Attack *attack) {
 			}
 		}
 
-		strcat_s(text, sizeof(text), ".");
+		Common::strcat_s(text, sizeof(text), ".");
 
 		displayMonitorAddMessage(text);
 	}
@@ -5093,11 +5093,11 @@ void _combat_display(Attack *attack) {
 				if (settings.preferences.combat_messages && (attack->attackerFlags & DAM_CRITICAL) != 0 && attack->criticalMessageId != -1) {
 					messageListItem.num = attack->criticalMessageId;
 					if (messageListGetItem(&gCombatMessageList, &messageListItem)) {
-						strcat_s(text, sizeof(text), messageListItem.text);
+						Common::strcat_s(text, sizeof(text), messageListItem.text);
 					}
 
 					if ((attack->defenderFlags & DAM_DEAD) != 0) {
-						strcat_s(text, sizeof(text), ".");
+						Common::strcat_s(text, sizeof(text), ".");
 						displayMonitorAddMessage(text);
 
 						if (attack->defender == gDude) {
@@ -5126,7 +5126,7 @@ void _combat_display(Attack *attack) {
 					combatAddDamageFlagsDescription(text, attack->defenderFlags, attack->defender);
 				}
 
-				strcat_s(text, sizeof(text), ".");
+				Common::strcat_s(text, sizeof(text), ".");
 
 				displayMonitorAddMessage(text);
 			}
@@ -5165,7 +5165,7 @@ void _combat_display(Attack *attack) {
 
 			combatAddDamageFlagsDescription(text, attack->attackerFlags, attack->attacker);
 
-			strcat_s(text, sizeof(text), ".");
+			Common::strcat_s(text, sizeof(text), ".");
 
 			displayMonitorAddMessage(text);
 		}
@@ -5174,7 +5174,7 @@ void _combat_display(Attack *attack) {
 			if (attack->attackerDamage > 0) {
 				combatCopyDamageAmountDescription(text, sizeof(text), attack->attacker, attack->attackerDamage);
 				combatAddDamageFlagsDescription(text, attack->attackerFlags, attack->attacker);
-				strcat_s(text, sizeof(text), ".");
+				Common::strcat_s(text, sizeof(text), ".");
 				displayMonitorAddMessage(text);
 			}
 		}
@@ -5185,7 +5185,7 @@ void _combat_display(Attack *attack) {
 		if ((critter->data.critter.combat.results & DAM_DEAD) == 0) {
 			combatCopyDamageAmountDescription(text, sizeof(text), critter, attack->extrasDamage[index]);
 			combatAddDamageFlagsDescription(text, attack->extrasFlags[index], critter);
-			strcat_s(text, sizeof(text), ".");
+			Common::strcat_s(text, sizeof(text), ".");
 
 			displayMonitorAddMessage(text);
 		}
@@ -5277,13 +5277,13 @@ static void combatAddDamageFlagsDescription(char *dest, int flags, Object *critt
 		// " and "
 		messageListItem.num = 108;
 		if (messageListGetItem(&gCombatMessageList, &messageListItem)) {
-			strcat_s(dest, 280, messageListItem.text);
+			Common::strcat_s(dest, 280, messageListItem.text);
 		}
 
 		// were killed
 		messageListItem.num = num + 7;
 		if (messageListGetItem(&gCombatMessageList, &messageListItem)) {
-			strcat_s(dest, 280, messageListItem.text);
+			Common::strcat_s(dest, 280, messageListItem.text);
 		}
 
 		return;
@@ -5301,23 +5301,23 @@ static void combatAddDamageFlagsDescription(char *dest, int flags, Object *critt
 
 	if (flagsListLength != 0) {
 		for (int index = 0; index < flagsListLength - 1; index++) {
-			strcat_s(dest, 280, ", ");
+			Common::strcat_s(dest, 280, ", ");
 
 			messageListItem.num = num + flagsList[index];
 			if (messageListGetItem(&gCombatMessageList, &messageListItem)) {
-				strcat_s(dest, 280, messageListItem.text);
+				Common::strcat_s(dest, 280, messageListItem.text);
 			}
 		}
 
 		// " and "
 		messageListItem.num = 108;
 		if (messageListGetItem(&gCombatMessageList, &messageListItem)) {
-			strcat_s(dest, 280, messageListItem.text);
+			Common::strcat_s(dest, 280, messageListItem.text);
 		}
 
 		messageListItem.num = num + flagsList[flagsListLength - 1];
 		if (messageListGetItem(&gCombatMessageList, &messageListItem)) {
-			strcat_s(dest, 280, messageListItem.text);
+			Common::strcat_s(dest, 280, messageListItem.text);
 		}
 	}
 }

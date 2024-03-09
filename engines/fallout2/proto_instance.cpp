@@ -364,7 +364,7 @@ int _obj_examine_func(Object *critter, Object *target, void (*fn)(char *string))
 				const int maxiumHitPoints = critterGetStat(target, STAT_MAXIMUM_HIT_POINTS);
 				const int currentHitPoints = critterGetStat(target, STAT_CURRENT_HIT_POINTS);
 				snprintf(formattedText, sizeof(formattedText), hpMessageListItem.text, currentHitPoints, maxiumHitPoints);
-				strcat_s(formattedText, sizeof(formattedText), endingMessageListItem.text);
+				Common::strcat_s(formattedText, sizeof(formattedText), endingMessageListItem.text);
 			}
 		} else {
 			int v12 = 0;
@@ -448,7 +448,7 @@ int _obj_examine_func(Object *critter, Object *target, void (*fn)(char *string))
 				error("Can't find msg num");
 			}
 
-			strcat_s(formattedText, sizeof(formattedText), v63.text);
+			Common::strcat_s(formattedText, sizeof(formattedText), v63.text);
 		}
 
 		fn(formattedText);
@@ -513,7 +513,7 @@ int _obj_examine_func(Object *critter, Object *target, void (*fn)(char *string))
 					 ammoMessageListItem.text,
 					 ammoGetArmorClassModifier(target));
 			if (fn == gameDialogRenderSupplementaryMessage) {
-				strcat_s(ammoFormattedText, sizeof(ammoFormattedText), formattedText);
+				Common::strcat_s(ammoFormattedText, sizeof(ammoFormattedText), formattedText);
 			} else {
 				fn(formattedText);
 			}
@@ -528,8 +528,8 @@ int _obj_examine_func(Object *critter, Object *target, void (*fn)(char *string))
 					 ammoMessageListItem.text,
 					 ammoGetDamageResistanceModifier(target));
 			if (fn == gameDialogRenderSupplementaryMessage) {
-				strcat_s(ammoFormattedText, sizeof(ammoFormattedText), ", ");
-				strcat_s(ammoFormattedText, sizeof(ammoFormattedText), formattedText);
+				Common::strcat_s(ammoFormattedText, sizeof(ammoFormattedText), ", ");
+				Common::strcat_s(ammoFormattedText, sizeof(ammoFormattedText), formattedText);
 			} else {
 				fn(formattedText);
 			}
@@ -545,9 +545,9 @@ int _obj_examine_func(Object *critter, Object *target, void (*fn)(char *string))
 					 ammoGetDamageMultiplier(target),
 					 ammoGetDamageDivisor(target));
 			if (fn == gameDialogRenderSupplementaryMessage) {
-				strcat_s(ammoFormattedText, sizeof(ammoFormattedText), ", ");
-				strcat_s(ammoFormattedText, sizeof(ammoFormattedText), formattedText);
-				strcat_s(ammoFormattedText, sizeof(ammoFormattedText), ".");
+				Common::strcat_s(ammoFormattedText, sizeof(ammoFormattedText), ", ");
+				Common::strcat_s(ammoFormattedText, sizeof(ammoFormattedText), formattedText);
+				Common::strcat_s(ammoFormattedText, sizeof(ammoFormattedText), ".");
 				fn(ammoFormattedText);
 			} else {
 				fn(formattedText);

@@ -1140,7 +1140,7 @@ void endgameSetupDeathEnding(int reason) {
 
 	EndgameDeathEnding *deathEnding = &(gEndgameDeathEndings[selectedEnding]);
 
-	strcat_s(gEndgameDeathEndingFileName, sizeof(gEndgameDeathEndingFileName), deathEnding->voiceOverBaseName);
+	Common::strcat_s(gEndgameDeathEndingFileName, sizeof(gEndgameDeathEndingFileName), deathEnding->voiceOverBaseName);
 
 	debugPrint("\nendgameSetupDeathEnding: Death Filename Picked: %s", gEndgameDeathEndingFileName);
 }

@@ -266,9 +266,9 @@ int lipsLoad(const char *audioFileName, const char *headFileName) {
 
 	strncpy(_lips_subdir_name, headFileName, sizeof(_lips_subdir_name) - 1);
 
-	strcat_s(path, sizeof(path), _lips_subdir_name);
+	Common::strcat_s(path, sizeof(path), _lips_subdir_name);
 
-	strcat_s(path, sizeof(path), "\\");
+	Common::strcat_s(path, sizeof(path), "\\");
 
 	sep = strchr(path, '.');
 	if (sep != nullptr) {
@@ -285,9 +285,9 @@ int lipsLoad(const char *audioFileName, const char *headFileName) {
 	(strncpy(gLipsData.field_50, v60, sizeof(gLipsData.field_50) - 1));
 	gLipsData.field_50[sizeof(gLipsData.field_50) - 1] = '\0';
 
-	strcat_s(path, sizeof(path), _lips_fix_string(gLipsData.field_50, sizeof(gLipsData.field_50)));
-	strcat_s(path, sizeof(path), ".");
-	strcat_s(path, sizeof(path), gLipsData.field_60);
+	Common::strcat_s(path, sizeof(path), _lips_fix_string(gLipsData.field_50, sizeof(gLipsData.field_50)));
+	Common::strcat_s(path, sizeof(path), ".");
+	Common::strcat_s(path, sizeof(path), gLipsData.field_60);
 
 	lipsFree();
 

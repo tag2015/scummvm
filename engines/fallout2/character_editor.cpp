@@ -3919,8 +3919,8 @@ static int characterEditorShowOptions() {
 
 				string4[0] = '\0';
 
-				strcat_s(string4, sizeof(string4), "*.");
-				strcat_s(string4, sizeof(string4), "TXT");
+				Common::strcat_s(string4, sizeof(string4), "*.");
+				Common::strcat_s(string4, sizeof(string4), "TXT");
 
 				char **fileList;
 				int fileListLength = 1; // fileNameListInit(string4, &fileList, 0, 0);
@@ -3932,11 +3932,11 @@ static int characterEditorShowOptions() {
 					strncpy(string4, getmsg(&gCharacterEditorMessageList, &gCharacterEditorMessageListItem, 602), sizeof(string4) - 1);
 
 					if (/*showSaveFileDialog(string4, fileList, string1, fileListLength, 168, 80, 0) == 0*/ 1) {
-						strcat_s(string1, sizeof(string1), ".");
-						strcat_s(string1, sizeof(string1), "TXT");
+						Common::strcat_s(string1, sizeof(string1), ".");
+						Common::strcat_s(string1, sizeof(string1), "TXT");
 
 						string4[0] = '\0';
-						strcat_s(string4, sizeof(string4), string1);
+						Common::strcat_s(string4, sizeof(string4), string1);
 
 						if (/*characterFileExists(string4)*/ saveMan->exists(txtFileName)) {
 							// already exists
@@ -3958,7 +3958,7 @@ static int characterEditorShowOptions() {
 
 						if (rc != 0) {
 							string4[0] = '\0';
-							strcat_s(string4, sizeof(string4), /*string1*/ const_cast<char *>(txtFileName.c_str()));
+							Common::strcat_s(string4, sizeof(string4), /*string1*/ const_cast<char *>(txtFileName.c_str()));
 
 							if (characterPrintToFile(string4) == 0) {
 								snprintf(string4, sizeof(string4),
@@ -3998,8 +3998,8 @@ static int characterEditorShowOptions() {
 				gcdFileName += "_" + Common::String(str) + ".gcd";
 
 				string4[0] = '\0';
-				strcat_s(string4, sizeof(string4), "*.");
-				strcat_s(string4, sizeof(string4), "GCD");
+				Common::strcat_s(string4, sizeof(string4), "*.");
+				Common::strcat_s(string4, sizeof(string4), "GCD");
 
 				char **fileNameList;
 				int fileNameListLength = 1; //fileNameListInit(string4, &fileNameList, 0, 0);
@@ -4015,7 +4015,7 @@ static int characterEditorShowOptions() {
 
 					if (/*loadFileDialogRc == 0*/ saveMan->exists(gcdFileName)) {
 						string4[0] = '\0';
-						strcat_s(string4, sizeof(string4), /*string3*/ gcdFileName.c_str());
+						Common::strcat_s(string4, sizeof(string4), /*string3*/ gcdFileName.c_str());
 
 						int oldRemainingCharacterPoints = gCharacterEditorRemainingCharacterPoints;
 
@@ -4069,8 +4069,8 @@ static int characterEditorShowOptions() {
 							soundPlayFile("iisxxxx1");
 
 							strncpy(string4, getmsg(&gCharacterEditorMessageList, &gCharacterEditorMessageListItem, 612), sizeof(string4) - 1);
-							strcat_s(string4, sizeof(string4), string3);
-							strcat_s(string4, sizeof(string4), "!");
+							Common::strcat_s(string4, sizeof(string4), string3);
+							Common::strcat_s(string4, sizeof(string4), "!");
 
 							showDialogBox(string4, nullptr, 0, 169, 126, _colorTable[32328], nullptr, _colorTable[32328], 0);
 						}
@@ -4102,8 +4102,8 @@ static int characterEditorShowOptions() {
 				gcdFileName += "_" + Common::String(str) + ".gcd";
 
 				string4[0] = '\0';
-				strcat_s(string4, sizeof(string4), "*.");
-				strcat_s(string4, sizeof(string4), "GCD");
+				Common::strcat_s(string4, sizeof(string4), "*.");
+				Common::strcat_s(string4, sizeof(string4), "GCD");
 
 				char **fileNameList;
 				int fileNameListLength = 1; //fileNameListInit(string4, &fileNameList, 0, 0);
@@ -4112,11 +4112,11 @@ static int characterEditorShowOptions() {
 					strncpy(string4, getmsg(&gCharacterEditorMessageList, &gCharacterEditorMessageListItem, 600), sizeof(string4) - 1);
 
 					if (/* showSaveFileDialog(string4, fileNameList, string1, fileNameListLength, 168, 80, 0) == 0*/ 1) {
-						strcat_s(string1, sizeof(string1), ".");
-						strcat_s(string1, sizeof(string1), "GCD");
+						Common::strcat_s(string1, sizeof(string1), ".");
+						Common::strcat_s(string1, sizeof(string1), "GCD");
 
 						string4[0] = '\0';
-						strcat_s(string4, sizeof(string4), string1);
+						Common::strcat_s(string4, sizeof(string4), string1);
 
 						bool shouldSave;
 						if (/*characterFileExists(string4)*/ saveMan->exists(gcdFileName)) {
@@ -4139,7 +4139,7 @@ static int characterEditorShowOptions() {
 							traitsSetSelected(gCharacterEditorTempTraits[0], gCharacterEditorTempTraits[1]);
 
 							string4[0] = '\0';
-							strcat_s(string4, sizeof(string4), /*string1*/ const_cast<char *>(gcdFileName.c_str()));
+							Common::strcat_s(string4, sizeof(string4), /*string1*/ const_cast<char *>(gcdFileName.c_str()));
 
 							if (gcdSave(string4) != 0) {
 								soundPlayFile("iisxxxx1");
@@ -4219,10 +4219,10 @@ static int characterEditorShowOptions() {
 	txtFileName += "_" + Common::String(str) + ".txt";
 
 	if (/*showSaveFileDialog(title, fileNames, fileName, filesCount, 168, 80, 0) == 0*/ 1) {
-		strcat_s(fileName, sizeof(fileName), ".TXT");
+		Common::strcat_s(fileName, sizeof(fileName), ".TXT");
 
 		title[0] = '\0';
-		strcat_s(title, sizeof(title), fileName);
+		Common::strcat_s(title, sizeof(title), fileName);
 
 		int v42 = 0;
 		if (/*characterFileExists(title)*/ saveMan->exists(txtFileName)) {
@@ -4301,8 +4301,8 @@ static int characterPrintToFile(const char *fileName) {
 	padding[0] = '\0';
 	_AddSpaces(padding, (80 - static_cast<int>(strlen(title1))) / 2 - 2);
 
-	strcat_s(padding, sizeof(padding), title1);
-	strcat_s(padding, sizeof(padding), "\n");
+	Common::strcat_s(padding, sizeof(padding), title1);
+	Common::strcat_s(padding, sizeof(padding), "\n");
 	stream->writeString(padding);
 
 	// VAULT-13 PERSONNEL RECORD
@@ -4312,8 +4312,8 @@ static int characterPrintToFile(const char *fileName) {
 	padding[0] = '\0';
 	_AddSpaces(padding, (80 - static_cast<int>(strlen(title1))) / 2 - 2);
 
-	strcat_s(padding, sizeof(padding), title1);
-	strcat_s(padding, sizeof(padding), "\n");
+	Common::strcat_s(padding, sizeof(padding), title1);
+	Common::strcat_s(padding, sizeof(padding), "\n");
 	stream->writeString(padding);
 
 	int month;
@@ -4332,8 +4332,8 @@ static int characterPrintToFile(const char *fileName) {
 	padding[0] = '\0';
 	_AddSpaces(padding, (80 - static_cast<int>(strlen(title1))) / 2 - 2);
 
-	strcat_s(padding, sizeof(padding), title1);
-	strcat_s(padding, sizeof(padding), "\n");
+	Common::strcat_s(padding, sizeof(padding), title1);
+	Common::strcat_s(padding, sizeof(padding), "\n");
 	stream->writeString(padding);
 
 	// Blank line
@@ -4351,7 +4351,7 @@ static int characterPrintToFile(const char *fileName) {
 		padding[0] = '\0';
 		_AddSpaces(padding, paddingLength);
 
-		strcat_s(title1, sizeof(title1), padding);
+		Common::strcat_s(title1, sizeof(title1), padding);
 	}
 
 	// Age
@@ -4384,7 +4384,7 @@ static int characterPrintToFile(const char *fileName) {
 		padding[0] = '\0';
 		_AddSpaces(padding, paddingLength);
 
-		strcat_s(title1, sizeof(title1), padding);
+		Common::strcat_s(title1, sizeof(title1), padding);
 	}
 
 	snprintf(title2, sizeof(title2),
@@ -4709,10 +4709,10 @@ static int characterPrintToFile(const char *fileName) {
 
 			_AddSpaces(title2, length);
 
-			strcat_s(title1, sizeof(title1), title2);
+			Common::strcat_s(title1, sizeof(title1), title2);
 		}
 
-		strcat_s(title1, sizeof(title1), "\n");
+		Common::strcat_s(title1, sizeof(title1), "\n");
 		stream->writeString(title1);
 	}
 
@@ -4912,14 +4912,14 @@ static char *_itostndn(int value, char *dest) {
 			if (v18 > 0 || v3) {
 				char temp[64]; // TODO: Size is probably wrong.
 				compat_itoa(v18, temp, 10);
-				strcat_s(dest, sizeof(dest), temp);
+				Common::strcat_s(dest, sizeof(dest), temp);
 
 				v3 = true;
 
 				value -= v16[index] * v18;
 
 				if (index == 0 || index == 3) {
-					strcat_s(dest, sizeof(dest), ",");
+					Common::strcat_s(dest, sizeof(dest), ",");
 				}
 			}
 		}
