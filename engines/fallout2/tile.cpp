@@ -1254,7 +1254,10 @@ static void roof_fill_push_task_if_in_bounds(Common::Stack<roof_fill_task> &task
 };
 
 static void roof_fill_off_process_task(Common::Stack<roof_fill_task> &tasks_stack, int elevation, bool on) {
-	auto [x, y] = tasks_stack.top();
+	roof_fill_task task = tasks_stack.top();
+	int x = task.x;
+	int y = task.y;
+
 	tasks_stack.pop();
 
 	int squareTileIndex = gSquareGridWidth * y + x;
