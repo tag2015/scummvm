@@ -1453,7 +1453,7 @@ static void opTileDistanceBetweenObjects(Program *program) {
 
 	int distance = 9999;
 	if (object1 != nullptr && object2 != nullptr) {
-		if ((uintptr_t)object2 >= HEX_GRID_SIZE && (uintptr_t)object1 >= HEX_GRID_SIZE) {
+		if ((uintptr)object2 >= HEX_GRID_SIZE && (uintptr)object1 >= HEX_GRID_SIZE) {
 			if (object1->elevation == object2->elevation) {
 				if (object1->tile != -1 && object2->tile != -1) {
 					distance = tileDistanceBetween(object1->tile, object2->tile);
