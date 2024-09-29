@@ -94,6 +94,9 @@ struct ScreenOverlay {
 	~ScreenOverlay();
 	ScreenOverlay &operator=(ScreenOverlay &&);
 
+	ScreenOverlay(const ScreenOverlay &) = default;
+	ScreenOverlay &operator=(const ScreenOverlay &) = default;
+
 	bool HasAlphaChannel() const {
 		return (_flags & kOver_AlphaChannel) != 0;
 	}
@@ -146,8 +149,6 @@ struct ScreenOverlay {
 
 private:
 	void ResetImage();
-	ScreenOverlay(const ScreenOverlay &) = default;
-	ScreenOverlay &operator=(const ScreenOverlay &) = default;
 
 	int _flags = 0;  // OverlayFlags
 	int _sprnum = 0; // sprite id
