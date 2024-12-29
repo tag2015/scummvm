@@ -18,7 +18,7 @@
 #include "common/config-manager.h"
 #include "common/rect.h"
 #include "engines/util.h"
-#include "graphics/palette.h"
+#include "graphics/paletteman.h"
 
 namespace Fallout2 {
 
@@ -356,11 +356,10 @@ void _GNW95_ShowRect(unsigned char *src, int srcPitch, int a3, int srcX, int src
 
 	const Common::Point destPos(destX, destY);
 
-	byte palette[256 * 3];
-	g_system->getPaletteManager()->grabPalette(palette, 0, 256);
+	Graphics::Palette newPalette = g_system->getPaletteManager()->grabPalette(0, 256);
 
 	const Graphics::Surface &newSurf = *gSdlSurface;
-	gSdlTextureSurface->blitFrom(newSurf, srcRect, destPos, palette);
+	gSdlTextureSurface->blitFrom(newSurf, srcRect, destPos, &newPalette);
 
 	//	SDL_BlitSurface(gSdlSurface, &srcRect, gSdlTextureSurface, &destRect);
 }

@@ -68,7 +68,6 @@
 #include "fallout2/window_manager_private.h"
 #include "fallout2/worldmap.h"
 
-#include "graphics/palette.h"
 #include "graphics/surface.h"
 
 namespace Fallout2 {

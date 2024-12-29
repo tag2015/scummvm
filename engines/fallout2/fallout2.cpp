@@ -28,7 +28,7 @@
 #include "engines/util.h"
 #include "fallout2/console.h"
 #include "fallout2/detection.h"
-#include "graphics/palette.h"
+#include "graphics/paletteman.h"
 #include "graphics/surface.h"
 
 #include "fallout2/animation.h"
