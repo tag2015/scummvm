@@ -20,7 +20,6 @@
 #include "fallout2/settings.h"
 #include "fallout2/svga.h"
 
-#include "common/math.h"
 #include "common/stack.h"
 #include "common/util.h"
 
