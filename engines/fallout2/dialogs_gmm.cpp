@@ -37,7 +37,7 @@
 namespace Fallout2 {
 
 OptionsWidget::OptionsWidget(GuiObject *boss, const Common::String &name, const Common::String &domain) :
-		OptionsContainerWidget(boss, name, "Fallout2GameOptionsDialog", false, domain) {
+		OptionsContainerWidget(boss, name, "Fallout2GameOptionsDialog", domain) {
 
 	_loadHiResCheckbox = new GUI::CheckboxWidget(
 		widgetsBoss(),
