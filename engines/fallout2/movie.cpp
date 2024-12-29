@@ -23,7 +23,7 @@
 
 #include "common/rect.h"
 #include "graphics/screen.h"
-#include "graphics/palette.h"
+#include "graphics/paletteman.h"
 
 namespace Fallout2 {
 
@@ -323,14 +323,14 @@ static void movieDirectImpl(Graphics::Surface *surface, int srcWidth, int srcHei
 	// backbuffer surface (with palette set), all we get is shiny white box.
 //	SDL_SetSurfacePalette(surface, gSdlSurface->format->palette); TODO
 //	SDL_BlitSurface(surface, &srcRect, gSdlSurface, &destRect);
-	byte palette[256 * 3];
-	g_system->getPaletteManager()->grabPalette(palette, 0, 256);
+
+	Graphics::Palette palette = g_system->getPaletteManager()->grabPalette(0, 256);
 
 	Graphics::ManagedSurface *managed_surface = new Graphics::ManagedSurface();
 	managed_surface->create(_scr_size.right + 1, _scr_size.bottom + 1, Graphics::PixelFormat(Graphics::PixelFormat::createFormatCLUT8()));
 
 	const Graphics::Surface &const_surface = *surface;
-	managed_surface->blitFrom(const_surface, srcRect, destRect, palette);
+	managed_surface->blitFrom(const_surface, srcRect, destRect, &palette);
 
 	// SDL_BlitSurface(gSdlSurface, nullptr, gSdlTextureSurface, nullptr);
 	const Graphics::ManagedSurface &final_surface = *managed_surface;
