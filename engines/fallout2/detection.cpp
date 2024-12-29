@@ -39,7 +39,7 @@ const DebugChannelDef Fallout2MetaEngineDetection::debugFlagList[] = {
 };
 
 Fallout2MetaEngineDetection::Fallout2MetaEngineDetection() : AdvancedMetaEngineDetection(Fallout2::gameDescriptions,
-	sizeof(ADGameDescription), Fallout2::fallout2Games) {
+	Fallout2::fallout2Games) {
 }
 
 REGISTER_PLUGIN_STATIC(FALLOUT2_DETECTION, PLUGIN_TYPE_ENGINE_DETECTION, Fallout2MetaEngineDetection);

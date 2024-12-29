@@ -42,7 +42,7 @@ extern const ADGameDescription gameDescriptions[];
 
 } // End of namespace Fallout2
 
-class Fallout2MetaEngineDetection : public AdvancedMetaEngineDetection {
+class Fallout2MetaEngineDetection : public AdvancedMetaEngineDetection<ADGameDescription> {
 	static const DebugChannelDef debugFlagList[];
 
 public:

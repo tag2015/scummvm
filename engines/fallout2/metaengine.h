@@ -24,7 +24,7 @@
 
 #include "engines/advancedDetector.h"
 
-class Fallout2MetaEngine : public AdvancedMetaEngine {
+class Fallout2MetaEngine : public AdvancedMetaEngine<ADGameDescription> {
 public:
 	const char *getName() const override;
 
