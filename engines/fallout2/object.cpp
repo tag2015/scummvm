@@ -446,7 +446,7 @@ int objectRead(Object *obj, File *stream) {
 		return -1;
 	if (fileReadInt32(stream, &(obj->sid)) == -1)
 		return -1;
-	if (fileReadInt32(stream, &(obj->field_80)) == -1)
+	if (fileReadInt32(stream, &(obj->scriptIndex)) == -1)
 		return -1;
 	debug(6, "Object header read successfully");
 	obj->outline = 0;
@@ -497,7 +497,7 @@ int objectReadScumm(Object *obj, Common::InSaveFile *stream) {
 	/*field_74 = */
 	stream->readSint32BE();
 	obj->sid = stream->readSint32BE();
-	obj->field_80 = stream->readSint32BE();
+	obj->scriptIndex = stream->readSint32BE();
 	if (stream->err())
 		return -1;
 
@@ -533,7 +533,7 @@ int objectReadScumm(Object *obj, Common::InSaveFile *stream) {
 		return -1;
 	if (fileReadInt32(stream, &(obj->sid)) == -1)
 		return -1;
-	if (fileReadInt32(stream, &(obj->field_80)) == -1)
+	if (fileReadInt32(stream, &(obj->scriptIndex)) == -1)
 		return -1;*/
 	debug(6, "Object header read successfully");
 	obj->outline = 0;
@@ -644,7 +644,7 @@ static int objectLoadAllInternal(File *stream) {
 					debugPrint("\nError connecting object to script!");
 				} else {
 					script->owner = objectListNode->obj;
-					objectListNode->obj->field_80 = script->field_14;
+					objectListNode->obj->scriptIndex = script->index;
 				}
 			}
 
@@ -776,7 +776,7 @@ static int objectLoadAllInternalScumm(Common::InSaveFile *stream) {
 					debugPrint("\nError connecting object to script!");
 				} else {
 					script->owner = objectListNode->obj;
-					objectListNode->obj->field_80 = script->field_14;
+					objectListNode->obj->scriptIndex = script->index;
 				}
 			}
 
@@ -899,7 +899,7 @@ static int objectWrite(Object *obj, Common::OutSaveFile *stream) {
 	stream->writeSint32BE(obj->lightIntensity);
 	stream->writeSint32BE(obj->outline);
 	stream->writeSint32BE(obj->sid);
-	stream->writeSint32BE(obj->field_80);
+	stream->writeSint32BE(obj->scriptIndex);
 
 /*	if (fileWriteInt32(stream, obj->id) == -1)
 		return -1;
@@ -935,7 +935,7 @@ static int objectWrite(Object *obj, Common::OutSaveFile *stream) {
 		return -1;
 	if (fileWriteInt32(stream, obj->sid) == -1)
 		return -1;
-	if (fileWriteInt32(stream, obj->field_80) == -1)
+	if (fileWriteInt32(stream, obj->scriptIndex) == -1)
 		return -1;*/
 
 	if (objectDataWrite(obj, stream) == -1)
@@ -3968,7 +3968,7 @@ static int objectAllocate(Object **objectPtr) {
 	object->pid = -1;
 	object->sid = -1;
 	object->owner = nullptr;
-	object->field_80 = -1;
+	object->scriptIndex = -1;
 
 	return 0;
 }

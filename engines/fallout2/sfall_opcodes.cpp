@@ -265,7 +265,7 @@ static void op_abs(Program *program) {
 // get_script
 static void op_get_script(Program *program) {
 	Object *obj = static_cast<Object *>(programStackPopPointer(program));
-	programStackPushInteger(program, obj->field_80 + 1);
+	programStackPushInteger(program, obj->scriptIndex + 1);
 }
 
 // get_proto_data
