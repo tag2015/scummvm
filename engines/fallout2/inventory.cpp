@@ -221,7 +221,7 @@ typedef enum InventoryWindowType {
 } InventoryWindowType;
 
 typedef struct InventoryWindowConfiguration {
-	int field_0; // artId
+	int frmId; // artId
 	int width;
 	int height;
 	int x;
@@ -751,7 +751,7 @@ static bool _setup_inventory(int inventoryWindowType) {
 		unsigned char *dest = windowGetBuffer(gInventoryWindow);
 
 		FrmImage backgroundFrmImage;
-		int backgroundFid = buildFid(OBJ_TYPE_INTERFACE, windowDescription->field_0, 0, 0, 0);
+		int backgroundFid = buildFid(OBJ_TYPE_INTERFACE, windowDescription->frmId, 0, 0, 0);
 		if (backgroundFrmImage.lock(backgroundFid)) {
 			blitBufferToBuffer(backgroundFrmImage.getData(), windowDescription->width, windowDescription->height, windowDescription->width, dest, windowDescription->width);
 		}
@@ -3834,7 +3834,7 @@ static void inventoryWindowOpenContextMenu(int keyCode, int inventoryWindowType)
 						   windowDescription->width);
 	} else {
 		FrmImage backgroundFrmImage;
-		int backgroundFid = buildFid(OBJ_TYPE_INTERFACE, windowDescription->field_0, 0, 0, 0);
+		int backgroundFid = buildFid(OBJ_TYPE_INTERFACE, windowDescription->frmId, 0, 0, 0);
 		if (backgroundFrmImage.lock(backgroundFid)) {
 			blitBufferToBuffer(backgroundFrmImage.getData() + windowDescription->width * rect.top + rect.left,
 							   cursorData->width,
@@ -5684,7 +5684,7 @@ static int inventoryQuantityWindowInit(int inventoryWindowType, Object *item) {
 	unsigned char *windowBuffer = windowGetBuffer(_mt_wid);
 
 	FrmImage backgroundFrmImage;
-	int backgroundFid = buildFid(OBJ_TYPE_INTERFACE, windowDescription->field_0, 0, 0, 0);
+	int backgroundFid = buildFid(OBJ_TYPE_INTERFACE, windowDescription->frmId, 0, 0, 0);
 	if (backgroundFrmImage.lock(backgroundFid)) {
 		blitBufferToBuffer(backgroundFrmImage.getData(),
 						   windowDescription->width,
