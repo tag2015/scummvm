@@ -613,11 +613,11 @@ void mouseGetPosition(int *xPtr, int *yPtr) {
 }
 
 // 0x4CAA04
-void _mouse_set_position(int a1, int a2) {
-	gMouseCursorX = a1 - _mouse_hotx;
-	gMouseCursorY = a2 - _mouse_hoty;
-	_raw_y = a2 - _mouse_hoty;
-	_raw_x = a1 - _mouse_hotx;
+void _mouse_set_position(int x, int y) {
+	gMouseCursorX = x - _mouse_hotx;
+	gMouseCursorY = y - _mouse_hoty;
+	_raw_y = y - _mouse_hoty;
+	_raw_x = x - _mouse_hotx;
 	_mouse_clip();
 }
 
