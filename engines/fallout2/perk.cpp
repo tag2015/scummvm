@@ -14,7 +14,6 @@
 
 namespace Fallout2 {
 
-// Available stats.
 enum PerkParamMode {
 	PERK_PARAM_MODE_FIRST_ONLY,
 	PERK_PARAM_MODE_OR,
