@@ -34,6 +34,7 @@
 #include "fallout2/tile.h"
 #include "fallout2/trait.h"
 // #include "fallout2/vcr.h" TODO vcr
+#include "fallout2/worldmap.h"
 
 namespace Fallout2 {
 
@@ -2994,7 +2995,7 @@ void _dude_fidget() {
 			objectGetRect(object, &rect);
 
 			Rect intersection;
-			if (rectIntersection(&rect, &_scr_size, &intersection) == 0 && (gMapHeader.field_34 != 97 || object->pid != 0x10000FA)) {
+			if (rectIntersection(&rect, &_scr_size, &intersection) == 0 && (gMapHeader.index != MAP_SPECIAL_RND_WOODSMAN || object->pid != 0x10000FA)) {
 				candidates[candidatesLength++] = object;
 			}
 		}
