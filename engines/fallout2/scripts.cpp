@@ -1786,7 +1786,7 @@ static int scriptWrite(Script *scr, Common::OutSaveFile *stream) {
 	stream->writeSint32BE(scr->ownerId);
 	stream->writeSint32BE(scr->localVarsOffset);
 	stream->writeSint32BE(scr->localVarsCount);
-	stream->writeSint32BE(scr->field_28);
+	stream->writeSint32BE(scr->returnValue);
 	stream->writeSint32BE(scr->action);
 	stream->writeSint32BE(scr->fixedParam);
 	stream->writeSint32BE(scr->actionBeingUsed);
@@ -1814,7 +1814,7 @@ static int scriptWrite(Script *scr, Common::OutSaveFile *stream) {
 			return -1;
 		if (fileWriteInt32(stream, scr->localVarsCount) == -1)
 			return -1;
-		if (fileWriteInt32(stream, scr->field_28) == -1)
+		if (fileWriteInt32(stream, scr->returnValue) == -1)
 			return -1;
 		if (fileWriteInt32(stream, scr->action) == -1)
 			return -1;
@@ -1992,7 +1992,7 @@ static int scriptRead(Script *scr, File *stream) {
 		return -1;
 	if (fileReadInt32(stream, &(scr->localVarsCount)) == -1)
 		return -1;
-	if (fileReadInt32(stream, &(scr->field_28)) == -1)
+	if (fileReadInt32(stream, &(scr->returnValue)) == -1)
 		return -1;
 	if (fileReadInt32(stream, &(scr->action)) == -1)
 		return -1;
@@ -2059,7 +2059,7 @@ static int scriptReadScumm(Script *scr, Common::InSaveFile *stream) {
 	scr->ownerId = stream->readSint32BE();
 	scr->localVarsOffset = stream->readSint32BE();
 	scr->localVarsCount = stream->readSint32BE();
-	scr->field_28 = stream->readSint32BE();
+	scr->returnValue = stream->readSint32BE();
 	scr->action = stream->readSint32BE();
 	scr->fixedParam = stream->readSint32BE();
 	scr->actionBeingUsed = stream->readSint32BE();
@@ -2080,7 +2080,7 @@ static int scriptReadScumm(Script *scr, Common::InSaveFile *stream) {
 			return -1;
 		if (fileReadInt32(stream, &(scr->localVarsCount)) == -1)
 			return -1;
-		if (fileReadInt32(stream, &(scr->field_28)) == -1)
+		if (fileReadInt32(stream, &(scr->returnValue)) == -1)
 			return -1;
 		if (fileReadInt32(stream, &(scr->action)) == -1)
 			return -1;
@@ -2412,7 +2412,7 @@ int scriptAdd(int *sidPtr, int scriptType) {
 	scr->program = 0;
 	scr->localVarsOffset = -1;
 	scr->localVarsCount = 0;
-	scr->field_28 = 0;
+	scr->returnValue = 0;
 	scr->action = 0;
 	scr->fixedParam = 0;
 	scr->owner = 0;
