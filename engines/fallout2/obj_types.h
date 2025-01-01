@@ -251,6 +251,7 @@ typedef struct MiscObjectData {
 	int rotation;
 } MiscObjectData;
 
+// TODO: use C-style inheritance for different ObjectData variants instead of unions within unions.
 typedef struct ObjectData {
 	Inventory inventory;
 	union {
@@ -279,6 +280,7 @@ typedef struct Object {
 	int flags;     // obj_flags
 	int elevation; // obj_elev
 	union {
+		// TODO: union of different ObjectData sub-structs
 		int field_2C_array[14];
 		ObjectData data;
 	};
