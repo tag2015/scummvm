@@ -1276,7 +1276,7 @@ int _protinst_use_item_on(Object *critter, Object *targetObj, Object *item) {
 				return -1;
 			}
 
-			if (script->field_28 == 0) {
+			if (script->returnValue == 0) {
 				if (targetObj->sid == -1) {
 					return _protinst_default_use_item(critter, targetObj, item);
 				}
@@ -1295,7 +1295,7 @@ int _protinst_use_item_on(Object *critter, Object *targetObj, Object *item) {
 			}
 		}
 
-		return script->field_28;
+		return script->returnValue;
 	}
 
 	if (isInCombat()) {
