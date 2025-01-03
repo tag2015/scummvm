@@ -992,7 +992,7 @@ int characterEditorShow(bool isCreationMode) {
 					}
 				} else if (characterEditorSelectedItem >= 61 && characterEditorSelectedItem < 79) {
 					if (gCharacterEditorIsCreationMode) {
-						_win_button_press_and_release(gCharacterEditorTagSkillBtns[gCharacterEditorIsCreationMode - 61]);
+						_win_button_press_and_release(gCharacterEditorTagSkillBtns[characterEditorSelectedItem - 61]);
 						windowRefresh(gCharacterEditorWindow);
 					} else {
 						characterEditorHandleAdjustSkillButtonPressed(keyCode);
@@ -1000,7 +1000,7 @@ int characterEditorShow(bool isCreationMode) {
 					}
 				} else if (characterEditorSelectedItem >= 82 && characterEditorSelectedItem < 98) {
 					if (gCharacterEditorIsCreationMode) {
-						_win_button_press_and_release(gCharacterEditorOptionalTraitBtns[gCharacterEditorIsCreationMode - 82]);
+						_win_button_press_and_release(gCharacterEditorOptionalTraitBtns[characterEditorSelectedItem - 82]);
 						windowRefresh(gCharacterEditorWindow);
 					}
 				}
@@ -1015,7 +1015,7 @@ int characterEditorShow(bool isCreationMode) {
 					}
 				} else if (characterEditorSelectedItem >= 61 && characterEditorSelectedItem < 79) {
 					if (gCharacterEditorIsCreationMode) {
-						_win_button_press_and_release(gCharacterEditorTagSkillBtns[gCharacterEditorIsCreationMode - 61]);
+						_win_button_press_and_release(gCharacterEditorTagSkillBtns[characterEditorSelectedItem - 61]);
 						windowRefresh(gCharacterEditorWindow);
 					} else {
 						characterEditorHandleAdjustSkillButtonPressed(keyCode);
@@ -1023,7 +1023,7 @@ int characterEditorShow(bool isCreationMode) {
 					}
 				} else if (characterEditorSelectedItem >= 82 && characterEditorSelectedItem < 98) {
 					if (gCharacterEditorIsCreationMode) {
-						_win_button_press_and_release(gCharacterEditorOptionalTraitBtns[gCharacterEditorIsCreationMode - 82]);
+						_win_button_press_and_release(gCharacterEditorOptionalTraitBtns[characterEditorSelectedItem - 82]);
 						windowRefresh(gCharacterEditorWindow);
 					}
 				}
@@ -1872,7 +1872,7 @@ static void characterEditorWindowFree() {
 
 	fontSetCurrent(gCharacterEditorOldFont);
 
-	if (gCharacterEditorIsCreationMode == 1) {
+	if (gCharacterEditorIsCreationMode) {
 		skillsSetTagged(gCharacterEditorTempTaggedSkills, 3);
 		traitsSetSelected(gCharacterEditorTempTraits[0], gCharacterEditorTempTraits[1]);
 		characterEditorSelectedItem = 0;
@@ -2032,7 +2032,8 @@ char *_strmfe(char *dest, const char *name, const char *ext) {
 
 	*dest++ = '.';
 
-	strncpy(dest, ext, COMPAT_MAX_PATH - 1);
+	// FIXME: unsafe, and should support longer exts
+	strncpy(dest, ext, 4);
 
 	return save;
 }
@@ -2352,7 +2353,7 @@ static void characterEditorDrawPcStats() {
 	char formattedValueBuffer[16];
 	char stringBuffer[128];
 
-	if (gCharacterEditorIsCreationMode == 1) {
+	if (gCharacterEditorIsCreationMode) {
 		return;
 	}
 
@@ -4924,7 +4925,7 @@ static char *_itostndn(int value, char *dest) {
 			}
 		}
 	} else {
-		strncpy(dest, "0", sizeof(dest) - 1);
+		strncpy(dest, "0", 2);
 	}
 
 	return savedDest;
@@ -5370,7 +5371,7 @@ static void characterEditorDrawOptionalTraits() {
 	double step;
 	double y;
 
-	if (gCharacterEditorIsCreationMode != 1) {
+	if (!gCharacterEditorIsCreationMode) {
 		return;
 	}
 
