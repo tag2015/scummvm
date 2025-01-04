@@ -762,8 +762,6 @@ int mapLoadByName(char *fileName) {
 		if (saveMan->exists(filePath)) {
 			debug("Found a saved .SAV map!");
 			Common::InSaveFile *stream = saveMan->openForLoading(Common::String(filePath));
-			//debug(".SAV map loading is not yet supported! Falling back to .MAP");  // TODO saveload
-			//stream = nullptr;  // TODO remove
 			if (stream != nullptr) {
 				// fileClose(stream);
 				delete stream;
@@ -786,6 +784,7 @@ int mapLoadByName(char *fileName) {
 			Common::SaveFileManager *saveMan = g_system->getSavefileManager();
 			Common::InSaveFile *stream = saveMan->openForLoading(Common::String(filePath));
 			rc = mapLoadScumm(stream);
+			delete stream;
 		} else {
 			newPath = "MAPS\\";
 			newPath += Common::String(fileName);
@@ -1318,7 +1317,7 @@ int mapLoadSaved(char *fileName) {
 		}
 	}
 
-	if (!wmMapIsSaveable()) {  // TODO map delete
+	if (!wmMapIsSaveable()) {
 		debugPrint("\nDestroying RANDOM encounter map.");
 
 		char v15[16];
@@ -1557,16 +1556,16 @@ static int _map_save() {
 		Common::SaveFileManager *saveMan = g_system->getSavefileManager();
 
 		Common::OutSaveFile *stream = saveMan->openForSaving(Common::String(mapFileName), false);
-//		File *stream = fileOpen(mapFileName, "wb");
 		if (stream != nullptr) {
 			rc = _map_save_file(stream);
 			stream->finalize();
-			delete stream;
-//			fileClose(stream);
+			if (stream->err())
+				rc = -1;
 		} else {
 			snprintf(temp, sizeof(temp), "Unable to open %s to write!", gMapHeader.name);
 			debugPrint(temp);
 		}
+		delete stream;
 
 		if (rc == 0) {
 			snprintf(temp, sizeof(temp), "%s saved.", gMapHeader.name);
@@ -1625,7 +1624,6 @@ static int _map_save_file(Common::OutSaveFile *stream) {
 	}
 
 	gMapHeader.localVariablesCount = gMapLocalVarsLength;
-	debug("map_save_file - gMapLocalVarsLength %d", gMapLocalVarsLength);
 	gMapHeader.globalVariablesCount = gMapGlobalVarsLength;
 	gMapHeader.darkness = 1;
 
@@ -1709,7 +1707,7 @@ int _map_save_in_game(bool a1) {
 
 		strncpy(name, gMapHeader.name, sizeof(name));
 		_strmfe(gMapHeader.name, name, "SAV");
-		_MapDirEraseFile_("MAPS\\", gMapHeader.name);  // TODO map delete
+		_MapDirEraseFile_("MAPS\\", gMapHeader.name);
 		strncpy(gMapHeader.name, name, sizeof(gMapHeader.name));
 	} else {
 		debugPrint("\n Saving \".SAV\" map.");
@@ -2047,7 +2045,6 @@ static int mapHeaderWrite(MapHeader *ptr, Common::OutSaveFile *stream) {
 	stream->writeSint32BE(ptr->version);
 	for (i = 0; i < 16; i++)
 		stream->writeByte(ptr->name[i]);
-	debug("mapHeaderWrite - EnteringTile: %d",ptr->enteringTile);
 	stream->writeSint32BE(ptr->enteringTile);
 	stream->writeSint32BE(ptr->enteringElevation);
 	stream->writeSint32BE(ptr->enteringRotation);
