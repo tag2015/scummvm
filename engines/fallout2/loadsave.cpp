@@ -346,21 +346,21 @@ void _InitLoadSave() {
 	_slot_cursor = 0;
 	_patches = settings.system.master_patches_path.c_str();
 
-/*	MapDirErase("MAPS\\", "SAV");  TODO delete temp map files
+	MapDirErase("MAPS\\", "SAV");
 	MapDirErase(PROTO_DIR_NAME "\\" CRITTERS_DIR_NAME "\\", PROTO_FILE_EXT);
-	MapDirErase(PROTO_DIR_NAME "\\" ITEMS_DIR_NAME "\\", PROTO_FILE_EXT);*/
+	MapDirErase(PROTO_DIR_NAME "\\" ITEMS_DIR_NAME "\\", PROTO_FILE_EXT);
 
-//	configGetInt(&gSfallConfig, SFALL_CONFIG_MISC_KEY, SFALL_CONFIG_AUTO_QUICK_SAVE, &quickSaveSlots); TODO sfall
-//	if (quickSaveSlots > 0 && quickSaveSlots <= 10) {
-//		autoQuickSaveSlots = true;
-//	}
+	configGetInt(&gSfallConfig, SFALL_CONFIG_MISC_KEY, SFALL_CONFIG_AUTO_QUICK_SAVE, &quickSaveSlots);
+	if (quickSaveSlots > 0 && quickSaveSlots <= 10) {
+		autoQuickSaveSlots = true;
+	}
 }
 
 // 0x47B85C
 void _ResetLoadSave() {
-/*	MapDirErase("MAPS\\", "SAV");  TODO delete temp map files
+	MapDirErase("MAPS\\", "SAV");
 	MapDirErase(PROTO_DIR_NAME "\\" CRITTERS_DIR_NAME "\\", PROTO_FILE_EXT);
-	MapDirErase(PROTO_DIR_NAME "\\" ITEMS_DIR_NAME "\\", PROTO_FILE_EXT);*/
+	MapDirErase(PROTO_DIR_NAME "\\" ITEMS_DIR_NAME "\\", PROTO_FILE_EXT);
 }
 
 // SaveGame
@@ -3191,32 +3191,60 @@ void lsgInit() {
 
 // 0x480040
 int MapDirErase(const char *relativePath, const char *extension) {
-/*	char path[COMPAT_MAX_PATH];
-	snprintf(path, sizeof(path), "%s*.%s", relativePath, extension);
+	/*	char path[COMPAT_MAX_PATH];
+		snprintf(path, sizeof(path), "%s*.%s", relativePath, extension);
 
-	char **fileList;
-	int fileListLength = fileNameListInit(path, &fileList, 0, 0);
-	while (--fileListLength >= 0) {
-		snprintf(path, sizeof(path), "%s\\%s%s", _patches, relativePath, fileList[fileListLength]);
-		compat_remove(path);
+		char **fileList;
+		int fileListLength = fileNameListInit(path, &fileList, 0, 0);
+		while (--fileListLength >= 0) {
+			snprintf(path, sizeof(path), "%s\\%s%s", _patches, relativePath, fileList[fileListLength]);
+			compat_remove(path);
+		}
+		fileNameListFree(&fileList, 0);
+	*/
+	Common::SaveFileManager *saveMan = g_system->getSavefileManager();
+
+	Common::String restrictedPath(g_engine->getTargetName());
+	restrictedPath += "_";
+	restrictedPath += relativePath;
+	restrictedPath.replace('\\', '_');
+	restrictedPath.chop(1); // remove last char
+
+	Common::StringArray filenames;
+	filenames = saveMan->listSavefiles(restrictedPath + "*." + extension);
+	debug("MapDirErase: %s", (restrictedPath + "*." + extension).c_str());
+
+	for (Common::StringArray::iterator filename = filenames.begin(); filename != filenames.end(); filename++) {
+		if (!saveMan->removeSavefile(filename->c_str()))
+			warning("Error removing %s", filename->c_str());
 	}
-	fileNameListFree(&fileList, 0);
-*/
-	warning("MapDirErase not implemented");
+
 	return 0;
 }
 
 // 0x4800C8
 int _MapDirEraseFile_(const char *a1, const char *a2) {
-/*	char path[COMPAT_MAX_PATH];
+	char path[COMPAT_MAX_PATH];
 
-	snprintf(path, sizeof(path), "%s\\%s%s", _patches, a1, a2);
+	/*snprintf(path, sizeof(path), "%s\\%s%s", _patches, a1, a2);
 	if (compat_remove(path) != 0) {
 		return -1;
 	} */
 
-	warning("MapDirEraseFile not implemented");
-	return 0;
+	snprintf(path, sizeof(path), "_maps_%s", a2);
+	Common::String mapName(g_engine->getTargetName());
+	mapName += path;
+
+	if (!Common::String(mapName).contains(".SAV")) {
+		warning("Can only delete .SAV maps!");
+		return -1;
+	}
+
+	debug("Deleting map: %s", mapName.c_str());
+	if (g_system->getSavefileManager()->removeSavefile(mapName))
+		return 0;
+	else
+		return -1;
 }
 
 // 0x480104
