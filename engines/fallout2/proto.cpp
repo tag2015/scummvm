@@ -2595,7 +2595,7 @@ int _proto_save_pid(int pid) {
 
 	_proto_list_str(pid, path + strlen(path));
 
-	debug("proto_save_pid: requested path to save: %s", path);
+	debug(5, "proto_save_pid: requested path to save: %s", path);
 
 	Common::String protoPath(g_engine->getTargetName());
 	protoPath += "_";
@@ -2617,7 +2617,7 @@ int _proto_save_pid(int pid) {
 		warning("PROTO: Error saving %s", protoPath.c_str());
 	delete stream;
 
-	debug("proto_save_pid: Saved %s", protoPath.c_str());
+	debug(5, "proto_save_pid: Saved %s", protoPath.c_str());
 	return rc;
 }
 

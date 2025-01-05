@@ -488,7 +488,7 @@ int _map_malloc_local_var(int a1) {
 
 // 0x48234C
 void mapSetStart(int tile, int elevation, int rotation) {
-	debug("mapSetStart - enteringTile %d - new %d", gMapHeader.enteringTile, tile);
+	debug(5, "mapSetStart - enteringTile %d - new %d", gMapHeader.enteringTile, tile);
 	gMapHeader.enteringTile = tile;
 	gMapHeader.enteringElevation = elevation;
 	gMapHeader.enteringRotation = rotation;
@@ -702,7 +702,7 @@ static char *mapBuildPath(char *name) {
 			snprintf(map_path, sizeof(map_path), "%s_maps_%s", newMapName.c_str(), name);
 		else
 			snprintf(map_path, sizeof(map_path), "MAPS\\%s", name);
-		debug("Built map path: %s", map_path);
+		debug(5, "Built map path: %s", map_path);
 		return map_path;
 	}
 	return name;
@@ -710,7 +710,7 @@ static char *mapBuildPath(char *name) {
 
 // 0x482924
 int mapSetEnteringLocation(int elevation, int tile_num, int orientation) {
-	debug("mapSetenteringlocation - gEnteringTile %d, new value %d",gEnteringTile, tile_num);
+	debug(5, "mapSetenteringlocation - gEnteringTile %d, new value %d",gEnteringTile, tile_num);
 	gEnteringElevation = elevation;
 	gEnteringTile = tile_num;
 	gEnteringRotation = orientation;
@@ -728,7 +728,7 @@ void mapNewMap() {
 	gMapHeader.version = 20;
 	gMapHeader.name[0] = '\0';
 	gMapHeader.enteringTile = 20100;
-	debug("mapNewMap - enteringTile %d", gMapHeader.enteringTile);
+	debug(5, "mapNewMap - enteringTile %d", gMapHeader.enteringTile);
 	_obj_remove_all();
 	animationStop();
 
@@ -1103,7 +1103,7 @@ static int mapLoad(File *stream) {
 		goto err;
 	}
 
-	debug("MapLoad - gEnteringElevation %d", gEnteringElevation);
+	debug(5, "MapLoad - gEnteringElevation %d", gEnteringElevation);
 	if (gEnteringElevation == -1) {
 		// NOTE: Uninline.
 		mapSetEnteringLocation(gMapHeader.enteringElevation, gMapHeader.enteringTile, gMapHeader.enteringRotation);
@@ -1649,7 +1649,7 @@ static int _map_save_file(Common::OutSaveFile *stream) {
 		}
 	}
 
-	debug("Saved map header and data");
+	debug(5, "Saved map header and data");
 
 	char err[80];
 
@@ -1658,14 +1658,14 @@ static int _map_save_file(Common::OutSaveFile *stream) {
 		_win_msg(err, 80, 80, _colorTable[31744]);
 	}
 	else
-		debug("Saved map scripts");
+		debug(5, "Saved map scripts");
 
 	if (objectSaveAll(stream) == -1) {
 		snprintf(err, sizeof(err), "Error saving objects in %s", gMapHeader.name);
 		_win_msg(err, 80, 80, _colorTable[31744]);
 	}
 	else
-		debug("Saved map objects");
+		debug(5, "Saved map objects");
 
 	scriptsEnable();
 
@@ -1677,7 +1677,7 @@ int _map_save_in_game(bool a1) {
 	if (gMapHeader.name[0] == '\0') {
 		return 0;
 	}
-	debug("Attempting map_save_in_game! a1 = %d", a1);
+	debug(5, "Attempting map_save_in_game! a1 = %d", a1);
 
 	animationStop();
 	_partyMemberSaveProtos();
@@ -2092,31 +2092,31 @@ static int mapHeaderWrite(MapHeader *ptr, Common::OutSaveFile *stream) {
 static int mapHeaderRead(MapHeader *ptr, File *stream) {
 	if (fileReadInt32(stream, &(ptr->version)) == -1)
 		return -1;
-	debug("Map Header - version %d", ptr->version);
+	debug(5, "Map Header - version %d", ptr->version);
 	if (fileReadFixedLengthString(stream, ptr->name, 16) == -1)
 		return -1;
-	debug("Map Header - name: %s", ptr->name);
+	debug(5, "Map Header - name: %s", ptr->name);
 	if (fileReadInt32(stream, &(ptr->enteringTile)) == -1)
 		return -1;
-	debug("Map Header - enteringTile: %d", ptr->enteringTile);
+	debug(5, "Map Header - enteringTile: %d", ptr->enteringTile);
 	if (fileReadInt32(stream, &(ptr->enteringElevation)) == -1)
 		return -1;
-	debug("Map Header - enteringElevation: %d", ptr->enteringElevation);
+	debug(5, "Map Header - enteringElevation: %d", ptr->enteringElevation);
 	if (fileReadInt32(stream, &(ptr->enteringRotation)) == -1)
 		return -1;
-	debug("Map Header - enteringRotation: %d", ptr->enteringRotation);
+	debug(5, "Map Header - enteringRotation: %d", ptr->enteringRotation);
 	if (fileReadInt32(stream, &(ptr->localVariablesCount)) == -1)
 		return -1;
-	debug("Map Header - localVariablesCount: %d", ptr->localVariablesCount);
+	debug(5, "Map Header - localVariablesCount: %d", ptr->localVariablesCount);
 	if (fileReadInt32(stream, &(ptr->scriptIndex)) == -1)
 		return -1;
-	debug("Map Header - scriptIndex: %d", ptr->scriptIndex);
+	debug(5, "Map Header - scriptIndex: %d", ptr->scriptIndex);
 	if (fileReadInt32(stream, &(ptr->flags)) == -1)
 		return -1;
-	debug("Map Header - flags: %d", ptr->flags);
+	debug(5, "Map Header - flags: %d", ptr->flags);
 	if (fileReadInt32(stream, &(ptr->darkness)) == -1)
 		return -1;
-	debug("Map Header - darkness: %d", ptr->darkness);
+	debug(5, "Map Header - darkness: %d", ptr->darkness);
 	if (fileReadInt32(stream, &(ptr->globalVariablesCount)) == -1)
 		return -1;
 	debug(5, "Map Header - globalVariablesCount: %d", ptr->globalVariablesCount);
