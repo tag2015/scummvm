@@ -3,6 +3,8 @@
 // #include <stdio.h>
 // #include <string.h>
 
+#include "fallout2/fallout2.h"
+
 #include "fallout2/art.h"
 #include "fallout2/character_editor.h"
 #include "fallout2/combat.h"
@@ -23,6 +25,7 @@
 #include "fallout2/trait.h"
 
 #include "common/config-manager.h"
+#include "common/savefile.h"
 #include "common/stream.h"
 
 namespace Fallout2 {
@@ -576,6 +579,8 @@ static int objectCritterCombatDataWrite(CritterCombatData *data, Common::OutSave
 	stream->writeSint32BE(data->aiPacket);
 	stream->writeSint32BE(data->team);
 	stream->writeSint32BE(data->whoHitMeCid);
+	if (stream->err())
+		return -1;
 
 	/*	if (fileWriteInt32(stream, data->damageLastTurn) == -1)
 			return -1;
@@ -2140,6 +2145,8 @@ static int protoItemDataWrite(ItemProtoData *item_data, int type, Common::WriteS
 		stream->writeSint32BE(item_data->armor.perk);
 		stream->writeSint32BE(item_data->armor.maleFid);
 		stream->writeSint32BE(item_data->armor.femaleFid);
+		if (stream->err())
+			return -1;
 
 		/*		if (fileWriteInt32(stream, item_data->armor.armorClass) == -1)
 					return -1;
@@ -2158,6 +2165,8 @@ static int protoItemDataWrite(ItemProtoData *item_data, int type, Common::WriteS
 	case ITEM_TYPE_CONTAINER:
 		stream->writeSint32BE(item_data->container.maxSize);
 		stream->writeSint32BE(item_data->container.openFlags);
+		if (stream->err())
+			return -1;
 
 		/*		if (fileWriteInt32(stream, item_data->container.maxSize) == -1)
 					return -1;
@@ -2180,6 +2189,8 @@ static int protoItemDataWrite(ItemProtoData *item_data, int type, Common::WriteS
 		stream->writeSint32BE(item_data->drug.addictionChance);
 		stream->writeSint32BE(item_data->drug.withdrawalEffect);
 		stream->writeSint32BE(item_data->drug.withdrawalOnset);
+		if (stream->err())
+			return -1;
 
 		/*		if (fileWriteInt32(stream, item_data->drug.stat[0]) == -1)
 					return -1;
@@ -2223,6 +2234,8 @@ static int protoItemDataWrite(ItemProtoData *item_data, int type, Common::WriteS
 		stream->writeSint32BE(item_data->weapon.ammoTypePid);
 		stream->writeSint32BE(item_data->weapon.ammoCapacity);
 		stream->writeByte(item_data->weapon.soundCode);
+		if (stream->err())
+			return -1;
 
 		/*		if (fileWriteInt32(stream, item_data->weapon.animationCode) == -1)
 					return -1;
@@ -2267,6 +2280,8 @@ static int protoItemDataWrite(ItemProtoData *item_data, int type, Common::WriteS
 		stream->writeSint32BE(item_data->ammo.damageResistanceModifier);
 		stream->writeSint32BE(item_data->ammo.damageMultiplier);
 		stream->writeSint32BE(item_data->ammo.damageDivisor);
+		if (stream->err())
+			return -1;
 
 		/*		if (fileWriteInt32(stream, item_data->ammo.caliber) == -1)
 					return -1;
@@ -2286,6 +2301,8 @@ static int protoItemDataWrite(ItemProtoData *item_data, int type, Common::WriteS
 		stream->writeSint32BE(item_data->misc.powerTypePid);
 		stream->writeSint32BE(item_data->misc.powerType);
 		stream->writeSint32BE(item_data->misc.charges);
+		if (stream->err())
+			return -1;
 
 		/*		if (fileWriteInt32(stream, item_data->misc.powerTypePid) == -1)
 					return -1;
@@ -2297,6 +2314,8 @@ static int protoItemDataWrite(ItemProtoData *item_data, int type, Common::WriteS
 		return 0;
 	case ITEM_TYPE_KEY:
 		stream->writeSint32BE(item_data->key.keyCode);
+		if (stream->err())
+			return -1;
 
 		/*		if (fileWriteInt32(stream, item_data->key.keyCode) == -1)
 					return -1;*/
@@ -2313,6 +2332,8 @@ static int protoSceneryDataWrite(SceneryProtoData *scenery_data, int type, Commo
 	case SCENERY_TYPE_DOOR:
 		stream->writeSint32BE(scenery_data->door.openFlags);
 		stream->writeSint32BE(scenery_data->door.keyCode);
+		if (stream->err())
+			return -1;
 
 		/*		if (fileWriteInt32(stream, scenery_data->door.openFlags) == -1)
 					return -1;
@@ -2323,6 +2344,9 @@ static int protoSceneryDataWrite(SceneryProtoData *scenery_data, int type, Commo
 	case SCENERY_TYPE_STAIRS:
 		stream->writeSint32BE(scenery_data->stairs.field_0);
 		stream->writeSint32BE(scenery_data->stairs.field_4);
+		if (stream->err())
+			return -1;
+
 		/*		if (fileWriteInt32(stream, scenery_data->stairs.field_0) == -1)
 					return -1;
 				if (fileWriteInt32(stream, scenery_data->stairs.field_4) == -1)
@@ -2332,6 +2356,9 @@ static int protoSceneryDataWrite(SceneryProtoData *scenery_data, int type, Commo
 	case SCENERY_TYPE_ELEVATOR:
 		stream->writeSint32BE(scenery_data->elevator.type);
 		stream->writeSint32BE(scenery_data->elevator.level);
+		if (stream->err())
+			return -1;
+
 		/*		if (fileWriteInt32(stream, scenery_data->elevator.type) == -1)
 					return -1;
 				if (fileWriteInt32(stream, scenery_data->elevator.level) == -1)
@@ -2341,6 +2368,8 @@ static int protoSceneryDataWrite(SceneryProtoData *scenery_data, int type, Commo
 	case SCENERY_TYPE_LADDER_UP:
 	case SCENERY_TYPE_LADDER_DOWN:
 		stream->writeSint32BE(scenery_data->ladder.field_0);
+		if (stream->err())
+			return -1;
 
 		/*		if (fileWriteInt32(stream, scenery_data->ladder.field_0) == -1)
 					return -1;*/
@@ -2348,6 +2377,8 @@ static int protoSceneryDataWrite(SceneryProtoData *scenery_data, int type, Commo
 		return 0;
 	case SCENERY_TYPE_GENERIC:
 		stream->writeSint32BE(scenery_data->generic.field_0);
+		if (stream->err())
+			return -1;
 
 		/*		if (fileWriteInt32(stream, scenery_data->generic.field_0) == -1)
 					return -1;*/
@@ -2364,6 +2395,8 @@ static int protoWrite(Proto *proto, Common::WriteStream *stream) {
 	stream->writeSint32BE(proto->pid);
 	stream->writeSint32BE(proto->messageId);
 	stream->writeSint32BE(proto->fid);
+	if (stream->err())
+		return -1;
 
 	/*	if (fileWriteInt32(stream, proto->pid) == -1)
 			return -1;
@@ -2386,6 +2419,8 @@ static int protoWrite(Proto *proto, Common::WriteStream *stream) {
 		stream->writeSint32BE(proto->item.cost);
 		stream->writeSint32BE(proto->item.inventoryFid);
 		stream->writeByte(proto->item.field_80);
+		if (stream->err())
+			return -1;
 
 		/*		if (fileWriteInt32(stream, proto->item.lightDistance) == -1)
 					return -1;
@@ -2411,6 +2446,7 @@ static int protoWrite(Proto *proto, Common::WriteStream *stream) {
 					return -1;
 				if (fileWriteUInt8(stream, proto->item.field_80) == -1)
 					return -1;*/
+
 		if (protoItemDataWrite(&(proto->item.data), proto->item.type, stream) == -1)
 			return -1;
 
@@ -2424,6 +2460,8 @@ static int protoWrite(Proto *proto, Common::WriteStream *stream) {
 		stream->writeSint32BE(proto->critter.headFid);
 		stream->writeSint32BE(proto->critter.aiPacket);
 		stream->writeSint32BE(proto->critter.team);
+		if (stream->err())
+			return -1;
 
 		/*		if (fileWriteInt32(stream, proto->critter.lightDistance) == -1)
 					return -1;
@@ -2441,6 +2479,7 @@ static int protoWrite(Proto *proto, Common::WriteStream *stream) {
 					return -1;
 				if (fileWriteInt32(stream, proto->critter.team) == -1)
 					return -1;*/
+
 		if (protoCritterDataWrite(stream, &(proto->critter.data)) == -1)
 			return -1;
 
@@ -2454,6 +2493,8 @@ static int protoWrite(Proto *proto, Common::WriteStream *stream) {
 		stream->writeSint32BE(proto->scenery.type);
 		stream->writeSint32BE(proto->scenery.field_2C);
 		stream->writeByte(proto->scenery.field_34);
+		if (stream->err())
+			return -1;
 
 		/*		if (fileWriteInt32(stream, proto->scenery.lightDistance) == -1)
 					return -1;
@@ -2471,6 +2512,7 @@ static int protoWrite(Proto *proto, Common::WriteStream *stream) {
 					return -1;
 				if (fileWriteUInt8(stream, proto->scenery.field_34) == -1)
 					return -1;*/
+
 		if (protoSceneryDataWrite(&(proto->scenery.data), proto->scenery.type, stream) == -1)
 			return -1;
 
@@ -2482,6 +2524,8 @@ static int protoWrite(Proto *proto, Common::WriteStream *stream) {
 		stream->writeSint32BE(proto->wall.extendedFlags);
 		stream->writeSint32BE(proto->wall.sid);
 		stream->writeSint32BE(proto->wall.material);
+		if (stream->err())
+			return -1;
 
 		/*		if (fileWriteInt32(stream, proto->wall.lightDistance) == -1)
 					return -1;
@@ -2502,6 +2546,8 @@ static int protoWrite(Proto *proto, Common::WriteStream *stream) {
 		stream->writeSint32BE(proto->tile.extendedFlags);
 		stream->writeSint32BE(proto->tile.sid);
 		stream->writeSint32BE(proto->tile.material);
+		if (stream->err())
+			return -1;
 
 		/*		if (fileWriteInt32(stream, proto->tile.flags) == -1)
 					return -1;
@@ -2518,6 +2564,9 @@ static int protoWrite(Proto *proto, Common::WriteStream *stream) {
 		stream->writeSint32BE(proto->misc.lightIntensity);
 		stream->writeSint32BE(proto->misc.flags);
 		stream->writeSint32BE(proto->misc.extendedFlags);
+		if (stream->err())
+			return -1;
+
 		/*		if (fileWriteInt32(stream, proto->misc.lightDistance) == -1)
 					return -1;
 				if (_db_fwriteLong(stream, proto->misc.lightIntensity) == -1)
@@ -2546,54 +2595,29 @@ int _proto_save_pid(int pid) {
 
 	_proto_list_str(pid, path + strlen(path));
 
-	// TODO move to init
-	const Common::Path &gamePath = ConfMan.getPath("path");
-	Common::FSNode gameNode(gamePath);
-	if (!gameNode.exists())
-		warning("PROTO_SAVE_PID: Can't open gamedir");
+	debug("proto_save_pid: requested path to save: %s", path);
 
-	Common::FSNode dataNode = gameNode.getChild("data");
-	if (!dataNode.exists())
-		dataNode.createDirectory();
-
-	Common::FSNode protoNode = dataNode.getChild("proto");
-	if (!protoNode.exists())
-		protoNode.createDirectory();
-
-	Common::FSNode crittersNode = protoNode.getChild("critters");
-	if (!crittersNode.exists())
-		crittersNode.createDirectory();
-
-	Common::FSNode itemsNode = protoNode.getChild("items");
-	if (!itemsNode.exists())
-		itemsNode.createDirectory();
-
-	path[strlen(path) - 13] = '\0';
-
-	Common::Path fullPath(gamePath);
-	fullPath.appendComponent("data\\");
-	fullPath.appendComponent(path);
-	Common::FSNode fullProtoPath(fullPath);
-	char fileName[13];
-	Common::sprintf_s(fileName, "%08d.pro", pid);
-
-	Common::FSNode proFile = fullProtoPath.getChild(fileName);
-
-	Common::WriteStream *stream = proFile.createWriteStream();
-
-	debug(5, "PROTO: Attempt to save proto %s in %s", fileName, fullPath.toString('/').c_str());
+	Common::String protoPath(g_engine->getTargetName());
+	protoPath += "_";
+	protoPath += path;
+	protoPath.replace('\\', '_');
+	Common::WriteStream *stream = g_system->getSavefileManager()->openForSaving(protoPath, false);
 
 	//	File *stream = fileOpen(path, "wb");
 	if (stream == nullptr) {
+		warning("PROTO: Couldn't open %s to save!", protoPath.c_str());
 		return -1;
-	} else
-		debug(5, "PROTO: Opened stream %s for writing", fileName);
+	}
 
 	int rc = protoWrite(proto, stream);
 
 	//	fileClose(stream);
 	stream->finalize();
+	if (stream->err() || rc == -1)
+		warning("PROTO: Error saving %s", protoPath.c_str());
 	delete stream;
+
+	debug("proto_save_pid: Saved %s", protoPath.c_str());
 	return rc;
 }
 
