@@ -378,7 +378,7 @@ int lsgSaveGame(int mode) {
 		_quick_done = true;
 	}
 
-	if (mode == LOAD_SAVE_MODE_QUICK && _quick_done) {
+	if (mode == LOAD_SAVE_MODE_QUICK && _quick_done) {  // TODO: quicksave
 		// SFALL: cycle through first N slots for quicksaving
 		if (autoQuickSaveSlots) {
 			if (++_slot_cursor >= quickSaveSlots) {
@@ -1720,7 +1720,7 @@ static int lsgPerformSaveGame() {
 	else
 		debug("Saved interface status");
 
-	_RestoreSave();  // TODO remove, this is to recover the backup if save fails
+	// _RestoreSave();  // TODO save  This is to recover the backup if save fails
 
 //	for (int index = 0; index < LOAD_SAVE_HANDLER_COUNT; index++) {
 //		long pos = fileTell(_flptr);
@@ -1739,8 +1739,9 @@ static int lsgPerformSaveGame() {
 // 		debugPrint("LOADSAVE: Save function #%d data size written: %d bytes.\n", index, fileTell(_flptr) - pos);
 // 	}
 
-//	debugPrint("LOADSAVE: Total save data written: %ld bytes.\n", fileTell(_flptr));
-
+	debugPrint("LOADSAVE: Total save data written: %ld bytes.\n", newSave->pos());
+	newSave->finalize();
+	delete newSave;
 //	fileClose(_flptr);
 
     // SFALL: Save sfallgv.sav.  TODO sfall
@@ -2445,6 +2446,7 @@ static int _GetSlotList() {
 			}
 
 			// fileClose(_flptr);
+			delete loadSave;
 		}
 	}
 	return index;

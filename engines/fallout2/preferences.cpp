@@ -839,16 +839,13 @@ int preferencesSave(Common::OutSaveFile *stream) {
 	stream->writeSint32BE(gPreferencesSpeechVolume1);
 	stream->writeSint32BE((int)brightness);
 	stream->writeSint32BE((int)mouseSensitivity);
-
-	stream->finalize();
-	if (!stream->err()) {
+	if (stream->err()) {
+		stream->finalize();
 		delete stream;
-		return 0;
-	} else {
-		delete stream;
-		debugPrint("\nOPTION MENU: Error save option data!\n");
 		return -1;
 	}
+
+	return 0;
 
 /*	if (fileWriteInt32(stream, gPreferencesGameDifficulty1) == -1)
 		goto err;
