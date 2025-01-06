@@ -1539,7 +1539,7 @@ static int lsgPerformSaveGame() {
 	Common::String newSaveDat, newSaveCritters, newSaveItems;
 
 	char slotname[30];
-	Common::sprintf_s(slotname, "_slot%02d_", _slot_cursor + 1);
+	Common::sprintf_s(slotname, "_slot%.2d_", _slot_cursor + 1);
 
 	newSaveName += slotname;
 	newSaveDat = newSaveName + "save.dat";
@@ -1859,7 +1859,7 @@ static int lsgLoadGameInSlot(int slot) {
 	Common::String loadSaveDat, loadSaveCritters, loadSaveItems;
 
 	char slotname[30];
-	Common::sprintf_s(slotname, "_slot%02d_", _slot_cursor + 1);
+	Common::sprintf_s(slotname, "_slot%.2d_", _slot_cursor + 1);
 
 	loadSaveName += slotname;
 	loadSaveDat = loadSaveName + "save.dat";
@@ -2404,7 +2404,7 @@ static int _GetSlotList() {
 	Common::SaveFileManager *saveMan = g_system->getSavefileManager();
 
 	Common::String pattern = g_engine->getTargetName();
-	pattern += "_slot???_save.dat";
+	pattern += "_slot??_save.dat";
 
 	Common::StringArray filenames;
 	filenames = saveMan->listSavefiles(pattern);
@@ -2414,7 +2414,7 @@ static int _GetSlotList() {
 //		snprintf(_str, sizeof(_str), "%s\\%s%.2d\\%s", "SAVEGAME", "SLOT", index + 1, "SAVE.DAT");
 
 		char index_tmp[4];
-		snprintf(index_tmp, sizeof(index_tmp), "%03d", index + 1);
+		snprintf(index_tmp, sizeof(index_tmp), "%.2d", index + 1);
 		Common::StringArray::const_iterator filename;
 		for (filename = filenames.begin(); filename != filenames.end() && !filename->contains(index_tmp); ++filename)
 			;
@@ -2578,7 +2578,7 @@ static int _LoadTumbSlot(int slot) {
 		Common::String saveName = g_engine->getTargetName();
 
 		char slotname[30];
-		Common::sprintf_s(slotname, "_slot%02d_", _slot_cursor + 1);
+		Common::sprintf_s(slotname, "_slot%.2d_", _slot_cursor + 1);
 		saveName += slotname;
 		saveName += "save.dat";
 
