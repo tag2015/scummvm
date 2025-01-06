@@ -402,7 +402,7 @@ void gameReset() {
 	itemsReset();
 	queueExit();
 	animationReset();
-//	lsgInit();
+	lsgInit();
 	critterReset();
 	aiReset();
 	_inven_reset_dude();
@@ -420,7 +420,7 @@ void gameReset() {
 	partyMembersReset();
 	characterEditorInit();
 	pipboyReset();
-//	_ResetLoadSave();
+	_ResetLoadSave();
 	gameDialogReset();
 	combatReset();
 	_game_user_wants_to_quit = 0;
