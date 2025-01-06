@@ -1539,7 +1539,7 @@ static int lsgPerformSaveGame() {
 	Common::String newSaveDat, newSaveCritters, newSaveItems;
 
 	char slotname[30];
-	Common::sprintf_s(slotname, "_slot%03d_", _slot_cursor + 1);
+	Common::sprintf_s(slotname, "_slot%02d_", _slot_cursor + 1);
 
 	newSaveName += slotname;
 	newSaveDat = newSaveName + "save.dat";
@@ -1576,11 +1576,21 @@ static int lsgPerformSaveGame() {
 	debugPrint("\nLOADSAVE: Save Proto Items: %s", newSaveItems.c_str());
 
 	newSave = saveMan->openForSaving(newSaveDat, false);
-	if(newSave == nullptr)
+	if (newSave == nullptr) {
+		debugPrint("\nLOADSAVE: ** Error opening save game for writing! **\n");
+		_partyMemberUnPrepSave();
+		backgroundSoundResume(); // TODO audio
 		return -1;
+	}
 
+	int64 pos = newSave->pos();
 	if (lsgSaveHeaderInSlot(_slot_cursor) == -1) {
 		debugPrint("\nLOADSAVE: ** Error writing save game header! **\n");
+		debugPrint("LOADSAVE: Save file header size written: %lld bytes.\n", newSave->pos() - pos);
+		newSave->finalize();
+		delete newSave;
+		_partyMemberUnPrepSave();
+		backgroundSoundResume(); // TODO audio
 		return -1;
 	}
 
@@ -1621,9 +1631,9 @@ static int lsgPerformSaveGame() {
 		debug("Saved script global vars!");
 
 	if(_GameMap2Slot(newSave))
-		warning("Error saving map stats");
+		warning("Error saving maps and protos");
 	else
-		warning("Saved placeholder map stats");
+		debug("Saved maps and protos");
 
 	if (scriptsSaveGameGlobalVars(newSave)) // TODO check, why twice?
 		warning("Error saving script global vars!");
@@ -1849,7 +1859,7 @@ static int lsgLoadGameInSlot(int slot) {
 	Common::String loadSaveDat, loadSaveCritters, loadSaveItems;
 
 	char slotname[30];
-	Common::sprintf_s(slotname, "_slot%03d_", _slot_cursor + 1);
+	Common::sprintf_s(slotname, "_slot%02d_", _slot_cursor + 1);
 
 	loadSaveName += slotname;
 	loadSaveDat = loadSaveName + "save.dat";
@@ -2568,7 +2578,7 @@ static int _LoadTumbSlot(int slot) {
 		Common::String saveName = g_engine->getTargetName();
 
 		char slotname[30];
-		Common::sprintf_s(slotname, "_slot%03d_", _slot_cursor + 1);
+		Common::sprintf_s(slotname, "_slot%02d_", _slot_cursor + 1);
 		saveName += slotname;
 		saveName += "save.dat";
 
@@ -2877,14 +2887,10 @@ static int _GameMap2Slot(Common::OutSaveFile *stream) {
 		return -1;
 	}
 
-	// TODO map save is not implemented, saving placeholder values
-	stream->writeSint32BE(1);  // number of visited maps
-	stream->writeString("ARTEMPLE.SAV");  // filelist of visited maps
-	stream->writeByte(0);
-	stream->writeSint32BE(1); // size of automap.db
-	return 0;
+	Common::SaveFileManager *saveMan = g_system->getSavefileManager();
 
-/*	for (int index = 1; index < gPartyMemberDescriptionsLength; index += 1) {
+	// copy all current critters & items protos to save slot
+	for (int index = 1; index < gPartyMemberDescriptionsLength; index++) {
 		int pid = gPartyMemberPids[index];
 		if (pid == -2) {
 			continue;
@@ -2895,46 +2901,123 @@ static int _GameMap2Slot(Common::OutSaveFile *stream) {
 			continue;
 		}
 
-		const char *critterItemPath = (pid >> 24) == OBJ_TYPE_CRITTER
-										  ? PROTO_DIR_NAME "\\" CRITTERS_DIR_NAME
-										  : PROTO_DIR_NAME "\\" ITEMS_DIR_NAME;
-		snprintf(_str0, sizeof(_str0), "%s\\%s\\%s", _patches, critterItemPath, path);
-		snprintf(_str1, sizeof(_str1), "%s\\%s\\%s%.2d\\%s\\%s", _patches, "SAVEGAME", "SLOT", _slot_cursor + 1, critterItemPath, path);
-		if (fileCopyCompressed(_str0, _str1) == -1) {
+		const char *critterItemPath = (pid >> 24) == OBJ_TYPE_CRITTER ? PROTO_DIR_NAME "\\" CRITTERS_DIR_NAME
+																	  : PROTO_DIR_NAME "\\" ITEMS_DIR_NAME;
+
+		//  snprintf(_str0, sizeof(_str0), "%s\\%s\\%s", _patches, critterItemPath, path);
+		//  snprintf(_str1, sizeof(_str1), "%s\\%s\\%s%.2d\\%s\\%s", _patches, "SAVEGAME", "SLOT", _slot_cursor + 1, critterItemPath, path);
+
+		snprintf(_str0, sizeof(_str0), "%s\\%s", critterItemPath, path);
+		snprintf(_str1, sizeof(_str1), "%s%.2d\\%s\\%s", "slot", _slot_cursor + 1, critterItemPath, path);
+
+		Common::String oldProtoFile(g_engine->getTargetName() + "_" + _str0);
+		Common::String newProtoFile(g_engine->getTargetName() + "_" + _str1);
+		oldProtoFile.replace('\\', '_');
+		newProtoFile.replace('\\', '_');
+
+		// Protos are gzip compressed in saves
+		if (saveMan->copySavefile(oldProtoFile, newProtoFile))
+			debug(5, "LOADSAVE: Copied %s to %s", oldProtoFile.c_str(), newProtoFile.c_str());
+		else {
+			warning("LOADSAVE: Couldn't copy %s to %s", oldProtoFile.c_str(), newProtoFile.c_str());
 			return -1;
 		}
 	}
 
-	snprintf(_str0, sizeof(_str0), "%s\\*.%s", "MAPS", "SAV");
+	Common::String mapsPath(g_engine->getTargetName() + "_maps_");
+	Common::StringArray savedMaps;
+	savedMaps = saveMan->listSavefiles(mapsPath + "*." + "SAV");
 
-	char **fileNameList;
-	int fileNameListLength = fileNameListInit(_str0, &fileNameList, 0, 0);
-	if (fileNameListLength == -1) {
+	// number of visited maps
+	stream->writeSint32BE(savedMaps.size());
+
+	/*	char **fileNameList;
+		int fileNameListLength = fileNameListInit(_str0, &fileNameList, 0, 0);
+		if (fileNameListLength == -1) {
+			return -1;
+		}
+
+		if (fileWriteInt32(stream, fileNameListLength) == -1) {
+			fileNameListFree(&fileNameList, 0);
+			return -1;
+		}
+
+		if (fileNameListLength == 0) {
+			fileNameListFree(&fileNameList, 0);
+			return -1;
+		}*/
+
+	// snprintf(_gmpath, sizeof(_gmpath), "%s\\%s%.2d\\", "SAVEGAME", "SLOT", _slot_cursor + 1);
+
+	// snprintf(_gmpath, sizeof(_gmpath), "%s\\%s%.2d\\", "SAVEGAME", "SLOT", _slot_cursor + 1);
+
+	Common::String slotNum(Common::String::format("%s%.2d", "slot", _slot_cursor + 1));
+	slotNum += '_';
+
+	debug("slotnum %s", slotNum.c_str());
+	// delete all maps in this slot (including AUTOMAP.SAV) before copying the new files
+	if (MapDirErase(slotNum.c_str(), "SAV") == -1) {
 		return -1;
 	}
 
-	if (fileWriteInt32(stream, fileNameListLength) == -1) {
-		fileNameListFree(&fileNameList, 0);
+	/*	snprintf(_gmpath, sizeof(_gmpath), "%s\\%s\\%s%.2d\\", _patches, "SAVEGAME", "SLOT", _slot_cursor + 1);
+		_strmfe(_str0, "AUTOMAP.DB", "SAV");
+		strcat(_gmpath, _str0);
+		compat_remove(_gmpath);*/
+
+	// Save filelist of visited maps in save.dat and copy .sav maps individually (compressed)
+	for (Common::StringArray::iterator mapName = savedMaps.begin(); mapName != savedMaps.end(); mapName++) {
+		Common::String shortMapName(mapName->substr(mapsPath.size()));
+		debug("writing %s to save.dat", shortMapName.c_str());
+		stream->writeString(shortMapName);
+		stream->writeByte(0);
+		if (stream->err()) {
+			warning("LOADSAVE: Couldn't write %s to save.dat", shortMapName.c_str());
+			return -1;
+		}
+
+		snprintf(_str1, sizeof(_str1), "%s%.2d\\%s", "slot", _slot_cursor + 1, shortMapName.c_str());
+		Common::String oldMapFile(mapName->c_str());
+		Common::String newMapFile(g_engine->getTargetName() + "_" + _str1);
+		newMapFile.replace('\\', '_');
+
+		if (saveMan->copySavefile(oldMapFile, newMapFile))
+			debug(5, "LOADSAVE: Copied %s to %s", oldMapFile.c_str(), newMapFile.c_str());
+		else {
+			warning("LOADSAVE: Couldn't copy %s to %s", oldMapFile.c_str(), newMapFile.c_str());
+			return -1;
+		}
+	}
+
+	// copy AUTOMAP.DB as AUTOMAP.SAV
+	snprintf(_str1, sizeof(_str1), "%s%.2d\\%s", "slot", _slot_cursor + 1, "AUTOMAP.SAV");
+	Common::String oldAutomap(g_engine->getTargetName() + "_AUTOMAP.DB");
+	Common::String newAutomap(g_engine->getTargetName() + "_" + _str1);
+	newAutomap.replace('\\', '_');
+	if (saveMan->copySavefile(oldAutomap, newAutomap))
+		debug(5, "LOADSAVE: Copied %s to %s", oldAutomap.c_str(), newAutomap.c_str());
+	else {
+		warning("LOADSAVE: Couldn't copy %s to %s", oldAutomap.c_str(), newAutomap.c_str());
 		return -1;
 	}
 
-	if (fileNameListLength == 0) {
-		fileNameListFree(&fileNameList, 0);
+	// AUTOMAP.DB size
+	Common::InSaveFile *autoMapTmp = saveMan->openForLoading(oldAutomap);
+	stream->writeSint32BE(autoMapTmp->size());
+	if (stream->err()) {
+		warning("LOADSAVE: Error saving AUTOMAP.DB filesize");
+		return -1;
+	}
+	delete autoMapTmp;
+
+	if (_partyMemberUnPrepSave() == -1) {
 		return -1;
 	}
 
-	snprintf(_gmpath, sizeof(_gmpath), "%s\\%s%.2d\\", "SAVEGAME", "SLOT", _slot_cursor + 1);
+	return 0;
+}
 
-	if (MapDirErase(_gmpath, "SAV") == -1) {
-		fileNameListFree(&fileNameList, 0);
-		return -1;
-	}
-
-	snprintf(_gmpath, sizeof(_gmpath), "%s\\%s\\%s%.2d\\", _patches, "SAVEGAME", "SLOT", _slot_cursor + 1);
-	_strmfe(_str0, "AUTOMAP.DB", "SAV");
-	strcat(_gmpath, _str0);
-	compat_remove(_gmpath);
-
+/*
 	for (int index = 0; index < fileNameListLength; index += 1) {
 		char *string = fileNameList[index];
 		if (fileWrite(string, strlen(string) + 1, 1, stream) == -1) {
@@ -2981,9 +3064,7 @@ static int _GameMap2Slot(Common::OutSaveFile *stream) {
 	if (_partyMemberUnPrepSave() == -1) {
 		return -1;
 	}
-
-	return 0;*/
-}
+*/
 
 // SlotMap2Game
 // 0x47F990
@@ -3209,8 +3290,9 @@ int MapDirErase(const char *relativePath, const char *extension) {
 	Common::String restrictedPath(g_engine->getTargetName());
 	restrictedPath += "_";
 	restrictedPath += relativePath;
+	if (restrictedPath.lastChar() == '\\')
+		restrictedPath.chop(1); // remove last char
 	restrictedPath.replace('\\', '_');
-	restrictedPath.chop(1); // remove last char
 
 	Common::StringArray filenames;
 	filenames = saveMan->listSavefiles(restrictedPath + "*." + extension);
