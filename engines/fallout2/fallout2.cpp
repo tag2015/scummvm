@@ -126,6 +126,7 @@ static int _main_game_paused = 0;
 static bool _main_show_death_scene = false;
 static bool _main_death_voiceover_done;
 
+static void mainLoop();
 static void showDeath();
 static void _main_death_voiceover_callback();
 static int _mainDeathGrabTextFile(const char *fileName, char *dest);
@@ -255,6 +256,51 @@ void Fallout2Engine::showSplash() {
 	internal_free(palette);
 
 	settings.system.splash = splash + 1;
+}
+
+static void mainLoop() {
+	bool cursorWasHidden = cursorIsHidden();
+	if (cursorWasHidden) {
+		mouseShowCursor();
+	}
+
+	_main_game_paused = 0;
+
+	scriptsEnable();
+
+	while (_game_user_wants_to_quit == 0) {
+		sharedFpsLimiter.mark();
+
+		int keyCode = inputGetInput();
+
+		// SFALL: MainLoopHook.
+		sfall_gl_scr_process_main();
+
+		gameHandleKey(keyCode, false);
+
+		scriptsHandleRequests();
+
+		mapHandleTransition();
+
+		if (_main_game_paused != 0) {
+			_main_game_paused = 0;
+		}
+
+		if ((gDude->data.critter.combat.results & (DAM_DEAD | DAM_KNOCKED_OUT)) != 0) {
+			endgameSetupDeathEnding(ENDGAME_DEATH_ENDING_REASON_DEATH);
+			_main_show_death_scene = 1;
+			_game_user_wants_to_quit = 2;
+		}
+
+		renderPresent();
+		sharedFpsLimiter.throttle();
+	}
+
+	scriptsDisable();
+
+	if (cursorWasHidden) {
+		mouseHideCursor();
+	}
 }
 
 static void showDeath() {
@@ -840,58 +886,19 @@ Common::Error Fallout2Engine::run() {
 				// SFALL: AfterNewGameStartHook.
 				sfall_gl_scr_exec_start_proc();
 
-				bool cursorWasHidden = cursorIsHidden();
-				if (cursorWasHidden) {
-					mouseShowCursor();
-				}
+				mainLoop();
+				paletteFadeTo(gPaletteWhite);
 
-				_main_game_paused = 0;
-				scriptsEnable();
+				objectHide(gDude, nullptr);
+				_map_exit();
 
-				while (_game_user_wants_to_quit == 0) {
-					sharedFpsLimiter.mark();
+				gameReset();
 
-					int keyCode = inputGetInput();
-
-					// SFALL: MainLoopHook.
-					sfall_gl_scr_process_main();
-
-					gameHandleKey(keyCode, false);
-
-					scriptsHandleRequests();
-
-					mapHandleTransition();
-
-					if (_main_game_paused != 0) {
-						_main_game_paused = 0;
-					}
-
-					if ((gDude->data.critter.combat.results & (DAM_DEAD | DAM_KNOCKED_OUT)) != 0) {
-						endgameSetupDeathEnding(ENDGAME_DEATH_ENDING_REASON_DEATH);
-						_main_show_death_scene = 1;
-						_game_user_wants_to_quit = 2;
-					}
-
-					renderPresent();
-					sharedFpsLimiter.throttle();
-				}
-				scriptsDisable();
-				if (cursorWasHidden) {
-					mouseHideCursor();
+				if (_main_show_death_scene != 0) {
+					showDeath();
+					_main_show_death_scene = 0;
 				}
 			}
-			paletteFadeTo(gPaletteWhite);
-
-			objectHide(gDude, nullptr);
-			_map_exit();
-
-			gameReset();
-
-			if (_main_show_death_scene != 0) {
-				showDeath();
-				_main_show_death_scene = 0;
-			}
-
 			mainMenuWindowInit();
 			break;
 
@@ -900,7 +907,7 @@ Common::Error Fallout2Engine::run() {
 			mainMenuWindowHide(true);
 			mainMenuWindowFree();
 			_game_user_wants_to_quit = 0;
-			//_main_show_death_scene = 0;
+			_main_show_death_scene = 0;
 
 			gDude->flags &= ~OBJECT_FLAT;
 
@@ -920,24 +927,21 @@ Common::Error Fallout2Engine::run() {
 			} else if (loadGameRc != 0) {
 				windowDestroy(win);
 				win = -1;
-//				mainLoop();
+				mainLoop();
 			}
 			paletteFadeTo(gPaletteWhite);
 			if (win != -1) {
 				windowDestroy(win);
 			}
 
-			// NOTE: Uninline.
 			objectHide(gDude, nullptr);
 			_map_exit();
-
-			// NOTE: Uninline.
 			gameReset();
 
-//			if (_main_show_death_scene != 0) {
-//				showDeath();
-//				_main_show_death_scene = 0;
-//			}
+			if (_main_show_death_scene != 0) {
+				showDeath();
+				_main_show_death_scene = 0;
+			}
 			mainMenuWindowInit();
 			break;
 		}
