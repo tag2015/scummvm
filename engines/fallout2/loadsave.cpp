@@ -168,12 +168,10 @@ static void _DrawInfoBox(int slot);
 static int _LoadTumbSlot(int slot);
 static int _GetComment(int slot);
 static int _get_input_str2(int win, int doneKeyCode, int cancelKeyCode, char *description, int maxLength, int x, int y, int textColor, int backgroundColor, int flags);
-// static int _DummyFunc(File *stream);
 static int _PrepLoad(Common::InSaveFile *stream);
 static int _EndLoad(Common::InSaveFile *stream);
 static int _GameMap2Slot(Common::OutSaveFile *stream);
 static int _SlotMap2Game(Common::InSaveFile *stream);
-// static int _mygets(char *dest, Common::InSaveFile *stream);
 static int _copy_file(const char *existingFileName, const char *newFileName);
 static int _SaveBackup();
 static int _RestoreSave();
@@ -212,67 +210,70 @@ static bool _automap_db_flag = false;
 // 0x5193CC
 static const char *_patches = nullptr;
 
+// The saving/loading routines are just called sequentially instead of using function pointers
+#if 0
 // 0x5193EC
-// static SaveGameHandler *_master_save_list[LOAD_SAVE_HANDLER_COUNT] = {
-//	_DummyFunc,
-//	_SaveObjDudeCid, DONE
-//	scriptsSaveGameGlobalVars, DONE
-//	_GameMap2Slot, DONE
-//	scriptsSaveGameGlobalVars, DONE
-//	_obj_save_dude, DONE
-//	critterSave, DONE
-//	killsSave, DONE
-//	skillsSave,  DONE
-//	randomSave, DONE
-//	perksSave, DONE
-//	combatSave, DONE
-//	aiSave, DONE
-//	statsSave, DONE
-//	itemsSave, DONE
-//	traitsSave,  DONE
-//	automapSave, DONE
-//	preferencesSave, DONE
-//	characterEditorSave, DONE
-//	wmWorldMap_save, DONE
-//	pipboySave, DONE
-//	gameMoviesSave, DONE
-//	skillsUsageSave, DONE
-//	partyMembersSave, DONE
-//	queueSave, DONE
-//	interfaceSave, DONE
-//	_DummyFunc,
-//};
+static SaveGameHandler *_master_save_list[LOAD_SAVE_HANDLER_COUNT] = {
+	_DummyFunc,
+	_SaveObjDudeCid,
+	scriptsSaveGameGlobalVars,
+	_GameMap2Slot,
+	scriptsSaveGameGlobalVars,
+	_obj_save_dude,
+	critterSave,
+	killsSave,
+	skillsSave,
+	randomSave,
+	perksSave,
+	combatSave,
+	aiSave,
+	statsSave,
+	itemsSave,
+	traitsSave,
+	automapSave,
+	preferencesSave,
+	characterEditorSave,
+	wmWorldMap_save,
+	pipboySave,
+	gameMoviesSave,
+	skillsUsageSave,
+	partyMembersSave,
+	queueSave,
+	interfaceSave,
+	_DummyFunc,
+};
 
 // 0x519458
-// static LoadGameHandler *_master_load_list[LOAD_SAVE_HANDLER_COUNT] = {
-//	_PrepLoad, DONE
-//	_LoadObjDudeCid, DONE
-//	scriptsLoadGameGlobalVars, DONE
-//	_SlotMap2Game, DONE
-//	scriptsSkipGameGlobalVars, DONE
-//	_obj_load_dude, DONE
-//	critterLoad, DONE
-//	killsLoad, DONE
-//	skillsLoad, DONE
-//	randomLoad, DONE
-//	perksLoad, DONE
-//	combatLoad, DONE
-//	aiLoad, DONE
-//	statsLoad, DONE
-//	itemsLoad, DONE
-//	traitsLoad, DONE
-//	automapLoad, DONE
-//	preferencesLoad, DONE
-//	characterEditorLoad, DONE
-//	wmWorldMap_load, DONE
-//	pipboyLoad, DONE
-//	gameMoviesLoad, DONE
-//	skillsUsageLoad, DONE
-//	partyMembersLoad, DONE
-//	queueLoad, DONE
-//	interfaceLoad, DONE
-//	_EndLoad, DONE
-// };
+static LoadGameHandler *_master_load_list[LOAD_SAVE_HANDLER_COUNT] = {
+	_PrepLoad,
+	_LoadObjDudeCid,
+	scriptsLoadGameGlobalVars,
+	_SlotMap2Game,
+	scriptsSkipGameGlobalVars,
+	_obj_load_dude,
+	critterLoad,
+	killsLoad,
+	skillsLoad,
+	randomLoad,
+	perksLoad,
+	combatLoad,
+	aiLoad,
+	statsLoad,
+	itemsLoad,
+	traitsLoad,
+	automapLoad,
+	preferencesLoad,
+	characterEditorLoad,
+	wmWorldMap_load,
+	pipboyLoad,
+	gameMoviesLoad,
+	skillsUsageLoad,
+	partyMembersLoad,
+	queueLoad,
+	interfaceLoad,
+	_EndLoad,
+};
+#endif
 
 // 0x5194C4
 static bool _loadingGame = false;
@@ -378,7 +379,13 @@ int lsgSaveGame(int mode) {
 		_quick_done = true;
 	}
 
-	if (mode == LOAD_SAVE_MODE_QUICK && _quick_done) {  // TODO: quicksave
+	// TODO save (quicksave)
+	if (mode == LOAD_SAVE_MODE_QUICK) {
+		warning("Quicksave not implemented");
+		return -1;
+	}
+
+	if (mode == LOAD_SAVE_MODE_QUICK && _quick_done) {
 		// SFALL: cycle through first N slots for quicksaving
 		if (autoQuickSaveSlots) {
 			if (++_slot_cursor >= quickSaveSlots) {
@@ -747,7 +754,7 @@ int lsgSaveGame(int mode) {
 				gameMouseSetCursor(MOUSE_CURSOR_ARROW);
 				rc = -1;
 			} else if (v50 == 1) {
-				debug("Starting lsgPerformSaveGame!");
+				debug(1, "Calling lsgPerformSaveGame!");
 				if (lsgPerformSaveGame() == -1) {
 					gameMouseSetCursor(MOUSE_CURSOR_ARROW);
 					soundPlayFile("iisxxxx1");
@@ -890,6 +897,12 @@ int lsgLoadGame(int mode) {
 
 	_ls_error_code = 0;
 	_patches = settings.system.master_patches_path.c_str();
+
+	// TODO save (quicksave)
+	if (mode == LOAD_SAVE_MODE_QUICK) {
+		warning("Quickload not implemented");
+		return -1;
+	}
 
 	if (mode == LOAD_SAVE_MODE_QUICK && _quick_done) {
 		int quickSaveWindowX = (screenGetWidth() - LS_WINDOW_WIDTH) / 2;
@@ -1534,50 +1547,30 @@ static int lsgPerformSaveGame() {
 
 	backgroundSoundPause();
 
+	// Original engine saves in multiple directories under SAVEGAME/SLOT##.
+	// In ScummVM it is currently set as individual files starting with
+	// <targetname>_slot##_, to avoid traversing
 	Common::SaveFileManager *saveMan = g_system->getSavefileManager();
 	Common::String newSaveName(g_engine->getTargetName());
-	Common::String newSaveDat, newSaveCritters, newSaveItems;
+	Common::String newSaveDat;
 
 	char slotname[30];
 	Common::sprintf_s(slotname, "_slot%.2d_", _slot_cursor + 1);
 
 	newSaveName += slotname;
 	newSaveDat = newSaveName + "save.dat";
-	newSaveCritters = newSaveName + "critters.dat";
-	newSaveItems = newSaveName + "items.dat";
-
-//	snprintf(_gmpath, sizeof(_gmpath), "%s\\%s", _patches, "SAVEGAME");
-//	compat_mkdir(_gmpath);
-
-//	snprintf(_gmpath, sizeof(_gmpath), "%s\\%s\\%s%.2d", _patches, "SAVEGAME", "SLOT", _slot_cursor + 1);
-//	compat_mkdir(_gmpath);
-
-//	strcat_s(_gmpath, sizeof(_gmpath), "\\" PROTO_DIR_NAME);
-//	compat_mkdir(_gmpath);
-
-//	char *protoBasePath = _gmpath + strlen(_gmpath);
-
-//	strncpy(protoBasePath, "\\" CRITTERS_DIR_NAME, sizeof(protoBasePath) - 1);
-//	compat_mkdir(_gmpath);
-
-//	strncpy(protoBasePath, "\\" ITEMS_DIR_NAME, sizeof(protoBasePath) - 1);
-//	compat_mkdir(_gmpath);
 
 	if (_SaveBackup() == -1) {
 		debugPrint("\nLOADSAVE: Warning, can't backup save file!\n");
 	}
 
-//	snprintf(_gmpath, sizeof(_gmpath), "%s\\%s%.2d\\", "SAVEGAME", "SLOT", _slot_cursor + 1);
-//	strcat_s(_gmpath, sizeof(_gmpath), "SAVE.DAT");
-
-//	debugPrint("\nLOADSAVE: Save name: %s\n", _gmpath);
-	debugPrint("\nLOADSAVE: Save Dat: %s", newSaveDat.c_str());
-	debugPrint("\nLOADSAVE: Save Proto Critters: %s", newSaveCritters.c_str());
-	debugPrint("\nLOADSAVE: Save Proto Items: %s", newSaveItems.c_str());
+	debugPrint("\nLOADSAVE: Save name: %s", newSaveDat.c_str());
 
 	newSave = saveMan->openForSaving(newSaveDat, false);
 	if (newSave == nullptr) {
 		debugPrint("\nLOADSAVE: ** Error opening save game for writing! **\n");
+		_RestoreSave();
+		// MapDirErase(_gmpath, "BAK");
 		_partyMemberUnPrepSave();
 		backgroundSoundResume(); // TODO audio
 		return -1;
@@ -1589,170 +1582,132 @@ static int lsgPerformSaveGame() {
 		debugPrint("LOADSAVE: Save file header size written: %lld bytes.\n", newSave->pos() - pos);
 		newSave->finalize();
 		delete newSave;
+		_RestoreSave();
+		// MapDirErase(_gmpath, "BAK");
 		_partyMemberUnPrepSave();
 		backgroundSoundResume(); // TODO audio
 		return -1;
 	}
 
-	debugPrint("Written header!");
-
-//	_flptr = fileOpen(_gmpath, "wb");
-//	if (_flptr == nullptr) {
-//		debugPrint("\nLOADSAVE: ** Error opening save game for writing! **\n");
-//		_RestoreSave();
-//		snprintf(_gmpath, sizeof(_gmpath), "%s\\%s%.2d\\", "SAVEGAME", "SLOT", _slot_cursor + 1);
-//		MapDirErase(_gmpath, "BAK");
-//		_partyMemberUnPrepSave();
-//		backgroundSoundResume(); TODO audio
-//		return -1;
-//	}
-
-//	long pos = fileTell(_flptr);
-//	if (lsgSaveHeaderInSlot(_slot_cursor) == -1) {
-//		debugPrint("\nLOADSAVE: ** Error writing save game header! **\n");
-//		debugPrint("LOADSAVE: Save file header size written: %d bytes.\n", fileTell(_flptr) - pos);
-//		fileClose(_flptr);
-//		_RestoreSave();
-//		snprintf(_gmpath, sizeof(_gmpath), "%s\\%s%.2d\\", "SAVEGAME", "SLOT", _slot_cursor + 1);
-//		MapDirErase(_gmpath, "BAK");
-//		_partyMemberUnPrepSave();
-//		backgroundSoundResume(); TODO audio
-//		return -1;
-//	}
-
 	if (_SaveObjDudeCid(newSave))
 		warning("Error saving DudeCid");
 	else
-		debug("Saved DudeCid");
+		debug(2, "Saved DudeCid");
 
 	if (scriptsSaveGameGlobalVars(newSave))
 		warning("Error saving script global vars!");
 	else
-		debug("Saved script global vars!");
+		debug(2, "Saved script global vars!");
 
 	if(_GameMap2Slot(newSave))
 		warning("Error saving maps and protos");
 	else
-		debug("Saved maps and protos");
+		debug(2, "Saved maps and protos");
 
 	if (scriptsSaveGameGlobalVars(newSave)) // TODO check, why twice?
 		warning("Error saving script global vars!");
 	else
-		debug("Saved script global vars!");
+		debug(2, "Saved script global vars!");
 
 	if (_obj_save_dude(newSave))
 		warning("Error saving dude objects!");
 	else
-		debug("Saved dude objects (obj_save_dude)");
+		debug(2, "Saved dude objects (obj_save_dude)");
 
 	if (critterSave(newSave))
 		warning("Error saving critter status!");
 	else
-		debug("Saved critter status");
+		debug(2, "Saved critter status");
 
 	if (killsSave(newSave))
 		warning("Error saving kills list");
 	else
-		debug("Saved kills list");
+		debug(2, "Saved kills list");
 
 	if (skillsSave(newSave))
 		warning("Error saving character skills list");
 	else
-		debug("Saved character skills list");
+		debug(2, "Saved character skills list");
 
 	if (perksSave(newSave))
 		warning("Error saving perks");
 	else
-		debug("Saved character perks");
+		debug(2, "Saved character perks");
 
 	if (combatSave(newSave))
 		warning("Error saving combat status");
 	else
-		debug("Saved combat status");
+		debug(2, "Saved combat status");
 
 	if (aiSave(newSave))
 		warning("Error saving combat AI status");
 	else
-		debug("Saved combat AI status");
+		debug(2, "Saved combat AI status");
 
 	if (statsSave(newSave))
 		warning("Error saving stats");
 	else
-		debug("Saved character stats");
+		debug(2, "Saved character stats");
 
 	if (traitsSave(newSave))
 		warning("Error saving traits");
 	else
-		debug("Saved character traits");
+		debug(2, "Saved character traits");
 
 	if (automapSave(newSave))
 		warning("Error saving automap flags");
 	else
-		debug("Saved automap flags");
+		debug(2, "Saved automap flags");
 
 	if (preferencesSave(newSave))
 		warning("Error saving preferences");
 	else
-		debug("Saved preferences");
+		debug(2, "Saved preferences");
 
 	if (characterEditorSave(newSave))
 		warning("Error saving character editor flags");
 	else
-		debug("Saved character editor flags");
+		debug(2, "Saved character editor flags");
 
 	if (wmWorldMap_save(newSave))
 		warning("Error saving world map stats");
 	else
-		debug("Saved world map stats");
+		debug(2, "Saved world map stats");
 
 	if (gameMoviesSave(newSave))
 		warning("Error saving movie stats");
 	else
-		debug("Saved movie stats");
+		debug(2, "Saved movie stats");
 
 	if (skillsUsageSave(newSave))
 		warning("Error saving skills usage");
 	else
-		debug("Saved skills usage");
+		debug(2, "Saved skills usage");
 
 	if (partyMembersSave(newSave))
 		warning("Error saving party members");
 	else
-		debug("Saved party members");
+		debug(2, "Saved party members");
 
 	if (queueSave(newSave))
 		warning("Error saving events queue");
 	else
-		debug("Saved events queue");
+		debug(2, "Saved events queue");
 
 	if (interfaceSave(newSave))
 		warning("Error saving interface status");
 	else
-		debug("Saved interface status");
+		debug(2, "Saved interface status");
 
 	// _RestoreSave();  // TODO save  This is to recover the backup if save fails
-
-//	for (int index = 0; index < LOAD_SAVE_HANDLER_COUNT; index++) {
-//		long pos = fileTell(_flptr);
-//		SaveGameHandler *handler = _master_save_list[index];
-//		if (handler(_flptr) == -1) {
-//			debugPrint("\nLOADSAVE: ** Error writing save function #%d data! **\n", index);
-//			fileClose(_flptr);
-//			_RestoreSave();
-// 			snprintf(_gmpath, sizeof(_gmpath), "%s\\%s%.2d\\", "SAVEGAME", "SLOT", _slot_cursor + 1);
-// 			MapDirErase(_gmpath, "BAK");
-// 			_partyMemberUnPrepSave();
-// //			backgroundSoundResume(); TODO audio
-// 			return -1;
-// 		}
-
-// 		debugPrint("LOADSAVE: Save function #%d data size written: %d bytes.\n", index, fileTell(_flptr) - pos);
-// 	}
+	// MapDirErase(_gmpath, "BAK");
+	// _partyMemberUnPrepSave();
+	// backgroundSoundResume(); TODO audio
+	// return -1;
 
 	debugPrint("LOADSAVE: Total save data written: %ld bytes.\n", newSave->pos());
 	newSave->finalize();
 	delete newSave;
-//	fileClose(_flptr);
 
     // SFALL: Save sfallgv.sav.  TODO sfall
 /*    snprintf(_gmpath, sizeof(_gmpath), "%s\\%s%.2d\\", "SAVEGAME", "SLOT", _slot_cursor + 1);
@@ -1821,8 +1776,8 @@ static int lsgPerformSaveGame() {
         fileClose(_flptr);
     } */
 
-//	snprintf(_gmpath, sizeof(_gmpath), "%s\\%s%.2d\\", "SAVEGAME", "SLOT", _slot_cursor + 1);
-//	MapDirErase(_gmpath, "BAK");
+	//	snprintf(_gmpath, sizeof(_gmpath), "%s\\%s%.2d\\", "SAVEGAME", "SLOT", _slot_cursor + 1);
+	//	MapDirErase(_gmpath, "BAK");
 
 	gLoadSaveMessageListItem.num = 140;
 	if (messageListGetItem(&gLoadSaveMessageList, &gLoadSaveMessageListItem)) {
@@ -1851,20 +1806,15 @@ static int lsgLoadGameInSlot(int slot) {
 		gameMouseSetCursor(MOUSE_CURSOR_WAIT_PLANET);
 	}
 
-//	snprintf(_gmpath, sizeof(_gmpath), "%s\\%s%.2d\\", "SAVEGAME", "SLOT", _slot_cursor + 1);
-//	strcat_s(_gmpath, sizeof(_gmpath), "SAVE.DAT");
-
 	Common::SaveFileManager *saveMan = g_system->getSavefileManager();
 	Common::String loadSaveName(g_engine->getTargetName());
-	Common::String loadSaveDat, loadSaveCritters, loadSaveItems;
+	Common::String loadSaveDat;
 
 	char slotname[30];
 	Common::sprintf_s(slotname, "_slot%.2d_", _slot_cursor + 1);
 
 	loadSaveName += slotname;
 	loadSaveDat = loadSaveName + "save.dat";
-	loadSaveCritters = loadSaveName + "critters.dat";
-	loadSaveItems = loadSaveName + "items.dat";
 
 	LoadSaveSlotData *ptr = &(_LSData[slot]);
 	debugPrint("\nLOADSAVE: Load name: %s\n", ptr->description);
@@ -1876,165 +1826,141 @@ static int lsgLoadGameInSlot(int slot) {
 		return -1;
 	}
 
-
-	// _flptr = fileOpen(_gmpath, "rb");
-	// if (_flptr == nullptr) {
-	// 	debugPrint("\nLOADSAVE: ** Error opening load game file for reading! **\n");
-	// 	_loadingGame = false;
-	// 	return -1;
-	// }
-
-//	long pos = fileTell(_flptr);
 	long pos = loadSave->pos();
 	if (lsgLoadHeaderInSlot(slot) == -1) {
-		debugPrint("\nLOADSAVE: ** Error reading save  game header! **\n");
+		debugPrint("\nLOADSAVE: ** Error reading savegame header! **\n");
+		debugPrint("LOADSAVE: Load file header size read: %d bytes.\n", loadSave->pos() - pos);
 		delete loadSave;
-//		fileClose(_flptr);
 		gameReset();
 		_loadingGame = false;
 		return -1;
 	}
 
-//	debugPrint("LOADSAVE: Load file header size read: %d bytes.\n", fileTell(_flptr) - pos);
-	debugPrint("LOADSAVE: Load file header size read: %d bytes.\n", loadSave->pos() - pos);
-
 	if (_PrepLoad(loadSave))
 		warning("Error prepping for loading");
 	else
-		debug("Prepped for loading!");
+		debug(2, "Prepped for loading!");
 
 	if (_LoadObjDudeCid(loadSave))
 		warning("Error loading DudeCid");
 	else
-		debug("Loaded DudeCid!");
+		debug(2, "Loaded DudeCid!");
 
 	if (scriptsLoadGameGlobalVars(loadSave))
 		warning("Error loading script global vars");
 	else
-		debug("Loaded script global vars!");
+		debug(2, "Loaded script global vars!");
 
 	if(_SlotMap2Game(loadSave))
 		warning("Error loading maps and protos");
 	else
-		debug("Loaded maps and protos");
+		debug(2, "Loaded maps and protos");
 
 	if (scriptsSkipGameGlobalVars(loadSave))
 		warning("Error skipping redundant global vars");
 	else
-		debug("Skipped redundant global vars!");
+		debug(2, "Skipped redundant global vars!");
 
 	if (_obj_load_dude(loadSave))
 		warning("Error loading dude objects!");
 	else
-		debug("Loaded dude objects (obj_load_dude)");
+		debug(2, "Loaded dude objects (obj_load_dude)");
 
 	if (critterLoad(loadSave))
 		warning("Error loading critter status!");
 	else
-		debug("Loaded critter status");
+		debug(2, "Loaded critter status");
 
 	if (killsLoad(loadSave))
 		warning("Error loading kills list");
 	else
-		debug("Loaded kills list!");
+		debug(2, "Loaded kills list!");
 
 	if (skillsLoadScumm(loadSave))
 		warning("Error loading character skills list");
 	else
-		debug("Loaded character skills list!");
+		debug(2, "Loaded character skills list!");
 
 	if (perksLoad(loadSave))
 		warning("Error loading perks");
 	else
-		debug("Loaded character perks!");
+		debug(2, "Loaded character perks!");
 
 	if (combatLoad(loadSave))
 		warning("Error loading combat status");
 	else
-		debug("Loaded combat status");
+		debug(2, "Loaded combat status");
 
 	if (aiLoad(loadSave))
 		warning("Error loading combat AI status");
 	else
-		debug("Loaded combat AI status");
+		debug(2, "Loaded combat AI status");
 
 	if (statsLoad(loadSave))
 		warning("Error loading stats");
 	else
-		debug("Loaded character stats");
+		debug(2, "Loaded character stats");
 
 	if (traitsLoadScumm(loadSave))
 		warning("Error loading traits");
 	else
-		debug("Loaded character traits");
+		debug(2, "Loaded character traits");
 
 	if (automapLoad(loadSave))
 		warning("Error loading automap flags");
 	else
-		debug("Loaded automap flags");
+		debug(2, "Loaded automap flags");
 
 	if (preferencesLoad(loadSave))
 		warning("Error loading preferences");
 	else
-		debug("Loaded preferences");
+		debug(2, "Loaded preferences");
 
 	if (characterEditorLoad(loadSave))
 		warning("Error loading character editor flags");
 	else
-		debug("Loaded character editor flags");
+		debug(2, "Loaded character editor flags");
 
 	if (wmWorldMap_load(loadSave))
 		warning("Error loading world map stats");
 	else
-		debug("Loaded world map stats");
+		debug(2, "Loaded world map stats");
 
 	if (gameMoviesLoad(loadSave))
 		warning("Error loading movie stats");
 	else
-		debug("Loaded movie stats");
+		debug(2, "Loaded movie stats");
 
 	if (skillsUsageLoad(loadSave))
 		warning("Error loading skills usage");
 	else
-		debug("Loaded skills usage");
+		debug(2, "Loaded skills usage");
 
 	if (partyMembersLoad(loadSave))
 		warning("Error loading party members");
 	else
-		debug("Loaded party members");
+		debug(2, "Loaded party members");
 
 	if (queueLoad(loadSave))
 		warning("Error loading events queue");
 	else
-		debug("Loaded events queue");
+		debug(2, "Loaded events queue");
 
 	if (interfaceLoad(loadSave))
 		warning("Error loading interface status");
 	else
-		debug("Loaded interface status");
+		debug(2, "Loaded interface status");
 
 	_EndLoad(loadSave);
 
-/*	for (int index = 0; index < LOAD_SAVE_HANDLER_COUNT; index += 1) {
-		long pos = fileTell(_flptr);
-		LoadGameHandler *handler = _master_load_list[index];
-		if (handler(_flptr) == -1) {
-			debugPrint("\nLOADSAVE: ** Error reading load function #%d data! **\n", index);
-			int v12 = fileTell(_flptr);
-			debugPrint("LOADSAVE: Load function #%d data size read: %d bytes.\n", index, fileTell(_flptr) - pos);
-			fileClose(_flptr);
-			gameReset();
-			_loadingGame = false;
-			return -1;
-		}
+	// TODO save recovery if load failed
+	// debugPrint("LOADSAVE: Load function #%d data size read: %d bytes.\n", index, fileTell(_flptr) - pos);
+	// fileClose(_flptr);
+	// gameReset();
+	// _loadingGame = false
+	// return -1;
 
-		debugPrint("LOADSAVE: Load function #%d data size read: %d bytes.\n", index, fileTell(_flptr) - pos);
-	}*/
-
-//	debugPrint("LOADSAVE: Total load data read: %ld bytes.\n", fileTell(_flptr));
 	debugPrint("LOADSAVE: Total load data read: %ld bytes.\n", loadSave->pos());
-
-//	fileClose(_flptr);
 	delete loadSave;
 
 	// SFALL: Load sfallgv.sav. TODO sfall
@@ -2055,8 +1981,9 @@ static int lsgLoadGameInSlot(int slot) {
 		fileClose(_flptr);
 	} */
 
-//	snprintf(_str, sizeof(_str), "%s\\", "MAPS");
-//	MapDirErase(_str, "BAK");
+	//	snprintf(_str, sizeof(_str), "%s\\", "MAPS");
+	//	MapDirErase(_str, "BAK");
+
 	_proto_dude_update_gender();
 
 	// Game Loaded.
@@ -2101,6 +2028,9 @@ static int lsgSaveHeaderInSlot(int slot) {
 	newSave->write(ptr->characterName, 32);
 
 	newSave->write(ptr->description, 30);
+
+	if (newSave->err())
+		return -1;
 
 	// Save system time
 	TimeDate local;
@@ -2150,125 +2080,20 @@ static int lsgSaveHeaderInSlot(int slot) {
 	strncpy(ptr->fileName, v1, 16);
 	newSave->write(ptr->fileName, 16);
 
+	if (newSave->err())
+		return -1;
+
 	newSave->write(_snapshotBuf, LS_PREVIEW_SIZE);
 
 	memset(mapName, 0, 128);
 	newSave->write(mapName, 128);
 
+	if (newSave->err())
+		return -1;
+
 	_ls_error_code = 0;
 
 	return 0;
-
-	//	if (fileWrite(ptr->field_0, 1, 24, _flptr) == -1) {
-	//		return -1;
-	//	}
-
-	/*	_ls_error_code = 4; TODO save header
-
-		STRUCT_613D30 *ptr = &(_LSData[slot]);
-		strncpy(ptr->field_0, "FALLOUT SAVE FILE", 24);
-
-		if (fileWrite(ptr->field_0, 1, 24, _flptr) == -1) {
-			return -1;
-		}
-
-		short temp[3];
-		temp[0] = VERSION_MAJOR;
-		temp[1] = VERSION_MINOR;
-
-		ptr->field_18 = temp[0];
-		ptr->field_1A = temp[1];
-
-		if (fileWriteInt16List(_flptr, temp, 2) == -1) {
-			return -1;
-		}
-
-		ptr->field_1C = VERSION_RELEASE;
-		if (fileWriteUInt8(_flptr, VERSION_RELEASE) == -1) {
-			return -1;
-		}
-
-		char *characterName = critterGetName(gDude);
-		strncpy(ptr->character_name, characterName, 32);
-
-		if (fileWrite(ptr->character_name, 32, 1, _flptr) != 1) {
-			return -1;
-		}
-
-		if (fileWrite(ptr->description, 30, 1, _flptr) != 1) {
-			return -1;
-		}
-
-		time_t now = time(nullptr);
-		struct tm *local = localtime(&now);
-
-		temp[0] = local->tm_mday;
-		temp[1] = local->tm_mon + 1;
-		temp[2] = local->tm_year + 1900;
-
-		ptr->field_5E = temp[0];
-		ptr->field_5C = temp[1];
-		ptr->field_60 = temp[2];
-		ptr->field_64 = local->tm_hour + local->tm_min;
-
-		if (fileWriteInt16List(_flptr, temp, 3) == -1) {
-			return -1;
-		}
-
-		if (_db_fwriteLong(_flptr, ptr->field_64) == -1) {
-			return -1;
-		}
-
-		int month;
-		int day;
-		int year;
-		gameTimeGetDate(&month, &day, &year);
-
-		temp[0] = month;
-		temp[1] = day;
-		temp[2] = year;
-		ptr->field_70 = gameTimeGetTime();
-
-		if (fileWriteInt16List(_flptr, temp, 3) == -1) {
-			return -1;
-		}
-
-		if (_db_fwriteLong(_flptr, ptr->field_70) == -1) {
-			return -1;
-		}
-
-		ptr->field_74 = gElevation;
-		if (fileWriteInt16(_flptr, ptr->field_74) == -1) {
-			return -1;
-		}
-
-		ptr->field_76 = mapGetCurrentMap();
-		if (fileWriteInt16(_flptr, ptr->field_76) == -1) {
-			return -1;
-		}
-
-		char mapName[128];
-		strcpy(mapName, gMapHeader.name);
-
-		// NOTE: Uppercased from "sav".
-		char *v1 = _strmfe(_str, mapName, "SAV");
-		strncpy(ptr->file_name, v1, 16);
-		if (fileWrite(ptr->file_name, 16, 1, _flptr) != 1) {
-			return -1;
-		}
-
-		if (fileWrite(_snapshotBuf, LS_PREVIEW_SIZE, 1, _flptr) != 1) {
-			return -1;
-		}
-
-		memset(mapName, 0, 128);
-		if (fileWrite(mapName, 1, 128, _flptr) != 128) {
-			return -1;
-		}
-
-		_ls_error_code = 0;
-
-		return 0;*/
 }
 
 // 0x47E2E4
@@ -2277,12 +2102,8 @@ static int lsgLoadHeaderInSlot(int slot) {
 
 	LoadSaveSlotData *ptr = &(_LSData[slot]);
 
-	if(loadSave->read(ptr->signature, 24) != 24)
+	if (loadSave->read(ptr->signature, 24) != 24)
 		return -1;
-
-//	if (fileRead(ptr->field_0, 1, 24, _flptr) != 24) {
-//		return -1;
-//	}
 
 	if (strncmp(ptr->signature, LOAD_SAVE_SIGNATURE, 18) != 0) {
 		debugPrint("\nLOADSAVE: ** Invalid save file on load! **\n");
@@ -2291,21 +2112,11 @@ static int lsgLoadHeaderInSlot(int slot) {
 	}
 
 	short v8[3];
-	v8[0]=loadSave->readUint16BE();
-	v8[1]=loadSave->readUint16BE();
-
-//	if (fileReadInt16List(_flptr, v8, 2) == -1) {
-//		return -1;
-//	}
-
+	v8[0] = loadSave->readUint16BE();
+	v8[1] = loadSave->readUint16BE();
 	ptr->versionMinor = v8[0];
 	ptr->versionMajor = v8[1];
-
 	ptr->versionRelease = loadSave->readByte();
-
-//	if (fileReadUInt8(_flptr, &(ptr->field_1C)) == -1) {
-//		return -1;
-//	}
 
 	if (ptr->versionMinor != 1 || ptr->versionMajor != 2 || ptr->versionRelease != 'R') {
 		debugPrint("\nLOADSAVE: Load slot #%d Version: %d.%d%c\n", slot, ptr->versionMinor, ptr->versionMajor, ptr->versionRelease);
@@ -2313,89 +2124,47 @@ static int lsgLoadHeaderInSlot(int slot) {
 		return -1;
 	}
 
-	if(loadSave->read(ptr->characterName, 32) != 32) {
+	if (loadSave->read(ptr->characterName, 32) != 32) {
 		return -1;
 	}
 
-//	if (fileRead(ptr->character_name, 32, 1, _flptr) != 1) {
-//		return -1;
-//	}
-
-	if(loadSave->read(ptr->description, 30) != 30) {
+	if (loadSave->read(ptr->description, 30) != 30) {
 		return -1;
 	}
-
-//	if (fileRead(ptr->description, 30, 1, _flptr) != 1) {
-//		return -1;
-//	}
 
 	v8[0] = loadSave->readUint16BE();
 	v8[1] = loadSave->readUint16BE();
 	v8[2] = loadSave->readUint16BE();
-
-//	if (fileReadInt16List(_flptr, v8, 3) == -1) {
-//		return -1;
-//	}
-
 	ptr->fileMonth = v8[0];
 	ptr->fileDay = v8[1];
 	ptr->fileYear = v8[2];
 
 	ptr->fileTime = loadSave->readUint32BE();
-//	if (_db_freadInt(_flptr, &(ptr->field_64)) == -1) {
-//		return -1;
-//	}
 
 	v8[0] = loadSave->readUint16BE();
 	v8[1] = loadSave->readUint16BE();
 	v8[2] = loadSave->readUint16BE();
-
-//	if (fileReadInt16List(_flptr, v8, 3) == -1) {
-//		return -1;
-//	}
-
 	ptr->gameMonth = v8[0];
 	ptr->gameDay = v8[1];
 	ptr->gameYear = v8[2];
 
 	ptr->gameTime = loadSave->readUint32BE();
-//	if (_db_freadInt(_flptr, &(ptr->field_70)) == -1) {
-//		return -1;
-//	}
-
 	ptr->elevation = loadSave->readUint16BE();
-//	if (fileReadInt16(_flptr, &(ptr->field_74)) == -1) {
-//		return -1;
-//	}
-
 	ptr->map = loadSave->readUint16BE();
-//	if (fileReadInt16(_flptr, &(ptr->field_76)) == -1) {
-//		return -1;
-//	}
 
-	if(loadSave->read(ptr->fileName, 16) != 16) {
+	if (loadSave->read(ptr->fileName, 16) != 16) {
 		return -1;
 	}
-//	if (fileRead(ptr->file_name, 1, 16, _flptr) != 16) {
-//		return -1;
-//	}
 
-	if(!loadSave->seek(LS_PREVIEW_SIZE, SEEK_CUR)) {
+	if (!loadSave->seek(LS_PREVIEW_SIZE, SEEK_CUR)) {
 		return -1;
 	}
-//	if (fileSeek(_flptr, LS_PREVIEW_SIZE, SEEK_CUR) != 0) {
-//		return -1;
-//	}
-
-	if(!loadSave->seek(128, SEEK_CUR)) {
+	if (!loadSave->seek(128, SEEK_CUR)) {
 		return -1;
 	}
-//	if (fileSeek(_flptr, 128, 1) != 0) {
-//		return -1;
-//	}
 
 	_ls_error_code = 0;
-	debug("HEADER READ!");
+
 	return 0;
 }
 
@@ -2850,11 +2619,6 @@ static int _get_input_str2(int win, int doneKeyCode, int cancelKeyCode, char *de
 	return rc;
 }
 
-// 0x47F48C
-// static int _DummyFunc(File *stream) {
-//   return 0;
-// }
-
 // 0x47F490
 static int _PrepLoad(Common::InSaveFile *stream) {
 	gameReset();
@@ -3188,32 +2952,6 @@ static int _SlotMap2Game(Common::InSaveFile *stream) {
 
 	return 0;
 }
-
-// 0x47FE14
-/* static int _mygets(char *dest, Common::InSaveFile *stream) {
-	int index = 14;
-	while (true) {
-		int c = fileReadChar(stream);
-		if (c == -1) {
-			return -1;
-		}
-
-		index -= 1;
-
-		*dest = c & 0xFF;
-		dest += 1;
-
-		if (index == -1 || c == '\0') {
-			break;
-		}
-	}
-
-	if (index == 0) {
-		return -1;
-	}
-
-	return 0;
-} */
 
 // 0x47FE58
 // TODO copy - this is used only to backup the automap DB
