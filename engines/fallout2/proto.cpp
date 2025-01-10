@@ -36,8 +36,10 @@ static int objectCritterCombatDataWrite(CritterCombatData *data, Common::OutSave
 static int _proto_update_gen(Object *obj);
 static int _proto_header_load();
 static int protoItemDataRead(ItemProtoData *item_data, int type, File *stream);
+static int protoItemDataReadScumm(ItemProtoData *item_data, int type, Common::InSaveFile *stream);
 static int protoSceneryDataRead(SceneryProtoData *scenery_data, int type, File *stream);
 static int protoRead(Proto *buf, File *stream);
+static int protoReadScumm(Proto *buf, Common::InSaveFile *stream);
 static int protoItemDataWrite(ItemProtoData *item_data, int type, Common::WriteStream *stream);
 static int protoSceneryDataWrite(SceneryProtoData *scenery_data, int type, Common::WriteStream *stream);
 static int protoWrite(Proto *buf, Common::WriteStream *stream);
@@ -239,6 +241,7 @@ int _proto_list_str(int pid, char *proto_path) {
 	fileClose(stream);
 
 	if (i != (pid & 0xFFFFFF)) {
+		warning("proto_list_str: Couldn't find proto name for pid %d", pid);
 		return -1;
 	}
 
@@ -549,8 +552,10 @@ static int objectCritterCombatDataReadScumm(CritterCombatData *data, Common::InS
 	data->aiPacket = stream->readSint32BE();
 	data->team = stream->readSint32BE();
 	data->whoHitMeCid = stream->readSint32BE();
-	if (stream->err())
+	if (stream->err()) {
+		warning("objectCritterCombatDataReadScumm - Error reading data");
 		return -1;
+	}
 
 	/*	if (fileReadInt32(stream, &(data->damageLastTurn)) == -1)
 			return -1;
@@ -566,7 +571,7 @@ static int objectCritterCombatDataReadScumm(CritterCombatData *data, Common::InS
 			return -1;
 		if (fileReadInt32(stream, &(data->whoHitMeCid)) == -1)
 			return -1;*/
-
+	debug(6, "objectCritterCombatDataReadScumm: critter combat data read!");
 	return 0;
 }
 
@@ -739,8 +744,10 @@ int objectDataReadScumm(Object *obj, Common::InSaveFile *stream) {
 	inventory->capacity = stream->readSint32BE();
 	// temp =
 	stream->readSint32BE();
-	if (stream->err())
+	if (stream->err()) {
+		warning("objectDataReadScumm: error reading inventory");
 		return -1;
+	}
 /*	if (fileReadInt32(stream, &(inventory->length)) == -1)
 		return -1;
 	if (fileReadInt32(stream, &(inventory->capacity)) == -1)
@@ -889,7 +896,7 @@ int objectDataReadScumm(Object *obj, Common::InSaveFile *stream) {
 	}
 	if(stream->err())
 		return -1;
-	debug(6, "Object proto loaded properly");
+	debug(6, "objectDataReadScumm: Object proto loaded properly");
 	return 0;
 }
 
@@ -1966,6 +1973,212 @@ static int protoItemDataRead(ItemProtoData *item_data, int type, File *stream) {
 	return 0;
 }
 
+static int protoItemDataReadScumm(ItemProtoData *item_data, int type, Common::InSaveFile *stream) {
+	switch (type) {
+	case ITEM_TYPE_ARMOR:
+		item_data->armor.armorClass = stream->readSint32BE();
+		for (int i = 0; i < 7; i++)
+			item_data->armor.damageResistance[i] = stream->readSint32BE();
+		for (int i = 0; i < 7; i++)
+			item_data->armor.damageThreshold[i] = stream->readSint32BE();
+		item_data->armor.perk = stream->readSint32BE();
+		item_data->armor.maleFid = stream->readSint32BE();
+		item_data->armor.femaleFid = stream->readSint32BE();
+		if (stream->err()) {
+			warning("protoItemDataReadScumm: error reading armor proto");
+			return -1;
+		}
+
+		/*		if (fileReadInt32(stream, &(item_data->armor.armorClass)) == -1)
+					return -1;
+				if (fileReadInt32List(stream, item_data->armor.damageResistance, 7) == -1)
+					return -1;
+				if (fileReadInt32List(stream, item_data->armor.damageThreshold, 7) == -1)
+					return -1;
+				if (fileReadInt32(stream, &(item_data->armor.perk)) == -1)
+					return -1;
+				if (fileReadInt32(stream, &(item_data->armor.maleFid)) == -1)
+					return -1;
+				if (fileReadInt32(stream, &(item_data->armor.femaleFid)) == -1)
+					return -1;*/
+
+		return 0;
+	case ITEM_TYPE_CONTAINER:
+		item_data->container.maxSize = stream->readSint32BE();
+		item_data->container.openFlags = stream->readSint32BE();
+		if (stream->err()) {
+			warning("protoItemDataReadScumm: error reading container proto");
+			return -1;
+		}
+
+		/*		if (fileReadInt32(stream, &(item_data->container.maxSize)) == -1)
+					return -1;
+				if (fileReadInt32(stream, &(item_data->container.openFlags)) == -1)
+					return -1;*/
+
+		return 0;
+	case ITEM_TYPE_DRUG:
+		item_data->drug.stat[0] = stream->readSint32BE();
+		item_data->drug.stat[1] = stream->readSint32BE();
+		item_data->drug.stat[2] = stream->readSint32BE();
+		for (int i = 0; i < 3; i++)
+			item_data->drug.amount[i] = stream->readSint32BE();
+		item_data->drug.duration1 = stream->readSint32BE();
+		for (int i = 0; i < 3; i++)
+			item_data->drug.amount1[i] = stream->readSint32BE();
+		item_data->drug.duration2 = stream->readSint32BE();
+		for (int i = 0; i < 3; i++)
+			item_data->drug.amount2[i] = stream->readSint32BE();
+		item_data->drug.addictionChance = stream->readSint32BE();
+		item_data->drug.withdrawalEffect = stream->readSint32BE();
+		item_data->drug.withdrawalOnset = stream->readSint32BE();
+		if (stream->err()) {
+			warning("protoItemDataReadScumm: error reading drug proto");
+			return -1;
+		}
+
+		/*		if (fileReadInt32(stream, &(item_data->drug.stat[0])) == -1)
+					return -1;
+				if (fileReadInt32(stream, &(item_data->drug.stat[1])) == -1)
+					return -1;
+				if (fileReadInt32(stream, &(item_data->drug.stat[2])) == -1)
+					return -1;
+				if (fileReadInt32List(stream, item_data->drug.amount, 3) == -1)
+					return -1;
+				if (fileReadInt32(stream, &(item_data->drug.duration1)) == -1)
+					return -1;
+				if (fileReadInt32List(stream, item_data->drug.amount1, 3) == -1)
+					return -1;
+				if (fileReadInt32(stream, &(item_data->drug.duration2)) == -1)
+					return -1;
+				if (fileReadInt32List(stream, item_data->drug.amount2, 3) == -1)
+					return -1;
+				if (fileReadInt32(stream, &(item_data->drug.addictionChance)) == -1)
+					return -1;
+				if (fileReadInt32(stream, &(item_data->drug.withdrawalEffect)) == -1)
+					return -1;
+				if (fileReadInt32(stream, &(item_data->drug.withdrawalOnset)) == -1)
+					return -1;*/
+
+		return 0;
+	case ITEM_TYPE_WEAPON:
+		item_data->weapon.animationCode = stream->readSint32BE();
+		item_data->weapon.minDamage = stream->readSint32BE();
+		item_data->weapon.maxDamage = stream->readSint32BE();
+		item_data->weapon.damageType = stream->readSint32BE();
+		item_data->weapon.maxRange1 = stream->readSint32BE();
+		item_data->weapon.maxRange2 = stream->readSint32BE();
+		item_data->weapon.projectilePid = stream->readSint32BE();
+		item_data->weapon.minStrength = stream->readSint32BE();
+		item_data->weapon.actionPointCost1 = stream->readSint32BE();
+		item_data->weapon.actionPointCost2 = stream->readSint32BE();
+		item_data->weapon.criticalFailureType = stream->readSint32BE();
+		item_data->weapon.perk = stream->readSint32BE();
+		item_data->weapon.rounds = stream->readSint32BE();
+		item_data->weapon.caliber = stream->readSint32BE();
+		item_data->weapon.ammoTypePid = stream->readSint32BE();
+		item_data->weapon.ammoCapacity = stream->readSint32BE();
+		item_data->weapon.soundCode = stream->readByte();
+		if (stream->err()) {
+			warning("protoItemDataReadScumm: error reading weapon proto");
+			return -1;
+		}
+
+		/*		if (fileReadInt32(stream, &(item_data->weapon.animationCode)) == -1)
+					return -1;
+				if (fileReadInt32(stream, &(item_data->weapon.minDamage)) == -1)
+					return -1;
+				if (fileReadInt32(stream, &(item_data->weapon.maxDamage)) == -1)
+					return -1;
+				if (fileReadInt32(stream, &(item_data->weapon.damageType)) == -1)
+					return -1;
+				if (fileReadInt32(stream, &(item_data->weapon.maxRange1)) == -1)
+					return -1;
+				if (fileReadInt32(stream, &(item_data->weapon.maxRange2)) == -1)
+					return -1;
+				if (fileReadInt32(stream, &(item_data->weapon.projectilePid)) == -1)
+					return -1;
+				if (fileReadInt32(stream, &(item_data->weapon.minStrength)) == -1)
+					return -1;
+				if (fileReadInt32(stream, &(item_data->weapon.actionPointCost1)) == -1)
+					return -1;
+				if (fileReadInt32(stream, &(item_data->weapon.actionPointCost2)) == -1)
+					return -1;
+				if (fileReadInt32(stream, &(item_data->weapon.criticalFailureType)) == -1)
+					return -1;
+				if (fileReadInt32(stream, &(item_data->weapon.perk)) == -1)
+					return -1;
+				if (fileReadInt32(stream, &(item_data->weapon.rounds)) == -1)
+					return -1;
+				if (fileReadInt32(stream, &(item_data->weapon.caliber)) == -1)
+					return -1;
+				if (fileReadInt32(stream, &(item_data->weapon.ammoTypePid)) == -1)
+					return -1;
+				if (fileReadInt32(stream, &(item_data->weapon.ammoCapacity)) == -1)
+					return -1;
+				if (fileReadUInt8(stream, &(item_data->weapon.soundCode)) == -1)
+					return -1;*/
+
+		return 0;
+	case ITEM_TYPE_AMMO:
+		item_data->ammo.caliber = stream->readSint32BE();
+		item_data->ammo.quantity = stream->readSint32BE();
+		item_data->ammo.armorClassModifier = stream->readSint32BE();
+		item_data->ammo.damageResistanceModifier = stream->readSint32BE();
+		item_data->ammo.damageMultiplier = stream->readSint32BE();
+		item_data->ammo.damageDivisor = stream->readSint32BE();
+		if (stream->err()) {
+			warning("protoItemDataReadScumm: error reading ammo proto");
+			return -1;
+		}
+
+		/*		if (fileReadInt32(stream, &(item_data->ammo.caliber)) == -1)
+					return -1;
+				if (fileReadInt32(stream, &(item_data->ammo.quantity)) == -1)
+					return -1;
+				if (fileReadInt32(stream, &(item_data->ammo.armorClassModifier)) == -1)
+					return -1;
+				if (fileReadInt32(stream, &(item_data->ammo.damageResistanceModifier)) == -1)
+					return -1;
+				if (fileReadInt32(stream, &(item_data->ammo.damageMultiplier)) == -1)
+					return -1;
+				if (fileReadInt32(stream, &(item_data->ammo.damageDivisor)) == -1)
+					return -1;*/
+
+		return 0;
+	case ITEM_TYPE_MISC:
+		item_data->misc.powerTypePid = stream->readSint32BE();
+		item_data->misc.powerType = stream->readSint32BE();
+		item_data->misc.charges = stream->readSint32BE();
+		if (stream->err()) {
+			warning("protoItemDataReadScumm: error reading misc proto");
+			return -1;
+		}
+
+		/*		if (fileReadInt32(stream, &(item_data->misc.powerTypePid)) == -1)
+					return -1;
+				if (fileReadInt32(stream, &(item_data->misc.powerType)) == -1)
+					return -1;
+				if (fileReadInt32(stream, &(item_data->misc.charges)) == -1)
+					return -1;*/
+
+		return 0;
+	case ITEM_TYPE_KEY:
+		item_data->key.keyCode = stream->readSint32BE();
+		if (stream->err()) {
+			warning("protoItemDataReadScumm: error reading key proto");
+			return -1;
+		}
+
+		/*		if (fileReadInt32(stream, &(item_data->key.keyCode)) == -1)
+					return -1;*/
+
+		return 0;
+	}
+
+	return 0;
+}
+
 // 0x4A0ED0
 static int protoSceneryDataRead(SceneryProtoData *scenery_data, int type, File *stream) {
 	switch (type) {
@@ -2126,6 +2339,125 @@ static int protoRead(Proto *proto, File *stream) {
 			return -1;
 
 		return 0;
+	}
+
+	return -1;
+}
+
+// read .pro file from local dir
+static int protoReadScumm(Proto *proto, Common::InSaveFile *stream) {
+	proto->pid = stream->readSint32BE();
+	proto->messageId = stream->readSint32BE();
+	proto->fid = stream->readSint32BE();
+	if (stream->err()) {
+		warning("protoReadScumm: Header read error");
+		return -1;
+	}
+
+	/*	if (fileReadInt32(stream, &(proto->pid)) == -1)
+			return -1;
+		if (fileReadInt32(stream, &(proto->messageId)) == -1)
+			return -1;
+		if (fileReadInt32(stream, &(proto->fid)) == -1)
+			return -1;*/
+
+	debug(7, "protoReadScumm - Loaded proto header - PID %d aka %d", proto->pid, PID_TYPE(proto->pid));
+
+	switch (PID_TYPE(proto->pid)) {
+	case OBJ_TYPE_ITEM:
+		proto->item.lightDistance = stream->readSint32BE();
+		proto->item.lightIntensity = stream->readUint32BE();
+		proto->item.flags = stream->readSint32BE();
+		proto->item.extendedFlags = stream->readSint32BE();
+		proto->item.sid = stream->readSint32BE();
+		proto->item.type = stream->readSint32BE();
+		proto->item.material = stream->readSint32BE();
+		proto->item.size = stream->readSint32BE();
+		proto->item.weight = stream->readUint32BE();
+		proto->item.cost = stream->readSint32BE();
+		proto->item.inventoryFid = stream->readSint32BE();
+		proto->item.field_80 = stream->readByte();
+		if (stream->err()) {
+			warning("protoReadScumm: Error reading item proto!");
+			return -1;
+		}
+		if (protoItemDataReadScumm(&(proto->item.data), proto->item.type, stream) == -1) {
+			warning("protoReadScumm: Error in protoItemDataReadScumm!");
+			return -1;
+		}
+
+		/*		if (fileReadInt32(stream, &(proto->item.lightDistance)) == -1)
+					return -1;
+				if (_db_freadInt(stream, &(proto->item.lightIntensity)) == -1)
+					return -1;
+				if (fileReadInt32(stream, &(proto->item.flags)) == -1)
+					return -1;
+				if (fileReadInt32(stream, &(proto->item.extendedFlags)) == -1)
+					return -1;
+				if (fileReadInt32(stream, &(proto->item.sid)) == -1)
+					return -1;
+				if (fileReadInt32(stream, &(proto->item.type)) == -1)
+					return -1;
+				if (fileReadInt32(stream, &(proto->item.material)) == -1)
+					return -1;
+				if (fileReadInt32(stream, &(proto->item.size)) == -1)
+					return -1;
+				if (_db_freadInt(stream, &(proto->item.weight)) == -1)
+					return -1;
+				if (fileReadInt32(stream, &(proto->item.cost)) == -1)
+					return -1;
+				if (fileReadInt32(stream, &(proto->item.inventoryFid)) == -1)
+					return -1;
+				if (fileReadUInt8(stream, &(proto->item.field_80)) == -1)
+					return -1;
+				if (protoItemDataRead(&(proto->item.data), proto->item.type, stream) == -1)
+					return -1;*/
+
+		return 0;
+	case OBJ_TYPE_CRITTER:
+		proto->critter.lightDistance = stream->readSint32BE();
+		proto->critter.lightIntensity = stream->readUint32BE();
+		proto->critter.flags = stream->readSint32BE();
+		proto->critter.extendedFlags = stream->readSint32BE();
+		proto->critter.sid = stream->readSint32BE();
+		proto->critter.headFid = stream->readSint32BE();
+		proto->critter.aiPacket = stream->readSint32BE();
+		proto->critter.team = stream->readSint32BE();
+		if (stream->err()) {
+			warning("protoReadScumm: Error reading critter proto!");
+			return -1;
+		}
+		if (protoCritterDataReadScumm(stream, &(proto->critter.data)) == -1) {
+			warning("protoReadScumm: Error in protoCritterDataReadScumm!");
+			return -1;
+		}
+
+		/*		if (fileReadInt32(stream, &(proto->critter.lightDistance)) == -1)
+					return -1;
+				if (_db_freadInt(stream, &(proto->critter.lightIntensity)) == -1)
+					return -1;
+				if (fileReadInt32(stream, &(proto->critter.flags)) == -1)
+					return -1;
+				if (fileReadInt32(stream, &(proto->critter.extendedFlags)) == -1)
+					return -1;
+				if (fileReadInt32(stream, &(proto->critter.sid)) == -1)
+					return -1;
+				if (fileReadInt32(stream, &(proto->critter.headFid)) == -1)
+					return -1;
+				if (fileReadInt32(stream, &(proto->critter.aiPacket)) == -1)
+					return -1;
+				if (fileReadInt32(stream, &(proto->critter.team)) == -1)
+					return -1;
+
+				if (protoCritterDataRead(stream, &(proto->critter.data)) == -1)
+					return -1;*/
+
+		return 0;
+	case OBJ_TYPE_SCENERY:
+	case OBJ_TYPE_WALL:
+	case OBJ_TYPE_TILE:
+	case OBJ_TYPE_MISC:
+		warning("protoReadScumm: Error loading PID %d (aka %d)! Can only load items or critter protos!", proto->pid, PID_TYPE(proto->pid));
 	}
 
 	return -1;
@@ -2631,7 +2963,27 @@ static int _proto_load_pid(int pid, Proto **protoPtr) {
 		return -1;
 	}
 
-	File *stream = fileOpen(path, "rb");  // TODO check that it loads from dir instead of archive if file is present
+	debug(6, "proto_load_pid: searching for %s", path);
+
+	// Search for temporary protos first
+	Common::String protoPath(g_engine->getTargetName() + "_" + path);
+	protoPath.replace('\\', '_');
+	Common::InSaveFile *scummStream = g_engine->getSaveFileManager()->openForLoading(protoPath);
+	if (scummStream) {
+		debug(6, "Found proto %s in savedir, loading it!", protoPath.c_str());
+		if (_proto_find_free_subnode(PID_TYPE(pid), protoPtr) == -1)
+			return -1;
+		if (protoReadScumm(*protoPtr, scummStream) != 0) {
+			delete scummStream;
+			warning("proto_load_pid: protoReadScumm returned nonzero!");
+			return -1;
+		}
+		delete scummStream;
+		return 0;
+	}
+
+	// Not found, load from game resources
+	File *stream = fileOpen(path, "rb");
 	if (stream == nullptr) {
 		debugPrint("\nError: Can't fopen proto!\n");
 		*protoPtr = nullptr;
