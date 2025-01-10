@@ -172,12 +172,10 @@ static int _PrepLoad(Common::InSaveFile *stream);
 static int _EndLoad(Common::InSaveFile *stream);
 static int _GameMap2Slot(Common::OutSaveFile *stream);
 static int _SlotMap2Game(Common::InSaveFile *stream);
-static int _copy_file(const char *existingFileName, const char *newFileName);
 static int _SaveBackup();
 static int _RestoreSave();
 static int _LoadObjDudeCid(Common::InSaveFile *stream);
 static int _SaveObjDudeCid(Common::OutSaveFile *stream);
-static int _EraseSave();
 
 // 0x47B7C0
 static const int gLoadSaveFrmIds[LOAD_SAVE_FRM_COUNT] = {
@@ -205,7 +203,7 @@ static bool gLoadSaveWindowIsoWasEnabled = false;
 static int _map_backup_count = -1;
 
 // 0x5193C8
-static bool _automap_db_flag = false;
+// static bool _automap_db_flag = false;
 
 // 0x5193CC
 static const char *_patches = nullptr;
@@ -754,7 +752,7 @@ int lsgSaveGame(int mode) {
 				gameMouseSetCursor(MOUSE_CURSOR_ARROW);
 				rc = -1;
 			} else if (v50 == 1) {
-				debug(1, "Calling lsgPerformSaveGame!");
+				debug(2, "Calling lsgPerformSaveGame!");
 				if (lsgPerformSaveGame() == -1) {
 					gameMouseSetCursor(MOUSE_CURSOR_ARROW);
 					soundPlayFile("iisxxxx1");
@@ -2179,38 +2177,25 @@ static int _GetSlotList() {
 	filenames = saveMan->listSavefiles(pattern);
 
 	int index = 0;
-	for (; index < 10; index += 1) {
-//		snprintf(_str, sizeof(_str), "%s\\%s%.2d\\%s", "SAVEGAME", "SLOT", index + 1, "SAVE.DAT");
-
+	for (; index < 10; index++) {
 		char index_tmp[4];
 		snprintf(index_tmp, sizeof(index_tmp), "%.2d", index + 1);
 		Common::StringArray::const_iterator filename;
-		for (filename = filenames.begin(); filename != filenames.end() && !filename->contains(index_tmp); ++filename)
+		for (filename = filenames.begin(); filename != filenames.end() && !filename->contains("_slot" + Common::String(index_tmp)); ++filename)
 			;
 
-		debug("Looking for file %s", index_tmp);
-
-		// int fileSize;
-		if (/*dbGetFileSize(_str, &fileSize) != 0*/ filename == filenames.end()) {
-			debug("slot is empty!");
+		if (filename == filenames.end()) {
+			debug(2, "No saves found for slot %d - slot is empty", index + 1);
 			_LSstatus[index] = SLOT_STATE_EMPTY;
 		} else {
 			strncpy(_str, filename->c_str(), COMPAT_MAX_PATH - 1);
-			debug("found save in slot %d", index);
-
+			debug(2, "Found slot %d save file: %s", index + 1, filename->c_str());
 
 			loadSave = saveMan->openForLoading(filename->c_str());
 			if (loadSave == nullptr) {
-				debugPrint("\nLOADSAVE: ** Error opening save  game for reading! **\n");
+				debugPrint("\nLOADSAVE: ** Error opening savegame for reading! **\n");
 				return -1;
 			}
-
-			// _flptr = fileOpen(_str, "rb");
-
-			// if (_flptr == nullptr) {
-			// 	debugPrint("\nLOADSAVE: ** Error opening save  game for reading! **\n");
-			// 	return -1;
-			// }
 
 			if (lsgLoadHeaderInSlot(index) == -1) {
 				if (_ls_error_code == 1) {
@@ -2224,7 +2209,6 @@ static int _GetSlotList() {
 				_LSstatus[index] = SLOT_STATE_OCCUPIED;
 			}
 
-			// fileClose(_flptr);
 			delete loadSave;
 		}
 	}
@@ -2351,22 +2335,17 @@ static int _LoadTumbSlot(int slot) {
 		saveName += slotname;
 		saveName += "save.dat";
 
-		// snprintf(_str, sizeof(_str), "%s\\%s%.2d\\%s", "SAVEGAME", "SLOT", _slot_cursor + 1, "SAVE.DAT");
-		debugPrint(" Load thumb from %s\n", saveName.c_str());
+		debug(5, "Loading thumbnail from %s\n", saveName.c_str());
 
-		if(saveMan->exists(saveName))
+		if (saveMan->exists(saveName))
 			stream = saveMan->openForLoading(saveName);
-//			File *stream = fileOpen(_str, "rb");
-
 		if (stream == nullptr) {
 			debugPrint("\nLOADSAVE: ** (A) Error reading thumbnail #%d! **\n", slot);
 			return -1;
 		}
 
-//		if (fileSeek(stream, 131, SEEK_SET) != 0) {
-		if(stream->seek(131, SEEK_SET) == false) {
+		if (stream->seek(131, SEEK_SET) == false) {
 			debugPrint("\nLOADSAVE: ** (B) Error reading thumbnail #%d! **\n", slot);
-//			fileClose(stream);
 			delete stream;
 			return -1;
 		}
@@ -2374,18 +2353,10 @@ static int _LoadTumbSlot(int slot) {
 		stream->read(_thumbnail_image, LS_PREVIEW_SIZE);
 		if (stream->err()) {
 			debugPrint("\nLOADSAVE: ** (C) Error reading thumbnail #%d! **\n", slot);
-//			fileClose(stream);
 			delete stream;
 			return -1;
 		}
 
-//		if (fileRead(_thumbnail_image, LS_PREVIEW_SIZE, 1, stream) != 1) {
-//			debugPrint("\nLOADSAVE: ** (C) Error reading thumbnail #%d! **\n", a1);
-//			fileClose(stream);
-//			return -1;
-//		}
-
-		//		fileClose(stream);
 		delete stream;
 	}
 
@@ -2539,8 +2510,6 @@ static int _get_input_str2(int win, int doneKeyCode, int cancelKeyCode, char *de
 	windowRefresh(win);
 	renderPresent();
 
-//	beginTextInput();
-
 	int blinkCounter = 3;
 	bool blink = false;
 
@@ -2609,11 +2578,9 @@ static int _get_input_str2(int win, int doneKeyCode, int cancelKeyCode, char *de
 		sharedFpsLimiter.throttle();
 	}
 
-//	endTextInput();
-
 	if (rc == 0) {
 		text[textLength] = '\0';
-		(strncpy(description, text, LOAD_SAVE_DESCRIPTION_LENGTH));
+		strncpy(description, text, LOAD_SAVE_DESCRIPTION_LENGTH);
 	}
 
 	return rc;
@@ -2668,9 +2635,6 @@ static int _GameMap2Slot(Common::OutSaveFile *stream) {
 		const char *critterItemPath = (pid >> 24) == OBJ_TYPE_CRITTER ? PROTO_DIR_NAME "\\" CRITTERS_DIR_NAME
 																	  : PROTO_DIR_NAME "\\" ITEMS_DIR_NAME;
 
-		//  snprintf(_str0, sizeof(_str0), "%s\\%s\\%s", _patches, critterItemPath, path);
-		//  snprintf(_str1, sizeof(_str1), "%s\\%s\\%s%.2d\\%s\\%s", _patches, "SAVEGAME", "SLOT", _slot_cursor + 1, critterItemPath, path);
-
 		snprintf(_str0, sizeof(_str0), "%s\\%s", critterItemPath, path);
 		snprintf(_str1, sizeof(_str1), "%s%.2d\\%s\\%s", "slot", _slot_cursor + 1, critterItemPath, path);
 
@@ -2695,48 +2659,22 @@ static int _GameMap2Slot(Common::OutSaveFile *stream) {
 	// number of visited maps
 	stream->writeSint32BE(savedMaps.size());
 
-	/*	char **fileNameList;
-		int fileNameListLength = fileNameListInit(_str0, &fileNameList, 0, 0);
-		if (fileNameListLength == -1) {
-			return -1;
-		}
-
-		if (fileWriteInt32(stream, fileNameListLength) == -1) {
-			fileNameListFree(&fileNameList, 0);
-			return -1;
-		}
-
-		if (fileNameListLength == 0) {
-			fileNameListFree(&fileNameList, 0);
-			return -1;
-		}*/
-
-	// snprintf(_gmpath, sizeof(_gmpath), "%s\\%s%.2d\\", "SAVEGAME", "SLOT", _slot_cursor + 1);
-
-	// snprintf(_gmpath, sizeof(_gmpath), "%s\\%s%.2d\\", "SAVEGAME", "SLOT", _slot_cursor + 1);
-
 	Common::String slotNum(Common::String::format("%s%.2d", "slot", _slot_cursor + 1));
 	slotNum += '_';
 
-	debug("slotnum %s", slotNum.c_str());
 	// delete all maps in this slot (including AUTOMAP.SAV) before copying the new files
 	if (MapDirErase(slotNum.c_str(), "SAV") == -1) {
 		return -1;
 	}
 
-	/*	snprintf(_gmpath, sizeof(_gmpath), "%s\\%s\\%s%.2d\\", _patches, "SAVEGAME", "SLOT", _slot_cursor + 1);
-		_strmfe(_str0, "AUTOMAP.DB", "SAV");
-		strcat(_gmpath, _str0);
-		compat_remove(_gmpath);*/
-
 	// Save filelist of visited maps in save.dat and copy .sav maps individually (compressed)
 	for (Common::StringArray::iterator mapName = savedMaps.begin(); mapName != savedMaps.end(); mapName++) {
 		Common::String shortMapName(mapName->substr(mapsPath.size()));
-		debug("writing %s to save.dat", shortMapName.c_str());
+		debug(5, "LOADSAVE: Writing map name %s to save.dat", shortMapName.c_str());
 		stream->writeString(shortMapName);
 		stream->writeByte(0);
 		if (stream->err()) {
-			warning("LOADSAVE: Couldn't write %s to save.dat", shortMapName.c_str());
+			warning("LOADSAVE: Couldn't write map name %s to save.dat", shortMapName.c_str());
 			return -1;
 		}
 
@@ -2781,59 +2719,9 @@ static int _GameMap2Slot(Common::OutSaveFile *stream) {
 	return 0;
 }
 
-/*
-	for (int index = 0; index < fileNameListLength; index += 1) {
-		char *string = fileNameList[index];
-		if (fileWrite(string, strlen(string) + 1, 1, stream) == -1) {
-			fileNameListFree(&fileNameList, 0);
-			return -1;
-		}
-
-		snprintf(_str0, sizeof(_str0), "%s\\%s\\%s", _patches, "MAPS", string);
-		snprintf(_str1, sizeof(_str1), "%s\\%s\\%s%.2d\\%s", _patches, "SAVEGAME", "SLOT", _slot_cursor + 1, string);
-		if (fileCopyCompressed(_str0, _str1) == -1) {
-			fileNameListFree(&fileNameList, 0);
-			return -1;
-		}
-	}
-
-	fileNameListFree(&fileNameList, 0);
-
-	_strmfe(_str0, "AUTOMAP.DB", "SAV");
-	snprintf(_str1, sizeof(_str1), "%s\\%s\\%s%.2d\\%s", _patches, "SAVEGAME", "SLOT", _slot_cursor + 1, _str0);
-	snprintf(_str0, sizeof(_str0), "%s\\%s\\%s", _patches, "MAPS", "AUTOMAP.DB");
-
-	if (fileCopyCompressed(_str0, _str1) == -1) {
-		return -1;
-	}
-
-	snprintf(_str0, sizeof(_str0), "%s\\%s", "MAPS", "AUTOMAP.DB");
-	File *inStream = fileOpen(_str0, "rb");
-	if (inStream == nullptr) {
-		return -1;
-	}
-
-	int fileSize = fileGetSize(inStream);
-	if (fileSize == -1) {
-		fileClose(inStream);
-		return -1;
-	}
-
-	fileClose(inStream);
-
-	if (fileWriteInt32(stream, fileSize) == -1) {
-		return -1;
-	}
-
-	if (_partyMemberUnPrepSave() == -1) {
-		return -1;
-	}
-*/
-
 // SlotMap2Game
 // 0x47F990
 static int _SlotMap2Game(Common::InSaveFile *stream) {
-	debugPrint("LOADSAVE: in SlotMap2Game\n");
 
 	Common::SaveFileManager *saveMan = g_system->getSavefileManager();
 
@@ -2843,12 +2731,6 @@ static int _SlotMap2Game(Common::InSaveFile *stream) {
 		debugPrint("LOADSAVE: Can't read number of maps!\n");
 		return -1;
 	}
-
-	/*	int fileNameListLength;
-		if (fileReadInt32(stream, &fileNameListLength) == -1) {
-			debugPrint("LOADSAVE: returning 1\n");
-			return -1;
-		}*/
 
 	if (fileNameListLength == 0) {
 		debugPrint("LOADSAVE: Found 0 maps!\n");
@@ -2874,8 +2756,6 @@ static int _SlotMap2Game(Common::InSaveFile *stream) {
 		return -1;
 	}
 
-	// snprintf(_str0, sizeof(_str0), "%s\\%s\\%s", _patches, "MAPS", "AUTOMAP.DB");
-	// compat_remove(_str0);
 	Common::String autoMapFile(g_engine->getTargetName() + "_AUTOMAP.DB");
 	if (!saveMan->removeSavefile(autoMapFile))
 		debug("LOADSAVE: Couldn't delete AUTOMAP.DB before load!");
@@ -2898,7 +2778,7 @@ static int _SlotMap2Game(Common::InSaveFile *stream) {
 
 				// Decompress and rename protos (gzipped in saves)
 				if (saveMan->copySavefile(oldProtoFile, newProtoFile, false))
-					debug("LOADSAVE: Copied %s to %s", oldProtoFile.c_str(), newProtoFile.c_str());
+					debug(5, "LOADSAVE: Copied %s to %s", oldProtoFile.c_str(), newProtoFile.c_str());
 				else {
 					warning("LOADSAVE: Couldn't copy %s to %s", oldProtoFile.c_str(), newProtoFile.c_str());
 					return -1;
@@ -2922,7 +2802,7 @@ static int _SlotMap2Game(Common::InSaveFile *stream) {
 		Common::String newMapFile(g_engine->getTargetName() + "_" + _str1);
 		newMapFile.replace('\\', '_');
 		if (saveMan->copySavefile(oldMapFile, newMapFile, false))
-			debug("LOADSAVE: Copied %s to %s", oldMapFile.c_str(), newMapFile.c_str());
+			debug(5, "LOADSAVE: Copied %s to %s", oldMapFile.c_str(), newMapFile.c_str());
 		else {
 			warning("LOADSAVE: Couldn't copy %s to %s", oldMapFile.c_str(), newMapFile.c_str());
 			return -1;
@@ -2940,10 +2820,6 @@ static int _SlotMap2Game(Common::InSaveFile *stream) {
 
 	// AUTOMAP.DB size (unused)
 	stream->readSint32BE();
-	/*if (fileReadInt32(stream, &v12) == -1) {
-		debugPrint("LOADSAVE: returning 9\n");
-		return -1;
-	}*/
 
 	if (mapLoadSaved(_LSData[_slot_cursor].fileName) == -1) {
 		debugPrint("LOADSAVE: Couldn't load saved map!\n");
@@ -2951,79 +2827,6 @@ static int _SlotMap2Game(Common::InSaveFile *stream) {
 	}
 
 	return 0;
-}
-
-// 0x47FE58
-// TODO copy - this is used only to backup the automap DB
-static int _copy_file(const char *existingFileName, const char *newFileName) {
-/*	File *stream1;
-	File *stream2;
-	int length;
-	int chunk_length;
-	void *buf;
-	int result;
-
-	stream1 = nullptr;
-	stream2 = nullptr;
-	buf = nullptr;
-	result = -1;
-
-	stream1 = fileOpen(existingFileName, "rb");
-	if (stream1 == nullptr) {
-		goto out;
-	}
-
-	length = fileGetSize(stream1);
-	if (length == -1) {
-		goto out;
-	}
-
-	stream2 = fileOpen(newFileName, "wb");
-	if (stream2 == nullptr) {
-		goto out;
-	}
-
-	buf = internal_malloc(0xFFFF);
-	if (buf == nullptr) {
-		goto out;
-	}
-
-	while (length != 0) {
-		chunk_length = std::min(length, 0xFFFF);
-
-		if (fileRead(buf, chunk_length, 1, stream1) != 1) {
-			break;
-		}
-
-		if (fileWrite(buf, chunk_length, 1, stream2) != 1) {
-			break;
-		}
-
-		length -= chunk_length;
-	}
-
-	if (length != 0) {
-		goto out;
-	}
-
-	result = 0;
-
-out:
-
-	if (stream1 != nullptr) {
-		fileClose(stream1);
-	}
-
-	if (stream2 != nullptr) {
-		fileClose(stream2);
-	}
-
-	if (buf != nullptr) {
-		internal_free(buf);
-	}
-
-	return result;*/
-	return -1;
 }
 
 // InitLoadSave
@@ -3036,17 +2839,7 @@ void lsgInit() {
 
 // 0x480040
 int MapDirErase(const char *relativePath, const char *extension) {
-	/*	char path[COMPAT_MAX_PATH];
-		snprintf(path, sizeof(path), "%s*.%s", relativePath, extension);
 
-		char **fileList;
-		int fileListLength = fileNameListInit(path, &fileList, 0, 0);
-		while (--fileListLength >= 0) {
-			snprintf(path, sizeof(path), "%s\\%s%s", _patches, relativePath, fileList[fileListLength]);
-			compat_remove(path);
-		}
-		fileNameListFree(&fileList, 0);
-	*/
 	Common::SaveFileManager *saveMan = g_system->getSavefileManager();
 
 	Common::String restrictedPath(g_engine->getTargetName());
@@ -3058,7 +2851,7 @@ int MapDirErase(const char *relativePath, const char *extension) {
 
 	Common::StringArray filenames;
 	filenames = saveMan->listSavefiles(restrictedPath + "*." + extension);
-	debug("MapDirErase: %s", (restrictedPath + "*." + extension).c_str());
+	debug(2, "MapDirErase: %s", (restrictedPath + "*." + extension).c_str());
 
 	for (Common::StringArray::iterator filename = filenames.begin(); filename != filenames.end(); filename++) {
 		if (!saveMan->removeSavefile(filename->c_str()))
@@ -3072,11 +2865,6 @@ int MapDirErase(const char *relativePath, const char *extension) {
 int _MapDirEraseFile_(const char *a1, const char *a2) {
 	char path[COMPAT_MAX_PATH];
 
-	/*snprintf(path, sizeof(path), "%s\\%s%s", _patches, a1, a2);
-	if (compat_remove(path) != 0) {
-		return -1;
-	} */
-
 	snprintf(path, sizeof(path), "_maps_%s", a2);
 	Common::String mapName(g_engine->getTargetName());
 	mapName += path;
@@ -3086,7 +2874,7 @@ int _MapDirEraseFile_(const char *a1, const char *a2) {
 		return -1;
 	}
 
-	debug("Deleting map: %s", mapName.c_str());
+	debug(2, "Deleting map: %s", mapName.c_str());
 	if (g_system->getSavefileManager()->removeSavefile(mapName))
 		return 0;
 	else
@@ -3095,142 +2883,13 @@ int _MapDirEraseFile_(const char *a1, const char *a2) {
 
 // 0x480104
 static int _SaveBackup() {
-/*	debugPrint("\nLOADSAVE: Backing up save slot files..\n");
-
-	snprintf(_gmpath, sizeof(_gmpath), "%s\\%s\\%s%.2d\\", _patches, "SAVEGAME", "SLOT", _slot_cursor + 1);
-	strcpy(_str0, _gmpath);
-
-	strcat(_str0, "SAVE.DAT");
-
-	_strmfe(_str1, _str0, "BAK");
-
-	File *stream1 = fileOpen(_str0, "rb");
-	if (stream1 != nullptr) {
-		fileClose(stream1);
-		if (compat_rename(_str0, _str1) != 0) {
-			return -1;
-		}
-	}
-
-	snprintf(_gmpath, sizeof(_gmpath), "%s\\%s%.2d\\", "SAVEGAME", "SLOT", _slot_cursor + 1);
-	snprintf(_str0, sizeof(_str0), "%s*.%s", _gmpath, "SAV");
-
-	char **fileList;
-	int fileListLength = fileNameListInit(_str0, &fileList, 0, 0);
-	if (fileListLength == -1) {
-		return -1;
-	}
-
-	_map_backup_count = fileListLength;
-
-	snprintf(_gmpath, sizeof(_gmpath), "%s\\%s\\%s%.2d\\", _patches, "SAVEGAME", "SLOT", _slot_cursor + 1);
-	for (int index = fileListLength - 1; index >= 0; index--) {
-		strcpy(_str0, _gmpath);
-		strcat(_str0, fileList[index]);
-
-		_strmfe(_str1, _str0, "BAK");
-		if (compat_rename(_str0, _str1) != 0) {
-			fileNameListFree(&fileList, 0);
-			return -1;
-		}
-	}
-
-	fileNameListFree(&fileList, 0);
-
-	debugPrint("\nLOADSAVE: %d map files backed up.\n", fileListLength);
-
-	snprintf(_gmpath, sizeof(_gmpath), "%s\\%s%.2d\\", "SAVEGAME", "SLOT", _slot_cursor + 1);
-
-	char *v1 = _strmfe(_str2, "AUTOMAP.DB", "SAV");
-	snprintf(_str0, sizeof(_str0), "%s\\%s", _gmpath, v1);
-
-	char *v2 = _strmfe(_str2, "AUTOMAP.DB", "BAK");
-	snprintf(_str1, sizeof(_str1), "%s\\%s", _gmpath, v2);
-
-	_automap_db_flag = false;
-
-	File *stream2 = fileOpen(_str0, "rb");
-	if (stream2 != nullptr) {
-		fileClose(stream2);
-
-		if (_copy_file(_str0, _str1) == -1) {
-			return -1;
-		}
-
-		_automap_db_flag = true;
-	}
-*/
-	warning("SaveBackup not implemented");
+	debug(2, "Savegame emergency backup not implemented");
 	return 0;
 }
 
 // 0x4803D8
 static int _RestoreSave() {
-	debugPrint("\nLOADSAVE: Restoring save file backup...\n");
-
-	_EraseSave();
-/*
-	snprintf(_gmpath, sizeof(_gmpath), "%s\\%s\\%s%.2d\\", _patches, "SAVEGAME", "SLOT", _slot_cursor + 1);
-	strcpy(_str0, _gmpath);
-	strcat(_str0, "SAVE.DAT");
-	_strmfe(_str1, _str0, "BAK");
-	compat_remove(_str0);
-
-	if (compat_rename(_str1, _str0) != 0) {
-		_EraseSave();
-		return -1;
-	}
-
-	snprintf(_gmpath, sizeof(_gmpath), "%s\\%s%.2d\\", "SAVEGAME", "SLOT", _slot_cursor + 1);
-	snprintf(_str0, sizeof(_str0), "%s*.%s", _gmpath, "BAK");
-
-	char **fileList;
-	int fileListLength = fileNameListInit(_str0, &fileList, 0, 0);
-	if (fileListLength == -1) {
-		return -1;
-	}
-
-	if (fileListLength != _map_backup_count) {
-		// FIXME: Probably leaks fileList.
-		_EraseSave();
-		return -1;
-	}
-
-	snprintf(_gmpath, sizeof(_gmpath), "%s\\%s\\%s%.2d\\", _patches, "SAVEGAME", "SLOT", _slot_cursor + 1);
-
-	for (int index = fileListLength - 1; index >= 0; index--) {
-		strcpy(_str0, _gmpath);
-		strcat(_str0, fileList[index]);
-		_strmfe(_str1, _str0, "SAV");
-		compat_remove(_str1);
-		if (compat_rename(_str0, _str1) != 0) {
-			// FIXME: Probably leaks fileList.
-			_EraseSave();
-			return -1;
-		}
-	}
-
-	fileNameListFree(&fileList, 0);
-
-	if (!_automap_db_flag) {
-		return 0;
-	}
-
-	snprintf(_gmpath, sizeof(_gmpath), "%s\\%s\\%s%.2d\\", _patches, "SAVEGAME", "SLOT", _slot_cursor + 1);
-	char *v1 = _strmfe(_str2, "AUTOMAP.DB", "BAK");
-	strcpy(_str0, _gmpath);
-	strcat(_str0, v1);
-
-	char *v2 = _strmfe(_str2, "AUTOMAP.DB", "SAV");
-	strcpy(_str1, _gmpath);
-	strcat(_str1, v2);
-
-	if (compat_rename(_str0, _str1) != 0) {
-		_EraseSave();
-		return -1;
-	}
-*/
-	warning("RestoreSave (backup) not implemented");
+	debug(2, "Savegame emergency recovery not implemented");
 	return 0;
 }
 
@@ -3241,9 +2900,6 @@ static int _LoadObjDudeCid(Common::InSaveFile *stream) {
 	value = stream->readSint32BE();
 	if (stream->err())
 		return -1;
-	//	if (fileReadInt32(stream, &value) == -1) {
-	//		return -1;
-	//	}
 
 	gDude->cid = value;
 
@@ -3254,47 +2910,6 @@ static int _LoadObjDudeCid(Common::InSaveFile *stream) {
 static int _SaveObjDudeCid(Common::OutSaveFile *stream) {
 	stream->writeSint32BE(gDude->cid);
 	return stream->err();
-//	return fileWriteInt32(stream, gDude->cid);
-}
-
-// 0x480754
-static int _EraseSave() {
-/*	debugPrint("\nLOADSAVE: Erasing save(bad) slot...\n");
-
-	snprintf(_gmpath, sizeof(_gmpath), "%s\\%s\\%s%.2d\\", _patches, "SAVEGAME", "SLOT", _slot_cursor + 1);
-	strcpy(_str0, _gmpath);
-	strcat(_str0, "SAVE.DAT");
-	compat_remove(_str0);
-
-	snprintf(_gmpath, sizeof(_gmpath), "%s\\%s%.2d\\", "SAVEGAME", "SLOT", _slot_cursor + 1);
-	snprintf(_str0, sizeof(_str0), "%s*.%s", _gmpath, "SAV");
-
-	char **fileList;
-	int fileListLength = fileNameListInit(_str0, &fileList, 0, 0);
-	if (fileListLength == -1) {
-		return -1;
-	}
-
-	snprintf(_gmpath, sizeof(_gmpath), "%s\\%s\\%s%.2d\\", _patches, "SAVEGAME", "SLOT", _slot_cursor + 1);
-	for (int index = fileListLength - 1; index >= 0; index--) {
-		strcpy(_str0, _gmpath);
-		strcat(_str0, fileList[index]);
-		compat_remove(_str0);
-	}
-
-	fileNameListFree(&fileList, 0);
-
-	snprintf(_gmpath, sizeof(_gmpath), "%s\\%s\\%s%.2d\\", _patches, "SAVEGAME", "SLOT", _slot_cursor + 1);
-
-	char *v1 = _strmfe(_str1, "AUTOMAP.DB", "SAV");
-	strcpy(_str0, _gmpath);
-	strcat(_str0, v1);
-
-	compat_remove(_str0);
-
-	return 0;*/
-	warning("EraseSave not implemented");
-	return 0;
 }
 
 } // namespace Fallout2
