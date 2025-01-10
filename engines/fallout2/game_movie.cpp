@@ -116,19 +116,18 @@ void gameMoviesReset() {
 }
 
 // 0x44E638
-int gameMoviesLoad(File *stream) {
-	if (fileRead(gGameMoviesSeen, sizeof(*gGameMoviesSeen), MOVIE_COUNT, stream) != MOVIE_COUNT) {
+int gameMoviesLoad(Common::InSaveFile *stream) {
+	if (stream->read(gGameMoviesSeen, sizeof(*gGameMoviesSeen) * MOVIE_COUNT) != MOVIE_COUNT)
 		return -1;
-	}
 
 	return 0;
 }
 
 // 0x44E664
-int gameMoviesSave(File *stream) {
-	if (fileWrite(gGameMoviesSeen, sizeof(*gGameMoviesSeen), MOVIE_COUNT, stream) != MOVIE_COUNT) {
+int gameMoviesSave(Common::OutSaveFile *stream) {
+	stream->write(gGameMoviesSeen, sizeof(*gGameMoviesSeen) * MOVIE_COUNT);
+	if (stream->err())
 		return -1;
-	}
 
 	return 0;
 }
