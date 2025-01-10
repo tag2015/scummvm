@@ -3,6 +3,8 @@
 
 #include "fallout2/db.h"
 
+#include "common/savefile.h"
+
 namespace Fallout2 {
 
 typedef enum GameMovieFlags {
@@ -35,8 +37,8 @@ typedef enum GameMovie {
 
 int gameMoviesInit();
 void gameMoviesReset();
-int gameMoviesLoad(File *stream);
-int gameMoviesSave(File *stream);
+int gameMoviesLoad(Common::InSaveFile *stream);
+int gameMoviesSave(Common::OutSaveFile *stream);
 int gameMoviePlay(int movie, int flags);
 void gameMovieFadeOut();
 bool gameMovieIsSeen(int movie);

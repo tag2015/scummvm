@@ -26,7 +26,7 @@
 #include "fallout2/file_utils.h"
 #include "fallout2/game.h"
 #include "fallout2/game_mouse.h"
-//#include "fallout2/game_movie.h" TODO movie
+#include "fallout2/game_movie.h"
 #include "fallout2/game_sound.h"
 #include "fallout2/geometry.h"
 #include "fallout2/input.h"
@@ -235,7 +235,7 @@ static const char *_patches = nullptr;
 //	characterEditorSave, DONE
 //	wmWorldMap_save, DONE
 //	pipboySave, DONE
-//	gameMoviesSave, TODO movie
+//	gameMoviesSave, DONE
 //	skillsUsageSave, DONE
 //	partyMembersSave, DONE
 //	queueSave, DONE
@@ -266,7 +266,7 @@ static const char *_patches = nullptr;
 //	characterEditorLoad, DONE
 //	wmWorldMap_load, DONE
 //	pipboyLoad, DONE
-//	gameMoviesLoad, TODO movie
+//	gameMoviesLoad, DONE
 //	skillsUsageLoad, DONE
 //	partyMembersLoad, DONE
 //	queueLoad, DONE
@@ -1705,10 +1705,10 @@ static int lsgPerformSaveGame() {
 	else
 		debug("Saved world map stats");
 
-	// TODO movie
-	for (int i = 0; i < 17; i++)
-		newSave->writeByte(0);
-	warning("Saved placeholder movie stats");
+	if (gameMoviesSave(newSave))
+		warning("Error saving movie stats");
+	else
+		debug("Saved movie stats");
 
 	if (skillsUsageSave(newSave))
 		warning("Error saving skills usage");
@@ -1988,10 +1988,10 @@ static int lsgLoadGameInSlot(int slot) {
 	else
 		debug("Loaded world map stats");
 
-	// TODO movie
-	for (int i = 0; i < 17; i++)
-		loadSave->readByte();
-	warning("Skipped loading movie stats");
+	if (gameMoviesLoad(loadSave))
+		warning("Error loading movie stats");
+	else
+		debug("Loaded movie stats");
 
 	if (skillsUsageLoad(loadSave))
 		warning("Error loading skills usage");
