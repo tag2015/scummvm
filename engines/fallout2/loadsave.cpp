@@ -217,7 +217,7 @@ static const char *_patches = nullptr;
 //	_DummyFunc,
 //	_SaveObjDudeCid, DONE
 //	scriptsSaveGameGlobalVars, DONE
-//	_GameMap2Slot, TODO map
+//	_GameMap2Slot, DONE
 //	scriptsSaveGameGlobalVars, DONE
 //	_obj_save_dude, DONE
 //	critterSave, DONE
@@ -1528,7 +1528,7 @@ static int lsgWindowFree(int windowType) {
 
 // 0x47D88C
 static int lsgPerformSaveGame() {
-	_ls_error_code = 0;  // TODO save
+	_ls_error_code = 0;
 	_map_backup_count = -1;
 	gameMouseSetCursor(MOUSE_CURSOR_WAIT_PLANET);
 
@@ -3163,6 +3163,15 @@ static int _SlotMap2Game(Common::InSaveFile *stream) {
 			warning("LOADSAVE: Couldn't copy %s to %s", oldMapFile.c_str(), newMapFile.c_str());
 			return -1;
 		}
+	}
+
+	// Discard map filenames list
+	int remainingMaps = fileNameListLength;
+	while (remainingMaps) {
+		if (stream->readByte() == 0)
+			remainingMaps--;
+		if (stream->err())
+			break;
 	}
 
 	// AUTOMAP.DB size (unused)
