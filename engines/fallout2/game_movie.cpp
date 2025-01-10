@@ -138,8 +138,8 @@ int gameMoviePlay(int movie, int flags) {
 	// TODO movie
 	// Currently the game crashes after playback, so for now let's just set the movie as played,
 	// for scripting reasons and return
-	warning("Movie playback not implemented");
-	gGameMoviesSeen[movie] = 1;  // TODO remove
+	warning("Movie playback not implemented (%s)", gMovieFileNames[movie]);
+	gGameMoviesSeen[movie] = 1; // TODO remove
 	return -1;  // TODO remove
 
 	gGameMovieIsPlaying = true;
