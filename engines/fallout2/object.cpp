@@ -463,7 +463,7 @@ int objectRead(Object *obj, File *stream) {
 			}
 		}
 	} else {
-		if (PID_TYPE(obj->pid) && !(gMapHeader.flags & 0x01)) {
+		if ((PID_TYPE(obj->pid) == 0) && !(gMapHeader.flags & 0x01)) {
 			_object_fix_weapon_ammo(obj);
 		}
 	}
@@ -479,25 +479,41 @@ int objectReadScumm(Object *obj, Common::InSaveFile *stream) {
 		return -1;
 	/*	if (fileReadInt32(stream, &(obj->id)) == -1)
 			return -1;*/
-	debug(6, "Reading Object - id %d from save", obj->id);
+	debug(6, "objectReadScumm: reading object id %d", obj->id);
 	obj->tile = stream->readSint32BE();
+	debug(7, "objectReadScumm: tile: %d", obj->tile);
 	obj->x = stream->readSint32BE();
+	debug(7, "objectReadScumm: x: %d", obj->x);
 	obj->y = stream->readSint32BE();
+	debug(7, "objectReadScumm: y: %d", obj->y);
 	obj->sx = stream->readSint32BE();
+	debug(7, "objectReadScumm: sx: %d", obj->sx);
 	obj->sy = stream->readSint32BE();
+	debug(7, "objectReadScumm: sy: %d", obj->sy);
 	obj->frame = stream->readSint32BE();
+	debug(7, "objectReadScumm: frame: %d", obj->frame);
 	obj->rotation = stream->readSint32BE();
+	debug(7, "objectReadScumm: rotation: %d", obj->rotation);
 	obj->fid = stream->readSint32BE();
+	debug(7, "objectReadScumm: fid: %d", obj->fid);
 	obj->flags = stream->readSint32BE();
+	debug(7, "objectReadScumm: flags: %d", obj->flags);
 	obj->elevation = stream->readSint32BE();
+	debug(7, "objectReadScumm: elevation: %d", obj->elevation);
 	obj->pid = stream->readSint32BE();
+	debug(7, "objectReadScumm: pid: %d", obj->pid);
 	obj->cid = stream->readSint32BE();
+	debug(7, "objectReadScumm: cid: %d", obj->cid);
 	obj->lightDistance = stream->readSint32BE();
+	debug(7, "objectReadScumm: lightDistance: %d", obj->lightDistance);
 	obj->lightIntensity = stream->readSint32BE();
+	debug(7, "objectReadScumm: lightIntensity: %d", obj->lightIntensity);
 	/*field_74 = */
 	stream->readSint32BE();
 	obj->sid = stream->readSint32BE();
+	debug(7, "objectReadScumm: sid: %d", obj->sid);
 	obj->scriptIndex = stream->readSint32BE();
+	debug(7, "objectReadScumm: scriptIndex: %d", obj->scriptIndex);
 	if (stream->err())
 		return -1;
 
@@ -535,7 +551,7 @@ int objectReadScumm(Object *obj, Common::InSaveFile *stream) {
 		return -1;
 	if (fileReadInt32(stream, &(obj->scriptIndex)) == -1)
 		return -1;*/
-	debug(6, "Object header read successfully");
+	debug(6, "ObjectReadScumm: Header read successfully");
 	obj->outline = 0;
 	obj->owner = nullptr;
 
@@ -550,7 +566,7 @@ int objectReadScumm(Object *obj, Common::InSaveFile *stream) {
 			}
 		}
 	} else {
-		if (PID_TYPE(obj->pid) && !(gMapHeader.flags & 0x01)) {
+		if ((PID_TYPE(obj->pid) == 0) && !(gMapHeader.flags & 0x01)) {
 			_object_fix_weapon_ammo(obj);
 		}
 	}
