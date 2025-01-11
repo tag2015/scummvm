@@ -1926,8 +1926,6 @@ static int _get_input_str(int win, int cancelKeyCode, char *text, int maxLength,
 
 	windowRefresh(win);
 
-//	beginTextInput();
-
 	int blinkingCounter = 3;
 	bool blink = false;
 
@@ -1991,11 +1989,9 @@ static int _get_input_str(int win, int cancelKeyCode, char *text, int maxLength,
 		sharedFpsLimiter.throttle();
 	}
 
-//	endTextInput();
-
 	if (rc == 0 || nameLength > 0) {
 		copy[nameLength] = '\0';
-		(strncpy(text, copy, 63));
+		strncpy(text, copy, 63);
 		text[63] = '\0';
 	}
 
@@ -4267,7 +4263,7 @@ static int characterEditorShowOptions() {
 }
 
 // 0x4390B4
-/*
+#if 0
 static bool characterFileExists(const char *fname) {
 	File *stream = fileOpen(fname, "rb");
 	if (stream == nullptr) {
@@ -4277,7 +4273,7 @@ static bool characterFileExists(const char *fname) {
 	fileClose(stream);
 	return true;
 }
-*/
+#endif
 
 // 0x4390D0
 static int characterPrintToFile(const char *fileName) {
@@ -5652,11 +5648,6 @@ int characterEditorSave(Common::OutSaveFile *stream) {
 		return -1;
 	}
 
-	/*	if (fileWriteInt32(stream, gCharacterEditorLastLevel) == -1)
-			return -1;
-		if (fileWriteUInt8(stream, gCharacterEditorHasFreePerk) == -1)
-			return -1;*/
-
 	return 0;
 }
 
@@ -5666,10 +5657,6 @@ int characterEditorLoad(Common::InSaveFile *stream) {
 	gCharacterEditorHasFreePerk = stream->readByte();
 	if (stream->err())
 		return -1;
-/*	if (fileReadInt32(stream, &gCharacterEditorLastLevel) == -1)
-		return -1;
-	if (fileReadUInt8(stream, &gCharacterEditorHasFreePerk) == -1)
-		return -1;*/
 
 	return 0;
 }
