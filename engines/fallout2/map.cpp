@@ -758,12 +758,10 @@ int mapLoadByName(char *fileName) {
 		const char *filePath = mapBuildPath(fileName);
 		// Check if .SAV map exists
 		Common::SaveFileManager *saveMan = g_system->getSavefileManager();
-		// File *stream = fileOpen(filePath, "rb");
 		if (saveMan->exists(filePath)) {
 			debug("Found a saved .SAV map!");
 			Common::InSaveFile *stream = saveMan->openForLoading(Common::String(filePath));
 			if (stream != nullptr) {
-				// fileClose(stream);
 				delete stream;
 				rc = mapLoadSaved(fileName);
 				wmMapMusicStart();
@@ -777,8 +775,6 @@ int mapLoadByName(char *fileName) {
 		const char *filePath = mapBuildPath(fileName);
 		char *ext = strstr(fileName, ".SAV");
 		if (ext != nullptr) {
-			// newPath = ConfMan.get("savepath").c_str();
-			// newPath += Common::String("/");
 			newPath += Common::String(filePath);
 			debug("MapLoadByName (.sav) map path: %s", newPath.c_str());
 			Common::SaveFileManager *saveMan = g_system->getSavefileManager();
@@ -1632,13 +1628,11 @@ static int _map_save_file(Common::OutSaveFile *stream) {
 	if (gMapHeader.globalVariablesCount != 0) {
 		for (int i = 0; i < gMapHeader.globalVariablesCount; i++)
 			stream->writeSint32BE(gMapGlobalVars[i]);
-		//fileWriteInt32List(stream, gMapGlobalVars, gMapHeader.globalVariablesCount);
 	}
 
 	if (gMapHeader.localVariablesCount != 0) {
 		for (int i = 0; i < gMapHeader.localVariablesCount; i++)
 			stream->writeSint32BE(gMapLocalVars[i]);
-		//fileWriteInt32List(stream, gMapLocalVars, gMapHeader.localVariablesCount);
 	}
 
 	for (int elevation = 0; elevation < ELEVATION_COUNT; elevation++) {
@@ -1836,9 +1830,6 @@ static int mapGlobalVariablesLoad(File *stream) {
 static int mapGlobalVariablesLoadScumm(Common::InSaveFile *stream) {
 	for (int i = 0; i < gMapGlobalVarsLength; i++)
 		gMapGlobalVars[i] = stream->readSint32BE();
-	//	if (fileReadInt32List(stream, gMapGlobalVars, gMapGlobalVarsLength) != 0) {
-	//		return -1;
-	//	}
 
 	if (stream->err())
 		return -1;
@@ -1889,9 +1880,6 @@ static int mapLocalVariablesLoad(File *stream) {
 }
 
 static int mapLocalVariablesLoadScumm(Common::InSaveFile *stream) {
-	//	if (fileReadInt32List(stream, gMapLocalVars, gMapLocalVarsLength) != 0) {
-	//		return -1;
-	//	}
 	for (int i = 0; i < gMapLocalVarsLength; i++)
 		gMapLocalVars[i] = stream->readSint32BE();
 
@@ -2015,10 +2003,6 @@ static int _square_load_scumm(Common::InSaveFile *stream, int flags) {
 			if (stream->err())
 				return -1;
 
-			//  if (_db_freadIntCount(stream, arr, SQUARE_GRID_SIZE) != 0) {
-			//    return -1;
-			//	}
-
 			for (int tile = 0; tile < SQUARE_GRID_SIZE; tile++) {
 				v6 = arr[tile];
 				v6 &= ~(0xFFFF);
@@ -2058,32 +2042,8 @@ static int mapHeaderWrite(MapHeader *ptr, Common::OutSaveFile *stream) {
 	for (i = 0; i < 44; i++)
 		stream->writeSint32BE(ptr->field_3C[i]);
 
-	/*	if (fileWriteInt32(stream, ptr->version) == -1)
-			return -1;
-		if (fileWriteFixedLengthString(stream, ptr->name, 16) == -1)
-			return -1;
-		if (fileWriteInt32(stream, ptr->enteringTile) == -1)
-			return -1;
-		if (fileWriteInt32(stream, ptr->enteringElevation) == -1)
-			return -1;
-		if (fileWriteInt32(stream, ptr->enteringRotation) == -1)
-			return -1;
-		if (fileWriteInt32(stream, ptr->localVariablesCount) == -1)
-			return -1;
-		if (fileWriteInt32(stream, ptr->scriptIndex) == -1)
-			return -1;
-		if (fileWriteInt32(stream, ptr->flags) == -1)
-			return -1;
-		if (fileWriteInt32(stream, ptr->darkness) == -1)
-			return -1;
-		if (fileWriteInt32(stream, ptr->globalVariablesCount) == -1)
-			return -1;
-		if (fileWriteInt32(stream, ptr->index) == -1)
-			return -1;
-		if (fileWriteInt32(stream, ptr->lastVisitTime) == -1)
-			return -1;
-		if (fileWriteInt32List(stream, ptr->field_3C, 44) == -1)
-			return -1;*/
+	if (stream->err())
+		return -1;
 
 	return 0;
 }
@@ -2134,70 +2094,32 @@ static int mapHeaderRead(MapHeader *ptr, File *stream) {
 
 static int mapHeaderReadScumm(MapHeader *ptr, Common::InSaveFile *stream) {
 	ptr->version = stream->readSint32BE();
-//	if (fileReadInt32(stream, &(ptr->version)) == -1)
-//		return -1;
 	debug(5, "Map Header - version %d", ptr->version);
-
 	for (int i = 0; i < 16; i++)
 		ptr->name[i] = stream->readByte();
-//	if (fileReadFixedLengthString(stream, ptr->name, 16) == -1)
-//		return -1;
 	debug(5, "Map Header - name: %s", ptr->name);
-
 	ptr->enteringTile = stream->readSint32BE();
-//	if (fileReadInt32(stream, &(ptr->enteringTile)) == -1)
-//		return -1;
 	debug(5, "Map Header - enteringTile: %d", ptr->enteringTile);
-
 	ptr->enteringElevation = stream->readSint32BE();
-//	if (fileReadInt32(stream, &(ptr->enteringElevation)) == -1)
-//		return -1;
 	debug(5, "Map Header - enteringElevation: %d", ptr->enteringElevation);
-
 	ptr->enteringRotation = stream->readSint32BE();
-//	if (fileReadInt32(stream, &(ptr->enteringRotation)) == -1)
-//		return -1;
 	debug(5, "Map Header - enteringRotation: %d", ptr->enteringRotation);
-
 	ptr->localVariablesCount = stream->readSint32BE();
-//	if (fileReadInt32(stream, &(ptr->localVariablesCount)) == -1)
-//		return -1;
 	debug(5, "Map Header - localVariablesCount: %d", ptr->localVariablesCount);
-
 	ptr->scriptIndex = stream->readSint32BE();
-//	if (fileReadInt32(stream, &(ptr->scriptIndex)) == -1)
-//		return -1;
 	debug(5, "Map Header - scriptIndex: %d", ptr->scriptIndex);
-
 	ptr->flags = stream->readSint32BE();
-//	if (fileReadInt32(stream, &(ptr->flags)) == -1)
-//		return -1;
 	debug(5, "Map Header - flags: %d", ptr->flags);
-
 	ptr->darkness = stream->readSint32BE();
-//	if (fileReadInt32(stream, &(ptr->darkness)) == -1)
-//		return -1;
 	debug(5, "Map Header - darkness: %d", ptr->darkness);
-
 	ptr->globalVariablesCount = stream->readSint32BE();
-//	if (fileReadInt32(stream, &(ptr->globalVariablesCount)) == -1)
-//		return -1;
 	debug(5, "Map Header - globalVariablesCount: %d", ptr->globalVariablesCount);
-
 	ptr->index = stream->readSint32BE();
-//	if (fileReadInt32(stream, &(ptr->index)) == -1)
-//		return -1;
 	debug(5, "Map Header - index: %d", ptr->index);
-
 	ptr->lastVisitTime = stream->readUint32BE();
-//	if (fileReadUInt32(stream, &(ptr->lastVisitTime)) == -1)
-//		return -1;
 	debug(5, "Map Header - lastVisitTime: %d", ptr->lastVisitTime);
-
 	for (int i = 0; i < 44; i++)
 		ptr->field_3C[i] = stream->readSint32BE();
-//	if (fileReadInt32List(stream, ptr->field_3C, 44) == -1)
-//		return -1;
 
 	if (stream->err())
 		return -1;
