@@ -477,9 +477,8 @@ int objectReadScumm(Object *obj, Common::InSaveFile *stream) {
 	obj->id = stream->readSint32BE();
 	if (stream->err())
 		return -1;
-	/*	if (fileReadInt32(stream, &(obj->id)) == -1)
-			return -1;*/
 	debug(6, "objectReadScumm: reading object id %d", obj->id);
+
 	obj->tile = stream->readSint32BE();
 	debug(7, "objectReadScumm: tile: %d", obj->tile);
 	obj->x = stream->readSint32BE();
@@ -516,42 +515,8 @@ int objectReadScumm(Object *obj, Common::InSaveFile *stream) {
 	debug(7, "objectReadScumm: scriptIndex: %d", obj->scriptIndex);
 	if (stream->err())
 		return -1;
-
-/*	if (fileReadInt32(stream, &(obj->tile)) == -1)
-		return -1;
-	if (fileReadInt32(stream, &(obj->x)) == -1)
-		return -1;
-	if (fileReadInt32(stream, &(obj->y)) == -1)
-		return -1;
-	if (fileReadInt32(stream, &(obj->sx)) == -1)
-		return -1;
-	if (fileReadInt32(stream, &(obj->sy)) == -1)
-		return -1;
-	if (fileReadInt32(stream, &(obj->frame)) == -1)
-		return -1;
-	if (fileReadInt32(stream, &(obj->rotation)) == -1)
-		return -1;
-	if (fileReadInt32(stream, &(obj->fid)) == -1)
-		return -1;
-	if (fileReadInt32(stream, &(obj->flags)) == -1)
-		return -1;
-	if (fileReadInt32(stream, &(obj->elevation)) == -1)
-		return -1;
-	if (fileReadInt32(stream, &(obj->pid)) == -1)
-		return -1;
-	if (fileReadInt32(stream, &(obj->cid)) == -1)
-		return -1;
-	if (fileReadInt32(stream, &(obj->lightDistance)) == -1)
-		return -1;
-	if (fileReadInt32(stream, &(obj->lightIntensity)) == -1)
-		return -1;
-	if (fileReadInt32(stream, &field_74) == -1)
-		return -1;
-	if (fileReadInt32(stream, &(obj->sid)) == -1)
-		return -1;
-	if (fileReadInt32(stream, &(obj->scriptIndex)) == -1)
-		return -1;*/
 	debug(6, "ObjectReadScumm: Header read successfully");
+
 	obj->outline = 0;
 	obj->owner = nullptr;
 
@@ -731,9 +696,6 @@ static int objectLoadAllInternalScumm(Common::InSaveFile *stream) {
 	objectCount = stream->readSint32BE();
 	if (stream->err())
 		return -1;
-	//	if (fileReadInt32(stream, &objectCount) == -1) {
-	//		return -1;
-	//	}*/
 
 	if (gObjectFids != nullptr) {
 		internal_free(gObjectFids);
@@ -754,9 +716,6 @@ static int objectLoadAllInternalScumm(Common::InSaveFile *stream) {
 		objectCountAtElevation = stream->readSint32BE();
 		if (stream->err())
 			return -1;
-		//		if (fileReadInt32(stream, &objectCountAtElevation) == -1) {
-		//			return -1;
-		//		}
 
 		for (int objectIndex = 0; objectIndex < objectCountAtElevation; objectIndex++) {
 			ObjectListNode *objectListNode;
@@ -815,7 +774,6 @@ static int objectLoadAllInternalScumm(Common::InSaveFile *stream) {
 				for (int inventoryItemIndex = 0; inventoryItemIndex < inventory->length; inventoryItemIndex++) {
 					InventoryItem *inventoryItem = &(inventory->items[inventoryItemIndex]);
 					inventoryItem->quantity = stream->readSint32BE();
-					//	if (fileReadInt32(stream, &(inventoryItem->quantity)) != 0) {
 					if (stream->err()) {
 						debugPrint("Error loading inventory\n");
 						return -1;
@@ -916,43 +874,8 @@ static int objectWrite(Object *obj, Common::OutSaveFile *stream) {
 	stream->writeSint32BE(obj->outline);
 	stream->writeSint32BE(obj->sid);
 	stream->writeSint32BE(obj->scriptIndex);
-
-/*	if (fileWriteInt32(stream, obj->id) == -1)
+	if (stream->err())
 		return -1;
-	if (fileWriteInt32(stream, obj->tile) == -1)
-		return -1;
-	if (fileWriteInt32(stream, obj->x) == -1)
-		return -1;
-	if (fileWriteInt32(stream, obj->y) == -1)
-		return -1;
-	if (fileWriteInt32(stream, obj->sx) == -1)
-		return -1;
-	if (fileWriteInt32(stream, obj->sy) == -1)
-		return -1;
-	if (fileWriteInt32(stream, obj->frame) == -1)
-		return -1;
-	if (fileWriteInt32(stream, obj->rotation) == -1)
-		return -1;
-	if (fileWriteInt32(stream, obj->fid) == -1)
-		return -1;
-	if (fileWriteInt32(stream, obj->flags) == -1)
-		return -1;
-	if (fileWriteInt32(stream, obj->elevation) == -1)
-		return -1;
-	if (fileWriteInt32(stream, obj->pid) == -1)
-		return -1;
-	if (fileWriteInt32(stream, obj->cid) == -1)
-		return -1;
-	if (fileWriteInt32(stream, obj->lightDistance) == -1)
-		return -1;
-	if (fileWriteInt32(stream, obj->lightIntensity) == -1)
-		return -1;
-	if (fileWriteInt32(stream, obj->outline) == -1)
-		return -1;
-	if (fileWriteInt32(stream, obj->sid) == -1)
-		return -1;
-	if (fileWriteInt32(stream, obj->scriptIndex) == -1)
-		return -1;*/
 
 	if (objectDataWrite(obj, stream) == -1)
 		return -1;
@@ -973,18 +896,16 @@ int objectSaveAll(Common::OutSaveFile *stream) {
 	long objectCountPos = stream->pos();
 
 	stream->writeSint32BE(objectCount);
-/*	if (fileWriteInt32(stream, objectCount) == -1) {
+	if (stream->err())
 		return -1;
-	}*/
 
 	for (int elevation = 0; elevation < ELEVATION_COUNT; elevation++) {
 		int objectCountAtElevation = 0;
 
 		long objectCountAtElevationPos = stream->pos();
 		stream->writeSint32BE(objectCountAtElevation);
-/*		if (fileWriteInt32(stream, objectCountAtElevation) == -1) {
+		if (stream->err())
 			return -1;
-		}*/
 
 		for (int tile = 0; tile < HEX_GRID_SIZE; tile++) {
 			for (ObjectListNode *objectListNode = gObjectListHeadByTile[tile]; objectListNode != nullptr; objectListNode = objectListNode->next) {
@@ -1024,9 +945,8 @@ int objectSaveAll(Common::OutSaveFile *stream) {
 					InventoryItem *inventoryItem = &(inventory->items[index]);
 
 					stream->writeSint32BE(inventoryItem->quantity);
-/*					if (fileWriteInt32(stream, inventoryItem->quantity) == -1) {
+					if (stream->err())
 						return -1;
-					}*/
 
 					if (_obj_save_obj(stream, inventoryItem->item) == -1) {
 						return -1;
@@ -1039,22 +959,16 @@ int objectSaveAll(Common::OutSaveFile *stream) {
 
 		long pos = stream->pos();
 		stream->seek(objectCountAtElevationPos, SEEK_SET);
-//		fileSeek(stream, objectCountAtElevationPos, SEEK_SET);
 		stream->writeSint32BE(objectCountAtElevation);
-//		fileWriteInt32(stream, objectCountAtElevation);
 		stream->seek(pos, SEEK_SET);
-//		fileSeek(stream, pos, SEEK_SET);
 
 		objectCount += objectCountAtElevation;
 	}
 
 	long pos = stream->pos();
 	stream->seek(objectCountPos, SEEK_SET);
-//	fileSeek(stream, objectCountPos, SEEK_SET);
 	stream->writeSint32BE(objectCount);
-//	fileWriteInt32(stream, objectCount);
 	stream->seek(pos, SEEK_SET);
-//	fileSeek(stream, pos, SEEK_SET);
 
 	return 0;
 }
@@ -3846,9 +3760,6 @@ static int _obj_load_obj_scumm(Common::InSaveFile *stream, Object **objectPtr, i
 		inventoryItem->quantity = stream->readSint32BE();
 		if (stream->err())
 			return -1;
-/*		if (fileReadInt32(stream, &(inventoryItem->quantity)) != 0) {
-			return -1;
-		}*/
 
 		if (_obj_load_obj_scumm(stream, &(inventoryItem->item), elevation, obj) != 0) {
 			return -1;
@@ -3874,15 +3785,11 @@ int _obj_save_dude(Common::OutSaveFile *stream) {
 	gDude->flags |= OBJECT_NO_SAVE;
 
 	stream->writeSint32BE(gCenterTile);
-	if(stream->err()) {
+	if (stream->err()) {
 		stream->finalize();
 		delete stream;
 		return -1;
 	}
-/*	if (fileWriteInt32(stream, gCenterTile) == -1) {
-		fileClose(stream);
-		return -1;
-	}*/
 
 	return rc;
 }
@@ -3954,10 +3861,6 @@ int _obj_load_dude(Common::InSaveFile *stream) {
 		delete stream;
 		return -1;
 	}
-/*	if (fileReadInt32(stream, &tile) == -1) {
-		fileClose(stream);
-		return -1;
-	}*/
 
 	tileSetCenter(tile, TILE_SET_CENTER_REFRESH_WINDOW | TILE_SET_CENTER_FLAG_IGNORE_SCROLL_RESTRICTIONS);
 
