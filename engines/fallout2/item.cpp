@@ -2785,20 +2785,13 @@ int drugEffectEventRead(Common::InSaveFile *stream, void **dataPtr) {
 	for (i = 0; i < 3; i++)
 		drugEffectEvent->modifiers[i] = stream->readSint32BE();
 
-	if (stream->err())
-		goto err;
-/*	if (fileReadInt32List(stream, drugEffectEvent->stats, 3) == -1)
-		goto err;
-	if (fileReadInt32List(stream, drugEffectEvent->modifiers, 3) == -1)
-		goto err;*/
+	if (stream->err()) {
+		internal_free(drugEffectEvent);
+		return -1;
+	}
 
 	*dataPtr = drugEffectEvent;
 	return 0;
-
-err:
-
-	internal_free(drugEffectEvent);
-	return -1;
 }
 
 // 0x47A254
@@ -2811,10 +2804,8 @@ int drugEffectEventWrite(Common::OutSaveFile *stream, void *data) {
 	for (i = 0; i < 3; i++)
 		stream->writeSint32BE(drugEffectEvent->modifiers[i]);
 
-	/*	if (fileWriteInt32List(stream, drugEffectEvent->stats, 3) == -1)
-			return -1;
-		if (fileWriteInt32List(stream, drugEffectEvent->modifiers, 3) == -1)
-			return -1;*/
+	if (stream->err())
+		return -1;
 
 	return 0;
 }
@@ -2913,23 +2904,13 @@ int withdrawalEventRead(Common::InSaveFile *stream, void **dataPtr) {
 	withdrawalEvent->field_0 = stream->readSint32BE();
 	withdrawalEvent->pid = stream->readSint32BE();
 	withdrawalEvent->perk = stream->readSint32BE();
-	if (stream->err())
-		goto err;
-
-/*	if (fileReadInt32(stream, &(withdrawalEvent->field_0)) == -1)
-		goto err;
-	if (fileReadInt32(stream, &(withdrawalEvent->pid)) == -1)
-		goto err;
-	if (fileReadInt32(stream, &(withdrawalEvent->perk)) == -1)
-		goto err;*/
+	if (stream->err()) {
+		internal_free(withdrawalEvent);
+		return -1;
+	}
 
 	*dataPtr = withdrawalEvent;
 	return 0;
-
-err:
-
-	internal_free(withdrawalEvent);
-	return -1;
 }
 
 // 0x47A484
@@ -2939,13 +2920,8 @@ int withdrawalEventWrite(Common::OutSaveFile *stream, void *data) {
 	stream->writeSint32BE(withdrawalEvent->field_0);
 	stream->writeSint32BE(withdrawalEvent->pid);
 	stream->writeSint32BE(withdrawalEvent->perk);
-
-	/*	if (fileWriteInt32(stream, withdrawalEvent->field_0) == -1)
-			return -1;
-		if (fileWriteInt32(stream, withdrawalEvent->pid) == -1)
-			return -1;
-		if (fileWriteInt32(stream, withdrawalEvent->perk) == -1)
-			return -1;*/
+	if (stream->err())
+		return -1;
 
 	return 0;
 }
