@@ -201,9 +201,6 @@ int critterLoad(Common::InSaveFile *stream) {
 	_sneak_working = stream->readSint32BE();
 	if (stream->err())
 		return -1;
-/*	if (fileReadInt32(stream, &_sneak_working) == -1) {
-		return -1;
-	}*/
 
 	Proto *proto;
 	protoGetProto(gDude->pid, &proto);
@@ -214,30 +211,11 @@ int critterLoad(Common::InSaveFile *stream) {
 // 0x42D058
 int critterSave(Common::OutSaveFile *stream) {
 	stream->writeSint32BE(_sneak_working);
-/*	if (fileWriteInt32(stream, _sneak_working) == -1) {
-		return -1;
-	}*/
 
 	Proto *proto;
 	protoGetProto(gDude->pid, &proto);
 
-	// TODO check
 	return protoCritterDataWrite(stream, &(proto->critter.data));
-
-/*	int i; TODO REMOVE
-
-	stream->writeSint32BE(proto->critter.data.flags);
-	for (i = 0; i < SAVEABLE_STAT_COUNT; i++)
-		stream->writeSint32BE(proto->critter.data.baseStats[i]);
-	for (i = 0; i < SAVEABLE_STAT_COUNT; i++)
-		stream->writeSint32BE(proto->critter.data.bonusStats[i]);
-	for (i = 0; i < SKILL_COUNT; i++)
-		stream->writeSint32BE(proto->critter.data.skills[i]);
-	stream->writeSint32BE(proto->critter.data.bodyType);
-	stream->writeSint32BE(proto->critter.data.experience);
-	stream->writeSint32BE(proto->critter.data.killType);
-	stream->writeSint32BE(proto->critter.data.damageType);*/
-
 }
 
 // 0x42D094
@@ -651,21 +629,13 @@ int radiationEventRead(Common::InSaveFile *stream, void **dataPtr) {
 
 	radiationEvent->radiationLevel = stream->readSint32BE();
 	radiationEvent->isHealing = stream->readSint32BE();
-	if (stream->err())
-		goto err;
-
-/*	if (fileReadInt32(stream, &(radiationEvent->radiationLevel)) == -1)
-		goto err;
-	if (fileReadInt32(stream, &(radiationEvent->isHealing)) == -1)
-		goto err;*/
+	if (stream->err()) {
+		internal_free(radiationEvent);
+		return -1;
+	}
 
 	*dataPtr = radiationEvent;
 	return 0;
-
-err:
-
-	internal_free(radiationEvent);
-	return -1;
 }
 
 // 0x42D7FC
@@ -674,11 +644,8 @@ int radiationEventWrite(Common::OutSaveFile *stream, void *data) {
 
 	stream->writeSint32BE(radiationEvent->radiationLevel);
 	stream->writeSint32BE(radiationEvent->isHealing);
-
-/*	if (fileWriteInt32(stream, radiationEvent->radiationLevel) == -1)
+	if (stream->err())
 		return -1;
-	if (fileWriteInt32(stream, radiationEvent->isHealing) == -1)
-		return -1;*/
 
 	return 0;
 }
@@ -733,10 +700,6 @@ int killsLoad(Common::InSaveFile *stream) {
 		delete stream;
 		return -1;
 	}
-	//	if (fileReadInt32List(stream, gKillsByType, KILL_TYPE_COUNT) == -1) {
-	//		fileClose(stream);
-	//		return -1;
-	//	}
 
 	return 0;
 }
@@ -751,11 +714,6 @@ int killsSave(Common::OutSaveFile *stream) {
 		delete stream;
 		return -1;
 	}
-
-	//	if (fileWriteInt32List(stream, gKillsByType, KILL_TYPE_COUNT) == -1) {
-	//		fileClose(stream);
-	//		return -1;
-	//	}
 
 	return 0;
 }
@@ -1075,23 +1033,10 @@ int gcdLoadScumm(const char *path) {
 	Proto *proto;
 	protoGetProto(gDude->pid, &proto);
 
-	// TODO : replace with protoCritterDataRead when implemented
-	proto->critter.data.flags = stream->readSint32BE();
-
-	int i;
-	for (i = 0; i < SAVEABLE_STAT_COUNT; i++)
-		proto->critter.data.baseStats[i] = stream->readSint32BE();
-	for (i = 0; i < SAVEABLE_STAT_COUNT; i++)
-		proto->critter.data.bonusStats[i] = stream->readSint32BE();
-	for (i = 0; i < SKILL_COUNT; i++)
-		proto->critter.data.skills[i] = stream->readSint32BE();
-
-	proto->critter.data.bodyType = stream->readSint32BE();
-	proto->critter.data.experience = stream->readSint32BE();
-	proto->critter.data.killType = stream->readSint32BE();
-	proto->critter.data.damageType = stream->readSint32BE();
-	if(stream->err())
-		proto->critter.data.damageType = DAMAGE_TYPE_NORMAL;
+	if (protoCritterDataReadScumm(stream, &(proto->critter.data)) == -1) {
+		delete stream;
+		return -1;
+	}
 
 	stream->read(gDudeName, DUDE_NAME_MAX_LENGTH);
 
@@ -1180,7 +1125,6 @@ int protoCritterDataReadScumm(Common::InSaveFile *stream, CritterProtoData *crit
 int gcdSave(const char *path) {
 	Common::SaveFileManager *saveMan = g_system->getSavefileManager();
 	Common::OutSaveFile *stream = saveMan->openForSaving(Common::String(path), false);
-//	File *stream = fileOpen(path, "wb");
 	if (stream == nullptr) {
 		return -1;
 	}
@@ -1188,54 +1132,33 @@ int gcdSave(const char *path) {
 	Proto *proto;
 	protoGetProto(gDude->pid, &proto);
 
-	// TODO : replace with protoCritterDataWrite when implemented
-	stream->writeSint32BE(proto->critter.data.flags);
-
-	int i;
-	for (i = 0; i < SAVEABLE_STAT_COUNT; i++)
-		stream->writeSint32BE(proto->critter.data.baseStats[i]);
-	for (i = 0; i < SAVEABLE_STAT_COUNT; i++)
-		stream->writeSint32BE(proto->critter.data.bonusStats[i]);
-	for (i = 0; i < SKILL_COUNT; i++)
-		stream->writeSint32BE(proto->critter.data.skills[i]);
-
-	stream->writeSint32BE(proto->critter.data.bodyType);
-	stream->writeSint32BE(proto->critter.data.experience);
-	stream->writeSint32BE(proto->critter.data.killType);
-	stream->writeSint32BE(proto->critter.data.damageType);
-
-	/*	if (protoCritterDataWrite(stream, &(proto->critter.data)) == -1) {
-			fileClose(stream);
+	if (protoCritterDataWrite(stream, &(proto->critter.data)) == -1) {
+			stream->finalize();
+			delete stream;
 			return -1;
-		}*/
+		}
 
 	stream->write(gDudeName, DUDE_NAME_MAX_LENGTH);
-//	fileWrite(gDudeName, DUDE_NAME_MAX_LENGTH, 1, stream);
 
 	if (skillsSave(stream) == -1) {
-//		fileClose(stream);
 		stream->finalize();
 		delete stream;
 		return -1;
 	}
 
 	if (traitsSave(stream) == -1) {
-//		fileClose(stream);
 		stream->finalize();
 		delete stream;
 		return -1;
 	}
 
 	stream->writeSint32BE(gCharacterEditorRemainingCharacterPoints);
-
-//	if (fileWriteInt32(stream, gCharacterEditorRemainingCharacterPoints) == -1) {
-//		fileClose(stream);
-//		return -1;
-//	}
-
-//	fileClose(stream);
-
 	stream->finalize();
+	if (stream->err()) {
+		delete stream;
+		return -1;
+	}
+
 	delete stream;
 	return 0;
 }
@@ -1255,23 +1178,9 @@ int protoCritterDataWrite(Common::WriteStream *stream, CritterProtoData *critter
 	stream->writeSint32BE(critterData->experience);
 	stream->writeSint32BE(critterData->killType);
 	stream->writeSint32BE(critterData->damageType);
-
-	/*	if (fileWriteInt32(stream, critterData->flags) == -1)
-			return -1;
-		if (fileWriteInt32List(stream, critterData->baseStats, SAVEABLE_STAT_COUNT) == -1)
-			return -1;
-		if (fileWriteInt32List(stream, critterData->bonusStats, SAVEABLE_STAT_COUNT) == -1)
-			return -1;
-		if (fileWriteInt32List(stream, critterData->skills, SKILL_COUNT) == -1)
-			return -1;
-		if (fileWriteInt32(stream, critterData->bodyType) == -1)
-			return -1;
-		if (fileWriteInt32(stream, critterData->experience) == -1)
-			return -1;
-		if (fileWriteInt32(stream, critterData->killType) == -1)
-			return -1;
-		if (fileWriteInt32(stream, critterData->damageType) == -1)
-			return -1;*/
+	if (stream->err()) {
+		return -1;
+	}
 
 	return 0;
 }
