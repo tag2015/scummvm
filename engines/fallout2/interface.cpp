@@ -720,21 +720,6 @@ int interfaceLoad(Common::InSaveFile *stream) {
 	if (stream->err())
 		return -1;
 
-/*	if (fileReadBool(stream, &interfaceBarEnabled) == -1)
-		return -1;
-
-	bool interfaceBarHidden;
-	if (fileReadBool(stream, &interfaceBarHidden) == -1)
-		return -1;
-
-	int interfaceCurrentHand;
-	if (fileReadInt32(stream, &interfaceCurrentHand) == -1)
-		return -1;
-
-	bool interfaceBarEndButtonsIsVisible;
-	if (fileReadBool(stream, &interfaceBarEndButtonsIsVisible) == -1)
-		return -1;*/
-
 	if (!gInterfaceBarEnabled) {
 		interfaceBarEnable();
 	}
@@ -788,15 +773,6 @@ int interfaceSave(Common::OutSaveFile *stream) {
 		delete stream;
 		return -1;
 	}
-
-	/*	if (fileWriteBool(stream, gInterfaceBarEnabled) == -1)
-			return -1;
-		if (fileWriteBool(stream, gInterfaceBarHidden) == -1)
-			return -1;
-		if (fileWriteInt32(stream, gInterfaceCurrentHand) == -1)
-			return -1;
-		if (fileWriteBool(stream, gInterfaceBarEndButtonsIsVisible) == -1)
-			return -1;*/
 
 	return 0;
 }
