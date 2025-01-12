@@ -19,7 +19,7 @@ void _debug_exit(void);
 
 template<typename... Args>
 void debugPrint(const char *format, Args... args) {
-	debug(format, args...);
+	debug(1, format, args...);
 }
 
 } // namespace Fallout2
