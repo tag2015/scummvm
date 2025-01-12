@@ -846,47 +846,6 @@ int preferencesSave(Common::OutSaveFile *stream) {
 	}
 
 	return 0;
-
-/*	if (fileWriteInt32(stream, gPreferencesGameDifficulty1) == -1)
-		goto err;
-	if (fileWriteInt32(stream, gPreferencesCombatDifficulty1) == -1)
-		goto err;
-	if (fileWriteInt32(stream, gPreferencesViolenceLevel1) == -1)
-		goto err;
-	if (fileWriteInt32(stream, gPreferencesTargetHighlight1) == -1)
-		goto err;
-	if (fileWriteInt32(stream, gPreferencesCombatLooks1) == -1)
-		goto err;
-	if (fileWriteInt32(stream, gPreferencesCombatMessages1) == -1)
-		goto err;
-	if (fileWriteInt32(stream, gPreferencesCombatTaunts1) == -1)
-		goto err;
-	if (fileWriteInt32(stream, gPreferencesLanguageFilter1) == -1)
-		goto err;
-	if (fileWriteInt32(stream, gPreferencesRunning1) == -1)
-		goto err;
-	if (fileWriteInt32(stream, gPreferencesSubtitles1) == -1)
-		goto err;
-	if (fileWriteInt32(stream, gPreferencesItemHighlight1) == -1)
-		goto err;
-	if (fileWriteInt32(stream, gPreferencesCombatSpeed1) == -1)
-		goto err;
-	if (fileWriteInt32(stream, gPreferencesPlayerSpeedup1) == -1)
-		goto err;
-	if (fileWriteFloat(stream, textBaseDelay) == -1)
-		goto err;
-	if (fileWriteInt32(stream, gPreferencesMasterVolume1) == -1)
-		goto err;
-	if (fileWriteInt32(stream, gPreferencesMusicVolume1) == -1)
-		goto err;
-	if (fileWriteInt32(stream, gPreferencesSoundEffectsVolume1) == -1)
-		goto err;
-	if (fileWriteInt32(stream, gPreferencesSpeechVolume1) == -1)
-		goto err;
-	if (fileWriteFloat(stream, brightness) == -1)
-		goto err;
-	if (fileWriteFloat(stream, mouseSensitivity) == -1)
-		goto err;*/
 }
 
 // 0x49340C
@@ -910,57 +869,16 @@ int preferencesLoad(Common::InSaveFile *stream) {
 	gPreferencesItemHighlight1 = stream->readSint32BE();
 	gPreferencesCombatSpeed1 = stream->readSint32BE();
 	gPreferencesPlayerSpeedup1 = stream->readSint32BE();
-	textBaseDelay = (float) stream->readSint32BE();
+	textBaseDelay = (float)stream->readSint32BE();
 	gPreferencesMasterVolume1 = stream->readSint32BE();
 	gPreferencesMusicVolume1 = stream->readSint32BE();
 	gPreferencesSoundEffectsVolume1 = stream->readSint32BE();
 	gPreferencesSpeechVolume1 = stream->readSint32BE();
-	brightness = (float) stream->readSint32BE();
-	mouseSensitivity = (float) stream->readSint32BE();
+	brightness = (float)stream->readSint32BE();
+	mouseSensitivity = (float)stream->readSint32BE();
 
 	if (stream->err())
 		goto err;
-
-/*	if (fileReadInt32(stream, &gPreferencesGameDifficulty1) == -1)
-		goto err;
-	if (fileReadInt32(stream, &gPreferencesCombatDifficulty1) == -1)
-		goto err;
-	if (fileReadInt32(stream, &gPreferencesViolenceLevel1) == -1)
-		goto err;
-	if (fileReadInt32(stream, &gPreferencesTargetHighlight1) == -1)
-		goto err;
-	if (fileReadInt32(stream, &gPreferencesCombatLooks1) == -1)
-		goto err;
-	if (fileReadInt32(stream, &gPreferencesCombatMessages1) == -1)
-		goto err;
-	if (fileReadInt32(stream, &gPreferencesCombatTaunts1) == -1)
-		goto err;
-	if (fileReadInt32(stream, &gPreferencesLanguageFilter1) == -1)
-		goto err;
-	if (fileReadInt32(stream, &gPreferencesRunning1) == -1)
-		goto err;
-	if (fileReadInt32(stream, &gPreferencesSubtitles1) == -1)
-		goto err;
-	if (fileReadInt32(stream, &gPreferencesItemHighlight1) == -1)
-		goto err;
-	if (fileReadInt32(stream, &gPreferencesCombatSpeed1) == -1)
-		goto err;
-	if (fileReadInt32(stream, &gPreferencesPlayerSpeedup1) == -1)
-		goto err;
-	if (fileReadFloat(stream, &textBaseDelay) == -1)
-		goto err;
-	if (fileReadInt32(stream, &gPreferencesMasterVolume1) == -1)
-		goto err;
-	if (fileReadInt32(stream, &gPreferencesMusicVolume1) == -1)
-		goto err;
-	if (fileReadInt32(stream, &gPreferencesSoundEffectsVolume1) == -1)
-		goto err;
-	if (fileReadInt32(stream, &gPreferencesSpeechVolume1) == -1)
-		goto err;
-	if (fileReadFloat(stream, &brightness) == -1)
-		goto err;
-	if (fileReadFloat(stream, &mouseSensitivity) == -1)
-		goto err;*/
 
 	gPreferencesBrightness1 = brightness;
 	gPreferencesMouseSensitivity1 = mouseSensitivity;
