@@ -3879,7 +3879,7 @@ void partyMemberCustomizationWindowHandleEvents() {
 				break;
 			}
 
-			if (keyCode <= 5) {
+			if (keyCode >= 0 && keyCode <= 5) {
 				_gdCustomSelect(keyCode);
 				partyMemberCustomizationWindowUpdate();
 			} else if (keyCode == KEY_RETURN || keyCode == KEY_ESCAPE) {
