@@ -440,8 +440,7 @@ int partyMemberRemove(Object *object) {
 	}
 
 	if (_partyStatePrepped) {
-//		debugPrint("\npartyMemberRemove DENIED: %s\n", critterGetName(object));
-		debugPrint("partyMemberRemove DENIED");
+		debugPrint("\npartyMemberRemove DENIED: %s\n", critterGetName(object));
 		return -1;
 	}
 
@@ -514,16 +513,9 @@ int partyMembersSave(Common::OutSaveFile *stream) {
 	stream->writeSint32BE(gPartyMembersLength);
 	stream->writeSint32BE(_partyMemberItemCount);
 
-	/*	if (fileWriteInt32(stream, gPartyMembersLength) == -1)
-			return -1;
-		if (fileWriteInt32(stream, _partyMemberItemCount) == -1)
-			return -1;*/
-
 	for (int index = 1; index < gPartyMembersLength; index++) {
 		PartyMemberListItem *partyMember = &(gPartyMembers[index]);
 		stream->writeSint32BE(partyMember->object->id);
-		//		if (fileWriteInt32(stream, partyMember->object->id) == -1)
-		//			return -1;
 	}
 	if (stream->err()) {
 		stream->finalize();
@@ -536,13 +528,6 @@ int partyMembersSave(Common::OutSaveFile *stream) {
 		stream->writeSint32BE(ptr->level);
 		stream->writeSint32BE(ptr->numLevelUps);
 		stream->writeSint32BE(ptr->isEarly);
-
-		/*	if (fileWriteInt32(stream, ptr->level) == -1)
-				return -1;
-			if (fileWriteInt32(stream, ptr->numLevelUps) == -1)
-				return -1;
-			if (fileWriteInt32(stream, ptr->isEarly) == -1)
-				return -1;*/
 	}
 	if (stream->err()) {
 		stream->finalize();
@@ -734,11 +719,6 @@ int partyMembersLoad(Common::InSaveFile *stream) {
 	if (stream->err())
 		return -1;
 
-	/*	if (fileReadInt32(stream, &gPartyMembersLength) == -1)
-			return -1;
-		if (fileReadInt32(stream, &_partyMemberItemCount) == -1)
-			return -1;*/
-
 	gPartyMembers->object = gDude;
 
 	if (gPartyMembersLength != 0) {
@@ -746,8 +726,6 @@ int partyMembersLoad(Common::InSaveFile *stream) {
 			partyMemberObjectIds[index] = stream->readSint32BE();
 			if (stream->err())
 				return -1;
-/*			if (fileReadInt32(stream, &(partyMemberObjectIds[index])) == -1)
-				return -1;*/
 		}
 
 		for (int index = 1; index < gPartyMembersLength; index++) {
@@ -791,12 +769,6 @@ int partyMembersLoad(Common::InSaveFile *stream) {
 		levelUpInfo->isEarly = stream->readSint32BE();
 		if (stream->err())
 			return -1;
-/*		if (fileReadInt32(stream, &(levelUpInfo->level)) == -1)
-			return -1;
-		if (fileReadInt32(stream, &(levelUpInfo->numLevelUps)) == -1)
-			return -1;
-		if (fileReadInt32(stream, &(levelUpInfo->isEarly)) == -1)
-			return -1;*/
 	}
 
 	return 0;
