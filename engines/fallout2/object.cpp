@@ -3956,11 +3956,12 @@ static int objectGetListNode(Object *object, ObjectListNode **nodePtr, ObjectLis
 	}
 
 	int tile = object->tile;
-	if (tile != -1) {
+	if (hexGridTileIsValid(tile)) {
 		*nodePtr = gObjectListHeadByTile[tile];
-	} else {
+	} else if (tile == -1) {
 		*nodePtr = gObjectListHead;
-	}
+	} else
+		*nodePtr = nullptr;
 
 	if (previousNodePtr != nullptr) {
 		*previousNodePtr = nullptr;
