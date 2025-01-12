@@ -186,7 +186,10 @@ int skillsLoad(File *stream) {
 int skillsLoadScumm(Common::InSaveFile *stream) {
 	for (int i = 0; i < NUM_TAGGED_SKILLS; i++)
 		gTaggedSkills[i] = stream->readSint32BE();
-	//	return fileReadInt32List(stream, gTaggedSkills, NUM_TAGGED_SKILLS);
+	if (stream->err()) {
+		return -1;
+	}
+
 	return 0;
 }
 
@@ -194,7 +197,10 @@ int skillsLoadScumm(Common::InSaveFile *stream) {
 int skillsSave(Common::OutSaveFile *stream) {
 	for (int i = 0; i < NUM_TAGGED_SKILLS; i++)
 		stream->writeSint32BE(gTaggedSkills[i]);
-	//	return fileWriteInt32List(stream, gTaggedSkills, NUM_TAGGED_SKILLS);
+	if (stream->err()) {
+		return -1;
+	}
+
 	return 0;
 }
 
@@ -1181,7 +1187,6 @@ int skillsUsageSave(Common::OutSaveFile *stream) {
 	}
 
 	return 0;
-	//	return fileWriteInt32List(stream, (int *)_timesSkillUsed, SKILL_COUNT * SKILLS_MAX_USES_PER_DAY);
 }
 
 // 0x4ABF5C
@@ -1194,7 +1199,6 @@ int skillsUsageLoad(Common::InSaveFile *stream) {
 		return -1;
 
 	return 0;
-	//	return fileReadInt32List(stream, (int *)_timesSkillUsed, SKILL_COUNT * SKILLS_MAX_USES_PER_DAY);
 }
 
 // 0x4ABF7C
