@@ -112,7 +112,10 @@ int traitsLoad(File *stream) {
 int traitsLoadScumm(Common::InSaveFile *stream) {
 	for (int i = 0; i < TRAITS_MAX_SELECTED_COUNT; i++)
 		gSelectedTraits[i] = stream->readSint32BE();
-	//	return fileReadInt32List(stream, gSelectedTraits, TRAITS_MAX_SELECTED_COUNT);
+
+	if (stream->err())
+		return -1;
+
 	return 0;
 }
 
@@ -122,7 +125,10 @@ int traitsLoadScumm(Common::InSaveFile *stream) {
 int traitsSave(Common::OutSaveFile *stream) {
 	for (int i = 0; i < TRAITS_MAX_SELECTED_COUNT; i++)
 		stream->writeSint32BE(gSelectedTraits[i]);
-	//	return fileWriteInt32List(stream, gSelectedTraits, TRAITS_MAX_SELECTED_COUNT);
+
+	if (stream->err())
+		return -1;
+
 	return 0;
 }
 

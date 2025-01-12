@@ -203,12 +203,14 @@ static void randomSeedPrerandomInternal(int seed) {
 	_idum = num;
 }
 
+#if 0
 // Provides seed for random number generator.
 //
 // 0x4A3258
-// static unsigned int randomGetSeed() {
-//	   return compat_timeGetTime();
-// }
+static unsigned int randomGetSeed() {
+	return compat_timeGetTime();
+}
+#endif
 
 // 0x4A3264
 static void randomValidatePrerandom() {

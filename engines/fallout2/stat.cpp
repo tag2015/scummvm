@@ -159,9 +159,6 @@ int statsLoad(Common::InSaveFile *stream) {
 		gPcStatValues[index] = stream->readSint32BE();
 		if (stream->err())
 			return -1;
-		//		if (fileReadInt32(stream, &(gPcStatValues[index])) == -1) {
-		//			return -1;
-		//		}
 	}
 
 	return 0;
@@ -176,9 +173,6 @@ int statsSave(Common::OutSaveFile *stream) {
 			delete stream;
 			return -1;
 		}
-		//		if (fileWriteInt32(stream, gPcStatValues[index]) == -1) {
-		//			return -1;
-		//		}
 	}
 
 	return 0;
