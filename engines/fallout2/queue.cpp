@@ -84,9 +84,6 @@ int queueLoad(Common::InSaveFile *stream) {
 	count = stream->readSint32BE();
 	if (stream->err())
 		return -1;
-/*	if (fileReadInt32(stream, &count) == -1) {
-		return -1;
-	}*/
 
 	QueueListNode *oldListHead = gQueueListHead;
 	gQueueListHead = nullptr;
@@ -110,19 +107,6 @@ int queueLoad(Common::InSaveFile *stream) {
 			rc = -1;
 			break;
 		}
-
-/*		if (fileReadInt32(stream, &(queueListNode->type)) == -1) {
-			internal_free(queueListNode);
-			rc = -1;
-			break;
-		}
-
-		int objectId;
-		if (fileReadInt32(stream, &objectId) == -1) {
-			internal_free(queueListNode);
-			rc = -1;
-			break;
-		}*/
 
 		Object *obj;
 		if (objectId == -2) {
@@ -204,9 +188,6 @@ int queueSave(Common::OutSaveFile *stream) {
 	}
 
 	stream->writeSint32BE(count);
-/*	if (fileWriteInt32(stream, count) == -1) {
-		return -1;
-	}*/
 
 	queueListNode = gQueueListHead;
 	while (queueListNode != nullptr) {
@@ -214,19 +195,8 @@ int queueSave(Common::OutSaveFile *stream) {
 		int objectId = object != nullptr ? object->id : -2;
 
 		stream->writeUint32BE(queueListNode->time);
-/*		if (fileWriteInt32(stream, queueListNode->time) == -1) {
-			return -1;
-		}*/
-
 		stream->writeSint32BE(queueListNode->type);
-/*		if (fileWriteInt32(stream, queueListNode->type) == -1) {
-			return -1;
-		}*/
-
 		stream->writeSint32BE(objectId);
-/*		if (fileWriteInt32(stream, objectId) == -1) {
-			return -1;
-		}*/
 
 		EventTypeDescription *eventTypeDescription = &(gEventTypeDescriptions[queueListNode->type]);
 		if (eventTypeDescription->writeProc != nullptr) {
