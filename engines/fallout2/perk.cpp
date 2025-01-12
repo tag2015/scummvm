@@ -252,13 +252,10 @@ int perksLoad(Common::InSaveFile *stream) {
 		PerkRankData *ranksData = &(gPartyMemberPerkRanks[index]);
 		for (int perk = 0; perk < PERK_COUNT; perk++) {
 			ranksData->ranks[perk] = stream->readSint32BE();
-			if(stream->err()) {
+			if (stream->err()) {
 				delete stream;
 				return -1;
 			}
-//			if (fileReadInt32(stream, &(ranksData->ranks[perk])) == -1) {
-//				return -1;
-//			}
 		}
 	}
 
@@ -276,10 +273,6 @@ int perksSave(Common::OutSaveFile *stream) {
 				delete stream;
 				return -1;
 			}
-
-			//	if (fileWriteInt32(stream, ranksData->ranks[perk]) == -1) {
-			//		return -1;
-			//	}
 		}
 	}
 
