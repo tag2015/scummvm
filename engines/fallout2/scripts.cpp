@@ -803,11 +803,8 @@ int scriptEventWrite(Common::OutSaveFile *stream, void *data) {
 
 	stream->writeSint32BE(scriptEvent->sid);
 	stream->writeSint32BE(scriptEvent->fixedParam);
-
-	/*	if (fileWriteInt32(stream, scriptEvent->sid) == -1)
-			return -1;
-		if (fileWriteInt32(stream, scriptEvent->fixedParam) == -1)
-			return -1;*/
+	if (stream->err())
+		return -1;
 
 	return 0;
 }
@@ -821,24 +818,15 @@ int scriptEventRead(Common::InSaveFile *stream, void **dataPtr) {
 
 	scriptEvent->sid = stream->readSint32BE();
 	scriptEvent->fixedParam = stream->readSint32BE();
-	if (stream->err())
-		goto err;
-
-/*	if (fileReadInt32(stream, &(scriptEvent->sid)) == -1)
-		goto err;
-	if (fileReadInt32(stream, &(scriptEvent->fixedParam)) == -1)
-		goto err;*/
+	if (stream->err()) {
+		// there is a memory leak in original code, free is not called
+		internal_free(scriptEvent);
+		return -1;
+	}
 
 	*dataPtr = scriptEvent;
 
 	return 0;
-
-err:
-
-	// there is a memory leak in original code, free is not called
-	internal_free(scriptEvent);
-
-	return -1;
 }
 
 // 0x4A3F4C
@@ -1236,7 +1224,7 @@ int scriptExecProc(int sid, int proc) {
 
 	bool programLoaded = false;
 	if ((script->flags & SCRIPT_FLAG_0x01) == 0) {
-		// clock(); TODO clock with no return?
+		// clock(); FIXME: clock with no return?
 
 		char name[16];
 		if (scriptsGetFileName(script->index & 0xFFFFFF, name, sizeof(name)) == -1) {
@@ -1673,16 +1661,20 @@ void _scr_disable_critters() {
 int scriptsSaveGameGlobalVars(Common::OutSaveFile *stream) {
 	for (int i = 0; i < gGameGlobalVarsLength; i++)
 		stream->writeSint32BE(gGameGlobalVars[i]);
-	return stream->err();
-//	return fileWriteInt32List(stream, gGameGlobalVars, gGameGlobalVarsLength);
+	if (stream->err())
+		return -1;
+
+	return 0;
 }
 
 // 0x4A5424
 int scriptsLoadGameGlobalVars(Common::InSaveFile *stream) {
 	for (int i = 0; i < gGameGlobalVarsLength; i++)
 		gGameGlobalVars[i] = stream->readSint32BE();
-	return stream->err();
-//	return fileReadInt32List(stream, gGameGlobalVars, gGameGlobalVarsLength);
+	if (stream->err())
+		return -1;
+
+	return 0;
 }
 
 // NOTE: For unknown reason save game files contains two identical sets of game
@@ -1697,10 +1689,7 @@ int scriptsSkipGameGlobalVars(Common::InSaveFile *stream) {
 		return -1;
 	}
 
-//	if (fileReadInt32List(stream, vars, gGameGlobalVarsLength) == -1) {
-		// FIXME: Leaks vars.
-//		return -1;
-//	}
+	// FIXME: Leaks vars.
 	for (int i = 0; i < gGameGlobalVarsLength; i++)
 		stream->readSint32BE();
 	if (stream->err())
@@ -1754,24 +1743,14 @@ static int _scr_header_load() {
 static int scriptWrite(Script *scr, Common::OutSaveFile *stream) {
 	stream->writeSint32BE(scr->sid);
 	stream->writeSint32BE(scr->field_4);
-	/*	if (fileWriteInt32(stream, scr->sid) == -1)
-			return -1;
-		if (fileWriteInt32(stream, scr->field_4) == -1)
-			return -1;*/
 
 	switch (SID_TYPE(scr->sid)) {
 	case SCRIPT_TYPE_SPATIAL:
 		stream->writeSint32BE(scr->sp.built_tile);
 		stream->writeSint32BE(scr->sp.radius);
-		/*		if (fileWriteInt32(stream, scr->sp.built_tile) == -1)
-					return -1;
-				if (fileWriteInt32(stream, scr->sp.radius) == -1)
-					return -1;*/
 		break;
 	case SCRIPT_TYPE_TIMED:
 		stream->writeSint32BE(scr->tm.time);
-		/*		if (fileWriteInt32(stream, scr->tm.time) == -1)
-					return -1;*/
 		break;
 	}
 	if (stream->err()) {
@@ -1782,6 +1761,7 @@ static int scriptWrite(Script *scr, Common::OutSaveFile *stream) {
 
 	stream->writeSint32BE(scr->flags);
 	stream->writeSint32BE(scr->index);
+	// NOTE: Original code writes `scr->program` pointer which is meaningless.
 	stream->writeSint32BE(0);
 	stream->writeSint32BE(scr->ownerId);
 	stream->writeSint32BE(scr->localVarsOffset);
@@ -1801,36 +1781,6 @@ static int scriptWrite(Script *scr, Common::OutSaveFile *stream) {
 		return -1;
 	}
 
-	/*	if (fileWriteInt32(stream, scr->flags) == -1)
-			return -1;
-		if (fileWriteInt32(stream, scr->index) == -1)
-			return -1;
-		// NOTE: Original code writes `scr->program` pointer which is meaningless.
-		if (fileWriteInt32(stream, 0) == -1)
-			return -1;
-		if (fileWriteInt32(stream, scr->ownerId) == -1)
-			return -1;
-		if (fileWriteInt32(stream, scr->localVarsOffset) == -1)
-			return -1;
-		if (fileWriteInt32(stream, scr->localVarsCount) == -1)
-			return -1;
-		if (fileWriteInt32(stream, scr->returnValue) == -1)
-			return -1;
-		if (fileWriteInt32(stream, scr->action) == -1)
-			return -1;
-		if (fileWriteInt32(stream, scr->fixedParam) == -1)
-			return -1;
-		if (fileWriteInt32(stream, scr->actionBeingUsed) == -1)
-			return -1;
-		if (fileWriteInt32(stream, scr->scriptOverrides) == -1)
-			return -1;
-		if (fileWriteInt32(stream, scr->field_48) == -1)
-			return -1;
-		if (fileWriteInt32(stream, scr->howMuch) == -1)
-			return -1;
-		if (fileWriteInt32(stream, scr->field_50) == -1)
-			return -1; */
-
 	return 0;
 }
 
@@ -1844,21 +1794,13 @@ static int scriptListExtentWrite(ScriptListExtent *a1, Common::OutSaveFile *stre
 	}
 
 	stream->writeSint32BE(a1->length);
+	// NOTE: Original code writes `a1->next` pointer which is meaningless.
 	stream->writeSint32BE(0);
 	if (stream->err()) {
 		stream->finalize();
 		delete stream;
 		return -1;
 	}
-
-	/*	if (fileWriteInt32(stream, a1->length) != 0) {
-			return -1;
-		}
-
-		// NOTE: Original code writes `a1->next` pointer which is meaningless.
-		if (fileWriteInt32(stream, 0) != 0) {
-			return -1;
-		}*/
 
 	return 0;
 }
@@ -1921,9 +1863,8 @@ int scriptSaveAll(Common::OutSaveFile *stream) {
 		}
 
 		stream->writeSint32BE(scriptCount);
-/*		if (fileWriteInt32(stream, scriptCount) == -1) {
+		if (stream->err())
 			return -1;
-		}*/
 
 		if (scriptCount > 0) {
 			ScriptListExtent *scriptExt = scriptList->head;
@@ -2028,34 +1969,27 @@ static int scriptRead(Script *scr, File *stream) {
 }
 
 static int scriptReadScumm(Script *scr, Common::InSaveFile *stream) {
-	int prg;
+	// int prg;
 
 	scr->sid = stream->readSint32BE();
 	scr->field_4 = stream->readSint32BE();
-	//	if (fileReadInt32(stream, &(scr->sid)) == -1)
-	//		return -1;
-	//	if (fileReadInt32(stream, &(scr->field_4)) == -1)
-	//		return -1;
+	if (stream->err())
+		return -1;
 
 	switch (SID_TYPE(scr->sid)) {
 	case SCRIPT_TYPE_SPATIAL:
 		scr->sp.built_tile = stream->readSint32BE();
 		scr->sp.radius = stream->readSint32BE();
-		// if (fileReadInt32(stream, &(scr->sp.built_tile)) == -1)
-		// 	return -1;
-		// if (fileReadInt32(stream, &(scr->sp.radius)) == -1)
-		// 	return -1;
 		break;
 	case SCRIPT_TYPE_TIMED:
 		scr->tm.time = stream->readSint32BE();
-		//	if (fileReadInt32(stream, &(scr->tm.time)) == -1)
-		//	return -1;
 		break;
 	}
 
 	scr->flags = stream->readSint32BE();
 	scr->index = stream->readSint32BE();
-	prg = stream->readSint32BE();
+	// prg =
+	stream->readSint32BE();
 	scr->ownerId = stream->readSint32BE();
 	scr->localVarsOffset = stream->readSint32BE();
 	scr->localVarsCount = stream->readSint32BE();
@@ -2067,35 +2001,6 @@ static int scriptReadScumm(Script *scr, Common::InSaveFile *stream) {
 	scr->field_48 = stream->readSint32BE();
 	scr->howMuch = stream->readSint32BE();
 	scr->field_50 = stream->readSint32BE();
-
-	/*	if (fileReadInt32(stream, &(scr->flags)) == -1)
-			return -1;
-		if (fileReadInt32(stream, &(scr->index)) == -1)
-			return -1;
-		if (fileReadInt32(stream, &(prg)) == -1)
-			return -1;
-		if (fileReadInt32(stream, &(scr->ownerId)) == -1)
-			return -1;
-		if (fileReadInt32(stream, &(scr->localVarsOffset)) == -1)
-			return -1;
-		if (fileReadInt32(stream, &(scr->localVarsCount)) == -1)
-			return -1;
-		if (fileReadInt32(stream, &(scr->returnValue)) == -1)
-			return -1;
-		if (fileReadInt32(stream, &(scr->action)) == -1)
-			return -1;
-		if (fileReadInt32(stream, &(scr->fixedParam)) == -1)
-			return -1;
-		if (fileReadInt32(stream, &(scr->actionBeingUsed)) == -1)
-			return -1;
-		if (fileReadInt32(stream, &(scr->scriptOverrides)) == -1)
-			return -1;
-		if (fileReadInt32(stream, &(scr->field_48)) == -1)
-			return -1;
-		if (fileReadInt32(stream, &(scr->howMuch)) == -1)
-			return -1;
-		if (fileReadInt32(stream, &(scr->field_50)) == -1)
-			return -1;*/
 	if (stream->err())
 		return -1;
 
@@ -2147,15 +2052,9 @@ static int scriptListExtentReadScumm(ScriptListExtent *scriptExtent, Common::InS
 	}
 
 	scriptExtent->length = stream->readSint32BE();
-	//	if (fileReadInt32(stream, &(scriptExtent->length)) != 0) {
-	//		return -1;
-	//	}
 
-	int next;
-	next = stream->readSint32BE();
-	//	if (fileReadInt32(stream, &(next)) != 0) {
-	//		return -1;
-	//	}
+	// int next =
+	stream->readSint32BE();
 
 	if (stream->err())
 		return -1;
@@ -2247,9 +2146,6 @@ int scriptLoadAllScumm(Common::InSaveFile *stream) {
 		scriptsCount = stream->readSint32BE();
 		if (stream->err())
 			return -1;
-		//if (fileReadInt32(stream, &scriptsCount) == -1) {
-		//	return -1;
-		//}
 
 		if (scriptsCount != 0) {
 			scriptList->length = scriptsCount / 16;
