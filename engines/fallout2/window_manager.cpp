@@ -58,10 +58,10 @@ static char _path_patches[] = "";
 // 0x51E3D8
 static bool _GNW95_already_running = false;
 
-//#ifdef _WIN32
+#if 0
 // 0x51E3DC
-//static HANDLE _GNW95_title_mutex = INVALID_HANDLE_VALUE;
-//#endif
+static HANDLE _GNW95_title_mutex = INVALID_HANDLE_VALUE;
+#endif
 
 // 0x51E3E0
 bool gWindowSystemInitialized = false;
@@ -121,20 +121,20 @@ static ButtonGroup gButtonGroups[BUTTON_GROUP_LIST_CAPACITY];
 
 // 0x4D5C30
 int windowManagerInit(VideoSystemInitProc *videoSystemInitProc, VideoSystemExitProc *videoSystemExitProc, int a3) {
-//#ifdef _WIN32
-//	CloseHandle(_GNW95_mutex);
-//	_GNW95_mutex = INVALID_HANDLE_VALUE;
-//#endif
+#if 0
+	CloseHandle(_GNW95_mutex);
+	_GNW95_mutex = INVALID_HANDLE_VALUE;
+#endif
 
 	if (_GNW95_already_running) {
 		return WINDOW_MANAGER_ERR_ALREADY_RUNNING;
 	}
 
-//#ifdef _WIN32
-//	if (_GNW95_title_mutex == INVALID_HANDLE_VALUE) {
-//		return WINDOW_MANAGER_ERR_TITLE_NOT_SET;
-//	}
-//#endif
+#if 0
+	if (_GNW95_title_mutex == INVALID_HANDLE_VALUE) {
+		return WINDOW_MANAGER_ERR_TITLE_NOT_SET;
+	}
+#endif
 
 	if (gWindowSystemInitialized) {
 		return WINDOW_MANAGER_ERR_WINDOW_SYSTEM_ALREADY_INITIALIZED;
@@ -155,7 +155,7 @@ int windowManagerInit(VideoSystemInitProc *videoSystemInitProc, VideoSystemExitP
 
 	debug("Initialized text fonts!");
 
-//	_get_start_mode_();
+	_get_start_mode_();
 
 	gVideoSystemInitProc = videoSystemInitProc;
 	gVideoSystemExitProc = directInputFree;
@@ -216,8 +216,6 @@ int windowManagerInit(VideoSystemInitProc *videoSystemInitProc, VideoSystemExitP
 		internal_free(palette);
 	}
 
-//	_GNW_debug_init();
-
 	if (inputInit(a3) == -1) {
 		return WINDOW_MANAGER_ERR_INITIALIZING_INPUT;
 	}
@@ -268,8 +266,6 @@ int windowManagerInit(VideoSystemInitProc *videoSystemInitProc, VideoSystemExitP
 	_GNW_wcolor[2] = 8456;
 	_GNW_wcolor[1] = 15855;
 
-//	atexit(windowManagerExit);
-
 	return WINDOW_MANAGER_OK;
 }
 
@@ -301,14 +297,12 @@ void windowManagerExit(void) {
 			textFontsExit();
 			_colorsClose();
 
-//			SDL_DestroyWindow(gSdlWindow); TODO SDL
-
 			gWindowSystemInitialized = false;
 
-//#ifdef _WIN32
-//			CloseHandle(_GNW95_title_mutex);
-//			_GNW95_title_mutex = INVALID_HANDLE_VALUE;
-//#endif
+#if 0
+			CloseHandle(_GNW95_title_mutex);
+			_GNW95_title_mutex = INVALID_HANDLE_VALUE;
+#endif
 		}
 		_insideWinExit = false;
 	}
@@ -473,14 +467,14 @@ void windowFree(int win) {
 	internal_free(window);
 }
 
-// 0x4D6558
-/*
+// 0x4D6558 - Unused
+#if 0
 void _win_buffering(bool a1) {
 	if (_screen_buffer != nullptr) {
 		_buffering = a1;
 	}
 }
-*/
+#endif
 
 // 0x4D6568
 void windowDrawBorder(int win) {
@@ -1366,15 +1360,6 @@ int paletteCloseFileImpl(int fd) {
 
 // 0x4D8200
 bool showMesageBox(const char *text) {
-/*	SDL_Cursor *prev = SDL_GetCursor();
-	SDL_Cursor *cursor = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_ARROW);
-	SDL_SetCursor(cursor);
-	SDL_ShowCursor(SDL_ENABLE);
-	SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, nullptr, text, nullptr);
-	SDL_ShowCursor(SDL_DISABLE);
-	SDL_SetCursor(prev);
-	SDL_FreeCursor(cursor);*/
-
 	Common::U32String msg = _(text);
 	GUI::MessageDialog dialog(msg);
 	dialog.runModal();
