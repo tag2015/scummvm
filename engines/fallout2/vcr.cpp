@@ -1,15 +1,17 @@
-#include "vcr.h"
+#include "fallout2/vcr.h"
 
-#include <stdlib.h>
+// #include <stdlib.h>
 
-#include "delay.h"
-#include "input.h"
-#include "kb.h"
-#include "memory.h"
-#include "mouse.h"
-#include "svga.h"
+#include "fallout2/fallout2.h"
 
-namespace fallout {
+#include "fallout2/delay.h"
+#include "fallout2/input.h"
+#include "fallout2/kb.h"
+#include "fallout2/memory.h"
+#include "fallout2/mouse.h"
+#include "fallout2/svga.h"
+
+namespace Fallout2 {
 
 static bool vcrInitBuffer();
 static bool vcrFreeBuffer();
@@ -17,7 +19,7 @@ static bool vcrClear();
 static bool vcrLoad();
 
 // 0x51E2F0
-VcrEntry* _vcr_buffer = nullptr;
+VcrEntry *_vcr_buffer = nullptr;
 
 // number of entries in _vcr_buffer
 // 0x51E2F4
@@ -45,13 +47,14 @@ static unsigned int _vcr_start_time = 0;
 static int _vcr_registered_atexit = 0;
 
 // 0x51E314
-static File* gVcrFile = nullptr;
+static Common::InSaveFile *gVcrFileIn = nullptr;
+static Common::OutSaveFile *gVcrFileOut = nullptr;
 
 // 0x51E318
 static int _vcr_buffer_end = 0;
 
 // 0x51E31C
-static VcrPlaybackCompletionCallback* gVcrPlaybackCompletionCallback = nullptr;
+static VcrPlaybackCompletionCallback *gVcrPlaybackCompletionCallback = nullptr;
 
 // 0x51E320
 static unsigned int gVcrRequestedTerminationFlags = 0;
@@ -63,7 +66,7 @@ static int gVcrOldKeyboardLayout = 0;
 static VcrEntry stru_6AD940;
 
 // 0x4D2680
-bool vcrRecord(const char* fileName) {
+bool vcrRecord(const char *fileName) {
 	if (gVcrState != VCR_STATE_TURNED_OFF) {
 		return false;
 	}
@@ -77,18 +80,21 @@ bool vcrRecord(const char* fileName) {
 		return false;
 	}
 
-	gVcrFile = fileOpen(fileName, "wb");
-	if (gVcrFile == nullptr) {
+	Common::String vcrPath(g_engine->getTargetName() + "_" + fileName);
+	vcrPath.replace('\\', '_');
+
+	gVcrFileOut = g_system->getSavefileManager()->openForSaving(Common::String(vcrPath));
+	if (gVcrFileOut == nullptr) {
 		// NOTE: Uninline.
 		vcrFreeBuffer();
 		return false;
 	}
 
 	if (_vcr_registered_atexit == 0) {
-		_vcr_registered_atexit = atexit(vcrStop);
+		//  _vcr_registered_atexit = atexit(vcrStop);
 	}
 
-	VcrEntry* vcrEntry = &(_vcr_buffer[_vcr_buffer_index]);
+	VcrEntry *vcrEntry = &(_vcr_buffer[_vcr_buffer_index]);
 	vcrEntry->type = VCR_ENTRY_TYPE_INITIAL_STATE;
 	vcrEntry->time = 0;
 	vcrEntry->counter = 0;
@@ -106,11 +112,12 @@ bool vcrRecord(const char* fileName) {
 	keyboardReset();
 	gVcrState = VCR_STATE_RECORDING;
 
+	debug(1, "Recording to VCR file %s", vcrPath.c_str());
 	return true;
 }
 
 // 0x4D27EC
-bool vcrPlay(const char* fileName, unsigned int terminationFlags, VcrPlaybackCompletionCallback* callback) {
+bool vcrPlay(const char *fileName, unsigned int terminationFlags, VcrPlaybackCompletionCallback *callback) {
 	if (gVcrState != VCR_STATE_TURNED_OFF) {
 		return false;
 	}
@@ -124,15 +131,18 @@ bool vcrPlay(const char* fileName, unsigned int terminationFlags, VcrPlaybackCom
 		return false;
 	}
 
-	gVcrFile = fileOpen(fileName, "rb");
-	if (gVcrFile == nullptr) {
+	Common::String vcrPath(g_engine->getTargetName() + "_" + fileName);
+	vcrPath.replace('\\', '_');
+
+	gVcrFileIn = g_system->getSavefileManager()->openForLoading(Common::String(vcrPath));
+	if (gVcrFileIn == nullptr) {
 		// NOTE: Uninline.
 		vcrFreeBuffer();
 		return false;
 	}
 
 	if (!vcrLoad()) {
-		fileClose(gVcrFile);
+		delete gVcrFileIn;
 		// NOTE: Uninline.
 		vcrFreeBuffer();
 		return false;
@@ -155,6 +165,7 @@ bool vcrPlay(const char* fileName, unsigned int terminationFlags, VcrPlaybackCom
 	stru_6AD940.time = 0;
 	stru_6AD940.counter = 0;
 
+	debug(1, "Playing VCR file %s", vcrPath.c_str());
 	return true;
 }
 
@@ -180,17 +191,17 @@ int vcrUpdate() {
 		switch (gVcrState) {
 		case VCR_STATE_RECORDING:
 			vcrDump();
-
-			fileClose(gVcrFile);
-			gVcrFile = nullptr;
+			gVcrFileOut->finalize();
+			delete gVcrFileOut;
+			gVcrFileOut = nullptr;
 
 			// NOTE: Uninline.
 			vcrFreeBuffer();
 
 			break;
 		case VCR_STATE_PLAYING:
-			fileClose(gVcrFile);
-			gVcrFile = nullptr;
+			delete gVcrFileIn;
+			gVcrFileIn = nullptr;
 
 			// NOTE: Uninline.
 			vcrFreeBuffer();
@@ -216,13 +227,11 @@ int vcrUpdate() {
 		break;
 	case VCR_STATE_PLAYING:
 		if (_vcr_buffer_index < _vcr_buffer_end || vcrLoad()) {
-			VcrEntry* vcrEntry = &(_vcr_buffer[_vcr_buffer_index]);
+			VcrEntry *vcrEntry = &(_vcr_buffer[_vcr_buffer_index]);
 			if (stru_6AD940.counter < vcrEntry->counter) {
 				if (vcrEntry->time > stru_6AD940.time) {
 					unsigned int delay = stru_6AD940.time;
-					delay += (_vcr_counter - stru_6AD940.counter)
-					         * (vcrEntry->time - stru_6AD940.time)
-					         / (vcrEntry->counter - stru_6AD940.counter);
+					delay += (_vcr_counter - stru_6AD940.counter) * (vcrEntry->time - stru_6AD940.time) / (vcrEntry->counter - stru_6AD940.counter);
 
 					delay_ms(delay - (getTicks() - _vcr_start_time));
 				}
@@ -233,8 +242,7 @@ int vcrUpdate() {
 			int rc = 0;
 			while (_vcr_counter >= _vcr_buffer[_vcr_buffer_index].counter) {
 				_vcr_time = getTicksSince(_vcr_start_time);
-				if (_vcr_time > _vcr_buffer[_vcr_buffer_index].time + 5
-				        || _vcr_time < _vcr_buffer[_vcr_buffer_index].time - 5) {
+				if (_vcr_time > _vcr_buffer[_vcr_buffer_index].time + 5 || _vcr_time < _vcr_buffer[_vcr_buffer_index].time - 5) {
 					_vcr_start_time += _vcr_time - _vcr_buffer[_vcr_buffer_index].time;
 				}
 
@@ -288,7 +296,7 @@ int vcrUpdate() {
 // 0x4D2C64
 static bool vcrInitBuffer() {
 	if (_vcr_buffer == nullptr) {
-		_vcr_buffer = (VcrEntry*)internal_malloc(sizeof(*_vcr_buffer) * VCR_BUFFER_CAPACITY);
+		_vcr_buffer = (VcrEntry *)internal_malloc(sizeof(*_vcr_buffer) * VCR_BUFFER_CAPACITY);
 		if (_vcr_buffer == nullptr) {
 			return false;
 		}
@@ -334,12 +342,12 @@ bool vcrDump() {
 		return false;
 	}
 
-	if (gVcrFile == nullptr) {
+	if (gVcrFileOut == nullptr) {
 		return false;
 	}
 
 	for (int index = 0; index < _vcr_buffer_index; index++) {
-		if (!vcrWriteEntry(&(_vcr_buffer[index]), gVcrFile)) {
+		if (!vcrWriteEntry(&(_vcr_buffer[index]), gVcrFileOut)) {
 			return false;
 		}
 	}
@@ -354,7 +362,7 @@ bool vcrDump() {
 
 // 0x4D2D74
 static bool vcrLoad() {
-	if (gVcrFile == nullptr) {
+	if (gVcrFileIn == nullptr) {
 		return false;
 	}
 
@@ -364,7 +372,7 @@ static bool vcrLoad() {
 	}
 
 	for (_vcr_buffer_end = 0; _vcr_buffer_end < VCR_BUFFER_CAPACITY; _vcr_buffer_end++) {
-		if (!vcrReadEntry(&(_vcr_buffer[_vcr_buffer_end]), gVcrFile)) {
+		if (!vcrReadEntry(&(_vcr_buffer[_vcr_buffer_end]), gVcrFileIn)) {
 			break;
 		}
 	}
@@ -377,53 +385,65 @@ static bool vcrLoad() {
 }
 
 // 0x4D2E00
-bool vcrWriteEntry(VcrEntry* vcrEntry, File* stream) {
-	if (fileWriteUInt32(stream, vcrEntry->type) == -1) return false;
-	if (fileWriteUInt32(stream, vcrEntry->time) == -1) return false;
-	if (fileWriteUInt32(stream, vcrEntry->counter) == -1) return false;
+bool vcrWriteEntry(VcrEntry *vcrEntry, Common::OutSaveFile *stream) {
+	stream->writeUint32BE(vcrEntry->type);
+	stream->writeUint32BE(vcrEntry->time);
+	stream->writeUint32BE(vcrEntry->counter);
+	if (stream->err())
+		return false;
 
 	switch (vcrEntry->type) {
 	case VCR_ENTRY_TYPE_INITIAL_STATE:
-		if (fileWriteInt32(stream, vcrEntry->initial.mouseX) == -1) return false;
-		if (fileWriteInt32(stream, vcrEntry->initial.mouseY) == -1) return false;
-		if (fileWriteInt32(stream, vcrEntry->initial.keyboardLayout) == -1) return false;
-		return true;
+		stream->writeSint32BE(vcrEntry->initial.mouseX);
+		stream->writeSint32BE(vcrEntry->initial.mouseY);
+		stream->writeSint32BE(vcrEntry->initial.keyboardLayout);
+		break;
+
 	case VCR_ENTRY_TYPE_KEYBOARD_EVENT:
-		if (fileWriteInt16(stream, vcrEntry->keyboardEvent.key) == -1) return false;
-		return true;
+		stream->writeUint16BE(vcrEntry->keyboardEvent.key);
+		break;
+
 	case VCR_ENTRY_TYPE_MOUSE_EVENT:
-		if (fileWriteInt32(stream, vcrEntry->mouseEvent.dx) == -1) return false;
-		if (fileWriteInt32(stream, vcrEntry->mouseEvent.dy) == -1) return false;
-		if (fileWriteInt32(stream, vcrEntry->mouseEvent.buttons) == -1) return false;
-		return true;
+		stream->writeSint32BE(vcrEntry->mouseEvent.dx);
+		stream->writeSint32BE(vcrEntry->mouseEvent.dy);
+		stream->writeSint32BE(vcrEntry->mouseEvent.buttons);
 	}
 
-	return false;
+	if (stream->err())
+		return false;
+
+	return true;
 }
 
 // 0x4D2EE4
-bool vcrReadEntry(VcrEntry* vcrEntry, File* stream) {
-	if (fileReadUInt32(stream, &(vcrEntry->type)) == -1) return false;
-	if (fileReadUInt32(stream, &(vcrEntry->time)) == -1) return false;
-	if (fileReadUInt32(stream, &(vcrEntry->counter)) == -1) return false;
+bool vcrReadEntry(VcrEntry *vcrEntry, Common::InSaveFile *stream) {
+	vcrEntry->type = stream->readUint32BE();
+	vcrEntry->time = stream->readUint32BE();
+	vcrEntry->counter = stream->readUint32BE();
+	if (stream->err())
+		return false;
 
 	switch (vcrEntry->type) {
 	case VCR_ENTRY_TYPE_INITIAL_STATE:
-		if (fileReadInt32(stream, &(vcrEntry->initial.mouseX)) == -1) return false;
-		if (fileReadInt32(stream, &(vcrEntry->initial.mouseY)) == -1) return false;
-		if (fileReadInt32(stream, &(vcrEntry->initial.keyboardLayout)) == -1) return false;
-		return true;
+		vcrEntry->initial.mouseX = stream->readSint32BE();
+		vcrEntry->initial.mouseY = stream->readSint32BE();
+		vcrEntry->initial.keyboardLayout = stream->readSint32BE();
+		break;
+
 	case VCR_ENTRY_TYPE_KEYBOARD_EVENT:
-		if (fileReadInt16(stream, &(vcrEntry->keyboardEvent.key)) == -1) return false;
-		return true;
+		vcrEntry->keyboardEvent.key = stream->readUint16BE();
+		break;
+
 	case VCR_ENTRY_TYPE_MOUSE_EVENT:
-		if (fileReadInt32(stream, &(vcrEntry->mouseEvent.dx)) == -1) return false;
-		if (fileReadInt32(stream, &(vcrEntry->mouseEvent.dy)) == -1) return false;
-		if (fileReadInt32(stream, &(vcrEntry->mouseEvent.buttons)) == -1) return false;
-		return true;
+		vcrEntry->mouseEvent.dx = stream->readSint32BE();
+		vcrEntry->mouseEvent.dy = stream->readSint32BE();
+		vcrEntry->mouseEvent.buttons = stream->readSint32BE();
 	}
 
-	return false;
+	if (stream->err())
+		return false;
+
+	return true;
 }
 
-} // fallout
+} // namespace Fallout2

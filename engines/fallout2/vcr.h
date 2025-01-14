@@ -1,9 +1,11 @@
-#ifndef FALLOUT_VCR_H_
-#define FALLOUT_VCR_H_
+#ifndef FALLOUT2_VCR_H
+#define FALLOUT2_VCR_H
 
-#include "db.h"
+#include "fallout2/db.h"
 
-namespace fallout {
+#include "common/savefile.h"
+
+namespace Fallout2 {
 
 #define VCR_BUFFER_CAPACITY 4096
 
@@ -66,7 +68,7 @@ typedef struct VcrEntry {
 	};
 } VcrEntry;
 
-extern VcrEntry* _vcr_buffer;
+extern VcrEntry *_vcr_buffer;
 extern int _vcr_buffer_index;
 extern unsigned int gVcrState;
 extern unsigned int _vcr_time;
@@ -74,15 +76,15 @@ extern unsigned int _vcr_counter;
 extern unsigned int gVcrTerminateFlags;
 extern int gVcrPlaybackCompletionReason;
 
-bool vcrRecord(const char* fileName);
-bool vcrPlay(const char* fileName, unsigned int terminationFlags, VcrPlaybackCompletionCallback* callback);
+bool vcrRecord(const char *fileName);
+bool vcrPlay(const char *fileName, unsigned int terminationFlags, VcrPlaybackCompletionCallback *callback);
 void vcrStop();
 int vcrGetState();
 int vcrUpdate();
 bool vcrDump();
-bool vcrWriteEntry(VcrEntry* ptr, File* stream);
-bool vcrReadEntry(VcrEntry* ptr, File* stream);
+bool vcrWriteEntry(VcrEntry *ptr, Common::OutSaveFile *stream);
+bool vcrReadEntry(VcrEntry *ptr, Common::InSaveFile *stream);
 
-} // namespace fallout
+} // namespace Fallout2
 
-#endif /* FALLOUT_VCR_H_ */
+#endif
