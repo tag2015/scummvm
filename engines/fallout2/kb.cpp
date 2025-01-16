@@ -4,7 +4,7 @@
 
 #include "fallout2/input.h"
 #include "fallout2/svga.h"
-// #include "fallout2/vcr.h" TODO vcr
+#include "fallout2/vcr.h"
 
 namespace Fallout2 {
 
@@ -202,7 +202,7 @@ int keyboardGetLayout() {
 
 // TODO: Key type is likely short.
 void _kb_simulate_key(KeyboardData *data) {
-/*	if (gVcrState == 0) { TODO vcr
+	if (gVcrState == 0) {
 		if (_vcr_buffer_index != VCR_BUFFER_CAPACITY - 1) {
 			VcrEntry *vcrEntry = &(_vcr_buffer[_vcr_buffer_index]);
 			vcrEntry->type = VCR_ENTRY_TYPE_KEYBOARD_EVENT;
@@ -212,7 +212,7 @@ void _kb_simulate_key(KeyboardData *data) {
 
 			_vcr_buffer_index++;
 		}
-	}*/
+	}
 
 	_kb_idle_start_time = _get_bk_time();
 

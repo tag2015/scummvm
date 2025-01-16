@@ -43,7 +43,7 @@
 #include "fallout2/text_object.h"
 #include "fallout2/tile.h"
 #include "fallout2/trait.h"
-// #include "fallout2/vcr.h" TODO vcr
+#include "fallout2/vcr.h"
 #include "fallout2/worldmap.h"
 
 namespace Fallout2 {
@@ -764,7 +764,7 @@ static void opRandom(Program *program) {
 	}
 
 	int result;
-	if (/*vcrGetState() == VCR_STATE_TURNED_OFF*/ 1) {  // TODO vcr
+	if (vcrGetState() == VCR_STATE_TURNED_OFF) {
 		result = randomBetween(data[1], data[0]);
 	} else {
 		result = (data[0] - data[1]) / 2;
