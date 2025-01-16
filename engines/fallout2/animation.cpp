@@ -33,7 +33,7 @@
 #include "fallout2/text_object.h"
 #include "fallout2/tile.h"
 #include "fallout2/trait.h"
-// #include "fallout2/vcr.h" TODO vcr
+#include "fallout2/vcr.h"
 #include "fallout2/worldmap.h"
 
 namespace Fallout2 {
@@ -2968,9 +2968,9 @@ void _dude_fidget() {
 		return;
 	}
 
-	/*if (vcrGetState() != VCR_STATE_TURNED_OFF) {  TODO vcr
+	if (vcrGetState() != VCR_STATE_TURNED_OFF) {
 		return;
-	}*/
+	}
 
 	if ((gDude->flags & OBJECT_HIDDEN) != 0) {
 		return;

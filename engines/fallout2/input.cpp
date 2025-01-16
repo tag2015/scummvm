@@ -13,7 +13,7 @@
 #include "fallout2/svga.h"
 #include "fallout2/text_font.h"
 // #include "fallout2/touch.h" TODO touch
-// #include "vcr.h" TODO vcr
+#include "fallout2/vcr.h"
 #include "fallout2/win32.h"
 
 #include "common/keyboard.h"
@@ -211,7 +211,7 @@ void _process_bk() {
 
 	tickersExecute();
 
-	if (/*vcrUpdate() != 3*/ 1) { // TODO vcr.cpp
+	if (vcrUpdate() != 3) {
 		_mouse_info();
 	}
 
@@ -1127,14 +1127,14 @@ static void _GNW95_process_key(KeyboardData *data) {
 	// timestamps, see usage from |_GNW95_process_message|.
 	int scanCode = data->key;
 
-//	data->key = gNormalizedQwertyKeys[data->key]; TODO vcr
+	// data->key = gNormalizedQwertyKeys[data->key]; TODO?
 
-	// if (gVcrState == VCR_STATE_PLAYING) {
-	// 	if ((gVcrTerminateFlags & VCR_TERMINATE_ON_KEY_PRESS) != 0) {
-	// 		gVcrPlaybackCompletionReason = VCR_PLAYBACK_COMPLETION_REASON_TERMINATED;
-	// 		vcrStop();
-	// 	}
-	// } else {
+	if (gVcrState == VCR_STATE_PLAYING) {
+		if ((gVcrTerminateFlags & VCR_TERMINATE_ON_KEY_PRESS) != 0) {
+			gVcrPlaybackCompletionReason = VCR_PLAYBACK_COMPLETION_REASON_TERMINATED;
+			vcrStop();
+		}
+	} else {
 		RepeatInfo *ptr = &(_GNW95_key_time_stamps[scanCode]);
 		if (data->down == 1) {
 			ptr->tick = getTicks();
@@ -1149,7 +1149,7 @@ static void _GNW95_process_key(KeyboardData *data) {
 		}
 
 		_kb_simulate_key(data);
-//	}
+	}
 }
 
 // 0x4C9EEC
