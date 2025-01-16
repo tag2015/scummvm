@@ -7,7 +7,7 @@
 #include "fallout2/memory.h"
 #include "fallout2/svga.h"
 // #include "fallout2/touch.h" TODO touch
-// #include "fallout2/vcr.h" TODO vcr
+#include "fallout2/vcr.h"
 
 namespace Fallout2 {
 
@@ -447,7 +447,7 @@ void _mouse_info() {
 	x = (int)(x * gMouseSensitivity);
 	y = (int)(y * gMouseSensitivity);
 
-/*	if (gVcrState == VCR_STATE_PLAYING) { TODO vcr.cpp
+	if (gVcrState == VCR_STATE_PLAYING) {
 		if (((gVcrTerminateFlags & VCR_TERMINATE_ON_MOUSE_PRESS) != 0 && buttons != 0) || ((gVcrTerminateFlags & VCR_TERMINATE_ON_MOUSE_MOVE) != 0 && (x != 0 || y != 0))) {
 			gVcrPlaybackCompletionReason = VCR_PLAYBACK_COMPLETION_REASON_TERMINATED;
 			vcrStop();
@@ -456,7 +456,7 @@ void _mouse_info() {
 		x = 0;
 		y = 0;
 		buttons = last_buttons;
-	}*/
+	}
 
 	_mouse_simulate_input(x, y, buttons);
 
@@ -487,7 +487,7 @@ void _mouse_simulate_input(int delta_x, int delta_y, int buttons) {
 	}
 
 	if (delta_x || delta_y || buttons != last_buttons) {
-/*		if (gVcrState == 0) {
+		if (gVcrState == 0) {
 			if (_vcr_buffer_index == VCR_BUFFER_CAPACITY - 1) {
 				vcrDump();
 			}
@@ -501,7 +501,7 @@ void _mouse_simulate_input(int delta_x, int delta_y, int buttons) {
 			vcrEntry->mouseEvent.buttons = buttons;
 
 			_vcr_buffer_index++;
-		}*/
+		}
 	} else {
 		if (last_buttons == 0) {
 			if (!_mouse_idling) {

@@ -18,7 +18,7 @@
 #include "fallout2/pointer_registry.h"
 #include "fallout2/svga.h"
 #include "fallout2/text_font.h"
-// #include "fallout2/vcr.h" TODO vcr
+#include "fallout2/vcr.h"
 #include "fallout2/win32.h"
 #include "fallout2/window_manager_private.h"
 
@@ -1004,9 +1004,9 @@ void win_drag(int win) {
 
 	tickersExecute();
 
-/*	if (vcrUpdate() != 3) {  TODO vcr.cpp
+	if (vcrUpdate() != 3) {
 		_mouse_info();
-	}*/
+	}
 
 	while ((mouseGetEvent() & MOUSE_EVENT_ANY_BUTTON_UP) == 0) {
 		sharedFpsLimiter.mark();
@@ -1035,9 +1035,9 @@ void win_drag(int win) {
 		mouseGetPosition(&mx, &my);
 		tickersExecute();
 
-		// if (vcrUpdate() != 3) { TODO vcr.cpp
-		//	_mouse_info();
-		// }
+		if (vcrUpdate() != 3) {
+			_mouse_info();
+		}
 
 		dx = mx;
 		dy = my;
