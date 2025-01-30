@@ -15,7 +15,7 @@
 
 namespace Fallout2 {
 
-static char *_lips_fix_string(const char *fileName, size_t length);
+static char *lips_fix_string(const char *fileName, size_t length);
 static int lipsReadV1(LipsData *a1, File *stream);
 static int _lips_make_speech();
 
@@ -66,13 +66,14 @@ static int _speechStartTime = 0;
 // 0x613CA0
 static char _lips_subdir_name[14];
 
-// 0x613CAE
-static char _tmp_str[50];
-
 // 0x47AAC0
-static char *_lips_fix_string(const char *fileName, size_t length) {
-	strncpy(_tmp_str, fileName, length);
-	return _tmp_str;
+static char *lips_fix_string(const char *fileName, size_t length) {
+	// 0x613CAE
+	static char tmp_str[50];
+
+	strncpy(tmp_str, fileName, length);
+	tmp_str[length] = '\0';
+	return tmp_str;
 }
 
 // 0x47AAD8
@@ -229,7 +230,7 @@ static int lipsReadV1(LipsData *lipsData, File *stream) {
 		return -1;
 	if (fileReadInt32(stream, &(lipsData->field_4C)) == -1)
 		return -1;
-	if (fileReadFixedLengthString(stream, lipsData->field_50, 8) == -1)
+	if (fileReadFixedLengthString(stream, lipsData->file_name, 8) == -1)
 		return -1;
 	if (fileReadFixedLengthString(stream, lipsData->field_58, 4) == -1)
 		return -1;
@@ -256,7 +257,7 @@ static int lipsReadV1(LipsData *lipsData, File *stream) {
 int lipsLoad(const char *audioFileName, const char *headFileName) {
 	char *sep;
 	int i;
-	char v60[16];
+	char audioBaseName[16];
 
 	SpeechMarker *speech_marker;
 	SpeechMarker *prev_speech_marker;
@@ -275,17 +276,17 @@ int lipsLoad(const char *audioFileName, const char *headFileName) {
 		*sep = '\0';
 	}
 
-	strncpy(v60, audioFileName, sizeof(v60) - 1);
+	strncpy(audioBaseName, audioFileName, sizeof(audioBaseName) - 1);
 
-	sep = strchr(v60, '.');
+	sep = strchr(audioBaseName, '.');
 	if (sep != nullptr) {
 		*sep = '\0';
 	}
 
-	(strncpy(gLipsData.field_50, v60, sizeof(gLipsData.field_50) - 1));
-	gLipsData.field_50[sizeof(gLipsData.field_50) - 1] = '\0';
+	(strncpy(gLipsData.file_name, audioBaseName, sizeof(gLipsData.file_name) - 1));
+	gLipsData.file_name[sizeof(gLipsData.file_name) - 1] = '\0';
 
-	Common::strcat_s(path, sizeof(path), _lips_fix_string(gLipsData.field_50, sizeof(gLipsData.field_50)));
+	Common::strcat_s(path, sizeof(path), lips_fix_string(gLipsData.file_name, sizeof(gLipsData.file_name)));
 	Common::strcat_s(path, sizeof(path), ".");
 	Common::strcat_s(path, sizeof(path), gLipsData.field_60);
 
@@ -325,7 +326,7 @@ int lipsLoad(const char *audioFileName, const char *headFileName) {
 				return -1;
 			if (fileReadInt32(stream, &(gLipsData.field_2C)) == -1)
 				return -1;
-			if (fileReadFixedLengthString(stream, gLipsData.field_50, 8) == -1)
+			if (fileReadFixedLengthString(stream, gLipsData.file_name, 8) == -1)
 				return -1;
 			if (fileReadFixedLengthString(stream, gLipsData.field_58, 4) == -1)
 				return -1;
@@ -437,7 +438,7 @@ static int _lips_make_speech() {
 	}
 
 	char path[COMPAT_MAX_PATH];
-	char *v1 = _lips_fix_string(gLipsData.field_50, sizeof(gLipsData.field_50));
+	char *v1 = lips_fix_string(gLipsData.file_name, sizeof(gLipsData.file_name));
 	snprintf(path, sizeof(path), "%s%s\\%s.%s", "SOUND\\SPEECH\\", _lips_subdir_name, v1, "ACM");
 
 	if (gLipsData.sound != nullptr) {
