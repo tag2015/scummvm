@@ -3,16 +3,16 @@
 
 // #include <SDL.h>
 
-#include "fallout2/memory_defs.h"
-
 #include "graphics/screen.h"
 
 namespace Fallout2 {
 
+typedef void *(MveMallocFunc)(size_t size);
+typedef void(MveFreeFunc)(void *ptr);
 typedef bool MovieReadProc(int fileHandle, void *buffer, int count);
 typedef void(MovieShowFrameProc)(Graphics::Surface *, int, int, int, int, int, int, int, int);
 
-void movieLibSetMemoryProcs(MallocProc *mallocProc, FreeProc *freeProc);
+void MveSetMemory(MveMallocFunc *malloc_func, MveFreeFunc *free_func);
 void movieLibSetReadProc(MovieReadProc *readProc);
 void movieLibSetVolume(int volume);
 void movieLibSetPan(int pan);
