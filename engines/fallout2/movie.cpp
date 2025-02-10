@@ -14,7 +14,6 @@
 #include "fallout2/movie_effect.h"
 #include "fallout2/movie_lib.h"
 #include "fallout2/platform_compat.h"
-#include "fallout2/pointer_registry.h"
 #include "fallout2/sound.h"
 #include "fallout2/svga.h"
 #include "fallout2/text_font.h"
@@ -35,7 +34,7 @@ typedef struct MovieSubtitleListNode {
 
 static void *movieMallocImpl(size_t size);
 static void movieFreeImpl(void *ptr);
-static bool movieReadImpl(int fileHandle, void *buf, int count);
+static bool movieReadImpl(void *handle, void *buf, int count);
 static void movieDirectImpl(Graphics::Surface *surface, int srcWidth, int srcHeight, int srcX, int srcY, int destWidth, int destHeight, int a8, int a9);
 static void movieBufferedImpl(Graphics::Surface *surface, int srcWidth, int srcHeight, int srcX, int srcY, int destWidth, int destHeight, int a8, int a9);
 static int _movieScaleSubRect(int win, unsigned char *data, int width, int height, int pitch);
@@ -209,7 +208,6 @@ static File *_alphaHandle;
 static unsigned char *_alphaBuf;
 
 static Graphics::Surface *gMovieSdlSurface = nullptr;
-static int gMovieFileStreamPointerKey = 0;
 
 // NOTE: Unused.
 //
@@ -244,8 +242,8 @@ static void movieFreeImpl(void *ptr) {
 }
 
 // 0x48662C
-static bool movieReadImpl(int fileHandle, void *buf, int count) {
-	return ((int)fileRead(buf, 1, count, (File *)intToPtr(fileHandle)) == count);
+static bool movieReadImpl(void *handle, void *buf, int count) {
+	return ((int)fileRead(buf, 1, count, (File *)handle) == count);
 }
 
 // 0x486654
@@ -501,7 +499,7 @@ void movieInit() {
 	MveSetMemory(movieMallocImpl, movieFreeImpl);
 	movieLibSetPaletteEntriesProc(movieSetPaletteEntriesImpl);
 	_MVE_sfSVGA(640, 480, 480, 0, 0, 0, 0, 0, 0);
-	movieLibSetReadProc(movieReadImpl);
+	MveSetIO(movieReadImpl);
 }
 
 // 0x486E98
@@ -817,8 +815,6 @@ static int _movieStart(int win, char *filePath, int (*a3)()) {
 		return 1;
 	}
 
-	gMovieFileStreamPointerKey = ptrToInt(gMovieFileStream);
-
 	gMovieWindow = win;
 	_running = 1;
 	gMovieFlags &= ~MOVIE_EXTENDED_FLAG_0x01;
@@ -846,7 +842,7 @@ static int _movieStart(int win, char *filePath, int (*a3)()) {
 		v15 = 0;
 	}
 
-	_MVE_rmPrepMovie(gMovieFileStreamPointerKey, v15, v16, v17);
+	_MVE_rmPrepMovie(gMovieFileStream, v15, v16, v17);
 
 	if (_movieScaleFlag) {
 		debugPrint("scaled\n");
