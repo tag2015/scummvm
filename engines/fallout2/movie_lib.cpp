@@ -153,7 +153,7 @@ static int _sync_late = 0;
 static int _sync_FrameDropped = 0;
 
 // 0x51EDF8
-static int gMovieLibVolume = 0;
+static int mve_volume = 0;
 
 // 0x51EDFC
 static int gMovieLibPan = 0;
@@ -548,8 +548,8 @@ static void _MVE_MemFree(STRUCT_6B3690 *a1) {
 }
 
 // 0x4F4900
-void movieLibSetVolume(int volume) {
-	gMovieLibVolume = volume;
+void MveSetVolume(int volume) {
+	mve_volume = volume;
 
 	if (gMveSoundBuffer != -1) {
 		audioEngineSoundBufferSetVolume(gMveSoundBuffer, volume);
@@ -1121,7 +1121,7 @@ static int _MVE_sndConfigure(int a1, int a2, int a3, int a4, int a5, int a6) {
 		return 0;
 	}
 
-	audioEngineSoundBufferSetVolume(gMveSoundBuffer, gMovieLibVolume);
+	audioEngineSoundBufferSetVolume(gMveSoundBuffer, mve_volume);
 	audioEngineSoundBufferSetPan(gMveSoundBuffer, gMovieLibPan);
 
 	dword_6B36A4 = 0;
