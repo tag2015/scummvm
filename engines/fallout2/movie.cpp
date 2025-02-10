@@ -950,7 +950,7 @@ void movieSetBuildSubtitleFilePathProc(MovieBuildSubtitleFilePathProc *proc) {
 // 0x487BD0
 void movieSetVolume(int volume) {
 	int normalizedVolume = _soundVolumeHMItoDirectSound(volume);
-	movieLibSetVolume(normalizedVolume);
+	MveSetVolume(normalizedVolume);
 }
 
 // 0x487BEC
