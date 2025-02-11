@@ -157,10 +157,8 @@ static int mve_volume = 0;
 // 0x51EE08
 static MovieShowFrameProc *_sf_ShowFrame = _do_nothing_2;
 
-// TODO: There is a default function (not yet implemented).
-//
 // 0x51EE14
-static void (*_pal_SetPalette)(unsigned char *, int, int) = nullptr;
+static MveSetPaletteFunc *pal_SetPalette;
 
 // 0x51EE18
 static int rm_hold = 0;
@@ -532,8 +530,8 @@ static void _do_nothing_2(Graphics::Surface *a1, int a2, int a3, int a4, int a5,
 }
 
 // 0x4F4A10
-void movieLibSetPaletteEntriesProc(void (*fn)(unsigned char *, int, int)) {
-	_pal_SetPalette = fn;
+void MveSetPalette(MveSetPaletteFunc *set_palette_func) {
+	pal_SetPalette = set_palette_func;
 }
 
 // 0x4F4B50
@@ -1529,14 +1527,14 @@ static void _do_nothing_(int a1, int a2, unsigned short *a3) {
 // 0x4F6090
 static void _SetPalette_1(int a1, int a2) {
 	if (!dword_6B4027) {
-		_pal_SetPalette(_pal_tbl, a1, a2);
+		pal_SetPalette(_pal_tbl, a1, a2);
 	}
 }
 
 // 0x4F60C0
 static void _SetPalette_(int a1, int a2) {
 	if (!dword_6B4027) {
-		_pal_SetPalette(_palette_entries1, a1, a2);
+		pal_SetPalette(_palette_entries1, a1, a2);
 	}
 }
 
