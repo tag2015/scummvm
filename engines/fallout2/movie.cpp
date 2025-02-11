@@ -533,7 +533,7 @@ static void _cleanupMovie(int a1) {
 		_MVE_rmEndMovie();
 	}
 
-	_MVE_ReleaseMem();
+	MVE_ReleaseMem();
 
 	fileClose(gMovieFileStream);
 
