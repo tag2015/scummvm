@@ -514,7 +514,7 @@ static void _cleanupMovie(int a1) {
 
 	int frame;
 	int dropped;
-	_MVE_rmFrameCounts(&frame, &dropped);
+	MVE_rmFrameCounts(&frame, &dropped);
 	debugPrint("Frames %d, dropped %d\n", frame, dropped);
 
 	if (_lastMovieBuffer != nullptr) {
@@ -760,7 +760,7 @@ static void movieRenderSubtitles() {
 
 	int frame;
 	int dropped;
-	_MVE_rmFrameCounts(&frame, &dropped);
+	MVE_rmFrameCounts(&frame, &dropped);
 
 	while (gMovieSubtitleHead != nullptr) {
 		if (frame < gMovieSubtitleHead->num) {
@@ -979,7 +979,7 @@ void _movieUpdate() {
 	if (gMoviePaletteProc != nullptr) {
 		int frame;
 		int dropped;
-		_MVE_rmFrameCounts(&frame, &dropped);
+		MVE_rmFrameCounts(&frame, &dropped);
 		gMoviePaletteProc(frame);
 	}
 }
