@@ -368,9 +368,6 @@ static unsigned char _palette_entries1[768];
 // 0x6B39B8
 static MveMallocFunc *mve_malloc_func;
 
-// 0x6B39BC
-static int (*_rm_ctl)();
-
 // 0x6B39C0
 static int rm_dx;
 
@@ -538,11 +535,6 @@ void MveSetPalette(MveSetPaletteFunc *set_palette_func) {
 // static int _sub_4F4B5() {
 //   return 0;
 // }
-
-// 0x4F4B90
-void _MVE_rmCallbacks(int (*fn)()) {
-	_rm_ctl = fn;
-}
 
 // 0x4F4BB0
 void _sub_4F4BB(int a1) {
