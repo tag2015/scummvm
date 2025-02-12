@@ -1,9 +1,6 @@
 #include "fallout2/game_memory.h"
 
-#include "fallout2/db.h"
-#include "fallout2/dictionary.h"
 #include "fallout2/memory.h"
-#include "fallout2/memory_defs.h"
 #include "fallout2/memory_manager.h"
 
 namespace Fallout2 {
@@ -14,7 +11,6 @@ static void gameMemoryFree(void *ptr);
 
 // 0x44B250
 int gameMemoryInit() {
-	dictionarySetMemoryProcs(internal_malloc, internal_realloc, internal_free);
 	memoryManagerSetProcs(gameMemoryMalloc, gameMemoryRealloc, gameMemoryFree);
 
 	return 0;
