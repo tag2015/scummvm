@@ -1,8 +1,6 @@
 #ifndef FALLOUT2_COLOR_H
 #define FALLOUT2_COLOR_H
 
-#include "fallout2/memory_defs.h"
-
 namespace Fallout2 {
 
 typedef unsigned char Color;
@@ -31,7 +29,6 @@ bool colorPaletteLoad(const char *path);
 char *_colorError();
 unsigned char *_getColorBlendTable(int ch);
 void _freeColorBlendTable(int a1);
-void colorPaletteSetMemoryProcs(MallocProc *mallocProc, ReallocProc *reallocProc, FreeProc *freeProc);
 void colorSetBrightness(double value);
 bool colorPushColorPalette();
 bool colorPopColorPalette();
