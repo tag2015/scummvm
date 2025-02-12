@@ -7,6 +7,7 @@
 */
 
 #include "fallout2/db.h"
+#include "fallout2/memory.h"
 #include "fallout2/svga.h"
 
 namespace Fallout2 {
@@ -51,15 +52,6 @@ static double gBrightness = 1.0;
 
 // 0x51DF20
 static ColorTransitionCallback *gColorPaletteTransitionCallback = nullptr;
-
-// 0x51DF24
-static MallocProc *gColorPaletteMallocProc = colorPaletteMallocDefaultImpl;
-
-// 0x51DF28
-static ReallocProc *gColorPaletteReallocProc = colorPaletteReallocDefaultImpl;
-
-// 0x51DF2C
-static FreeProc *gColorPaletteFreeProc = colorPaletteFreeDefaultImpl;
 
 // 0x51DF30
 static ColorFileNameManger *gColorFileNameMangler = nullptr;
@@ -461,7 +453,7 @@ unsigned char *_getColorBlendTable(int ch) {
 	unsigned char *ptr;
 
 	if (_blendTable[ch] == nullptr) {
-		ptr = (unsigned char *)gColorPaletteMallocProc(4100);
+		ptr = (unsigned char *)internal_malloc(4100);
 		*(int *)ptr = 1;
 		_blendTable[ch] = ptr + 4;
 		_buildBlendTable(_blendTable[ch], ch);
@@ -480,17 +472,10 @@ void _freeColorBlendTable(int a1) {
 		int *count = (int *)(v2 - sizeof(int));
 		*count -= 1;
 		if (*count == 0) {
-			gColorPaletteFreeProc(count);
+			internal_free(count);
 			_blendTable[a1] = nullptr;
 		}
 	}
-}
-
-// 0x4C7E58
-void colorPaletteSetMemoryProcs(MallocProc *mallocProc, ReallocProc *reallocProc, FreeProc *freeProc) {
-	gColorPaletteMallocProc = mallocProc;
-	gColorPaletteReallocProc = reallocProc;
-	gColorPaletteFreeProc = freeProc;
 }
 
 // 0x4C7E6C
