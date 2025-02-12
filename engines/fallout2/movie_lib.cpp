@@ -39,15 +39,15 @@ static int ioReset(void *handle);
 static void *ioRead(int size);
 static void *MVE_MemAlloc(MveMem *mem, unsigned int size);
 static unsigned char *ioNextRecord();
-static int _syncWait();
+static int syncWait();
 // static void _MVE_sndPause();
-static int _syncInit(int a1, int a2);
-static void _syncReset(int a1);
+static int syncInit(int rate, int resolution);
+static void syncReset(int quanta);
 static int _MVE_sndConfigure(int a1, int a2, int a3, int a4, int a5, int a6);
-// static void _MVE_syncSync();
+static void MVE_syncSync();
 static void _MVE_sndReset();
 static void _MVE_sndSync();
-static int _syncWaitLevel(int a1);
+static int syncWaitLevel(int wait);
 static void _CallsSndBuff_Loc(unsigned char *a1, int a2);
 static int _MVE_sndAdd(unsigned char *dest, unsigned char **src_ptr, int a3, int a4, int a5);
 static void _MVE_sndResume();
@@ -61,7 +61,7 @@ static void palSetPalette(int start, int count);
 static void palClrPalette(int start, int count);
 static void palMakeSynthPalette(int a1, int a2, int a3, int a4, int a5, int a6);
 static void palLoadPalette(unsigned char *palette, int start, int count);
-static void _syncRelease();
+static void syncRelease();
 static void ioRelease();
 static void _MVE_sndRelease();
 static void _nfRelease();
@@ -115,13 +115,13 @@ static unsigned short word_51EBE0[256] = {
 };
 
 // 0x51EDE4
-static int _sync_active = 0;
+static int sync_active = 0;
 
 // 0x51EDE8
-static int _sync_late = 0;
+static int sync_late = 0;
 
 // 0x51EDEC
-static int _sync_FrameDropped = 0;
+static int sync_FrameDropped = 0;
 
 // 0x51EDF8
 static int mve_volume = 0;
@@ -362,13 +362,13 @@ static unsigned char *rm_p;
 static int dword_6B39E0[60];
 
 // 0x6B3AD0
-static int _sync_wait_quanta;
+static int sync_wait_quanta;
 
 // 0x6B3AD8
 static int rm_track_bit;
 
 // 0x6B3ADC
-static int _sync_time;
+static int sync_time;
 
 // 0x6B3AE0
 static MveReadFunc *mve_read_func;
@@ -613,22 +613,19 @@ static unsigned char *ioNextRecord() {
 }
 
 // 0x4F4E40
-static int _syncWait() {
-	int result;
+static int syncWait() {
+	int late;
 
-	result = 0;
-	if (_sync_active) {
-		if (((_sync_time + 1000 * compat_timeGetTime()) & 0x80000000) != 0) {
-			result = 1;
-
-			delay_ms(-(_sync_time + 1000 * compat_timeGetTime()) / 1000 - 3);
-			while (((_sync_time + 1000 * compat_timeGetTime()) & 0x80000000) != 0)
-				;
+	late = 0;
+	if (sync_active) {
+		while ((sync_time + 1000 * compat_timeGetTime()) < 0) {
+			late = 1;
+			delay_ms(-(sync_time + 1000 * compat_timeGetTime()) / 1000 - 3);
 		}
-		_sync_time += _sync_wait_quanta;
+		sync_time += sync_wait_quanta;
 	}
 
-	return result;
+	return late;
 }
 
 #if 0
@@ -689,7 +686,7 @@ LABEL_5:
 			v1 = (unsigned short *)ioNextRecord();
 			goto LABEL_5;
 		case 2:
-			if (!_syncInit(v1[0], v1[2])) {
+			if (!syncInit(v1[0], v1[2])) {
 				v6 = -3;
 				break;
 			}
@@ -779,10 +776,10 @@ LABEL_5:
 
 			if (v21) {
 				_do_nothing_(rm_dx, rm_dy, v21);
-			} else if (!_sync_late || v1[1]) {
+			} else if (!sync_late || v1[1]) {
 				_sfShowFrame(rm_dx, rm_dy, v18);
 			} else {
-				_sync_FrameDropped = 1;
+				sync_FrameDropped = 1;
 				++rm_FrameDropCount;
 			}
 
@@ -912,32 +909,29 @@ LABEL_5:
 }
 
 // 0x4F54F0
-static int _syncInit(int a1, int a2) {
-	int v2;
+static int syncInit(int rate, int resolution) {
+	int quanta;
 
-	v2 = -((a2 >> 1) + a1 * a2);
+	quanta = -(rate * resolution + resolution / 2);
 
-	if (_sync_active && _sync_wait_quanta == v2) {
-		return 1;
+	if (!sync_active || sync_wait_quanta != quanta) {
+		syncWait();
+		sync_wait_quanta = quanta;
+		syncReset(quanta);
 	}
-
-	_syncWait();
-
-	_sync_wait_quanta = v2;
-
-	_syncReset(v2);
 
 	return 1;
 }
 
 // 0x4F5540
-static void _syncReset(int a1) {
-	_sync_active = 1;
-	_sync_time = -1000 * compat_timeGetTime() + a1;
+static void syncReset(int quanta) {
+	sync_active = 1;
+	sync_time = -1000 * compat_timeGetTime() + quanta;
 }
 
 // 0x4F5570
 static int _MVE_sndConfigure(int a1, int a2, int a3, int a4, int a5, int a6) {
+	MVE_syncSync();
 	_MVE_sndReset();
 
 	_snd_comp = a3;
@@ -961,16 +955,13 @@ static int _MVE_sndConfigure(int a1, int a2, int a3, int a4, int a5, int a6) {
 	return 1;
 }
 
-#if 0
 // 0x4F56C0
-// Looks like this function is not used
-static void _MVE_syncSync() {
-	if (_sync_active) {
-		while (((_sync_time + 1000 * compat_timeGetTime()) & 0x80000000) != 0) {
+static void MVE_syncSync() {
+	if (sync_active) {
+		while (sync_time + 1000 * compat_timeGetTime() < 0) {
 		}
 	}
 }
-#endif
 
 // 0x4F56F0
 static void _MVE_sndReset() {
@@ -1000,8 +991,8 @@ static void _MVE_sndSync() {
 
 	v0 = false;
 
-	_sync_late = _syncWaitLevel(_sync_wait_quanta >> 2) > -_sync_wait_quanta >> 1 && !_sync_FrameDropped;
-	_sync_FrameDropped = 0;
+	sync_late = syncWaitLevel(sync_wait_quanta / 4) > -sync_wait_quanta / 2 && !sync_FrameDropped;
+	sync_FrameDropped = 0;
 
 	if (gMveSoundBuffer == -1) {
 		return;
@@ -1036,7 +1027,7 @@ static void _MVE_sndSync() {
 
 		if (!v2 || !(dwStatus & AUDIO_ENGINE_SOUND_BUFFER_STATUS_PLAYING)) {
 			if (v0) {
-				_syncReset(_sync_wait_quanta + (_sync_wait_quanta >> 2));
+				syncReset(sync_wait_quanta + (sync_wait_quanta >> 2));
 			}
 
 			v3 = dword_6B39E0[dword_6B3660];
@@ -1123,26 +1114,26 @@ static void _MVE_sndSync() {
 }
 
 // 0x4F59B0
-static int _syncWaitLevel(int a1) {
-	int v2;
-	int result;
+static int syncWaitLevel(int wait) {
+	int deadline;
+	int diff;
 
-	if (!_sync_active) {
+	if (!sync_active) {
 		return 0;
 	}
 
-	v2 = _sync_time + a1;
+	deadline = sync_time + wait;
 	do {
-		result = v2 + 1000 * compat_timeGetTime();
-		if (result < 0) {
-			delay_ms(-result / 1000 - 3);
+		diff = deadline + 1000 * compat_timeGetTime();
+		if (diff < 0) {
+			delay_ms(-diff / 1000 - 3);
 		}
-		result = v2 + 1000 * compat_timeGetTime();
-	} while (result < 0);
+		diff = deadline + 1000 * compat_timeGetTime();
+	} while (diff < 0);
 
-	_sync_time += _sync_wait_quanta;
+	sync_time += sync_wait_quanta;
 
-	return result;
+	return diff;
 }
 
 // 0x4F5A00
@@ -1486,16 +1477,16 @@ static void palLoadPalette(unsigned char *palette, int start, int count) {
 // 0x4F6240
 void _MVE_rmEndMovie() {
 	if (rm_active) {
-		_syncWait();
-		_syncRelease();
+		syncWait();
+		syncRelease();
 		_MVE_sndReset();
 		rm_active = 0;
 	}
 }
 
 // 0x4F6270
-static void _syncRelease() {
-	_sync_active = 0;
+static void syncRelease() {
+	sync_active = 0;
 }
 
 // 0x4F6350
