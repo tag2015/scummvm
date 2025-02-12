@@ -1,5 +1,6 @@
 #include "fallout2/dictionary.h"
 
+#include "fallout2/memory.h"
 #include "fallout2/platform_compat.h"
 
 /*#include <assert.h>
@@ -13,34 +14,7 @@ namespace Fallout2 {
 // with a check for this value.
 #define DICTIONARY_MARKER 0xFEBAFEBA
 
-static void *dictionaryMallocDefaultImpl(size_t size);
-static void *dictionaryReallocDefaultImpl(void *ptr, size_t newSize);
-static void dictionaryFreeDefaultImpl(void *ptr);
 static int dictionaryFindIndexForKey(Dictionary *dictionary, const char *key, int *index);
-
-// 0x51E408
-static MallocProc *gDictionaryMallocProc = dictionaryMallocDefaultImpl;
-
-// 0x51E40C
-static ReallocProc *gDictionaryReallocProc = dictionaryReallocDefaultImpl;
-
-// 0x51E410
-static FreeProc *gDictionaryFreeProc = dictionaryFreeDefaultImpl;
-
-// 0x4D9B90
-static void *dictionaryMallocDefaultImpl(size_t size) {
-	return malloc(size);
-}
-
-// 0x4D9B98
-static void *dictionaryReallocDefaultImpl(void *ptr, size_t newSize) {
-	return realloc(ptr, newSize);
-}
-
-// 0x4D9BA0
-static void dictionaryFreeDefaultImpl(void *ptr) {
-	free(ptr);
-}
 
 // 0x4D9BA8
 int dictionaryInit(Dictionary *dictionary, int initialCapacity, size_t valueSize, DictionaryIO *io) {
@@ -60,7 +34,7 @@ int dictionaryInit(Dictionary *dictionary, int initialCapacity, size_t valueSize
 	int rc = 0;
 
 	if (initialCapacity != 0) {
-		dictionary->entries = (DictionaryEntry *)gDictionaryMallocProc(sizeof(*dictionary->entries) * initialCapacity);
+		dictionary->entries = (DictionaryEntry *)internal_malloc(sizeof(*dictionary->entries) * initialCapacity);
 		if (dictionary->entries == nullptr) {
 			rc = -1;
 		}
@@ -85,7 +59,7 @@ int dictionarySetCapacity(Dictionary *dictionary, int newCapacity) {
 		return -1;
 	}
 
-	DictionaryEntry *entries = (DictionaryEntry *)gDictionaryReallocProc(dictionary->entries, sizeof(*dictionary->entries) * newCapacity);
+	DictionaryEntry *entries = (DictionaryEntry *)internal_realloc(dictionary->entries, sizeof(*dictionary->entries) * newCapacity);
 	if (entries == nullptr) {
 		return -1;
 	}
@@ -105,16 +79,16 @@ int dictionaryFree(Dictionary *dictionary) {
 	for (int index = 0; index < dictionary->entriesLength; index++) {
 		DictionaryEntry *entry = &(dictionary->entries[index]);
 		if (entry->key != nullptr) {
-			gDictionaryFreeProc(entry->key);
+			internal_free(entry->key);
 		}
 
 		if (entry->value != nullptr) {
-			gDictionaryFreeProc(entry->value);
+			internal_free(entry->value);
 		}
 	}
 
 	if (dictionary->entries != nullptr) {
-		gDictionaryFreeProc(dictionary->entries);
+		internal_free(dictionary->entries);
 	}
 
 	memset(dictionary, 0, sizeof(*dictionary));
@@ -214,7 +188,7 @@ int dictionaryAddValue(Dictionary *dictionary, const char *key, const void *valu
 	}
 
 	// Make a copy of the key.
-	char *keyCopy = (char *)gDictionaryMallocProc(strlen(key) + 1);
+	char *keyCopy = (char *)internal_malloc(strlen(key) + 1);
 	if (keyCopy == nullptr) {
 		return -1;
 	}
@@ -224,9 +198,9 @@ int dictionaryAddValue(Dictionary *dictionary, const char *key, const void *valu
 	// Make a copy of the value.
 	void *valueCopy = nullptr;
 	if (value != nullptr && dictionary->valueSize != 0) {
-		valueCopy = gDictionaryMallocProc(dictionary->valueSize);
+		valueCopy = internal_malloc(dictionary->valueSize);
 		if (valueCopy == nullptr) {
-			gDictionaryFreeProc(keyCopy);
+			internal_free(keyCopy);
 			return -1;
 		}
 	}
@@ -271,9 +245,9 @@ int dictionaryRemoveValue(Dictionary *dictionary, const char *key) {
 	DictionaryEntry *entry = &(dictionary->entries[indexToRemove]);
 
 	// Free key and value (which are copies).
-	gDictionaryFreeProc(entry->key);
+	internal_free(entry->key);
 	if (entry->value != nullptr) {
-		gDictionaryFreeProc(entry->value);
+		internal_free(entry->value);
 	}
 
 	dictionary->entriesLength--;
@@ -388,16 +362,16 @@ int dictionaryLoad(Common::File *stream, Dictionary *dictionary, int a3) {
 	for (int index = 0; index < dictionary->entriesLength; index++) {
 		DictionaryEntry *entry = &(dictionary->entries[index]);
 		if (entry->key != nullptr) {
-			gDictionaryFreeProc(entry->key);
+			internal_free(entry->key);
 		}
 
 		if (entry->value != nullptr) {
-			gDictionaryFreeProc(entry->value);
+			internal_free(entry->value);
 		}
 	}
 
 	if (dictionary->entries != nullptr) {
-		gDictionaryFreeProc(dictionary->entries);
+		internal_free(dictionary->entries);
 	}
 
 	if (dictionaryReadHeader(stream, dictionary) != 0) {
@@ -410,7 +384,7 @@ int dictionaryLoad(Common::File *stream, Dictionary *dictionary, int a3) {
 		return 0;
 	}
 
-	dictionary->entries = (DictionaryEntry *)gDictionaryMallocProc(sizeof(*dictionary->entries) * dictionary->entriesCapacity);
+	dictionary->entries = (DictionaryEntry *)internal_malloc(sizeof(*dictionary->entries) * dictionary->entriesCapacity);
 	if (dictionary->entries == nullptr) {
 		return -1;
 	}
@@ -432,7 +406,7 @@ int dictionaryLoad(Common::File *stream, Dictionary *dictionary, int a3) {
 			return -1;
 		}
 
-		entry->key = (char *)gDictionaryMallocProc(keyLength + 1);
+		entry->key = (char *)internal_malloc(keyLength + 1);
 		if (entry->key == nullptr) {
 			return -1;
 		}
@@ -442,7 +416,7 @@ int dictionaryLoad(Common::File *stream, Dictionary *dictionary, int a3) {
 		}
 
 		if (dictionary->valueSize != 0) {
-			entry->value = gDictionaryMallocProc(dictionary->valueSize);
+			entry->value = internal_malloc(dictionary->valueSize);
 			if (entry->value == nullptr) {
 				return -1;
 			}
@@ -536,19 +510,6 @@ int dictionaryWrite(Common::File *stream, Dictionary *dictionary, int a3) {
 	}
 #endif
 	return 0;
-}
-
-// 0x4DA498
-void dictionarySetMemoryProcs(MallocProc *mallocProc, ReallocProc *reallocProc, FreeProc *freeProc) {
-	if (mallocProc != nullptr && reallocProc != nullptr && freeProc != nullptr) {
-		gDictionaryMallocProc = mallocProc;
-		gDictionaryReallocProc = reallocProc;
-		gDictionaryFreeProc = freeProc;
-	} else {
-		gDictionaryMallocProc = dictionaryMallocDefaultImpl;
-		gDictionaryReallocProc = dictionaryReallocDefaultImpl;
-		gDictionaryFreeProc = dictionaryFreeDefaultImpl;
-	}
 }
 
 } // namespace Fallout2
