@@ -2452,15 +2452,15 @@ static void _inven_pickup(int buttonCode, int indexOffset) {
 	_display_inventory(indexOffset, -1, INVENTORY_WINDOW_TYPE_NORMAL);
 	inventorySetCursor(INVENTORY_WINDOW_CURSOR_HAND);
 	if (_inven_dude == gDude) {
-		Object *item;
+		Object *new_item;
 		if (interfaceGetCurrentHand() == HAND_LEFT) {
-			item = critterGetItem1(_inven_dude);
+			new_item = critterGetItem1(_inven_dude);
 		} else {
-			item = critterGetItem2(_inven_dude);
+			new_item = critterGetItem2(_inven_dude);
 		}
 
-		if (item != nullptr) {
-			_inven_update_lighting(item);
+		if (new_item != nullptr) {
+			_inven_update_lighting(new_item);
 		}
 	}
 }
@@ -3725,9 +3725,9 @@ static void inventoryWindowOpenContextMenu(int keyCode, int inventoryWindowType)
 		if (inventoryWindowType != INVENTORY_WINDOW_TYPE_NORMAL) {
 			// SFALL: Fix crash when trying to open bag/backpack on the table
 			// in the bartering interface.
-			Object *owner = objectGetOwner(item);
-			if (owner != gDude) {
-				if (itemType == ITEM_TYPE_CONTAINER && (owner == _stack[_curr_stack] || owner == _target_stack[_target_curr_stack])) {
+			Object *item_owner = objectGetOwner(item);
+			if (item_owner != gDude) {
+				if (itemType == ITEM_TYPE_CONTAINER && (item_owner == _stack[_curr_stack] || item_owner == _target_stack[_target_curr_stack])) {
 					actionMenuItemsLength = 3;
 					actionMenuItems = _act_just_use;
 				} else {
