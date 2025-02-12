@@ -51,7 +51,7 @@ static int syncWaitLevel(int wait);
 static void _CallsSndBuff_Loc(unsigned char *a1, int a2);
 static int _MVE_sndAdd(unsigned char *dest, unsigned char **src_ptr, int a3, int a4, int a5);
 static void _MVE_sndResume();
-static int _nfConfig(int a1, int a2, int a3, int a4);
+static int _nfConfig(int a1, int a2, int a3, int is_16_bpp);
 static bool movieLockSurfaces();
 static void movieUnlockSurfaces();
 static void movieSwapSurfaces();
@@ -406,9 +406,6 @@ static int dword_6B401F;
 // 0x6B4023
 static int dword_6B4023;
 
-// 0x6B4027
-static int dword_6B4027;
-
 // 0x6B402F
 static int _mveBH;
 
@@ -729,9 +726,6 @@ LABEL_5:
 			}
 
 			v11 = 4 * _mveBW / dword_51EBDC & 0xFFFFFFF0;
-			if (dword_6B4027) {
-				v11 >>= 1;
-			}
 
 			v12 = rm_dx;
 			if (v12 < 0) {
@@ -749,11 +743,6 @@ LABEL_5:
 			}
 
 			if (_mveBH + v13 > sf_ScreenHeight) {
-				v6 = -6;
-				break;
-			}
-
-			if (dword_6B4027) {
 				v6 = -6;
 				break;
 			}
@@ -832,27 +821,6 @@ LABEL_5:
 			// swap movie surfaces
 			if (v1[6] & 0x01) {
 				movieSwapSurfaces();
-			}
-
-			if (dword_6B4027) {
-				if (dword_51EBD8) {
-					v6 = -8;
-					break;
-				}
-
-				// lock
-				if (!movieLockSurfaces()) {
-					v6 = -12;
-					break;
-				}
-
-				// TODO: Incomplete.
-				assert(false);
-				// _nfHPkDecomp(v3, v1[7], v1[2], v1[3], v1[4], v1[5]);
-
-				// unlock
-				movieUnlockSurfaces();
-				continue;
 			}
 
 			if ((dword_51EBD8 & 3) == 1) {
@@ -1270,7 +1238,7 @@ static void _MVE_sndResume() {
 }
 
 // 0x4F5CB0
-static int _nfConfig(int a1, int a2, int a3, int a4) {
+static int _nfConfig(int a1, int a2, int a3, int is_16_bpp) {
 	if (gMovieSdlSurface1 != nullptr) {
 		//  SDL_FreeSurface(gMovieSdlSurface1);
 		//  gMovieSdlSurface1 = nullptr;
@@ -1291,48 +1259,21 @@ static int _nfConfig(int a1, int a2, int a3, int a4) {
 		_mveBH >>= 1;
 	}
 
-/*	int depth;
-	int rmask;
-	int gmask;
-	int bmask;*/
-	Graphics::PixelFormat pixelformat;
-	if (a4) {
-/*		depth = 16;
-		rmask = 0x7C00;
-		gmask = 0x3E0;
-		bmask = 0x1F;*/
-		pixelformat = Graphics::PixelFormat(2, 5, 5, 5, 0, 10, 5, 0, 0);
-	} else {
-/*		depth = 8;
-		rmask = 0;
-		gmask = 0;
-		bmask = 0;*/
-		pixelformat = Graphics::PixelFormat::createFormatCLUT8();
-	}
-
-	//	gMovieSdlSurface1 = SDL_CreateRGBSurface(0, _mveBW, _mveBH, depth, rmask, gmask, bmask, 0);
+	//	gMovieSdlSurface1 = SDL_CreateRGBSurface(0, _mveBW, _mveBH, 8, 0, 0, 0, 0);
 	gMovieSdlSurface1 = new Graphics::Surface();
-	if (gMovieSdlSurface1)
-		gMovieSdlSurface1->create(_mveBW, _mveBH, pixelformat);
-
 	if (gMovieSdlSurface1 == nullptr) {
 		return 0;
 	}
+	if (gMovieSdlSurface1)
+		gMovieSdlSurface1->create(_mveBW, _mveBH, Graphics::PixelFormat::createFormatCLUT8());
 
-	//	gMovieSdlSurface2 = SDL_CreateRGBSurface(0, _mveBW, _mveBH, depth, rmask, gmask, bmask, 0);
+	//	gMovieSdlSurface2 = SDL_CreateRGBSurface(0, _mveBW, _mveBH, 8, 0, 0, 0, 0);
 	gMovieSdlSurface2 = new Graphics::Surface();
-	if (gMovieSdlSurface2)
-		gMovieSdlSurface2->create(_mveBW, _mveBH, pixelformat);
-
 	if (gMovieSdlSurface2 == nullptr) {
 		return 0;
 	}
-
-	dword_6B4027 = a4;
-
-	if (a4) {
-		_mveBW *= 2;
-	}
+	if (gMovieSdlSurface2)
+		gMovieSdlSurface2->create(_mveBW, _mveBH, Graphics::PixelFormat::createFormatCLUT8());
 
 	dword_6B3D00 = 8 * a3 * _mveBW;
 	dword_6B3CEC = 7 * a3 * _mveBW;
@@ -1388,15 +1329,7 @@ static void _sfShowFrame(int a1, int a2, int a3) {
 
 	v3 = a1;
 	if (a1 < 0) {
-		if (dword_6B4027) {
-			v3 = (sf_ScreenWidth - (v4 >> 1)) >> 1;
-		} else {
-			v3 = (sf_ScreenWidth - v4) >> 1;
-		}
-	}
-
-	if (dword_6B4027) {
-		v3 *= 2;
+		v3 = (sf_ScreenWidth - v4) >> 1;
 	}
 
 	v5 = a2;
@@ -1432,19 +1365,14 @@ static void _do_nothing_(int a1, int a2, unsigned short *a3) {
 
 // 0x4F6090
 static void palSetPalette(int start, int count) {
-	if (!dword_6B4027) {
-		pal_SetPalette(pal_tbl, start, count);
-	}
+	pal_SetPalette(pal_tbl, start, count);
 }
 
 // 0x4F60C0
 static void palClrPalette(int start, int count) {
 	unsigned char palette[768];
-
-	if (!dword_6B4027) {
-		memset(palette, 0, sizeof(palette));
-		pal_SetPalette(palette, start, count);
-	}
+	memset(palette, 0, sizeof(palette));
+	pal_SetPalette(palette, start, count);
 }
 
 // 0x4F60F0
