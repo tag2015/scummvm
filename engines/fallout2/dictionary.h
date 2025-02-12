@@ -1,8 +1,6 @@
 #ifndef FALLOUT2_DICTIONARY_H
 #define FALLOUT2_DICTIONARY_H
 
-#include "fallout2/memory_defs.h"
-
 #include "common/file.h"
 
 namespace Fallout2 {
@@ -63,7 +61,6 @@ int dictionaryLoad(Common::File *stream, Dictionary *dictionary, int a3);
 int dictionaryWriteInt(Common::File *stream, int value);
 int dictionaryWriteHeader(Common::File *stream, Dictionary *dictionary);
 int dictionaryWrite(Common::File *stream, Dictionary *dictionary, int a3);
-void dictionarySetMemoryProcs(MallocProc *mallocProc, ReallocProc *reallocProc, FreeProc *freeProc);
 
 } // namespace Fallout2
 
