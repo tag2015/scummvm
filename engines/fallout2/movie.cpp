@@ -20,7 +20,6 @@
 #include "fallout2/window.h"
 #include "fallout2/window_manager.h"
 
-#include "common/rect.h"
 #include "graphics/screen.h"
 #include "graphics/paletteman.h"
 
@@ -210,16 +209,16 @@ static void movieDirectImpl(unsigned char *pixels, int src_width, int src_height
 	// int v14;
 	int v15;
 
-	Common::Rect srcRect;
-	srcRect.left = src_x;
-	srcRect.top = src_y;
-	srcRect.right = srcRect.left + src_width;
-	srcRect.bottom = srcRect.top + src_height;
+	// Rect srcRect;
+	// srcRect.left = src_x;
+	// srcRect.top = src_y;
+	// srcRect.right = src_width;
+	// srcRect.bottom = src_height;
 
 	// v14 = gMovieWindowRect.right - gMovieWindowRect.left;
 	v15 = gMovieWindowRect.right - gMovieWindowRect.left + 1;
 
-	Common::Rect destRect;
+	Rect destRect;
 
 	if (_movieScaleFlag) {
 		if ((gMovieFlags & MOVIE_EXTENDED_FLAG_0x08) != 0) {
@@ -230,8 +229,8 @@ static void movieDirectImpl(unsigned char *pixels, int src_width, int src_height
 			destRect.left = gMovieWindowRect.left + _movieX;
 		}
 
-		destRect.right = destRect.left + 4 * src_width / 3;
-		destRect.bottom = destRect.top + dst_height;
+		destRect.right = 4 * src_width / 3;
+		destRect.bottom = dst_height;
 	} else {
 		if ((gMovieFlags & MOVIE_EXTENDED_FLAG_0x08) != 0) {
 			destRect.top = (gMovieWindowRect.bottom - gMovieWindowRect.top + 1 - dst_height) / 2;
@@ -240,8 +239,8 @@ static void movieDirectImpl(unsigned char *pixels, int src_width, int src_height
 			destRect.top = _movieY + gMovieWindowRect.top;
 			destRect.left = gMovieWindowRect.left + _movieX;
 		}
-		destRect.right = destRect.left + dst_width;
-		destRect.bottom = destRect.top + dst_height;
+		destRect.right = dst_width;
+		destRect.bottom = dst_height;
 	}
 
 	_lastMovieSX = src_x;
@@ -249,10 +248,10 @@ static void movieDirectImpl(unsigned char *pixels, int src_width, int src_height
 	_lastMovieX = destRect.left;
 	_lastMovieY = destRect.top;
 	_lastMovieBH = src_height;
-	_lastMovieW = destRect.width();
+	_lastMovieW = destRect.right;
 	MVE_lastBuffer = pixels;
 	_lastMovieBW = src_width;
-	_lastMovieH = destRect.height();
+	_lastMovieH = destRect.bottom;
 
 	// The code above assumes `gMovieWindowRect` is always at (0,0) which is not
 	// the case in HRP. For blitting purposes we have to adjust it relative to
