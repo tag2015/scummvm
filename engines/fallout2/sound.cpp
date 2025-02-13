@@ -67,11 +67,10 @@ static int _soundSetData(Sound *sound, unsigned char *buf, int size);
 static int soundContinue(Sound *sound);
 static int _soundGetVolume(Sound *sound);
 static void soundDeleteInternal(Sound *sound);
-static uint32 _doTimerEvent(uint32 interval, void *param);
+// static uint32 _doTimerEvent(uint32 interval, void *param);
 // static void _removeTimedEvent(SDL_TimerID *timerId);
-static void _removeTimedEvent(Common::TimerManager *timerId);
 static void _removeFadeSound(FadeSound *fadeSound);
-static void _fadeSounds();
+static void _fadeSounds(void *refCon);
 static int _internalSoundFade(Sound *sound, int duration, int targetVolume, bool pause);
 
 // 0x51D478
@@ -170,11 +169,8 @@ static bool gSoundInitialized;
 // 0x668174
 static Sound *gSoundListHead;
 
-//static SDL_TimerID gFadeSoundsTimerId = 0;
+// static SDL_TimerID gFadeSoundsTimerId = 0;
 static int gFadeSoundsTimerId = 0;
-
-// TODO timer
-// use Common::TimerManager
 
 // 0x4AC6F0
 void *soundMallocProcDefaultImpl(size_t size) {
@@ -482,8 +478,9 @@ void soundExit() {
 	}
 
 	if (gFadeSoundsTimerId != 0) {
-		//  TODO  timer
-//		_removeTimedEvent(&gFadeSoundsTimerId);
+		// _removeTimedEvent(&gFadeSoundsTimerId);
+		g_system->getTimerManager()->removeTimerProc(&_fadeSounds);
+		gFadeSoundsTimerId = 0;
 	}
 
 	while (_fadeFreeList != nullptr) {
@@ -1323,6 +1320,7 @@ int _soundSetMasterVolume(int volume) {
 	return gSoundLastError;
 }
 
+#if 0
 // 0x4AE5C8
 uint32 _doTimerEvent(uint32 interval, void *param) {
 	void (*fn)();
@@ -1336,14 +1334,13 @@ uint32 _doTimerEvent(uint32 interval, void *param) {
 }
 
 // 0x4AE614
-void _removeTimedEvent(Common::TimerManager *timerId) {
-	/*	if (*timerId != 0) {
-			SDL_RemoveTimer(*timerId);
-			*timerId = 0;
-		}*/
-	if (timerId != nullptr)
-		delete timerId;
+void _removeTimedEvent(SDL_TimerID *timerId) {
+	if (*timerId != 0) {
+		SDL_RemoveTimer(*timerId);
+		*timerId = 0;
+	}
 }
+#endif
 
 // 0x4AE634
 int _soundGetPosition(Sound *sound) {
@@ -1462,7 +1459,7 @@ void _removeFadeSound(FadeSound *fadeSound) {
 }
 
 // 0x4AE8B0
-void _fadeSounds() {
+void _fadeSounds(void *refCon) {
 	FadeSound *fadeSound;
 
 	fadeSound = _fadeHead;
@@ -1496,8 +1493,7 @@ void _fadeSounds() {
 
 	if (_fadeHead == nullptr) {
 		// NOTE: Uninline.
-		// TODO timer
-//		_removeTimedEvent(&gFadeSoundsTimerId);
+		// _removeTimedEvent(&gFadeSoundsTimerId);
 	}
 }
 
@@ -1583,8 +1579,9 @@ int _internalSoundFade(Sound *sound, int duration, int targetVolume, bool pause)
 		return gSoundLastError;
 	}
 
-	// TODO timer
-//	gFadeSoundsTimerId = SDL_AddTimer(40, _doTimerEvent, (void *)_fadeSounds);
+	// gFadeSoundsTimerId = SDL_AddTimer(40, _doTimerEvent, (void *)_fadeSounds);
+	gFadeSoundsTimerId = g_system->getTimerManager()->installTimerProc(&_fadeSounds, 40 * 1000, nullptr, "fallout2SoundTimer");
+
 	if (gFadeSoundsTimerId == 0) {
 		gSoundLastError = SOUND_UNKNOWN_ERROR;
 		return gSoundLastError;
