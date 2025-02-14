@@ -2580,7 +2580,7 @@ static int _get_input_str2(int win, int doneKeyCode, int cancelKeyCode, char *de
 
 	if (rc == 0) {
 		text[textLength] = '\0';
-		strncpy(description, text, LOAD_SAVE_DESCRIPTION_LENGTH);
+		Common::strcpy_s(description, LOAD_SAVE_DESCRIPTION_LENGTH, text);
 	}
 
 	return rc;
