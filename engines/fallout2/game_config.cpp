@@ -11,6 +11,8 @@
 
 namespace Fallout2 {
 
+static void gameConfigResolvePath(const char *section, const char *key);
+
 // A flag indicating if [gGameConfig] was initialized.
 //
 // 0x5186D0
@@ -166,13 +168,24 @@ bool gameConfigInit(bool isMapper, int argc, char **argv) {
 		Common::strcpy_s(gGameConfigFilePath, sizeof(gGameConfigFilePath), MAPPER_CONFIG_FILE_NAME);
 	else
 		Common::strcpy_s(gGameConfigFilePath, sizeof(gGameConfigFilePath), configFileName);
+
 	// Read contents of `fallout2.cfg` into config. The values from the file
 	// will override the defaults above.
 	configReadScumm(&gGameConfig, gGameConfigFilePath);
+
 	// Add key-values from command line, which overrides both defaults and
 	// whatever was loaded from `fallout2.cfg`.
 	// TODO? Commandline
 	// configParseCommandLineArguments(&gGameConfig, argc, argv);
+
+	// CE: Normalize and resolve asset bundle paths.
+	gameConfigResolvePath(GAME_CONFIG_SYSTEM_KEY, GAME_CONFIG_MASTER_DAT_KEY);
+	gameConfigResolvePath(GAME_CONFIG_SYSTEM_KEY, GAME_CONFIG_MASTER_PATCHES_KEY);
+	gameConfigResolvePath(GAME_CONFIG_SYSTEM_KEY, GAME_CONFIG_CRITTER_DAT_KEY);
+	gameConfigResolvePath(GAME_CONFIG_SYSTEM_KEY, GAME_CONFIG_CRITTER_PATCHES_KEY);
+	gameConfigResolvePath(GAME_CONFIG_SYSTEM_KEY, GAME_CONFIG_CRITTER_PATCHES_KEY);
+	gameConfigResolvePath(GAME_CONFIG_SOUND_KEY, GAME_CONFIG_MUSIC_PATH1_KEY);
+	gameConfigResolvePath(GAME_CONFIG_SOUND_KEY, GAME_CONFIG_MUSIC_PATH2_KEY);
 
 	gGameConfigInitialized = true;
 
@@ -215,6 +228,13 @@ bool gameConfigExit(bool shouldSave) {
 	gGameConfigInitialized = false;
 
 	return result;
+}
+
+static void gameConfigResolvePath(const char *section, const char *key) {
+	char *path;
+	configGetString(&gGameConfig, section, key, &path);
+	compat_windows_path_to_native(path);
+	compat_resolve_path(path);
 }
 
 } // namespace Fallout2
