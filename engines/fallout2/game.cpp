@@ -588,6 +588,7 @@ int gameHandleKey(int eventCode, bool isInCombatMode) {
 	case KEY_UPPERCASE_X:
 		if ((gPressedPhysicalKeys[Common::KEYCODE_RCTRL] == 0) && (gPressedPhysicalKeys[Common::KEYCODE_LCTRL] == 0))
 			break;
+		// FALLTHROUGH
 	case KEY_F10:
 		soundPlayFile("ib1p1xx1");
 		showQuitConfirmationDialog();
@@ -1365,7 +1366,7 @@ int showQuitConfirmationDialog() {
 	char *path_file_name_template = nullptr;
 	configGetString(&gSfallConfig, SFALL_CONFIG_MISC_KEY, SFALL_CONFIG_PATCH_FILE, &path_file_name_template);
 	if (path_file_name_template == nullptr || *path_file_name_template == '\0') {
-		path_file_name_template = "patch%03d.dat";
+		Common::strcpy_s(path_file_name_template, 14, "patch%03d.dat");
 	}
 
 	for (patch_index = 0; patch_index < 1000; patch_index++) {
@@ -1586,9 +1587,9 @@ bool GameMode::isInGameMode(int gameMode) {
 	return (currentGameMode & gameMode) != 0;
 }
 
-ScopedGameMode::ScopedGameMode(int gameMode) {
-	this->gameMode = gameMode;
-	GameMode::enterGameMode(gameMode);
+ScopedGameMode::ScopedGameMode(int startingGameMode) {
+	this->gameMode = startingGameMode;
+	GameMode::enterGameMode(startingGameMode);
 }
 
 ScopedGameMode::~ScopedGameMode() {

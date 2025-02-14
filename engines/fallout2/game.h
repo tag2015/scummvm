@@ -87,7 +87,7 @@ private:
 
 class ScopedGameMode {
 public:
-	ScopedGameMode(int gameMode);
+	ScopedGameMode(int startingGameMode);
 	~ScopedGameMode();
 
 private:
