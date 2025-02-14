@@ -24,12 +24,6 @@ static char _aColor_cNoError[] = "color.c: No errors\n";
 // 0x50F95C
 static char _aColor_cColorTa[] = "color.c: color table not found\n";
 
-// 0x50F984
-static char _aColor_cColorpa[] = "color.c: colorpalettestack overflow";
-
-// 0x50F9AC
-static char aColor_cColor_0[] = "color.c: colorpalettestack underflow";
-
 // 0x51DF10
 static char *_errorStr = _aColor_cNoError;
 
