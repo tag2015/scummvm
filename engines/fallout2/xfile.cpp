@@ -31,9 +31,9 @@ typedef struct XListEnumerationContext {
 typedef bool(XListEnumerationHandler)(XListEnumerationContext *context);
 
 static bool xlistEnumerate(const char *pattern, XListEnumerationHandler *handler, XList *xlist);
-static int xbaseMakeDirectory(const char *path);
+// static int xbaseMakeDirectory(const char *path);
 static void xbaseCloseAll();
-static void xbaseExitHandler(void);
+// static void xbaseExitHandler(void);
 static bool xlistEnumerateHandler(XListEnumerationContext *context);
 
 // 0x6B24D0
@@ -503,8 +503,7 @@ bool xbaseOpen(const char *path) {
 	// Register atexit handler so that underlying dbase (if any) can be
 	// gracefully closed.
 	if (!gXbaseExitHandlerRegistered) {
-		// TODO: put in main functions
-		//		atexit(xbaseExitHandler);
+		// atexit(xbaseExitHandler);
 		gXbaseExitHandlerRegistered = true;
 	}
 
@@ -726,9 +725,8 @@ void xlistFree(XList *xlist) {
 // Recursively creates specified file path.
 //
 // 0x4DFFAC
-static int xbaseMakeDirectory(const char *filePath) {
-// TODO create directory
 #if 0
+static int xbaseMakeDirectory(const char *filePath) {
 	char workingDirectory[COMPAT_MAX_PATH];
 	if (getcwd(workingDirectory, COMPAT_MAX_PATH) == nullptr) {
 		return -1;
@@ -789,9 +787,9 @@ static int xbaseMakeDirectory(const char *filePath) {
 	compat_mkdir(path);
 
 	chdir(workingDirectory);
-#endif
 	return 0;
 }
+#endif
 
 // Closes all xbases.
 //
@@ -816,11 +814,13 @@ static void xbaseCloseAll() {
 	}
 }
 
+#if 0
 // xbase atexit
 static void xbaseExitHandler(void) {
 	// NOTE: Uninline.
 	xbaseCloseAll();
 }
+#endif
 
 // 0x4E0278
 static bool xlistEnumerateHandler(XListEnumerationContext *context) {
