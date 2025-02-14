@@ -790,7 +790,7 @@ static Common::Array<TownReputationEntry> gCustomTownReputationEntries;
 
 // 0x431DF8
 int characterEditorShow(bool isCreationMode) {
-	ScopedGameMode gm(!isCreationMode ? GameMode::kEditor : 0);
+	ScopedGameMode gm(!isCreationMode ? (int)GameMode::kEditor : 0);
 
 	char *messageListItemText;
 	char line1[128];
@@ -1991,8 +1991,7 @@ static int _get_input_str(int win, int cancelKeyCode, char *text, int maxLength,
 
 	if (rc == 0 || nameLength > 0) {
 		copy[nameLength] = '\0';
-		strncpy(text, copy, 63);
-		text[63] = '\0';
+		Common::strcpy_s(text, 64, copy);
 	}
 
 	return rc;
