@@ -145,17 +145,17 @@ static char _sfx_file_name[13];
 static char gBackgroundSoundFileName[270];
 
 static void soundEffectsEnable();
-static void soundEffectsDisable();
-static int soundEffectsIsEnabled();
-static int soundEffectsGetVolume();
+// static void soundEffectsDisable();
+// static int soundEffectsIsEnabled();
+// static int soundEffectsGetVolume();
 static void backgroundSoundDisable();
 static void backgroundSoundEnable();
-static int backgroundSoundGetDuration();
-static void speechDisable();
+// static int backgroundSoundGetDuration();
+// static void speechDisable();
 static void speechEnable();
-static int _gsound_speech_volume_get_set(int volume);
-static void speechPause();
-static void speechResume();
+// static int _gsound_speech_volume_get_set(int volume);
+// static void speechPause();
+// static void speechResume();
 static void _gsound_bkg_proc();
 static int gameSoundFileOpen(const char *fname, int *sampleRate);
 static long _gsound_write_();
@@ -405,6 +405,7 @@ void soundEffectsEnable() {
 	}
 }
 
+#if 0
 // NOTE: Inlined.
 //
 // 0x4502D0
@@ -418,6 +419,7 @@ void soundEffectsDisable() {
 int soundEffectsIsEnabled() {
 	return gSoundEffectsEnabled;
 }
+#endif
 
 // 0x4502EC
 int gameSoundSetMasterVolume(int volume) {
@@ -474,10 +476,12 @@ int soundEffectsSetVolume(int volume) {
 	return 0;
 }
 
+#if 0
 // 0x450454
 int soundEffectsGetVolume() {
 	return gSoundEffectsVolume;
 }
+#endif
 
 // NOTE: Inlined.
 //
@@ -570,9 +574,11 @@ void backgroundSoundSetEndCallback(SoundEndCallback *callback) {
 // NOTE: There are no references to this function.
 //
 // 0x450670
+#if 0
 int backgroundSoundGetDuration() {
 	return soundGetDuration(gBackgroundSound);
 }
+#endif
 
 // [fileName] is base file name, without path and extension.
 //
@@ -772,6 +778,7 @@ void backgroundSoundResume() {
 // NOTE: Inlined.
 //
 // 0x450B78
+#if 0
 void speechDisable() {
 	if (gGameSoundInitialized) {
 		if (gSpeechEnabled) {
@@ -780,6 +787,7 @@ void speechDisable() {
 		}
 	}
 }
+#endif
 
 // NOTE: Inlined.
 //
@@ -824,12 +832,14 @@ int speechGetVolume() {
 	return gSpeechVolume;
 }
 
+#if 0
 // 0x450C64
 int _gsound_speech_volume_get_set(int volume) {
 	int oldVolume = gSpeechVolume;
 	speechSetVolume(volume);
 	return oldVolume;
 }
+#endif
 
 // 0x450C74
 void speechSetEndCallback(SoundEndCallback *callback) {
@@ -994,6 +1004,7 @@ void speechDelete() {
 	}
 }
 
+#if 0
 // 0x451054
 void speechPause() {
 	if (gSpeechSound != nullptr) {
@@ -1007,6 +1018,7 @@ void speechResume() {
 		soundResume(gSpeechSound);
 	}
 }
+#endif
 
 // 0x45108C
 int _gsound_play_sfx_file_volume(const char *a1, int a2) {
