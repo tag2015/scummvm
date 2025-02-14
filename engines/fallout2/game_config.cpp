@@ -5,6 +5,7 @@
 /*#include <stdio.h>
 #include <string.h>*/
 
+#include "fallout2/db.h"
 // #include "main.h"
 #include "fallout2/platform_compat.h"
 
@@ -118,6 +119,21 @@ bool gameConfigInit(bool isMapper, int argc, char **argv) {
 		configSetInt(&gGameConfig, GAME_CONFIG_MAPPER_KEY, GAME_CONFIG_RUN_MAPPER_AS_GAME_KEY, 0);
 		configSetInt(&gGameConfig, GAME_CONFIG_MAPPER_KEY, GAME_CONFIG_DEFAULT_F8_AS_GAME_KEY, 1);
 		configSetInt(&gGameConfig, GAME_CONFIG_MAPPER_KEY, GAME_CONFIG_SORT_SCRIPT_LIST_KEY, 0);
+	}
+
+	// CE: Detect alternative default music directory.
+	char alternativeMusicPath[COMPAT_MAX_PATH];
+	Common::strcpy_s(alternativeMusicPath, COMPAT_MAX_PATH, "data\\sound\\music\\*.acm");
+	compat_windows_path_to_native(alternativeMusicPath);
+	compat_resolve_path(alternativeMusicPath);
+	char **acms;
+	int acmsLength = fileNameListInit(alternativeMusicPath, &acms, 0, 0);
+	if (acmsLength != -1) {
+		if (acmsLength > 0) {
+			configSetString(&gGameConfig, GAME_CONFIG_SOUND_KEY, GAME_CONFIG_MUSIC_PATH1_KEY, "data\\sound\\music\\");
+			configSetString(&gGameConfig, GAME_CONFIG_SOUND_KEY, GAME_CONFIG_MUSIC_PATH2_KEY, "data\\sound\\music\\");
+		}
+		fileNameListFree(&acms, 0);
 	}
 
 	// SFALL: Custom config file name.
