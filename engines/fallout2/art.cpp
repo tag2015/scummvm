@@ -683,8 +683,9 @@ static int artReadList(const char *path, char **artListPtr, int *artListSizePtr)
 		if (brk != nullptr) {
 			*brk = '\0';
 		}
-
-		(strncpy(artList, string, 12));
+		// FIXME: Ugly hack to avoid truncation warning
+		Common::String art_string(string);
+		strncpy(artList, art_string.c_str(), 12);
 		artList[12] = '\0';
 
 		artList += 13;
