@@ -618,7 +618,7 @@ void messageListFilterGenderWords(MessageList *messageList, int gender) {
 				}
 
 				strncpy(start, src, length);
-				strncpy(start + length, end + 1, strlen(end + 1) + 1);
+				Common::strcpy_s(start + length, strlen(end + 1), end + 1);
 			} else {
 				text = sep + 1;
 			}

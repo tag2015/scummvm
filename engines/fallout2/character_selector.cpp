@@ -965,9 +965,9 @@ void premadeCharactersInit() {
 		gCustomPremadeCharacterDescriptions.resize(PREMADE_CHARACTER_COUNT);
 
 		for (int index = 0; index < PREMADE_CHARACTER_COUNT; index++) {
-			(strncpy(gCustomPremadeCharacterDescriptions[index].fileName, gPremadeCharacterDescriptions[index].fileName, 20));
+			Common::strcpy_s(gCustomPremadeCharacterDescriptions[index].fileName, 20, gPremadeCharacterDescriptions[index].fileName);
 			gCustomPremadeCharacterDescriptions[index].face = gPremadeCharacterDescriptions[index].face;
-			(strncpy(gCustomPremadeCharacterDescriptions[index].field_18, gPremadeCharacterDescriptions[index].field_18, 20));
+			Common::strcpy_s(gCustomPremadeCharacterDescriptions[index].field_18, 20, gPremadeCharacterDescriptions[index].field_18);
 		}
 	}
 
