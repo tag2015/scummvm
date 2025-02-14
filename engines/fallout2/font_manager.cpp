@@ -364,7 +364,8 @@ static void interfaceFontDrawImpl(unsigned char *buf, const char *string, int le
 			for (int x = 0; x < glyph->width; x++) {
 				unsigned char byte = *glyphDataPtr++;
 
-				*ptr++ = palette[(byte << 8) + *ptr];
+				*ptr = palette[(byte << 8) + *ptr];
+				ptr++;
 			}
 
 			ptr += pitch - glyph->width;
