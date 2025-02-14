@@ -120,16 +120,14 @@ bool gameConfigInit(bool isMapper, int argc, char **argv) {
 		configSetInt(&gGameConfig, GAME_CONFIG_MAPPER_KEY, GAME_CONFIG_SORT_SCRIPT_LIST_KEY, 0);
 	}
 
-	// SFALL: custom config file name.
-	char *configFileName = nullptr;
-	if (configGetString(&gSfallConfig, SFALL_CONFIG_MISC_KEY, SFALL_CONFIG_CONFIG_FILE, &configFileName)) {
-		if (configFileName == nullptr || *configFileName == '\0') {
-			configFileName = DEFAULT_GAME_CONFIG_FILE_NAME;
-		}
-	}
+	// SFALL: Custom config file name.
+	char *customConfigFileName = nullptr;
+	configGetString(&gSfallConfig, SFALL_CONFIG_MISC_KEY, SFALL_CONFIG_CONFIG_FILE, &customConfigFileName);
+	const char *configFileName = (customConfigFileName != nullptr && *customConfigFileName != '\0') ? customConfigFileName : DEFAULT_GAME_CONFIG_FILE_NAME;
 
+#if 0
 	// Make `fallout2.cfg` file path.
-	char *executable ="fallout2.exe"/* argv[0]*/;
+	char *executable = argv[0];
 	char *ch = strrchr(executable, '\\');
 	if (ch != nullptr) {
 		*ch = '\0';
@@ -141,15 +139,20 @@ bool gameConfigInit(bool isMapper, int argc, char **argv) {
 		*ch = '\\';
 	} else {
 		if (isMapper) {
-			strncpy(gGameConfigFilePath, MAPPER_CONFIG_FILE_NAME, sizeof(gGameConfigFilePath) - 1);
+			strcpy(gGameConfigFilePath, MAPPER_CONFIG_FILE_NAME, sizeof(gGameConfigFilePath) - 1);
 		} else {
-			strncpy(gGameConfigFilePath, configFileName, sizeof(gGameConfigFilePath) - 1);
+			strcpy(gGameConfigFilePath, configFileName, sizeof(gGameConfigFilePath) - 1);
 		}
 	}
+#endif
 
+	if (isMapper)
+		Common::strcpy_s(gGameConfigFilePath, sizeof(gGameConfigFilePath), MAPPER_CONFIG_FILE_NAME);
+	else
+		Common::strcpy_s(gGameConfigFilePath, sizeof(gGameConfigFilePath), configFileName);
 	// Read contents of `fallout2.cfg` into config. The values from the file
 	// will override the defaults above.
-	configReadScumm(&gGameConfig, configFileName);
+	configReadScumm(&gGameConfig, gGameConfigFilePath);
 	// Add key-values from command line, which overrides both defaults and
 	// whatever was loaded from `fallout2.cfg`.
 	// TODO? Commandline
