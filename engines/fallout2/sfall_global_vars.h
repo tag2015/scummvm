@@ -3,7 +3,7 @@
 
 #include "fallout2/db.h"
 
-#include "common/scummsys.h"
+#include "common/savefile.h"
 
 namespace Fallout2 {
 
@@ -14,8 +14,8 @@ typedef uint64 uint64_t;
 bool sfall_gl_vars_init();
 void sfall_gl_vars_reset();
 void sfall_gl_vars_exit();
-bool sfall_gl_vars_save(File *stream);
-bool sfall_gl_vars_load(File *stream);
+bool sfall_gl_vars_save(Common::OutSaveFile *stream);
+bool sfall_gl_vars_load(Common::InSaveFile *stream);
 bool sfall_gl_vars_store(const char *key, int value);
 bool sfall_gl_vars_store(int key, int value);
 bool sfall_gl_vars_fetch(const char *key, int &value);

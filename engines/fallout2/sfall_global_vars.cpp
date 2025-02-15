@@ -51,40 +51,34 @@ void sfall_gl_vars_exit() {
 	}
 }
 
-bool sfall_gl_vars_save(File *stream) {
-	// TODO loadsave
-	warning("SFALL: Saving global vars not implemented");
+bool sfall_gl_vars_save(Common::OutSaveFile *stream) {
 	int count = static_cast<int>(sfall_gl_vars_state->vars.size());
-	if (fileWrite(&count, sizeof(count), 1, stream) != 1) {
+	if (stream->write(&count, sizeof(count)) != sizeof(count))
 		return false;
-	}
 
 	GlobalVarEntry entry = {0, 0, 0};
 	for (auto &pair : sfall_gl_vars_state->vars) {
 		entry.key = pair._key;
 		entry.value = pair._value;
 
-		if (fileWrite(&entry, sizeof(entry), 1, stream) != 1) {
+		if (stream->write(&entry, sizeof(entry)) != sizeof(entry))
 			return false;
-		}
 	}
 
 	return true;
 }
 
-bool sfall_gl_vars_load(File *stream) {
+bool sfall_gl_vars_load(Common::InSaveFile *stream) {
 	int count;
-	if (fileRead(&count, sizeof(count), 1, stream) != 1) {
+	if (stream->read(&count, sizeof(count)) != sizeof(count))
 		return false;
-	}
 
 	sfall_gl_vars_state->vars.reserve(count);
 
 	GlobalVarEntry entry;
 	while (count > 0) {
-		if (fileRead(&entry, sizeof(entry), 1, stream) != 1) {
+		if (stream->read(&entry, sizeof(entry)) != sizeof(entry))
 			return false;
-		}
 
 		sfall_gl_vars_state->vars[entry.key] = static_cast<int>(entry.value);
 
