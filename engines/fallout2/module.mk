@@ -111,7 +111,6 @@ MODULE_OBJS = \
 	text_object.o \
 	tile.o \
 	trait.o \
-	vcr.o \
 	version.o \
 	widget.o \
 	win32.o \
