@@ -47,11 +47,6 @@ static void screenshotBlitter(unsigned char *src, int src_pitch, int a3, int x, 
 static void buildNormalizedQwertyKeys();
 static void _GNW95_process_key(KeyboardData *data);
 
-static void idleImpl();
-
-// 0x51E234
-static IdleFunc *_idle_func = nullptr;
-
 // 0x51E23C
 static int gKeyboardKeyRepeatRate = 80;
 
@@ -149,10 +144,6 @@ int inputInit(int a1) {
 	gScreenshotHandler = screenshotHandlerDefaultImpl;
 	gTickerListHead = nullptr;
 	gScreenshotKeyCode = KEY_ALT_C;
-
-	// SFALL: Set idle function.
-	// CE: Prevents frying CPU when window is not focused.
-	inputSetIdleFunc(idleImpl);
 
 	return 0;
 }
@@ -669,20 +660,6 @@ int inputGetKeyboardKeyRepeatDelay() {
 	return gKeyboardKeyRepeatDelay;
 }
 
-// NOTE: Unused.
-//
-// 0x4C9448
-void inputSetIdleFunc(IdleFunc *func) {
-	_idle_func = func;
-}
-
-// NOTE: Unused.
-//
-// 0x4C9450
-IdleFunc *inputGetIdleFunc() {
-	return _idle_func;
-}
-
 // 0x4C9490
 static void buildNormalizedQwertyKeys() {
 /*	int *keys = gNormalizedQwertyKeys; TODO
@@ -1130,15 +1107,9 @@ void _GNW95_lost_focus() {
 	while (!gProgramIsActive) {
 		_GNW95_process_message();
 
-		if (_idle_func != nullptr) {
-			_idle_func();
-		}
+		//	SDL_Delay(125);
+		g_system->delayMillis(125);
 	}
-}
-
-static void idleImpl() {
-	//	SDL_Delay(125);
-	g_system->delayMillis(125);
 }
 
 void beginTextInput() {
