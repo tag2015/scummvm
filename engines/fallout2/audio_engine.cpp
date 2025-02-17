@@ -100,10 +100,7 @@ static void audioEngineMixin(void *userData, uint8 *stream, int length) { // TOD
 }
 
 bool audioEngineInit() {
-/*	if (SDL_InitSubSystem(SDL_INIT_AUDIO) == -1) {
-		return false;
-	}
-
+/*	
 	SDL_AudioSpec desiredSpec;
 	desiredSpec.freq = 22050;
 	desiredSpec.format = AUDIO_S16;
@@ -126,10 +123,6 @@ void audioEngineExit() {
 //		SDL_CloseAudioDevice(gAudioEngineDeviceId);
 		gAudioEngineDeviceId = -1;
 	}
-
-//	if (SDL_WasInit(SDL_INIT_AUDIO)) {
-//		SDL_QuitSubSystem(SDL_INIT_AUDIO);
-//	}
 }
 
 void audioEnginePause() {
