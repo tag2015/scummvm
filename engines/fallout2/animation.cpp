@@ -33,7 +33,6 @@
 #include "fallout2/text_object.h"
 #include "fallout2/tile.h"
 #include "fallout2/trait.h"
-#include "fallout2/vcr.h"
 #include "fallout2/worldmap.h"
 
 namespace Fallout2 {
@@ -2965,10 +2964,6 @@ void _dude_fidget() {
 	}
 
 	if (isInCombat()) {
-		return;
-	}
-
-	if (vcrGetState() != VCR_STATE_TURNED_OFF) {
 		return;
 	}
 
