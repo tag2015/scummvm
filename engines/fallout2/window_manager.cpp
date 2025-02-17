@@ -118,8 +118,8 @@ static ButtonGroup gButtonGroups[BUTTON_GROUP_LIST_CAPACITY];
 // 0x4D5C30
 int windowManagerInit(VideoSystemInitProc *videoSystemInitProc, VideoSystemExitProc *videoSystemExitProc, int a3) {
 #if 0
-	CloseHandle(_GNW95_mutex);
-	_GNW95_mutex = INVALID_HANDLE_VALUE;
+	CloseHandle(GNW95_mutex);
+	GNW95_mutex = INVALID_HANDLE_VALUE;
 #endif
 
 	if (_GNW95_already_running) {
