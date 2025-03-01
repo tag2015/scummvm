@@ -1,5 +1,6 @@
 #include "fallout2/game_config.h"
 
+#include "fallout2/fallout2.h"
 #include "fallout2/sfall_config.h"
 
 /*#include <stdio.h>
@@ -172,6 +173,26 @@ bool gameConfigInit(bool isMapper, int argc, char **argv) {
 	// Read contents of `fallout2.cfg` into config. The values from the file
 	// will override the defaults above.
 	configReadScumm(&gGameConfig, gGameConfigFilePath);
+	// Set game language. Fallback to english
+	switch (g_engine->getLanguage()) {
+		case Common::DE_DEU:
+			configSetString(&gGameConfig, GAME_CONFIG_SYSTEM_KEY, GAME_CONFIG_LANGUAGE_KEY, GERMAN);
+			break;
+		case Common::ES_ESP:
+			configSetString(&gGameConfig, GAME_CONFIG_SYSTEM_KEY, GAME_CONFIG_LANGUAGE_KEY, SPANISH);
+			break;
+		case Common::FR_FRA:
+			configSetString(&gGameConfig, GAME_CONFIG_SYSTEM_KEY, GAME_CONFIG_LANGUAGE_KEY, FRENCH);
+			break;
+		case Common::IT_ITA:
+			configSetString(&gGameConfig, GAME_CONFIG_SYSTEM_KEY, GAME_CONFIG_LANGUAGE_KEY, ITALIAN);
+			break;
+		case Common::RU_RUS:
+			configSetString(&gGameConfig, GAME_CONFIG_SYSTEM_KEY, GAME_CONFIG_LANGUAGE_KEY, "russian");
+			break;
+		default:
+			configSetString(&gGameConfig, GAME_CONFIG_SYSTEM_KEY, GAME_CONFIG_LANGUAGE_KEY, ENGLISH);
+	}
 
 	// Add key-values from command line, which overrides both defaults and
 	// whatever was loaded from `fallout2.cfg`.
