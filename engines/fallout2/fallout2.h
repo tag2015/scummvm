@@ -61,6 +61,11 @@ public:
 	Common::String getGameId() const;
 
 	/**
+	 * Returns game language
+	 */
+	Common::Language getLanguage() const;
+
+	/**
 	 * Gets a random number
 	 */
 	uint32 getRandomNumber(uint maxNum) {

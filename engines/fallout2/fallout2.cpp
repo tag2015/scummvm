@@ -121,6 +121,10 @@ Common::String Fallout2Engine::getGameId() const {
 	return _gameDescription->gameId;
 }
 
+Common::Language Fallout2Engine::getLanguage() const {
+	return _gameDescription->language;
+}
+
 static char _mainMap[] = "artemple.map";
 static int _main_game_paused = 0;
 static bool _main_show_death_scene = false;
