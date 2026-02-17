@@ -63,6 +63,7 @@ bool sfallConfigInit(int argc, char **argv) {
 	configSetString(&gSfallConfig, SFALL_CONFIG_MISC_KEY, SFALL_CONFIG_VERSION_STRING, "");
 	configSetString(&gSfallConfig, SFALL_CONFIG_MISC_KEY, SFALL_CONFIG_CONFIG_FILE, "");
 	configSetString(&gSfallConfig, SFALL_CONFIG_MISC_KEY, SFALL_CONFIG_PATCH_FILE, "");
+	configSetBool(&gSfallConfig, SFALL_CONFIG_MISC_KEY, SFALL_CONFIG_CITIES_LIMIT_FIX, true);
 	configSetInt(&gSfallConfig, SFALL_CONFIG_MISC_KEY, SFALL_CONFIG_PIPBOY_AVAILABLE_AT_GAMESTART, 0);
 
 	configSetString(&gSfallConfig, SFALL_CONFIG_SCRIPTS_KEY, SFALL_CONFIG_INI_CONFIG_FOLDER, "");
@@ -87,6 +88,8 @@ bool sfallConfigInit(int argc, char **argv) {
 		debug("Loaded SFALL config (%s) from save dir!", SFALL_CONFIG_FILE_NAME);
 	else if (configRead(&gSfallConfig, path, false))
 		debug("Loaded SFALL config (%s) from game dir!", path);
+	else
+		configSetBool(&gSfallConfig, SFALL_CONFIG_MISC_KEY, SFALL_CONFIG_CITIES_LIMIT_FIX, false);
 
 	//	configParseCommandLineArguments(&gSfallConfig, argc, argv); TODO commandline
 
