@@ -3219,6 +3219,7 @@ static int _combat_turn(Object *obj, bool a2) {
 	} else {
 		if (obj == gDude) {
 			keyboardReset();
+			inputEventQueueReset();
 			interfaceRenderArmorClass(true);
 			_combat_free_move = 2 * perkGetRank(gDude, PERK_BONUS_MOVE);
 			interfaceRenderActionPoints(gDude->data.critter.combat.ap, _combat_free_move);

@@ -260,6 +260,8 @@ static int dequeueInputEvent() {
 void inputEventQueueReset() {
 	gInputEventQueueReadIndex = -1;
 	gInputEventQueueWriteIndex = 0;
+	g_system->getEventManager()->purgeKeyboardEvents();
+	g_system->getEventManager()->purgeMouseEvents();
 }
 
 // 0x4C8D1C
