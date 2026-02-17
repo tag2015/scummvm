@@ -88,8 +88,6 @@ bool sfallConfigInit(int argc, char **argv) {
 		debug("Loaded SFALL config (%s) from save dir!", SFALL_CONFIG_FILE_NAME);
 	else if (configRead(&gSfallConfig, path, false))
 		debug("Loaded SFALL config (%s) from game dir!", path);
-	else
-		configSetBool(&gSfallConfig, SFALL_CONFIG_MISC_KEY, SFALL_CONFIG_CITIES_LIMIT_FIX, false);
 
 	//	configParseCommandLineArguments(&gSfallConfig, argc, argv); TODO commandline
 
