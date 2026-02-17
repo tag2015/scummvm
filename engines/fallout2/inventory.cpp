@@ -6,6 +6,7 @@
 
 #include <algorithm>*/
 
+#include "fallout2/fallout2.h"
 #include "fallout2/actions.h"
 #include "fallout2/animation.h"
 #include "fallout2/art.h"
@@ -278,7 +279,7 @@ static void _container_exit(int keyCode, int inventoryWindowType);
 static int _drop_into_container(Object *container, Object *item, int sourceIndex, Object **itemSlot, int quantity);
 static int _drop_ammo_into_weapon(Object *weapon, Object *ammo, Object **ammoItemSlot, int quantity, int keyCode);
 static void _draw_amount(int value, int inventoryWindowType);
-static int inventoryQuantitySelect(int inventoryWindowType, Object *item, int max, int suggestedValue = 1);
+static int inventoryQuantitySelect(int inventoryWindowType, Object *item, int max, int defaultValue = 1);
 static int inventoryQuantityWindowInit(int inventoryWindowType, Object *item);
 static int inventoryQuantityWindowFree(int inventoryWindowType);
 
@@ -4722,24 +4723,11 @@ static int _barter_get_quantity_moved_items(Object *item, int maxQuantity, bool 
 		// Calculate change money automatically
 		int totalCostPlayer = objectGetCost(_ptable);
 		int totalCostNpc = _barter_compute_value(gDude, _target_stack[0]);
-		int balance = totalCostPlayer - totalCostNpc;
-		bool balancePositive = true;
-		if (balance < 0) {
-			balancePositive = false;
-			balance = -balance;
-		}
-		// fromPlayer | fromInventory | balancePositive | suggestedVale
-		//     0      |        0      |        0        |   abs(balance)
-		//     0      |        0      |        1        |      1
-		//     0      |        1      |        0        |      1
-		//     0      |        1      |        1        |   balance
-		//     1      |        0      |        0        |      1
-		//     1      |        0      |        1        |   balance
-		//     1      |        1      |        0        |   abs(balance)
-		//     1      |        1      |        1        |      1
-		// if balance 0 then suggestedVale is 1
-		if (balance != 0 && !(fromPlayer ^ fromInventory ^ balancePositive)) {
-			suggestedValue = MIN(balance, maxQuantity);
+		// Actor's balance: negative - the actor must add money to balance the tables and vice versa
+		int balance = fromPlayer ? totalCostPlayer - totalCostNpc : totalCostNpc - totalCostPlayer;
+
+		if ((balance < 0 && fromInventory) || (balance > 0 && !fromInventory)) {
+			suggestedValue = MIN(ABS(balance), maxQuantity);
 		}
 	}
 	return inventoryQuantitySelect(INVENTORY_WINDOW_TYPE_MOVE_ITEMS, item, maxQuantity, suggestedValue);
@@ -5558,7 +5546,7 @@ static void _draw_amount(int value, int inventoryWindowType) {
 }
 
 // 0x47688C
-static int inventoryQuantitySelect(int inventoryWindowType, Object *item, int max, int suggestedValue) {
+static int inventoryQuantitySelect(int inventoryWindowType, Object *item, int max, int defaultValue) {
 	ScopedGameMode gm(GameMode::kCounter);
 
 	inventoryQuantityWindowInit(inventoryWindowType, item);
@@ -5566,11 +5554,11 @@ static int inventoryQuantitySelect(int inventoryWindowType, Object *item, int ma
 	int value;
 	int min;
 	if (inventoryWindowType == INVENTORY_WINDOW_TYPE_MOVE_ITEMS) {
-		value = suggestedValue;
 		if (max > 99999) {
 			max = 99999;
 		}
 		min = 1;
+		value = clamp(defaultValue, min, max);
 	} else {
 		value = 60;
 		min = 10;
