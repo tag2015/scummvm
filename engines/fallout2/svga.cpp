@@ -374,7 +374,8 @@ void _GNW95_zero_vid_mem() {
 		surface += gSdlSurface->pitch;
 	}
 
-	gSdlTextureSurface->blitFrom(gSdlSurface);
+	const Graphics::Surface &newSurf = *gSdlSurface;
+	gSdlTextureSurface->blitFrom(newSurf);
 }
 
 int screenGetWidth() {
