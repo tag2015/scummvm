@@ -36,7 +36,6 @@ bool keyboardDeviceInit();
 void keyboardDeviceFree();
 
 void handleMouseEvent(const Common::Event *event);
-void handleTouchEvent(const Common::Event *event);
 
 } // namespace Fallout2
 

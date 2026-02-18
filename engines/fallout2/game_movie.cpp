@@ -20,7 +20,6 @@
 #include "fallout2/settings.h"
 #include "fallout2/svga.h"
 #include "fallout2/text_font.h"
-// #include "fallout2/touch.h" TODO touch
 #include "fallout2/window_manager.h"
 
 namespace Fallout2 {
@@ -252,11 +251,6 @@ int gameMoviePlay(int movie, int flags) {
 		if (!_moviePlaying() || _game_user_wants_to_quit || inputGetInput() != -1) {
 			break;
 		}
-
-/*		Gesture gesture; TODO touch
-		if (touch_get_gesture(&gesture) && gesture.state == kEnded) {
-			break;
-		}*/
 
 		int x;
 		int y;

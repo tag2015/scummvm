@@ -12,7 +12,6 @@
 #include "fallout2/mouse.h"
 #include "fallout2/svga.h"
 #include "fallout2/text_font.h"
-// #include "fallout2/touch.h" TODO touch
 #include "fallout2/win32.h"
 
 #include "common/keyboard.h"
@@ -906,33 +905,6 @@ void _GNW95_process_message() {
 			_GNW95_process_key(&keyboardData);
 		}
 	}
-
-/*		case SDL_FINGERDOWN:  TODO touch
-			touch_handle_start(&(e.tfinger));
-			break;
-		case SDL_FINGERMOTION:
-			touch_handle_move(&(e.tfinger));
-			break;
-		case SDL_FINGERUP:
-			touch_handle_end(&(e.tfinger));
-			break;
-		case SDL_WINDOWEVENT:  TODO
-			switch (e.window.event) {
-			case SDL_WINDOWEVENT_EXPOSED:
-				windowRefreshAll(&_scr_size);
-				break;
-			case SDL_WINDOWEVENT_SIZE_CHANGED:
-				handleWindowSizeChanged();
-				break;
-			}
-			break;
-		case SDL_QUIT:
-			exit(EXIT_SUCCESS);
-			break;
-		}
-	}*/
-
-	// touch_process_gesture();  TODO touch
 
 	if (gProgramIsActive && !keyboardIsDisabled()) {
 		// NOTE: Uninline
