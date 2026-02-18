@@ -1052,7 +1052,6 @@ err:
 	mapSetEnteringLocation(-1, -1, -1);
 
 	tile_hires_stencil_init();
-	tileWindowRefresh();
 
 //	gameMovieFadeOut(); TODO movie
 
@@ -1293,7 +1292,6 @@ err:
 	mapSetEnteringLocation(-1, -1, -1);
 
 	tile_hires_stencil_init();
-	tileWindowRefresh();
 
 //	gameMovieFadeOut(); TODO movie
 
