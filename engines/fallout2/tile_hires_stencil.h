@@ -1,8 +1,7 @@
 #ifndef FALLOUT2_TILE_HIRES_STENCIL_H
 #define FALLOUT2_TILE_HIRES_STENCIL_H
 
-#include "fallout2/map.h"
-#include "fallout2/tile.h"
+#include "fallout2/geometry.h"
 
 namespace Fallout2 {
 

@@ -132,7 +132,6 @@ enum class MarkOnlyPart {
 };
 
 static void mark_screen_tiles_around_as_visible(int center_tile, const Point &screen_diff, MarkOnlyPart part) {
-	// TODO: Use neighbors information to cover only new squares
 
 	int centerTileScreenX;
 	int centerTileScreenY;
@@ -188,11 +187,11 @@ void tile_hires_stencil_on_center_tile_or_elevation_change() {
 	}
 
 	if (visited_tiles[gElevation][gCenterTile]) {
-		debugPrint("on_center_tile_or_elevation_change tile was visited gElevation=%i gCenterTile=%i so doing nothing\n", gElevation, gCenterTile);
+		debugPrint("tile_hires_stencil_on_center_tile_or_elevation_change tile was visited gElevation=%i gCenterTile=%i so doing nothing\n", gElevation, gCenterTile);
 		return;
 	}
 
-	debugPrint("on_center_tile_or_elevation_change non-visited tile gElevation=%i gCenterTile=%i\n", gElevation, gCenterTile);
+	debugPrint("tile_hires_stencil_on_center_tile_or_elevation_change non-visited tile gElevation=%i gCenterTile=%i\n", gElevation, gCenterTile);
 
 	clean_cache_for_elevation(gElevation);
 
@@ -290,7 +289,7 @@ void tile_hires_stencil_on_center_tile_or_elevation_change() {
 								  MarkOnlyPart::DOWN});
 	}
 
-	debugPrint("on_center_tile_or_elevation_change visited_tiles_count=%i\n", visited_tiles_count);
+	debugPrint("tile_hires_stencil_on_center_tile_or_elevation_change visited_tiles_count=%i\n", visited_tiles_count);
 }
 
 void tile_hires_stencil_draw(Rect *rect, unsigned char *buffer, int windowWidth, int windowHeight) {
