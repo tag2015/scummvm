@@ -52,6 +52,7 @@
 #include "fallout2/settings.h"
 // #include "fallout2/sfall_arrays.h"
 #include "fallout2/sfall_config.h"
+#include "fallout2/sfall_ext.h"
 #include "fallout2/sfall_global_scripts.h"
 #include "fallout2/sfall_global_vars.h"
 #include "fallout2/sfall_ini.h"
@@ -1375,6 +1376,8 @@ int showQuitConfirmationDialog() {
 			dbOpen(filename, 0, nullptr, 1);
 		}
 	}
+
+	sfallLoadMods();
 
 	if (compat_access("f2_res.dat", 0) == 0) {
 		dbOpen("f2_res.dat", 0, nullptr, 1);

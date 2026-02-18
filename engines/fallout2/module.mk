@@ -91,6 +91,7 @@ MODULE_OBJS = \
 	select_file_list.o \
 	settings.o \
 	sfall_config.o \
+	sfall_ext.o \
 	sfall_global_scripts.o \
 	sfall_global_vars.o \
 	sfall_ini.o \
