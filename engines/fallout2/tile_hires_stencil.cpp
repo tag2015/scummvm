@@ -28,8 +28,8 @@ static constexpr int squares_per_vertical_move = 2;
 static constexpr int square_width = pixels_per_horizontal_move / squares_per_horizontal_move;
 static constexpr int square_height = pixels_per_vertical_move / squares_per_vertical_move;
 
-static_assert(pixels_per_horizontal_move % square_width == 0);
-static_assert(pixels_per_vertical_move % square_height == 0);
+static_assert(pixels_per_horizontal_move % square_width == 0, "pixels_per_horizontal_move is not a multiple of square_width");
+static_assert(pixels_per_vertical_move % square_height == 0, "pixels_per_vertical_move is not a multiple of square_height");
 
 // Dimensions of the grid of squares
 static constexpr int square_grid_width = 500;
@@ -41,8 +41,8 @@ static bool visible_squares[ELEVATION_COUNT][square_grid_width][square_grid_heig
 // Dimensions of the grid of squares were calculated by
 // going through all hex tiles and finding the lowest and highest x and y.
 // This way we can be sure that all hex tiles can be covered by squares.
-static_assert(square_width * square_grid_width == 8000);
-static_assert(square_height * square_grid_height == 3600);
+static_assert(square_width * square_grid_width == 8000, "square_width * square_grid_width must be 8000");
+static_assert(square_height * square_grid_height == 3600, "square_height * square_grid_height must be 3600");
 
 // What can be seen on the screen in original resolution
 static constexpr int screen_view_width = 640;
@@ -52,10 +52,10 @@ static constexpr int screen_view_height = 380;
 static constexpr int squares_screen_width_half = screen_view_width / 2 / square_width;
 static constexpr int squares_screen_height_half = screen_view_height / 2 / square_height;
 // Horizontal visibility fits hex grid perfectly
-static_assert(screen_view_width % (2 * square_width) == 0);
+static_assert(screen_view_width % (2 * square_width) == 0, "screen_view_width is not a multiple of 2*square_width");
 // In the vertical direction we have 10+10 pixels left per each direction
 // which is covered by squares but theoretically could be seen in the original game
-static_assert(screen_view_height % (2 * square_height) == 20);
+static_assert(screen_view_height % (2 * square_height) == 20, "screen_view_height leftover space must be 20px");
 
 static bool gIsTileHiresStencilEnabled = false;
 
