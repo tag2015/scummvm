@@ -111,6 +111,7 @@ MODULE_OBJS = \
 	text_font.o \
 	text_object.o \
 	tile.o \
+	tile_hires_stencil.o \
 	trait.o \
 	version.o \
 	widget.o \
