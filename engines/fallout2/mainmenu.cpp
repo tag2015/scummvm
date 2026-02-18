@@ -153,7 +153,11 @@ int mainMenuWindowInit() {
 	char version[VERSION_MAX];
 	versionGetVersion(version, sizeof(version));
 	len = fontGetStringWidth(version);
-	windowDrawText(gMainMenuWindow, version, 0, 615 - len, 460, fontSettings | 0x06000000);
+	windowDrawText(gMainMenuWindow, version, 0, 615 - len, 450, fontSettings | 0x06000000);
+
+	char scummVersion[VERSION_MAX] = VERSION_SCUMMVM;
+	len = fontGetStringWidth(scummVersion);
+	windowDrawText(gMainMenuWindow, scummVersion, 0, 615 - len, 460, fontSettings | 0x06000000);
 
 	// menuup.frm
 	fid = buildFid(OBJ_TYPE_INTERFACE, 299, 0, 0, 0);

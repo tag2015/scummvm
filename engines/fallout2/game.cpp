@@ -92,6 +92,7 @@ static char _aGame_0[] = "game\\";
 
 // 0x5020B8
 static char _aDec11199816543[] = VERSION_BUILD_TIME;
+static char _aScummVMVer[] = VERSION_SCUMMVM;
 
 // 0x5186B4
 static bool gGameUiDisabled = false;
@@ -940,6 +941,7 @@ int gameHandleKey(int eventCode, bool isInCombatMode) {
 		versionGetVersion(version, sizeof(version));
 		displayMonitorAddMessage(version);
 		displayMonitorAddMessage(_aDec11199816543);
+		displayMonitorAddMessage(_aScummVMVer);
 	} break;
 	case KEY_ARROW_LEFT:
 		mapScroll(-1, 0);
