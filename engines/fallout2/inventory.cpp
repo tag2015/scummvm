@@ -5572,6 +5572,7 @@ static int inventoryQuantitySelect(int inventoryWindowType, Object *item, int ma
 
 		int keyCode = inputGetInput();
 		if (keyCode == KEY_ESCAPE) {
+			soundPlayFile("ib1p1xx1");
 			inventoryQuantityWindowFree(inventoryWindowType);
 			return -1;
 		}
@@ -5849,9 +5850,6 @@ static int inventoryQuantityWindowInit(int inventoryWindowType, Object *item) {
 						   _moveFrmImages[5].getData(),
 						   nullptr,
 						   BUTTON_FLAG_TRANSPARENT);
-		if (btn != -1) {
-			buttonSetCallbacks(btn, _gsound_red_butt_press, _gsound_red_butt_release);
-		}
 
 		// Cancel
 		btn = buttonCreate(_mt_wid,
@@ -5867,9 +5865,6 @@ static int inventoryQuantityWindowInit(int inventoryWindowType, Object *item) {
 						   _moveFrmImages[5].getData(),
 						   nullptr,
 						   BUTTON_FLAG_TRANSPARENT);
-		if (btn != -1) {
-			buttonSetCallbacks(btn, _gsound_red_butt_press, _gsound_red_butt_release);
-		}
 	}
 
 	if (inventoryWindowType == INVENTORY_WINDOW_TYPE_MOVE_ITEMS) {
