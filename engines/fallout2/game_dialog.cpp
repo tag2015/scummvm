@@ -4268,6 +4268,7 @@ int _gdialog_window_create() {
 			// TODO: Not sure about offsets.
 			blitBufferToBuffer(bgWindowBuf + screenWidth * (GAME_DIALOG_WINDOW_HEIGHT - _dialogue_subwin_len), screenWidth, _dialogue_subwin_len, screenWidth, windowBuf, screenWidth);
 
+			// BARTER/TRADE
 			_gdialog_buttons[0] = buttonCreate(gGameDialogWindow, 593, 41, 14, 14, -1, -1, -1, -1, _redButtonNormalFrmImage.getData(), _redButtonPressedFrmImage.getData(), nullptr, BUTTON_FLAG_TRANSPARENT);
 
 			if (_dialogue_just_started) {
@@ -4278,7 +4279,6 @@ int _gdialog_window_create() {
 				_gdialog_scroll_subwin(gGameDialogWindow, true, backgroundFrmData, windowBuf, nullptr, _dialogue_subwin_len, false);
 			}
 
-			// BARTER/TRADE
 			if (_gdialog_buttons[0] != -1) {
 				buttonSetMouseCallbacks(_gdialog_buttons[0], nullptr, nullptr, nullptr, gameDialogBarterButtonUpMouseUp);
 				buttonSetCallbacks(_gdialog_buttons[0], _gsound_med_butt_press, _gsound_med_butt_release);
