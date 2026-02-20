@@ -361,6 +361,8 @@ void _InitLoadSave() {
 	if (quickSaveSlots > 0 && quickSaveSlots <= saveLoadTotalSlots) {
 		autoQuickSaveSlots = true;
 	}
+
+	pipboyMessageListInit();
 }
 
 // 0x47B85C
@@ -2460,8 +2462,8 @@ static void _ShowSlotList(int windowType) {
 		int inactiveColor = _colorTable[8804];
 
 		MessageListItem messageListItemBack;
-		messageListItemBack.num = 654; // Back
-		messageListGetItem(&gProtoMessageList, &messageListItemBack);
+		messageListItemBack.num = 201; // Back
+		messageListGetItem(&gPipboyMessageList, &messageListItemBack);
 		fontDrawText(
 			gLoadSaveWindowBuffer + LS_WINDOW_WIDTH * (y + 0) + 95,
 			messageListItemBack.text,
@@ -2470,8 +2472,8 @@ static void _ShowSlotList(int windowType) {
 			_currentSlotPage > 0 ? activeColor : inactiveColor);
 
 		MessageListItem messageListItemMore;
-		messageListItemMore.num = 652; // More
-		messageListGetItem(&gProtoMessageList, &messageListItemMore);
+		messageListItemMore.num = 200; // More
+		messageListGetItem(&gPipboyMessageList, &messageListItemMore);
 		fontDrawText(gLoadSaveWindowBuffer + LS_WINDOW_WIDTH * (y + 0) + 210,
 					 messageListItemMore.text,
 					 LS_WINDOW_WIDTH,

@@ -2,6 +2,7 @@
 #define FALLOUT2_PIPBOY_H
 
 #include "fallout2/db.h"
+#include "fallout2/message.h"
 
 namespace Fallout2 {
 
@@ -15,6 +16,9 @@ void pipboyInit();
 void pipboyReset();
 int pipboySave(File *stream);
 int pipboyLoad(File *stream);
+
+extern MessageList gPipboyMessageList;
+int pipboyMessageListInit();
 
 } // namespace Fallout2
 
