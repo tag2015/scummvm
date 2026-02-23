@@ -2464,9 +2464,11 @@ static void _ShowSlotList(int windowType) {
 		int activeColor = _colorTable[992];
 		int inactiveColor = _colorTable[8804];
 
-		MessageListItem messageListItemBack;
-		messageListItemBack.num = 201; // Back
-		messageListGetItem(&gPipboyMessageList, &messageListItemBack);
+		MessageListItem messageListItemBack = {201, 0, nullptr, nullptr};
+		if (!messageListGetItem(&gPipboyMessageList, &messageListItemBack)) {
+			debugPrint("Error: Couldn't find LoadSave Message!");
+			messageListItemBack.text = "BACK";
+		}
 		fontDrawText(
 			gLoadSaveWindowBuffer + LS_WINDOW_WIDTH * (y + 0) + 95,
 			messageListItemBack.text,
@@ -2474,9 +2476,11 @@ static void _ShowSlotList(int windowType) {
 			LS_WINDOW_WIDTH,
 			_currentSlotPage > 0 ? activeColor : inactiveColor);
 
-		MessageListItem messageListItemMore;
-		messageListItemMore.num = 200; // More
-		messageListGetItem(&gPipboyMessageList, &messageListItemMore);
+		MessageListItem messageListItemMore = {200, 0, nullptr, nullptr};
+		if (!messageListGetItem(&gPipboyMessageList, &messageListItemMore)) {
+			debugPrint("Error: Couldn't find LoadSave Message!");
+			messageListItemMore.text = "MORE";
+		}
 		fontDrawText(gLoadSaveWindowBuffer + LS_WINDOW_WIDTH * (y + 0) + 210,
 					 messageListItemMore.text,
 					 LS_WINDOW_WIDTH,
