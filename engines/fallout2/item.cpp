@@ -51,10 +51,10 @@ static int stealthBoyTurnOff(Object *critter, Object *item);
 static int _insert_drug_effect(Object *critter, Object *item, int duration, int *stats, int *mods);
 static void _perform_drug_effect(Object *critter, int *stats, int *mods, bool isImmediate);
 static bool _drug_effect_allowed(Object *critter, int pid);
-static int _insert_withdrawal(Object *obj, int a2, int a3, int a4, int a5);
-static int _item_wd_clear_all(Object *a1, void *data);
-static void performWithdrawalStart(Object *obj, int perk, int a3);
-static void performWithdrawalEnd(Object *obj, int a2);
+static int _insert_withdrawal(Object *obj, int active, int duration, int perk, int pid);
+static int _item_wd_clear_all(Object *obj, void *data);
+static void performWithdrawalStart(Object *obj, int perk, int pid);
+static void performWithdrawalEnd(Object *obj, int perk);
 static int drugGetAddictionGvarByPid(int drugPid);
 static void dudeSetAddiction(int drugPid);
 static void dudeClearAddiction(int drugPid);
@@ -1500,6 +1500,9 @@ bool weaponCanBeReloadedWith(Object *weapon, Object *ammo) {
 }
 
 // 0x478918
+// weaponReload adds ammo to the weapon and removes it from the given ammo stack
+// return -1 if ammo is incompatible with weapon; otherwise returns the number of
+// rounds left in the ammo stack
 int weaponReload(Object *weapon, Object *ammo) {
 	if (!weaponCanBeReloadedWith(weapon, ammo)) {
 		return -1;
@@ -1517,26 +1520,26 @@ int weaponReload(Object *weapon, Object *ammo) {
 	}
 
 	// NOTE: Uninline.
-	int v10 = ammoGetQuantity(ammo);
+	int quantity = ammoGetQuantity(ammo);
 
-	int v11 = v10;
+	int left = quantity;
 	if (ammoQuantity < ammoCapacity) {
-		int v12;
-		if (ammoQuantity + v10 > ammoCapacity) {
-			v11 = v10 - (ammoCapacity - ammoQuantity);
-			v12 = ammoCapacity;
+		int newQuantity;
+		if (ammoQuantity + quantity > ammoCapacity) {
+			left = quantity - (ammoCapacity - ammoQuantity);
+			newQuantity = ammoCapacity;
 		} else {
-			v11 = 0;
-			v12 = ammoQuantity + v10;
+			left = 0;
+			newQuantity = ammoQuantity + quantity;
 		}
 
 		weapon->data.item.weapon.ammoTypePid = ammo->pid;
 
-		ammoSetQuantity(ammo, v11);
-		ammoSetQuantity(weapon, v12);
+		ammoSetQuantity(ammo, left);
+		ammoSetQuantity(weapon, newQuantity);
 	}
 
-	return v11;
+	return left;
 }
 
 // 0x478A1C
@@ -2807,13 +2810,13 @@ int drugEffectEventWrite(Common::OutSaveFile *stream, void *data) {
 }
 
 // 0x47A290
-static int _insert_withdrawal(Object *obj, int a2, int duration, int perk, int pid) {
+static int _insert_withdrawal(Object *obj, int active, int duration, int perk, int pid) {
 	WithdrawalEvent *withdrawalEvent = (WithdrawalEvent *)internal_malloc(sizeof(*withdrawalEvent));
 	if (withdrawalEvent == nullptr) {
 		return -1;
 	}
 
-	withdrawalEvent->field_0 = a2;
+	withdrawalEvent->active = active;
 	withdrawalEvent->pid = pid;
 	withdrawalEvent->perk = perk;
 
@@ -2833,7 +2836,7 @@ int _item_wd_clear(Object *obj, void *data) {
 		return 0;
 	}
 
-	if (!withdrawalEvent->field_0) {
+	if (!withdrawalEvent->active) {
 		performWithdrawalEnd(obj, withdrawalEvent->perk);
 	}
 
@@ -2841,10 +2844,10 @@ int _item_wd_clear(Object *obj, void *data) {
 }
 
 // 0x47A324
-static int _item_wd_clear_all(Object *a1, void *data) {
+static int _item_wd_clear_all(Object *obj, void *data) {
 	WithdrawalEvent *withdrawalEvent = (WithdrawalEvent *)data;
 
-	if (a1 != _wd_obj) {
+	if (obj != _wd_obj) {
 		return 0;
 	}
 
@@ -2852,11 +2855,11 @@ static int _item_wd_clear_all(Object *a1, void *data) {
 		return 0;
 	}
 
-	if (!withdrawalEvent->field_0) {
+	if (!withdrawalEvent->active) {
 		performWithdrawalEnd(_wd_obj, withdrawalEvent->perk);
 	}
 
-	_insert_withdrawal(a1, 1, _wd_onset, withdrawalEvent->perk, withdrawalEvent->pid);
+	_insert_withdrawal(obj, 1, _wd_onset, withdrawalEvent->perk, withdrawalEvent->pid);
 
 	_wd_obj = nullptr;
 
@@ -2867,7 +2870,7 @@ static int _item_wd_clear_all(Object *a1, void *data) {
 int withdrawalEventProcess(Object *obj, void *data) {
 	WithdrawalEvent *withdrawalEvent = (WithdrawalEvent *)data;
 
-	if (withdrawalEvent->field_0) {
+	if (withdrawalEvent->active) {
 		performWithdrawalStart(obj, withdrawalEvent->perk, withdrawalEvent->pid);
 	} else {
 		if (withdrawalEvent->perk == PERK_JET_ADDICTION) {
@@ -2897,7 +2900,7 @@ int withdrawalEventRead(Common::InSaveFile *stream, void **dataPtr) {
 		return -1;
 	}
 
-	withdrawalEvent->field_0 = stream->readSint32BE();
+	withdrawalEvent->active = stream->readSint32BE();
 	withdrawalEvent->pid = stream->readSint32BE();
 	withdrawalEvent->perk = stream->readSint32BE();
 	if (stream->err()) {
@@ -2913,7 +2916,7 @@ int withdrawalEventRead(Common::InSaveFile *stream, void **dataPtr) {
 int withdrawalEventWrite(Common::OutSaveFile *stream, void *data) {
 	WithdrawalEvent *withdrawalEvent = (WithdrawalEvent *)data;
 
-	stream->writeSint32BE(withdrawalEvent->field_0);
+	stream->writeSint32BE(withdrawalEvent->active);
 	stream->writeSint32BE(withdrawalEvent->pid);
 	stream->writeSint32BE(withdrawalEvent->perk);
 	if (stream->err())
@@ -2951,6 +2954,7 @@ static void performWithdrawalStart(Object *obj, int perk, int pid) {
 		}
 	}
 
+	// schedule end of withdrawal
 	_insert_withdrawal(obj, 0, duration, perk, pid);
 }
 
