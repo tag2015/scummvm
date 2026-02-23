@@ -4361,12 +4361,12 @@ static void wmInterfaceScrollTabsStart(int delta) {
 	// in the disabled state.
 	if (delta >= 0) {
 		if (wmGenData.tabsOffsetY < wmGenData.tabsBackgroundFrmImage.getHeight() - 230) {
-			wmGenData.oldTabsOffsetY = MIN(wmGenData.tabsOffsetY + 7 * delta, wmGenData.tabsBackgroundFrmImage.getHeight() - 230);
+			wmGenData.oldTabsOffsetY = MIN(wmGenData.tabsOffsetY + delta, wmGenData.tabsBackgroundFrmImage.getHeight() - 230);
 			wmGenData.tabsScrollingDelta = delta;
 		}
 	} else {
 		if (wmGenData.tabsOffsetY > 0) {
-			wmGenData.oldTabsOffsetY = MAX(wmGenData.tabsOffsetY + 7 * delta, 0);
+			wmGenData.oldTabsOffsetY = MAX(wmGenData.tabsOffsetY + delta, 0);
 			wmGenData.tabsScrollingDelta = delta;
 		}
 	}
