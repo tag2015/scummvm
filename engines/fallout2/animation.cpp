@@ -214,7 +214,9 @@ typedef struct AnimationDescription {
 } AnimationDescription;
 
 typedef struct AnimationSequence {
-	int field_0;
+	// Index of the next animation in [animations] or -1000 if sequence is complete.
+	// Can be higher than animationIndex
+	int step;
 	// Index of current animation in [animations] array or -1 if animations in
 	// this sequence is not playing.
 	int animationIndex;
@@ -259,7 +261,7 @@ typedef struct AnimationSad {
 } AnimationSad;
 
 #define SAD_INIT -2000
-#define SAD_COMPLETE -1000
+#define ANIM_COMPLETE -1000
 
 static int _anim_free_slot(int a1);
 static int _anim_preload(Object *object, int fid, CacheEntry **cacheEntryPtr);
@@ -343,7 +345,7 @@ void animationReset() {
 	gAnimationSequenceCurrentIndex = -1;
 
 	for (int index = 0; index < ANIMATION_SEQUENCE_LIST_CAPACITY; index++) {
-		gAnimationSequences[index].field_0 = SAD_COMPLETE;
+		gAnimationSequences[index].step = ANIM_COMPLETE;
 		gAnimationSequences[index].flags = 0;
 	}
 }
@@ -397,7 +399,7 @@ static int _anim_free_slot(int requestOptions) {
 	int v2 = 0;
 	for (int index = 0; index < ANIMATION_SEQUENCE_LIST_CAPACITY; index++) {
 		AnimationSequence *animationSequence = &(gAnimationSequences[index]);
-		if (animationSequence->field_0 != SAD_COMPLETE || (animationSequence->flags & ANIM_SEQ_ACCUMULATING) != 0 || (animationSequence->flags & ANIM_SEQ_0x20) != 0) {
+		if (animationSequence->step != ANIM_COMPLETE || (animationSequence->flags & ANIM_SEQ_ACCUMULATING) != 0 || (animationSequence->flags & ANIM_SEQ_0x20) != 0) {
 			if (!(animationSequence->flags & ANIM_SEQ_RESERVED)) {
 				v2++;
 			}
@@ -438,7 +440,7 @@ int _register_priority(int a1) {
 int reg_anim_clear(Object *a1) {
 	for (int animationSequenceIndex = 0; animationSequenceIndex < ANIMATION_SEQUENCE_LIST_CAPACITY; animationSequenceIndex++) {
 		AnimationSequence *animationSequence = &(gAnimationSequences[animationSequenceIndex]);
-		if (animationSequence->field_0 == SAD_COMPLETE) {
+		if (animationSequence->step == ANIM_COMPLETE) {
 			continue;
 		}
 
@@ -475,7 +477,7 @@ int reg_anim_end() {
 	}
 
 	AnimationSequence *animationSequence = &(gAnimationSequences[gAnimationSequenceCurrentIndex]);
-	animationSequence->field_0 = 0;
+	animationSequence->step = 0;
 	animationSequence->length = gAnimationDescriptionCurrentIndex;
 	animationSequence->animationIndex = -1;
 	animationSequence->flags &= ~ANIM_SEQ_ACCUMULATING;
@@ -552,7 +554,7 @@ static int _check_registry(Object *obj) {
 	for (int animationSequenceIndex = 0; animationSequenceIndex < ANIMATION_SEQUENCE_LIST_CAPACITY; animationSequenceIndex++) {
 		AnimationSequence *animationSequence = &(gAnimationSequences[animationSequenceIndex]);
 
-		if (animationSequenceIndex != gAnimationSequenceCurrentIndex && animationSequence->field_0 != SAD_COMPLETE) {
+		if (animationSequenceIndex != gAnimationSequenceCurrentIndex && animationSequence->step != ANIM_COMPLETE) {
 			for (int animationDescriptionIndex = 0; animationDescriptionIndex < animationSequence->length; animationDescriptionIndex++) {
 				AnimationDescription *animationDescription = &(animationSequence->animations[animationDescriptionIndex]);
 				if (obj == animationDescription->owner && animationDescription->kind != 11) {
@@ -579,7 +581,7 @@ int animationIsBusy(Object *a1) {
 
 	for (int animationSequenceIndex = 0; animationSequenceIndex < ANIMATION_SEQUENCE_LIST_CAPACITY; animationSequenceIndex++) {
 		AnimationSequence *animationSequence = &(gAnimationSequences[animationSequenceIndex]);
-		if (animationSequenceIndex != gAnimationSequenceCurrentIndex && animationSequence->field_0 != SAD_COMPLETE) {
+		if (animationSequenceIndex != gAnimationSequenceCurrentIndex && animationSequence->step != ANIM_COMPLETE) {
 			for (int animationDescriptionIndex = 0; animationDescriptionIndex < animationSequence->length; animationDescriptionIndex++) {
 				AnimationDescription *animationDescription = &(animationSequence->animations[animationDescriptionIndex]);
 				if (a1 != animationDescription->owner) {
@@ -1318,17 +1320,17 @@ static int animationRunSequence(int animationSequenceIndex) {
 	}
 
 	AnimationSequence *animationSequence = &(gAnimationSequences[animationSequenceIndex]);
-	if (animationSequence->field_0 == SAD_COMPLETE) {
+	if (animationSequence->step == ANIM_COMPLETE) {
 		return -1;
 	}
 
 	while (1) {
-		if (animationSequence->field_0 >= animationSequence->length) {
+		if (animationSequence->step >= animationSequence->length) {
 			return 0;
 		}
 
-		if (animationSequence->field_0 > animationSequence->animationIndex) {
-			AnimationDescription *animationDescription = &(animationSequence->animations[animationSequence->field_0]);
+		if (animationSequence->step > animationSequence->animationIndex) {
+			AnimationDescription *animationDescription = &(animationSequence->animations[animationSequence->step]);
 			if (animationDescription->delay < 0) {
 				return 0;
 			}
@@ -1339,7 +1341,7 @@ static int animationRunSequence(int animationSequenceIndex) {
 			}
 		}
 
-		AnimationDescription *animationDescription = &(animationSequence->animations[animationSequence->field_0++]);
+		AnimationDescription *animationDescription = &(animationSequence->animations[animationSequence->step++]);
 
 		int rc;
 		Rect rect;
@@ -1491,7 +1493,7 @@ static int animationRunSequence(int animationSequenceIndex) {
 			_anim_set_end(animationSequenceIndex);
 		}
 
-		if (animationSequence->field_0 == SAD_COMPLETE) {
+		if (animationSequence->step == ANIM_COMPLETE) {
 			return -1;
 		}
 	}
@@ -1504,7 +1506,7 @@ static int _anim_set_continue(int animationSequenceIndex, int a2) {
 	}
 
 	AnimationSequence *animationSequence = &(gAnimationSequences[animationSequenceIndex]);
-	if (animationSequence->field_0 == SAD_COMPLETE) {
+	if (animationSequence->step == ANIM_COMPLETE) {
 		return -1;
 	}
 
@@ -1531,14 +1533,14 @@ static int _anim_set_end(int animationSequenceIndex) {
 	}
 
 	animationSequence = &(gAnimationSequences[animationSequenceIndex]);
-	if (animationSequence->field_0 == SAD_COMPLETE) {
+	if (animationSequence->step == ANIM_COMPLETE) {
 		return -1;
 	}
 
 	for (i = 0; i < gAnimationCurrentSad; i++) {
 		AnimationSad *sad = &(gAnimationSads[i]);
 		if (sad->animationSequenceIndex == animationSequenceIndex) {
-			sad->step = SAD_COMPLETE;
+			sad->step = ANIM_COMPLETE;
 		}
 	}
 
@@ -1585,7 +1587,7 @@ static int _anim_set_end(int animationSequenceIndex) {
 						if (k == animationSequence->animationIndex) {
 							for (int m = 0; m < gAnimationCurrentSad; m++) {
 								if (gAnimationSads[m].obj == owner) {
-									gAnimationSads[m].step = SAD_COMPLETE;
+									gAnimationSads[m].step = ANIM_COMPLETE;
 									break;
 								}
 							}
@@ -1597,7 +1599,7 @@ static int _anim_set_end(int animationSequenceIndex) {
 					}
 				}
 			}
-		} else if (i >= animationSequence->field_0) {
+		} else if (i >= animationSequence->step) {
 			if (animationDescription->extendedFlags & ANIMATION_SEQUENCE_FORCED) {
 				animationDescription->callback(animationDescription->param1, animationDescription->param2);
 			} else {
@@ -1609,7 +1611,7 @@ static int _anim_set_end(int animationSequenceIndex) {
 	}
 
 	animationSequence->animationIndex = -1;
-	animationSequence->field_0 = SAD_COMPLETE;
+	animationSequence->step = ANIM_COMPLETE;
 	if ((animationSequence->flags & ANIM_SEQ_COMBAT_ANIM_STARTED) != 0) {
 		_combat_anim_finished();
 	}
@@ -2117,7 +2119,7 @@ static int animateMoveObjectToObject(Object *from, Object *to, int actionPoints,
 	bool isMultihex = (from->flags & OBJECT_MULTIHEX);
 	sad->length -= (isMultihex ? 2 : 1);
 	if (sad->length <= 0) {
-		sad->step = SAD_COMPLETE;
+		sad->step = ANIM_COMPLETE;
 		_anim_set_continue(animationSequenceIndex, 0);
 	}
 
@@ -2323,7 +2325,7 @@ static int animateMoveObjectToTile(Object *obj, int tile, int elev, int actionPo
 		AnimationSad *sad = &(gAnimationSads[index]);
 		sad->length--;
 		if (sad->length <= 0) {
-			sad->step = SAD_COMPLETE;
+			sad->step = ANIM_COMPLETE;
 			_anim_set_continue(animationSequenceIndex, 0);
 		}
 
@@ -2361,7 +2363,7 @@ static int _anim_move(Object *obj, int tile, int elev, int a3, int anim, int a5,
 
 	sad->length = _make_path(obj, obj->tile, tile, sad->rotations, a5);
 	if (sad->length == 0) {
-		sad->step = SAD_COMPLETE;
+		sad->step = ANIM_COMPLETE;
 		return -1;
 	}
 
@@ -2406,7 +2408,7 @@ static int animateMoveObjectToTileStraight(Object *obj, int tile, int elevation,
 
 	sad->length = _make_straight_path(obj, obj->tile, tile, sad->straightPathNodeList, nullptr, v15);
 	if (sad->length == 0) {
-		sad->step = SAD_COMPLETE;
+		sad->step = ANIM_COMPLETE;
 		return -1;
 	}
 
@@ -2436,7 +2438,7 @@ static int _anim_move_on_stairs(Object *obj, int tile, int elevation, int anim, 
 	sad->animationSequenceIndex = animationSequenceIndex;
 	sad->length = _make_stair_path(obj, obj->tile, obj->elevation, tile, elevation, sad->straightPathNodeList, nullptr);
 	if (sad->length == 0) {
-		sad->step = SAD_COMPLETE;
+		sad->step = ANIM_COMPLETE;
 		return -1;
 	}
 
@@ -2470,7 +2472,7 @@ static int _check_for_falling(Object *obj, int anim, int a3) {
 	sad->animationSequenceIndex = a3;
 	sad->length = _make_straight_path_func(obj, obj->tile, obj->tile, sad->straightPathNodeList, 0, 16, _obj_blocking_at);
 	if (sad->length == 0) {
-		sad->step = SAD_COMPLETE;
+		sad->step = ANIM_COMPLETE;
 		return -1;
 	}
 
@@ -2545,7 +2547,7 @@ static void _object_move(int index) {
 
 					sad->step = 0;
 				} else {
-					sad->step = SAD_COMPLETE;
+					sad->step = ANIM_COMPLETE;
 				}
 				nextTile = -1;
 			} else {
@@ -2582,7 +2584,7 @@ static void _object_move(int index) {
 			sad->step += 1;
 
 			if (sad->step == sad->length || cannotMove) {
-				sad->step = SAD_COMPLETE;
+				sad->step = ANIM_COMPLETE;
 			} else {
 				objectSetRotation(object, sad->rotations[sad->step], &tempRect);
 				rectUnion(&dirtyRect, &tempRect, &dirtyRect);
@@ -2594,7 +2596,7 @@ static void _object_move(int index) {
 	}
 
 	tileWindowRefreshRect(&dirtyRect, object->elevation);
-	if (sad->step == SAD_COMPLETE) {
+	if (sad->step == ANIM_COMPLETE) {
 		_anim_set_continue(sad->animationSequenceIndex, 1);
 	}
 }
@@ -2641,13 +2643,13 @@ static void _object_straight_move(int index) {
 
 		if (sad->step == sad->length) {
 			if ((sad->flags & ANIM_SAD_WAIT_FOR_COMPLETION) == 0 || object->frame == lastFrame) {
-				sad->step = SAD_COMPLETE;
+				sad->step = ANIM_COMPLETE;
 			}
 		}
 
 		tileWindowRefreshRect(&dirtyRect, sad->obj->elevation);
 
-		if (sad->step == SAD_COMPLETE) {
+		if (sad->step == ANIM_COMPLETE) {
 			_anim_set_continue(sad->animationSequenceIndex, 1);
 		}
 	}
@@ -2697,7 +2699,7 @@ void _object_animate() {
 
 	for (int index = 0; index < gAnimationCurrentSad; index++) {
 		AnimationSad *sad = &(gAnimationSads[index]);
-		if (sad->step == SAD_COMPLETE) {
+		if (sad->step == ANIM_COMPLETE) {
 			continue;
 		}
 
@@ -2731,7 +2733,7 @@ void _object_animate() {
 			for (int i = 0; i < gAnimationCurrentSad; i++) {
 				AnimationSad *otherSad = &(gAnimationSads[i]);
 				if (object == otherSad->obj && otherSad->step == SAD_INIT) {
-					otherSad->step = SAD_COMPLETE;
+					otherSad->step = ANIM_COMPLETE;
 					_anim_set_continue(otherSad->animationSequenceIndex, 1);
 				}
 			}
@@ -2749,7 +2751,7 @@ void _object_animate() {
 				Art *art = artLock(object->fid, &cacheHandle);
 				if (art != nullptr) {
 					if ((sad->flags & ANIM_SAD_FOREVER) == 0 && object->frame == artGetFrameCount(art) - 1) {
-						sad->step = SAD_COMPLETE;
+						sad->step = ANIM_COMPLETE;
 						artUnlock(cacheHandle);
 
 						if ((sad->flags & ANIM_SAD_HIDE_ON_END) != 0) {
@@ -2800,7 +2802,7 @@ void _object_animate() {
 				continue;
 			}
 
-			sad->step = SAD_COMPLETE;
+			sad->step = ANIM_COMPLETE;
 			_anim_set_continue(sad->animationSequenceIndex, 1);
 		} else {
 			int x;
@@ -2865,10 +2867,10 @@ static void _object_anim_compact() {
 
 	int index = 0;
 	for (; index < gAnimationCurrentSad; index++) {
-		if (gAnimationSads[index].step == SAD_COMPLETE) {
+		if (gAnimationSads[index].step == ANIM_COMPLETE) {
 			int nextIndex = index + 1;
 			for (; nextIndex < gAnimationCurrentSad; nextIndex++) {
-				if (gAnimationSads[nextIndex].step != SAD_COMPLETE) {
+				if (gAnimationSads[nextIndex].step != ANIM_COMPLETE) {
 					break;
 				}
 			}
@@ -2879,7 +2881,7 @@ static void _object_anim_compact() {
 
 			if (index != nextIndex) {
 				memcpy(&(gAnimationSads[index]), &(gAnimationSads[nextIndex]), sizeof(AnimationSad));
-				gAnimationSads[nextIndex].step = SAD_COMPLETE;
+				gAnimationSads[nextIndex].step = ANIM_COMPLETE;
 				gAnimationSads[nextIndex].flags = 0;
 			}
 		}
