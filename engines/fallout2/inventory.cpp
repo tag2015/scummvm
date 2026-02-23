@@ -5572,7 +5572,6 @@ static int inventoryQuantitySelect(int inventoryWindowType, Object *item, int ma
 
 		int keyCode = inputGetInput();
 		if (keyCode == KEY_ESCAPE) {
-			soundPlayFile("ib1p1xx1");
 			inventoryQuantityWindowFree(inventoryWindowType);
 			return -1;
 		}
