@@ -48,7 +48,7 @@ int backgroundSoundGetVolume();
 int _gsound_background_volume_get_set(int a1);
 void backgroundSoundSetEndCallback(SoundEndCallback *callback);
 int backgroundSoundLoad(const char *fileName, int a2, int a3, int a4);
-int _gsound_background_play_level_music(const char *a1, int a2);
+int _gsound_background_play_level_music(const char *fileName, int a2);
 void backgroundSoundDelete();
 void backgroundSoundRestart(int value);
 void backgroundSoundPause();

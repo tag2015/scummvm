@@ -37,6 +37,7 @@
 #include "fallout2/random.h"
 #include "fallout2/scripts.h"
 #include "fallout2/settings.h"
+#include "fallout2/sfall_config.h"
 #include "fallout2/svga.h"
 #include "fallout2/text_object.h"
 #include "fallout2/tile.h"
@@ -824,7 +825,11 @@ int mapLoadById(int map) {
 
 static int mapLoadScumm(Common::InSaveFile *stream) {
 	_map_save_in_game(true);
-	backgroundSoundLoad("wind2", 12, 13, 16);
+	int gaplessMusic = 0;
+	configGetInt(&gSfallConfig, SFALL_CONFIG_MISC_KEY, SFALL_CONFIG_GAPLESS_MUSIC, &gaplessMusic);
+	if (!gaplessMusic) {
+		backgroundSoundLoad("wind2", 12, 13, 16);
+	}
 	isoDisable();
 	_partyMemberPrepLoad();
 	_gmouse_disable_scrolling();
@@ -1063,7 +1068,11 @@ err:
 // 0x482B74
 static int mapLoad(File *stream) {
 	_map_save_in_game(true);
-	backgroundSoundLoad("wind2", 12, 13, 16);
+	int gaplessMusic = 0;
+	configGetInt(&gSfallConfig, SFALL_CONFIG_MISC_KEY, SFALL_CONFIG_GAPLESS_MUSIC, &gaplessMusic);
+	if (!gaplessMusic) {
+		backgroundSoundLoad("wind2", 12, 13, 16);
+	}
 	isoDisable();
 	_partyMemberPrepLoad();
 	_gmouse_disable_scrolling();
