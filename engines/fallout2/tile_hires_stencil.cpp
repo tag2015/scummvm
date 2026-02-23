@@ -57,7 +57,7 @@ static_assert(screen_view_width % (2 * square_width) == 0, "screen_view_width is
 // which is covered by squares but theoretically could be seen in the original game
 static_assert(screen_view_height % (2 * square_height) == 20, "screen_view_height leftover space must be 20px");
 
-static bool gIsTileHiresStencilEnabled = false;
+static bool gIsTileHiresStencilEnabled = true;
 
 static void clean_cache() {
 	memset(visited_tiles, 0, sizeof(visited_tiles));

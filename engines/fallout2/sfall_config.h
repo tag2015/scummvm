@@ -81,7 +81,7 @@ namespace Fallout2 {
 #define SFALL_CONFIG_HIRES_MODE "HiResMode"
 #define SFALL_CONFIG_USE_WALK_DISTANCE "UseWalkDistance"
 #define SFALL_CONFIG_AUTO_OPEN_DOORS "AutoOpenDoors"
-#define SFALL_CONFIG_GAPLESS_MUSIC "GaplessMusic"
+#define SFALL_CONFIG_GAPLESS_MUSIC "GaplessMusic" // note: this isn't a sfall config
 
 #define SFALL_CONFIG_BURST_MOD_DEFAULT_CENTER_MULTIPLIER 1
 #define SFALL_CONFIG_BURST_MOD_DEFAULT_CENTER_DIVISOR 3
